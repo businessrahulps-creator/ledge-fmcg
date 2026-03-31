@@ -16,6 +16,16 @@ export interface Product {
   totalSold: number;
 }
 
+export interface Salesperson {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  region: string;
+  totalOrders: number;
+  totalValue: number;
+}
+
 export interface OrderLine {
   productId: string;
   productName: string;
@@ -30,6 +40,7 @@ export interface Order {
   date: string;
   distributorId: string;
   distributorName: string;
+  salespersonId: string;
   salesperson: string;
   lines: OrderLine[];
   total: number;
@@ -41,6 +52,13 @@ export interface Order {
   deliveryStatus: "pending" | "dispatched" | "delivered";
   dispatchRemarks: string;
 }
+
+export const salespersons: Salesperson[] = [
+  { id: "s1", name: "Rajesh Kumar", phone: "+91 98100 55555", email: "rajesh@ordra.in", region: "North", totalOrders: 89, totalValue: 1820000 },
+  { id: "s2", name: "Amit Shah", phone: "+91 97120 66666", email: "amit@ordra.in", region: "West", totalOrders: 72, totalValue: 1450000 },
+  { id: "s3", name: "Priya Verma", phone: "+91 94150 77777", email: "priya@ordra.in", region: "Central", totalOrders: 58, totalValue: 1120000 },
+  { id: "s4", name: "Deepak Joshi", phone: "+91 99490 88888", email: "deepak@ordra.in", region: "South", totalOrders: 34, totalValue: 680000 },
+];
 
 export const distributors: Distributor[] = [
   { id: "d1", name: "Sharma Traders", location: "Delhi", contact: "+91 98100 12345", totalOrders: 142, totalValue: 2850000 },
@@ -66,7 +84,7 @@ export const products: Product[] = [
 export const orders: Order[] = [
   {
     id: "o1", orderNumber: "ORD-2026-001", date: "2026-03-31", distributorId: "d1", distributorName: "Sharma Traders",
-    salesperson: "Rajesh Kumar",
+    salespersonId: "s1", salesperson: "Rajesh Kumar",
     lines: [
       { productId: "p1", productName: "Premium Basmati Rice 5kg", quantity: 50, unitPrice: 450, lineTotal: 22500 },
       { productId: "p2", productName: "Sunflower Oil 1L", quantity: 100, unitPrice: 180, lineTotal: 18000 },
@@ -77,7 +95,7 @@ export const orders: Order[] = [
   },
   {
     id: "o2", orderNumber: "ORD-2026-002", date: "2026-03-30", distributorId: "d2", distributorName: "Patel Distributors",
-    salesperson: "Amit Shah",
+    salespersonId: "s2", salesperson: "Amit Shah",
     lines: [
       { productId: "p3", productName: "Wheat Flour 10kg", quantity: 80, unitPrice: 380, lineTotal: 30400 },
       { productId: "p4", productName: "Sugar 5kg", quantity: 60, unitPrice: 240, lineTotal: 14400 },
@@ -89,7 +107,7 @@ export const orders: Order[] = [
   },
   {
     id: "o3", orderNumber: "ORD-2026-003", date: "2026-03-29", distributorId: "d3", distributorName: "Gupta & Sons",
-    salesperson: "Priya Verma",
+    salespersonId: "s3", salesperson: "Priya Verma",
     lines: [
       { productId: "p6", productName: "Tea Powder 500g", quantity: 200, unitPrice: 320, lineTotal: 64000 },
     ],
@@ -99,7 +117,7 @@ export const orders: Order[] = [
   },
   {
     id: "o4", orderNumber: "ORD-2026-004", date: "2026-03-28", distributorId: "d4", distributorName: "Reddy Agencies",
-    salesperson: "Rajesh Kumar",
+    salespersonId: "s1", salesperson: "Rajesh Kumar",
     lines: [
       { productId: "p7", productName: "Washing Powder 1kg", quantity: 300, unitPrice: 95, lineTotal: 28500 },
       { productId: "p8", productName: "Bath Soap 100g (Pack of 4)", quantity: 200, unitPrice: 140, lineTotal: 28000 },
@@ -110,7 +128,7 @@ export const orders: Order[] = [
   },
   {
     id: "o5", orderNumber: "ORD-2026-005", date: "2026-03-28", distributorId: "d5", distributorName: "Singh Supply Co.",
-    salesperson: "Amit Shah",
+    salespersonId: "s2", salesperson: "Amit Shah",
     lines: [
       { productId: "p1", productName: "Premium Basmati Rice 5kg", quantity: 30, unitPrice: 450, lineTotal: 13500 },
       { productId: "p5", productName: "Toor Dal 1kg", quantity: 80, unitPrice: 160, lineTotal: 12800 },
@@ -121,7 +139,7 @@ export const orders: Order[] = [
   },
   {
     id: "o6", orderNumber: "ORD-2026-006", date: "2026-03-27", distributorId: "d1", distributorName: "Sharma Traders",
-    salesperson: "Priya Verma",
+    salespersonId: "s3", salesperson: "Priya Verma",
     lines: [
       { productId: "p2", productName: "Sunflower Oil 1L", quantity: 150, unitPrice: 180, lineTotal: 27000 },
       { productId: "p4", productName: "Sugar 5kg", quantity: 100, unitPrice: 240, lineTotal: 24000 },
@@ -132,7 +150,7 @@ export const orders: Order[] = [
   },
   {
     id: "o7", orderNumber: "ORD-2026-007", date: "2026-03-27", distributorId: "d6", distributorName: "Nair Enterprises",
-    salesperson: "Rajesh Kumar",
+    salespersonId: "s1", salesperson: "Rajesh Kumar",
     lines: [
       { productId: "p3", productName: "Wheat Flour 10kg", quantity: 40, unitPrice: 380, lineTotal: 15200 },
     ],
@@ -142,7 +160,7 @@ export const orders: Order[] = [
   },
   {
     id: "o8", orderNumber: "ORD-2026-008", date: "2026-03-26", distributorId: "d7", distributorName: "Das Trading",
-    salesperson: "Amit Shah",
+    salespersonId: "s2", salesperson: "Amit Shah",
     lines: [
       { productId: "p6", productName: "Tea Powder 500g", quantity: 100, unitPrice: 320, lineTotal: 32000 },
       { productId: "p7", productName: "Washing Powder 1kg", quantity: 200, unitPrice: 95, lineTotal: 19000 },
