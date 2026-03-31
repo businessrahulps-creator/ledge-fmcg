@@ -1,4 +1,4 @@
-import { useRef, ReactNode } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { motion, useInView } from "framer-motion";
 
 interface AnimateInProps {
@@ -43,5 +43,3 @@ export function useCountUp(end: number, isInView: boolean, duration = 2000) {
 
   return count;
 }
-
-import { useState, useEffect } from "react";
