@@ -2,13 +2,13 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, Users, Package, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, BarChart3, UserCheck } from "lucide-react";
 
 const mobileNav = [
   { title: "Home", url: "/dashboard", icon: LayoutDashboard },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Distributors", url: "/distributors", icon: Users },
-  { title: "Products", url: "/products", icon: Package },
+  { title: "Sales", url: "/salespersons", icon: UserCheck },
   { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 

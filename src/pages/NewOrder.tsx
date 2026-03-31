@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { products, distributors, formatCurrency } from "@/data/mock-data";
+import { products, distributors, salespersons, formatCurrency } from "@/data/mock-data";
 import {
   Select,
   SelectContent,
@@ -137,7 +137,18 @@ export default function NewOrder() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Salesperson</Label>
-                  <Input placeholder="Salesperson name" className="h-12 rounded-lg" />
+                  <Select>
+                    <SelectTrigger className="h-12 rounded-lg">
+                      <SelectValue placeholder="Select salesperson" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salespersons.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </section>
