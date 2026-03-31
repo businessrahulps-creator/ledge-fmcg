@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { products, distributors, formatCurrency } from "@/data/mock-data";
+import { products, distributors, salespersons, formatCurrency } from "@/data/mock-data";
 import {
   Select,
   SelectContent,
