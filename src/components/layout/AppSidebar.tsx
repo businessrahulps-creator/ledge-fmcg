@@ -7,7 +7,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Menu,
+  UserCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,6 +28,7 @@ const mainNav = [
   { title: "Orders", url: "/orders", icon: ShoppingCart },
   { title: "Distributors", url: "/distributors", icon: Users },
   { title: "Products", url: "/products", icon: Package },
+  { title: "Salespersons", url: "/salespersons", icon: UserCheck },
   { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 

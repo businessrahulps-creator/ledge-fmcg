@@ -137,7 +137,18 @@ export default function NewOrder() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Salesperson</Label>
-                  <Input placeholder="Salesperson name" className="h-12 rounded-lg" />
+                  <Select>
+                    <SelectTrigger className="h-12 rounded-lg">
+                      <SelectValue placeholder="Select salesperson" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salespersons.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </section>
