@@ -15,6 +15,9 @@ import Salespersons from "./pages/Salespersons";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import GodownOverview from "./pages/GodownOverview";
+import GodownInventory from "./pages/GodownInventory";
+import GodownAlerts from "./pages/GodownAlerts";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,9 @@ const App = () => (
           <Route path="/salespersons" element={<Salespersons />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/godown" element={<GodownOverview />} />
+          <Route path="/godown/inventory" element={<GodownInventory />} />
+          <Route path="/godown/alerts" element={<GodownAlerts />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
