@@ -81,14 +81,15 @@ export default function Orders() {
     setOrdersData((prev) =>
       prev.map((o) =>
         o.id === selectedOrder.id
-          ? {
-              ...o,
-              paymentStatus: editPayment as Order["paymentStatus"],
-              deliveryStatus: editDelivery as Order["deliveryStatus"],
-              dispatchDate: editDispatchDate || null,
-              vehicle: editVehicle,
-              driverName: editDriver,
-            }
+           ? {
+               ...o,
+               paymentMode: editPaymentMode as Order["paymentMode"],
+               paymentStatus: editPayment as Order["paymentStatus"],
+               deliveryStatus: editDelivery as Order["deliveryStatus"],
+               dispatchDate: editDispatchDate || null,
+               vehicle: editVehicle,
+               driverName: editDriver,
+             }
           : o
       )
     );
