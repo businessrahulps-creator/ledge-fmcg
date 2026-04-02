@@ -50,10 +50,10 @@ export default function Dashboard() {
       <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <div>
-          <p className="text-[13px] text-muted-foreground font-medium tracking-wide uppercase">
+          <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="text-[28px] font-bold tracking-tight mt-0.5">{getGreeting()} 👋</h1>
+          <h1 className="text-xl font-bold tracking-tight mt-0.5 md:text-2xl">{getGreeting()} 👋</h1>
 
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-4">
