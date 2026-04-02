@@ -54,7 +54,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           {/* Swipeable Bottom Nav — mobile only */}
           <nav
-            className="fixed bottom-4 left-4 right-4 z-50 rounded-2xl bg-card border border-border shadow-lg shadow-black/5 md:hidden overflow-hidden"
+            className="fixed bottom-4 left-4 right-4 z-50 rounded-2xl bg-white/60 dark:bg-black/40 backdrop-blur-2xl backdrop-saturate-[1.8] border border-white/30 dark:border-white/10 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] md:hidden overflow-hidden"
             style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
           >
             <div
@@ -73,15 +73,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     {isActive && (
                       <motion.div
                         layoutId="nav-pill"
-                        className="absolute inset-1 rounded-xl bg-muted"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
+                        transition={{ type: "spring", stiffness: 350, damping: 35 }}
                       />
                     )}
                     <item.icon
-                      className={`w-[18px] h-[18px] relative z-10 transition-colors ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                      className={`w-[18px] h-[18px] relative z-10 transition-all duration-200 ${isActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
                       strokeWidth={isActive ? 1.8 : 1.5}
                     />
-                    <span className={`text-[10px] font-semibold relative z-10 transition-colors whitespace-nowrap ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                    <span className={`text-[10px] relative z-10 transition-all duration-200 whitespace-nowrap ${isActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
                       {item.title}
                     </span>
                   </Link>
@@ -103,7 +103,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
 
             {/* Right fade hint */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-card to-transparent rounded-r-2xl" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/60 dark:from-black/40 to-transparent rounded-r-2xl" />
           </nav>
         </div>
       </div>
