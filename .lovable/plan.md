@@ -1,69 +1,33 @@
 
 
-# Roll Out Light Premium Design — Full Platform
+# Fix Orders Page — Match Premium Design System
 
-## Design System (from approved /preview)
+## Issues Found
 
-- **Background**: `#FAFAFA`, **Cards**: `bg-white border-[#EBEBEB] shadow-sm rounded-2xl`
-- **Text**: `#111` primary, `#333` secondary, `#888`/`#999` muted
-- **Status badges**: Soft tones (`bg-emerald-50 text-emerald-600`, `bg-amber-50 text-amber-600`, `bg-red-50 text-red-500`)
-- **Icons**: Modern Lucide (`House`, `Receipt`, `Box`, `UserRound`, `ChartNoAxesCombined`), 18px, strokeWidth 1.8
-- **Mobile nav**: Floating pill with animated active state
-- **Desktop**: Sidebar with updated icons, content max-width `5xl`
+1. **Blue "New Order" button** — `--primary` CSS var is still `224 100% 62%` (blue). The button uses `bg-primary`, which renders blue. Since the design system's primary action color should be black, we need to update `--primary` to near-black (`0 0% 7%`) in the light theme CSS vars. This also fixes order numbers showing in blue (`text-primary`).
 
-## Files Changed (22 files)
+2. **Distributor names too large on mobile cards** — The mobile card view uses `text-sm` for distributor names, but the order number row is `text-sm font-medium` which combined with the overall spacing makes everything feel oversized. Need to tighten the card layout.
 
-### Foundation (3 files)
-| File | Change |
-|---|---|
-| `src/index.css` | Update CSS vars: background → #FAFAFA, card → white, border → #EBEBEB, foreground → #111 |
-| `src/components/ui/status-badge.tsx` | Replace `status-*` classes with soft-color inline styles |
-| `src/App.tsx` | Remove `/preview` route |
+3. **`--primary` change has cascading impact** — Since `--primary` drives buttons, links, active nav states, and accent colors globally, changing it to black means we also need to update `--accent` (used for hover states) to stay distinguishable, and ensure the sidebar active state still looks good.
 
-### Layout Shell (2 files)
-| File | Change |
-|---|---|
-| `src/components/layout/AppLayout.tsx` | bg-[#FAFAFA], floating pill nav with modern icons + framer-motion, lighter header, responsive container |
-| `src/components/layout/AppSidebar.tsx` | Swap to modern icons, white bg, updated border colors |
+## Changes
 
-### Pages (13 files)
-| File | Change |
-|---|---|
-| `src/pages/Dashboard.tsx` | Greeting header, day indicator, preview-style KPI cards, grayscale progress bars, order cards |
-| `src/pages/Orders.tsx` | White cards, updated borders/colors, status badges |
-| `src/pages/NewOrder.tsx` | Card styling, form inputs |
-| `src/pages/Distributors.tsx` | Card grid + dialog styling |
-| `src/pages/Products.tsx` | Table/card borders |
-| `src/pages/Salespersons.tsx` | Card grid + profile dialog |
-| `src/pages/Reports.tsx` | Tab styling |
-| `src/pages/GodownOverview.tsx` | KPI from dark glass → white cards, location cards |
-| `src/pages/GodownInventory.tsx` | Table/card/filter styling |
-| `src/pages/GodownAlerts.tsx` | Alert card styling |
-| `src/pages/Settings.tsx` | Tabs, team list, subscription |
-| `src/pages/Login.tsx` | Background + card |
-| `src/pages/Signup.tsx` | Background + card |
+### `src/index.css`
+- `:root` — `--primary: 224 100% 62%` → `--primary: 0 0% 7%` (near-black)
+- `:root` — `--accent: 224 100% 62%` → `--accent: 0 0% 95%` (light gray for hover backgrounds)
+- `:root` — `--accent-foreground: 0 0% 100%` → `--accent-foreground: 0 0% 7%`
+- `:root` — `--ring: 224 100% 62%` → `--ring: 0 0% 7%`
+- `:root` — `--sidebar-primary: 224 100% 62%` → `--sidebar-primary: 0 0% 7%`
+- `:root` — `--sidebar-ring: 224 100% 62%` → `--sidebar-ring: 0 0% 7%`
+- Keep `--primary-foreground: 0 0% 100%` (white text on black button — correct)
 
-### Report Components (4 files)
-| File | Change |
-|---|---|
-| `DistributorReport.tsx` | Table/card colors |
-| `ProductReport.tsx` | Table/card colors |
-| `PaymentReport.tsx` | Table/card colors |
-| `DispatchReport.tsx` | Table/card colors |
+### `src/pages/Orders.tsx`
+- **Mobile cards**: Reduce order number to `text-xs`, distributor name to `text-[11px]`, tighten padding from `py-3` → `py-2.5`
+- **Order number color**: Change `text-primary` → `text-[#111]` (since primary is now black, this is fine either way, but explicit is cleaner)
+- **Desktop table**: Order number `text-primary` is fine as black
 
-### Godown Components (2 files)
-| File | Change |
-|---|---|
-| `StockDetailPanel.tsx` | Panel bg/border |
-| `TransferStockModal.tsx` | Modal bg/border |
-
-### Cleanup (1 file)
-| File | Change |
-|---|---|
-| `src/pages/PreviewDashboard.tsx` | Delete — design absorbed into main pages |
-
-## What Won't Change
-- Landing page (`/`) — keeps its dark theme
-- Core UI primitives (button, input, dialog) — pick up new CSS vars automatically
-- Data layer, routing logic, business logic
+### What stays the same
+- All other pages — they use `bg-[#111]` or explicit colors, not `text-primary`, so they're unaffected
+- Landing page — has its own dark overrides
+- Status badges — already using explicit emerald/amber/red colors
 
