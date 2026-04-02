@@ -1,124 +1,59 @@
 
 
-# Font Consistency Audit
+# Redesign Dashboard KPI Cards
 
-## Findings
+## Problem
+1. The value text (`text-xl font-bold`) is too large for the card width — a revenue figure like ₹14,82,000 will overflow on mobile
+2. The icon sits in a grey box with no color differentiation — all four cards look identical
+3. The layout (icon top-left, change top-right, big number, tiny label) feels dated and cluttered
+4. No color coding to help users scan at a glance
 
-After reviewing every page and component, here are the inconsistencies:
+## Design Direction — Apple-style "tinted glass" cards
 
-### 1. Page Title (h1) — Inconsistent size and weight
+Each KPI gets a unique subtle tint so users can identify them instantly without reading labels:
 
-| Page | Mobile | Desktop | Weight |
-|------|--------|---------|--------|
-| Dashboard | `text-[28px]` | `text-[28px]` | `font-bold` |
-| Orders | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| New Order | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| Stock | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| Dealers | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| Sales Team | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| Settings | `text-xl` (20px) | `text-2xl` (32px) | `font-bold` |
-| **Reports** | **`text-lg` (20px)** | **`text-xl` (24px)** | **`font-semibold`** |
+- **Revenue**: Emerald tint (money = green)
+- **Orders**: Blue tint (primary action)
+- **Pending**: Amber tint (warning/attention)
+- **Dispatched**: Violet tint (in-transit)
 
-**Issue**: Dashboard uses a custom `28px` while others use `text-xl`. Reports uses `text-lg`/`text-xl` with `font-semibold` instead of `font-bold` — both size and weight are off.
-
-### 2. Section Headings (h2) — Mostly consistent but Dashboard differs
-
-| Context | Size |
-|---------|------|
-| Dashboard sections | `text-[15px] font-semibold` |
-| NewOrder sections | `text-sm font-semibold md:text-base` (14px → 16px) |
-| Settings sections | `text-sm font-semibold md:text-base` |
-| NotificationCenter | `text-sm font-semibold` |
-
-**Issue**: Dashboard uses non-standard `text-[15px]` instead of `text-sm` (14px). Should unify to `text-sm md:text-base`.
-
-### 3. "View all" links on Dashboard
-
-Uses `text-[12px]` (custom arbitrary) instead of the design system's `text-xs` (12px). While numerically identical, it bypasses the Tailwind scale and won't respond to any future base-size changes.
-
-### 4. KPI values on Dashboard
-
-Uses `text-[22px]` — not in the type scale. Closest standard size is `text-xl` (24px) or `text-lg` (20px).
-
-### 5. KPI change badge
-
-Uses `text-[11px]` — not in the type scale. Should be `text-[10px]` (matching other micro-text) or `text-xs` (12px).
-
-### 6. KPI label
-
-Uses `text-[11px]` — same issue as above.
-
-### 7. Dashboard greeting date
-
-Uses `text-[13px]` — not in the scale. Should be `text-xs` (12px).
-
-### 8. Dashboard day-of-week circles
-
-Uses `text-[13px]` — not in the scale.
-
-### 9. Dashboard mobile order cards
-
-- Dealer name: `text-[14px] font-semibold` — should be `text-sm font-semibold`
-- Amount: `text-[14px] font-bold` — should be `text-sm font-bold`
-- Meta text: `text-[11px]` — not in the scale
-
-### 10. StatusBadge
-
-Uses `text-xs font-medium` — consistent across all uses. No issue.
-
-### 11. Stock page HealthBadge
-
-Uses `text-[10px] font-semibold` — this micro-size is used elsewhere too (settings role badges, meta text). Acceptable as a "micro" tier, but it's arbitrary rather than in the scale.
-
-### 12. Dialog titles — Minor inconsistency
-
-- Some: `text-base md:text-lg` (16→20px)
-- Some: `text-base md:text-xl` (16→24px)
-- Should pick one. `text-base md:text-lg` is better for dialogs.
-
----
-
-## Proposed Standard (Type Scale)
-
-```text
-Micro label:     text-[10px]  font-medium     (metadata, timestamps)
-Body small:      text-xs      font-medium      (12px — labels, secondary)
-Body:            text-sm      font-medium      (14px — default body)
-Section head:    text-sm      font-semibold    (14px mobile)
-                 md:text-base font-semibold    (16px desktop)
-Page title:      text-xl      font-bold        (20px mobile)
-                 md:text-2xl  font-bold        (32px desktop)
-Dialog title:    text-base    md:text-lg       (16→20px)
-KPI value:       text-xl      font-bold        (24px — standardized)
-```
+The tint applies as a very light background wash (~5-8% opacity) and a matching icon background (~12% opacity), keeping the light premium aesthetic.
 
 ## Changes
 
 ### `src/pages/Dashboard.tsx`
-- h1: `text-[28px] font-bold` → `text-xl font-bold tracking-tight md:text-2xl`
-- Date: `text-[13px]` → `text-xs`
-- Day circles: `text-[13px]` → `text-xs`
-- KPI value: `text-[22px]` → `text-xl`
-- KPI change: `text-[11px]` → `text-[10px]`
-- KPI label: `text-[11px]` → `text-[10px]`
-- Section headings: `text-[15px] font-semibold` → `text-sm font-semibold md:text-base`
-- "View all": `text-[12px]` → `text-xs`
-- Mobile card dealer: `text-[14px]` → `text-sm`
-- Mobile card amount: `text-[14px]` → `text-sm`
-- Mobile card meta: `text-[11px]` → `text-[10px]`
 
-### `src/pages/Reports.tsx`
-- h1: `text-lg font-semibold` → `text-xl font-bold tracking-tight md:text-2xl`
+**KPI data structure** — add a `color` key to each KPI:
+```ts
+const kpis = [
+  { label: "Revenue", value: formatCurrency(totalRevenue), icon: IndianRupee, change: "+12%", up: true, color: "emerald" },
+  { label: "Orders", value: totalOrders.toString(), icon: Package, change: "+8%", up: true, color: "blue" },
+  { label: "Pending", value: pendingOrders.toString(), icon: Truck, change: "-3%", up: false, color: "amber" },
+  { label: "Dispatched", value: dispatchedOrders.toString(), icon: Truck, change: "+5%", up: true, color: "violet" },
+];
+```
 
-### `src/pages/Orders.tsx`
-- Dialog title: `text-base md:text-xl` → `text-base md:text-lg` (match other dialogs)
+**Card layout** — restructure to a cleaner vertical flow:
+1. Top row: colored icon pill (left) + change badge (right)
+2. Label in `text-xs text-muted-foreground font-medium` (above value — label-first is easier to scan)
+3. Value in `text-lg font-bold tracking-tight` (down from `text-xl` to prevent overflow)
 
-### `src/pages/Distributors.tsx`
-- Profile dialog title: `text-base md:text-xl` → `text-base md:text-lg`
+**Color mapping** — a simple object for card bg, icon bg, and icon text:
+```ts
+const kpiColors = {
+  emerald: { card: "bg-emerald-50/60", icon: "bg-emerald-500/12 text-emerald-600" },
+  blue:    { card: "bg-blue-50/60",    icon: "bg-blue-500/12 text-blue-600" },
+  amber:   { card: "bg-amber-50/60",   icon: "bg-amber-500/12 text-amber-600" },
+  violet:  { card: "bg-violet-50/60",  icon: "bg-violet-500/12 text-violet-600" },
+};
+```
 
-### `src/pages/Salespersons.tsx`
-- Profile dialog title: `text-base md:text-xl` → `text-base md:text-lg`
+**Dark mode** — these Tailwind colors already have dark variants built in, but we'll add dark-mode overrides if needed (e.g. `dark:bg-emerald-500/8`).
+
+**Animation** — keep the existing staggered `motion.div` fade-up. Add a subtle `whileHover={{ y: -2 }}` for a micro-interaction feel, replacing the CSS `card-hover` class with Framer Motion's built-in hover.
+
+**Value sizing** — `text-lg` (18px) instead of `text-xl` (20px) ensures even ₹14,82,000 fits comfortably in half-width mobile cards.
 
 ## Result
-Every screen follows the same type scale — page titles, section heads, body text, labels, and micro-text all use consistent sizes and weights. No more arbitrary pixel values scattered across pages.
+Four visually distinct, color-coded KPI cards with a modern tinted-glass look. Values are sized to never overflow. Subtle hover animation adds polish without distraction.
 
