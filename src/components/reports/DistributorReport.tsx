@@ -3,18 +3,20 @@ import { orders, distributors, formatCurrency, type Distributor } from "@/data/m
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Separator } from "@/components/ui/separator";
 
 export function DistributorReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [selected, setSelected] = useState<(Distributor & { orderCount: number; revenue: number }) | null>(null);
   const filteredOrders = filterByTimePeriod(orders, period);
 
-  const data = distributors.map((d) => {
-    const dOrders = filteredOrders.filter((o) => o.distributorId === d.id);
-    const total = dOrders.reduce((s, o) => s + o.total, 0);
-    return { ...d, orderCount: dOrders.length, revenue: total };
-  }).filter((d) => d.orderCount > 0).sort((a, b) => b.revenue - a.revenue);
+  const data = distributors
+    .map((d) => {
+      const dOrders = filteredOrders.filter((o) => o.distributorId === d.id);
+      const total = dOrders.reduce((s, o) => s + o.total, 0);
+      return { ...d, orderCount: dOrders.length, revenue: total };
+    })
+    .filter((d) => d.orderCount > 0)
+    .sort((a, b) => b.revenue - a.revenue);
 
   const totalRevenue = data.reduce((s, d) => s + d.revenue, 0);
   const totalOrders = data.reduce((s, d) => s + d.orderCount, 0);
@@ -22,15 +24,15 @@ export function DistributorReport() {
   const selectedOrders = selected ? filteredOrders.filter((o) => o.distributorId === selected.id) : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
-        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
+          <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
-          <span className="text-muted-foreground">{totalOrders} orders</span>
-          <span className="text-muted-foreground">{data.length} dealers</span>
+          <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
+          <span className="whitespace-nowrap text-muted-foreground">{data.length} dealers</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -63,11 +65,13 @@ export function DistributorReport() {
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((d) => (
             <div key={d.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(d)}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{d.name}</span>
-                <span className="text-sm font-medium">{formatCurrency(d.revenue)}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{d.name}</span>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{d.location} · {d.orderCount} orders</p>
+                </div>
+                <span className="shrink-0 text-sm font-medium">{formatCurrency(d.revenue)}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{d.location} · {d.orderCount} orders</p>
             </div>
           ))}
         </div>
@@ -81,7 +85,6 @@ export function DistributorReport() {
                 <DialogTitle className="text-base md:text-xl">{selected.name}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 md:space-y-5">
-                {/* Info cards */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Location</span>
@@ -101,7 +104,6 @@ export function DistributorReport() {
                   </div>
                 </div>
 
-                {/* Orders table */}
                 <div>
                   <h3 className="mb-2 text-xs font-semibold md:text-sm">Orders ({periodLabel(period).toLowerCase()})</h3>
                   <div className="rounded-lg border border-border overflow-x-auto">
@@ -117,7 +119,7 @@ export function DistributorReport() {
                       <tbody>
                         {selectedOrders.map((o) => (
                           <tr key={o.id} className="border-b border-border/50">
-                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[90px]">{o.orderNumber}</td>
+                            <td className="px-2 py-2.5 max-w-[90px] truncate font-medium md:px-4">{o.orderNumber}</td>
                             <td className="px-2 py-2.5 text-muted-foreground md:px-4">{o.date}</td>
                             <td className="px-2 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
