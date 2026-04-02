@@ -1,13 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Wallet,
-  ShoppingBag,
-  Clock,
-  PackageCheck,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
 import { orders, distributors, products, formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
