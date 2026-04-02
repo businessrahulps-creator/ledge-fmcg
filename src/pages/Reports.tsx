@@ -11,7 +11,7 @@ export default function Reports() {
     <AppLayout>
       <div className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight md:text-xl">Reports</h1>
+          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Reports</h1>
           <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Analyze your business performance
           </p>

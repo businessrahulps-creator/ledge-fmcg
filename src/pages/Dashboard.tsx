@@ -198,11 +198,11 @@ export default function Dashboard() {
                 className="glass-card card-hover p-4"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[14px] font-semibold">{o.distributorName}</span>
-                  <span className="text-[14px] font-bold">{formatCurrency(o.total)}</span>
+                  <span className="text-sm font-semibold">{o.distributorName}</span>
+                  <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
+                  <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
                   <div className="flex gap-1.5">
                     <StatusBadge status={o.paymentStatus} />
                     <StatusBadge status={o.deliveryStatus} />

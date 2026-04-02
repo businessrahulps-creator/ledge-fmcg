@@ -209,7 +209,7 @@ export default function Salespersons() {
             {profilePerson && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-base md:text-xl">{profilePerson.name}</DialogTitle>
+                  <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-6">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
