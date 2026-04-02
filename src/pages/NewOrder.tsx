@@ -121,10 +121,10 @@ export default function NewOrder() {
                   <Input type="date" defaultValue="2026-03-31" className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Distributor</Label>
+                  <Label className="text-xs md:text-sm">Dealer</Label>
                   <Select>
                     <SelectTrigger className="h-11 rounded-lg md:h-12">
-                      <SelectValue placeholder="Select distributor" />
+                      <SelectValue placeholder="Select dealer" />
                     </SelectTrigger>
                     <SelectContent>
                       {distributors.map((d) => (
