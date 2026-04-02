@@ -1,33 +1,49 @@
 
 
-# Confetti Celebration on Order Save
+# Fix Order Save Celebration Flow
 
-## Concept
-When a user taps "Save Order", a burst of confetti particles animates across the screen for ~2 seconds before navigating to `/orders`. Lightweight, no external libraries — pure canvas-based confetti using the small `canvas-confetti` package (~6KB gzipped).
+## Problem
+Confetti fires instantly, then 1.5s later the page navigates away — feels abrupt. The particles barely have time to animate before the screen disappears.
 
-## Changes
+## Solution
+Create a **two-phase celebration** that feels intentional:
 
-### Install `canvas-confetti`
-- Add `canvas-confetti` package (tiny, well-maintained, zero dependencies)
+1. **Phase 1 — Button feedback** (0ms): Disable button, show "Saving..." state
+2. **Phase 2 — Confetti + success overlay** (300ms): Fire confetti with a second delayed burst, show a centered success message (checkmark + "Order Created!") that fades in over the form
+3. **Phase 3 — Navigate** (2500ms): Navigate to `/orders` after the user has time to enjoy the celebration
 
-### `src/pages/NewOrder.tsx`
-- Import `confetti` from `canvas-confetti`
-- In `handleSave()`: fire confetti burst, then delay navigation by ~1.5s so the user sees the celebration
-- Fire from center-bottom with spread and particle count tuned for mobile (80-100 particles, 2-3 second gravity)
+### Changes to `src/pages/NewOrder.tsx`
 
-```
+- Add `isSaving` state to disable the button and show a loading/success state
+- Fire **two confetti bursts** (staggered by 400ms) for a richer effect
+- Add a **full-screen success overlay** using `AnimatePresence` + `motion.div` that fades in with a large checkmark icon and "Order Created!" text
+- Extend total delay to ~2.5s so confetti has time to fall naturally
+- The overlay uses the existing frosted glass style (`backdrop-blur`) to obscure the form underneath gracefully
+
+```tsx
+const [isSaving, setIsSaving] = useState(false);
+
 const handleSave = () => {
-  confetti({
-    particleCount: 100,
-    spread: 70,
-    origin: { y: 0.7 },
-    colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'],
-  });
-  toast({ title: "Order saved ✓", description: "..." });
-  setTimeout(() => navigate("/orders"), 1500);
+  setIsSaving(true);
+  
+  // First burst
+  setTimeout(() => {
+    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: [...] });
+  }, 300);
+  
+  // Second burst  
+  setTimeout(() => {
+    confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors: [...] });
+  }, 700);
+  
+  toast({ title: "Order saved ✓", ... });
+  setTimeout(() => navigate("/orders"), 2500);
 };
 ```
 
+- The success overlay renders when `isSaving` is true — a centered `motion.div` with scale-in animation showing a green checkmark circle and "Order Created!" text
+- Save button shows "Saving..." with a spinner when `isSaving` is true
+
 ## Result
-A quick, satisfying confetti burst on every successful order — feels celebratory without being heavy or disruptive.
+A smooth flow: tap Save → button shows saving → confetti bursts cascade → success overlay fades in → navigate after celebration completes naturally.
 
