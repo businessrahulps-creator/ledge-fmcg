@@ -144,7 +144,7 @@ export default function Salespersons() {
         <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Salesperson" : "Edit Salesperson"}</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
             </DialogHeader>
             {editItem && (
               <div className="space-y-3 md:space-y-4">
