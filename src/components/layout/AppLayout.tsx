@@ -72,7 +72,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     key={item.title}
                     to={item.url}
                     data-active={isActive}
-                    className="flex flex-col items-center gap-0.5 py-3 px-3 relative flex-shrink-0 min-w-[60px]"
+                    className="flex flex-col items-center gap-0.5 py-3 px-3 relative flex-shrink-0 min-w-[60px] active:scale-90 transition-transform"
                   >
                     {isActive && (
                       <motion.div
