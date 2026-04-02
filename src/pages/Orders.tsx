@@ -32,6 +32,13 @@ const statusColors: Record<string, string> = {
   delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
 };
 
+const paymentModes = [
+  { value: "cash", label: "Cash" },
+  { value: "bank_transfer", label: "Bank Transfer" },
+  { value: "cheque", label: "Cheque" },
+  { value: "upi", label: "UPI" },
+];
+
 const paymentStatuses = [
   { value: "paid", label: "Paid" },
   { value: "partial", label: "Partial" },
@@ -52,6 +59,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Editable fields for dialog
+  const [editPaymentMode, setEditPaymentMode] = useState("");
   const [editPayment, setEditPayment] = useState("");
   const [editDelivery, setEditDelivery] = useState("");
   const [editDispatchDate, setEditDispatchDate] = useState("");
@@ -60,6 +68,7 @@ export default function Orders() {
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
+    setEditPaymentMode(order.paymentMode);
     setEditPayment(order.paymentStatus);
     setEditDelivery(order.deliveryStatus);
     setEditDispatchDate(order.dispatchDate || "");
@@ -72,14 +81,15 @@ export default function Orders() {
     setOrdersData((prev) =>
       prev.map((o) =>
         o.id === selectedOrder.id
-          ? {
-              ...o,
-              paymentStatus: editPayment as Order["paymentStatus"],
-              deliveryStatus: editDelivery as Order["deliveryStatus"],
-              dispatchDate: editDispatchDate || null,
-              vehicle: editVehicle,
-              driverName: editDriver,
-            }
+           ? {
+               ...o,
+               paymentMode: editPaymentMode as Order["paymentMode"],
+               paymentStatus: editPayment as Order["paymentStatus"],
+               deliveryStatus: editDelivery as Order["deliveryStatus"],
+               dispatchDate: editDispatchDate || null,
+               vehicle: editVehicle,
+               driverName: editDriver,
+             }
           : o
       )
     );
@@ -279,6 +289,25 @@ export default function Orders() {
 
                   {/* Editable statuses */}
                   <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs md:text-sm">Payment Mode</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {paymentModes.map((m) => (
+                          <button
+                            key={m.value}
+                            onClick={() => setEditPaymentMode(m.value)}
+                            className={`rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
+                              editPaymentMode === m.value
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-foreground/20"
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="space-y-1.5">
                       <Label className="text-xs md:text-sm">Payment Status</Label>
                       <div className="flex gap-2">
