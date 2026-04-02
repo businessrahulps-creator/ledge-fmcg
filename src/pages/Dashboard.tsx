@@ -60,7 +60,7 @@ export default function Dashboard() {
             {DAYS.map((d, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-[13px] font-semibold transition-all ${
+                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
                   i === dayOfWeek
                     ? "bg-foreground text-background shadow-md"
                     : "bg-muted text-muted-foreground"
