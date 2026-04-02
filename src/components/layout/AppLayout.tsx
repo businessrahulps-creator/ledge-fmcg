@@ -96,7 +96,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
 
             {/* Right fade hint */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/60 dark:from-black/40 to-transparent rounded-r-2xl" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background/60 to-transparent rounded-r-2xl" />
           </nav>
         </div>
       </div>
