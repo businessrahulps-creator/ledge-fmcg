@@ -149,6 +149,15 @@ export default function GodownInventory() {
                         <QtyDisplay quantity={item.quantity} threshold={item.threshold} />
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">{item.unit}</td>
+                      <td className="px-6 py-4 text-right font-medium">{formatCurrency(item.basePrice)}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/products`); }}
+                          className="text-muted-foreground hover:text-primary hover:underline"
+                        >
+                          {formatNumber(getProductData(item.productId)?.totalSold ?? 0)}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 text-right font-medium">{formatCurrency(item.quantity * item.basePrice)}</td>
                       <td className="px-6 py-4 text-muted-foreground">{item.lastDeductedDate ? getTimeAgo(item.lastDeductedDate) : "—"}</td>
                       <td className="px-6 py-4"><HealthBadge health={health} /></td>

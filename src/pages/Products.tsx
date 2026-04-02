@@ -145,6 +145,7 @@ export default function Products() {
                   <p className="font-medium">{p.name}</p>
                   <p className="text-xs text-muted-foreground font-mono">{p.sku} · {p.unit}</p>
                   <p className="mt-1 text-sm font-semibold">{formatCurrency(p.basePrice)}</p>
+                  <p className="text-xs text-muted-foreground">Stock: {formatNumber(getProductStock(p.id))}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
