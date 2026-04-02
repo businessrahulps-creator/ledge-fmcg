@@ -21,7 +21,7 @@ function HealthBadge({ health }: { health: string }) {
     critical: "bg-destructive/10 text-destructive",
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${styles[health] || ""}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize md:px-2.5 md:text-xs ${styles[health] || ""}`}>
       {health === "low" ? "Low Stock" : health === "critical" ? "Critical" : "Healthy"}
     </span>
   );
@@ -30,7 +30,7 @@ function HealthBadge({ health }: { health: string }) {
 function QtyDisplay({ quantity, threshold }: { quantity: number; threshold: number }) {
   const health = getStockHealth(quantity, threshold);
   const color = health === "healthy" ? "text-success" : health === "low" ? "text-warning" : "text-destructive";
-  return <span className={`text-lg font-bold ${color}`}>{quantity}</span>;
+  return <span className={`text-base font-bold md:text-lg ${color}`}>{quantity}</span>;
 }
 
 export default function GodownInventory() {
@@ -54,14 +54,14 @@ export default function GodownInventory() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Finished Stocks</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Inventory across all godown locations</p>
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Finished Stocks</h1>
+            <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">Inventory across all godown locations</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-medium text-success">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-medium text-success md:px-3 md:text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Live
             </span>
           </div>
@@ -69,17 +69,17 @@ export default function GodownInventory() {
 
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative flex-1 min-w-0 sm:min-w-[240px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search product or SKU..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-12 rounded-xl pl-10"
+              className="h-11 rounded-xl pl-10 md:h-12"
             />
           </div>
           <Select value={godownFilter} onValueChange={setGodownFilter}>
-            <SelectTrigger className="h-12 w-full rounded-xl sm:w-52">
+            <SelectTrigger className="h-11 w-full rounded-xl sm:w-52 md:h-12">
               <SelectValue placeholder="All Godowns" />
             </SelectTrigger>
             <SelectContent>
@@ -89,12 +89,12 @@ export default function GodownInventory() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex gap-1 rounded-xl border border-border p-1">
+          <div className="flex gap-1 overflow-x-auto rounded-xl border border-border p-1">
             {healthFilters.map(f => (
               <button
                 key={f}
                 onClick={() => setHealthFilter(f)}
-                className={`rounded-lg px-3 py-2 text-xs font-medium capitalize transition-colors ${
+                className={`shrink-0 rounded-lg px-3 py-2 text-[10px] font-medium capitalize transition-colors md:text-xs ${
                   healthFilter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -102,7 +102,7 @@ export default function GodownInventory() {
               </button>
             ))}
           </div>
-          <Button variant="outline" className="h-12 rounded-xl">
+          <Button variant="outline" className="h-11 rounded-xl md:h-12">
             <Download className="h-4 w-4 mr-2" /> Export
           </Button>
         </div>
@@ -118,9 +118,9 @@ export default function GodownInventory() {
                   <th className="px-6 py-3 text-right">Qty Available</th>
                   <th className="px-6 py-3">Unit</th>
                   <th className="px-6 py-3 text-right">Base Price</th>
-                   <th className="px-6 py-3 text-right">Total Sold</th>
-                   <th className="px-6 py-3 text-right">Est. Value</th>
-                   <th className="px-6 py-3">Last Deducted</th>
+                  <th className="px-6 py-3 text-right">Total Sold</th>
+                  <th className="px-6 py-3 text-right">Est. Value</th>
+                  <th className="px-6 py-3">Last Deducted</th>
                   <th className="px-6 py-3">Health</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
@@ -191,19 +191,19 @@ export default function GodownInventory() {
               return (
                 <div
                   key={item.id}
-                  className="border-b border-border/50 p-4 transition-colors hover:bg-muted/20"
+                  className="border-b border-border/50 px-4 py-3 transition-colors active:bg-muted/20"
                   onClick={() => setSelectedItem(item)}
                 >
                   <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-medium">{item.productName}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{item.sku} · {item.godownName}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{item.productName}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">{item.sku} · {item.godownName}</div>
                     </div>
                     <QtyDisplay quantity={item.quantity} threshold={item.threshold} />
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 mt-1.5">
                     <HealthBadge health={health} />
-                    <span className="text-xs text-muted-foreground">{formatCurrency(item.quantity * item.basePrice)}</span>
+                    <span className="text-[10px] text-muted-foreground">{formatCurrency(item.quantity * item.basePrice)}</span>
                   </div>
                 </div>
               );
@@ -212,8 +212,8 @@ export default function GodownInventory() {
 
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <PackageOpen className="h-16 w-16 text-muted-foreground/30" strokeWidth={1.5} />
-              <p className="mt-4 text-sm font-medium">No stock data yet.</p>
+              <PackageOpen className="h-12 w-12 text-muted-foreground/30 md:h-16 md:w-16" strokeWidth={1.5} />
+              <p className="mt-3 text-sm font-medium md:mt-4">No stock data yet.</p>
               <p className="text-xs text-muted-foreground mt-1">Stock will appear here once orders are dispatched.</p>
             </div>
           )}

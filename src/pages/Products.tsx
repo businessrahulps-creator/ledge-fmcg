@@ -66,27 +66,27 @@ export default function Products() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Products</h1>
+            <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage your product catalogue
             </p>
           </div>
-          <Button onClick={openNew}>
+          <Button onClick={openNew} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Add Product
           </Button>
         </div>
 
-        <div className="relative max-w-md">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-12 rounded-lg pl-10"
+            className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
           />
         </div>
 
@@ -100,9 +100,9 @@ export default function Products() {
                   <th className="px-6 py-3 font-medium">SKU</th>
                   <th className="px-6 py-3 font-medium">Unit</th>
                   <th className="px-6 py-3 font-medium text-right">Base Price</th>
-                   <th className="px-6 py-3 font-medium text-right">Total Sold</th>
-                   <th className="px-6 py-3 font-medium text-right">Stock</th>
-                   <th className="px-6 py-3 font-medium text-right">Actions</th>
+                  <th className="px-6 py-3 font-medium text-right">Total Sold</th>
+                  <th className="px-6 py-3 font-medium text-right">Stock</th>
+                  <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,10 +123,10 @@ export default function Products() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => openEdit(p)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(p.id)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => remove(p.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -140,18 +140,25 @@ export default function Products() {
           {/* Mobile cards */}
           <div className="space-y-0 md:hidden">
             {filtered.map((p) => (
-              <div key={p.id} className="flex items-center justify-between border-b border-border/50 p-4">
-                <div>
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-xs text-muted-foreground font-mono">{p.sku} · {p.unit}</p>
-                  <p className="mt-1 text-sm font-semibold">{formatCurrency(p.basePrice)}</p>
-                  <p className="text-xs text-muted-foreground">Stock: {formatNumber(getProductStock(p.id))}</p>
+              <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{p.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-mono md:text-xs">{p.sku} · {p.unit}</p>
+                  <div className="mt-1 flex items-center gap-3">
+                    <span className="text-xs font-semibold">{formatCurrency(p.basePrice)}</span>
+                    <button
+                      onClick={() => navigate(`/godown/inventory?location=all&search=${encodeURIComponent(p.sku)}`)}
+                      className="text-[10px] font-medium text-primary"
+                    >
+                      Stock: {formatNumber(getProductStock(p.id))}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
+                <div className="flex gap-1 shrink-0 ml-2">
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => openEdit(p)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(p.id)}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => remove(p.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -170,53 +177,53 @@ export default function Products() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{isNew ? "Add Product" : "Edit Product"}</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Product" : "Edit Product"}</DialogTitle>
             </DialogHeader>
             {editItem && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">Product Name</Label>
+              <div className="space-y-3 md:space-y-4">
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Product Name</Label>
                   <Input
                     value={editItem.name}
                     onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
                     placeholder="e.g. Premium Basmati Rice 5kg"
-                    className="h-12 rounded-lg"
+                    className="h-11 rounded-lg md:h-12"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm">SKU</Label>
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">SKU</Label>
                     <Input
                       value={editItem.sku}
                       onChange={(e) => setEditItem({ ...editItem, sku: e.target.value })}
                       placeholder="RIC-BAS-5K"
-                      className="h-12 rounded-lg"
+                      className="h-11 rounded-lg md:h-12"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm">Unit</Label>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Unit</Label>
                     <Input
                       value={editItem.unit}
                       onChange={(e) => setEditItem({ ...editItem, unit: e.target.value })}
                       placeholder="Pack"
-                      className="h-12 rounded-lg"
+                      className="h-11 rounded-lg md:h-12"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm">Base Price (₹)</Label>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Base Price (₹)</Label>
                   <Input
                     type="number"
                     value={editItem.basePrice}
                     onChange={(e) => setEditItem({ ...editItem, basePrice: parseFloat(e.target.value) || 0 })}
-                    className="h-12 rounded-lg"
+                    className="h-11 rounded-lg md:h-12"
                   />
                 </div>
               </div>
             )}
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
               <Button onClick={save}>{isNew ? "Add Product" : "Save Changes"}</Button>
             </DialogFooter>

@@ -17,9 +17,9 @@ export function DistributorReport() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
-        <div className="flex items-center gap-6 text-sm">
+        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
           <span className="text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
@@ -28,28 +28,45 @@ export function DistributorReport() {
         </div>
       </div>
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
-              <th className="px-6 py-3 font-medium">Distributor</th>
-              <th className="px-6 py-3 font-medium">Location</th>
-              <th className="px-6 py-3 font-medium text-right">Orders</th>
-              <th className="px-6 py-3 font-medium text-right">Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length === 0 ? (
-              <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
-            ) : data.map((d) => (
-              <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="px-6 py-4 font-medium">{d.name}</td>
-                <td className="px-6 py-4 text-muted-foreground">{d.location}</td>
-                <td className="px-6 py-4 text-right">{d.orderCount}</td>
-                <td className="px-6 py-4 text-right font-medium">{formatCurrency(d.revenue)}</td>
+        {/* Desktop table */}
+        <div className="hidden md:block">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                <th className="px-6 py-3 font-medium">Distributor</th>
+                <th className="px-6 py-3 font-medium">Location</th>
+                <th className="px-6 py-3 font-medium text-right">Orders</th>
+                <th className="px-6 py-3 font-medium text-right">Revenue</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.length === 0 ? (
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
+              ) : data.map((d) => (
+                <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                  <td className="px-6 py-4 font-medium">{d.name}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{d.location}</td>
+                  <td className="px-6 py-4 text-right">{d.orderCount}</td>
+                  <td className="px-6 py-4 text-right font-medium">{formatCurrency(d.revenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Mobile cards */}
+        <div className="md:hidden">
+          {data.length === 0 ? (
+            <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
+          ) : data.map((d) => (
+            <div key={d.id} className="border-b border-border/50 px-4 py-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{d.name}</span>
+                <span className="text-sm font-medium">{formatCurrency(d.revenue)}</span>
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">{d.location} · {d.orderCount} orders</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
