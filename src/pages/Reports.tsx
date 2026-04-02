@@ -24,6 +24,7 @@ export default function Reports() {
               <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
               <TabsTrigger value="payments" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Payments</TabsTrigger>
               <TabsTrigger value="dispatch" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Dispatch</TabsTrigger>
+              <TabsTrigger value="salesteam" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Sales Team</TabsTrigger>
             </TabsList>
           </div>
 
