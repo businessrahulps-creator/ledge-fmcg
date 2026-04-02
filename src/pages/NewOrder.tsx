@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Save, CheckCircle2, Loader2 } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -388,10 +388,7 @@ export default function NewOrder() {
                     Saving...
                   </>
                 ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save Order
-                  </>
+                  <>Save Order</>
                 )}
               </Button>
             </div>
