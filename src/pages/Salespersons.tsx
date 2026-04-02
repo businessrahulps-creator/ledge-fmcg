@@ -168,13 +168,13 @@ export default function Salespersons() {
           </div>
         )}
 
-        {/* Add/Edit Dialog */}
-        <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
-            </DialogHeader>
-            {editItem && (
+        {/* Add/Edit Dialog — only mount when open to avoid ref warnings */}
+        {editItem && (
+          <Dialog open onOpenChange={() => setEditItem(null)}>
+            <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
+              </DialogHeader>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name *</Label>
@@ -195,105 +195,105 @@ export default function Salespersons() {
                   <Input value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="name@company.com" className="h-11 rounded-lg md:h-12" />
                 </div>
               </div>
-            )}
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button onClick={save}>{isNew ? "Add Member" : "Save Changes"}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
+                <Button onClick={save}>{isNew ? "Add Member" : "Save Changes"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
 
-        {/* Delete Confirmation */}
-        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deletePerson?.name}</span>? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button variant="destructive" onClick={confirmDelete}>Remove</Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Delete Confirmation — only mount when deleteId is set */}
+        {deleteId && (
+          <AlertDialog open onOpenChange={() => setDeleteId(null)}>
+            <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to remove <span className="font-semibold text-foreground">{deletePerson?.name}</span>? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button variant="destructive" onClick={confirmDelete}>Remove</Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
 
-        {/* Profile Dialog */}
-        <Dialog open={!!profileId} onOpenChange={() => setProfileId(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
-            {profilePerson && (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 md:space-y-6">
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Phone</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Email</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Region</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Total Value</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
-                    </div>
+        {/* Profile Dialog — only mount when profileId is set */}
+        {profileId && profilePerson && (
+          <Dialog open onOpenChange={() => setProfileId(null)}>
+            <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Phone</span>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
                   </div>
-                  <div>
-                    <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
-                    {profileOrders.length > 0 ? (
-                      <div className="rounded-lg border border-border overflow-hidden">
-                        <table className="hidden w-full text-sm md:table">
-                          <thead>
-                            <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                              <th className="px-4 py-2.5 font-medium">Order</th>
-                              <th className="px-4 py-2.5 font-medium">Dealer</th>
-                              <th className="px-4 py-2.5 font-medium text-right">Amount</th>
-                              <th className="px-4 py-2.5 font-medium">Payment</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {profileOrders.map((o) => (
-                              <tr key={o.id} className="border-b border-border/50">
-                                <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
-                                <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total)}</td>
-                                <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        <div className="md:hidden">
-                          {profileOrders.map((o) => (
-                            <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
-                                <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
-                              </div>
-                              <div className="mt-0.5 flex items-center gap-2">
-                                <span className="text-[10px] text-muted-foreground">{o.distributorName}</span>
-                                <StatusBadge status={o.paymentStatus} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground md:text-sm">No orders yet</p>
-                    )}
+                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Email</span>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Region</span>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Total Value</span>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
                   </div>
                 </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
+                  {profileOrders.length > 0 ? (
+                    <div className="rounded-lg border border-border overflow-hidden">
+                      <table className="hidden w-full text-sm md:table">
+                        <thead>
+                          <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                            <th className="px-4 py-2.5 font-medium">Order</th>
+                            <th className="px-4 py-2.5 font-medium">Dealer</th>
+                            <th className="px-4 py-2.5 font-medium text-right">Amount</th>
+                            <th className="px-4 py-2.5 font-medium">Payment</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {profileOrders.map((o) => (
+                            <tr key={o.id} className="border-b border-border/50">
+                              <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
+                              <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total)}</td>
+                              <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="md:hidden">
+                        {profileOrders.map((o) => (
+                          <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
+                              <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
+                            </div>
+                            <div className="mt-0.5 flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">{o.distributorName}</span>
+                              <StatusBadge status={o.paymentStatus} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground md:text-sm">No orders yet</p>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </AppLayout>
   );
