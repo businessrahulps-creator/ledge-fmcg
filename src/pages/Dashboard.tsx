@@ -64,7 +64,7 @@ export default function Dashboard() {
                 key={i}
                 onClick={() => setSelectedDay(i)}
                 aria-label={DAY_LABELS[i]}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 ${
                   i === selectedDay
                     ? "bg-foreground text-background shadow-md"
                     : "bg-muted text-muted-foreground"

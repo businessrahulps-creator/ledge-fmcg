@@ -58,7 +58,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           {/* Swipeable Bottom Nav — mobile only */}
           <nav
-            className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-white/30 bg-white/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-white/10 dark:bg-black/40 md:hidden"
+            className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-border/30 bg-background/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-border/20 dark:bg-background/40 md:hidden"
             style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
           >
             <div
@@ -72,7 +72,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     key={item.title}
                     to={item.url}
                     data-active={isActive}
-                    className="flex flex-col items-center gap-0.5 py-3 px-3 relative flex-shrink-0 min-w-[60px]"
+                    className="flex flex-col items-center gap-0.5 py-3 px-3 relative flex-shrink-0 min-w-[60px] active:scale-90 transition-transform"
                   >
                     {isActive && (
                       <motion.div
@@ -96,7 +96,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
 
             {/* Right fade hint */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/60 dark:from-black/40 to-transparent rounded-r-2xl" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background/60 to-transparent rounded-r-2xl" />
           </nav>
         </div>
       </div>
