@@ -63,7 +63,7 @@ export function DispatchReport() {
           {filtered.length === 0 ? (
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : filtered.map((o) => (
-            <div key={o.id} className="border-b border-border/50 px-4 py-3">
+            <div key={o.id} className="border-b border-border/50 px-4 py-3 card-hover">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-primary">{o.orderNumber}</span>
                 <StatusBadge status={o.deliveryStatus} />

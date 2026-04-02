@@ -140,7 +140,7 @@ export default function Products() {
           {/* Mobile cards */}
           <div className="space-y-0 md:hidden">
             {filtered.map((p) => (
-              <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+              <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3 card-hover">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{p.name}</p>
                   <p className="text-[10px] text-muted-foreground font-mono md:text-xs">{p.sku} · {p.unit}</p>

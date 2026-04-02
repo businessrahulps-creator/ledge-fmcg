@@ -58,7 +58,7 @@ export function DistributorReport() {
           {data.length === 0 ? (
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((d) => (
-            <div key={d.id} className="border-b border-border/50 px-4 py-3">
+            <div key={d.id} className="border-b border-border/50 px-4 py-3 card-hover">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{d.name}</span>
                 <span className="text-sm font-medium">{formatCurrency(d.revenue)}</span>

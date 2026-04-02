@@ -79,7 +79,7 @@ export default function GodownOverview() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }}
-                  className="glass-card p-4 md:p-6 transition-all duration-200 hover:border-primary/40 hover:-translate-y-0.5"
+                  className="glass-card card-hover p-4 md:p-6"
                 >
                   <h3 className="text-sm font-semibold md:text-base">{godown.name}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5 md:mt-1">{godown.address}</p>

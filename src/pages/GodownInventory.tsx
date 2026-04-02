@@ -191,7 +191,7 @@ export default function GodownInventory() {
               return (
                 <div
                   key={item.id}
-                  className="border-b border-border/50 px-4 py-3 transition-colors active:bg-muted/20"
+                  className="border-b border-border/50 px-4 py-3 card-hover"
                   onClick={() => setSelectedItem(item)}
                 >
                   <div className="flex items-start justify-between">

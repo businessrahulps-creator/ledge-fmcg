@@ -121,7 +121,7 @@ export default function Orders() {
             {filtered.map((order) => (
               <div
                 key={order.id}
-                className="border-b border-border/50 px-4 py-2.5 transition-colors active:bg-muted/30"
+                className="border-b border-border/50 px-4 py-2.5 card-hover"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-foreground">{order.orderNumber}</span>

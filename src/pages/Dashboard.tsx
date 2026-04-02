@@ -205,7 +205,7 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.06 }}
-                className="glass-card p-4"
+                className="glass-card card-hover p-4"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[14px] font-semibold">{o.distributorName}</span>
