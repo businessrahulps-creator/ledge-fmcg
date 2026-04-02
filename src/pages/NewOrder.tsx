@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/use-notifications";
 
 interface OrderLineState {
   id: string;
@@ -49,6 +50,7 @@ let lineCounter = 0;
 export default function NewOrder() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: `line-${lineCounter++}`, productId: "", quantity: 1, unitPrice: 0 },
   ]);
@@ -103,6 +105,8 @@ export default function NewOrder() {
       title: "Order saved ✓",
       description: "Your order has been created successfully.",
     });
+
+    addNotification("order_placed", "New Order Created", "A new order has been placed successfully.");
 
     setTimeout(() => navigate("/orders"), 2500);
   };

@@ -4,6 +4,8 @@ import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
 import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { NotificationCenter } from "./NotificationCenter";
+import { NotificationProvider } from "@/hooks/use-notifications";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -29,6 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [location.pathname]);
 
   return (
+    <NotificationProvider>
     <SidebarProvider>
       <div className="flex min-h-screen w-full overflow-x-hidden bg-background">
         <div className="hidden md:block">
@@ -43,6 +46,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span className="text-xs font-bold text-background">O</span>
               </div>
               <span className="text-base font-bold tracking-tight">Ordra</span>
+            </div>
+            <div className="ml-auto">
+              <NotificationCenter />
             </div>
           </header>
 
@@ -109,5 +115,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     </SidebarProvider>
+    </NotificationProvider>
   );
 }

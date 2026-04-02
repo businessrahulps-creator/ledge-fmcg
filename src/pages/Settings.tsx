@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/use-notifications";
 
 interface TeamMember {
   id: string;
@@ -48,6 +49,7 @@ const roleLabels: Record<string, string> = {
 
 export default function Settings() {
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
   const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
   const [team, setTeam] = useState<TeamMember[]>([
@@ -84,6 +86,7 @@ export default function Settings() {
     if (!deleteMember) return;
     setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
     toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+    addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
     setDeleteMember(null);
   };
 
