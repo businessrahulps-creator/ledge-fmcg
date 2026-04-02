@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { orders, products, formatCurrency, formatNumber, type Product } from "@/data/mock-data";
+import { orders, products, formatCurrency, formatNumber } from "@/data/mock-data";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 export function ProductReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -28,7 +27,6 @@ export function ProductReport() {
   type ProductRow = typeof data[number];
   const [selected, setSelected] = useState<ProductRow | null>(null);
 
-  // Get orders containing the selected product
   const selectedProductOrders = selected
     ? filteredOrders.filter((o) => o.lines.some((l) => l.productId === selected.id)).map((o) => {
         const line = o.lines.find((l) => l.productId === selected!.id)!;
@@ -88,37 +86,57 @@ export function ProductReport() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>{selected.name}</DialogTitle>
-                <p className="text-sm text-muted-foreground">SKU: {selected.sku} · Unit: {selected.unit} · Base Price: {formatCurrency(selected.basePrice)}</p>
+                <DialogTitle className="text-base md:text-xl">{selected.name}</DialogTitle>
               </DialogHeader>
-              <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Total Sold</span>
-                <span className="font-semibold">{formatNumber(selected.qtySold)} units</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Total Revenue</span>
-                <span className="font-semibold">{formatCurrency(selected.revenue)}</span>
-              </div>
-              <Separator />
-              <h4 className="text-sm font-medium">Orders ({periodLabel(period).toLowerCase()})</h4>
-              <div className="space-y-2">
-                {selectedProductOrders.map((o) => (
-                  <div key={o.id} className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2">
-                    <div>
-                      <p className="text-sm font-medium">{o.orderNumber}</p>
-                      <p className="text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{formatCurrency(o.lineTotal)}</p>
-                      <p className="text-xs text-muted-foreground">{formatNumber(o.qty)} units</p>
-                    </div>
+              <div className="space-y-4 md:space-y-5">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">SKU</span>
+                    <p className="mt-0.5 text-xs font-medium font-mono md:text-sm">{selected.sku}</p>
                   </div>
-                ))}
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Base Price</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{formatCurrency(selected.basePrice)}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Units Sold</span>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatNumber(selected.qtySold)}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Revenue</span>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selected.revenue)}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold md:text-sm">Orders ({periodLabel(period).toLowerCase()})</h3>
+                  <div className="rounded-lg border border-border overflow-hidden">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
+                          <th className="px-3 py-2 font-medium md:px-4">Order</th>
+                          <th className="px-3 py-2 font-medium md:px-4">Dealer</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedProductOrders.map((o) => (
+                          <tr key={o.id} className="border-b border-border/50">
+                            <td className="px-3 py-2.5 font-medium md:px-4">{o.orderNumber}</td>
+                            <td className="px-3 py-2.5 text-muted-foreground md:px-4">{o.distributorName}</td>
+                            <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{formatNumber(o.qty)}</td>
+                            <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.lineTotal)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </>
           )}

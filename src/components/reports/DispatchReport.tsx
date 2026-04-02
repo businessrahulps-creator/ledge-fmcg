@@ -4,7 +4,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 export function DispatchReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -78,53 +77,79 @@ export function DispatchReport() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>{selected.orderNumber}</DialogTitle>
-                <p className="text-sm text-muted-foreground">{selected.distributorName} · {selected.date}</p>
+                <DialogTitle className="text-base md:text-xl">{selected.orderNumber}</DialogTitle>
               </DialogHeader>
-              <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Delivery Status</span>
-                <StatusBadge status={selected.deliveryStatus} />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Dispatch Date</span>
-                <span className="font-medium">{selected.dispatchDate || "—"}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Vehicle</span>
-                <span className="font-medium">{selected.vehicle || "—"}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Driver</span>
-                <span className="font-medium">{selected.driverName || "—"}</span>
-              </div>
-              {selected.dispatchRemarks && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Remarks</span>
-                  <span className="font-medium">{selected.dispatchRemarks}</span>
-                </div>
-              )}
-              <Separator />
-              <h4 className="text-sm font-medium">Line Items</h4>
-              <div className="space-y-2">
-                {selected.lines.map((l, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2">
-                    <div>
-                      <p className="text-sm font-medium">{l.productName}</p>
-                      <p className="text-xs text-muted-foreground">{l.quantity} × {formatCurrency(l.unitPrice)}</p>
-                    </div>
-                    <span className="text-sm font-medium">{formatCurrency(l.lineTotal)}</span>
+              <div className="space-y-4 md:space-y-5">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Dealer</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.distributorName}</p>
                   </div>
-                ))}
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Total</span>
-                <span className="font-semibold">{formatCurrency(selected.total)}</span>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.date}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Delivery Status</span>
+                    <div className="mt-1"><StatusBadge status={selected.deliveryStatus} /></div>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Total</span>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selected.total)}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Dispatch Date</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.dispatchDate || "—"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Vehicle</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.vehicle || "—"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Driver</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.driverName || "—"}</p>
+                  </div>
+                </div>
+
+                {selected.dispatchRemarks && (
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Remarks</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.dispatchRemarks}</p>
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold md:text-sm">Line Items</h3>
+                  <div className="rounded-lg border border-border overflow-hidden">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
+                          <th className="px-3 py-2 font-medium md:px-4">Product</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Price</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selected.lines.map((l, i) => (
+                          <tr key={i} className="border-b border-border/50">
+                            <td className="px-3 py-2.5 font-medium md:px-4">{l.productName}</td>
+                            <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{l.quantity}</td>
+                            <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(l.unitPrice)}</td>
+                            <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(l.lineTotal)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </>
           )}
