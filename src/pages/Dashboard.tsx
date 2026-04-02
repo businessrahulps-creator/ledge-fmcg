@@ -86,7 +86,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
                   <kpi.icon className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
+                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
                   {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {kpi.change}
                 </span>
