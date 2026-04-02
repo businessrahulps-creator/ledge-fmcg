@@ -96,15 +96,17 @@ export default function Dashboard() {
                 {/* Decorative gradient blob */}
                 <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 ${colors.blob}`} />
                 
-                <div className={`flex items-center justify-center w-11 h-11 rounded-2xl mb-4 ${colors.icon}`}>
-                  <kpi.icon className="w-5 h-5" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`flex items-center justify-center w-11 h-11 rounded-2xl ${colors.icon}`}>
+                    <kpi.icon className="w-5 h-5" />
+                  </div>
+                  <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${kpi.up ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500 dark:text-red-400"}`}>
+                    {kpi.up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                    {kpi.change}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
-                <p className="text-[22px] font-bold tracking-tight leading-none mb-2">{kpi.value}</p>
-                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${kpi.up ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500 dark:text-red-400"}`}>
-                  {kpi.up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                  {kpi.change}
-                </div>
+                <p className="text-[22px] font-bold tracking-tight leading-none">{kpi.value}</p>
               </motion.div>
             );
           })}
