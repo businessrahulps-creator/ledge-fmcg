@@ -113,7 +113,7 @@ export default function NewOrder() {
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           <div className="space-y-6 lg:col-span-2 lg:space-y-8">
             {/* Order Header */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Order Details</h2>
               <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
