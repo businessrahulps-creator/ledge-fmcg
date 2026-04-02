@@ -26,7 +26,9 @@ export function DispatchReport() {
             <SelectItem value="delivered">Delivered</SelectItem>
           </SelectContent>
         </Select>
-        <span className="text-xs text-muted-foreground md:text-sm">{filtered.length} orders</span>
+        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
+          <span className="text-muted-foreground">{filtered.length} orders</span>
+        </div>
       </div>
       <div className="glass-card overflow-hidden">
         {/* Desktop table */}
