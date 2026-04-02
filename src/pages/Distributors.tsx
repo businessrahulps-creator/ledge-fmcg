@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { distributors as initialDealers, orders, formatCurrency, formatNumber, type Distributor } from "@/data/mock-data";
+import { formatCurrency, formatNumber, type Distributor } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useData } from "@/context/DataContext";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,7 @@ import {
 import { toast } from "sonner";
 
 export default function Distributors() {
-  const [items, setItems] = useState<Distributor[]>(initialDealers);
+  const { distributors: items, orders, addDistributor, updateDistributor, deleteDistributor } = useData();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Distributor | null>(null);
@@ -55,12 +56,19 @@ export default function Distributors() {
   };
 
   const save = () => {
-    if (!editItem?.name) return;
+    if (!editItem?.name.trim()) {
+      toast.error("Name required", { description: "Please enter a dealer name." });
+      return;
+    }
+    if (!editItem?.contact.trim()) {
+      toast.error("Contact required", { description: "Please enter a contact number." });
+      return;
+    }
     if (isNew) {
-      setItems((prev) => [...prev, editItem]);
+      addDistributor(editItem);
       toast.success("Dealer added", { description: `${editItem.name} has been added.` });
     } else {
-      setItems((prev) => prev.map((d) => (d.id === editItem.id ? editItem : d)));
+      updateDistributor(editItem);
       toast.success("Dealer updated", { description: `${editItem.name} has been updated.` });
     }
     setEditItem(null);
@@ -69,7 +77,7 @@ export default function Distributors() {
   const confirmDelete = () => {
     if (!deleteId) return;
     const d = items.find((i) => i.id === deleteId);
-    setItems((prev) => prev.filter((i) => i.id !== deleteId));
+    deleteDistributor(deleteId);
     toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
     setDeleteId(null);
   };
@@ -159,7 +167,7 @@ export default function Distributors() {
             {editItem && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dealer Name</Label>
+                  <Label className="text-xs md:text-sm">Dealer Name *</Label>
                   <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
@@ -168,7 +176,7 @@ export default function Distributors() {
                     <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-11 rounded-lg md:h-12" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Contact</Label>
+                    <Label className="text-xs md:text-sm">Contact *</Label>
                     <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-11 rounded-lg md:h-12" />
                   </div>
                 </div>

@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { orders, distributors, formatCurrency, type Distributor } from "@/data/mock-data";
+import { formatCurrency, type Distributor } from "@/data/mock-data";
+import { useData } from "@/context/DataContext";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 export function DistributorReport() {
+  const { orders, distributors } = useData();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [selected, setSelected] = useState<(Distributor & { orderCount: number; revenue: number }) | null>(null);
   const filteredOrders = filterByTimePeriod(orders, period);

@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { products as initialProducts, formatCurrency, formatNumber, type Product } from "@/data/mock-data";
-import { stockItems as initialStockItems, godownLocations as initialLocations, getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
+import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
+import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
+import { useData } from "@/context/DataContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -35,9 +36,9 @@ import { toast } from "sonner";
 
 function HealthBadge({ health }: { health: string }) {
   const styles: Record<string, string> = {
-    healthy: "bg-emerald-50 text-emerald-600",
-    low: "bg-amber-50 text-amber-600",
-    critical: "bg-red-50 text-red-500",
+    healthy: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
+    low: "bg-amber-50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+    critical: "bg-red-50 text-red-500 dark:bg-red-500/20 dark:text-red-400",
   };
   const labels: Record<string, string> = { healthy: "Healthy", low: "Low", critical: "Critical" };
   return (
@@ -48,34 +49,31 @@ function HealthBadge({ health }: { health: string }) {
 }
 
 export default function Stock() {
-  // Products state
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const {
+    products, addProduct, updateProduct, deleteProduct: deleteProductCtx,
+    locations, addLocation, updateLocation, deleteLocation,
+    stockItems: stockItemsList, addStockItem, updateStockItem, deleteStockItem: deleteStockItemCtx, setStockItems,
+  } = useData();
+
   const [productSearch, setProductSearch] = useState("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
-  // Warehouses state
-  const [locations, setLocations] = useState<GodownLocation[]>(initialLocations);
-  const [stockItemsList, setStockItemsList] = useState<StockItem[]>(initialStockItems);
   const [editWarehouse, setEditWarehouse] = useState<GodownLocation | null>(null);
   const [isNewWarehouse, setIsNewWarehouse] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(null);
   const [warehouseSearch, setWarehouseSearch] = useState("");
 
-  // Delete warehouse confirmation
-  const [deleteWarehouse, setDeleteWarehouse] = useState<GodownLocation | null>(null);
+  const [deleteWarehouseLoc, setDeleteWarehouseLoc] = useState<GodownLocation | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  // Edit stock item
   const [editStockItem, setEditStockItem] = useState<StockItem | null>(null);
 
-  // Add Stock dialog
   const [addStockOpen, setAddStockOpen] = useState(false);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
 
-  // Auto-scroll ref
   const inventoryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,7 +84,6 @@ export default function Stock() {
     }
   }, [selectedWarehouse]);
 
-  // Products helpers
   const getProductStock = (productId: string) =>
     stockItemsList.filter((si) => si.productId === productId).reduce((sum, si) => sum + si.quantity, 0);
 
@@ -102,12 +99,23 @@ export default function Stock() {
   };
 
   const saveProduct = () => {
-    if (!editProduct?.name || !editProduct?.sku) return;
+    if (!editProduct?.name.trim()) {
+      toast.error("Name required", { description: "Please enter a product name." });
+      return;
+    }
+    if (!editProduct?.sku.trim()) {
+      toast.error("SKU required", { description: "Please enter a SKU." });
+      return;
+    }
+    if (editProduct.basePrice <= 0) {
+      toast.error("Invalid price", { description: "Base price must be greater than 0." });
+      return;
+    }
     if (isNewProduct) {
-      setProducts((prev) => [...prev, editProduct]);
+      addProduct(editProduct);
       toast.success("Product added", { description: `${editProduct.name} has been added.` });
     } else {
-      setProducts((prev) => prev.map((p) => (p.id === editProduct.id ? editProduct : p)));
+      updateProduct(editProduct);
       toast.success("Product updated", { description: `${editProduct.name} has been updated.` });
     }
     setEditProduct(null);
@@ -116,12 +124,11 @@ export default function Stock() {
   const confirmDeleteProduct = () => {
     if (!deleteProductId) return;
     const p = products.find((i) => i.id === deleteProductId);
-    setProducts((prev) => prev.filter((i) => i.id !== deleteProductId));
+    deleteProductCtx(deleteProductId);
     toast.success("Product deleted", { description: `${p?.name} has been removed.` });
     setDeleteProductId(null);
   };
 
-  // Warehouse helpers
   const activeLocations = locations.filter((l) => l.isActive);
 
   const getWarehouseStats = (warehouseId: string) => {
@@ -138,45 +145,44 @@ export default function Stock() {
   };
 
   const saveWarehouse = () => {
-    if (!editWarehouse?.name) return;
+    if (!editWarehouse?.name.trim()) {
+      toast.error("Name required", { description: "Please enter a warehouse name." });
+      return;
+    }
     if (isNewWarehouse) {
-      setLocations((prev) => [...prev, editWarehouse]);
+      addLocation(editWarehouse);
       toast.success("Warehouse added", { description: `${editWarehouse.name} has been added.` });
     } else {
-      setLocations((prev) => prev.map((l) => (l.id === editWarehouse.id ? editWarehouse : l)));
+      updateLocation(editWarehouse);
       toast.success("Warehouse updated", { description: `${editWarehouse.name} has been updated.` });
     }
     setEditWarehouse(null);
   };
 
   const confirmDeleteWarehouse = () => {
-    if (!deleteWarehouse) return;
-    setLocations((prev) => prev.filter((l) => l.id !== deleteWarehouse.id));
-    setStockItemsList((prev) => prev.filter((si) => si.godownId !== deleteWarehouse.id));
-    if (selectedWarehouse === deleteWarehouse.id) setSelectedWarehouse(null);
-    toast.success("Warehouse deleted", { description: `${deleteWarehouse.name} and all its inventory have been removed.` });
-    setDeleteWarehouse(null);
+    if (!deleteWarehouseLoc) return;
+    deleteLocation(deleteWarehouseLoc.id);
+    setStockItems((prev) => prev.filter((si) => si.godownId !== deleteWarehouseLoc.id));
+    if (selectedWarehouse === deleteWarehouseLoc.id) setSelectedWarehouse(null);
+    toast.success("Warehouse deleted", { description: `${deleteWarehouseLoc.name} and all its inventory have been removed.` });
+    setDeleteWarehouseLoc(null);
     setDeleteConfirmText("");
   };
 
-  // Edit stock item
-  const saveStockItem = () => {
+  const saveStockItemFn = () => {
     if (!editStockItem) return;
-    setStockItemsList((prev) =>
-      prev.map((si) => (si.id === editStockItem.id ? editStockItem : si))
-    );
+    updateStockItem(editStockItem);
     toast.success("Inventory updated", { description: `${editStockItem.productName} has been updated.` });
     setEditStockItem(null);
   };
 
-  const deleteStockItem = () => {
+  const deleteStockItemFn = () => {
     if (!editStockItem) return;
-    setStockItemsList((prev) => prev.filter((si) => si.id !== editStockItem.id));
+    deleteStockItemCtx(editStockItem.id);
     toast.success("Inventory removed", { description: `${editStockItem.productName} removed from warehouse.` });
     setEditStockItem(null);
   };
 
-  // Selected warehouse inventory
   const warehouseInventory = selectedWarehouse
     ? stockItemsList
         .filter((si) => si.godownId === selectedWarehouse)
@@ -188,12 +194,19 @@ export default function Stock() {
     : [];
 
   const handleAddStock = () => {
-    if (!addStockProductId || !selectedWarehouse || addStockQty <= 0) return;
+    if (!addStockProductId || !selectedWarehouse) {
+      toast.error("Product required", { description: "Please select a product." });
+      return;
+    }
+    if (addStockQty <= 0) {
+      toast.error("Invalid quantity", { description: "Quantity must be greater than 0." });
+      return;
+    }
     const existing = stockItemsList.find(
       (si) => si.productId === addStockProductId && si.godownId === selectedWarehouse
     );
     if (existing) {
-      setStockItemsList((prev) =>
+      setStockItems((prev) =>
         prev.map((si) =>
           si.id === existing.id ? { ...si, quantity: si.quantity + addStockQty } : si
         )
@@ -215,7 +228,7 @@ export default function Stock() {
           basePrice: product.basePrice,
           lastDeductedDate: null,
         };
-        setStockItemsList((prev) => [...prev, newItem]);
+        addStockItem(newItem);
       }
     }
     toast.success("Stock added", { description: `${addStockQty} units added successfully.` });
@@ -244,7 +257,7 @@ export default function Stock() {
             </TabsList>
           </div>
 
-          {/* ===== PRODUCTS TAB ===== */}
+          {/* PRODUCTS TAB */}
           <TabsContent value="products">
             <div className="space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -264,7 +277,6 @@ export default function Stock() {
               </div>
 
               <div className="glass-card overflow-hidden">
-                {/* Desktop Table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -303,7 +315,6 @@ export default function Stock() {
                   </table>
                 </div>
 
-                {/* Mobile cards */}
                 <div className="space-y-0 md:hidden">
                   {filteredProducts.map((p) => (
                     <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3 card-hover">
@@ -340,7 +351,7 @@ export default function Stock() {
             </div>
           </TabsContent>
 
-          {/* ===== WAREHOUSES TAB ===== */}
+          {/* WAREHOUSES TAB */}
           <TabsContent value="warehouses">
             <div className="space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -353,7 +364,6 @@ export default function Stock() {
                 </Button>
               </div>
 
-              {/* Warehouse cards */}
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
                 {locations.map((loc, i) => {
                   const stats = getWarehouseStats(loc.id);
@@ -384,7 +394,7 @@ export default function Stock() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouse(loc); }}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
@@ -415,7 +425,6 @@ export default function Stock() {
                 </div>
               )}
 
-              {/* Selected warehouse inventory */}
               <AnimatePresence>
                 {selectedWarehouse && (
                   <motion.div
@@ -448,7 +457,6 @@ export default function Stock() {
                     </div>
 
                     <div className="glass-card overflow-hidden">
-                      {/* Desktop */}
                       <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
@@ -482,7 +490,6 @@ export default function Stock() {
                           </tbody>
                         </table>
                       </div>
-                      {/* Mobile */}
                       <div className="md:hidden">
                         {warehouseInventory.map((si) => {
                           const health = getStockHealth(si.quantity, si.threshold);
@@ -526,12 +533,12 @@ export default function Stock() {
             {editProduct && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Product Name</Label>
+                  <Label className="text-xs md:text-sm">Product Name *</Label>
                   <Input value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">SKU</Label>
+                    <Label className="text-xs md:text-sm">SKU *</Label>
                     <Input value={editProduct.sku} onChange={(e) => setEditProduct({ ...editProduct, sku: e.target.value })} placeholder="RIC-BAS-5K" className="h-11 rounded-lg md:h-12" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
@@ -540,7 +547,7 @@ export default function Stock() {
                   </div>
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Base Price (₹)</Label>
+                  <Label className="text-xs md:text-sm">Base Price (₹) *</Label>
                   <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-11 rounded-lg md:h-12" />
                 </div>
               </div>
@@ -552,7 +559,7 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Product Confirmation */}
+        {/* Delete Product */}
         <AlertDialog open={!!deleteProductId} onOpenChange={() => setDeleteProductId(null)}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <AlertDialogHeader>
@@ -568,7 +575,7 @@ export default function Stock() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Add/Edit Warehouse Dialog */}
+        {/* Add/Edit Warehouse */}
         <Dialog open={!!editWarehouse} onOpenChange={() => setEditWarehouse(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
@@ -577,7 +584,7 @@ export default function Stock() {
             {editWarehouse && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Warehouse Name</Label>
+                  <Label className="text-xs md:text-sm">Warehouse Name *</Label>
                   <Input value={editWarehouse.name} onChange={(e) => setEditWarehouse({ ...editWarehouse, name: e.target.value })} placeholder="e.g. Main Warehouse — Kochi" className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
@@ -593,14 +600,14 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Warehouse Confirmation (type-to-confirm) */}
-        <AlertDialog open={!!deleteWarehouse} onOpenChange={() => { setDeleteWarehouse(null); setDeleteConfirmText(""); }}>
+        {/* Delete Warehouse */}
+        <AlertDialog open={!!deleteWarehouseLoc} onOpenChange={() => { setDeleteWarehouseLoc(null); setDeleteConfirmText(""); }}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
               <AlertDialogDescription className="space-y-3">
-                <span>This will permanently delete <span className="font-semibold text-foreground">{deleteWarehouse?.name}</span> and all its inventory. This action cannot be undone.</span>
-                <span className="block text-xs">Type <span className="font-mono font-semibold text-foreground">{deleteWarehouse?.name}</span> to confirm:</span>
+                <span>This will permanently delete <span className="font-semibold text-foreground">{deleteWarehouseLoc?.name}</span> and all its inventory. This action cannot be undone.</span>
+                <span className="block text-xs">Type <span className="font-mono font-semibold text-foreground">{deleteWarehouseLoc?.name}</span> to confirm:</span>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Input
@@ -614,7 +621,7 @@ export default function Stock() {
               <Button
                 variant="destructive"
                 onClick={confirmDeleteWarehouse}
-                disabled={deleteConfirmText !== deleteWarehouse?.name}
+                disabled={deleteConfirmText !== deleteWarehouseLoc?.name}
               >
                 Delete Warehouse
               </Button>
@@ -622,7 +629,7 @@ export default function Stock() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Edit Stock Item Dialog */}
+        {/* Edit Stock Item */}
         <Dialog open={!!editStockItem} onOpenChange={() => setEditStockItem(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
@@ -660,16 +667,16 @@ export default function Stock() {
               </div>
             )}
             <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
-              <Button variant="destructive" onClick={deleteStockItem} className="sm:mr-auto">
+              <Button variant="destructive" onClick={deleteStockItemFn} className="sm:mr-auto">
                 Remove from Warehouse
               </Button>
               <Button variant="outline" onClick={() => setEditStockItem(null)}>Cancel</Button>
-              <Button onClick={saveStockItem}>Save Changes</Button>
+              <Button onClick={saveStockItemFn}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Add Stock Dialog */}
+        {/* Add Stock */}
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
@@ -677,7 +684,7 @@ export default function Stock() {
             </DialogHeader>
             <div className="space-y-3 md:space-y-4">
               <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Product</Label>
+                <Label className="text-xs md:text-sm">Product *</Label>
                 <Select value={addStockProductId} onValueChange={setAddStockProductId}>
                   <SelectTrigger className="h-11 rounded-lg md:h-12">
                     <SelectValue placeholder="Select product" />
@@ -690,13 +697,19 @@ export default function Stock() {
                 </Select>
               </div>
               <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Quantity to Add</Label>
-                <Input type="number" min={1} value={addStockQty || ""} onChange={(e) => setAddStockQty(parseInt(e.target.value) || 0)} placeholder="e.g. 100" className="h-11 rounded-lg md:h-12" />
+                <Label className="text-xs md:text-sm">Quantity to Add *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={addStockQty}
+                  onChange={(e) => setAddStockQty(parseInt(e.target.value) || 0)}
+                  className="h-11 rounded-lg md:h-12"
+                />
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock} disabled={!addStockProductId || addStockQty <= 0}>Add Stock</Button>
+              <Button onClick={handleAddStock}>Add Stock</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

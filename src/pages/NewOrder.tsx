@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
@@ -9,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { products, distributors, salespersons, formatCurrency } from "@/data/mock-data";
+import { formatCurrency } from "@/data/mock-data";
+import { useData } from "@/context/DataContext";
 import {
   Select,
   SelectContent,
@@ -17,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { useNotifications } from "@/hooks/use-notifications";
+import { toast } from "sonner";
 
 interface OrderLineState {
   id: string;
@@ -54,24 +54,32 @@ const statusColors: Record<string, string> = {
   delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
 };
 
-let lineCounter = 0;
-
 export default function NewOrder() {
   const navigate = useNavigate();
-  
+  const { products, distributors, salespersons, addOrder, nextOrderNumber } = useData();
   const { addNotification } = useNotifications();
+
   const [lines, setLines] = useState<OrderLineState[]>([
-    { id: `line-${lineCounter++}`, productId: "", quantity: 1, unitPrice: 0 },
+    { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Controlled form fields
+  const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedDealer, setSelectedDealer] = useState("");
+  const [selectedSalesperson, setSelectedSalesperson] = useState("");
+  const [dispatchDate, setDispatchDate] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [driverName, setDriverName] = useState("");
+  const [remarks, setRemarks] = useState("");
+
   const addLine = () => {
     setLines((prev) => [
       ...prev,
-      { id: `line-${lineCounter++}`, productId: "", quantity: 1, unitPrice: 0 },
+      { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
     ]);
   };
 
@@ -98,21 +106,63 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const handleSave = () => {
+    // Validation
+    if (!selectedDealer) {
+      toast.error("Dealer required", { description: "Please select a dealer for this order." });
+      return;
+    }
+
+    const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+    if (validLines.length === 0) {
+      toast.error("Products required", { description: "Add at least one product with quantity > 0." });
+      return;
+    }
+
     setIsSaving(true);
 
-    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
+    const dealer = distributors.find((d) => d.id === selectedDealer);
+    const sp = salespersons.find((s) => s.id === selectedSalesperson);
 
+    const orderNum = nextOrderNumber();
+    const order = {
+      id: `o${Date.now()}`,
+      orderNumber: orderNum,
+      date: orderDate,
+      distributorId: selectedDealer,
+      distributorName: dealer?.name || "",
+      salespersonId: selectedSalesperson,
+      salesperson: sp?.name || "",
+      lines: validLines.map((l) => {
+        const product = products.find((p) => p.id === l.productId);
+        return {
+          productId: l.productId,
+          productName: product?.name || "",
+          quantity: l.quantity,
+          unitPrice: l.unitPrice,
+          lineTotal: l.quantity * l.unitPrice,
+        };
+      }),
+      total: validLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0),
+      paymentMode: paymentMode as "cash" | "bank_transfer" | "cheque" | "upi",
+      paymentStatus: paymentStatus as "paid" | "partial" | "pending",
+      dispatchDate: dispatchDate || null,
+      vehicle,
+      driverName,
+      deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
+      dispatchRemarks: remarks,
+    };
+
+    addOrder(order);
+
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
     setTimeout(() => {
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
     }, 300);
-
     setTimeout(() => {
       confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
     }, 700);
 
-
-    addNotification("order_placed", "New Order Created", "A new order has been placed successfully.");
-
+    addNotification("order_placed", "New Order Created", `${orderNum} for ${dealer?.name} has been placed.`);
     setTimeout(() => navigate("/orders"), 2500);
   };
 
@@ -142,12 +192,12 @@ export default function NewOrder() {
               <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" defaultValue="2026-03-31" className="h-11 rounded-lg md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dealer</Label>
-                  <Select>
-                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                  <Label className="text-xs md:text-sm">Dealer *</Label>
+                  <Select value={selectedDealer} onValueChange={setSelectedDealer}>
+                    <SelectTrigger className={`h-11 rounded-lg md:h-12 ${!selectedDealer ? "" : ""}`}>
                       <SelectValue placeholder="Select dealer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -159,7 +209,7 @@ export default function NewOrder() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Sales Person</Label>
-                  <Select>
+                  <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
                     <SelectTrigger className="h-11 rounded-lg md:h-12">
                       <SelectValue placeholder="Select sales person" />
                     </SelectTrigger>
@@ -269,15 +319,15 @@ export default function NewOrder() {
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dispatch Date</Label>
-                  <Input type="date" className="h-11 rounded-lg md:h-12" />
+                  <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
-                  <Input placeholder="e.g. MH-01-AB-1234" className="h-11 rounded-lg md:h-12" />
+                  <Input placeholder="e.g. MH-01-AB-1234" value={vehicle} onChange={(e) => setVehicle(e.target.value)} className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Driver Name</Label>
-                  <Input placeholder="Optional" className="h-11 rounded-lg md:h-12" />
+                  <Input placeholder="Optional" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Delivery Status</Label>
@@ -300,7 +350,7 @@ export default function NewOrder() {
               </div>
               <div className="mt-3 space-y-1.5 md:mt-4 md:space-y-2">
                 <Label className="text-xs md:text-sm">Dispatch Remarks</Label>
-                <Textarea placeholder="Any additional notes..." className="min-h-[80px] rounded-lg" />
+                <Textarea placeholder="Any additional notes..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
               </div>
             </section>
           </div>
@@ -371,7 +421,7 @@ export default function NewOrder() {
               </div>
             </section>
 
-            {/* Save button - sticky on mobile */}
+            {/* Save button */}
             <div className="sticky bottom-24 z-10 md:static">
               <Button
                 className="w-full shadow-lg md:shadow-none"

@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { NotificationProvider } from "@/hooks/use-notifications";
+import { DataProvider } from "@/context/DataContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -21,35 +23,38 @@ import Stock from "./pages/Stock";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <NotificationProvider>
-      <Toaster />
-      <Sonner />
-      <InstallPrompt />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/orders/new" element={<NewOrder />} />
-          <Route path="/distributors" element={<Distributors />} />
-          <Route path="/stock" element={<Stock />} />
-          <Route path="/salespersons" element={<Salespersons />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* Redirects for old routes */}
-          <Route path="/products" element={<Navigate to="/stock" replace />} />
-          <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
-          <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      </NotificationProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <DataProvider>
+          <NotificationProvider>
+            <Toaster />
+            <Sonner />
+            <InstallPrompt />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/orders/new" element={<NewOrder />} />
+                <Route path="/distributors" element={<Distributors />} />
+                <Route path="/stock" element={<Stock />} />
+                <Route path="/salespersons" element={<Salespersons />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/products" element={<Navigate to="/stock" replace />} />
+                <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
+                <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </NotificationProvider>
+        </DataProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
