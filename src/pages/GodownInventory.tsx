@@ -134,7 +134,7 @@ export default function GodownInventory() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.03 }}
-                      className={`group border-b border-border/50 transition-colors hover:bg-muted/20 cursor-pointer ${
+                      className={`group border-b border-border/50 row-hover cursor-pointer ${
                         i % 2 === 0 ? "bg-card" : "bg-transparent"
                       }`}
                       style={{ minHeight: 64 }}
