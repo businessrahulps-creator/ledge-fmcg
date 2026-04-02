@@ -44,16 +44,6 @@ export default function Dashboard() {
 
   const recentOrders = orders.slice(0, 6);
 
-  const paymentColor: Record<string, string> = {
-    paid: "bg-emerald-50 text-emerald-600",
-    partial: "bg-amber-50 text-amber-600",
-    pending: "bg-red-50 text-red-500",
-  };
-  const deliveryColor: Record<string, string> = {
-    delivered: "bg-emerald-50 text-emerald-600",
-    dispatched: "bg-blue-50 text-blue-600",
-    pending: "bg-orange-50 text-orange-500",
-  };
 
   return (
     <AppLayout>
