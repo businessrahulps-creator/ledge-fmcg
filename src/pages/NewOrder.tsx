@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, Save } from "lucide-react";
+import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,11 +86,17 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const handleSave = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.7 },
+      colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'],
+    });
     toast({
-      title: "Order saved",
+      title: "Order saved ✓",
       description: "Your order has been created successfully.",
     });
-    navigate("/orders");
+    setTimeout(() => navigate("/orders"), 1500);
   };
 
   return (
