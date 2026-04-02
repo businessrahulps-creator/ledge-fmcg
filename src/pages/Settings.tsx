@@ -49,6 +49,7 @@ const roleLabels: Record<string, string> = {
 
 export default function Settings() {
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
   const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
   const [team, setTeam] = useState<TeamMember[]>([
