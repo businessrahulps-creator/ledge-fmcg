@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, Receipt, Package, ChartNoAxesCombined, Store, BadgeCheck, Settings, LogOut } from "lucide-react";
+import { House, Receipt, Package, ChartNoAxesCombined, Store, UsersRound, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const allMobileNav = [
@@ -11,7 +11,7 @@ const allMobileNav = [
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
   { title: "Dealers", url: "/distributors", icon: Store },
-  { title: "Sales", url: "/salespersons", icon: BadgeCheck },
+  { title: "Team", url: "/salespersons", icon: UsersRound },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
