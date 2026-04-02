@@ -341,7 +341,7 @@ export default function NewOrder() {
                         onClick={() => setPaymentStatus(s.value)}
                         className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
                           paymentStatus === s.value
-                            ? "border-primary bg-primary/10 text-primary"
+                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                             : "border-border text-muted-foreground hover:border-foreground/20"
                         }`}
                       >
