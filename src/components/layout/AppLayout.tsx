@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, Receipt, Package, ChartNoAxesCombined, UserRound, UserCheck, Settings, LogOut } from "lucide-react";
+import { House, Receipt, Package, ChartNoAxesCombined, Store, BadgeCheck, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const allMobileNav = [
