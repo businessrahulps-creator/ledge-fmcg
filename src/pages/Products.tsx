@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { products as initialProducts, formatCurrency, formatNumber, type Product } from "@/data/mock-data";
+import { stockItems } from "@/data/godown-data";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
