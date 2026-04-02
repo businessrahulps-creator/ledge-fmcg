@@ -23,6 +23,12 @@ export default function Products() {
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const getProductStock = (productId: string) => {
+    const entries = stockItems.filter(si => si.productId === productId);
+    return entries.reduce((sum, si) => sum + si.quantity, 0);
+  };
 
   const filtered = items.filter(
     (p) =>
