@@ -29,18 +29,11 @@ export default function Dashboard() {
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue), icon: Wallet, change: "+12%", up: true, color: "emerald" as const },
-    { label: "Orders", value: totalOrders.toString(), icon: ShoppingBag, change: "+8%", up: true, color: "blue" as const },
-    { label: "Pending", value: pendingOrders.toString(), icon: Clock, change: "-3%", up: false, color: "amber" as const },
-    { label: "Dispatched", value: dispatchedOrders.toString(), icon: PackageCheck, change: "+5%", up: true, color: "violet" as const },
+    { label: "Revenue", value: formatCurrency(totalRevenue), change: "+12%", up: true },
+    { label: "Orders", value: totalOrders.toString(), change: "+8%", up: true },
+    { label: "Pending", value: pendingOrders.toString(), change: "-3%", up: false },
+    { label: "Dispatched", value: dispatchedOrders.toString(), change: "+5%", up: true },
   ];
-
-  const kpiColors = {
-    emerald: { card: "bg-emerald-50/60 dark:bg-emerald-500/8", icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400", blob: "bg-emerald-400" },
-    blue:    { card: "bg-blue-50/60 dark:bg-blue-500/8",       icon: "bg-blue-500/12 text-blue-600 dark:text-blue-400",         blob: "bg-blue-400" },
-    amber:   { card: "bg-amber-50/60 dark:bg-amber-500/8",     icon: "bg-amber-500/12 text-amber-600 dark:text-amber-400",       blob: "bg-amber-400" },
-    violet:  { card: "bg-violet-50/60 dark:bg-violet-500/8",   icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400",     blob: "bg-violet-400" },
-  };
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
