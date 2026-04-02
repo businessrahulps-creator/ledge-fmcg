@@ -181,58 +181,66 @@ export default function Dashboard() {
             <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
           </div>
 
-          {/* Desktop table */}
-          <div className="hidden md:block glass-card overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-6 py-3 font-medium">Order</th>
-                  <th className="px-6 py-3 font-medium">Dealer</th>
-                  <th className="px-6 py-3 font-medium">Date</th>
-                  <th className="px-6 py-3 font-medium text-right">Amount</th>
-                  <th className="px-6 py-3 font-medium">Payment</th>
-                  <th className="px-6 py-3 font-medium">Delivery</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-border/50 row-hover">
-                    <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
-                    <td className="px-6 py-4">{order.distributorName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
-                    <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                    <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {recentOrders.length === 0 ? (
+            <div className="glass-card p-8 text-center">
+              <p className="text-sm text-muted-foreground">No orders on this day</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block glass-card overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                      <th className="px-6 py-3 font-medium">Order</th>
+                      <th className="px-6 py-3 font-medium">Dealer</th>
+                      <th className="px-6 py-3 font-medium">Date</th>
+                      <th className="px-6 py-3 font-medium text-right">Amount</th>
+                      <th className="px-6 py-3 font-medium">Payment</th>
+                      <th className="px-6 py-3 font-medium">Delivery</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr key={order.id} className="border-b border-border/50 row-hover">
+                        <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
+                        <td className="px-6 py-4">{order.distributorName}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
+                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
+                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Mobile cards */}
-          <div className="space-y-2.5 md:hidden">
-            {recentOrders.map((o, i) => (
-              <motion.div
-                key={o.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06 }}
-                className="glass-card card-hover p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold">{o.distributorName}</span>
-                  <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
-                  <div className="flex gap-1.5">
-                    <StatusBadge status={o.paymentStatus} />
-                    <StatusBadge status={o.deliveryStatus} />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              {/* Mobile cards */}
+              <div className="space-y-2.5 md:hidden">
+                {recentOrders.map((o, i) => (
+                  <motion.div
+                    key={o.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.06 }}
+                    className="glass-card card-hover p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold">{o.distributorName}</span>
+                      <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
+                      <div className="flex gap-1.5">
+                        <StatusBadge status={o.paymentStatus} />
+                        <StatusBadge status={o.deliveryStatus} />
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
         </section>
       </div>
     </AppLayout>
