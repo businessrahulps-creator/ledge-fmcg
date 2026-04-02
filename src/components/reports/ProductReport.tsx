@@ -7,19 +7,22 @@ export function ProductReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const filteredOrders = filterByTimePeriod(orders, period);
 
-  const data = products.map((p) => {
-    let qty = 0;
-    let rev = 0;
-    filteredOrders.forEach((o) => {
-      o.lines.forEach((l) => {
-        if (l.productId === p.id) {
-          qty += l.quantity;
-          rev += l.lineTotal;
-        }
+  const data = products
+    .map((p) => {
+      let qty = 0;
+      let rev = 0;
+      filteredOrders.forEach((o) => {
+        o.lines.forEach((l) => {
+          if (l.productId === p.id) {
+            qty += l.quantity;
+            rev += l.lineTotal;
+          }
+        });
       });
-    });
-    return { ...p, qtySold: qty, revenue: rev };
-  }).filter((p) => p.qtySold > 0).sort((a, b) => b.revenue - a.revenue);
+      return { ...p, qtySold: qty, revenue: rev };
+    })
+    .filter((p) => p.qtySold > 0)
+    .sort((a, b) => b.revenue - a.revenue);
 
   const totalRevenue = data.reduce((s, p) => s + p.revenue, 0);
   const totalQty = data.reduce((s, p) => s + p.qtySold, 0);
@@ -28,21 +31,23 @@ export function ProductReport() {
   const [selected, setSelected] = useState<ProductRow | null>(null);
 
   const selectedProductOrders = selected
-    ? filteredOrders.filter((o) => o.lines.some((l) => l.productId === selected.id)).map((o) => {
-        const line = o.lines.find((l) => l.productId === selected!.id)!;
-        return { ...o, qty: line.quantity, lineTotal: line.lineTotal };
-      })
+    ? filteredOrders
+        .filter((o) => o.lines.some((l) => l.productId === selected.id))
+        .map((o) => {
+          const line = o.lines.find((l) => l.productId === selected!.id)!;
+          return { ...o, qty: line.quantity, lineTotal: line.lineTotal };
+        })
     : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
-        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
+          <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
-          <span className="text-muted-foreground">{formatNumber(totalQty)} units sold</span>
+          <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -62,7 +67,7 @@ export function ProductReport() {
               ) : data.map((p) => (
                 <tr key={p.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => setSelected(p)}>
                   <td className="px-6 py-4 font-medium">{p.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
+                  <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{p.sku}</td>
                   <td className="px-6 py-4 text-right">{formatNumber(p.qtySold)}</td>
                   <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.revenue)}</td>
                 </tr>
@@ -75,11 +80,13 @@ export function ProductReport() {
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((p) => (
             <div key={p.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(p)}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{p.name}</span>
-                <span className="text-sm font-medium">{formatCurrency(p.revenue)}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{p.name}</span>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{p.sku} · {formatNumber(p.qtySold)} sold</p>
+                </div>
+                <span className="shrink-0 text-sm font-medium">{formatCurrency(p.revenue)}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{p.sku} · {formatNumber(p.qtySold)} sold</p>
             </div>
           ))}
         </div>
@@ -96,7 +103,7 @@ export function ProductReport() {
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">SKU</span>
-                    <p className="mt-0.5 text-xs font-medium font-mono md:text-sm">{selected.sku}</p>
+                    <p className="mt-0.5 font-mono text-xs font-medium md:text-sm">{selected.sku}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Base Price</span>
@@ -127,8 +134,8 @@ export function ProductReport() {
                       <tbody>
                         {selectedProductOrders.map((o) => (
                           <tr key={o.id} className="border-b border-border/50">
-                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[90px]">{o.orderNumber}</td>
-                            <td className="px-2 py-2.5 text-muted-foreground md:px-4 truncate max-w-[90px]">{o.distributorName}</td>
+                            <td className="px-2 py-2.5 max-w-[90px] truncate font-medium md:px-4">{o.orderNumber}</td>
+                            <td className="px-2 py-2.5 max-w-[90px] truncate text-muted-foreground md:px-4">{o.distributorName}</td>
                             <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{formatNumber(o.qty)}</td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.lineTotal)}</td>
                           </tr>

@@ -4,7 +4,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 export function PaymentReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -15,7 +14,7 @@ export function PaymentReport() {
   const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.paymentStatus === filter);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
         <Select value={filter} onValueChange={setFilter}>
@@ -29,11 +28,11 @@ export function PaymentReport() {
             <SelectItem value="pending">Pending</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
+          <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + o.total, 0))}</span>
           </span>
-          <span className="text-muted-foreground">{filtered.length} orders</span>
+          <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -59,7 +58,7 @@ export function PaymentReport() {
                   <td className="px-6 py-4 text-muted-foreground">{o.date}</td>
                   <td className="px-6 py-4 text-right font-medium">{formatCurrency(o.total)}</td>
                   <td className="px-6 py-4"><StatusBadge status={o.paymentStatus} /></td>
-                  <td className="px-6 py-4 text-muted-foreground capitalize">{o.paymentMode.replace("_", " ")}</td>
+                  <td className="px-6 py-4 capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</td>
                 </tr>
               ))}
             </tbody>
@@ -70,14 +69,16 @@ export function PaymentReport() {
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : filtered.map((o) => (
             <div key={o.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(o)}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{o.orderNumber}</span>
-                <span className="text-sm font-medium">{formatCurrency(o.total)}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{o.orderNumber}</span>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
+                </div>
+                <span className="shrink-0 text-sm font-medium">{formatCurrency(o.total)}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
-              <div className="mt-1 flex items-center gap-2">
+              <div className="mt-1 flex flex-wrap items-center gap-2">
                 <StatusBadge status={o.paymentStatus} />
-                <span className="text-xs text-muted-foreground capitalize">{o.paymentMode.replace("_", " ")}</span>
+                <span className="text-xs capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</span>
               </div>
             </div>
           ))}
@@ -131,7 +132,7 @@ export function PaymentReport() {
                       <tbody>
                         {selected.lines.map((l, i) => (
                           <tr key={i} className="border-b border-border/50">
-                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[100px]">{l.productName}</td>
+                            <td className="px-2 py-2.5 max-w-[100px] truncate font-medium md:px-4">{l.productName}</td>
                             <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{l.quantity}</td>
                             <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(l.unitPrice)}</td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(l.lineTotal)}</td>

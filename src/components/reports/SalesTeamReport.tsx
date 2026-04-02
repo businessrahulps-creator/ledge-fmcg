@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { orders, salespersons, formatCurrency, formatNumber } from "@/data/mock-data";
+import { orders, salespersons, formatCurrency } from "@/data/mock-data";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -8,11 +8,14 @@ export function SalesTeamReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const filteredOrders = filterByTimePeriod(orders, period);
 
-  const data = salespersons.map((s) => {
-    const sOrders = filteredOrders.filter((o) => o.salespersonId === s.id);
-    const revenue = sOrders.reduce((sum, o) => sum + o.total, 0);
-    return { ...s, orderCount: sOrders.length, revenue };
-  }).filter((s) => s.orderCount > 0).sort((a, b) => b.revenue - a.revenue);
+  const data = salespersons
+    .map((s) => {
+      const sOrders = filteredOrders.filter((o) => o.salespersonId === s.id);
+      const revenue = sOrders.reduce((sum, o) => sum + o.total, 0);
+      return { ...s, orderCount: sOrders.length, revenue };
+    })
+    .filter((s) => s.orderCount > 0)
+    .sort((a, b) => b.revenue - a.revenue);
 
   const totalRevenue = data.reduce((s, d) => s + d.revenue, 0);
   const totalOrders = data.reduce((s, d) => s + d.orderCount, 0);
@@ -23,15 +26,15 @@ export function SalesTeamReport() {
   const selectedOrders = selected ? filteredOrders.filter((o) => o.salespersonId === selected.id) : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
-        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
+          <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
-          <span className="text-muted-foreground">{totalOrders} orders</span>
-          <span className="text-muted-foreground">{data.length} members</span>
+          <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
+          <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -64,11 +67,13 @@ export function SalesTeamReport() {
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((s) => (
             <div key={s.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(s)}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{s.name}</span>
-                <span className="text-sm font-medium">{formatCurrency(s.revenue)}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{s.name}</span>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{s.region} · {s.orderCount} orders</p>
+                </div>
+                <span className="shrink-0 text-sm font-medium">{formatCurrency(s.revenue)}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{s.region} · {s.orderCount} orders</p>
             </div>
           ))}
         </div>
@@ -116,8 +121,8 @@ export function SalesTeamReport() {
                       <tbody>
                         {selectedOrders.map((o) => (
                           <tr key={o.id} className="border-b border-border/50">
-                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[90px]">{o.orderNumber}</td>
-                            <td className="px-2 py-2.5 text-muted-foreground md:px-4 truncate max-w-[90px]">{o.distributorName}</td>
+                            <td className="px-2 py-2.5 max-w-[90px] truncate font-medium md:px-4">{o.orderNumber}</td>
+                            <td className="px-2 py-2.5 max-w-[90px] truncate text-muted-foreground md:px-4">{o.distributorName}</td>
                             <td className="px-2 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
                           </tr>

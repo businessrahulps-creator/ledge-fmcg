@@ -14,7 +14,7 @@ export function DispatchReport() {
   const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.deliveryStatus === filter);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
         <Select value={filter} onValueChange={setFilter}>
@@ -28,8 +28,8 @@ export function DispatchReport() {
             <SelectItem value="delivered">Delivered</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex flex-wrap items-center gap-3 text-xs md:gap-6 md:text-sm">
-          <span className="text-muted-foreground">{filtered.length} orders</span>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
+          <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -66,12 +66,12 @@ export function DispatchReport() {
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : filtered.map((o) => (
             <div key={o.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(o)}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{o.orderNumber}</span>
-                <StatusBadge status={o.deliveryStatus} />
+              <div className="flex items-start justify-between gap-3">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{o.orderNumber}</span>
+                <div className="shrink-0"><StatusBadge status={o.deliveryStatus} /></div>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground truncate">{o.distributorName} · {o.dispatchDate || "No dispatch date"}</p>
-              {o.vehicle && <p className="text-xs text-muted-foreground truncate">{o.vehicle}</p>}
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {o.dispatchDate || "No dispatch date"}</p>
+              <p className="truncate text-xs text-muted-foreground">{o.vehicle || "No vehicle"}</p>
             </div>
           ))}
         </div>
@@ -141,7 +141,7 @@ export function DispatchReport() {
                       <tbody>
                         {selected.lines.map((l, i) => (
                           <tr key={i} className="border-b border-border/50">
-                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[100px]">{l.productName}</td>
+                            <td className="px-2 py-2.5 max-w-[100px] truncate font-medium md:px-4">{l.productName}</td>
                             <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{l.quantity}</td>
                             <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(l.unitPrice)}</td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(l.lineTotal)}</td>
