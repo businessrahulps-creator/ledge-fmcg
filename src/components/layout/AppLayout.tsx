@@ -31,6 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [location.pathname]);
 
   return (
+    <NotificationProvider>
     <SidebarProvider>
       <div className="flex min-h-screen w-full overflow-x-hidden bg-background">
         <div className="hidden md:block">
@@ -45,6 +46,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span className="text-xs font-bold text-background">O</span>
               </div>
               <span className="text-base font-bold tracking-tight">Ordra</span>
+            </div>
+            <div className="ml-auto">
+              <NotificationCenter />
             </div>
           </header>
 
