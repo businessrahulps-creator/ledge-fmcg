@@ -7,6 +7,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { NotificationProvider } from "@/hooks/use-notifications";
 import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -22,6 +23,11 @@ import Stock from "./pages/Stock";
 
 const queryClient = new QueryClient();
 
+function OnlineStatusWatcher() {
+  useOnlineStatus();
+  return null;
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -31,6 +37,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <InstallPrompt />
+            <OnlineStatusWatcher />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
