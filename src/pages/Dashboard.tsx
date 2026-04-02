@@ -24,12 +24,17 @@ function getGreeting() {
 
 export default function Dashboard() {
   const today = new Date();
-  const dayOfWeek = today.getDay();
+  const [selectedDay, setSelectedDay] = useState(today.getDay());
 
-  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter((o) => o.deliveryStatus === "pending").length;
-  const dispatchedOrders = orders.filter((o) => o.deliveryStatus === "dispatched").length;
+  const filteredOrders = orders.filter((o) => {
+    const orderDay = new Date(o.date).getDay();
+    return orderDay === selectedDay;
+  });
+
+  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
+  const totalOrders = filteredOrders.length;
+  const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
+  const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue), icon: Wallet, change: "+12%", up: true, color: "emerald" as const },
@@ -51,7 +56,7 @@ export default function Dashboard() {
   const topProducts = [...products].sort((a, b) => b.totalSold - a.totalSold).slice(0, 4);
   const maxProdVal = topProducts[0]?.totalSold || 1;
 
-  const recentOrders = orders.slice(0, 6);
+  const recentOrders = filteredOrders.slice(0, 6);
 
 
   return (
