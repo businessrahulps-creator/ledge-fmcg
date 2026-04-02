@@ -305,9 +305,9 @@ export default function Orders() {
                           <button
                             key={s.value}
                             onClick={() => setEditDelivery(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:text-sm ${
+                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
                               editDelivery === s.value
-                                ? "border-primary bg-primary/10 text-primary"
+                                ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
                             }`}
                           >
