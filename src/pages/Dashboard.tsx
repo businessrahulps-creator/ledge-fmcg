@@ -1,13 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Wallet,
-  ShoppingBag,
-  Clock,
-  PackageCheck,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
 import { orders, distributors, products, formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -37,18 +29,11 @@ export default function Dashboard() {
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue), icon: Wallet, change: "+12%", up: true, color: "emerald" as const },
-    { label: "Orders", value: totalOrders.toString(), icon: ShoppingBag, change: "+8%", up: true, color: "blue" as const },
-    { label: "Pending", value: pendingOrders.toString(), icon: Clock, change: "-3%", up: false, color: "amber" as const },
-    { label: "Dispatched", value: dispatchedOrders.toString(), icon: PackageCheck, change: "+5%", up: true, color: "violet" as const },
+    { label: "Revenue", value: formatCurrency(totalRevenue), change: "+12%", up: true },
+    { label: "Orders", value: totalOrders.toString(), change: "+8%", up: true },
+    { label: "Pending", value: pendingOrders.toString(), change: "-3%", up: false },
+    { label: "Dispatched", value: dispatchedOrders.toString(), change: "+5%", up: true },
   ];
-
-  const kpiColors = {
-    emerald: { card: "bg-emerald-50/60 dark:bg-emerald-500/8", icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400", blob: "bg-emerald-400" },
-    blue:    { card: "bg-blue-50/60 dark:bg-blue-500/8",       icon: "bg-blue-500/12 text-blue-600 dark:text-blue-400",         blob: "bg-blue-400" },
-    amber:   { card: "bg-amber-50/60 dark:bg-amber-500/8",     icon: "bg-amber-500/12 text-amber-600 dark:text-amber-400",       blob: "bg-amber-400" },
-    violet:  { card: "bg-violet-50/60 dark:bg-violet-500/8",   icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400",     blob: "bg-violet-400" },
-  };
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
@@ -89,34 +74,23 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {kpis.map((kpi, i) => {
-            const colors = kpiColors[kpi.color];
-            return (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -3, scale: 1.02 }}
-                transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 24 }}
-                className={`relative overflow-hidden rounded-2xl p-5 ${colors.card} border border-border/50 shadow-sm`}
-              >
-                {/* Decorative gradient blob */}
-                <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 ${colors.blob}`} />
-                
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex items-center justify-center w-11 h-11 rounded-2xl ${colors.icon}`}>
-                    <kpi.icon className="w-[28px] h-[28px]" />
-                  </div>
-                  <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${kpi.up ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500 dark:text-red-400"}`}>
-                    {kpi.up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                    {kpi.change}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
-                <p className="text-[22px] tracking-tight leading-none font-medium">{kpi.value}</p>
-              </motion.div>
-            );
-          })}
+          {kpis.map((kpi, i) => (
+            <motion.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
+              className="glass-card p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
+                <span className={`text-[11px] font-semibold ${kpi.up ? "text-emerald-600" : "text-red-500"}`}>
+                  {kpi.change}
+                </span>
+              </div>
+              <p className="text-xl font-semibold tracking-tight">{kpi.value}</p>
+            </motion.div>
+          ))}
         </div>
 
         {/* Dealers + Products side-by-side on desktop */}
