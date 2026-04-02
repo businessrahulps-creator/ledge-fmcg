@@ -103,7 +103,7 @@ export default function Orders() {
                     key={order.id}
                     className="group border-b border-border/50 transition-colors hover:bg-muted/30 cursor-pointer"
                   >
-                    <td className="px-6 py-4 font-medium text-primary">{order.orderNumber}</td>
+                    <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>

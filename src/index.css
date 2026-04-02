@@ -42,12 +42,12 @@
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 224 100% 62%;
+    --sidebar-primary: 0 0% 7%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96%;
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 224 100% 62%;
+    --sidebar-ring: 0 0% 7%;
 
     --surface: 0 0% 100%;
     --surface-border: 0 0% 92%;
