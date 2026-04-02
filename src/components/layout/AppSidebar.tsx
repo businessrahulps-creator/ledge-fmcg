@@ -1,7 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   House,
-  Receipt,
+  IndianRupee,
   UserRound,
   Package,
   ChartNoAxesCombined,
@@ -25,7 +25,7 @@ import { NavLink } from "@/components/NavLink";
 
 const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: Receipt },
+  { title: "Orders", url: "/orders", icon: IndianRupee },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Dealers", url: "/distributors", icon: UserRound },
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },

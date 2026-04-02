@@ -2,12 +2,12 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, Receipt, Package, ChartNoAxesCombined, Store, UsersRound, Settings, LogOut } from "lucide-react";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: Receipt },
+  { title: "Orders", url: "/orders", icon: IndianRupee },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
   { title: "Dealers", url: "/distributors", icon: Store },
