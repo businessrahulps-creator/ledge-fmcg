@@ -32,6 +32,7 @@ export default function Reports() {
           <TabsContent value="products"><ProductReport /></TabsContent>
           <TabsContent value="payments"><PaymentReport /></TabsContent>
           <TabsContent value="dispatch"><DispatchReport /></TabsContent>
+          <TabsContent value="salesteam"><SalesTeamReport /></TabsContent>
         </Tabs>
       </div>
     </AppLayout>

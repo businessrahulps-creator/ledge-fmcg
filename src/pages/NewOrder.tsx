@@ -348,7 +348,7 @@ export default function NewOrder() {
             </section>
 
             {/* Save button - sticky on mobile */}
-            <div className="sticky bottom-20 z-10 md:static">
+            <div className="sticky bottom-24 z-10 md:static">
               <Button className="w-full shadow-lg md:shadow-none" size="lg" onClick={handleSave}>
                 <Save className="h-4 w-4" />
                 Save Order
