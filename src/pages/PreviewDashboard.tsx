@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { orders, distributors, products, formatCurrency, formatNumber } from "@/data/mock-data";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingCart, Users, Warehouse, BarChart3,
-  TrendingUp, TrendingDown, Package, IndianRupee, Truck, CalendarDays
+  TrendingUp, TrendingDown, Package, IndianRupee, Truck
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -50,21 +49,21 @@ export default function PreviewDashboard() {
   const recentOrders = orders.slice(0, 5);
 
   const paymentColor: Record<string, string> = {
-    paid: "bg-emerald-500/20 text-emerald-400",
-    partial: "bg-amber-500/20 text-amber-400",
-    pending: "bg-red-500/20 text-red-400",
+    paid: "bg-emerald-50 text-emerald-600",
+    partial: "bg-amber-50 text-amber-600",
+    pending: "bg-red-50 text-red-500",
   };
   const deliveryColor: Record<string, string> = {
-    delivered: "bg-emerald-500/20 text-emerald-400",
-    dispatched: "bg-blue-500/20 text-blue-400",
-    pending: "bg-orange-500/20 text-orange-400",
+    delivered: "bg-emerald-50 text-emerald-600",
+    dispatched: "bg-blue-50 text-blue-600",
+    pending: "bg-orange-50 text-orange-500",
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white relative">
+    <div className="min-h-screen bg-[#FAFAFA] text-[#111] relative">
       {/* Header */}
-      <header className="px-5 pt-12 pb-2">
-        <p className="text-[13px] text-white/40 font-medium tracking-wide uppercase">
+      <header className="px-5 pt-14 pb-2">
+        <p className="text-[13px] text-[#999] font-medium tracking-wide uppercase">
           {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
         </p>
         <h1 className="text-[28px] font-bold tracking-tight mt-0.5">{getGreeting()} 👋</h1>
@@ -76,8 +75,8 @@ export default function PreviewDashboard() {
               key={i}
               className={`flex items-center justify-center w-9 h-9 rounded-full text-[13px] font-semibold transition-all ${
                 i === dayOfWeek
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
-                  : "bg-white/[0.06] text-white/30"
+                  ? "bg-[#111] text-white shadow-md"
+                  : "bg-[#F0F0F0] text-[#BBB]"
               }`}
             >
               {d}
@@ -94,19 +93,19 @@ export default function PreviewDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] p-4"
+            className="rounded-2xl bg-white border border-[#EBEBEB] shadow-sm p-4"
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/[0.08]">
-                <kpi.icon className="w-4 h-4 text-white/50" />
+              <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#F5F5F5]">
+                <kpi.icon className="w-4 h-4 text-[#666]" />
               </div>
-              <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-400" : "text-red-400"}`}>
+              <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
                 {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {kpi.change}
               </span>
             </div>
-            <p className="text-[22px] font-bold tracking-tight">{kpi.value}</p>
-            <p className="text-[11px] text-white/35 font-medium mt-0.5">{kpi.label}</p>
+            <p className="text-[22px] font-bold tracking-tight text-[#111]">{kpi.value}</p>
+            <p className="text-[11px] text-[#888] font-medium mt-0.5">{kpi.label}</p>
           </motion.div>
         ))}
       </section>
@@ -114,22 +113,22 @@ export default function PreviewDashboard() {
       {/* Top Distributors */}
       <section className="px-5 mt-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-semibold text-white/80">Top Distributors</h2>
-          <Link to="/distributors" className="text-[12px] text-blue-400 font-medium">View all</Link>
+          <h2 className="text-[15px] font-semibold text-[#111]">Top Distributors</h2>
+          <Link to="/distributors" className="text-[12px] text-[#888] font-medium">View all</Link>
         </div>
-        <div className="rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] p-4 space-y-3.5">
+        <div className="rounded-2xl bg-white border border-[#EBEBEB] shadow-sm p-4 space-y-3.5">
           {topDistributors.map((d) => (
             <div key={d.id}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[13px] font-medium text-white/80">{d.name}</span>
-                <span className="text-[12px] text-white/40">{formatCurrency(d.totalValue)}</span>
+                <span className="text-[13px] font-medium text-[#333]">{d.name}</span>
+                <span className="text-[12px] text-[#999]">{formatCurrency(d.totalValue)}</span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[#F0F0F0] overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-400"
+                  className="h-full rounded-full bg-gradient-to-r from-[#111] to-[#444]"
                 />
               </div>
             </div>
@@ -140,22 +139,22 @@ export default function PreviewDashboard() {
       {/* Top Products */}
       <section className="px-5 mt-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-semibold text-white/80">Top Products</h2>
-          <Link to="/products" className="text-[12px] text-blue-400 font-medium">View all</Link>
+          <h2 className="text-[15px] font-semibold text-[#111]">Top Products</h2>
+          <Link to="/products" className="text-[12px] text-[#888] font-medium">View all</Link>
         </div>
-        <div className="rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] p-4 space-y-3.5">
+        <div className="rounded-2xl bg-white border border-[#EBEBEB] shadow-sm p-4 space-y-3.5">
           {topProducts.map((p) => (
             <div key={p.id}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[13px] font-medium text-white/80 truncate mr-3">{p.name}</span>
-                <span className="text-[12px] text-white/40 shrink-0">{formatNumber(p.totalSold)} sold</span>
+                <span className="text-[13px] font-medium text-[#333] truncate mr-3">{p.name}</span>
+                <span className="text-[12px] text-[#999] shrink-0">{formatNumber(p.totalSold)} sold</span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[#F0F0F0] overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-400"
+                  className="h-full rounded-full bg-gradient-to-r from-[#666] to-[#AAA]"
                 />
               </div>
             </div>
@@ -166,8 +165,8 @@ export default function PreviewDashboard() {
       {/* Recent Orders */}
       <section className="px-5 mt-6 pb-32">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-semibold text-white/80">Recent Orders</h2>
-          <Link to="/orders" className="text-[12px] text-blue-400 font-medium">View all</Link>
+          <h2 className="text-[15px] font-semibold text-[#111]">Recent Orders</h2>
+          <Link to="/orders" className="text-[12px] text-[#888] font-medium">View all</Link>
         </div>
         <div className="space-y-2.5">
           {recentOrders.map((o, i) => (
@@ -176,14 +175,14 @@ export default function PreviewDashboard() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + i * 0.06 }}
-              className="rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] p-4"
+              className="rounded-2xl bg-white border border-[#EBEBEB] shadow-sm p-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[14px] font-semibold">{o.distributorName}</span>
-                <span className="text-[14px] font-bold">{formatCurrency(o.total)}</span>
+                <span className="text-[14px] font-semibold text-[#111]">{o.distributorName}</span>
+                <span className="text-[14px] font-bold text-[#111]">{formatCurrency(o.total)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-white/35">{o.orderNumber} · {o.date}</span>
+                <span className="text-[11px] text-[#AAA]">{o.orderNumber} · {o.date}</span>
                 <div className="flex gap-1.5">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${paymentColor[o.paymentStatus]}`}>
                     {o.paymentStatus}
@@ -200,7 +199,7 @@ export default function PreviewDashboard() {
 
       {/* Floating Pill Bottom Nav */}
       <nav
-        className="fixed bottom-4 left-4 right-4 z-50 flex items-center justify-around rounded-2xl bg-white/[0.08] backdrop-blur-2xl border border-white/[0.1] shadow-2xl shadow-black/40"
+        className="fixed bottom-4 left-4 right-4 z-50 flex items-center justify-around rounded-2xl bg-white border border-[#E8E8E8] shadow-lg shadow-black/5"
         style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
       >
         {mobileNav.map((item) => {
@@ -214,15 +213,15 @@ export default function PreviewDashboard() {
               {isActive && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-1 rounded-xl bg-white/[0.12]"
+                  className="absolute inset-1 rounded-xl bg-[#F0F0F0]"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
               <item.icon
-                className={`w-5 h-5 relative z-10 transition-colors ${isActive ? "text-blue-400" : "text-white/30"}`}
+                className={`w-5 h-5 relative z-10 transition-colors ${isActive ? "text-[#111]" : "text-[#BBB]"}`}
                 strokeWidth={isActive ? 2 : 1.5}
               />
-              <span className={`text-[10px] font-semibold relative z-10 transition-colors ${isActive ? "text-blue-400" : "text-white/30"}`}>
+              <span className={`text-[10px] font-semibold relative z-10 transition-colors ${isActive ? "text-[#111]" : "text-[#BBB]"}`}>
                 {item.title}
               </span>
             </Link>
