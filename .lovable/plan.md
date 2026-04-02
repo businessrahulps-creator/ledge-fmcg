@@ -1,49 +1,45 @@
 
 
-# Fix Order Save Celebration Flow
+# Notification Center in Top Bar
 
-## Problem
-Confetti fires instantly, then 1.5s later the page navigates away — feels abrupt. The particles barely have time to animate before the screen disappears.
+## Concept
+Add a bell icon with unread badge to the right side of the header bar. Tapping it opens a dropdown/popover listing recent notifications. Toasts still appear for immediate feedback, but important events also get logged into the notification center.
 
-## Solution
-Create a **two-phase celebration** that feels intentional:
+## Changes
 
-1. **Phase 1 — Button feedback** (0ms): Disable button, show "Saving..." state
-2. **Phase 2 — Confetti + success overlay** (300ms): Fire confetti with a second delayed burst, show a centered success message (checkmark + "Order Created!") that fades in over the form
-3. **Phase 3 — Navigate** (2500ms): Navigate to `/orders` after the user has time to enjoy the celebration
+### New file: `src/components/layout/NotificationCenter.tsx`
+- Bell icon button with animated unread count badge (red dot or number)
+- Popover dropdown (using existing Popover component) showing a scrollable list of notifications
+- Each notification: icon + title + description + relative timestamp + read/unread state
+- "Mark all as read" button in the header of the dropdown
+- Empty state: "No notifications yet"
+- Notification types: order_placed, stock_alert, team_update, general
 
-### Changes to `src/pages/NewOrder.tsx`
+### New file: `src/hooks/use-notifications.ts`
+- React context + hook for managing notifications state
+- `addNotification(type, title, description)` — adds to the list
+- `markAsRead(id)` / `markAllAsRead()` — clears unread state
+- `unreadCount` — computed count for the badge
+- Stores notifications in state (mock data for now, can be wired to Supabase later)
+- Pre-seed with 2-3 sample notifications so it doesn't look empty on first load
 
-- Add `isSaving` state to disable the button and show a loading/success state
-- Fire **two confetti bursts** (staggered by 400ms) for a richer effect
-- Add a **full-screen success overlay** using `AnimatePresence` + `motion.div` that fades in with a large checkmark icon and "Order Created!" text
-- Extend total delay to ~2.5s so confetti has time to fall naturally
-- The overlay uses the existing frosted glass style (`backdrop-blur`) to obscure the form underneath gracefully
+### Modified: `src/components/layout/AppLayout.tsx`
+- Import and render `<NotificationCenter />` on the right side of the header (`ml-auto`)
+- Wrap the app layout content with `NotificationProvider`
 
-```tsx
-const [isSaving, setIsSaving] = useState(false);
+### Modified: `src/pages/NewOrder.tsx`
+- After saving an order, also call `addNotification('order_placed', 'New Order Created', 'Order for [dealer] has been placed')`
 
-const handleSave = () => {
-  setIsSaving(true);
-  
-  // First burst
-  setTimeout(() => {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: [...] });
-  }, 300);
-  
-  // Second burst  
-  setTimeout(() => {
-    confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors: [...] });
-  }, 700);
-  
-  toast({ title: "Order saved ✓", ... });
-  setTimeout(() => navigate("/orders"), 2500);
-};
-```
+### Modified: `src/pages/Settings.tsx`
+- When a team member is removed, call `addNotification('team_update', 'Team Member Removed', '[name] was removed')`
 
-- The success overlay renders when `isSaving` is true — a centered `motion.div` with scale-in animation showing a green checkmark circle and "Order Created!" text
-- Save button shows "Saving..." with a spinner when `isSaving` is true
+## UI Details
+- Bell icon: `Bell` from lucide-react, sized to match header
+- Badge: small red circle with count, absolute-positioned top-right of bell, animated scale-in
+- Popover: 320px wide, max-height 400px with scroll, matches existing glass/card styling
+- Each notification row: subtle left border color by type, hover highlight, click to mark as read
+- Mobile: popover becomes full-width minus padding
 
 ## Result
-A smooth flow: tap Save → button shows saving → confetti bursts cascade → success overlay fades in → navigate after celebration completes naturally.
+Users get a persistent, reviewable notification history alongside the existing toast system. Clean, lightweight, and ready to be wired to real-time data later.
 
