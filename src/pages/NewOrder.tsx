@@ -282,7 +282,7 @@ export default function NewOrder() {
           </div>
 
           {/* Sidebar Summary */}
-          <div className="space-y-4 md:space-y-6">
+          <div className="space-y-4 pb-28 md:space-y-6 md:pb-0">
             {/* Payment */}
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Payment</h2>
