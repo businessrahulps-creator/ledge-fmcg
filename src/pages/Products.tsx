@@ -114,6 +114,14 @@ export default function Products() {
                     <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.basePrice)}</td>
                     <td className="px-6 py-4 text-right text-muted-foreground">{formatNumber(p.totalSold)}</td>
                     <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/godown/inventory?location=all&search=${encodeURIComponent(p.sku)}`); }}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                      >
+                        {formatNumber(getProductStock(p.id))}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
                           <Pencil className="h-3.5 w-3.5" />
