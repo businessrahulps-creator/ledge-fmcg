@@ -107,12 +107,12 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Distributors + Products side-by-side on desktop */}
+        {/* Dealers + Products side-by-side on desktop */}
         <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
-          {/* Top Distributors */}
+          {/* Top Dealers */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-semibold">Top Distributors</h2>
+              <h2 className="text-[15px] font-semibold">Top Dealers</h2>
               <Link to="/distributors" className="text-[12px] text-muted-foreground font-medium">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
