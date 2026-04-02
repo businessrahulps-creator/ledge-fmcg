@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, Receipt, Box, ChartNoAxesCombined, MoreHorizontal, UserRound, Package, Users, Settings, LogOut } from "lucide-react";
+import { House, Receipt, Package, ChartNoAxesCombined, MoreHorizontal, UserRound, UserCheck, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
@@ -10,14 +10,13 @@ import { Separator } from "@/components/ui/separator";
 const mobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: Receipt },
-  { title: "Godown", url: "/godown", icon: Box },
+  { title: "Stock", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
 const moreLinks = [
   { title: "Dealers", url: "/distributors", icon: UserRound },
-  { title: "Products", url: "/products", icon: Package },
-  { title: "Salespersons", url: "/salespersons", icon: Users },
+  { title: "Sales Team", url: "/salespersons", icon: UserCheck },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

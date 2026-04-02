@@ -19,7 +19,7 @@ export default function Reports() {
         <Tabs defaultValue="distributors" className="space-y-4 md:space-y-6">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
-              <TabsTrigger value="distributors" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Distributors</TabsTrigger>
+              <TabsTrigger value="distributors" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Dealers</TabsTrigger>
               <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
               <TabsTrigger value="payments" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Payments</TabsTrigger>
               <TabsTrigger value="dispatch" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Dispatch</TabsTrigger>

@@ -90,8 +90,8 @@ export default function Orders() {
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Order #</th>
                   <th className="px-6 py-3 font-medium">Date</th>
-                  <th className="px-6 py-3 font-medium">Distributor</th>
-                  <th className="px-6 py-3 font-medium">Salesperson</th>
+                  <th className="px-6 py-3 font-medium">Dealer</th>
+                  <th className="px-6 py-3 font-medium">Sales Person</th>
                   <th className="px-6 py-3 font-medium text-right">Amount</th>
                   <th className="px-6 py-3 font-medium">Payment</th>
                   <th className="px-6 py-3 font-medium">Delivery</th>

@@ -24,7 +24,7 @@ export function DistributorReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
           <span className="text-muted-foreground">{totalOrders} orders</span>
-          <span className="text-muted-foreground">{data.length} distributors</span>
+          <span className="text-muted-foreground">{data.length} dealers</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
@@ -33,7 +33,7 @@ export function DistributorReport() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-6 py-3 font-medium">Distributor</th>
+                <th className="px-6 py-3 font-medium">Dealer</th>
                 <th className="px-6 py-3 font-medium">Location</th>
                 <th className="px-6 py-3 font-medium text-right">Orders</th>
                 <th className="px-6 py-3 font-medium text-right">Revenue</th>

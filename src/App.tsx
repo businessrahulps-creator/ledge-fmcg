@@ -11,14 +11,11 @@ import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import NewOrder from "./pages/NewOrder";
 import Distributors from "./pages/Distributors";
-import Products from "./pages/Products";
 import Salespersons from "./pages/Salespersons";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import GodownOverview from "./pages/GodownOverview";
-import GodownInventory from "./pages/GodownInventory";
-import GodownAlerts from "./pages/GodownAlerts";
+import Stock from "./pages/Stock";
 
 const queryClient = new QueryClient();
 
@@ -37,13 +34,14 @@ const App = () => (
           <Route path="/orders" element={<Orders />} />
           <Route path="/orders/new" element={<NewOrder />} />
           <Route path="/distributors" element={<Distributors />} />
-          <Route path="/products" element={<Products />} />
+          <Route path="/stock" element={<Stock />} />
           <Route path="/salespersons" element={<Salespersons />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/godown" element={<GodownOverview />} />
-          <Route path="/godown/inventory" element={<GodownInventory />} />
-          <Route path="/godown/alerts" element={<GodownAlerts />} />
+          {/* Redirects for old routes */}
+          <Route path="/products" element={<Navigate to="/stock" replace />} />
+          <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
+          <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

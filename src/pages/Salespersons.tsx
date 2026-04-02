@@ -68,21 +68,21 @@ export default function Salespersons() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Salespersons</h1>
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Sales Team</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage your sales team
             </p>
           </div>
           <Button onClick={openNew} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
-            Add Salesperson
+            Add Member
           </Button>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search salespersons..."
+            placeholder="Search sales team..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
@@ -135,8 +135,8 @@ export default function Salespersons() {
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-            <p className="mt-3 text-sm font-medium">No salespersons found</p>
-            <p className="text-xs text-muted-foreground">Add your first salesperson to get started</p>
+            <p className="mt-3 text-sm font-medium">No team members found</p>
+            <p className="text-xs text-muted-foreground">Add your first team member to get started</p>
           </div>
         )}
 
@@ -144,7 +144,7 @@ export default function Salespersons() {
         <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Salesperson" : "Edit Salesperson"}</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
             </DialogHeader>
             {editItem && (
               <div className="space-y-3 md:space-y-4">
@@ -170,7 +170,7 @@ export default function Salespersons() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button onClick={save}>{isNew ? "Add Salesperson" : "Save Changes"}</Button>
+              <Button onClick={save}>{isNew ? "Add Member" : "Save Changes"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -211,7 +211,7 @@ export default function Salespersons() {
                           <thead>
                             <tr className="border-b border-border text-left text-xs text-muted-foreground">
                               <th className="px-4 py-2.5 font-medium">Order</th>
-                              <th className="px-4 py-2.5 font-medium">Distributor</th>
+                              <th className="px-4 py-2.5 font-medium">Dealer</th>
                               <th className="px-4 py-2.5 font-medium text-right">Amount</th>
                               <th className="px-4 py-2.5 font-medium">Payment</th>
                             </tr>
