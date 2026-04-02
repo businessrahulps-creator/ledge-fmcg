@@ -30,11 +30,18 @@ export default function Dashboard() {
   const dispatchedOrders = orders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue), icon: IndianRupee, change: "+12%", up: true },
-    { label: "Orders", value: totalOrders.toString(), icon: Package, change: "+8%", up: true },
-    { label: "Pending", value: pendingOrders.toString(), icon: Truck, change: "-3%", up: false },
-    { label: "Dispatched", value: dispatchedOrders.toString(), icon: Truck, change: "+5%", up: true },
+    { label: "Revenue", value: formatCurrency(totalRevenue), icon: IndianRupee, change: "+12%", up: true, color: "emerald" as const },
+    { label: "Orders", value: totalOrders.toString(), icon: Package, change: "+8%", up: true, color: "blue" as const },
+    { label: "Pending", value: pendingOrders.toString(), icon: Truck, change: "-3%", up: false, color: "amber" as const },
+    { label: "Dispatched", value: dispatchedOrders.toString(), icon: Truck, change: "+5%", up: true, color: "violet" as const },
   ];
+
+  const kpiColors = {
+    emerald: { card: "bg-emerald-50/60 dark:bg-emerald-500/8", icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400" },
+    blue:    { card: "bg-blue-50/60 dark:bg-blue-500/8",       icon: "bg-blue-500/12 text-blue-600 dark:text-blue-400" },
+    amber:   { card: "bg-amber-50/60 dark:bg-amber-500/8",     icon: "bg-amber-500/12 text-amber-600 dark:text-amber-400" },
+    violet:  { card: "bg-violet-50/60 dark:bg-violet-500/8",   icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400" },
+  };
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
@@ -74,27 +81,31 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {kpis.map((kpi, i) => (
-            <motion.div
-              key={kpi.label}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card card-hover p-4"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
-                  <kpi.icon className="w-4 h-4 text-muted-foreground" />
+          {kpis.map((kpi, i) => {
+            const colors = kpiColors[kpi.color];
+            return (
+              <motion.div
+                key={kpi.label}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -2 }}
+                transition={{ delay: i * 0.08 }}
+                className={`glass-card p-4 ${colors.card} transition-shadow duration-200`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${colors.icon}`}>
+                    <kpi.icon className="w-4 h-4" />
+                  </div>
+                  <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
+                    {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {kpi.change}
+                  </span>
                 </div>
-                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
-                  {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  {kpi.change}
-                </span>
-              </div>
-              <p className="text-xl font-bold tracking-tight">{kpi.value}</p>
-              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
-            </motion.div>
-          ))}
+                <p className="text-[10px] text-muted-foreground font-medium mb-0.5">{kpi.label}</p>
+                <p className="text-lg font-bold tracking-tight">{kpi.value}</p>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Dealers + Products side-by-side on desktop */}
