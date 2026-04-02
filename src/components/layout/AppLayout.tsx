@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: Receipt },
+  { title: "Orders", url: "/orders", icon: IndianRupee },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
   { title: "Dealers", url: "/distributors", icon: Store },

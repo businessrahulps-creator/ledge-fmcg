@@ -1,7 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   House,
-  Receipt,
+  IndianRupee,
   UserRound,
   Package,
   ChartNoAxesCombined,
