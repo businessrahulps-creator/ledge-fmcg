@@ -32,6 +32,13 @@ const statusColors: Record<string, string> = {
   delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
 };
 
+const paymentModes = [
+  { value: "cash", label: "Cash" },
+  { value: "bank_transfer", label: "Bank Transfer" },
+  { value: "cheque", label: "Cheque" },
+  { value: "upi", label: "UPI" },
+];
+
 const paymentStatuses = [
   { value: "paid", label: "Paid" },
   { value: "partial", label: "Partial" },
