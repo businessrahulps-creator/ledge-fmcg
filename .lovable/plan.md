@@ -1,37 +1,40 @@
 
 
-# Apple Liquid Glass Bottom Nav
+# Fix Report Section Mobile Overflow Issues
 
-## Concept
-Apply iOS 26's "Liquid Glass" aesthetic to the mobile bottom nav — a translucent frosted glass bar with vibrant blur, subtle light refraction borders, and a smooth glowing active indicator that morphs between tabs.
+## Problems found
+From testing at 390px viewport:
+1. **Dialog tables cramped**: Tables inside detail dialogs have 4 columns with `px-3` padding — order numbers like "ORD-2026-001" wrap mid-word on small screens
+2. **Dialog padding too wide**: Base DialogContent has `p-6` which eats into the available space on mobile; report dialogs use `max-w-[calc(100vw-2rem)]` but inner padding is still 24px per side = 48px lost
+3. **Dispatch mobile cards**: Subtitle line crams dealer name + dispatch date + vehicle number into one line, causing text overflow
+4. **Dialog inner table wrapper**: No horizontal scroll fallback — if content overflows, it breaks the layout
 
-## Visual changes
+## Fixes (5 files)
 
-**Bar itself:**
-- Replace solid `bg-card border` with frosted glass: `bg-white/60 dark:bg-black/40` + `backdrop-blur-2xl backdrop-saturate-[1.8]`
-- Subtle top-edge highlight: `border-t border-white/30 dark:border-white/10` (light refraction effect)
-- Softer, more diffused shadow: `shadow-[0_-4px_30px_rgba(0,0,0,0.08)]`
-- Slightly more rounded: keep `rounded-2xl`
+### All 5 report dialogs — shared pattern
+- Change `DialogContent` padding: add `p-4 md:p-6` to reduce mobile padding
+- Wrap all `<table>` sections inside dialogs with `overflow-x-auto` so they scroll horizontally if needed
+- Reduce mobile table cell padding from `px-3` to `px-2`
+- Truncate long text in table cells with `truncate max-w-[100px]` on mobile for order numbers and dealer names
 
-**Active pill indicator:**
-- Change from flat `bg-muted` to a glowing translucent pill: `bg-foreground/10 dark:bg-white/15` with a subtle `shadow-[0_0_12px_rgba(0,0,0,0.06)]`
-- Add `backdrop-blur-md` to the pill itself for a nested glass-in-glass effect
-- Smoother spring: lower stiffness (~350), higher damping (~35)
+### `DispatchReport.tsx` — mobile card fix
+- Split the long subtitle into two lines: line 1 = dealer + date, line 2 = vehicle number
+- Prevents horizontal overflow on the card entries
 
-**Icons & labels:**
-- Active icon: slightly larger scale via `scale-105` transition
-- Active label: `font-bold` instead of `font-semibold`, slight opacity bump
-- Inactive: lower opacity (`text-muted-foreground/70`) for more contrast with active
+### `PaymentReport.tsx` — line items table
+- Same table padding and overflow-x-auto fixes
 
-**Fade hint:**
-- Change from solid `from-card` to `from-white/60 dark:from-black/40` to match the translucent bar
+### `ProductReport.tsx` — orders table
+- Same table padding and overflow-x-auto fixes
 
-## File: `src/components/layout/AppLayout.tsx`
-- Update `<nav>` className for glass effect
-- Update `motion.div` pill styling
-- Update icon/label active/inactive classes
-- Update fade gradient colors
+### `DistributorReport.tsx` — orders table
+- Same table padding and overflow-x-auto fixes
 
-## Result
-Same layout and swipe behavior, but the bar now looks like it's floating on frosted glass — consistent with Apple's Liquid Glass language while blending with the existing monochrome design system.
+### `SalesTeamReport.tsx` — orders table
+- Same table padding and overflow-x-auto fixes
+
+## Technical detail
+- All `<div className="rounded-lg border border-border overflow-hidden">` wrapping tables become `<div className="rounded-lg border border-border overflow-x-auto">` 
+- Table `<th>` and `<td>` padding changes from `px-3 py-2` to `px-2 py-2 md:px-3` on mobile
+- DialogContent gets `p-4 md:p-6` added to className alongside existing overrides
 
