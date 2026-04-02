@@ -73,8 +73,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     {isActive && (
                       <motion.div
                         layoutId="nav-pill"
-                        className="absolute inset-1 rounded-xl bg-muted"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
+                        transition={{ type: "spring", stiffness: 350, damping: 35 }}
                       />
                     )}
                     <item.icon
