@@ -364,13 +364,52 @@ export default function NewOrder() {
 
             {/* Save button - sticky on mobile */}
             <div className="sticky bottom-24 z-10 md:static">
-              <Button className="w-full shadow-lg md:shadow-none" size="lg" onClick={handleSave}>
-                <Save className="h-4 w-4" />
-                Save Order
+              <Button
+                className="w-full shadow-lg md:shadow-none"
+                size="lg"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Order
+                  </>
+                )}
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Success overlay */}
+        <AnimatePresence>
+          {isSaving && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.35, type: "spring", stiffness: 200 }}
+                className="flex flex-col items-center gap-3"
+              >
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                  <CheckCircle2 className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">Order Created!</h2>
+                <p className="text-sm text-muted-foreground">Redirecting to orders…</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppLayout>
   );
