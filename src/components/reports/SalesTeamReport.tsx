@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { orders, salespersons, formatCurrency } from "@/data/mock-data";
+import { formatCurrency } from "@/data/mock-data";
+import { useData } from "@/context/DataContext";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
