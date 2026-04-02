@@ -240,7 +240,7 @@ export default function NewOrder() {
             </section>
 
             {/* Dispatch Details */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
