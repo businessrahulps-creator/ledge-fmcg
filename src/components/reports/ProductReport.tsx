@@ -50,7 +50,7 @@ export function ProductReport() {
               {data.length === 0 ? (
                 <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : data.map((p) => (
-                <tr key={p.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                <tr key={p.id} className="border-b border-border/50 row-hover">
                   <td className="px-6 py-4 font-medium">{p.name}</td>
                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
                   <td className="px-6 py-4 text-right">{formatNumber(p.qtySold)}</td>
@@ -65,7 +65,7 @@ export function ProductReport() {
           {data.length === 0 ? (
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((p) => (
-            <div key={p.id} className="border-b border-border/50 px-4 py-3">
+            <div key={p.id} className="border-b border-border/50 px-4 py-3 card-hover">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{p.name}</span>
                 <span className="text-sm font-medium">{formatCurrency(p.revenue)}</span>

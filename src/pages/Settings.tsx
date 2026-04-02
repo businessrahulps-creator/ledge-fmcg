@@ -141,7 +141,7 @@ export default function Settings() {
 
               <div className="glass-card overflow-hidden">
                 {team.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 hover:bg-muted/30 transition-colors md:px-6 md:py-4">
+                  <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 row-hover md:px-6 md:py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary md:h-10 md:w-10 md:text-sm">
                         {m.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}

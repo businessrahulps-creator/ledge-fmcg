@@ -107,7 +107,7 @@ export default function Products() {
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="group border-b border-border/50 transition-colors hover:bg-muted/30">
+                  <tr key={p.id} className="group border-b border-border/50 row-hover">
                     <td className="px-6 py-4 font-medium">{p.name}</td>
                     <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
                     <td className="px-6 py-4 text-muted-foreground">{p.unit}</td>
@@ -140,7 +140,7 @@ export default function Products() {
           {/* Mobile cards */}
           <div className="space-y-0 md:hidden">
             {filtered.map((p) => (
-              <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+              <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3 card-hover">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{p.name}</p>
                   <p className="text-[10px] text-muted-foreground font-mono md:text-xs">{p.sku} · {p.unit}</p>

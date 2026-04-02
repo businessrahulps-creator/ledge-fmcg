@@ -43,7 +43,7 @@ export function DistributorReport() {
               {data.length === 0 ? (
                 <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : data.map((d) => (
-                <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                <tr key={d.id} className="border-b border-border/50 row-hover">
                   <td className="px-6 py-4 font-medium">{d.name}</td>
                   <td className="px-6 py-4 text-muted-foreground">{d.location}</td>
                   <td className="px-6 py-4 text-right">{d.orderCount}</td>
@@ -58,7 +58,7 @@ export function DistributorReport() {
           {data.length === 0 ? (
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((d) => (
-            <div key={d.id} className="border-b border-border/50 px-4 py-3">
+            <div key={d.id} className="border-b border-border/50 px-4 py-3 card-hover">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{d.name}</span>
                 <span className="text-sm font-medium">{formatCurrency(d.revenue)}</span>

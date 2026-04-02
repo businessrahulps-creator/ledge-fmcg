@@ -123,6 +123,16 @@
     @apply rounded-2xl bg-card border border-border shadow-sm;
   }
 
+  .row-hover {
+    @apply transition-all duration-200 ease-out hover:bg-muted/40;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 ease-out 
+           hover:-translate-y-[1px] hover:shadow-md hover:border-border/80
+           active:scale-[0.98] active:shadow-sm;
+  }
+
   .status-paid {
     @apply bg-emerald-50 text-emerald-600;
   }

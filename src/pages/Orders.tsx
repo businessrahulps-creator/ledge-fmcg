@@ -101,7 +101,7 @@ export default function Orders() {
                 {filtered.map((order) => (
                   <tr
                     key={order.id}
-                    className="group border-b border-border/50 transition-colors hover:bg-muted/30 cursor-pointer"
+                    className="group border-b border-border/50 row-hover cursor-pointer"
                   >
                     <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
@@ -121,7 +121,7 @@ export default function Orders() {
             {filtered.map((order) => (
               <div
                 key={order.id}
-                className="border-b border-border/50 px-4 py-2.5 transition-colors active:bg-muted/30"
+                className="border-b border-border/50 px-4 py-2.5 card-hover"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-foreground">{order.orderNumber}</span>

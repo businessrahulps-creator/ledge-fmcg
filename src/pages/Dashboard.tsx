@@ -90,7 +90,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card p-4"
+              className="glass-card card-hover p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
@@ -184,7 +184,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-border/50 transition-colors hover:bg-muted/30">
+                  <tr key={order.id} className="border-b border-border/50 row-hover">
                     <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
@@ -205,7 +205,7 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.06 }}
-                className="glass-card p-4"
+                className="glass-card card-hover p-4"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[14px] font-semibold">{o.distributorName}</span>
