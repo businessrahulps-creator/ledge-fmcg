@@ -1,40 +1,37 @@
 
 
-# Swipeable Bottom Navigation — Apple Music Style
+# Apple Liquid Glass Bottom Nav
 
 ## Concept
-Remove the "More" button + bottom drawer. Instead, make the entire bottom nav bar a **horizontally scrollable strip** containing all 7 nav items (Home, Orders, Stock, Reports, Dealers, Sales Team, Settings) plus Log out. The user swipes left/right to reveal more items — exactly like Apple Music's tab bar behavior on iOS.
+Apply iOS 26's "Liquid Glass" aesthetic to the mobile bottom nav — a translucent frosted glass bar with vibrant blur, subtle light refraction borders, and a smooth glowing active indicator that morphs between tabs.
 
-## How it works
-- All nav items sit in a single horizontal row inside a `overflow-x-auto` container with hidden scrollbar
-- The strip is wider than the screen, so items like Dealers, Sales Team, Settings are off-screen to the right
-- User drags/swipes horizontally to see them — no tap needed, no sheet popup
-- A subtle fade gradient on the right edge hints that more items exist
-- When navigating to a "hidden" item (e.g. Dealers), the strip auto-scrolls to show the active item using `scrollIntoView`
+## Visual changes
 
-## Visual
-```text
-┌──────────────────────────────┐
-│ [Home] [Orders] [Stock] [Reports] [Dealers] [Sales] [Settings] [Logout]
-│  ◄──── visible ────►  ◄── swipe to reveal ──►
-└──────────────────────────────┘
-```
+**Bar itself:**
+- Replace solid `bg-card border` with frosted glass: `bg-white/60 dark:bg-black/40` + `backdrop-blur-2xl backdrop-saturate-[1.8]`
+- Subtle top-edge highlight: `border-t border-white/30 dark:border-white/10` (light refraction effect)
+- Softer, more diffused shadow: `shadow-[0_-4px_30px_rgba(0,0,0,0.08)]`
+- Slightly more rounded: keep `rounded-2xl`
 
-## Changes — single file: `src/components/layout/AppLayout.tsx`
+**Active pill indicator:**
+- Change from flat `bg-muted` to a glowing translucent pill: `bg-foreground/10 dark:bg-white/15` with a subtle `shadow-[0_0_12px_rgba(0,0,0,0.06)]`
+- Add `backdrop-blur-md` to the pill itself for a nested glass-in-glass effect
+- Smoother spring: lower stiffness (~350), higher damping (~35)
 
-1. **Merge nav arrays**: Combine `mobileNav` + `moreLinks` + Log out into one flat `allMobileNav` array
-2. **Remove**: `moreOpen` state, `isMoreActive`, the "More" button, the entire `<Drawer>` block, Drawer imports
-3. **Replace `<nav>` internals**: Wrap all nav items in a horizontal scroll container:
-   - `overflow-x-auto scrollbar-hide` (CSS utility to hide scrollbar)
-   - `flex-nowrap` so items stay in one row
-   - Each item has `flex-shrink-0` and fixed width (~64px)
-4. **Right fade hint**: Add a `pointer-events-none` gradient overlay on the right edge of the nav bar (`bg-gradient-to-l from-card to-transparent`) so users see there's more to scroll
-5. **Auto-scroll to active**: Use a `useRef` on the nav container + `useEffect` watching `location.pathname` to call `activeElement.scrollIntoView({ inline: 'center', behavior: 'smooth' })` so the active tab is always visible
-6. **Add scrollbar-hide utility**: Add `.scrollbar-hide::-webkit-scrollbar { display: none }` and `-ms-overflow-style: none; scrollbar-width: none` to `src/index.css`
+**Icons & labels:**
+- Active icon: slightly larger scale via `scale-105` transition
+- Active label: `font-bold` instead of `font-semibold`, slight opacity bump
+- Inactive: lower opacity (`text-muted-foreground/70`) for more contrast with active
+
+**Fade hint:**
+- Change from solid `from-card` to `from-white/60 dark:from-black/40` to match the translucent bar
+
+## File: `src/components/layout/AppLayout.tsx`
+- Update `<nav>` className for glass effect
+- Update `motion.div` pill styling
+- Update icon/label active/inactive classes
+- Update fade gradient colors
 
 ## Result
-- No more popup/drawer — feels native and fluid
-- One-handed thumb swipe to access all destinations
-- Active item always scrolls into view automatically
-- Maintains the existing animated pill indicator (`layoutId="nav-pill"`)
+Same layout and swipe behavior, but the bar now looks like it's floating on frosted glass — consistent with Apple's Liquid Glass language while blending with the existing monochrome design system.
 
