@@ -103,23 +103,23 @@ export function SalesTeamReport() {
 
                 <div>
                   <h3 className="mb-2 text-xs font-semibold md:text-sm">Orders ({periodLabel(period).toLowerCase()})</h3>
-                  <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="rounded-lg border border-border overflow-x-auto">
                     <table className="w-full text-xs md:text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
-                          <th className="px-3 py-2 font-medium md:px-4">Order</th>
-                          <th className="px-3 py-2 font-medium md:px-4">Dealer</th>
-                          <th className="px-3 py-2 font-medium md:px-4">Status</th>
-                          <th className="px-3 py-2 font-medium text-right md:px-4">Amount</th>
+                          <th className="px-2 py-2 font-medium md:px-4">Order</th>
+                          <th className="px-2 py-2 font-medium md:px-4">Dealer</th>
+                          <th className="px-2 py-2 font-medium md:px-4">Status</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {selectedOrders.map((o) => (
                           <tr key={o.id} className="border-b border-border/50">
-                            <td className="px-3 py-2.5 font-medium md:px-4">{o.orderNumber}</td>
-                            <td className="px-3 py-2.5 text-muted-foreground md:px-4">{o.distributorName}</td>
-                            <td className="px-3 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
-                            <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
+                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[90px]">{o.orderNumber}</td>
+                            <td className="px-2 py-2.5 text-muted-foreground md:px-4 truncate max-w-[90px]">{o.distributorName}</td>
+                            <td className="px-2 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
+                            <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
                           </tr>
                         ))}
                       </tbody>
