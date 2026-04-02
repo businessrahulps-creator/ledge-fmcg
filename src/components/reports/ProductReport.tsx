@@ -5,6 +5,7 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function ProductReport() {
+  const { orders, products } = useData();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const filteredOrders = filterByTimePeriod(orders, period);
 

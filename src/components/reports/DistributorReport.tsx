@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/ui/status-badge";
 
 export function DistributorReport() {
+  const { orders, distributors } = useData();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [selected, setSelected] = useState<(Distributor & { orderCount: number; revenue: number }) | null>(null);
   const filteredOrders = filterByTimePeriod(orders, period);

@@ -7,6 +7,7 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function PaymentReport() {
+  const { orders } = useData();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Order | null>(null);
