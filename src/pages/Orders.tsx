@@ -103,7 +103,7 @@ export default function Orders() {
                     key={order.id}
                     className="group border-b border-border/50 transition-colors hover:bg-muted/30 cursor-pointer"
                   >
-                    <td className="px-6 py-4 font-medium text-primary">{order.orderNumber}</td>
+                    <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
@@ -121,13 +121,13 @@ export default function Orders() {
             {filtered.map((order) => (
               <div
                 key={order.id}
-                className="border-b border-border/50 px-4 py-3 transition-colors active:bg-muted/30"
+                className="border-b border-border/50 px-4 py-2.5 transition-colors active:bg-muted/30"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-primary">{order.orderNumber}</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.total)}</span>
+                  <span className="text-xs font-medium text-foreground">{order.orderNumber}</span>
+                  <span className="text-xs font-medium">{formatCurrency(order.total)}</span>
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
                   {order.distributorName} · {order.date}
                 </p>
                 <div className="mt-1.5 flex gap-1.5">
