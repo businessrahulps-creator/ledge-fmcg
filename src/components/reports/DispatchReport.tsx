@@ -70,7 +70,8 @@ export function DispatchReport() {
                 <span className="text-sm font-medium">{o.orderNumber}</span>
                 <StatusBadge status={o.deliveryStatus} />
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{o.distributorName} · {o.dispatchDate || "No dispatch date"} · {o.vehicle || "No vehicle"}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground truncate">{o.distributorName} · {o.dispatchDate || "No dispatch date"}</p>
+              {o.vehicle && <p className="text-xs text-muted-foreground truncate">{o.vehicle}</p>}
             </div>
           ))}
         </div>
