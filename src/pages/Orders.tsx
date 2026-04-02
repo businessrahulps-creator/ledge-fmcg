@@ -24,6 +24,14 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
+const statusColors: Record<string, string> = {
+  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
+  pending: "border-red-500 bg-red-500/10 text-red-600",
+  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
+  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+};
+
 const paymentStatuses = [
   { value: "paid", label: "Paid" },
   { value: "partial", label: "Partial" },
@@ -278,9 +286,9 @@ export default function Orders() {
                           <button
                             key={s.value}
                             onClick={() => setEditPayment(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:text-sm ${
+                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
                               editPayment === s.value
-                                ? "border-primary bg-primary/10 text-primary"
+                                ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
                             }`}
                           >
@@ -297,9 +305,9 @@ export default function Orders() {
                           <button
                             key={s.value}
                             onClick={() => setEditDelivery(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:text-sm ${
+                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
                               editDelivery === s.value
-                                ? "border-primary bg-primary/10 text-primary"
+                                ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
                             }`}
                           >
