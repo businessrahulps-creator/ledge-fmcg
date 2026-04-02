@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { orders, salespersons, formatCurrency, formatNumber, type Salesperson } from "@/data/mock-data";
+import { orders, salespersons, formatCurrency, formatNumber } from "@/data/mock-data";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export function SalesTeamReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -75,34 +75,57 @@ export function SalesTeamReport() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>{selected.name}</DialogTitle>
-                <p className="text-sm text-muted-foreground">{selected.region} · {selected.phone} · {selected.email}</p>
+                <DialogTitle className="text-base md:text-xl">{selected.name}</DialogTitle>
               </DialogHeader>
-              <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Total Revenue</span>
-                <span className="font-semibold">{formatCurrency(selected.revenue)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Orders</span>
-                <span className="font-semibold">{selected.orderCount}</span>
-              </div>
-              <Separator />
-              <h4 className="text-sm font-medium">Orders ({periodLabel(period).toLowerCase()})</h4>
-              <div className="space-y-2">
-                {selectedOrders.map((o) => (
-                  <div key={o.id} className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2">
-                    <div>
-                      <p className="text-sm font-medium">{o.orderNumber}</p>
-                      <p className="text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
-                    </div>
-                    <span className="text-sm font-medium">{formatCurrency(o.total)}</span>
+              <div className="space-y-4 md:space-y-5">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Region</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.region}</p>
                   </div>
-                ))}
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Phone</span>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.phone}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Orders</span>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{selected.orderCount}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Revenue</span>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selected.revenue)}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold md:text-sm">Orders ({periodLabel(period).toLowerCase()})</h3>
+                  <div className="rounded-lg border border-border overflow-hidden">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
+                          <th className="px-3 py-2 font-medium md:px-4">Order</th>
+                          <th className="px-3 py-2 font-medium md:px-4">Dealer</th>
+                          <th className="px-3 py-2 font-medium md:px-4">Status</th>
+                          <th className="px-3 py-2 font-medium text-right md:px-4">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedOrders.map((o) => (
+                          <tr key={o.id} className="border-b border-border/50">
+                            <td className="px-3 py-2.5 font-medium md:px-4">{o.orderNumber}</td>
+                            <td className="px-3 py-2.5 text-muted-foreground md:px-4">{o.distributorName}</td>
+                            <td className="px-3 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
+                            <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </>
           )}
