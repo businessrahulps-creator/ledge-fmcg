@@ -155,8 +155,8 @@ export default function Dashboard() {
         {/* Recent Orders */}
         <section className="pb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[15px] font-semibold">Recent Orders</h2>
-            <Link to="/orders" className="text-[12px] text-muted-foreground font-medium">View all</Link>
+            <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
+            <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
           </div>
 
           {/* Desktop table */}
