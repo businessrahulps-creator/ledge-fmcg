@@ -74,7 +74,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       <motion.div
                         layoutId="nav-pill"
                         className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                        transition={{ type: "spring", stiffness: 350, damping: 35 }}
+                        transition={{ type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                        style={{ willChange: "transform" }}
                       />
                     )}
                     <item.icon
