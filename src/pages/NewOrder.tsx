@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+
 import { useNotifications } from "@/hooks/use-notifications";
 
 interface OrderLineState {
@@ -57,7 +57,7 @@ let lineCounter = 0;
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const { addNotification } = useNotifications();
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: `line-${lineCounter++}`, productId: "", quantity: 1, unitPrice: 0 },
@@ -109,10 +109,6 @@ export default function NewOrder() {
       confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
     }, 700);
 
-    toast({
-      title: "Order saved ✓",
-      description: "Your order has been created successfully.",
-    });
 
     addNotification("order_placed", "New Order Created", "A new order has been placed successfully.");
 
