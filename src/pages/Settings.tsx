@@ -295,8 +295,7 @@ export default function Settings() {
               <h3 className="text-sm font-semibold md:text-base">Log Out</h3>
               <p className="text-xs text-muted-foreground md:text-sm mt-0.5">Sign out of your account on this device</p>
             </div>
-            <Button variant="destructive" size="sm" onClick={() => setShowLogoutConfirm(true)}>
-              <LogOut className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="text-muted-foreground" onClick={() => setShowLogoutConfirm(true)}>
               Log Out
             </Button>
           </div>
