@@ -1,71 +1,40 @@
 
 
-# Redesign KPI Cards to Match App Aesthetic
+# Sync Order Detail Dialog Styling with New Order Page
 
 ## Problem
-The KPI cards use colored backgrounds, gradient blobs, and oversized styled icon containers that clash with the app's monochrome, minimal "Light Premium" aesthetic. Every other page uses plain white cards with subtle borders.
+The **New Order** page uses color-coded status buttons (emerald for paid/delivered, amber for partial, red for pending, blue for dispatched) via a `statusColors` map. The **Order Detail Dialog** on the Orders page uses generic `border-primary bg-primary/10 text-primary` for all active states — no color differentiation. This makes the two experiences feel inconsistent.
 
-## Design Direction
-Strip the cards to match the rest of the app: white `glass-card` background, no color tints, no blobs. Use the standard 18px icon size. Keep it data-focused and clean.
+## Changes — `src/pages/Orders.tsx`
 
-## Layout per card
-```text
-┌─────────────────────┐
-│ Label        +12% ↑ │
-│ ₹14,82,000          │
-└─────────────────────┘
-```
-
-- Label and trend badge on top row (label left, badge right)
-- Value below, prominent but not oversized
-- No icon container, no blob, no colored background
-
-## Changes — `src/pages/Dashboard.tsx`
-
-### 1. Remove color system
-Delete the entire `kpiColors` object and the `color` property from the `kpis` array. Remove `TrendingUp`/`TrendingDown` icon imports if we simplify the badge to text-only, or keep them small.
-
-### 2. Simplify KPI array
+### 1. Add the `statusColors` map
+Copy the same map from NewOrder.tsx:
 ```ts
-const kpis = [
-  { label: "Revenue", value: formatCurrency(totalRevenue), change: "+12%", up: true },
-  { label: "Orders", value: totalOrders.toString(), change: "+8%", up: true },
-  { label: "Pending", value: pendingOrders.toString(), change: "-3%", up: false },
-  { label: "Dispatched", value: dispatchedOrders.toString(), change: "+5%", up: true },
-];
+const statusColors: Record<string, string> = {
+  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
+  pending: "border-red-500 bg-red-500/10 text-red-600",
+  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
+  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+};
 ```
 
-No `icon` or `color` properties needed.
-
-### 3. New card markup
-```tsx
-<motion.div
-  key={kpi.label}
-  initial={{ opacity: 0, y: 16 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
-  className="glass-card p-5"
->
-  <div className="flex items-center justify-between mb-3">
-    <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
-    <span className={`text-[11px] font-semibold ${kpi.up ? "text-emerald-600" : "text-red-500"}`}>
-      {kpi.change}
-    </span>
-  </div>
-  <p className="text-xl font-semibold tracking-tight">{kpi.value}</p>
-</motion.div>
+### 2. Update Payment Status buttons (lines 278-289)
+Replace the active state class from:
+```
+"border-primary bg-primary/10 text-primary"
+```
+to:
+```
+statusColors[s.value] || "border-primary bg-primary/10 text-primary"
 ```
 
-Key decisions:
-- `glass-card` class (white bg, subtle border, rounded-2xl) — same as every other card in the app
-- No icon containers, no blobs, no colored backgrounds
-- Trend indicator is just colored text (green/red), no pill background, no trend arrow icon — minimal
-- Value at `text-xl` (20px) with `font-semibold` — fits any currency amount
-- Remove `whileHover` scale/translate — other cards in the app don't do this
+### 3. Update Delivery Status buttons (lines 296-308)
+Same change — use `statusColors[s.value]` for the active state.
 
-### 4. Clean up imports
-Remove: `Wallet`, `ShoppingBag`, `Clock`, `PackageCheck`, `TrendingUp`, `TrendingDown` from lucide-react imports.
+### 4. Match button sizing
+The dialog buttons use `px-2 py-2.5` while NewOrder uses `px-2 py-2.5 md:px-3 md:py-3`. Add the responsive `md:px-3 md:py-3` to the dialog buttons for consistency.
 
 ## Result
-KPI cards that look like they belong to the same app as Orders, Distributors, and Stock — clean, white, data-forward, no visual clutter.
+Tapping an existing order shows the same color-coded status buttons as the New Order form — paid is green, partial is amber, pending is red, dispatched is blue.
 
