@@ -217,7 +217,7 @@ export default function Orders() {
             {selectedOrder && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-base md:text-xl">{selectedOrder.orderNumber}</DialogTitle>
+                  <DialogTitle className="text-base md:text-lg">{selectedOrder.orderNumber}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-5">
                   {/* Read-only info */}

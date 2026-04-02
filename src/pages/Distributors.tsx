@@ -203,7 +203,7 @@ export default function Distributors() {
             {selected && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-base md:text-xl">{selected.name}</DialogTitle>
+                  <DialogTitle className="text-base md:text-lg">{selected.name}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-6">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">

@@ -50,17 +50,17 @@ export default function Dashboard() {
       <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <div>
-          <p className="text-[13px] text-muted-foreground font-medium tracking-wide uppercase">
+          <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="text-[28px] font-bold tracking-tight mt-0.5">{getGreeting()} 👋</h1>
+          <h1 className="text-xl font-bold tracking-tight mt-0.5 md:text-2xl">{getGreeting()} 👋</h1>
 
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-4">
             {DAYS.map((d, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-[13px] font-semibold transition-all ${
+                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
                   i === dayOfWeek
                     ? "bg-foreground text-background shadow-md"
                     : "bg-muted text-muted-foreground"
@@ -86,13 +86,13 @@ export default function Dashboard() {
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
                   <kpi.icon className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
+                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${kpi.up ? "text-emerald-500" : "text-red-400"}`}>
                   {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {kpi.change}
                 </span>
               </div>
-              <p className="text-[22px] font-bold tracking-tight">{kpi.value}</p>
-              <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
+              <p className="text-xl font-bold tracking-tight">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
             </motion.div>
           ))}
         </div>
@@ -102,15 +102,15 @@ export default function Dashboard() {
           {/* Top Dealers */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-semibold">Top Dealers</h2>
-              <Link to="/distributors" className="text-[12px] text-muted-foreground font-medium">View all</Link>
+              <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
+              <Link to="/distributors" className="text-xs text-muted-foreground font-medium">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.map((d) => (
                 <div key={d.id}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[13px] font-medium">{d.name}</span>
-                    <span className="text-[12px] text-muted-foreground">{formatCurrency(d.totalValue)}</span>
+                    <span className="text-sm font-medium">{d.name}</span>
+                    <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
@@ -128,15 +128,15 @@ export default function Dashboard() {
           {/* Top Products */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-semibold">Top Products</h2>
-              <Link to="/stock" className="text-[12px] text-muted-foreground font-medium">View all</Link>
+              <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
+              <Link to="/stock" className="text-xs text-muted-foreground font-medium">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.map((p) => (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[13px] font-medium truncate mr-3">{p.name}</span>
-                    <span className="text-[12px] text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
+                    <span className="text-sm font-medium truncate mr-3">{p.name}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
@@ -155,8 +155,8 @@ export default function Dashboard() {
         {/* Recent Orders */}
         <section className="pb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[15px] font-semibold">Recent Orders</h2>
-            <Link to="/orders" className="text-[12px] text-muted-foreground font-medium">View all</Link>
+            <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
+            <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
           </div>
 
           {/* Desktop table */}
@@ -198,11 +198,11 @@ export default function Dashboard() {
                 className="glass-card card-hover p-4"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[14px] font-semibold">{o.distributorName}</span>
-                  <span className="text-[14px] font-bold">{formatCurrency(o.total)}</span>
+                  <span className="text-sm font-semibold">{o.distributorName}</span>
+                  <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
+                  <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
                   <div className="flex gap-1.5">
                     <StatusBadge status={o.paymentStatus} />
                     <StatusBadge status={o.deliveryStatus} />
