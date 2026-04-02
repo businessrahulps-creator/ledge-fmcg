@@ -32,18 +32,6 @@ export interface StockDeduction {
   date: string;
 }
 
-export interface StockTransfer {
-  id: string;
-  productId: string;
-  productName: string;
-  fromGodownId: string;
-  fromGodownName: string;
-  toGodownId: string;
-  toGodownName: string;
-  quantity: number;
-  date: string;
-  remarks: string;
-}
 
 export type StockHealth = "healthy" | "low" | "critical";
 
