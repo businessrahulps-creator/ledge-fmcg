@@ -148,4 +148,12 @@
   .status-delivered {
     @apply bg-emerald-50 text-emerald-600;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
