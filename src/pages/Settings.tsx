@@ -21,6 +21,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface TeamMember {
@@ -46,6 +56,7 @@ export default function Settings() {
     { id: "t3", name: "Sneha Agarwal", email: "sneha@acmefmcg.in", role: "accountant" },
   ]);
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
+  const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
 
   const saveCompany = () => {
@@ -69,10 +80,11 @@ export default function Settings() {
     setEditMember(null);
   };
 
-  const removeMember = (id: string) => {
-    const m = team.find((t) => t.id === id);
-    setTeam((prev) => prev.filter((t) => t.id !== id));
-    toast({ title: "Member removed", description: `${m?.name} has been removed.` });
+  const confirmRemoveMember = () => {
+    if (!deleteMember) return;
+    setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
+    toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+    setDeleteMember(null);
   };
 
   const trialDaysLeft = 11;
@@ -172,7 +184,7 @@ export default function Settings() {
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       {m.role !== "super_admin" && (
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => removeMember(m.id)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -270,6 +282,23 @@ export default function Settings() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteMember} onOpenChange={(open) => !open && setDeleteMember(null)}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm">
+                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
