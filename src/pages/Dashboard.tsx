@@ -74,34 +74,23 @@ export default function Dashboard() {
 
         {/* KPI Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {kpis.map((kpi, i) => {
-            const colors = kpiColors[kpi.color];
-            return (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -3, scale: 1.02 }}
-                transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 24 }}
-                className={`relative overflow-hidden rounded-2xl p-5 ${colors.card} border border-border/50 shadow-sm`}
-              >
-                {/* Decorative gradient blob */}
-                <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 ${colors.blob}`} />
-                
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex items-center justify-center w-11 h-11 rounded-2xl ${colors.icon}`}>
-                    <kpi.icon className="w-[28px] h-[28px]" />
-                  </div>
-                  <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${kpi.up ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500 dark:text-red-400"}`}>
-                    {kpi.up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                    {kpi.change}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
-                <p className="text-[22px] tracking-tight leading-none font-medium">{kpi.value}</p>
-              </motion.div>
-            );
-          })}
+          {kpis.map((kpi, i) => (
+            <motion.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
+              className="glass-card p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
+                <span className={`text-[11px] font-semibold ${kpi.up ? "text-emerald-600" : "text-red-500"}`}>
+                  {kpi.change}
+                </span>
+              </div>
+              <p className="text-xl font-semibold tracking-tight">{kpi.value}</p>
+            </motion.div>
+          ))}
         </div>
 
         {/* Dealers + Products side-by-side on desktop */}
