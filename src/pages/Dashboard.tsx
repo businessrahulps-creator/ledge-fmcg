@@ -128,8 +128,8 @@ export default function Dashboard() {
           {/* Top Products */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[15px] font-semibold">Top Products</h2>
-              <Link to="/stock" className="text-[12px] text-muted-foreground font-medium">View all</Link>
+              <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
+              <Link to="/stock" className="text-xs text-muted-foreground font-medium">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.map((p) => (
