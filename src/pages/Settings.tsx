@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,6 +51,8 @@ const roleLabels: Record<string, string> = {
 export default function Settings() {
   const { toast } = useToast();
   const { addNotification } = useNotifications();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
   const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
   const [team, setTeam] = useState<TeamMember[]>([
@@ -285,6 +288,20 @@ export default function Settings() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Logout Section */}
+        <div className="glass-card p-4 md:p-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold md:text-base">Log Out</h3>
+              <p className="text-xs text-muted-foreground md:text-sm mt-0.5">Sign out of your account on this device</p>
+            </div>
+            <Button variant="destructive" size="sm" onClick={() => setShowLogoutConfirm(true)}>
+              <LogOut className="h-4 w-4" />
+              Log Out
+            </Button>
+          </div>
+        </div>
+
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!deleteMember} onOpenChange={(open) => !open && setDeleteMember(null)}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
@@ -298,6 +315,24 @@ export default function Settings() {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                 Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Logout Confirmation Dialog */}
+        <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">Log Out</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm">
+                Are you sure you want to log out? You'll need to sign in again to access your account.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => navigate("/")} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Log Out
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

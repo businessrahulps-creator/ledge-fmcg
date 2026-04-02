@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, LogOut } from "lucide-react";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { NotificationProvider } from "@/hooks/use-notifications";
@@ -95,18 +95,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 );
               })}
 
-              <Link
-                to="/"
-                className="flex flex-col items-center gap-0.5 py-3 px-3 relative flex-shrink-0 min-w-[60px]"
-              >
-                <LogOut
-                  className="w-[18px] h-[18px] relative z-10 text-muted-foreground"
-                  strokeWidth={1.5}
-                />
-                <span className="text-[10px] font-semibold relative z-10 text-muted-foreground whitespace-nowrap">
-                  Logout
-                </span>
-              </Link>
             </div>
 
             {/* Right fade hint */}
