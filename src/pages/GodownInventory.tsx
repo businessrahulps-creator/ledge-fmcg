@@ -108,7 +108,7 @@ export default function GodownInventory() {
         </div>
 
         {/* Table - Desktop */}
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

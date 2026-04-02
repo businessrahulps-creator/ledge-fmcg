@@ -91,7 +91,7 @@ export default function Products() {
         </div>
 
         {/* Desktop Table */}
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="glass-card overflow-hidden">
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

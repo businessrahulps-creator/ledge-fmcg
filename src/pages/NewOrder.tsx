@@ -327,7 +327,7 @@ export default function NewOrder() {
             </section>
 
             {/* Summary */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Summary</h2>
               <div className="space-y-2 md:space-y-3">
                 <div className="flex items-center justify-between text-xs md:text-sm">

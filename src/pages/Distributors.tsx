@@ -53,7 +53,7 @@ export default function Distributors() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
               onClick={() => setSelectedId(d.id)}
-              className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:scale-[0.98] md:p-6"
+              className="cursor-pointer glass-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:scale-[0.98] md:p-6"
             >
               <h3 className="text-sm font-semibold md:text-base">{d.name}</h3>
               <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground md:mt-2 md:text-sm">

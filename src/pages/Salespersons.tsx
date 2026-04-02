@@ -97,7 +97,7 @@ export default function Salespersons() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
               onClick={() => setProfileId(s.id)}
-              className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:scale-[0.98] md:p-6"
+              className="cursor-pointer glass-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:scale-[0.98] md:p-6"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2.5 md:gap-3">

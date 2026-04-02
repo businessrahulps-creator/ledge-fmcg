@@ -123,7 +123,7 @@ export default function GodownOverview() {
           </div>
           <div className="flex h-2.5 w-full overflow-hidden rounded-full md:h-3">
             {stats.healthyCount > 0 && (
-              <div className="bg-emerald-400 transition-all" style={{ width: `${(stats.healthyCount / stats.total) * 100}%` }} />
+              <div className="bg-success transition-all" style={{ width: `${(stats.healthyCount / stats.total) * 100}%` }} />
             )}
             {stats.lowCount > 0 && (
               <div className="bg-warning transition-all" style={{ width: `${(stats.lowCount / stats.total) * 100}%` }} />

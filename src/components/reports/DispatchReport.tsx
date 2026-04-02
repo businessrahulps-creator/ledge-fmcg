@@ -28,7 +28,7 @@ export function DispatchReport() {
         </Select>
         <span className="text-xs text-muted-foreground md:text-sm">{filtered.length} orders</span>
       </div>
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="glass-card overflow-hidden">
         {/* Desktop table */}
         <div className="hidden md:block">
           <table className="w-full text-sm">

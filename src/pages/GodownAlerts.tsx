@@ -43,7 +43,7 @@ export default function GodownAlerts() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className={`rounded-xl border border-border bg-card p-6 ${
+                    className={`glass-card p-6 ${
                       isCritical ? "border-l-4 border-l-destructive" : "border-l-4 border-l-warning"
                     }`}
                   >

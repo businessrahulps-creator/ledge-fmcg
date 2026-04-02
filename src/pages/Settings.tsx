@@ -202,7 +202,7 @@ export default function Settings() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-4 space-y-3 md:p-6 md:space-y-4">
+              <div className="glass-card p-4 space-y-3 md:p-6 md:space-y-4">
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-4 w-4 text-muted-foreground md:h-5 md:w-5" strokeWidth={1.5} />
                   <h3 className="text-sm font-semibold md:text-base">Plan Details</h3>
