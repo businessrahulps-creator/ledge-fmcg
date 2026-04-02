@@ -290,6 +290,25 @@ export default function Orders() {
                   {/* Editable statuses */}
                   <div className="space-y-3 md:space-y-4">
                     <div className="space-y-1.5">
+                      <Label className="text-xs md:text-sm">Payment Mode</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {paymentModes.map((m) => (
+                          <button
+                            key={m.value}
+                            onClick={() => setEditPaymentMode(m.value)}
+                            className={`rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
+                              editPaymentMode === m.value
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-foreground/20"
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
                       <Label className="text-xs md:text-sm">Payment Status</Label>
                       <div className="flex gap-2">
                         {paymentStatuses.map((s) => (
