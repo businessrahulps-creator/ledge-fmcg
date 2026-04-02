@@ -70,14 +70,15 @@ export function DispatchReport() {
                 <span className="text-sm font-medium">{o.orderNumber}</span>
                 <StatusBadge status={o.deliveryStatus} />
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{o.distributorName} · {o.dispatchDate || "No dispatch date"} · {o.vehicle || "No vehicle"}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground truncate">{o.distributorName} · {o.dispatchDate || "No dispatch date"}</p>
+              {o.vehicle && <p className="text-xs text-muted-foreground truncate">{o.vehicle}</p>}
             </div>
           ))}
         </div>
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
@@ -127,23 +128,23 @@ export function DispatchReport() {
 
                 <div>
                   <h3 className="mb-2 text-xs font-semibold md:text-sm">Line Items</h3>
-                  <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="rounded-lg border border-border overflow-x-auto">
                     <table className="w-full text-xs md:text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
-                          <th className="px-3 py-2 font-medium md:px-4">Product</th>
-                          <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
-                          <th className="px-3 py-2 font-medium text-right md:px-4">Price</th>
-                          <th className="px-3 py-2 font-medium text-right md:px-4">Total</th>
+                          <th className="px-2 py-2 font-medium md:px-4">Product</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Qty</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Price</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {selected.lines.map((l, i) => (
                           <tr key={i} className="border-b border-border/50">
-                            <td className="px-3 py-2.5 font-medium md:px-4">{l.productName}</td>
-                            <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{l.quantity}</td>
-                            <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(l.unitPrice)}</td>
-                            <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(l.lineTotal)}</td>
+                            <td className="px-2 py-2.5 font-medium md:px-4 truncate max-w-[100px]">{l.productName}</td>
+                            <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{l.quantity}</td>
+                            <td className="px-2 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(l.unitPrice)}</td>
+                            <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(l.lineTotal)}</td>
                           </tr>
                         ))}
                       </tbody>
