@@ -4,6 +4,7 @@ import { DistributorReport } from "@/components/reports/DistributorReport";
 import { ProductReport } from "@/components/reports/ProductReport";
 import { PaymentReport } from "@/components/reports/PaymentReport";
 import { DispatchReport } from "@/components/reports/DispatchReport";
+import { SalesTeamReport } from "@/components/reports/SalesTeamReport";
 
 export default function Reports() {
   return (
