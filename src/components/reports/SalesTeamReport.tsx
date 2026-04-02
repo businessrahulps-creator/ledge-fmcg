@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { orders, salespersons, formatCurrency, formatNumber } from "@/data/mock-data";
+import { orders, salespersons, formatCurrency, formatNumber, type Salesperson } from "@/data/mock-data";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 export function SalesTeamReport() {
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -14,6 +16,11 @@ export function SalesTeamReport() {
 
   const totalRevenue = data.reduce((s, d) => s + d.revenue, 0);
   const totalOrders = data.reduce((s, d) => s + d.orderCount, 0);
+
+  type MemberRow = typeof data[number];
+  const [selected, setSelected] = useState<MemberRow | null>(null);
+
+  const selectedOrders = selected ? filteredOrders.filter((o) => o.salespersonId === selected.id) : [];
 
   return (
     <div className="space-y-4">
@@ -42,7 +49,7 @@ export function SalesTeamReport() {
               {data.length === 0 ? (
                 <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : data.map((s) => (
-                <tr key={s.id} className="border-b border-border/50 row-hover">
+                <tr key={s.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => setSelected(s)}>
                   <td className="px-6 py-4 font-medium">{s.name}</td>
                   <td className="px-6 py-4 text-muted-foreground">{s.region}</td>
                   <td className="px-6 py-4 text-right">{s.orderCount}</td>
@@ -56,7 +63,7 @@ export function SalesTeamReport() {
           {data.length === 0 ? (
             <div className="px-4 py-12 text-center text-xs text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</div>
           ) : data.map((s) => (
-            <div key={s.id} className="border-b border-border/50 px-4 py-3 card-hover">
+            <div key={s.id} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer" onClick={() => setSelected(s)}>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{s.name}</span>
                 <span className="text-sm font-medium">{formatCurrency(s.revenue)}</span>
@@ -66,6 +73,41 @@ export function SalesTeamReport() {
           ))}
         </div>
       </div>
+
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selected.name}</DialogTitle>
+                <p className="text-sm text-muted-foreground">{selected.region} · {selected.phone} · {selected.email}</p>
+              </DialogHeader>
+              <Separator />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total Revenue</span>
+                <span className="font-semibold">{formatCurrency(selected.revenue)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Orders</span>
+                <span className="font-semibold">{selected.orderCount}</span>
+              </div>
+              <Separator />
+              <h4 className="text-sm font-medium">Orders ({periodLabel(period).toLowerCase()})</h4>
+              <div className="space-y-2">
+                {selectedOrders.map((o) => (
+                  <div key={o.id} className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2">
+                    <div>
+                      <p className="text-sm font-medium">{o.orderNumber}</p>
+                      <p className="text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
+                    </div>
+                    <span className="text-sm font-medium">{formatCurrency(o.total)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
