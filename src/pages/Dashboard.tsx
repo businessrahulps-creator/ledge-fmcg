@@ -91,8 +91,8 @@ export default function Dashboard() {
                   {kpi.change}
                 </span>
               </div>
-              <p className="text-[22px] font-bold tracking-tight">{kpi.value}</p>
-              <p className="text-[11px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
+              <p className="text-xl font-bold tracking-tight">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{kpi.label}</p>
             </motion.div>
           ))}
         </div>
