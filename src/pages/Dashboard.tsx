@@ -184,7 +184,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-border/50 transition-colors hover:bg-muted/30">
+                  <tr key={order.id} className="border-b border-border/50 row-hover">
                     <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
