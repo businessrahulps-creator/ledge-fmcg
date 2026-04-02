@@ -24,6 +24,14 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
+const statusColors: Record<string, string> = {
+  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
+  pending: "border-red-500 bg-red-500/10 text-red-600",
+  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
+  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+};
+
 const paymentStatuses = [
   { value: "paid", label: "Paid" },
   { value: "partial", label: "Partial" },
