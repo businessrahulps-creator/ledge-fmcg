@@ -107,7 +107,7 @@ export default function Products() {
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="group border-b border-border/50 transition-colors hover:bg-muted/30">
+                  <tr key={p.id} className="group border-b border-border/50 row-hover">
                     <td className="px-6 py-4 font-medium">{p.name}</td>
                     <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
                     <td className="px-6 py-4 text-muted-foreground">{p.unit}</td>
