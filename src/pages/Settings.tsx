@@ -184,7 +184,7 @@ export default function Settings() {
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       {m.role !== "super_admin" && (
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => removeMember(m.id)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
