@@ -135,8 +135,8 @@ export default function Salespersons() {
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-            <p className="mt-3 text-sm font-medium">No salespersons found</p>
-            <p className="text-xs text-muted-foreground">Add your first salesperson to get started</p>
+            <p className="mt-3 text-sm font-medium">No team members found</p>
+            <p className="text-xs text-muted-foreground">Add your first team member to get started</p>
           </div>
         )}
 
