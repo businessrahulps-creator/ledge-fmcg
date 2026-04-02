@@ -1,66 +1,43 @@
 
 
-# Add Subtle Hover Interactions — All Pages
+# Fix Reports Tab Inconsistencies
 
-## Philosophy
+## Issues Found
 
-No bouncy transforms, no color shifts, no "AI slop." Just two refined patterns used consistently:
+Auditing the four report tabs reveals these inconsistencies:
 
-1. **Table rows**: Soft background tint on hover + action buttons fade in. Already partially done — just needs consistency and a subtle left-border accent on hover.
-2. **Cards**: Micro-lift (`translateY(-1px)`) + border darkens slightly + shadow deepens. No scale transforms. 200ms `ease-out`. On mobile, `active:scale-[0.98]` for touch feedback only.
+1. **Summary stats bar** — Distributor/Product/Payment wrap stats in a `flex` div with `text-xs md:text-sm`. Dispatch has a bare `<span>` with `text-xs md:text-sm` outside any wrapper, breaking alignment when filters stack on mobile.
 
-These are the same patterns Linear, Stripe, and Vercel use — understated, functional, never decorative.
+2. **Mobile card structure** — Distributor and Product cards are clean 2-line layouts. Payment and Dispatch add a third line using `text-[10px]` which feels smaller and inconsistent with the `text-xs` used elsewhere.
 
-## What Changes
+3. **Order number color** — Payment and Dispatch mobile cards use `text-primary` for order numbers. Since primary is now black and matches `text-foreground`, this is functionally fine but should be explicit `text-foreground` for clarity and consistency with Distributor/Product which use no color class.
 
-### `src/index.css` — Add two reusable utility classes
+4. **StatusBadge sizing** — Uses `rounded-pill` which isn't a standard Tailwind class (should be `rounded-full`). Also `px-3 py-1` feels large relative to the `text-xs` mobile cards.
 
-```css
-.row-hover {
-  @apply transition-all duration-200 ease-out hover:bg-muted/40;
-}
+## Changes
 
-.card-hover {
-  @apply transition-all duration-200 ease-out 
-         hover:-translate-y-[1px] hover:shadow-md hover:border-border/80
-         active:scale-[0.98] active:shadow-sm;
-}
-```
+### `src/components/ui/status-badge.tsx`
+- Fix `rounded-pill` to `rounded-full`
+- Tighten to `px-2.5 py-0.5` for better proportion
 
-This keeps the interaction layer in CSS utilities rather than scattered inline classes. Every page just applies `.card-hover` or `.row-hover`.
+### `src/components/reports/DispatchReport.tsx`
+- Wrap summary count in the same `flex` div pattern used by other tabs
+- Mobile cards: change `text-[10px]` to `text-xs` on the third line, merge dispatch date + vehicle into the secondary line (same `mt-0.5 text-xs text-muted-foreground` pattern)
+- Order number: `text-primary` to `text-foreground`
 
-### Pages updated (hover classes consolidated)
+### `src/components/reports/PaymentReport.tsx`
+- Mobile cards: merge the third-line status + mode into the secondary `text-xs` line, or keep as a separate line but use `text-xs` not `text-[10px]`
+- Order number: `text-primary` to `text-foreground`
+- Status row: `mt-1.5` to `mt-1` for tighter spacing
 
-| Page | Element | Current | New |
-|---|---|---|---|
-| **Dashboard** | KPI cards | No hover | `card-hover` |
-| **Dashboard** | Distributor/Product section cards | No hover | `card-hover` |
-| **Dashboard** | Recent order rows (desktop) | `hover:bg-muted/30` | `row-hover` |
-| **Dashboard** | Recent order cards (mobile) | No hover | `card-hover` |
-| **Orders** | Table rows | `hover:bg-muted/30` | `row-hover` |
-| **Orders** | Mobile cards | `active:bg-muted/30` | `card-hover` |
-| **Products** | Table rows | `hover:bg-muted/30` | `row-hover` |
-| **Products** | Mobile cards | No hover | `card-hover` on each item row |
-| **Distributors** | Cards | `hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg` | `card-hover` (refined, less aggressive) |
-| **Salespersons** | Cards | Same as distributors | `card-hover` |
-| **GodownOverview** | Location cards | `hover:border-primary/40 hover:-translate-y-0.5` | `card-hover` |
-| **GodownOverview** | KPI cards | No hover | `card-hover` |
-| **GodownInventory** | Table rows | `hover:bg-muted/20` | `row-hover` |
-| **GodownInventory** | Mobile cards | `active:bg-muted/20` | `card-hover` |
-| **GodownAlerts** | Alert cards | No hover | `card-hover` |
-| **Reports** (all 4) | Table rows | `hover:bg-muted/30` | `row-hover` |
-| **Reports** (all 4) | Mobile cards | No hover | `card-hover` |
-| **Settings** | Team member rows | No hover | `row-hover` |
+### `src/components/reports/DistributorReport.tsx`
+- No structural changes needed — already the cleanest. Just ensure mobile card name uses same weight as others.
 
-### Report components (4 files)
-- `DistributorReport.tsx`, `ProductReport.tsx`, `PaymentReport.tsx`, `DispatchReport.tsx` — swap inline `hover:bg-muted/30` on `<tr>` to `row-hover`, add `card-hover` to mobile card divs.
+### `src/components/reports/ProductReport.tsx`
+- No structural changes needed — already consistent with Distributor.
 
-### What does NOT change
-- No new dependencies. No framer-motion additions. Pure CSS.
-- Landing page untouched.
-- Button hover states stay as-is (handled by shadcn).
-- Dialog/modal content stays as-is.
+### `src/pages/Reports.tsx`
+- Page header: standardize `text-lg font-semibold` to match other pages' header sizing (currently `text-xl font-bold` which may differ from other pages)
 
-## Files touched: ~13
-`index.css` + `Dashboard` + `Orders` + `Products` + `Distributors` + `Salespersons` + `GodownOverview` + `GodownInventory` + `GodownAlerts` + `Settings` + 4 report components
+**Result**: All four tabs will share identical typography scales (`text-xs` for secondary, `text-sm font-medium` for primary), identical summary bar structure, identical mobile card padding and line spacing, and a properly sized status badge.
 
