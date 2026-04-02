@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  IndianRupee,
-  Package,
-  Truck,
+  Wallet,
+  ShoppingBag,
+  Clock,
+  PackageCheck,
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
