@@ -1,21 +1,39 @@
 
 
-# Move Logout to Settings Page
+# Synchronize Status Labels Across Dashboard & Orders
 
-## Why
-- Logout in the bottom nav wastes space and is an unusual pattern — most apps put it in Settings/Profile
-- Frees up room in the mobile nav bar, reducing the need to scroll
+## Problem
+The Dashboard's **mobile card view** (lines 217-221) renders status labels using raw lowercase strings (`o.paymentStatus`, `o.deliveryStatus`) with custom inline color classes. Meanwhile, the Dashboard's **desktop table** and the **Orders page** both use the `<StatusBadge>` component, which renders capitalized labels with consistent styling.
 
-## Changes
+This creates a visual mismatch: "paid" vs "Paid", different sizes, different color treatments.
 
-### `src/components/layout/AppLayout.tsx`
-- Remove the Logout `<Link>` from the bottom nav (the last item pointing to `/`)
+## Fix
 
-### `src/components/layout/AppSidebar.tsx`
-- Remove logout from the sidebar footer if present (need to check)
+### `src/pages/Dashboard.tsx`
+Replace the two inline `<span>` badges in the mobile card section (lines 216-222) with the same `<StatusBadge>` component already used in the desktop table.
 
-### `src/pages/Settings.tsx`
-- Add a "Logout" section at the bottom of the page — a simple card with a red "Log Out" button
-- On click, show a confirmation dialog ("Are you sure you want to log out?"), then navigate to `/`
-- Style: destructive variant button with `LogOut` icon
+**Before:**
+```tsx
+<div className="flex gap-1.5">
+  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${paymentColor[o.paymentStatus]}`}>
+    {o.paymentStatus}
+  </span>
+  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${deliveryColor[o.deliveryStatus]}`}>
+    {o.deliveryStatus}
+  </span>
+</div>
+```
+
+**After:**
+```tsx
+<div className="flex gap-1.5">
+  <StatusBadge status={o.paymentStatus} />
+  <StatusBadge status={o.deliveryStatus} />
+</div>
+```
+
+Also remove the now-unused `paymentColor` and `deliveryColor` objects (lines ~52-59) to keep the code clean.
+
+## Result
+All status labels across Dashboard (mobile + desktop) and Orders page will use the same `StatusBadge` component — consistent capitalization, colors, and sizing everywhere.
 
