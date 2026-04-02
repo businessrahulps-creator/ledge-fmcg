@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Wallet,
@@ -23,12 +24,17 @@ function getGreeting() {
 
 export default function Dashboard() {
   const today = new Date();
-  const dayOfWeek = today.getDay();
+  const [selectedDay, setSelectedDay] = useState(today.getDay());
 
-  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter((o) => o.deliveryStatus === "pending").length;
-  const dispatchedOrders = orders.filter((o) => o.deliveryStatus === "dispatched").length;
+  const filteredOrders = orders.filter((o) => {
+    const orderDay = new Date(o.date).getDay();
+    return orderDay === selectedDay;
+  });
+
+  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
+  const totalOrders = filteredOrders.length;
+  const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
+  const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue), icon: Wallet, change: "+12%", up: true, color: "emerald" as const },
@@ -50,7 +56,7 @@ export default function Dashboard() {
   const topProducts = [...products].sort((a, b) => b.totalSold - a.totalSold).slice(0, 4);
   const maxProdVal = topProducts[0]?.totalSold || 1;
 
-  const recentOrders = orders.slice(0, 6);
+  const recentOrders = filteredOrders.slice(0, 6);
 
 
   return (
@@ -66,16 +72,17 @@ export default function Dashboard() {
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-4">
             {DAYS.map((d, i) => (
-              <div
+              <button
                 key={i}
+                onClick={() => setSelectedDay(i)}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
-                  i === dayOfWeek
+                  i === selectedDay
                     ? "bg-foreground text-background shadow-md"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
                 {d}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -174,58 +181,66 @@ export default function Dashboard() {
             <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
           </div>
 
-          {/* Desktop table */}
-          <div className="hidden md:block glass-card overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-6 py-3 font-medium">Order</th>
-                  <th className="px-6 py-3 font-medium">Dealer</th>
-                  <th className="px-6 py-3 font-medium">Date</th>
-                  <th className="px-6 py-3 font-medium text-right">Amount</th>
-                  <th className="px-6 py-3 font-medium">Payment</th>
-                  <th className="px-6 py-3 font-medium">Delivery</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-border/50 row-hover">
-                    <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
-                    <td className="px-6 py-4">{order.distributorName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
-                    <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                    <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {recentOrders.length === 0 ? (
+            <div className="glass-card p-8 text-center">
+              <p className="text-sm text-muted-foreground">No orders on this day</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block glass-card overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                      <th className="px-6 py-3 font-medium">Order</th>
+                      <th className="px-6 py-3 font-medium">Dealer</th>
+                      <th className="px-6 py-3 font-medium">Date</th>
+                      <th className="px-6 py-3 font-medium text-right">Amount</th>
+                      <th className="px-6 py-3 font-medium">Payment</th>
+                      <th className="px-6 py-3 font-medium">Delivery</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr key={order.id} className="border-b border-border/50 row-hover">
+                        <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
+                        <td className="px-6 py-4">{order.distributorName}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
+                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
+                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Mobile cards */}
-          <div className="space-y-2.5 md:hidden">
-            {recentOrders.map((o, i) => (
-              <motion.div
-                key={o.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06 }}
-                className="glass-card card-hover p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold">{o.distributorName}</span>
-                  <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
-                  <div className="flex gap-1.5">
-                    <StatusBadge status={o.paymentStatus} />
-                    <StatusBadge status={o.deliveryStatus} />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              {/* Mobile cards */}
+              <div className="space-y-2.5 md:hidden">
+                {recentOrders.map((o, i) => (
+                  <motion.div
+                    key={o.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.06 }}
+                    className="glass-card card-hover p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold">{o.distributorName}</span>
+                      <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
+                      <div className="flex gap-1.5">
+                        <StatusBadge status={o.paymentStatus} />
+                        <StatusBadge status={o.deliveryStatus} />
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
         </section>
       </div>
     </AppLayout>
