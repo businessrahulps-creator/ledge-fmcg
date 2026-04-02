@@ -41,6 +41,9 @@ export default function GodownInventory() {
   const [healthFilter, setHealthFilter] = useState<string>("all");
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
   const [transferItem, setTransferItem] = useState<StockItem | null>(null);
+  const navigate = useNavigate();
+
+  const getProductData = (productId: string) => products.find(p => p.id === productId);
 
   const filtered = stockItems.filter((si) => {
     const matchSearch = si.productName.toLowerCase().includes(search.toLowerCase()) || si.sku.toLowerCase().includes(search.toLowerCase());
