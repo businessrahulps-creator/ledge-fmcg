@@ -101,6 +101,5 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     </SidebarProvider>
-    </NotificationProvider>
   );
 }
