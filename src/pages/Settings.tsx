@@ -86,6 +86,7 @@ export default function Settings() {
     if (!deleteMember) return;
     setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
     toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+    addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
     setDeleteMember(null);
   };
 

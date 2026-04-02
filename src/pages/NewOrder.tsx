@@ -106,6 +106,8 @@ export default function NewOrder() {
       description: "Your order has been created successfully.",
     });
 
+    addNotification("order_placed", "New Order Created", "A new order has been placed successfully.");
+
     setTimeout(() => navigate("/orders"), 2500);
   };
 
