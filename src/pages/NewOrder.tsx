@@ -55,6 +55,7 @@ export default function NewOrder() {
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
+  const [isSaving, setIsSaving] = useState(false);
 
   const addLine = () => {
     setLines((prev) => [
