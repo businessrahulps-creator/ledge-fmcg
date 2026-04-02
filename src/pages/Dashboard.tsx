@@ -98,7 +98,7 @@ export default function Dashboard() {
                 
                 <div className="flex items-center gap-3 mb-4">
                   <div className={`flex items-center justify-center w-11 h-11 rounded-2xl ${colors.icon}`}>
-                    <kpi.icon className="w-5 h-5" />
+                    <kpi.icon className="w-[28px] h-[28px]" />
                   </div>
                   <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${kpi.up ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-500 dark:text-red-400"}`}>
                     {kpi.up ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
@@ -106,7 +106,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
-                <p className="text-[22px] font-bold tracking-tight leading-none">{kpi.value}</p>
+                <p className="text-[22px] tracking-tight leading-none font-medium">{kpi.value}</p>
               </motion.div>
             );
           })}
