@@ -88,10 +88,6 @@ export const stockDeductions: StockDeduction[] = [
   { id: "sd10", productId: "p3", godownId: "g1", orderId: "o7", orderNumber: "ORD-2026-007", distributorName: "Nair Enterprises", quantityDeducted: 40, date: "2026-03-27" },
 ];
 
-export const stockTransfers: StockTransfer[] = [
-  { id: "st1", productId: "p1", productName: "Premium Basmati Rice 5kg", fromGodownId: "g1", fromGodownName: "Main Warehouse — Thrissur", toGodownId: "g2", toGodownName: "North Hub — Delhi", quantity: 100, date: "2026-03-25", remarks: "Restocking Delhi hub" },
-  { id: "st2", productId: "p2", productName: "Sunflower Oil 1L", fromGodownId: "g1", fromGodownName: "Main Warehouse — Thrissur", toGodownId: "g3", toGodownName: "West Depot — Ahmedabad", quantity: 50, date: "2026-03-22", remarks: "" },
-];
 
 // Sparkline data (daily closing stock for last 30 days)
 export function generateSparklineData(currentQty: number): number[] {
