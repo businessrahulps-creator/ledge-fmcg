@@ -157,8 +157,21 @@ export default function Dashboard() {
           </div>
 
           {recentOrders.length === 0 ? (
-            <div className="glass-card p-8 text-center">
-              <p className="text-sm text-muted-foreground">No orders on this day</p>
+            <div className="glass-card p-10 text-center flex flex-col items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/60"><path d="M16 6H3"/><path d="M21 12H8"/><path d="M21 18H8"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium">No orders on {DAY_LABELS[selectedDay]}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Create an order to see it here</p>
+              </div>
+              <Link
+                to="/orders/new"
+                className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Create Order
+              </Link>
             </div>
           ) : (
             <>
