@@ -135,8 +135,8 @@ export default function Dashboard() {
               {topProducts.map((p) => (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[13px] font-medium truncate mr-3">{p.name}</span>
-                    <span className="text-[12px] text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
+                    <span className="text-sm font-medium truncate mr-3">{p.name}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
