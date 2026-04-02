@@ -70,13 +70,13 @@ export function PaymentReport() {
           ) : filtered.map((o) => (
             <div key={o.id} className="border-b border-border/50 px-4 py-3 card-hover">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-primary">{o.orderNumber}</span>
+                <span className="text-sm font-medium">{o.orderNumber}</span>
                 <span className="text-sm font-medium">{formatCurrency(o.total)}</span>
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
-              <div className="mt-1.5 flex items-center gap-2">
+              <div className="mt-1 flex items-center gap-2">
                 <StatusBadge status={o.paymentStatus} />
-                <span className="text-[10px] text-muted-foreground capitalize">{o.paymentMode.replace("_", " ")}</span>
+                <span className="text-xs text-muted-foreground capitalize">{o.paymentMode.replace("_", " ")}</span>
               </div>
             </div>
           ))}
