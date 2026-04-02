@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Save } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Save, CheckCircle2, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +55,7 @@ export default function NewOrder() {
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
+  const [isSaving, setIsSaving] = useState(false);
 
   const addLine = () => {
     setLines((prev) => [
@@ -86,17 +87,24 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const handleSave = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.7 },
-      colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'],
-    });
+    setIsSaving(true);
+
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
+
+    setTimeout(() => {
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
+    }, 300);
+
+    setTimeout(() => {
+      confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
+    }, 700);
+
     toast({
       title: "Order saved ✓",
       description: "Your order has been created successfully.",
     });
-    setTimeout(() => navigate("/orders"), 1500);
+
+    setTimeout(() => navigate("/orders"), 2500);
   };
 
   return (
@@ -356,13 +364,52 @@ export default function NewOrder() {
 
             {/* Save button - sticky on mobile */}
             <div className="sticky bottom-24 z-10 md:static">
-              <Button className="w-full shadow-lg md:shadow-none" size="lg" onClick={handleSave}>
-                <Save className="h-4 w-4" />
-                Save Order
+              <Button
+                className="w-full shadow-lg md:shadow-none"
+                size="lg"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Order
+                  </>
+                )}
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Success overlay */}
+        <AnimatePresence>
+          {isSaving && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.35, type: "spring", stiffness: 200 }}
+                className="flex flex-col items-center gap-3"
+              >
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                  <CheckCircle2 className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">Order Created!</h2>
+                <p className="text-sm text-muted-foreground">Redirecting to orders…</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppLayout>
   );
