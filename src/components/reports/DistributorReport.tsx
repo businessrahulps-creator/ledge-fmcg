@@ -43,7 +43,7 @@ export function DistributorReport() {
               {data.length === 0 ? (
                 <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : data.map((d) => (
-                <tr key={d.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                <tr key={d.id} className="border-b border-border/50 row-hover">
                   <td className="px-6 py-4 font-medium">{d.name}</td>
                   <td className="px-6 py-4 text-muted-foreground">{d.location}</td>
                   <td className="px-6 py-4 text-right">{d.orderCount}</td>
