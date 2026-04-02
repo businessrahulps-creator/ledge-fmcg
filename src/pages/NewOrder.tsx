@@ -45,6 +45,14 @@ const deliveryStatuses = [
   { value: "delivered", label: "Delivered" },
 ];
 
+const statusColors: Record<string, string> = {
+  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
+  pending: "border-red-500 bg-red-500/10 text-red-600",
+  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
+  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+};
+
 let lineCounter = 0;
 
 export default function NewOrder() {
@@ -283,7 +291,7 @@ export default function NewOrder() {
                         onClick={() => setDeliveryStatus(s.value)}
                         className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
                           deliveryStatus === s.value
-                            ? "border-primary bg-primary/10 text-primary"
+                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                             : "border-border text-muted-foreground hover:border-foreground/20"
                         }`}
                       >
@@ -333,7 +341,7 @@ export default function NewOrder() {
                         onClick={() => setPaymentStatus(s.value)}
                         className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
                           paymentStatus === s.value
-                            ? "border-primary bg-primary/10 text-primary"
+                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                             : "border-border text-muted-foreground hover:border-foreground/20"
                         }`}
                       >
