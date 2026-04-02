@@ -134,10 +134,10 @@ export default function NewOrder() {
                   </Select>
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Salesperson</Label>
+                  <Label className="text-xs md:text-sm">Sales Person</Label>
                   <Select>
                     <SelectTrigger className="h-11 rounded-lg md:h-12">
-                      <SelectValue placeholder="Select salesperson" />
+                      <SelectValue placeholder="Select sales person" />
                     </SelectTrigger>
                     <SelectContent>
                       {salespersons.map((s) => (

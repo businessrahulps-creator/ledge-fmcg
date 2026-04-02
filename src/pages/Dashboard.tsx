@@ -175,7 +175,7 @@ export default function Dashboard() {
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Order</th>
-                  <th className="px-6 py-3 font-medium">Distributor</th>
+                  <th className="px-6 py-3 font-medium">Dealer</th>
                   <th className="px-6 py-3 font-medium">Date</th>
                   <th className="px-6 py-3 font-medium text-right">Amount</th>
                   <th className="px-6 py-3 font-medium">Payment</th>

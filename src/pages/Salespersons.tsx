@@ -211,7 +211,7 @@ export default function Salespersons() {
                           <thead>
                             <tr className="border-b border-border text-left text-xs text-muted-foreground">
                               <th className="px-4 py-2.5 font-medium">Order</th>
-                              <th className="px-4 py-2.5 font-medium">Distributor</th>
+                              <th className="px-4 py-2.5 font-medium">Dealer</th>
                               <th className="px-4 py-2.5 font-medium text-right">Amount</th>
                               <th className="px-4 py-2.5 font-medium">Payment</th>
                             </tr>

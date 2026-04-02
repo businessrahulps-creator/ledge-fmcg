@@ -33,7 +33,7 @@ export function DistributorReport() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-6 py-3 font-medium">Distributor</th>
+                <th className="px-6 py-3 font-medium">Dealer</th>
                 <th className="px-6 py-3 font-medium">Location</th>
                 <th className="px-6 py-3 font-medium text-right">Orders</th>
                 <th className="px-6 py-3 font-medium text-right">Revenue</th>
