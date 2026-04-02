@@ -284,7 +284,7 @@ export default function NewOrder() {
           {/* Sidebar Summary */}
           <div className="space-y-4 md:space-y-6">
             {/* Payment */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Payment</h2>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
