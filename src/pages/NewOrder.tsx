@@ -388,10 +388,7 @@ export default function NewOrder() {
                     Saving...
                   </>
                 ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save Order
-                  </>
+                  <>Save Order</>
                 )}
               </Button>
             </div>
