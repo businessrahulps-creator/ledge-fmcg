@@ -282,7 +282,7 @@ export default function NewOrder() {
           </div>
 
           {/* Sidebar Summary */}
-          <div className="space-y-4 md:space-y-6">
+          <div className="space-y-4 pb-28 md:space-y-6 md:pb-0">
             {/* Payment */}
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Payment</h2>
@@ -348,7 +348,7 @@ export default function NewOrder() {
             </section>
 
             {/* Save button - sticky on mobile */}
-            <div className="sticky bottom-20 z-10 md:static">
+            <div className="sticky bottom-24 z-10 md:static">
               <Button className="w-full shadow-lg md:shadow-none" size="lg" onClick={handleSave}>
                 <Save className="h-4 w-4" />
                 Save Order

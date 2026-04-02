@@ -14,7 +14,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function Distributors() {
   const [items, setItems] = useState<Distributor[]>(initialDealers);
@@ -22,7 +31,7 @@ export default function Distributors() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Distributor | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const { toast } = useToast();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = items.filter(
     (d) =>
@@ -32,6 +41,7 @@ export default function Distributors() {
 
   const selected = items.find((d) => d.id === selectedId);
   const selectedOrders = orders.filter((o) => o.distributorId === selectedId);
+  const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;
 
   const openNew = () => {
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", totalOrders: 0, totalValue: 0 });
@@ -48,19 +58,20 @@ export default function Distributors() {
     if (!editItem?.name) return;
     if (isNew) {
       setItems((prev) => [...prev, editItem]);
-      toast({ title: "Dealer added", description: `${editItem.name} has been added.` });
+      toast.success("Dealer added", { description: `${editItem.name} has been added.` });
     } else {
       setItems((prev) => prev.map((d) => (d.id === editItem.id ? editItem : d)));
-      toast({ title: "Dealer updated", description: `${editItem.name} has been updated.` });
+      toast.success("Dealer updated", { description: `${editItem.name} has been updated.` });
     }
     setEditItem(null);
   };
 
-  const remove = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const d = items.find((i) => i.id === id);
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    toast({ title: "Dealer removed", description: `${d?.name} has been removed.` });
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    const d = items.find((i) => i.id === deleteId);
+    setItems((prev) => prev.filter((i) => i.id !== deleteId));
+    toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
+    setDeleteId(null);
   };
 
   return (
@@ -115,7 +126,7 @@ export default function Distributors() {
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => openEdit(d, e)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => remove(d.id, e)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -169,6 +180,22 @@ export default function Distributors() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Dealer</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span>? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <Button variant="destructive" onClick={confirmDelete}>Remove</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Dealer Profile Dialog */}
         <Dialog open={!!selectedId} onOpenChange={() => setSelectedId(null)}>

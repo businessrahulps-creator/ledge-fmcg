@@ -4,6 +4,7 @@ import { DistributorReport } from "@/components/reports/DistributorReport";
 import { ProductReport } from "@/components/reports/ProductReport";
 import { PaymentReport } from "@/components/reports/PaymentReport";
 import { DispatchReport } from "@/components/reports/DispatchReport";
+import { SalesTeamReport } from "@/components/reports/SalesTeamReport";
 
 export default function Reports() {
   return (
@@ -23,6 +24,7 @@ export default function Reports() {
               <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
               <TabsTrigger value="payments" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Payments</TabsTrigger>
               <TabsTrigger value="dispatch" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Dispatch</TabsTrigger>
+              <TabsTrigger value="salesteam" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Sales Team</TabsTrigger>
             </TabsList>
           </div>
 
@@ -30,6 +32,7 @@ export default function Reports() {
           <TabsContent value="products"><ProductReport /></TabsContent>
           <TabsContent value="payments"><PaymentReport /></TabsContent>
           <TabsContent value="dispatch"><DispatchReport /></TabsContent>
+          <TabsContent value="salesteam"><SalesTeamReport /></TabsContent>
         </Tabs>
       </div>
     </AppLayout>
