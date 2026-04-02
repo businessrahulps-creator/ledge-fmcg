@@ -170,7 +170,7 @@ export default function Salespersons() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button onClick={save}>{isNew ? "Add Salesperson" : "Save Changes"}</Button>
+              <Button onClick={save}>{isNew ? "Add Member" : "Save Changes"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
