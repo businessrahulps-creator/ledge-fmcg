@@ -21,8 +21,9 @@ export default function Dashboard() {
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
 
+  // Parse date as local timezone to avoid UTC offset shifting the day
   const filteredOrders = orders.filter((o) => {
-    const orderDay = new Date(o.date).getDay();
+    const orderDay = new Date(o.date + "T00:00:00").getDay();
     return orderDay === selectedDay;
   });
 
