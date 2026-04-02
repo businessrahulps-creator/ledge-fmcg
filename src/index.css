@@ -4,23 +4,23 @@
 
 @layer base {
   :root {
-    --background: 240 25% 96%;
-    --foreground: 240 10% 10%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 0 0% 7%;
 
     --primary: 224 100% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 20% 92%;
-    --secondary-foreground: 240 10% 20%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 240 15% 90%;
-    --muted-foreground: 240 7% 45%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
     --accent: 224 100% 62%;
     --accent-foreground: 0 0% 100%;
@@ -28,29 +28,29 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 152 69% 40%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --border: 240 10% 85%;
-    --input: 240 10% 85%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
     --ring: 224 100% 62%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 10% 20%;
+    --sidebar-foreground: 0 0% 20%;
     --sidebar-primary: 224 100% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 20% 95%;
-    --sidebar-accent-foreground: 240 10% 20%;
-    --sidebar-border: 240 10% 90%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 92%;
     --sidebar-ring: 224 100% 62%;
 
     --surface: 0 0% 100%;
-    --surface-border: 240 10% 90%;
+    --surface-border: 0 0% 92%;
 
     --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   }
@@ -120,30 +120,22 @@
 
 @layer utilities {
   .glass-card {
-    @apply backdrop-blur-xl border;
-    background: hsl(var(--surface) / 0.6);
-    border-color: hsl(var(--surface-border) / 0.5);
-  }
-
-  .dark .glass-card {
-    background: hsl(var(--surface) / 0.4);
-    border-color: hsl(255 255 255 / 0.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+    @apply rounded-2xl bg-card border border-border shadow-sm;
   }
 
   .status-paid {
-    @apply bg-success/15 text-success;
+    @apply bg-emerald-50 text-emerald-600;
   }
   .status-partial {
-    @apply bg-warning/15 text-warning;
+    @apply bg-amber-50 text-amber-600;
   }
   .status-pending {
-    @apply bg-destructive/15 text-destructive;
+    @apply bg-red-50 text-red-500;
   }
   .status-dispatched {
-    @apply bg-primary/15 text-primary;
+    @apply bg-blue-50 text-blue-600;
   }
   .status-delivered {
-    @apply bg-success/15 text-success;
+    @apply bg-emerald-50 text-emerald-600;
   }
 }

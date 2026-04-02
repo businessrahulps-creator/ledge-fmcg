@@ -99,7 +99,7 @@ export default function Settings() {
           {/* Company Tab */}
           <TabsContent value="company">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
-              <div className="rounded-xl border border-border bg-card p-4 space-y-4 md:p-6 md:space-y-6">
+              <div className="glass-card p-4 space-y-4 md:p-6 md:space-y-6">
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 md:h-16 md:w-16">
                     <Building2 className="h-6 w-6 text-muted-foreground md:h-7 md:w-7" strokeWidth={1.5} />
@@ -139,7 +139,7 @@ export default function Settings() {
                 </Button>
               </div>
 
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="glass-card overflow-hidden">
                 {team.map((m) => (
                   <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 hover:bg-muted/30 transition-colors md:px-6 md:py-4">
                     <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function Settings() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-4 space-y-3 md:p-6 md:space-y-4">
+              <div className="glass-card p-4 space-y-3 md:p-6 md:space-y-4">
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-4 w-4 text-muted-foreground md:h-5 md:w-5" strokeWidth={1.5} />
                   <h3 className="text-sm font-semibold md:text-base">Plan Details</h3>

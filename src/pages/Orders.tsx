@@ -82,7 +82,7 @@ export default function Orders() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="glass-card overflow-hidden">
           {/* Desktop table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">

@@ -113,7 +113,7 @@ export default function NewOrder() {
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           <div className="space-y-6 lg:col-span-2 lg:space-y-8">
             {/* Order Header */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Order Details</h2>
               <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -150,7 +150,7 @@ export default function NewOrder() {
             </section>
 
             {/* Order Lines */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <div className="mb-3 flex items-center justify-between md:mb-4">
                 <h2 className="text-sm font-semibold md:text-base">Products</h2>
                 <Button variant="ghost" size="sm" onClick={addLine} className="h-9">
@@ -240,7 +240,7 @@ export default function NewOrder() {
             </section>
 
             {/* Dispatch Details */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -284,7 +284,7 @@ export default function NewOrder() {
           {/* Sidebar Summary */}
           <div className="space-y-4 md:space-y-6">
             {/* Payment */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Payment</h2>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -327,7 +327,7 @@ export default function NewOrder() {
             </section>
 
             {/* Summary */}
-            <section className="rounded-xl border border-border bg-card p-4 md:p-6">
+            <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Summary</h2>
               <div className="space-y-2 md:space-y-3">
                 <div className="flex items-center justify-between text-xs md:text-sm">

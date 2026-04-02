@@ -1,14 +1,14 @@
 import { useLocation, Link } from "react-router-dom";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Users,
+  House,
+  Receipt,
+  UserRound,
   Package,
-  BarChart3,
+  ChartNoAxesCombined,
   Settings,
   LogOut,
   UserCheck,
-  Warehouse,
+  Box,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -28,8 +28,8 @@ import { useState } from "react";
 import { stockItems, getStockHealth } from "@/data/godown-data";
 
 const mainNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "Dashboard", url: "/dashboard", icon: House },
+  { title: "Orders", url: "/orders", icon: Receipt },
 ];
 
 const godownSubNav = [
@@ -39,10 +39,10 @@ const godownSubNav = [
 ];
 
 const mainNavAfter = [
-  { title: "Distributors", url: "/distributors", icon: Users },
+  { title: "Distributors", url: "/distributors", icon: UserRound },
   { title: "Products", url: "/products", icon: Package },
   { title: "Salespersons", url: "/salespersons", icon: UserCheck },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
 const bottomNav = [
@@ -66,7 +66,7 @@ export function AppSidebar() {
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent"
           activeClassName="bg-sidebar-accent text-primary font-medium"
         >
-          <item.icon className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+          <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
           {!collapsed && <span>{item.title}</span>}
         </NavLink>
       </SidebarMenuButton>
@@ -74,11 +74,11 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-card">
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">O</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
+            <span className="text-sm font-bold text-background">O</span>
           </div>
           {!collapsed && (
             <span className="text-lg font-bold tracking-tight">Ordra</span>
@@ -100,7 +100,7 @@ export function AppSidebar() {
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent w-full"
                 >
                   <div className="relative">
-                    <Warehouse className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+                    <Box className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                     {alertCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-warning animate-pulse" />
                     )}
@@ -148,7 +148,7 @@ export function AppSidebar() {
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent"
                   activeClassName="bg-sidebar-accent text-primary font-medium"
                 >
-                  <item.icon className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+                  <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                   {!collapsed && <span>{item.title}</span>}
                 </NavLink>
               </SidebarMenuButton>
@@ -160,7 +160,7 @@ export function AppSidebar() {
                 to="/"
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent"
               >
-                <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+                <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                 {!collapsed && <span>Log out</span>}
               </Link>
             </SidebarMenuButton>

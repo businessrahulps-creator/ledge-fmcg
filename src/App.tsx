@@ -19,7 +19,6 @@ import NotFound from "./pages/NotFound";
 import GodownOverview from "./pages/GodownOverview";
 import GodownInventory from "./pages/GodownInventory";
 import GodownAlerts from "./pages/GodownAlerts";
-import PreviewDashboard from "./pages/PreviewDashboard";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +42,6 @@ const App = () => (
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/godown" element={<GodownOverview />} />
-          <Route path="/preview" element={<PreviewDashboard />} />
           <Route path="/godown/inventory" element={<GodownInventory />} />
           <Route path="/godown/alerts" element={<GodownAlerts />} />
           <Route path="*" element={<NotFound />} />
