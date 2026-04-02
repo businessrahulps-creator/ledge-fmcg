@@ -139,7 +139,7 @@ export default function Settings() {
                 </Button>
               </div>
 
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="glass-card overflow-hidden">
                 {team.map((m) => (
                   <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 hover:bg-muted/30 transition-colors md:px-6 md:py-4">
                     <div className="flex items-center gap-3">
