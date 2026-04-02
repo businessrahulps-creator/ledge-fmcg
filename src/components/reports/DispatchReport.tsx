@@ -46,7 +46,7 @@ export function DispatchReport() {
               {filtered.length === 0 ? (
                 <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : filtered.map((o) => (
-                <tr key={o.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                <tr key={o.id} className="border-b border-border/50 row-hover">
                   <td className="px-6 py-4 font-medium text-primary">{o.orderNumber}</td>
                   <td className="px-6 py-4">{o.distributorName}</td>
                   <td className="px-6 py-4 text-muted-foreground">{o.dispatchDate || "—"}</td>
