@@ -109,8 +109,8 @@ export default function Dashboard() {
               {topDistributors.map((d) => (
                 <div key={d.id}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[13px] font-medium">{d.name}</span>
-                    <span className="text-[12px] text-muted-foreground">{formatCurrency(d.totalValue)}</span>
+                    <span className="text-sm font-medium">{d.name}</span>
+                    <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
