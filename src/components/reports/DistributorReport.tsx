@@ -24,7 +24,7 @@ export function DistributorReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
           <span className="text-muted-foreground">{totalOrders} orders</span>
-          <span className="text-muted-foreground">{data.length} distributors</span>
+          <span className="text-muted-foreground">{data.length} dealers</span>
         </div>
       </div>
       <div className="glass-card overflow-hidden">
