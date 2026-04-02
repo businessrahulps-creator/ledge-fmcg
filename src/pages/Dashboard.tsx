@@ -90,7 +90,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="glass-card p-4"
+              className="glass-card card-hover p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
