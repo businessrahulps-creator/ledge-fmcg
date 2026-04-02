@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Package, IndianRupee, AlertTriangle, MapPin, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { godownLocations, getGodownStats, getOverallStats, getStockHealth, stockItems } from "@/data/godown-data";
+import { godownLocations, getGodownStats, getOverallStats, stockItems } from "@/data/godown-data";
 import { formatCurrency } from "@/data/mock-data";
 import { motion } from "framer-motion";
 
@@ -33,13 +33,12 @@ function KPICard({ icon: Icon, label, value, sub, accentWarning, delay }: {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className={`relative rounded-xl border p-4 md:p-6 lg:p-8 backdrop-blur-xl ${
-        accentWarning ? "border-warning/40" : "border-border"
-      }`}
-      style={{ background: "rgba(22, 22, 31, 0.8)" }}
+      className={`glass-card p-4 md:p-6 relative ${accentWarning ? "border-warning/40" : ""}`}
     >
-      <div className={`absolute top-3 right-3 h-2 w-2 rounded-full md:top-4 md:right-4 ${accentWarning ? "bg-warning animate-pulse" : "bg-success"}`} />
-      <Icon className="h-4 w-4 text-muted-foreground mb-2 md:h-5 md:w-5 md:mb-3" strokeWidth={1.5} />
+      <div className={`absolute top-3 right-3 h-2 w-2 rounded-full md:top-4 md:right-4 ${accentWarning ? "bg-warning animate-pulse" : "bg-emerald-400"}`} />
+      <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted mb-2 md:mb-3">
+        <Icon className="h-4 w-4 text-muted-foreground md:h-5 md:w-5" strokeWidth={1.5} />
+      </div>
       <p className="text-2xl font-bold leading-tight tracking-tight md:text-[40px]">{value}</p>
       <p className="text-[10px] text-muted-foreground mt-0.5 md:text-xs md:mt-1">{sub}</p>
     </motion.div>
@@ -80,7 +79,7 @@ export default function GodownOverview() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }}
-                  className="group rounded-xl border border-border bg-card p-4 md:p-6 transition-all duration-200 hover:border-primary/40 hover:-translate-y-0.5"
+                  className="glass-card p-4 md:p-6 transition-all duration-200 hover:border-primary/40 hover:-translate-y-0.5"
                 >
                   <h3 className="text-sm font-semibold md:text-base">{godown.name}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5 md:mt-1">{godown.address}</p>
@@ -117,14 +116,14 @@ export default function GodownOverview() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.4 }}
-          className="rounded-xl border border-border bg-card p-4 md:p-6"
+          className="glass-card p-4 md:p-6"
         >
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <h3 className="text-xs font-semibold md:text-sm">Overall Stock Health</h3>
           </div>
           <div className="flex h-2.5 w-full overflow-hidden rounded-full md:h-3">
             {stats.healthyCount > 0 && (
-              <div className="bg-success transition-all" style={{ width: `${(stats.healthyCount / stats.total) * 100}%` }} />
+              <div className="bg-emerald-400 transition-all" style={{ width: `${(stats.healthyCount / stats.total) * 100}%` }} />
             )}
             {stats.lowCount > 0 && (
               <div className="bg-warning transition-all" style={{ width: `${(stats.lowCount / stats.total) * 100}%` }} />
