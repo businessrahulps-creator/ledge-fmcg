@@ -72,16 +72,17 @@ export default function Dashboard() {
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-4">
             {DAYS.map((d, i) => (
-              <div
+              <button
                 key={i}
+                onClick={() => setSelectedDay(i)}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
-                  i === dayOfWeek
+                  i === selectedDay
                     ? "bg-foreground text-background shadow-md"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
                 {d}
-              </div>
+              </button>
             ))}
           </div>
         </div>
