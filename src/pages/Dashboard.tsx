@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  IndianRupee,
-  Package,
-  Truck,
+  Wallet,
+  ShoppingBag,
+  Clock,
+  PackageCheck,
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
@@ -30,10 +31,10 @@ export default function Dashboard() {
   const dispatchedOrders = orders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue), icon: IndianRupee, change: "+12%", up: true, color: "emerald" as const },
-    { label: "Orders", value: totalOrders.toString(), icon: Package, change: "+8%", up: true, color: "blue" as const },
-    { label: "Pending", value: pendingOrders.toString(), icon: Truck, change: "-3%", up: false, color: "amber" as const },
-    { label: "Dispatched", value: dispatchedOrders.toString(), icon: Truck, change: "+5%", up: true, color: "violet" as const },
+    { label: "Revenue", value: formatCurrency(totalRevenue), icon: Wallet, change: "+12%", up: true, color: "emerald" as const },
+    { label: "Orders", value: totalOrders.toString(), icon: ShoppingBag, change: "+8%", up: true, color: "blue" as const },
+    { label: "Pending", value: pendingOrders.toString(), icon: Clock, change: "-3%", up: false, color: "amber" as const },
+    { label: "Dispatched", value: dispatchedOrders.toString(), icon: PackageCheck, change: "+5%", up: true, color: "violet" as const },
   ];
 
   const kpiColors = {
