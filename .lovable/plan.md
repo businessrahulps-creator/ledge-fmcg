@@ -1,33 +1,66 @@
 
 
-# Fix Orders Page — Match Premium Design System
+# Add Subtle Hover Interactions — All Pages
 
-## Issues Found
+## Philosophy
 
-1. **Blue "New Order" button** — `--primary` CSS var is still `224 100% 62%` (blue). The button uses `bg-primary`, which renders blue. Since the design system's primary action color should be black, we need to update `--primary` to near-black (`0 0% 7%`) in the light theme CSS vars. This also fixes order numbers showing in blue (`text-primary`).
+No bouncy transforms, no color shifts, no "AI slop." Just two refined patterns used consistently:
 
-2. **Distributor names too large on mobile cards** — The mobile card view uses `text-sm` for distributor names, but the order number row is `text-sm font-medium` which combined with the overall spacing makes everything feel oversized. Need to tighten the card layout.
+1. **Table rows**: Soft background tint on hover + action buttons fade in. Already partially done — just needs consistency and a subtle left-border accent on hover.
+2. **Cards**: Micro-lift (`translateY(-1px)`) + border darkens slightly + shadow deepens. No scale transforms. 200ms `ease-out`. On mobile, `active:scale-[0.98]` for touch feedback only.
 
-3. **`--primary` change has cascading impact** — Since `--primary` drives buttons, links, active nav states, and accent colors globally, changing it to black means we also need to update `--accent` (used for hover states) to stay distinguishable, and ensure the sidebar active state still looks good.
+These are the same patterns Linear, Stripe, and Vercel use — understated, functional, never decorative.
 
-## Changes
+## What Changes
 
-### `src/index.css`
-- `:root` — `--primary: 224 100% 62%` → `--primary: 0 0% 7%` (near-black)
-- `:root` — `--accent: 224 100% 62%` → `--accent: 0 0% 95%` (light gray for hover backgrounds)
-- `:root` — `--accent-foreground: 0 0% 100%` → `--accent-foreground: 0 0% 7%`
-- `:root` — `--ring: 224 100% 62%` → `--ring: 0 0% 7%`
-- `:root` — `--sidebar-primary: 224 100% 62%` → `--sidebar-primary: 0 0% 7%`
-- `:root` — `--sidebar-ring: 224 100% 62%` → `--sidebar-ring: 0 0% 7%`
-- Keep `--primary-foreground: 0 0% 100%` (white text on black button — correct)
+### `src/index.css` — Add two reusable utility classes
 
-### `src/pages/Orders.tsx`
-- **Mobile cards**: Reduce order number to `text-xs`, distributor name to `text-[11px]`, tighten padding from `py-3` → `py-2.5`
-- **Order number color**: Change `text-primary` → `text-[#111]` (since primary is now black, this is fine either way, but explicit is cleaner)
-- **Desktop table**: Order number `text-primary` is fine as black
+```css
+.row-hover {
+  @apply transition-all duration-200 ease-out hover:bg-muted/40;
+}
 
-### What stays the same
-- All other pages — they use `bg-[#111]` or explicit colors, not `text-primary`, so they're unaffected
-- Landing page — has its own dark overrides
-- Status badges — already using explicit emerald/amber/red colors
+.card-hover {
+  @apply transition-all duration-200 ease-out 
+         hover:-translate-y-[1px] hover:shadow-md hover:border-border/80
+         active:scale-[0.98] active:shadow-sm;
+}
+```
+
+This keeps the interaction layer in CSS utilities rather than scattered inline classes. Every page just applies `.card-hover` or `.row-hover`.
+
+### Pages updated (hover classes consolidated)
+
+| Page | Element | Current | New |
+|---|---|---|---|
+| **Dashboard** | KPI cards | No hover | `card-hover` |
+| **Dashboard** | Distributor/Product section cards | No hover | `card-hover` |
+| **Dashboard** | Recent order rows (desktop) | `hover:bg-muted/30` | `row-hover` |
+| **Dashboard** | Recent order cards (mobile) | No hover | `card-hover` |
+| **Orders** | Table rows | `hover:bg-muted/30` | `row-hover` |
+| **Orders** | Mobile cards | `active:bg-muted/30` | `card-hover` |
+| **Products** | Table rows | `hover:bg-muted/30` | `row-hover` |
+| **Products** | Mobile cards | No hover | `card-hover` on each item row |
+| **Distributors** | Cards | `hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg` | `card-hover` (refined, less aggressive) |
+| **Salespersons** | Cards | Same as distributors | `card-hover` |
+| **GodownOverview** | Location cards | `hover:border-primary/40 hover:-translate-y-0.5` | `card-hover` |
+| **GodownOverview** | KPI cards | No hover | `card-hover` |
+| **GodownInventory** | Table rows | `hover:bg-muted/20` | `row-hover` |
+| **GodownInventory** | Mobile cards | `active:bg-muted/20` | `card-hover` |
+| **GodownAlerts** | Alert cards | No hover | `card-hover` |
+| **Reports** (all 4) | Table rows | `hover:bg-muted/30` | `row-hover` |
+| **Reports** (all 4) | Mobile cards | No hover | `card-hover` |
+| **Settings** | Team member rows | No hover | `row-hover` |
+
+### Report components (4 files)
+- `DistributorReport.tsx`, `ProductReport.tsx`, `PaymentReport.tsx`, `DispatchReport.tsx` — swap inline `hover:bg-muted/30` on `<tr>` to `row-hover`, add `card-hover` to mobile card divs.
+
+### What does NOT change
+- No new dependencies. No framer-motion additions. Pure CSS.
+- Landing page untouched.
+- Button hover states stay as-is (handled by shadcn).
+- Dialog/modal content stays as-is.
+
+## Files touched: ~13
+`index.css` + `Dashboard` + `Orders` + `Products` + `Distributors` + `Salespersons` + `GodownOverview` + `GodownInventory` + `GodownAlerts` + `Settings` + 4 report components
 
