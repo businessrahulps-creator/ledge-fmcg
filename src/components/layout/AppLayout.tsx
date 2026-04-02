@@ -10,8 +10,8 @@ const allMobileNav = [
   { title: "Orders", url: "/orders", icon: Receipt },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
-  { title: "Dealers", url: "/distributors", icon: UserRound },
-  { title: "Sales", url: "/salespersons", icon: UserCheck },
+  { title: "Dealers", url: "/distributors", icon: Store },
+  { title: "Sales", url: "/salespersons", icon: BadgeCheck },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
