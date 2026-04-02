@@ -78,10 +78,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       />
                     )}
                     <item.icon
-                      className={`w-[18px] h-[18px] relative z-10 transition-colors ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                      className={`w-[18px] h-[18px] relative z-10 transition-all duration-200 ${isActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
                       strokeWidth={isActive ? 1.8 : 1.5}
                     />
-                    <span className={`text-[10px] font-semibold relative z-10 transition-colors whitespace-nowrap ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                    <span className={`text-[10px] relative z-10 transition-all duration-200 whitespace-nowrap ${isActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
                       {item.title}
                     </span>
                   </Link>
