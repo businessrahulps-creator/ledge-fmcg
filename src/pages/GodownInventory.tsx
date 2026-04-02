@@ -117,8 +117,10 @@ export default function GodownInventory() {
                   <th className="px-6 py-3">Godown</th>
                   <th className="px-6 py-3 text-right">Qty Available</th>
                   <th className="px-6 py-3">Unit</th>
-                  <th className="px-6 py-3 text-right">Est. Value</th>
-                  <th className="px-6 py-3">Last Deducted</th>
+                  <th className="px-6 py-3 text-right">Base Price</th>
+                   <th className="px-6 py-3 text-right">Total Sold</th>
+                   <th className="px-6 py-3 text-right">Est. Value</th>
+                   <th className="px-6 py-3">Last Deducted</th>
                   <th className="px-6 py-3">Health</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
