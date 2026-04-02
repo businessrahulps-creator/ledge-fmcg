@@ -68,7 +68,7 @@ export default function Salespersons() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Salespersons</h1>
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Sales Team</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage your sales team
             </p>
