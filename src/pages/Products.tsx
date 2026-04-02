@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { products as initialProducts, formatCurrency, formatNumber, type Product } from "@/data/mock-data";
+import { stockItems } from "@/data/godown-data";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +23,12 @@ export default function Products() {
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const getProductStock = (productId: string) => {
+    const entries = stockItems.filter(si => si.productId === productId);
+    return entries.reduce((sum, si) => sum + si.quantity, 0);
+  };
 
   const filtered = items.filter(
     (p) =>
@@ -92,8 +100,9 @@ export default function Products() {
                   <th className="px-6 py-3 font-medium">SKU</th>
                   <th className="px-6 py-3 font-medium">Unit</th>
                   <th className="px-6 py-3 font-medium text-right">Base Price</th>
-                  <th className="px-6 py-3 font-medium text-right">Total Sold</th>
-                  <th className="px-6 py-3 font-medium text-right">Actions</th>
+                   <th className="px-6 py-3 font-medium text-right">Total Sold</th>
+                   <th className="px-6 py-3 font-medium text-right">Stock</th>
+                   <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -104,6 +113,14 @@ export default function Products() {
                     <td className="px-6 py-4 text-muted-foreground">{p.unit}</td>
                     <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.basePrice)}</td>
                     <td className="px-6 py-4 text-right text-muted-foreground">{formatNumber(p.totalSold)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/godown/inventory?location=all&search=${encodeURIComponent(p.sku)}`); }}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                      >
+                        {formatNumber(getProductStock(p.id))}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
@@ -128,6 +145,7 @@ export default function Products() {
                   <p className="font-medium">{p.name}</p>
                   <p className="text-xs text-muted-foreground font-mono">{p.sku} · {p.unit}</p>
                   <p className="mt-1 text-sm font-semibold">{formatCurrency(p.basePrice)}</p>
+                  <p className="text-xs text-muted-foreground">Stock: {formatNumber(getProductStock(p.id))}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>

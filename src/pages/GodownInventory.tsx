@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { stockItems, godownLocations, getStockHealth, getTimeAgo, type StockItem } from "@/data/godown-data";
-import { formatCurrency } from "@/data/mock-data";
+import { formatCurrency, formatNumber, products } from "@/data/mock-data";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { StockDetailPanel } from "@/components/godown/StockDetailPanel";
 import { TransferStockModal } from "@/components/godown/TransferStockModal";
@@ -40,6 +41,9 @@ export default function GodownInventory() {
   const [healthFilter, setHealthFilter] = useState<string>("all");
   const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
   const [transferItem, setTransferItem] = useState<StockItem | null>(null);
+  const navigate = useNavigate();
+
+  const getProductData = (productId: string) => products.find(p => p.id === productId);
 
   const filtered = stockItems.filter((si) => {
     const matchSearch = si.productName.toLowerCase().includes(search.toLowerCase()) || si.sku.toLowerCase().includes(search.toLowerCase());
@@ -113,8 +117,10 @@ export default function GodownInventory() {
                   <th className="px-6 py-3">Godown</th>
                   <th className="px-6 py-3 text-right">Qty Available</th>
                   <th className="px-6 py-3">Unit</th>
-                  <th className="px-6 py-3 text-right">Est. Value</th>
-                  <th className="px-6 py-3">Last Deducted</th>
+                  <th className="px-6 py-3 text-right">Base Price</th>
+                   <th className="px-6 py-3 text-right">Total Sold</th>
+                   <th className="px-6 py-3 text-right">Est. Value</th>
+                   <th className="px-6 py-3">Last Deducted</th>
                   <th className="px-6 py-3">Health</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
@@ -143,6 +149,15 @@ export default function GodownInventory() {
                         <QtyDisplay quantity={item.quantity} threshold={item.threshold} />
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">{item.unit}</td>
+                      <td className="px-6 py-4 text-right font-medium">{formatCurrency(item.basePrice)}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/products`); }}
+                          className="text-muted-foreground hover:text-primary hover:underline"
+                        >
+                          {formatNumber(getProductData(item.productId)?.totalSold ?? 0)}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 text-right font-medium">{formatCurrency(item.quantity * item.basePrice)}</td>
                       <td className="px-6 py-4 text-muted-foreground">{item.lastDeductedDate ? getTimeAgo(item.lastDeductedDate) : "—"}</td>
                       <td className="px-6 py-4"><HealthBadge health={health} /></td>
