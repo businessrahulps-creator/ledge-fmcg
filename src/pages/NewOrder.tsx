@@ -109,10 +109,6 @@ export default function NewOrder() {
       confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
     }, 700);
 
-    toast({
-      title: "Order saved ✓",
-      description: "Your order has been created successfully.",
-    });
 
     addNotification("order_placed", "New Order Created", "A new order has been placed successfully.");
 
