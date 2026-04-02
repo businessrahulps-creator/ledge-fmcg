@@ -50,7 +50,7 @@ export function ProductReport() {
               {data.length === 0 ? (
                 <tr><td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">No data for {periodLabel(period).toLowerCase()}</td></tr>
               ) : data.map((p) => (
-                <tr key={p.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                <tr key={p.id} className="border-b border-border/50 row-hover">
                   <td className="px-6 py-4 font-medium">{p.name}</td>
                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
                   <td className="px-6 py-4 text-right">{formatNumber(p.qtySold)}</td>
