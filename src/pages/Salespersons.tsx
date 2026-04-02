@@ -75,7 +75,7 @@ export default function Salespersons() {
           </div>
           <Button onClick={openNew} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
-            Add Salesperson
+            Add Member
           </Button>
         </div>
 
