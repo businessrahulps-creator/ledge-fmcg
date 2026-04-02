@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { orders, formatCurrency, type Order } from "@/data/mock-data";
+import { formatCurrency, type Order } from "@/data/mock-data";
+import { useData } from "@/context/DataContext";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
