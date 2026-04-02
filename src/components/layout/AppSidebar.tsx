@@ -6,7 +6,6 @@ import {
   Package,
   ChartNoAxesCombined,
   Settings,
-  LogOut,
   UserCheck,
 } from "lucide-react";
 import {
