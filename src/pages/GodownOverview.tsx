@@ -33,7 +33,7 @@ function KPICard({ icon: Icon, label, value, sub, accentWarning, delay }: {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className={`glass-card p-4 md:p-6 relative ${accentWarning ? "border-warning/40" : ""}`}
+      className={`glass-card card-hover p-4 md:p-6 relative ${accentWarning ? "border-warning/40" : ""}`}
     >
       <div className={`absolute top-3 right-3 h-2 w-2 rounded-full md:top-4 md:right-4 ${accentWarning ? "bg-warning animate-pulse" : "bg-emerald-400"}`} />
       <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted mb-2 md:mb-3">
