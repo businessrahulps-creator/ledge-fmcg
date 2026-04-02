@@ -1,58 +1,40 @@
 
 
-# Report Detail Dialogs — Click-to-View for All Report Tabs
+# Swipeable Bottom Navigation — Apple Music Style
 
-## Problem
-All 5 report tabs (Dealers, Products, Payments, Dispatch, Sales Team) show summary rows but clicking any row does nothing. Users expect to see details when they tap an entry.
+## Concept
+Remove the "More" button + bottom drawer. Instead, make the entire bottom nav bar a **horizontally scrollable strip** containing all 7 nav items (Home, Orders, Stock, Reports, Dealers, Sales Team, Settings) plus Log out. The user swipes left/right to reveal more items — exactly like Apple Music's tab bar behavior on iOS.
 
-## Solution
-Add a detail Dialog to each report component. When a user clicks a row, a dialog opens showing the breakdown relevant to that entity for the selected time period.
+## How it works
+- All nav items sit in a single horizontal row inside a `overflow-x-auto` container with hidden scrollbar
+- The strip is wider than the screen, so items like Dealers, Sales Team, Settings are off-screen to the right
+- User drags/swipes horizontally to see them — no tap needed, no sheet popup
+- A subtle fade gradient on the right edge hints that more items exist
+- When navigating to a "hidden" item (e.g. Dealers), the strip auto-scrolls to show the active item using `scrollIntoView`
 
-### What each detail dialog shows:
+## Visual
+```text
+┌──────────────────────────────┐
+│ [Home] [Orders] [Stock] [Reports] [Dealers] [Sales] [Settings] [Logout]
+│  ◄──── visible ────►  ◄── swipe to reveal ──►
+└──────────────────────────────┘
+```
 
-**Dealers tab** — Click a dealer row:
-- Dealer name, location, contact (header)
-- List of their orders for the period: order number, date, amount, payment status
-- Total revenue summary
+## Changes — single file: `src/components/layout/AppLayout.tsx`
 
-**Products tab** — Click a product row:
-- Product name, SKU, unit, base price (header)
-- List of orders containing this product: order number, dealer, qty, line total
-- Total units sold + revenue summary
+1. **Merge nav arrays**: Combine `mobileNav` + `moreLinks` + Log out into one flat `allMobileNav` array
+2. **Remove**: `moreOpen` state, `isMoreActive`, the "More" button, the entire `<Drawer>` block, Drawer imports
+3. **Replace `<nav>` internals**: Wrap all nav items in a horizontal scroll container:
+   - `overflow-x-auto scrollbar-hide` (CSS utility to hide scrollbar)
+   - `flex-nowrap` so items stay in one row
+   - Each item has `flex-shrink-0` and fixed width (~64px)
+4. **Right fade hint**: Add a `pointer-events-none` gradient overlay on the right edge of the nav bar (`bg-gradient-to-l from-card to-transparent`) so users see there's more to scroll
+5. **Auto-scroll to active**: Use a `useRef` on the nav container + `useEffect` watching `location.pathname` to call `activeElement.scrollIntoView({ inline: 'center', behavior: 'smooth' })` so the active tab is always visible
+6. **Add scrollbar-hide utility**: Add `.scrollbar-hide::-webkit-scrollbar { display: none }` and `-ms-overflow-style: none; scrollbar-width: none` to `src/index.css`
 
-**Payments tab** — Click an order row:
-- Already handled by the Orders page detail dialog pattern
-- Show order number, dealer, date, line items, payment mode/status, total
-- Read-only view (editing happens in Orders page)
-
-**Dispatch tab** — Click an order row:
-- Same as Payments: order detail with dispatch-focused info
-- Order number, dealer, dispatch date, vehicle, driver, delivery status, line items
-
-**Sales Team tab** — Click a team member row:
-- Name, region, phone, email (header)
-- List of their orders for the period: order number, dealer, date, amount
-- Total revenue summary
-
-### UX details
-- Rows get `cursor-pointer` styling so users know they're clickable
-- Dialog uses the existing `Dialog` component (already in the project)
-- Mobile-friendly: dialog content scrolls, line items in a compact list
-- Read-only — reports are for viewing, not editing
-
-### Additional UX issue found
-- **PaymentReport still says "distributorName"** in the mobile card (line 76) — should say dealer. Will fix.
-
-## Files to modify (5)
-1. `src/components/reports/DistributorReport.tsx` — add dealer detail dialog with their orders
-2. `src/components/reports/ProductReport.tsx` — add product detail dialog with order breakdown
-3. `src/components/reports/PaymentReport.tsx` — add order detail dialog + fix "distributorName" label
-4. `src/components/reports/DispatchReport.tsx` — add order detail dialog with dispatch info
-5. `src/components/reports/SalesTeamReport.tsx` — add team member detail dialog with their orders
-
-## Implementation pattern (same across all 5)
-- Add `selectedItem` state
-- Add `onClick` + `cursor-pointer` to desktop `<tr>` and mobile card `<div>`
-- Add `<Dialog open={!!selectedItem} onOpenChange={...}>` with relevant detail content
-- Import Dialog components, Separator, formatCurrency from existing files
+## Result
+- No more popup/drawer — feels native and fluid
+- One-handed thumb swipe to access all destinations
+- Active item always scrolls into view automatically
+- Maintains the existing animated pill indicator (`layoutId="nav-pill"`)
 
