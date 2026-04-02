@@ -30,7 +30,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, [location.pathname]);
 
   return (
-    <NotificationProvider>
     <SidebarProvider>
       <div className="flex min-h-screen w-full overflow-x-hidden bg-background">
         <div className="hidden md:block">
