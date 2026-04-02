@@ -100,8 +100,9 @@ export default function Products() {
                   <th className="px-6 py-3 font-medium">SKU</th>
                   <th className="px-6 py-3 font-medium">Unit</th>
                   <th className="px-6 py-3 font-medium text-right">Base Price</th>
-                  <th className="px-6 py-3 font-medium text-right">Total Sold</th>
-                  <th className="px-6 py-3 font-medium text-right">Actions</th>
+                   <th className="px-6 py-3 font-medium text-right">Total Sold</th>
+                   <th className="px-6 py-3 font-medium text-right">Stock</th>
+                   <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
