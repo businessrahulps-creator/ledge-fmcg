@@ -44,16 +44,6 @@ export default function Dashboard() {
 
   const recentOrders = orders.slice(0, 6);
 
-  const paymentColor: Record<string, string> = {
-    paid: "bg-emerald-50 text-emerald-600",
-    partial: "bg-amber-50 text-amber-600",
-    pending: "bg-red-50 text-red-500",
-  };
-  const deliveryColor: Record<string, string> = {
-    delivered: "bg-emerald-50 text-emerald-600",
-    dispatched: "bg-blue-50 text-blue-600",
-    pending: "bg-orange-50 text-orange-500",
-  };
 
   return (
     <AppLayout>
@@ -214,12 +204,8 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
                   <div className="flex gap-1.5">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${paymentColor[o.paymentStatus]}`}>
-                      {o.paymentStatus}
-                    </span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${deliveryColor[o.deliveryStatus]}`}>
-                      {o.deliveryStatus}
-                    </span>
+                    <StatusBadge status={o.paymentStatus} />
+                    <StatusBadge status={o.deliveryStatus} />
                   </div>
                 </div>
               </motion.div>
