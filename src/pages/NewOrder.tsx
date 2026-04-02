@@ -57,7 +57,7 @@ let lineCounter = 0;
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const { addNotification } = useNotifications();
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: `line-${lineCounter++}`, productId: "", quantity: 1, unitPrice: 0 },
