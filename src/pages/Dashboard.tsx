@@ -37,10 +37,10 @@ export default function Dashboard() {
   ];
 
   const kpiColors = {
-    emerald: { card: "bg-emerald-50/60 dark:bg-emerald-500/8", icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400" },
-    blue:    { card: "bg-blue-50/60 dark:bg-blue-500/8",       icon: "bg-blue-500/12 text-blue-600 dark:text-blue-400" },
-    amber:   { card: "bg-amber-50/60 dark:bg-amber-500/8",     icon: "bg-amber-500/12 text-amber-600 dark:text-amber-400" },
-    violet:  { card: "bg-violet-50/60 dark:bg-violet-500/8",   icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400" },
+    emerald: { card: "bg-emerald-50/60 dark:bg-emerald-500/8", icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400", blob: "bg-emerald-400" },
+    blue:    { card: "bg-blue-50/60 dark:bg-blue-500/8",       icon: "bg-blue-500/12 text-blue-600 dark:text-blue-400",         blob: "bg-blue-400" },
+    amber:   { card: "bg-amber-50/60 dark:bg-amber-500/8",     icon: "bg-amber-500/12 text-amber-600 dark:text-amber-400",       blob: "bg-amber-400" },
+    violet:  { card: "bg-violet-50/60 dark:bg-violet-500/8",   icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400",     blob: "bg-violet-400" },
   };
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
