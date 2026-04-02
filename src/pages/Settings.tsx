@@ -56,6 +56,7 @@ export default function Settings() {
     { id: "t3", name: "Sneha Agarwal", email: "sneha@acmefmcg.in", role: "accountant" },
   ]);
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
+  const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
 
   const saveCompany = () => {
