@@ -58,7 +58,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           {/* Swipeable Bottom Nav — mobile only */}
           <nav
-            className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-white/30 bg-white/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-white/10 dark:bg-black/40 md:hidden"
+            className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-border/30 bg-background/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-border/20 dark:bg-background/40 md:hidden"
             style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
           >
             <div
