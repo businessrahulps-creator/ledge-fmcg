@@ -80,10 +80,11 @@ export default function Settings() {
     setEditMember(null);
   };
 
-  const removeMember = (id: string) => {
-    const m = team.find((t) => t.id === id);
-    setTeam((prev) => prev.filter((t) => t.id !== id));
-    toast({ title: "Member removed", description: `${m?.name} has been removed.` });
+  const confirmRemoveMember = () => {
+    if (!deleteMember) return;
+    setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
+    toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+    setDeleteMember(null);
   };
 
   const trialDaysLeft = 11;
