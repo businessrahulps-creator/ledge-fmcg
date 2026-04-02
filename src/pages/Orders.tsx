@@ -59,6 +59,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Editable fields for dialog
+  const [editPaymentMode, setEditPaymentMode] = useState("");
   const [editPayment, setEditPayment] = useState("");
   const [editDelivery, setEditDelivery] = useState("");
   const [editDispatchDate, setEditDispatchDate] = useState("");
