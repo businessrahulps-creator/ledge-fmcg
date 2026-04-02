@@ -8,21 +8,23 @@ import { DispatchReport } from "@/components/reports/DispatchReport";
 export default function Reports() {
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Reports</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Analyze your business performance
           </p>
         </div>
 
-        <Tabs defaultValue="distributors" className="space-y-6">
-          <TabsList className="h-12 rounded-lg bg-muted/50 p-1">
-            <TabsTrigger value="distributors" className="rounded-md px-4 py-2 text-sm">Distributors</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-md px-4 py-2 text-sm">Products</TabsTrigger>
-            <TabsTrigger value="payments" className="rounded-md px-4 py-2 text-sm">Payments</TabsTrigger>
-            <TabsTrigger value="dispatch" className="rounded-md px-4 py-2 text-sm">Dispatch</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="distributors" className="space-y-4 md:space-y-6">
+          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
+            <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
+              <TabsTrigger value="distributors" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Distributors</TabsTrigger>
+              <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
+              <TabsTrigger value="payments" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Payments</TabsTrigger>
+              <TabsTrigger value="dispatch" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Dispatch</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="distributors"><DistributorReport /></TabsContent>
           <TabsContent value="products"><ProductReport /></TabsContent>

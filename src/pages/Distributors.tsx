@@ -27,25 +27,25 @@ export default function Distributors() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Distributors</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Distributors</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Manage your distributor network
           </p>
         </div>
 
-        <div className="relative max-w-md">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search distributors..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-12 rounded-lg pl-10"
+            className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {filtered.map((d, i) => (
             <motion.div
               key={d.id}
@@ -53,23 +53,23 @@ export default function Distributors() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
               onClick={() => setSelectedId(d.id)}
-              className="cursor-pointer rounded-xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg"
+              className="cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:scale-[0.98] md:p-6"
             >
-              <h3 className="text-base font-semibold">{d.name}</h3>
-              <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+              <h3 className="text-sm font-semibold md:text-base">{d.name}</h3>
+              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground md:mt-2 md:text-sm">
+                <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
                 {d.location}
               </div>
-              <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Phone className="h-3.5 w-3.5" strokeWidth={1.5} />
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground md:text-sm">
+                <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
                 {d.contact}
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                <div className="flex items-center gap-1.5 text-sm">
-                  <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 md:mt-4 md:pt-4">
+                <div className="flex items-center gap-1.5 text-xs md:text-sm">
+                  <ShoppingCart className="h-3 w-3 text-muted-foreground md:h-3.5 md:w-3.5" strokeWidth={1.5} />
                   <span>{d.totalOrders} orders</span>
                 </div>
-                <span className="text-sm font-semibold">{formatCurrency(d.totalValue)}</span>
+                <span className="text-xs font-semibold md:text-sm">{formatCurrency(d.totalValue)}</span>
               </div>
             </motion.div>
           ))}
@@ -84,37 +84,37 @@ export default function Distributors() {
 
         {/* Distributor Profile Dialog */}
         <Dialog open={!!selectedId} onOpenChange={() => setSelectedId(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
             {selected && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-xl">{selected.name}</DialogTitle>
+                  <DialogTitle className="text-base md:text-xl">{selected.name}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <span className="text-xs text-muted-foreground">Location</span>
-                      <p className="mt-1 text-sm font-medium">{selected.location}</p>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Location</span>
+                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.location}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <span className="text-xs text-muted-foreground">Contact</span>
-                      <p className="mt-1 text-sm font-medium">{selected.contact}</p>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Contact</span>
+                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.contact}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <span className="text-xs text-muted-foreground">Total Orders</span>
-                      <p className="mt-1 text-sm font-medium">{formatNumber(selected.totalOrders)}</p>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Total Orders</span>
+                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatNumber(selected.totalOrders)}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-4">
-                      <span className="text-xs text-muted-foreground">Total Value</span>
-                      <p className="mt-1 text-sm font-medium">{formatCurrency(selected.totalValue)}</p>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Total Value</span>
+                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(selected.totalValue)}</p>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="mb-3 text-sm font-semibold">Order History</h3>
+                    <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {selectedOrders.length > 0 ? (
                       <div className="rounded-lg border border-border overflow-hidden">
-                        <table className="w-full text-sm">
+                        <table className="hidden w-full text-sm md:table">
                           <thead>
                             <tr className="border-b border-border text-left text-xs text-muted-foreground">
                               <th className="px-4 py-2.5 font-medium">Order</th>
@@ -134,9 +134,23 @@ export default function Distributors() {
                             ))}
                           </tbody>
                         </table>
+                        <div className="md:hidden">
+                          {selectedOrders.map((o) => (
+                            <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
+                                <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
+                              </div>
+                              <div className="mt-0.5 flex items-center gap-2">
+                                <span className="text-[10px] text-muted-foreground">{o.date}</span>
+                                <StatusBadge status={o.paymentStatus} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No orders yet</p>
+                      <p className="text-xs text-muted-foreground md:text-sm">No orders yet</p>
                     )}
                   </div>
                 </div>

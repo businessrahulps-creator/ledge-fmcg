@@ -30,16 +30,16 @@ export default function Orders() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Orders</h1>
+            <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage and track all sales orders
             </p>
           </div>
           <Link to="/orders/new">
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               New Order
             </Button>
@@ -54,11 +54,11 @@ export default function Orders() {
               placeholder="Search orders..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-12 rounded-lg pl-10"
+              className="h-11 rounded-lg pl-10 md:h-12"
             />
           </div>
           <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="h-12 w-full rounded-lg sm:w-44">
+            <SelectTrigger className="h-11 w-full rounded-lg sm:w-44 md:h-12">
               <SelectValue placeholder="Payment" />
             </SelectTrigger>
             <SelectContent>
@@ -69,7 +69,7 @@ export default function Orders() {
             </SelectContent>
           </Select>
           <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-            <SelectTrigger className="h-12 w-full rounded-lg sm:w-44">
+            <SelectTrigger className="h-11 w-full rounded-lg sm:w-44 md:h-12">
               <SelectValue placeholder="Delivery" />
             </SelectTrigger>
             <SelectContent>
@@ -121,16 +121,16 @@ export default function Orders() {
             {filtered.map((order) => (
               <div
                 key={order.id}
-                className="border-b border-border/50 p-4 transition-colors hover:bg-muted/30"
+                className="border-b border-border/50 px-4 py-3 transition-colors active:bg-muted/30"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-primary">{order.orderNumber}</span>
-                  <span className="font-medium">{formatCurrency(order.total)}</span>
+                  <span className="text-sm font-medium text-primary">{order.orderNumber}</span>
+                  <span className="text-sm font-medium">{formatCurrency(order.total)}</span>
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {order.distributorName} · {order.date}
-                </div>
-                <div className="mt-2 flex gap-2">
+                </p>
+                <div className="mt-1.5 flex gap-1.5">
                   <StatusBadge status={order.paymentStatus} />
                   <StatusBadge status={order.deliveryStatus} />
                 </div>

@@ -10,7 +10,7 @@ interface TimePeriodFilterProps {
 export function TimePeriodFilter({ value, onChange }: TimePeriodFilterProps) {
   return (
     <Select value={value} onValueChange={(v) => onChange(v as TimePeriod)}>
-      <SelectTrigger className="h-10 w-40 rounded-lg">
+      <SelectTrigger className="h-10 w-full rounded-lg sm:w-40">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
