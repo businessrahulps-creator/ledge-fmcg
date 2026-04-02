@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Plus, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { orders, formatCurrency } from "@/data/mock-data";
+import { orders as initialOrders, formatCurrency, type Order } from "@/data/mock-data";
 import {
   Select,
   SelectContent,
@@ -13,13 +15,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+
+const paymentStatuses = [
+  { value: "paid", label: "Paid" },
+  { value: "partial", label: "Partial" },
+  { value: "pending", label: "Pending" },
+];
+
+const deliveryStatuses = [
+  { value: "pending", label: "Pending" },
+  { value: "dispatched", label: "Dispatched" },
+  { value: "delivered", label: "Delivered" },
+];
 
 export default function Orders() {
+  const [ordersData, setOrdersData] = useState<Order[]>(initialOrders);
   const [search, setSearch] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryFilter, setDeliveryFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const filtered = orders.filter((o) => {
+  // Editable fields for dialog
+  const [editPayment, setEditPayment] = useState("");
+  const [editDelivery, setEditDelivery] = useState("");
+  const [editDispatchDate, setEditDispatchDate] = useState("");
+  const [editVehicle, setEditVehicle] = useState("");
+  const [editDriver, setEditDriver] = useState("");
+
+  const openOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setEditPayment(order.paymentStatus);
+    setEditDelivery(order.deliveryStatus);
+    setEditDispatchDate(order.dispatchDate || "");
+    setEditVehicle(order.vehicle || "");
+    setEditDriver(order.driverName || "");
+  };
+
+  const saveOrder = () => {
+    if (!selectedOrder) return;
+    setOrdersData((prev) =>
+      prev.map((o) =>
+        o.id === selectedOrder.id
+          ? {
+              ...o,
+              paymentStatus: editPayment as Order["paymentStatus"],
+              deliveryStatus: editDelivery as Order["deliveryStatus"],
+              dispatchDate: editDispatchDate || null,
+              vehicle: editVehicle,
+              driverName: editDriver,
+            }
+          : o
+      )
+    );
+    toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
+    setSelectedOrder(null);
+  };
+
+  const filtered = ordersData.filter((o) => {
     const matchesSearch =
       o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
       o.distributorName.toLowerCase().includes(search.toLowerCase());
@@ -101,6 +161,7 @@ export default function Orders() {
                 {filtered.map((order) => (
                   <tr
                     key={order.id}
+                    onClick={() => openOrder(order)}
                     className="group border-b border-border/50 row-hover cursor-pointer"
                   >
                     <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
@@ -121,7 +182,8 @@ export default function Orders() {
             {filtered.map((order) => (
               <div
                 key={order.id}
-                className="border-b border-border/50 px-4 py-2.5 card-hover"
+                onClick={() => openOrder(order)}
+                className="border-b border-border/50 px-4 py-2.5 card-hover cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-foreground">{order.orderNumber}</span>
@@ -148,6 +210,144 @@ export default function Orders() {
             </div>
           )}
         </div>
+
+        {/* Order Detail Dialog */}
+        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
+            {selectedOrder && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-base md:text-xl">{selectedOrder.orderNumber}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 md:space-y-5">
+                  {/* Read-only info */}
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
+                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.date}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Dealer</span>
+                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.distributorName}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Sales Person</span>
+                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.salesperson}</p>
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <span className="text-[10px] text-muted-foreground md:text-xs">Total</span>
+                      <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total)}</p>
+                    </div>
+                  </div>
+
+                  {/* Line items */}
+                  <div>
+                    <h3 className="mb-2 text-xs font-semibold md:text-sm">Items</h3>
+                    <div className="rounded-lg border border-border overflow-hidden">
+                      <table className="w-full text-xs md:text-sm">
+                        <thead>
+                          <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
+                            <th className="px-3 py-2 font-medium md:px-4">Product</th>
+                            <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
+                            <th className="px-3 py-2 font-medium text-right md:px-4">Price</th>
+                            <th className="px-3 py-2 font-medium text-right md:px-4">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedOrder.lines.map((line, i) => (
+                            <tr key={i} className="border-b border-border/50">
+                              <td className="px-3 py-2.5 font-medium md:px-4">{line.productName}</td>
+                              <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{line.quantity}</td>
+                              <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(line.unitPrice)}</td>
+                              <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(line.lineTotal)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Editable statuses */}
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs md:text-sm">Payment Status</Label>
+                      <div className="flex gap-2">
+                        {paymentStatuses.map((s) => (
+                          <button
+                            key={s.value}
+                            onClick={() => setEditPayment(s.value)}
+                            className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:text-sm ${
+                              editPayment === s.value
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-foreground/20"
+                            }`}
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs md:text-sm">Delivery Status</Label>
+                      <div className="flex gap-2">
+                        {deliveryStatuses.map((s) => (
+                          <button
+                            key={s.value}
+                            onClick={() => setEditDelivery(s.value)}
+                            className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:text-sm ${
+                              editDelivery === s.value
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-foreground/20"
+                            }`}
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs md:text-sm">Dispatch Date</Label>
+                        <Input
+                          type="date"
+                          value={editDispatchDate}
+                          onChange={(e) => setEditDispatchDate(e.target.value)}
+                          className="h-11 rounded-lg md:h-12"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs md:text-sm">Vehicle</Label>
+                        <Input
+                          value={editVehicle}
+                          onChange={(e) => setEditVehicle(e.target.value)}
+                          placeholder="e.g. MH-01-AB-1234"
+                          className="h-11 rounded-lg md:h-12"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs md:text-sm">Driver</Label>
+                        <Input
+                          value={editDriver}
+                          onChange={(e) => setEditDriver(e.target.value)}
+                          placeholder="Driver name"
+                          className="h-11 rounded-lg md:h-12"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
+                  <Button onClick={saveOrder}>Save Changes</Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

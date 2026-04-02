@@ -14,7 +14,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function Salespersons() {
   const [items, setItems] = useState<Salesperson[]>(initialData);
@@ -22,13 +31,15 @@ export default function Salespersons() {
   const [editItem, setEditItem] = useState<Salesperson | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = items.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.region.toLowerCase().includes(search.toLowerCase())
   );
+
+  const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
   const openNew = () => {
     setEditItem({ id: `s${Date.now()}`, name: "", phone: "", email: "", region: "", totalOrders: 0, totalValue: 0 });
@@ -45,19 +56,20 @@ export default function Salespersons() {
     if (!editItem?.name) return;
     if (isNew) {
       setItems((prev) => [...prev, editItem]);
-      toast({ title: "Salesperson added", description: `${editItem.name} has been added.` });
+      toast.success("Team member added", { description: `${editItem.name} has been added.` });
     } else {
       setItems((prev) => prev.map((s) => (s.id === editItem.id ? editItem : s)));
-      toast({ title: "Salesperson updated", description: `${editItem.name} has been updated.` });
+      toast.success("Team member updated", { description: `${editItem.name} has been updated.` });
     }
     setEditItem(null);
   };
 
-  const remove = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const s = items.find((i) => i.id === id);
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    toast({ title: "Salesperson removed", description: `${s?.name} has been removed.` });
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    const s = items.find((i) => i.id === deleteId);
+    setItems((prev) => prev.filter((i) => i.id !== deleteId));
+    toast.success("Team member removed", { description: `${s?.name} has been removed.` });
+    setDeleteId(null);
   };
 
   const profilePerson = items.find((s) => s.id === profileId);
@@ -116,7 +128,7 @@ export default function Salespersons() {
                   <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9" onClick={(e) => openEdit(s, e)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive md:h-9 md:w-9" onClick={(e) => remove(s.id, e)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive md:h-9 md:w-9" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -175,6 +187,22 @@ export default function Salespersons() {
           </DialogContent>
         </Dialog>
 
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove <span className="font-semibold text-foreground">{deletePerson?.name}</span>? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <Button variant="destructive" onClick={confirmDelete}>Remove</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Profile Dialog */}
         <Dialog open={!!profileId} onOpenChange={() => setProfileId(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
@@ -206,7 +234,6 @@ export default function Salespersons() {
                     <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {profileOrders.length > 0 ? (
                       <div className="rounded-lg border border-border overflow-hidden">
-                        {/* Desktop */}
                         <table className="hidden w-full text-sm md:table">
                           <thead>
                             <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -227,7 +254,6 @@ export default function Salespersons() {
                             ))}
                           </tbody>
                         </table>
-                        {/* Mobile */}
                         <div className="md:hidden">
                           {profileOrders.map((o) => (
                             <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
