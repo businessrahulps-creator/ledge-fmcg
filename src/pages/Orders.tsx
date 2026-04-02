@@ -68,6 +68,7 @@ export default function Orders() {
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
+    setEditPaymentMode(order.paymentMode);
     setEditPayment(order.paymentStatus);
     setEditDelivery(order.deliveryStatus);
     setEditDispatchDate(order.dispatchDate || "");
