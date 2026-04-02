@@ -1,25 +1,11 @@
 
+# V1 Restructuring — Complete
 
-# Mobile "More" Tab — Bottom Drawer
-
-## What
-Replace the 5th mobile tab (Dealers) with a **"More"** button that opens a swipe-up bottom drawer listing all secondary pages. Desktop sidebar stays untouched.
-
-## Bottom bar becomes
-`Home · Orders · Godown · Reports · More`
-
-## Drawer contents
-- Dealers, Products, Salespersons, Settings (each with icon)
-- Divider
-- Log out
-
-## File: `src/components/layout/AppLayout.tsx`
-- Trim `mobileNav` to 4 items (drop Dealers)
-- Add `useState` for drawer open/close
-- Render 5th tab as "More" with `MoreHorizontal` icon — highlights when current route is any secondary page
-- Import `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` from existing Vaul component
-- Drawer body: list of `Link` items with icons, `onClick` closes drawer
-- Log out link at bottom after `Separator`
-
-No new dependencies. No other files change.
-
+## What Changed
+- **Stock page** (`/stock`): Merged Products + Warehouses into one tabbed page with full CRUD + Add Stock
+- **Dealers** (`/distributors`): Renamed from Distributors, added Add/Edit/Delete CRUD
+- **Sales Team** (`/salespersons`): Renamed from Salespersons
+- **Navigation**: Flattened sidebar (no sub-menus), updated mobile nav (Stock replaces Godown)
+- **Labels**: All "Distributor" → "Dealer", "Salesperson" → "Sales Person/Team", "Godown" → "Warehouse" across Dashboard, Orders, NewOrder, Reports
+- **Deleted**: GodownOverview, GodownInventory, GodownAlerts, Products, TransferStockModal, StockDetailPanel
+- **Old routes** (`/products`, `/godown/*`) redirect to `/stock`
