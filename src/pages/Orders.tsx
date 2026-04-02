@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { orders as initialOrders, formatCurrency, type Order } from "@/data/mock-data";
+import { formatCurrency, type Order } from "@/data/mock-data";
+import { useData } from "@/context/DataContext";
 import {
   Select,
   SelectContent,
@@ -52,13 +53,12 @@ const deliveryStatuses = [
 ];
 
 export default function Orders() {
-  const [ordersData, setOrdersData] = useState<Order[]>(initialOrders);
+  const { orders, updateOrder } = useData();
   const [search, setSearch] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Editable fields for dialog
   const [editPaymentMode, setEditPaymentMode] = useState("");
   const [editPayment, setEditPayment] = useState("");
   const [editDelivery, setEditDelivery] = useState("");
@@ -78,26 +78,19 @@ export default function Orders() {
 
   const saveOrder = () => {
     if (!selectedOrder) return;
-    setOrdersData((prev) =>
-      prev.map((o) =>
-        o.id === selectedOrder.id
-           ? {
-               ...o,
-               paymentMode: editPaymentMode as Order["paymentMode"],
-               paymentStatus: editPayment as Order["paymentStatus"],
-               deliveryStatus: editDelivery as Order["deliveryStatus"],
-               dispatchDate: editDispatchDate || null,
-               vehicle: editVehicle,
-               driverName: editDriver,
-             }
-          : o
-      )
-    );
+    updateOrder(selectedOrder.id, {
+      paymentMode: editPaymentMode as Order["paymentMode"],
+      paymentStatus: editPayment as Order["paymentStatus"],
+      deliveryStatus: editDelivery as Order["deliveryStatus"],
+      dispatchDate: editDispatchDate || null,
+      vehicle: editVehicle,
+      driverName: editDriver,
+    });
     toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
     setSelectedOrder(null);
   };
 
-  const filtered = ordersData.filter((o) => {
+  const filtered = orders.filter((o) => {
     const matchesSearch =
       o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
       o.distributorName.toLowerCase().includes(search.toLowerCase());
@@ -161,7 +154,6 @@ export default function Orders() {
 
         {/* Table */}
         <div className="glass-card overflow-hidden">
-          {/* Desktop table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -195,7 +187,6 @@ export default function Orders() {
             </table>
           </div>
 
-          {/* Mobile card view */}
           <div className="space-y-0 md:hidden">
             {filtered.map((order) => (
               <div
@@ -238,7 +229,6 @@ export default function Orders() {
                   <DialogTitle className="text-base md:text-lg">{selectedOrder.orderNumber}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-5">
-                  {/* Read-only info */}
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
                       <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
@@ -258,7 +248,6 @@ export default function Orders() {
                     </div>
                   </div>
 
-                  {/* Line items */}
                   <div>
                     <h3 className="mb-2 text-xs font-semibold md:text-sm">Items</h3>
                     <div className="rounded-lg border border-border overflow-hidden">
@@ -287,7 +276,6 @@ export default function Orders() {
 
                   <Separator />
 
-                  {/* Editable statuses */}
                   <div className="space-y-3 md:space-y-4">
                     <div className="space-y-1.5">
                       <Label className="text-xs md:text-sm">Payment Mode</Label>

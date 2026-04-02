@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { salespersons as initialData, orders, formatCurrency, formatNumber, type Salesperson } from "@/data/mock-data";
+import { formatCurrency, formatNumber, type Salesperson } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useData } from "@/context/DataContext";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,7 @@ import {
 import { toast } from "sonner";
 
 export default function Salespersons() {
-  const [items, setItems] = useState<Salesperson[]>(initialData);
+  const { salespersons: items, orders, addSalesperson, updateSalesperson, deleteSalesperson } = useData();
   const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState<Salesperson | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -53,12 +54,27 @@ export default function Salespersons() {
   };
 
   const save = () => {
-    if (!editItem?.name) return;
+    if (!editItem?.name.trim()) {
+      toast.error("Name required", { description: "Please enter a name." });
+      return;
+    }
+    if (!editItem?.phone.trim()) {
+      toast.error("Phone required", { description: "Please enter a phone number." });
+      return;
+    }
+    if (!editItem?.region.trim()) {
+      toast.error("Region required", { description: "Please enter a region." });
+      return;
+    }
+    if (editItem.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editItem.email)) {
+      toast.error("Invalid email", { description: "Please enter a valid email address." });
+      return;
+    }
     if (isNew) {
-      setItems((prev) => [...prev, editItem]);
+      addSalesperson(editItem);
       toast.success("Team member added", { description: `${editItem.name} has been added.` });
     } else {
-      setItems((prev) => prev.map((s) => (s.id === editItem.id ? editItem : s)));
+      updateSalesperson(editItem);
       toast.success("Team member updated", { description: `${editItem.name} has been updated.` });
     }
     setEditItem(null);
@@ -67,7 +83,7 @@ export default function Salespersons() {
   const confirmDelete = () => {
     if (!deleteId) return;
     const s = items.find((i) => i.id === deleteId);
-    setItems((prev) => prev.filter((i) => i.id !== deleteId));
+    deleteSalesperson(deleteId);
     toast.success("Team member removed", { description: `${s?.name} has been removed.` });
     setDeleteId(null);
   };
@@ -161,16 +177,16 @@ export default function Salespersons() {
             {editItem && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Full Name</Label>
+                  <Label className="text-xs md:text-sm">Full Name *</Label>
                   <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Rajesh Kumar" className="h-11 rounded-lg md:h-12" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Phone</Label>
+                    <Label className="text-xs md:text-sm">Phone *</Label>
                     <Input value={editItem.phone} onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} placeholder="+91 98100 55555" className="h-11 rounded-lg md:h-12" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Region</Label>
+                    <Label className="text-xs md:text-sm">Region *</Label>
                     <Input value={editItem.region} onChange={(e) => setEditItem({ ...editItem, region: e.target.value })} placeholder="North" className="h-11 rounded-lg md:h-12" />
                   </div>
                 </div>

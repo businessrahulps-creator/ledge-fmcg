@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { orders, distributors, products, formatCurrency, formatNumber } from "@/data/mock-data";
+import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Link } from "react-router-dom";
+import { useData } from "@/context/DataContext";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -15,6 +17,7 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
+  const { orders, distributors, products } = useData();
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
 
@@ -29,10 +32,10 @@ export default function Dashboard() {
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue), change: "+12%", up: true },
-    { label: "Orders", value: totalOrders.toString(), change: "+8%", up: true },
-    { label: "Pending", value: pendingOrders.toString(), change: "-3%", up: false },
-    { label: "Dispatched", value: dispatchedOrders.toString(), change: "+5%", up: true },
+    { label: "Revenue", value: formatCurrency(totalRevenue) },
+    { label: "Orders", value: totalOrders.toString() },
+    { label: "Pending", value: pendingOrders.toString() },
+    { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
@@ -42,7 +45,6 @@ export default function Dashboard() {
   const maxProdVal = topProducts[0]?.totalSold || 1;
 
   const recentOrders = filteredOrders.slice(0, 6);
-
 
   return (
     <AppLayout>
@@ -60,6 +62,7 @@ export default function Dashboard() {
               <button
                 key={i}
                 onClick={() => setSelectedDay(i)}
+                aria-label={DAY_LABELS[i]}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all ${
                   i === selectedDay
                     ? "bg-foreground text-background shadow-md"
@@ -84,9 +87,6 @@ export default function Dashboard() {
             >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
-                <span className={`text-[11px] font-semibold ${kpi.up ? "text-emerald-600" : "text-red-500"}`}>
-                  {kpi.change}
-                </span>
               </div>
               <p className="text-xl font-semibold tracking-tight">{kpi.value}</p>
             </motion.div>
