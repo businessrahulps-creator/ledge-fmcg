@@ -7,11 +7,6 @@ const fadeUp = (delay: number) => ({
   transition: { duration: 0.5, delay, ease: "easeOut" as const },
 });
 
-const trustChips = [
-  "Any Android or iPhone",
-  "No app store needed",
-  "Setup in 5 minutes",
-];
 
 /* ── Inline Dashboard Mockup ── */
 function DashboardMockup() {
