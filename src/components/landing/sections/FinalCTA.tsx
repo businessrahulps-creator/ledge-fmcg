@@ -21,7 +21,7 @@ export function FinalCTA() {
             to="/signup"
             className="bg-ink text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-ink-light hover:scale-[1.02] transition-all duration-200 inline-flex items-center"
           >
-            Start Free — Takes 2 Minutes
+            Start Free. Takes 2 Minutes
           </Link>
           <a
             href="mailto:hello@ordra.in"
