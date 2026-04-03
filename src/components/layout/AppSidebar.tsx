@@ -59,11 +59,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-card">
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
-            <span className="text-sm font-bold text-background">O</span>
-          </div>
-          {!collapsed && (
-            <span className="text-lg font-bold tracking-tight">Ordra</span>
+          {collapsed ? (
+            <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">L</span>
+          ) : (
+            <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
           )}
         </Link>
       </SidebarHeader>

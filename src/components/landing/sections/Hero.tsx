@@ -56,8 +56,7 @@ function DashboardMockup() {
         {/* Sidebar */}
         <div className="hidden md:flex flex-col w-36 border-r border-fog bg-[#FAFAFA] p-3 gap-1.5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-midnight flex items-center justify-center text-white text-[9px] font-bold">O</div>
-            <span className="text-xs font-semibold text-midnight">Ordra</span>
+            <span className="text-xs font-extrabold tracking-[-0.04em] text-midnight">Ledge</span>
           </div>
           {["Dashboard", "Orders", "Dealers", "Stock", "Reports"].map((item, i) => (
             <motion.div

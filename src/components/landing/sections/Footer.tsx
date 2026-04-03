@@ -53,9 +53,9 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-fog flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-bold text-lg text-midnight">Ordra</span>
+            <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</span>
             <span className="font-body text-sm text-lp-zinc">
-              © 2026 Ordra. All rights reserved.
+              © 2026 Ledge. All rights reserved.
             </span>
           </div>
 

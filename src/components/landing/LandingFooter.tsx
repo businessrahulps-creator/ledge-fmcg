@@ -58,7 +58,7 @@ export function LandingFooter() {
         </div>
 
         <div className="border-t border-[#1E1E2C] pt-8 text-sm text-[#55556A] text-center">
-          © {new Date().getFullYear()} Ordra. All rights reserved.
+          © {new Date().getFullYear()} Ledge. All rights reserved.
         </div>
       </div>
     </footer>
