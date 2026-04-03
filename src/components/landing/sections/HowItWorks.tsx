@@ -116,7 +116,7 @@ const steps = [
     badge: "Step 1",
     title: "Your salesperson places the order.",
     description:
-      "They open Ordra on their phone — it works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute. Even if they're in a village with no signal, it saves locally and syncs the moment connectivity returns.",
+      "They open Ordra on their phone. It works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute. Even if they're in a village with no signal, it saves locally and syncs the moment connectivity returns.",
     mockup: OrderMockup,
     reversed: false,
   },
