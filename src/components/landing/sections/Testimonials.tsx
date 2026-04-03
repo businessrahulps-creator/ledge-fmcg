@@ -15,7 +15,7 @@ const testimonials = [
   },
   {
     quote:
-      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune godown — 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
+      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune godown, 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
     name: "Karthik Sundaram",
     role: "Warehouse Manager, TamilNadu Retail Supply · Coimbatore",
   },
