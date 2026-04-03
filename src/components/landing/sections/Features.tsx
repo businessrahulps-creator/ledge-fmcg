@@ -22,9 +22,9 @@ const features = [
   },
   {
     icon: Package,
-    title: "Stock by godown, not guesswork",
+    title: "Stock across warehouses, at a glance",
     description:
-      "Real inventory across multiple warehouses. Health badges: Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
+      "Real inventory across all your warehouses. Color-coded health indicators tell you what's running low before it costs you an order. No more calling the warehouse guy to ask 'kitna maal bacha hai.'",
   },
   {
     icon: IndianRupee,
