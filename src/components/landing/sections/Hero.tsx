@@ -25,7 +25,7 @@ function DashboardMockup() {
   const orders = [
     { dealer: "Sharma Traders, Pune", amount: "₹12,400", status: "Dispatched", statusColor: "bg-amber-100 text-amber-700" },
     { dealer: "Gupta & Sons, Nagpur", amount: "₹8,750", status: "Delivered", statusColor: "bg-emerald-100 text-emerald-700" },
-    { dealer: "Patel Agencies, Surat", amount: "₹21,300", status: "Placed", statusColor: "bg-blue-100 text-blue-700" },
+    { dealer: "Patel Agencies, Surat", amount: "₹21,300", status: "Pending", statusColor: "bg-blue-100 text-blue-700" },
   ];
 
   const barHeights = [40, 65, 50, 80, 70, 55, 90];
