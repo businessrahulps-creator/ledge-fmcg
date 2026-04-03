@@ -1,37 +1,29 @@
 
 
-# Build How It Works Section
+# Build Features Section
 
-Replace `src/components/landing/sections/HowItWorks.tsx` with a three-row alternating layout.
+Replace `src/components/landing/sections/Features.tsx` with a 3×2 feature card grid on a dark background.
 
-## File: `src/components/landing/sections/HowItWorks.tsx`
+## File: `src/components/landing/sections/Features.tsx`
 
-**Section wrapper:** `bg-white py-16 md:py-32`
+**Section wrapper:** `bg-midnight py-16 md:py-32`
 
-**Headline:** Centered, `font-heading font-bold text-[28px] md:text-[44px] text-midnight mb-16 tracking-[-0.03em]` — "Three steps. Sixty seconds. Total clarity."
+**Headline:** `font-heading font-bold text-[28px] md:text-[44px] text-white text-center mb-4 tracking-[-0.03em]` — "Everything you need. Nothing you don't."
 
-**Data:** Array of 3 step objects, each with: badge label, title, description, placeholder text, and a boolean `reversed` flag (rows 1 & 3 = text-left/image-right, row 2 = image-left/text-right).
+**Subheadline:** `font-body text-lg text-silver text-center mb-16` — "Built from the ground up for Indian FMCG distribution."
 
-**Each row** (spaced with `space-y-24`):
-- `grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`
-- On reversed rows, use `lg:order-1` / `lg:order-2` to swap column positions
-- Wrapped in `AnimateIn` with staggered delay per row
+**Grid:** `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto`
 
-**Text column:**
-- Step badge: `bg-violet-wash text-violet text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4`
-- Title: `font-heading font-bold text-[24px] md:text-[28px] text-midnight`
-- Description: `font-body text-[17px] text-graphite leading-[1.7] mt-4`
+**Each card:**
+- `bg-onyx border border-slate-border rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3F3F46]`
+- Wrapped in `AnimateIn` with staggered delay (i * 0.08)
+- Icon: Lucide, 24px, `text-violet mb-5`
+- Title: `font-heading font-bold text-[20px] text-white mb-3`
+- Description: `font-body text-base text-silver leading-[1.65]`
 
-**Image column:**
-- `bg-snow rounded-2xl aspect-video border border-fog flex items-center justify-center`
-- Placeholder text: `font-body text-sm text-silver`
+**6 cards:** LayoutGrid, ClipboardCheck, Users, Package, IndianRupee, CloudOff — with provided copy.
 
-**Imports:** `AnimateIn` from `../AnimateIn`
-
-**Content:**
-1. "Your salesperson places the order." / Order Creation Screenshot
-2. "You see everything, instantly." / Dashboard KPI Screenshot (reversed)
-3. "You spot what matters before it becomes a problem." / Stock Health Screenshot
+**Imports:** `AnimateIn` from `../AnimateIn`, 6 Lucide icons.
 
 No other files changed.
 
