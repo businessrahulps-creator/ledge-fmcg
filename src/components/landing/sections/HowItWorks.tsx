@@ -116,7 +116,7 @@ const steps = [
     badge: "Step 1",
     title: "Your salesperson places the order.",
     description:
-      "They open Ordra on their phone — it works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute. Even if they're in a village with no signal, it saves locally and syncs the moment connectivity returns.",
+      "They open Ordra on their phone. It works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute. Even if they're in a village with no signal, it saves locally and syncs the moment connectivity returns.",
     mockup: OrderMockup,
     reversed: false,
   },
@@ -124,7 +124,7 @@ const steps = [
     badge: "Step 2",
     title: "You see everything, instantly.",
     description:
-      "The order appears on your dashboard. Revenue updates. Pending count changes. That dealer's order history grows. No phone call. No WhatsApp message. No delay. You see what your team sold today the same way you check the weather — just open the app.",
+      "The order appears on your dashboard. Revenue updates. Pending count changes. That dealer's order history grows. No phone call. No WhatsApp message. No delay. You see what your team sold today the same way you check the weather. Just open the app.",
     mockup: DashboardMiniMockup,
     reversed: true,
   },

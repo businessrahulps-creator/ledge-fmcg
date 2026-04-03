@@ -6,17 +6,17 @@ const features = [
     icon: LayoutGrid,
     title: "Your business, at a glance",
     description:
-      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns — maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
+      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns. Maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
   },
   {
     icon: ClipboardCheck,
     title: "Orders that track themselves",
     description:
-      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing — done in under a minute. Every order moves through Placed → Dispatched → Delivered with clear status badges. You see it happen live.",
+      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Placed → Dispatched → Delivered with clear status badges. You see it happen live.",
   },
   {
     icon: Users,
-    title: "Every dealer, every salesperson — one tap",
+    title: "Every dealer, every salesperson, one tap",
     description:
       "Tap a dealer and see their region, last 20 orders, outstanding payments, and lifetime value. Tap a salesperson and see their territory, today's orders, and whether they've actually been active this week. No more keeping this in your head.",
   },
@@ -24,19 +24,19 @@ const features = [
     icon: Package,
     title: "Stock by godown, not guesswork",
     description:
-      "Real inventory across multiple warehouses. Health badges — Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
+      "Real inventory across multiple warehouses. Health badges: Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
   },
   {
     icon: IndianRupee,
     title: "Payments the way India pays",
     description:
-      "Cash, UPI, cheque, credit — tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
+      "Cash, UPI, cheque, credit. Tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
   },
   {
     icon: CloudOff,
     title: "No signal? No problem.",
     description:
-      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns — auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
+      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns, auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
   },
 ];
 

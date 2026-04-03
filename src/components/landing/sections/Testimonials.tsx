@@ -3,7 +3,7 @@ import { AnimateIn } from "../AnimateIn";
 const testimonials = [
   {
     quote:
-      "I have 6 salespeople covering Ernakulam, Thrissur, and Palakkad. Before Ordra, I would call each of them around 7pm — 'kitne order aaye aaj?' — and write it down in a diary. Some would pick up, some wouldn't. I'd get the real numbers 2 days late. Now I open the dashboard at 5pm and it's all there. Every order, every dealer, every rupee. My wife says I'm less stressed. She's right.",
+      "I have 6 salespeople covering Ernakulam, Thrissur, and Palakkad. Before Ordra, I would call each of them around 7pm, 'kitne order aaye aaj?', and write it down in a diary. Some would pick up, some wouldn't. I'd get the real numbers 2 days late. Now I open the dashboard at 5pm and it's all there. Every order, every dealer, every rupee. My wife says I'm less stressed. She's right.",
     name: "Rajesh Menon",
     role: "Founder, SouthSpice Distributors · Kochi",
   },
@@ -15,13 +15,13 @@ const testimonials = [
   },
   {
     quote:
-      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune godown — 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
+      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune godown, 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
     name: "Karthik Sundaram",
     role: "Warehouse Manager, TamilNadu Retail Supply · Coimbatore",
   },
   {
     quote:
-      "Main Indore se Ujjain, Dewas, Ratlam cover karta hoon. Signal toh milta nahi half the time. Pehle WhatsApp pe order bhejta tha — net nahi hai toh message pending mein. Ab Ordra pe order daalta hoon, offline save ho jaata hai. Jaise hi signal aata hai, auto send. Mera koi order miss nahi hua 3 months mein.",
+      "Main Indore se Ujjain, Dewas, Ratlam cover karta hoon. Signal toh milta nahi half the time. Pehle WhatsApp pe order bhejta tha, net nahi hai toh message pending mein. Ab Ordra pe order daalta hoon, offline save ho jaata hai. Jaise hi signal aata hai, auto send. Mera koi order miss nahi hua 3 months mein.",
     name: "Deepak Yadav",
     role: "Field Sales · MadhyaBharat Foods · Indore",
     translationNote:
