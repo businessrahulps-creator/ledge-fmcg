@@ -33,7 +33,7 @@ export function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center">
           <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-midnight">Ledge</span>
