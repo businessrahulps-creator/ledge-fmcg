@@ -92,7 +92,7 @@ function StockMockup() {
       <div className="space-y-1.5">
         <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-fog">
           <span>Product</span>
-          <span>Godown</span>
+          <span>Warehouse</span>
           <span className="text-right">Qty</span>
           <span className="text-right">Status</span>
         </div>
