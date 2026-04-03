@@ -21,7 +21,7 @@ const testimonials = [
   },
   {
     quote:
-      "Main Indore se Ujjain, Dewas, Ratlam cover karta hoon. Signal toh milta nahi half the time. Pehle WhatsApp pe order bhejta tha — net nahi hai toh message pending mein. Ab Ordra pe order daalta hoon, offline save ho jaata hai. Jaise hi signal aata hai, auto send. Mera koi order miss nahi hua 3 months mein.",
+      "Main Indore se Ujjain, Dewas, Ratlam cover karta hoon. Signal toh milta nahi half the time. Pehle WhatsApp pe order bhejta tha, net nahi hai toh message pending mein. Ab Ordra pe order daalta hoon, offline save ho jaata hai. Jaise hi signal aata hai, auto send. Mera koi order miss nahi hua 3 months mein.",
     name: "Deepak Yadav",
     role: "Field Sales · MadhyaBharat Foods · Indore",
     translationNote:

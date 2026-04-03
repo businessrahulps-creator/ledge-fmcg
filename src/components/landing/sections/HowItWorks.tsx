@@ -124,7 +124,7 @@ const steps = [
     badge: "Step 2",
     title: "You see everything, instantly.",
     description:
-      "The order appears on your dashboard. Revenue updates. Pending count changes. That dealer's order history grows. No phone call. No WhatsApp message. No delay. You see what your team sold today the same way you check the weather — just open the app.",
+      "The order appears on your dashboard. Revenue updates. Pending count changes. That dealer's order history grows. No phone call. No WhatsApp message. No delay. You see what your team sold today the same way you check the weather. Just open the app.",
     mockup: DashboardMiniMockup,
     reversed: true,
   },

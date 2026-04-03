@@ -36,7 +36,7 @@ const features = [
     icon: CloudOff,
     title: "No signal? No problem.",
     description:
-      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns — auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
+      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns, auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
   },
 ];
 
