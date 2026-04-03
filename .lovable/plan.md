@@ -1,15 +1,23 @@
 
 
-# Reduce Hero CTA Button Size
+# Fix Navbar Logo Alignment with Hero Content
 
-## Change
+## Problem
+The Navbar container uses `max-w-[1200px]` while the Hero section uses `max-w-7xl` (1280px). This 80px difference causes the "Ledge" logo to sit ~40px to the right of where the headline text starts.
 
-**File: `src/components/landing/sections/Hero.tsx`** (lines 164-177)
+## Fix
 
-Make both hero buttons match the navbar CTA sizing (`px-6 py-2.5 text-sm`) instead of the current oversized `px-8 py-3.5` with no explicit text size:
+**File: `src/components/landing/sections/Navbar.tsx`** (line 36)
 
-- Primary CTA: `px-8 py-3.5` → `px-6 py-2.5 text-sm`
-- Secondary CTA: `px-8 py-3.5` → `px-6 py-2.5 text-sm`
+Change the inner container's max-width from `max-w-[1200px]` to `max-w-7xl` so it matches the Hero section's container width. Both will then share the same left edge with `px-6` padding.
 
-This aligns the hero buttons with the navbar button styling for a cohesive, refined look. One file, two class changes.
+```
+// Before
+<div className="max-w-[1200px] mx-auto w-full px-6 ...">
+
+// After
+<div className="max-w-7xl mx-auto w-full px-6 ...">
+```
+
+One line change, one file.
 
