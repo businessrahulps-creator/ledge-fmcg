@@ -35,7 +35,7 @@ export function Testimonials() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            Our product speaks for itself.
+            Don't take our word for it.
           </h2>
         </AnimateIn>
 
@@ -44,7 +44,7 @@ export function Testimonials() {
             <div key={t.name}>
               <AnimateIn delay={i * 0.1}>
                 <div className="bg-white rounded-2xl p-8 border border-fog h-full">
-                  <span className="font-heading font-extrabold text-6xl text-violet opacity-20 leading-none block mb-2">
+                  <span className="font-heading font-extrabold text-6xl text-ink opacity-20 leading-none block mb-2">
                     "
                   </span>
                   <p className="font-body text-base text-graphite leading-[1.7]">

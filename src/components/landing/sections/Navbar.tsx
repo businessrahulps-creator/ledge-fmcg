@@ -29,17 +29,17 @@ export function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
         scrolled
-          ? "bg-midnight/95 backdrop-blur-md border-b border-slate-border"
+          ? "bg-white/95 backdrop-blur-md border-b border-fog"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
-            <span className="text-white text-xs font-heading font-bold leading-none">O</span>
+          <div className="w-6 h-6 rounded-full border-2 border-midnight flex items-center justify-center">
+            <span className="text-midnight text-xs font-heading font-bold leading-none">O</span>
           </div>
-          <span className="font-heading font-bold text-xl text-white">Ordra</span>
+          <span className="font-heading font-bold text-xl text-midnight">Ordra</span>
         </a>
 
         {/* Center links — desktop */}
@@ -48,7 +48,7 @@ export function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="font-body font-medium text-[15px] text-silver hover:text-white transition-colors duration-200"
+              className="font-body font-medium text-[15px] text-graphite hover:text-midnight transition-colors duration-200"
             >
               {l.label}
             </a>
@@ -59,7 +59,7 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             to="/signup"
-            className="inline-flex items-center bg-violet text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-violet-hover transition-colors duration-200"
+            className="inline-flex items-center bg-ink text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-ink-light transition-colors duration-200"
           >
             Start Free Trial
           </Link>
@@ -68,13 +68,13 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button className="md:hidden text-white p-2 -mr-2" aria-label="Open menu">
+            <button className="md:hidden text-midnight p-2 -mr-2" aria-label="Open menu">
               <Menu size={24} />
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="bg-midnight border-slate-border w-72 flex flex-col">
+          <SheetContent side="right" className="bg-white border-fog w-72 flex flex-col">
             <SheetHeader>
-              <SheetTitle className="text-white font-heading">Menu</SheetTitle>
+              <SheetTitle className="text-midnight font-heading">Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-6 mt-8 flex-1">
               {links.map((l) => (
@@ -82,7 +82,7 @@ export function Navbar() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="font-body font-medium text-lg text-silver hover:text-white transition-colors"
+                  className="font-body font-medium text-lg text-graphite hover:text-midnight transition-colors"
                 >
                   {l.label}
                 </a>
@@ -91,7 +91,7 @@ export function Navbar() {
             <Link
               to="/signup"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center bg-violet text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-violet-hover transition-colors mb-4"
+              className="inline-flex items-center justify-center bg-ink text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-ink-light transition-colors mb-4"
             >
               Start Free Trial
             </Link>

@@ -9,50 +9,50 @@ const fadeUp = (delay: number) => ({
 
 const trustChips = [
   "✦ Works offline",
-  "✦ Installs in 30 seconds",
-  "✦ Built for Indian FMCG",
+  "✦ Any Android or iPhone",
+  "✦ Setup in 5 minutes",
 ];
 
 export function Hero() {
   return (
-    <section className="min-h-screen bg-midnight pt-36 py-20 md:py-32 px-6">
+    <section className="min-h-screen bg-white pt-36 py-20 md:py-32 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left — Text */}
         <div>
           <motion.h1
-            className="font-heading font-extrabold text-[34px] md:text-[60px] text-white leading-[1.08] tracking-[-0.03em]"
+            className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
             {...fadeUp(0)}
           >
-            Your distribution,
+            You shouldn't have to call 6 people
           </motion.h1>
           <motion.h1
-            className="font-heading font-extrabold text-[34px] md:text-[60px] text-white leading-[1.08] tracking-[-0.03em]"
+            className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
             {...fadeUp(0.1)}
           >
-            finally in your hands.
+            to know how today went.
           </motion.h1>
 
           <motion.p
-            className="font-body text-[17px] md:text-[20px] text-silver leading-[1.6] max-w-xl mt-6"
+            className="font-body text-[17px] md:text-[20px] text-graphite leading-[1.6] max-w-xl mt-6"
             {...fadeUp(0.2)}
           >
-            One app replaces your 14 WhatsApp groups, 3 Excel sheets, and
-            nightly phone calls. Orders, stock, dealers, payments — live on
-            your phone, even without internet.
+            Your salespeople place orders on their phone. You see every order,
+            every dealer, every rupee — live on your dashboard. Works offline.
+            Replaces your WhatsApp groups, Excel sheets, and nightly phone calls.
           </motion.p>
 
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-white bg-violet hover:bg-violet-hover px-8 py-3.5 rounded-full hover:scale-[1.02] transition-all duration-150"
+              className="font-body font-semibold text-white bg-ink hover:bg-ink-light px-8 py-3.5 rounded-full hover:scale-[1.02] transition-all duration-150"
             >
-              Start Free — No Card Needed
+              Try Ordra Free
             </Link>
             <a
               href="#features"
-              className="font-body font-medium text-white border border-white/25 hover:border-white/50 px-8 py-3.5 rounded-full transition-all duration-150"
+              className="font-body font-medium text-midnight border border-fog hover:border-midnight px-8 py-3.5 rounded-full transition-all duration-150"
             >
-              See It In Action →
+              Watch a 2-min demo →
             </a>
           </motion.div>
 
@@ -60,7 +60,7 @@ export function Hero() {
             {trustChips.map((chip) => (
               <span
                 key={chip}
-                className="font-body text-sm text-silver bg-onyx px-4 py-1.5 rounded-full"
+                className="font-body text-sm text-graphite bg-[#F5F5F5] px-4 py-1.5 rounded-full"
               >
                 {chip}
               </span>
@@ -76,13 +76,13 @@ export function Hero() {
           className="w-full max-w-md mx-auto"
         >
           <div
-            className="w-full aspect-[9/16] md:aspect-[3/4] bg-onyx rounded-3xl border border-[rgba(124,58,237,0.15)] flex items-center justify-center"
+            className="w-full aspect-[9/16] md:aspect-[3/4] bg-[#FAFAFA] rounded-3xl border border-fog flex items-center justify-center"
             style={{
-              boxShadow: "0 0 80px rgba(124, 58, 237, 0.12)",
+              boxShadow: "0 8px 40px rgba(0, 0, 0, 0.06)",
               transform: "perspective(1200px) rotateY(-4deg)",
             }}
           >
-            <span className="font-body text-silver text-sm">
+            <span className="font-body text-graphite text-sm">
               Dashboard Screenshot
             </span>
           </div>
