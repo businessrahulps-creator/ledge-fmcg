@@ -142,6 +142,7 @@ export default {
         "count-up": "count-up 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
         "fade-in": "fade-in 0.2s ease-out",
+        marquee: "marquee 30s linear infinite",
       },
     },
   },
