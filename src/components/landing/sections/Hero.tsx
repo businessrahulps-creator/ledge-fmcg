@@ -85,7 +85,7 @@ function DashboardMockup() {
                 whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", borderColor: "#D4D4D8" }}
               >
                 <div className="text-[9px] text-graphite mb-1">{kpi.label}</div>
-                <div className={`text-sm font-semibold ${kpi.color}`}>{kpi.value}</div>
+                <div className={`text-xs font-semibold ${kpi.color}`}>{kpi.value}</div>
               </motion.div>
             ))}
           </div>
