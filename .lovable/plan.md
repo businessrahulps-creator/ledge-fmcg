@@ -1,23 +1,34 @@
 
 
-# Center Hero Content Vertically
+# Set Custom PWA App Icon
 
-## Problem
-The hero section uses `pt-36 py-20 md:py-32` which pushes content toward the top. With `min-h-screen`, the content isn't vertically centered.
+## Overview
+Replace the existing PWA icons with the uploaded image (the colorful checkmark icon) so it appears as the app icon when users install Ledge from their browser.
 
-## Fix
+## Steps
 
-**File: `src/components/landing/sections/Hero.tsx`** (line 144)
+### 1. Copy uploaded image to public directory
+Copy the uploaded icon to the project and generate the three required PWA icon sizes:
+- `public/pwa-192.png` (192x192)
+- `public/pwa-512.png` (512x512)
+- `public/pwa-maskable-512.png` (512x512, same image — it already has padding suitable for maskable use)
 
-Replace the fixed padding approach with flexbox centering:
+### 2. Set as favicon
+Also update `public/favicon.ico` and add a PNG favicon reference in `index.html` so the browser tab icon matches.
 
-```
-// Before
-<section className="min-h-screen bg-white pt-36 py-20 md:py-32 px-6">
+### 3. Update InstallPrompt icon
+In `src/components/InstallPrompt.tsx`, replace the "L" text logo in the install prompt with the actual app icon image for a polished look.
 
-// After
-<section className="min-h-screen bg-white flex items-center pt-16 px-6">
-```
+## Technical Details
+- Use ImageMagick (`nix run nixpkgs#imagemagick`) to resize the uploaded PNG to 192x192 and 512x512
+- The uploaded image has a transparent background and rounded corners — it's already well-suited for PWA icons
+- No changes to `vite.config.ts` needed; icon filenames remain the same
 
-This uses `flex items-center` to truly vertically center the content within the full viewport height, with a small `pt-16` to account for the fixed navbar. One line change.
+## Files Modified
+- `public/pwa-192.png` — replaced
+- `public/pwa-512.png` — replaced
+- `public/pwa-maskable-512.png` — replaced
+- `public/favicon.ico` — replaced
+- `index.html` — add PNG favicon link
+- `src/components/InstallPrompt.tsx` — use icon image instead of "L" text
 
