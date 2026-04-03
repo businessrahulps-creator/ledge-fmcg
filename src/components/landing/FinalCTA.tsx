@@ -23,7 +23,7 @@ export function FinalCTA() {
               Start your free trial
             </Link>
             <a
-              href="mailto:hello@ordra.in"
+              href="mailto:hello@ledge.in"
               className="h-12 px-8 rounded-xl border border-[#1E1E2C] text-[#F2F2F5] font-medium flex items-center hover:border-[#2E2E3E] transition-all duration-150"
             >
               Contact us

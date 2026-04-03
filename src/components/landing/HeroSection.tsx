@@ -141,7 +141,7 @@ export function HeroSection() {
 
         <AnimateIn delay={0.2}>
           <p className="text-base md:text-xl text-[#8888A0] leading-[1.7] max-w-[480px] mx-auto mb-10">
-            Ordra helps FMCG companies capture sales orders, manage distributors,
+            Ledge helps FMCG companies capture sales orders, manage distributors,
             and track payments — all in one clean, fast platform.
           </p>
         </AnimateIn>
