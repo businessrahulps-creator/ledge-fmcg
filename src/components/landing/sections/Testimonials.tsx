@@ -15,17 +15,17 @@ const testimonials = [
   },
   {
     quote:
-      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune godown, 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
+      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune warehouse, 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
     name: "Karthik Sundaram",
     role: "Warehouse Manager, TamilNadu Retail Supply · Coimbatore",
   },
   {
     quote:
-      "Main Indore se Ujjain, Dewas, Ratlam cover karta hoon. Signal toh milta nahi half the time. Pehle WhatsApp pe order bhejta tha, net nahi hai toh message pending mein. Ab Ordra pe order daalta hoon, offline save ho jaata hai. Jaise hi signal aata hai, auto send. Mera koi order miss nahi hua 3 months mein.",
+      "Pehle har cheez ke liye call karna padta tha. Ab Ordra pe sab dikh jaata hai. Kaun sa dealer kitna order de raha hai, payment kya hai, sab ek jagah. Mujhe ab raat ko kisi ko call nahi karna padta.",
     name: "Deepak Yadav",
     role: "Field Sales · MadhyaBharat Foods · Indore",
     translationNote:
-      "(I cover Indore to Ujjain, Dewas, Ratlam. Half the time there's no signal. Now I enter orders on Ordra offline, they sync automatically. Haven't missed a single order in 3 months.)",
+      "(Earlier I had to call for everything. Now I see it all on Ordra. Which dealer is ordering how much, payment status, everything in one place. I don't have to call anyone at night anymore.)",
   },
 ];
 

@@ -14,7 +14,7 @@ const blocks = [
   {
     title: "Built here. For here.",
     content:
-      "₹ is the default currency. UPI and cheque are payment modes, not afterthoughts. Stock is tracked by godown, not 'warehouse.' Offline-first isn't a feature we added. It's the foundation, because we know what internet looks like on an Indore-to-Ujjain field route.",
+      "₹ is the default currency. UPI and cheque are payment modes, not afterthoughts. Stock is tracked warehouse by warehouse, the way your business actually runs. This isn't software translated from English. It was written here, for here.",
   },
   {
     title: "See everything. Chase nothing.",

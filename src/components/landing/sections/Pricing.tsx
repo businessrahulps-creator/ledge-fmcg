@@ -11,9 +11,8 @@ const plans = [
     features: [
       "Up to 3 users",
       "50 orders/month",
-      "1 godown",
+      "1 warehouse",
       "Basic dashboard",
-      "Offline mode",
     ],
     cta: "Start Free →",
     highlighted: false,
@@ -27,7 +26,7 @@ const plans = [
     features: [
       "Up to 15 users",
       "Unlimited orders",
-      "Multi-godown stock",
+      "Multi-warehouse stock",
       "Dealer & sales analytics",
       "Payment tracking (UPI, cheque, cash)",
       "Priority WhatsApp support",
@@ -150,7 +149,7 @@ export function Pricing() {
 
         <div className="text-center mt-10 space-y-2">
           <p className="font-body text-[15px] text-lp-zinc">
-            All plans include offline mode, PWA install, and automatic updates.
+            All plans include PWA install and automatic updates.
           </p>
           <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
             Need help choosing? Chat on WhatsApp →

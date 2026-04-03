@@ -8,8 +8,8 @@ const fadeUp = (delay: number) => ({
 });
 
 const trustChips = [
-  "Works offline",
   "Any Android or iPhone",
+  "No app store needed",
   "Setup in 5 minutes",
 ];
 
@@ -25,7 +25,7 @@ function DashboardMockup() {
   const orders = [
     { dealer: "Sharma Traders, Pune", amount: "₹12,400", status: "Dispatched", statusColor: "bg-amber-100 text-amber-700" },
     { dealer: "Gupta & Sons, Nagpur", amount: "₹8,750", status: "Delivered", statusColor: "bg-emerald-100 text-emerald-700" },
-    { dealer: "Patel Agencies, Surat", amount: "₹21,300", status: "Placed", statusColor: "bg-blue-100 text-blue-700" },
+    { dealer: "Patel Agencies, Surat", amount: "₹21,300", status: "Pending", statusColor: "bg-blue-100 text-blue-700" },
   ];
 
   const barHeights = [40, 65, 50, 80, 70, 55, 90];
@@ -64,7 +64,7 @@ function DashboardMockup() {
             <div className="w-6 h-6 rounded-full bg-midnight flex items-center justify-center text-white text-[9px] font-bold">O</div>
             <span className="text-xs font-semibold text-midnight">Ordra</span>
           </div>
-          {["Dashboard", "Orders", "Distributors", "Stock", "Payments"].map((item, i) => (
+          {["Dashboard", "Orders", "Dealers", "Stock", "Reports"].map((item, i) => (
             <motion.div
               key={item}
               className={`text-[11px] px-2 py-1.5 rounded-md cursor-default ${i === 0 ? "bg-white font-medium text-midnight shadow-sm" : "text-graphite"}`}
@@ -169,7 +169,7 @@ export function Hero() {
             {...fadeUp(0.2)}
           >
             Your salespeople place orders on their phone. You see every order,
-            every dealer, every rupee, live on your dashboard.. Works offline.
+            every dealer, every rupee, live on your dashboard.
             Replaces your WhatsApp groups, Excel sheets, and nightly phone calls.
           </motion.p>
 

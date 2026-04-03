@@ -80,10 +80,10 @@ function DashboardMiniMockup() {
 /* ── Step 3: Stock Health Mockup ── */
 function StockMockup() {
   const rows = [
-    { product: "Premium Masala 500g", godown: "Pune", qty: "340", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
-    { product: "Gold Atta 10kg", godown: "Surat", qty: "42", health: "Low", color: "bg-amber-100 text-amber-700" },
-    { product: "Royal Ghee 1L", godown: "Nagpur", qty: "8", health: "Critical", color: "bg-red-100 text-red-700" },
-    { product: "Classic Tea 250g", godown: "Indore", qty: "210", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
+    { product: "Premium Masala 500g", warehouse: "Pune", qty: "340", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
+    { product: "Gold Atta 10kg", warehouse: "Surat", qty: "42", health: "Low", color: "bg-amber-100 text-amber-700" },
+    { product: "Royal Ghee 1L", warehouse: "Nagpur", qty: "8", health: "Critical", color: "bg-red-100 text-red-700" },
+    { product: "Classic Tea 250g", warehouse: "Indore", qty: "210", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
   ];
 
   return (
@@ -92,14 +92,14 @@ function StockMockup() {
       <div className="space-y-1.5">
         <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-fog">
           <span>Product</span>
-          <span>Godown</span>
+          <span>Warehouse</span>
           <span className="text-right">Qty</span>
           <span className="text-right">Status</span>
         </div>
         {rows.map((r) => (
           <div key={r.product} className="grid grid-cols-4 items-center py-1">
             <span className="text-[10px] text-midnight truncate pr-1">{r.product}</span>
-            <span className="text-[10px] text-graphite">{r.godown}</span>
+            <span className="text-[10px] text-graphite">{r.warehouse}</span>
             <span className="text-[10px] text-midnight text-right">{r.qty}</span>
             <div className="text-right">
               <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${r.color}`}>{r.health}</span>
@@ -116,7 +116,7 @@ const steps = [
     badge: "Step 1",
     title: "Your salesperson places the order.",
     description:
-      "They open Ordra on their phone. It works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute. Even if they're in a village with no signal, it saves locally and syncs the moment connectivity returns.",
+      "They open Ordra on their phone. It works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute, even on a basic Android phone.",
     mockup: OrderMockup,
     reversed: false,
   },
@@ -132,7 +132,7 @@ const steps = [
     badge: "Step 3",
     title: "You spot what matters before it becomes a problem.",
     description:
-      "Your Surat godown is at 12% stock on your best-selling SKU. Your newest salesperson hasn't logged an order in 3 days. A dealer's payment has been partial for 2 weeks. Ordra surfaces these things. You act on data, not hunches.",
+      "Your Surat warehouse is at 12% stock on your best-selling SKU. Your newest salesperson hasn't logged an order in 3 days. A dealer's payment has been partial for 2 weeks. Ordra surfaces these things. You act on data, not hunches.",
     mockup: StockMockup,
     reversed: false,
   },

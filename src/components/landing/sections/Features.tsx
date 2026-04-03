@@ -6,13 +6,13 @@ const features = [
     icon: LayoutGrid,
     title: "Your business, at a glance",
     description:
-      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns. Maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
+      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, dispatches completed. Filter by day to spot patterns. Maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
   },
   {
     icon: ClipboardCheck,
     title: "Orders that track themselves",
     description:
-      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Placed → Dispatched → Delivered with clear status badges. You see it happen live.",
+      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Pending → Dispatched → Delivered with clear status badges. You see it happen live.",
   },
   {
     icon: Users,
@@ -22,9 +22,9 @@ const features = [
   },
   {
     icon: Package,
-    title: "Stock by godown, not guesswork",
+    title: "Stock across warehouses, at a glance",
     description:
-      "Real inventory across multiple warehouses. Health badges: Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
+      "Real inventory across all your warehouses. Color-coded health indicators tell you what's running low before it costs you an order. No more calling the warehouse guy to ask 'kitna maal bacha hai.'",
   },
   {
     icon: IndianRupee,
@@ -34,9 +34,9 @@ const features = [
   },
   {
     icon: CloudOff,
-    title: "No signal? No problem.",
+    title: "Runs on any phone. No app store needed.",
     description:
-      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns, auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
+      "Ordra runs as a full app on any phone. No Play Store, no heavy downloads. Your salesperson taps a link, adds it to their home screen, and they're ready. Fast, light, and built for phones your field team actually carries.",
   },
 ];
 
