@@ -99,6 +99,12 @@ export default {
         silver: "var(--silver)",
         fog: "var(--fog)",
         "slate-border": "var(--slate-border)",
+        ink: {
+          DEFAULT: "var(--ink)",
+          light: "var(--ink-light)",
+        },
+        "accent-indigo": "var(--accent)",
+        "accent-wash": "var(--accent-wash)",
       },
       borderRadius: {
         lg: "var(--radius)",
