@@ -34,9 +34,9 @@ const features = [
   },
   {
     icon: CloudOff,
-    title: "No signal? No problem.",
+    title: "Runs on any phone. No app store needed.",
     description:
-      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns, auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
+      "Ordra runs as a full app on any phone. No Play Store, no heavy downloads. Your salesperson taps a link, adds it to their home screen, and they're ready. Fast, light, and built for phones your field team actually carries.",
   },
 ];
 
