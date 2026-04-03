@@ -46,7 +46,7 @@ export function Problem() {
           {cards.map((card, i) => (
             <AnimateIn key={card.title} delay={i * 0.08}>
               <div className="bg-white rounded-2xl p-8 border border-fog">
-                <card.icon className="text-violet mb-4" size={24} />
+                <card.icon className="text-accent-indigo mb-4" size={24} />
                 <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
                   {card.title}
                 </h3>
