@@ -1,29 +1,29 @@
 
 
-# Build Features Section
+# Build Why Ordra Section
 
-Replace `src/components/landing/sections/Features.tsx` with a 3×2 feature card grid on a dark background.
+Replace `src/components/landing/sections/WhyOrdra.tsx` with four bordered content blocks.
 
-## File: `src/components/landing/sections/Features.tsx`
+## File: `src/components/landing/sections/WhyOrdra.tsx`
 
-**Section wrapper:** `bg-midnight py-16 md:py-32`
+**Section wrapper:** `bg-snow py-16 md:py-32`
 
-**Headline:** `font-heading font-bold text-[28px] md:text-[44px] text-white text-center mb-4 tracking-[-0.03em]` — "Everything you need. Nothing you don't."
+**Headline:** `font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]` — "This isn't another ERP you'll abandon in a month."
 
-**Subheadline:** `font-body text-lg text-silver text-center mb-16` — "Built from the ground up for Indian FMCG distribution."
+**Container:** `max-w-3xl mx-auto space-y-12`
 
-**Grid:** `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto`
+**Each block** (4 total, wrapped in `AnimateIn` with staggered delay `i * 0.1`):
+- `border-l-4 border-violet pl-8`
+- Subtitle: `font-heading font-bold text-[24px] text-midnight mb-4`
+- Paragraph: `font-body text-[17px] text-graphite leading-[1.7]`
 
-**Each card:**
-- `bg-onyx border border-slate-border rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3F3F46]`
-- Wrapped in `AnimateIn` with staggered delay (i * 0.08)
-- Icon: Lucide, 24px, `text-violet mb-5`
-- Title: `font-heading font-bold text-[20px] text-white mb-3`
-- Description: `font-body text-base text-silver leading-[1.65]`
+**4 blocks:**
+1. "Your team will actually open it." + provided copy
+2. "Installs in 30 seconds. No IT department." + provided copy
+3. "Built here. For here." + provided copy
+4. "See everything. Chase nothing." + provided copy
 
-**6 cards:** LayoutGrid, ClipboardCheck, Users, Package, IndianRupee, CloudOff — with provided copy.
-
-**Imports:** `AnimateIn` from `../AnimateIn`, 6 Lucide icons.
+**Imports:** `AnimateIn` from `../AnimateIn`
 
 No other files changed.
 
