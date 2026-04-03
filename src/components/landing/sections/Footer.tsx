@@ -27,12 +27,12 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-charcoal py-16 border-t border-slate-border">
+    <footer className="bg-white py-16 border-t border-fog">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="font-body font-semibold text-[14px] text-white uppercase tracking-wider mb-4">
+              <h4 className="font-body font-semibold text-[14px] text-midnight uppercase tracking-wider mb-4">
                 {col.title}
               </h4>
               <ul className="space-y-3">
@@ -40,7 +40,7 @@ export function Footer() {
                   <li key={link}>
                     <a
                       href="#"
-                      className="font-body text-[14px] text-silver hover:text-white transition-colors duration-200"
+                      className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
                     >
                       {link}
                     </a>
@@ -51,9 +51,9 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-border flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-8 border-t border-fog flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-bold text-lg text-white">Ordra</span>
+            <span className="font-heading font-bold text-lg text-midnight">Ordra</span>
             <span className="font-body text-sm text-lp-zinc">
               © 2026 AxisVale Systems Pvt. Ltd.
             </span>
@@ -64,7 +64,7 @@ export function Footer() {
               <a
                 key={Icon.displayName}
                 href={href}
-                className="text-lp-zinc hover:text-white transition-colors duration-200"
+                className="text-lp-zinc hover:text-midnight transition-colors duration-200"
               >
                 <Icon size={20} />
               </a>

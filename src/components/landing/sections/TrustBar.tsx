@@ -19,24 +19,33 @@ function StatBlock({ value, prefix, suffix, label, delay }: { value: number; pre
   );
 }
 
-const logos = Array.from({ length: 6 });
+const companies = [
+  "FreshVale Foods",
+  "SouthSpice",
+  "GreenLeaf FMCG",
+  "TamilNadu Retail",
+  "MadhyaBharat Foods",
+  "Prime Agencies",
+];
 
 export function TrustBar() {
   return (
     <section className="bg-[#FAFAFA] py-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
-        <div className="overflow-hidden opacity-60">
-          <div className="flex gap-8 animate-marquee w-max">
-            {[...logos, ...logos].map((_, i) => (
-              <div key={i} className="w-24 h-8 bg-fog rounded-lg shrink-0" />
+        <div className="overflow-hidden">
+          <div className="flex gap-12 animate-marquee w-max items-center">
+            {[...companies, ...companies].map((name, i) => (
+              <span key={i} className="text-lg font-semibold text-[#C4C4C4] whitespace-nowrap shrink-0">
+                {name}
+              </span>
             ))}
           </div>
         </div>
 
         {/* Stat Row */}
         <div className="grid grid-cols-3 max-w-3xl mx-auto text-center mt-12">
-          <StatBlock value={10} prefix="₹" suffix="Cr+" label="Monthly orders managed" delay={0} />
+          <StatBlock value={10} prefix="" suffix=" Cr+" label="Monthly orders managed" delay={0} />
           <StatBlock value={12} suffix="" label="States covered" delay={0.1} />
           <StatBlock value={50} suffix="+" label="FMCG brands onboarded" delay={0.2} />
         </div>

@@ -8,10 +8,98 @@ const fadeUp = (delay: number) => ({
 });
 
 const trustChips = [
-  "✦ Works offline",
-  "✦ Any Android or iPhone",
-  "✦ Setup in 5 minutes",
+  "Works offline",
+  "Any Android or iPhone",
+  "Setup in 5 minutes",
 ];
+
+/* ── Inline Dashboard Mockup ── */
+function DashboardMockup() {
+  const kpis = [
+    { label: "Today's Revenue", value: "₹1,84,200", color: "text-emerald-600" },
+    { label: "Orders Placed", value: "47", color: "text-midnight" },
+    { label: "Pending Dispatch", value: "12", color: "text-amber-600" },
+    { label: "Delivered", value: "35", color: "text-emerald-600" },
+  ];
+
+  const orders = [
+    { dealer: "Sharma Traders, Pune", amount: "₹12,400", status: "Dispatched", statusColor: "bg-amber-100 text-amber-700" },
+    { dealer: "Gupta & Sons, Nagpur", amount: "₹8,750", status: "Delivered", statusColor: "bg-emerald-100 text-emerald-700" },
+    { dealer: "Patel Agencies, Surat", amount: "₹21,300", status: "Placed", statusColor: "bg-blue-100 text-blue-700" },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-fog overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.06)" }}>
+      {/* Browser chrome */}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-fog bg-[#FAFAFA]">
+        <div className="flex gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E4E4E7]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E4E4E7]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E4E4E7]" />
+        </div>
+        <div className="flex-1 mx-8">
+          <div className="h-5 bg-[#F4F4F5] rounded-md flex items-center justify-center">
+            <span className="text-[10px] text-[#A1A1AA]">app.ordra.in/dashboard</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="hidden md:flex flex-col w-36 border-r border-fog bg-[#FAFAFA] p-3 gap-1.5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-full bg-midnight flex items-center justify-center text-white text-[9px] font-bold">O</div>
+            <span className="text-xs font-semibold text-midnight">Ordra</span>
+          </div>
+          {["Dashboard", "Orders", "Distributors", "Stock", "Payments"].map((item, i) => (
+            <div key={item} className={`text-[11px] px-2 py-1.5 rounded-md ${i === 0 ? "bg-white font-medium text-midnight shadow-sm" : "text-graphite"}`}>
+              {item}
+            </div>
+          ))}
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 p-4">
+          {/* KPI Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            {kpis.map((kpi) => (
+              <div key={kpi.label} className="bg-white rounded-xl border border-fog p-3" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                <div className="text-[9px] text-graphite mb-1">{kpi.label}</div>
+                <div className={`text-sm font-semibold ${kpi.color}`}>{kpi.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mini chart */}
+          <div className="bg-white rounded-xl border border-fog p-3 mb-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <div className="text-[9px] text-graphite mb-2">This Week</div>
+            <div className="flex items-end gap-1 h-10">
+              {[40, 65, 50, 80, 70, 55, 90].map((h, i) => (
+                <div key={i} className="flex-1 bg-midnight/10 rounded-sm" style={{ height: `${h}%` }}>
+                  <div className="w-full bg-midnight rounded-sm" style={{ height: `${Math.min(h + 10, 100)}%` }} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent orders */}
+          <div className="bg-white rounded-xl border border-fog p-3" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <div className="text-[9px] text-graphite mb-2">Recent Orders</div>
+            <div className="space-y-1.5">
+              {orders.map((o) => (
+                <div key={o.dealer} className="flex items-center justify-between">
+                  <span className="text-[10px] text-midnight truncate flex-1">{o.dealer}</span>
+                  <span className="text-[10px] font-medium text-midnight mx-2">{o.amount}</span>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${o.statusColor}`}>{o.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Hero() {
   return (
@@ -52,7 +140,7 @@ export function Hero() {
               href="#features"
               className="font-body font-medium text-midnight border border-fog hover:border-midnight px-8 py-3.5 rounded-full transition-all duration-150"
             >
-              Watch a 2-min demo →
+              Watch a 2-min demo
             </a>
           </motion.div>
 
@@ -68,24 +156,15 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Right — Mockup frame */}
+        {/* Right — Dashboard Mockup */}
         <motion.div
           initial={{ x: 60, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-full max-w-md mx-auto"
+          className="w-full max-w-lg mx-auto"
+          style={{ transform: "perspective(1200px) rotateY(-4deg)" }}
         >
-          <div
-            className="w-full aspect-[9/16] md:aspect-[3/4] bg-[#FAFAFA] rounded-3xl border border-fog flex items-center justify-center"
-            style={{
-              boxShadow: "0 8px 40px rgba(0, 0, 0, 0.06)",
-              transform: "perspective(1200px) rotateY(-4deg)",
-            }}
-          >
-            <span className="font-body text-graphite text-sm">
-              Dashboard Screenshot
-            </span>
-          </div>
+          <DashboardMockup />
         </motion.div>
       </div>
     </section>
