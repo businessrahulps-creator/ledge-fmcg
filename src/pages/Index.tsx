@@ -1,31 +1,29 @@
-import { LandingNav } from "@/components/landing/LandingNav";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { SocialProofBar } from "@/components/landing/SocialProofBar";
-import { FeatureOrderCapture } from "@/components/landing/FeatureOrderCapture";
-import { FeatureDashboard } from "@/components/landing/FeatureDashboard";
-import { FeatureDistributors } from "@/components/landing/FeatureDistributors";
-import { FeaturePayments } from "@/components/landing/FeaturePayments";
-import { FeatureExport } from "@/components/landing/FeatureExport";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { PricingSection } from "@/components/landing/PricingSection";
-import { FinalCTA } from "@/components/landing/FinalCTA";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+import { Navbar } from "@/components/landing/sections/Navbar";
+import { Hero } from "@/components/landing/sections/Hero";
+import { TrustBar } from "@/components/landing/sections/TrustBar";
+import { Problem } from "@/components/landing/sections/Problem";
+import { HowItWorks } from "@/components/landing/sections/HowItWorks";
+import { Features } from "@/components/landing/sections/Features";
+import { WhyOrdra } from "@/components/landing/sections/WhyOrdra";
+import { Testimonials } from "@/components/landing/sections/Testimonials";
+import { Pricing } from "@/components/landing/sections/Pricing";
+import { FinalCTA } from "@/components/landing/sections/FinalCTA";
+import { Footer } from "@/components/landing/sections/Footer";
 
 export default function Index() {
   return (
-    <div className="bg-[#08080D] text-[#F2F2F5] font-sans min-h-screen antialiased">
-      <LandingNav />
-      <HeroSection />
-      <SocialProofBar />
-      <FeatureOrderCapture />
-      <FeatureDashboard />
-      <FeatureDistributors />
-      <FeaturePayments />
-      <FeatureExport />
+    <div className="font-body antialiased">
+      <Navbar />
+      <Hero />
+      <TrustBar />
+      <Problem />
       <HowItWorks />
-      <PricingSection />
+      <Features />
+      <WhyOrdra />
+      <Testimonials />
+      <Pricing />
       <FinalCTA />
-      <LandingFooter />
+      <Footer />
     </div>
   );
 }
