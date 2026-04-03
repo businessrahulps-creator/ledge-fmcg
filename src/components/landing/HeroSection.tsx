@@ -36,16 +36,15 @@ function DashboardMockup() {
           <div className="w-3 h-3 rounded-full bg-[#22C55E]/60" />
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="px-4 py-1 rounded-md bg-[#16161F] text-[#55556A] text-xs">app.ordra.in/dashboard</div>
+          <div className="px-4 py-1 rounded-md bg-[#16161F] text-[#55556A] text-xs">app.ledge.in/dashboard</div>
         </div>
       </div>
 
       <div className="flex">
         {/* Sidebar */}
         <div className="hidden md:flex flex-col w-48 border-r border-[#1E1E2C] bg-[#08080D] p-4 gap-1">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-6 h-6 rounded bg-[#3D6FFF] flex items-center justify-center text-white text-[10px] font-bold">O</div>
-            <span className="text-sm font-bold text-[#F2F2F5]">Ordra</span>
+          <div className="mb-6">
+            <span className="font-extrabold text-sm tracking-[-0.04em] text-[#F2F2F5]">Ledge</span>
           </div>
           {sidebarItems.map((item, i) => (
             <div
@@ -142,7 +141,7 @@ export function HeroSection() {
 
         <AnimateIn delay={0.2}>
           <p className="text-base md:text-xl text-[#8888A0] leading-[1.7] max-w-[480px] mx-auto mb-10">
-            Ordra helps FMCG companies capture sales orders, manage distributors,
+            Ledge helps FMCG companies capture sales orders, manage distributors,
             and track payments — all in one clean, fast platform.
           </p>
         </AnimateIn>

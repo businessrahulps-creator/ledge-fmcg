@@ -43,8 +43,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "Ordra — Sales & Order Management",
-        short_name: "Ordra",
+        name: "Ledge — Sales & Order Management",
+        short_name: "Ledge",
         description: "Sales & Order Management for FMCG businesses. Manage distributors, orders, dispatch & payments.",
         start_url: "/dashboard",
         display: "standalone",

@@ -8,7 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const STORAGE_KEY = "ordra-install-state"; // "dismissed" | "never" | undefined
+const STORAGE_KEY = "ledge-install-state"; // "dismissed" | "never" | undefined
 
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
@@ -99,11 +99,11 @@ export function InstallPrompt() {
             <div className="flex items-start gap-3">
               {/* App icon */}
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-foreground shadow-sm">
-                <span className="text-lg font-bold text-background">O</span>
+                <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-background">L</span>
               </div>
 
               <div className="min-w-0 flex-1 pr-4">
-                <p className="text-sm font-semibold">Install Ordra</p>
+                <p className="text-sm font-semibold">Install Ledge</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {showIOS
                     ? "Add to your home screen for the best experience"

@@ -12,7 +12,7 @@ export function LandingFooter() {
       title: "Company",
       links: [
         { label: "About", href: "#" },
-        { label: "Contact", href: "mailto:hello@ordra.in" },
+        { label: "Contact", href: "mailto:hello@ledge.in" },
       ],
     },
     {
@@ -29,9 +29,8 @@ export function LandingFooter() {
       <div className="max-w-[1200px] mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded bg-[#3D6FFF] flex items-center justify-center text-white text-[10px] font-bold">O</div>
-              <span className="font-bold text-[#F2F2F5]">Ordra</span>
+            <div className="mb-3">
+              <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-[#F2F2F5]">Ledge</span>
             </div>
             <p className="text-sm text-[#55556A] leading-relaxed">
               Sales captured. Distributors managed.
@@ -59,7 +58,7 @@ export function LandingFooter() {
         </div>
 
         <div className="border-t border-[#1E1E2C] pt-8 text-sm text-[#55556A] text-center">
-          © {new Date().getFullYear()} Ordra. All rights reserved.
+          © {new Date().getFullYear()} Ledge. All rights reserved.
         </div>
       </div>
     </footer>

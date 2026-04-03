@@ -9,7 +9,7 @@ const testimonials = [
   },
   {
     quote:
-      "We paid a premium for legacy software, but my team hated it and kept reverting to WhatsApp. I sent them the Ordra link, and by lunch, all eight were using it without a single complaint.",
+      "We paid a premium for legacy software, but my team hated it and kept reverting to WhatsApp. I sent them the Ledge link, and by lunch, all eight were using it without a single complaint.",
     name: "Priya Radhakrishnan",
     role: "Operations Head, GreenLeaf Naturals · Madurai",
   },

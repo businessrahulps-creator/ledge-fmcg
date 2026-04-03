@@ -35,11 +35,8 @@ export function Navbar() {
     >
       <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full border-2 border-midnight flex items-center justify-center">
-            <span className="text-midnight text-xs font-heading font-bold leading-none">O</span>
-          </div>
-          <span className="font-heading font-bold text-xl text-midnight">Ordra</span>
+        <a href="#" className="flex items-center">
+          <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-midnight">Ledge</span>
         </a>
 
         {/* Center links — desktop */}

@@ -57,7 +57,7 @@ export function TrustBar() {
               "
             </span>
             <p className="font-body text-lg text-graphite italic leading-[1.7] pl-8">
-              Saturday evening, I opened Ordra and saw every order from the week. First time in 8 years I didn't call a single person for updates.
+              Saturday evening, I opened Ledge and saw every order from the week. First time in 8 years I didn't call a single person for updates.
             </p>
             <p className="font-body font-semibold text-midnight mt-4 pl-8">
               Karthik Iyer · Deccan Consumer Products, Coimbatore

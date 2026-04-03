@@ -13,7 +13,7 @@ export function FinalCTA() {
         </AnimateIn>
 
         <p className="font-body text-[20px] text-graphite max-w-xl mx-auto mt-6">
-          Set up Ordra in 15 minutes. Regain complete control over your daily distribution.
+          Set up Ledge in 15 minutes. Regain complete control over your daily distribution.
         </p>
 
         <div className="flex justify-center gap-4 mt-10 flex-wrap">

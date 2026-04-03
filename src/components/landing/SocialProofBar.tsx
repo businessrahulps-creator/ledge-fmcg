@@ -23,7 +23,7 @@ export function SocialProofBar() {
       <div className="max-w-[1200px] mx-auto px-6">
         <AnimateIn>
           <p className="text-center text-base md:text-lg text-[#8888A0] mb-10">
-            Ordra is helping <span className="text-[#F2F2F5] font-medium">FMCG teams</span> replace spreadsheets and WhatsApp chaos.
+            Ledge is helping <span className="text-[#F2F2F5] font-medium">FMCG teams</span> replace spreadsheets and WhatsApp chaos.
           </p>
         </AnimateIn>
 

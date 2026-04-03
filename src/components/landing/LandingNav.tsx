@@ -26,9 +26,8 @@ export function LandingNav() {
         }`}
       >
         <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between h-16">
-          <a href="#" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-[#3D6FFF] flex items-center justify-center text-white text-xs font-bold">O</div>
-            <span className="text-[#F2F2F5] font-bold text-xl tracking-tight">Ordra</span>
+          <a href="#" className="flex items-center">
+            <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-[#F2F2F5]">Ledge</span>
           </a>
 
           <div className="hidden md:flex items-center gap-8">
