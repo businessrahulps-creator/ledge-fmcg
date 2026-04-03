@@ -80,10 +80,10 @@ function DashboardMiniMockup() {
 /* ── Step 3: Stock Health Mockup ── */
 function StockMockup() {
   const rows = [
-    { product: "Premium Masala 500g", godown: "Pune", qty: "340", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
-    { product: "Gold Atta 10kg", godown: "Surat", qty: "42", health: "Low", color: "bg-amber-100 text-amber-700" },
-    { product: "Royal Ghee 1L", godown: "Nagpur", qty: "8", health: "Critical", color: "bg-red-100 text-red-700" },
-    { product: "Classic Tea 250g", godown: "Indore", qty: "210", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
+    { product: "Premium Masala 500g", warehouse: "Pune", qty: "340", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
+    { product: "Gold Atta 10kg", warehouse: "Surat", qty: "42", health: "Low", color: "bg-amber-100 text-amber-700" },
+    { product: "Royal Ghee 1L", warehouse: "Nagpur", qty: "8", health: "Critical", color: "bg-red-100 text-red-700" },
+    { product: "Classic Tea 250g", warehouse: "Indore", qty: "210", health: "Healthy", color: "bg-emerald-100 text-emerald-700" },
   ];
 
   return (
