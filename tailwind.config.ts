@@ -15,6 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
+        heading: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
         xs: ["12px", { lineHeight: "16px" }],
