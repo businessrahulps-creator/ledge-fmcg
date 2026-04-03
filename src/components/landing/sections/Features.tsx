@@ -12,7 +12,7 @@ const features = [
     icon: ClipboardCheck,
     title: "Orders that track themselves",
     description:
-      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Placed → Dispatched → Delivered with clear status badges. You see it happen live.",
+      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Pending → Dispatched → Delivered with clear status badges. You see it happen live.",
   },
   {
     icon: Users,
