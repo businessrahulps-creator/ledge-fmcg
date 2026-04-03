@@ -1,12 +1,6 @@
 import { Link } from "react-router-dom";
 import { AnimateIn } from "../AnimateIn";
 
-const badges = [
-  "Bank-grade encryption",
-  "Works on any phone",
-  "Data stored in India",
-  "Go live today",
-];
 
 export function FinalCTA() {
   return (
