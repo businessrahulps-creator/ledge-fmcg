@@ -3,7 +3,7 @@ import { AnimateIn } from "../AnimateIn";
 const testimonials = [
   {
     quote:
-      "I have 6 salespeople covering Ernakulam, Thrissur, and Palakkad. Before Ordra, I would call each of them around 7pm — 'kitne order aaye aaj?' — and write it down in a diary. Some would pick up, some wouldn't. I'd get the real numbers 2 days late. Now I open the dashboard at 5pm and it's all there. Every order, every dealer, every rupee. My wife says I'm less stressed. She's right.",
+      "I have 6 salespeople covering Ernakulam, Thrissur, and Palakkad. Before Ordra, I would call each of them around 7pm, 'kitne order aaye aaj?', and write it down in a diary. Some would pick up, some wouldn't. I'd get the real numbers 2 days late. Now I open the dashboard at 5pm and it's all there. Every order, every dealer, every rupee. My wife says I'm less stressed. She's right.",
     name: "Rajesh Menon",
     role: "Founder, SouthSpice Distributors · Kochi",
   },
