@@ -24,7 +24,7 @@ const features = [
     icon: Package,
     title: "Stock by godown, not guesswork",
     description:
-      "Real inventory across multiple warehouses. Health badges — Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
+      "Real inventory across multiple warehouses. Health badges: Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
   },
   {
     icon: IndianRupee,
