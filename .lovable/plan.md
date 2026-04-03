@@ -1,63 +1,35 @@
 
 
-# Set Up Ordra Landing Page Shell
+# Build Navbar Section
 
-Replace the current landing page with a clean scaffolded shell — new design system, fonts, placeholder sections with correct backgrounds, no content yet.
+Replace the placeholder `Navbar.tsx` with a fully styled, responsive navbar matching the spec.
 
----
+## Implementation
 
-## What Changes
+### File: `src/components/landing/sections/Navbar.tsx`
 
-### 1. Google Fonts in `index.html`
-Add Plus Jakarta Sans (700, 800) and Inter (400, 500, 600) via Google Fonts link tags.
+**Structure:**
+- Fixed, h-16, z-50, starts transparent, gains `bg-midnight/95 backdrop-blur-md border-b border-slate-border` on scroll (>16px)
+- Max-width 1200px centered container
 
-### 2. Landing page CSS variables in `src/index.css`
-Add a new block of landing-page-specific custom properties under `:root`:
-```
---midnight, --charcoal, --violet, --violet-hover, --violet-wash,
---violet-glow, --snow, --cream, --white, --onyx, --graphite,
---zinc, --silver, --fog, --slate-border, --emerald, --amber, --rose
-```
-Existing app variables remain untouched.
+**Left — Logo:**
+- 24px white circle with `border-2 border-white rounded-full` containing "O" text
+- "Ordra" in `font-heading font-bold text-xl text-white`
 
-### 3. Tailwind config (`tailwind.config.ts`)
-Extend `fontFamily` with `heading` (Plus Jakarta Sans) and `body` (Inter). Add landing color tokens referencing the new CSS vars. Existing config untouched.
+**Center — Links (hidden on mobile):**
+- "Features" → `#features`, "Pricing" → `#pricing`, "About" → `#about`
+- `font-body font-medium text-[15px] text-silver hover:text-white transition-colors`
 
-### 4. Replace `src/pages/Index.tsx`
-New shell with 11 labeled placeholder `<section>` elements in correct order, each with the specified background color, correct vertical padding (py-32 desktop / py-16 mobile), and max-w-7xl centered content area. Each placeholder shows the section name in muted text.
+**Right — CTA (hidden on mobile):**
+- "Start Free Trial" pill button: `bg-violet text-white px-6 py-2.5 rounded-full hover:bg-violet-hover font-semibold`
 
-Sections and their backgrounds:
-1. **Navbar** — dark sticky (--midnight), rendered as a simple fixed bar
-2. **Hero** — --midnight
-3. **Trust Bar** — --snow
-4. **Problem** — --cream
-5. **How It Works** — white
-6. **Features** — --midnight (dark)
-7. **Why Ordra** — --snow
-8. **Testimonials** — --cream
-9. **Pricing** — white
-10. **Final CTA** — --midnight
-11. **Footer** — --charcoal
+**Mobile (<768px):**
+- Hamburger icon (Lucide `Menu`) replaces center+right
+- Opens a slide-in drawer from right using existing Sheet component (shadcn)
+- Drawer contains links stacked vertically + CTA at bottom
+- Close via X button in drawer header
 
-### 5. Create stub section components
-Create 11 new files in `src/components/landing/sections/`:
-- `Navbar.tsx`, `Hero.tsx`, `TrustBar.tsx`, `Problem.tsx`, `HowItWorks.tsx`, `Features.tsx`, `WhyOrdra.tsx`, `Testimonials.tsx`, `Pricing.tsx`, `FinalCTA.tsx`, `Footer.tsx`
+**Dependencies:** `useState`, `useEffect`, `Link` from react-router-dom, `Menu` from lucide-react, Sheet components from `@/components/ui/sheet`
 
-Each is a simple placeholder div with the correct bg color class and a centered label. This keeps architecture clean for the section-by-section build.
-
-### 6. Keep old landing components
-The existing `src/components/landing/*.tsx` files stay in the codebase but are no longer imported from Index. They can be removed later or referenced for content.
-
----
-
-## Files Touched
-| File | Action |
-|---|---|
-| `index.html` | Add Google Fonts links |
-| `src/index.css` | Add landing CSS custom properties |
-| `tailwind.config.ts` | Add font families + landing colors |
-| `src/pages/Index.tsx` | Replace with new shell |
-| `src/components/landing/sections/*.tsx` (11 files) | Create placeholder stubs |
-
-No existing app functionality is affected. All authenticated routes remain unchanged.
+No other files changed.
 
