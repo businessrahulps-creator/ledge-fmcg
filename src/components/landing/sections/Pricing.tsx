@@ -11,9 +11,8 @@ const plans = [
     features: [
       "Up to 3 users",
       "50 orders/month",
-      "1 godown",
+      "1 warehouse",
       "Basic dashboard",
-      "Offline mode",
     ],
     cta: "Start Free →",
     highlighted: false,
