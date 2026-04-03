@@ -8,8 +8,8 @@ const fadeUp = (delay: number) => ({
 });
 
 const trustChips = [
-  "Works offline",
   "Any Android or iPhone",
+  "No app store needed",
   "Setup in 5 minutes",
 ];
 
