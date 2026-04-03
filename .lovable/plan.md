@@ -1,34 +1,28 @@
 
 
-# Build Hero Section
+# Build Problem Section
 
-Replace the placeholder `Hero.tsx` with a fully styled, two-column hero section.
+Replace `src/components/landing/sections/Problem.tsx` with the full two-column pain-point layout.
 
-## File: `src/components/landing/sections/Hero.tsx`
+## File: `src/components/landing/sections/Problem.tsx`
 
 **Structure:**
-- `min-h-screen`, `bg-midnight`, `py-20 md:py-32`, `pt-36` (accounts for fixed navbar)
-- Inner container: `max-w-7xl mx-auto px-6`
-- Grid: `grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`
+- `bg-cream py-16 md:py-32`
+- Inner: `max-w-7xl mx-auto px-6`
+- Grid: `grid grid-cols-1 lg:grid-cols-12 gap-16`
 
-**Left column — Text content (uses Framer Motion for stagger):**
-- Headline split into two lines, each wrapped in a motion.div with `fadeUp` + 100ms stagger delay
-- `font-heading font-extrabold text-[34px] md:text-[60px] text-white leading-[1.08] tracking-[-0.03em]`
-- Subheadline: `font-body text-[17px] md:text-[20px] text-silver leading-[1.6] max-w-xl mt-6`
-- CTA row: `flex flex-wrap gap-4 mt-8`
-  - Primary: violet pill with hover scale
-  - Secondary: transparent bordered pill
-- Trust chips row: `flex flex-wrap gap-3 mt-8`, three onyx pill badges
+**Left column (`lg:col-span-4 lg:sticky lg:top-32 self-start`):**
+- `"You know this routine."` — `font-heading font-bold text-[28px] md:text-[44px] text-midnight leading-[1.08] tracking-[-0.03em]`
 
-**Right column — Mockup frame:**
-- Container with `aspect-[9/16] md:aspect-[3/4]`, `max-w-md mx-auto`, `bg-onyx rounded-3xl`
-- Border: `border border-[rgba(124,58,237,0.15)]`
-- Glow shadow via inline style: `boxShadow: "0 0 80px rgba(124, 58, 237, 0.12)"`
-- 3D tilt on desktop via `lg:transform lg:perspective-[1200px] lg:rotate-y-[-4deg]` (inline style for rotateY since Tailwind doesn't support it natively)
-- Framer Motion: slides in from `x: 60, opacity: 0` → `x: 0, opacity: 1`, 800ms ease-out
-- Centered placeholder text in silver
+**Right column (`lg:col-span-8`):**
+- 4 cards in `space-y-6`, each wrapped in `AnimateIn` with staggered delay (0, 0.08, 0.16, 0.24s)
+- Each card: `bg-white rounded-2xl p-8 border border-fog`
+  - Lucide icon (24px, `text-violet`, `mb-4`): MessageCircle, Table, Compass, Laptop
+  - Title: `font-heading font-bold text-[20px] text-midnight mb-3`
+  - Description: `font-body text-base text-graphite leading-[1.7]`
+- Closing line below cards: `mt-8`, `font-body font-medium text-lg text-violet`, centered on mobile, left-aligned on desktop
 
-**Animation approach:** Use `motion.div` from framer-motion directly (already a dependency) with `initial`/`animate` for page-load animations. No scroll trigger needed for hero — it animates on mount.
+**Imports:** `MessageCircle`, `Table`, `Compass`, `Laptop` from lucide-react; `AnimateIn` from `../AnimateIn`
 
 **No other files changed.**
 
