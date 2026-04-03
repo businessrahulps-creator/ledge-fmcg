@@ -4,64 +4,64 @@ import { AnimateIn } from "../AnimateIn";
 const features = [
   {
     icon: LayoutGrid,
-    title: "Live Dashboard",
+    title: "Your business, at a glance",
     description:
-      "Revenue, order count, pending dispatches, completed deliveries — four numbers that tell you how your business is doing right now. Filter by day of week to find patterns: maybe Tuesdays are your weakest. Now you know.",
+      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns — maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
   },
   {
     icon: ClipboardCheck,
-    title: "Complete Order Lifecycle",
+    title: "Orders that track themselves",
     description:
-      "Multi-line orders with auto-pricing from your rate list. Every order moves through Placed → Dispatched → Delivered with clear status badges. And yes — confetti when an order is complete, because small joys matter.",
+      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing — done in under a minute. Every order moves through Placed → Dispatched → Delivered with clear status badges. You see it happen live.",
   },
   {
     icon: Users,
-    title: "Dealer & Sales Team Hub",
+    title: "Every dealer, every salesperson — one tap",
     description:
-      "Every dealer card shows region, recent orders, outstanding payments, and lifetime value. Every salesperson card shows territory, today's activity, and performance trend. No more keeping this in your head.",
+      "Tap a dealer and see their region, last 20 orders, outstanding payments, and lifetime value. Tap a salesperson and see their territory, today's orders, and whether they've actually been active this week. No more keeping this in your head.",
   },
   {
     icon: Package,
-    title: "Godown-Level Stock",
+    title: "Stock by godown, not guesswork",
     description:
       "Real inventory across multiple warehouses. Health badges — Healthy (green), Low (amber), Critical (red). Catch a stockout days before it costs you an order.",
   },
   {
     icon: IndianRupee,
-    title: "Indian Payment Tracking",
+    title: "Payments the way India pays",
     description:
-      "Cash, UPI, cheque, credit — tracked the way Indian businesses actually transact. See what's paid, what's partial, what's overdue. No more maintaining a separate khata.",
+      "Cash, UPI, cheque, credit — tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
   },
   {
     icon: CloudOff,
-    title: "Offline-First. Everywhere.",
+    title: "No signal? No problem.",
     description:
-      "Installs like WhatsApp from a link. Takes up almost no storage. Works without internet. Your salesperson places orders offline in a village with zero signal. When connectivity returns, everything syncs. No data lost.",
+      "Your salesperson is between Indore and Ujjain. Zero signal. They open Ordra, place the order, it saves locally. The moment connectivity returns — auto sync. No data lost. No order missed. This isn't a feature we bolted on. It's the foundation.",
   },
 ];
 
 export function Features() {
   return (
-    <section className="bg-midnight py-16 md:py-32">
+    <section className="bg-[#FAFAFA] py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-white text-center mb-4 tracking-[-0.03em]">
-            Everything you need. Nothing you don't.
+          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-4 tracking-[-0.03em]">
+            What your team actually gets.
           </h2>
-          <p className="font-body text-lg text-silver text-center mb-16">
-            Built from the ground up for Indian FMCG distribution.
+          <p className="font-body text-lg text-graphite text-center mb-16">
+            Every feature exists because an FMCG founder asked for it.
           </p>
         </AnimateIn>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <AnimateIn key={feature.title} delay={i * 0.08}>
-              <div className="bg-onyx border border-slate-border rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#3F3F46]">
-                <feature.icon size={24} className="text-violet mb-5" strokeWidth={1.5} />
-                <h3 className="font-heading font-bold text-[20px] text-white mb-3">
+              <div className="bg-white border border-fog rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D8]">
+                <feature.icon size={24} className="text-accent-indigo mb-5" strokeWidth={1.5} />
+                <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
                   {feature.title}
                 </h3>
-                <p className="font-body text-base text-silver leading-[1.65]">
+                <p className="font-body text-base text-graphite leading-[1.65]">
                   {feature.description}
                 </p>
               </div>

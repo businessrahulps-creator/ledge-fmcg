@@ -46,7 +46,7 @@ export function Problem() {
           {cards.map((card, i) => (
             <AnimateIn key={card.title} delay={i * 0.08}>
               <div className="bg-white rounded-2xl p-8 border border-fog">
-                <card.icon className="text-violet mb-4" size={24} />
+                <card.icon className="text-accent-indigo mb-4" size={24} />
                 <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
                   {card.title}
                 </h3>
@@ -58,7 +58,7 @@ export function Problem() {
           ))}
 
           <AnimateIn delay={0.32}>
-            <p className="mt-8 font-body font-medium text-lg text-violet text-center lg:text-left">
+            <p className="mt-8 font-body font-medium text-lg text-accent-indigo text-center lg:text-left">
               None of this is your fault. Your tools were never designed for how
               Indian distribution actually works. Ordra was.
             </p>

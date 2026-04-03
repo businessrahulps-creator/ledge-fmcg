@@ -34,7 +34,7 @@ const plans = [
     ],
     cta: "Start 14-Day Trial →",
     highlighted: true,
-    ctaStyle: "bg-violet text-white hover:bg-violet-hover",
+    ctaStyle: "bg-ink text-white hover:bg-ink-light",
   },
   {
     name: "Scale",
@@ -89,12 +89,12 @@ export function Pricing() {
               <div
                 className={`bg-white rounded-2xl p-8 flex flex-col h-full ${
                   plan.highlighted
-                    ? "border-2 border-violet relative"
+                    ? "border-2 border-ink relative"
                     : "border border-fog"
                 }`}
               >
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-violet text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-ink text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
@@ -152,7 +152,7 @@ export function Pricing() {
           <p className="font-body text-[15px] text-lp-zinc">
             All plans include offline mode, PWA install, and automatic updates.
           </p>
-          <p className="font-body text-[15px] text-violet font-medium hover:underline cursor-pointer">
+          <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
             Need help choosing? Chat on WhatsApp →
           </p>
         </div>
