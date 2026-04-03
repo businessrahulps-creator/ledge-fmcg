@@ -188,16 +188,6 @@ export function Hero() {
             </a>
           </motion.div>
 
-          <motion.div className="flex flex-wrap gap-3 mt-8" {...fadeUp(0.4)}>
-            {trustChips.map((chip) => (
-              <span
-                key={chip}
-                className="font-body text-sm text-graphite bg-[#F5F5F5] px-4 py-1.5 rounded-full"
-              >
-                {chip}
-              </span>
-            ))}
-          </motion.div>
         </div>
 
         {/* Right — Dashboard Mockup */}
