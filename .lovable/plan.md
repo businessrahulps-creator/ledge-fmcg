@@ -1,35 +1,34 @@
 
 
-# Build Navbar Section
+# Build Hero Section
 
-Replace the placeholder `Navbar.tsx` with a fully styled, responsive navbar matching the spec.
+Replace the placeholder `Hero.tsx` with a fully styled, two-column hero section.
 
-## Implementation
-
-### File: `src/components/landing/sections/Navbar.tsx`
+## File: `src/components/landing/sections/Hero.tsx`
 
 **Structure:**
-- Fixed, h-16, z-50, starts transparent, gains `bg-midnight/95 backdrop-blur-md border-b border-slate-border` on scroll (>16px)
-- Max-width 1200px centered container
+- `min-h-screen`, `bg-midnight`, `py-20 md:py-32`, `pt-36` (accounts for fixed navbar)
+- Inner container: `max-w-7xl mx-auto px-6`
+- Grid: `grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`
 
-**Left — Logo:**
-- 24px white circle with `border-2 border-white rounded-full` containing "O" text
-- "Ordra" in `font-heading font-bold text-xl text-white`
+**Left column — Text content (uses Framer Motion for stagger):**
+- Headline split into two lines, each wrapped in a motion.div with `fadeUp` + 100ms stagger delay
+- `font-heading font-extrabold text-[34px] md:text-[60px] text-white leading-[1.08] tracking-[-0.03em]`
+- Subheadline: `font-body text-[17px] md:text-[20px] text-silver leading-[1.6] max-w-xl mt-6`
+- CTA row: `flex flex-wrap gap-4 mt-8`
+  - Primary: violet pill with hover scale
+  - Secondary: transparent bordered pill
+- Trust chips row: `flex flex-wrap gap-3 mt-8`, three onyx pill badges
 
-**Center — Links (hidden on mobile):**
-- "Features" → `#features`, "Pricing" → `#pricing`, "About" → `#about`
-- `font-body font-medium text-[15px] text-silver hover:text-white transition-colors`
+**Right column — Mockup frame:**
+- Container with `aspect-[9/16] md:aspect-[3/4]`, `max-w-md mx-auto`, `bg-onyx rounded-3xl`
+- Border: `border border-[rgba(124,58,237,0.15)]`
+- Glow shadow via inline style: `boxShadow: "0 0 80px rgba(124, 58, 237, 0.12)"`
+- 3D tilt on desktop via `lg:transform lg:perspective-[1200px] lg:rotate-y-[-4deg]` (inline style for rotateY since Tailwind doesn't support it natively)
+- Framer Motion: slides in from `x: 60, opacity: 0` → `x: 0, opacity: 1`, 800ms ease-out
+- Centered placeholder text in silver
 
-**Right — CTA (hidden on mobile):**
-- "Start Free Trial" pill button: `bg-violet text-white px-6 py-2.5 rounded-full hover:bg-violet-hover font-semibold`
+**Animation approach:** Use `motion.div` from framer-motion directly (already a dependency) with `initial`/`animate` for page-load animations. No scroll trigger needed for hero — it animates on mount.
 
-**Mobile (<768px):**
-- Hamburger icon (Lucide `Menu`) replaces center+right
-- Opens a slide-in drawer from right using existing Sheet component (shadcn)
-- Drawer contains links stacked vertically + CTA at bottom
-- Close via X button in drawer header
-
-**Dependencies:** `useState`, `useEffect`, `Link` from react-router-dom, `Menu` from lucide-react, Sheet components from `@/components/ui/sheet`
-
-No other files changed.
+**No other files changed.**
 
