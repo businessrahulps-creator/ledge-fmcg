@@ -1,42 +1,37 @@
 
 
-# Build Trust Bar Section
+# Build How It Works Section
 
-Replace `src/components/landing/sections/TrustBar.tsx` with three stacked elements: logo marquee, stat row with count-up, and pull quote card.
+Replace `src/components/landing/sections/HowItWorks.tsx` with a three-row alternating layout.
 
-## File: `src/components/landing/sections/TrustBar.tsx`
+## File: `src/components/landing/sections/HowItWorks.tsx`
 
-**Section wrapper:** `bg-[#FAFAFA] py-20`
+**Section wrapper:** `bg-white py-16 md:py-32`
 
-### 1. Logo Marquee
-- Container with `overflow-hidden opacity-60`
-- Inner flex row of 12 placeholder boxes (6 duplicated for seamless loop), each `w-24 h-8 bg-fog rounded-lg shrink-0`
-- CSS `@keyframes marquee` for infinite horizontal scroll (30s linear), applied via inline style or Tailwind arbitrary animation
-- Add the keyframe to `tailwind.config.ts` under `keyframes.marquee` → `{ "0%": { transform: "translateX(0)" }, "100%": { transform: "translateX(-50%)" } }` and `animation.marquee: "marquee 30s linear infinite"`
+**Headline:** Centered, `font-heading font-bold text-[28px] md:text-[44px] text-midnight mb-16 tracking-[-0.03em]` — "Three steps. Sixty seconds. Total clarity."
 
-### 2. Stat Row (mt-12)
-- `grid grid-cols-3 max-w-3xl mx-auto text-center`
-- Three stats using `useCountUp` + `useInView` from existing `AnimateIn.tsx`:
-  - `₹10Cr+` (value=10, prefix="₹", suffix="Cr+") / "Monthly orders managed"
-  - `12` (value=12) / "States covered"
-  - `50+` (value=50, suffix="+") / "FMCG brands onboarded"
-- Number: `font-heading font-extrabold text-[36px] md:text-[48px] text-midnight`
-- Label: `font-body text-sm text-lp-zinc`
-- Each stat wrapped in `AnimateIn` with staggered delay
+**Data:** Array of 3 step objects, each with: badge label, title, description, placeholder text, and a boolean `reversed` flag (rows 1 & 3 = text-left/image-right, row 2 = image-left/text-right).
 
-### 3. Pull Quote (mt-12)
-- Card: `bg-cream rounded-2xl p-8 max-w-2xl mx-auto relative`
-- Decorative `"` top-left: `absolute top-4 left-6 text-6xl font-serif text-violet opacity-30 leading-none`
-- Quote text: `font-body text-lg text-graphite italic leading-[1.7] pl-8`
-- Attribution: `font-body font-semibold text-midnight mt-4 pl-8`
-- Wrapped in `AnimateIn`
+**Each row** (spaced with `space-y-24`):
+- `grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`
+- On reversed rows, use `lg:order-1` / `lg:order-2` to swap column positions
+- Wrapped in `AnimateIn` with staggered delay per row
 
-### Tailwind config change
-Add `marquee` keyframe and animation to `tailwind.config.ts`.
+**Text column:**
+- Step badge: `bg-violet-wash text-violet text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4`
+- Title: `font-heading font-bold text-[24px] md:text-[28px] text-midnight`
+- Description: `font-body text-[17px] text-graphite leading-[1.7] mt-4`
 
-## Files Changed
-| File | Action |
-|---|---|
-| `src/components/landing/sections/TrustBar.tsx` | Full rewrite |
-| `tailwind.config.ts` | Add marquee keyframe + animation |
+**Image column:**
+- `bg-snow rounded-2xl aspect-video border border-fog flex items-center justify-center`
+- Placeholder text: `font-body text-sm text-silver`
+
+**Imports:** `AnimateIn` from `../AnimateIn`
+
+**Content:**
+1. "Your salesperson places the order." / Order Creation Screenshot
+2. "You see everything, instantly." / Dashboard KPI Screenshot (reversed)
+3. "You spot what matters before it becomes a problem." / Stock Health Screenshot
+
+No other files changed.
 
