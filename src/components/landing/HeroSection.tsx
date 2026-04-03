@@ -43,9 +43,8 @@ function DashboardMockup() {
       <div className="flex">
         {/* Sidebar */}
         <div className="hidden md:flex flex-col w-48 border-r border-[#1E1E2C] bg-[#08080D] p-4 gap-1">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-6 h-6 rounded bg-[#3D6FFF] flex items-center justify-center text-white text-[10px] font-bold">O</div>
-            <span className="text-sm font-bold text-[#F2F2F5]">Ordra</span>
+          <div className="mb-6">
+            <span className="font-extrabold text-sm tracking-[-0.04em] text-[#F2F2F5]">Ledge</span>
           </div>
           {sidebarItems.map((item, i) => (
             <div
