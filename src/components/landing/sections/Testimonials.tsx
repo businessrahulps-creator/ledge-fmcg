@@ -3,29 +3,27 @@ import { AnimateIn } from "../AnimateIn";
 const testimonials = [
   {
     quote:
-      "I have 6 salespeople covering Ernakulam, Thrissur, and Palakkad. Before Ordra, I would call each of them around 7pm, 'kitne order aaye aaj?', and write it down in a diary. Some would pick up, some wouldn't. I'd get the real numbers 2 days late. Now I open the dashboard at 5pm and it's all there. Every order, every dealer, every rupee. My wife says I'm less stressed. She's right.",
+      "I used to call six team members every evening just to know what we sold. Now I open the dashboard at 5 PM and see every order and payment. My family says I am noticeably less stressed.",
     name: "Rajesh Menon",
-    role: "Founder, SouthSpice Distributors · Kochi",
+    role: "Owner, SouthSpice Distributors · Kochi",
   },
   {
     quote:
-      "We were paying ₹35,000/month for software my team hated. Training took 3 days. Two of my guys just refused to use it and kept sending WhatsApp messages. I cancelled after 4 months. Ordra? I sent my team a link on Monday morning. By lunch, all 8 were placing orders. Nobody complained. That has literally never happened with any software.",
-    name: "Priya Sharma",
-    role: "Operations Head, GreenLeaf FMCG · Surat",
+      "We paid a premium for legacy software, but my team hated it and kept reverting to WhatsApp. I sent them the Ordra link, and by lunch, all eight were using it without a single complaint.",
+    name: "Priya Radhakrishnan",
+    role: "Operations Head, GreenLeaf Naturals · Madurai",
   },
   {
     quote:
-      "The stock alert saved our Diwali season. 'Kesari Mix 500g' was showing Critical in the Pune warehouse, 3 days before our biggest ordering week. I would have found out only when a dealer called asking why we short-shipped. Instead, we transferred stock from Nashik same day. That one alert probably saved ₹4-5 lakh in orders.",
-    name: "Karthik Sundaram",
-    role: "Warehouse Manager, TamilNadu Retail Supply · Coimbatore",
+      "A critical stock alert saved our festival season. We moved inventory from our Salem warehouse the same day, saving us lakhs in potential lost orders.",
+    name: "S. Prakash",
+    role: "Warehouse Manager, TamilNadu Retail Supply · Tiruppur",
   },
   {
     quote:
-      "Pehle har cheez ke liye call karna padta tha. Ab Ordra pe sab dikh jaata hai. Kaun sa dealer kitna order de raha hai, payment kya hai, sab ek jagah. Mujhe ab raat ko kisi ko call nahi karna padta.",
-    name: "Deepak Yadav",
-    role: "Field Sales · MadhyaBharat Foods · Indore",
-    translationNote:
-      "(Earlier I had to call for everything. Now I see it all on Ordra. Which dealer is ordering how much, payment status, everything in one place. I don't have to call anyone at night anymore.)",
+      "Earlier, I had to call the office for every little detail. Now I see exactly what each dealer needs and their pending payments right on my phone. It saves me hours every week.",
+    name: "Murugan K.",
+    role: "Field Sales, Deccan Consumer Products · Mysore",
   },
 ];
 
@@ -35,7 +33,7 @@ export function Testimonials() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            Don't take our word for it.
+            Run by business owners who demand clarity.
           </h2>
         </AnimateIn>
 
@@ -58,11 +56,6 @@ export function Testimonials() {
                   </div>
                 </div>
               </AnimateIn>
-              {t.translationNote && (
-                <p className="font-body text-sm text-lp-zinc italic mt-3 px-2">
-                  {t.translationNote}
-                </p>
-              )}
             </div>
           ))}
         </div>

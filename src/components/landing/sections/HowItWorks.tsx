@@ -114,25 +114,25 @@ function StockMockup() {
 const steps = [
   {
     badge: "Step 1",
-    title: "Your salesperson places the order.",
+    title: "Your team captures orders instantly.",
     description:
-      "They open Ordra on their phone. It works like an app, no Play Store needed. Select the dealer, tap the products, confirm pricing. Done in under a minute, even on a basic Android phone.",
+      "Your field team selects the dealer, taps the products, and confirms pricing in under a minute. It runs smoothly on any basic Android phone without a heavy app download.",
     mockup: OrderMockup,
     reversed: false,
   },
   {
     badge: "Step 2",
-    title: "You see everything, instantly.",
+    title: "You see the data live.",
     description:
-      "The order appears on your dashboard. Revenue updates. Pending count changes. That dealer's order history grows. No phone call. No WhatsApp message. No delay. You see what your team sold today the same way you check the weather. Just open the app.",
+      "The order hits your dashboard immediately, updating your daily sales and pending dispatches. You track what your team sold today as easily as checking your bank balance.",
     mockup: DashboardMiniMockup,
     reversed: true,
   },
   {
     badge: "Step 3",
-    title: "You spot what matters before it becomes a problem.",
+    title: "You act on actual metrics.",
     description:
-      "Your Surat warehouse is at 12% stock on your best-selling SKU. Your newest salesperson hasn't logged an order in 3 days. A dealer's payment has been partial for 2 weeks. Ordra surfaces these things. You act on data, not hunches.",
+      "Spot low warehouse stock, identify inactive territories, and track pending collections instantly. You can finally stop relying on estimates and manage with exact data.",
     mockup: StockMockup,
     reversed: false,
   },

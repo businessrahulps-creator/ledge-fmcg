@@ -20,11 +20,11 @@ function StatBlock({ value, prefix, suffix, label, delay }: { value: number; pre
 }
 
 const companies = [
-  "FreshVale Foods",
   "SouthSpice",
-  "GreenLeaf FMCG",
+  "GreenLeaf Naturals",
   "TamilNadu Retail",
-  "MadhyaBharat Foods",
+  "Malabar Foods",
+  "Deccan Consumer Products",
   "Prime Agencies",
 ];
 
@@ -57,10 +57,10 @@ export function TrustBar() {
               "
             </span>
             <p className="font-body text-lg text-graphite italic leading-[1.7] pl-8">
-              Saturday evening, I opened Ordra and saw every order from the week, dealer-wise, product-wise, payment-wise. First time in 8 years I didn't call a single salesman for updates.
+              Saturday evening, I opened Ordra and saw every order from the week. First time in 8 years I didn't call a single person for updates.
             </p>
             <p className="font-body font-semibold text-midnight mt-4 pl-8">
-              Amit Patel · FreshVale Foods, Ahmedabad
+              Karthik Iyer · Deccan Consumer Products, Coimbatore
             </p>
           </div>
         </AnimateIn>

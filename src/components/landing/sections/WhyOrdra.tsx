@@ -2,24 +2,24 @@ import { AnimateIn } from "../AnimateIn";
 
 const blocks = [
   {
-    title: "Your team will actually open it.",
+    title: "Designed for actual field adoption.",
     content:
-      "Most B2B software looks like a government portal from 2011. Ordra looks like something you'd actually want to use. Beautiful tools get used. Ugly tools get abandoned. Your field team will open Ordra because it's fast, clean, and doesn't waste their time.",
+      "Heavy software fails when your team refuses to use it. We built an interface so fast and clean that your field force will actually prefer it over their paper order books.",
   },
   {
-    title: "Installs in 30 seconds. No IT department.",
+    title: "Deployed in under thirty seconds.",
     content:
-      "Send your salesperson a link. They tap 'Add to Home Screen.' That's it. Full app on their phone. Works on any Android — even a ₹8,000 Redmi. Works on iPhone. Works on desktop. Updates happen automatically.",
+      "Skip the IT department and lengthy setups. Send your team a link, and they can start capturing orders on any smartphone immediately.",
   },
   {
-    title: "Built here. For here.",
+    title: "Built for operational realities.",
     content:
-      "₹ is the default currency. UPI and cheque are payment modes, not afterthoughts. Stock is tracked warehouse by warehouse, the way your business actually runs. This isn't software translated from English. It was written here, for here.",
+      "We treat UPI payments, multiple warehouses, and basic network connections as absolute defaults, not as corporate afterthoughts.",
   },
   {
-    title: "See everything. Chase nothing.",
+    title: "Immediate operational visibility.",
     content:
-      "The moment your salesperson places an order, you see it. Real-time. Not 'I'll send you the Excel tonight.' Ordra gives you a live picture of your business that updates with every order, every dispatch, every payment.",
+      "Stop waiting for the evening Excel file. Make critical decisions based on a live feed of your entire distribution network from anywhere.",
   },
 ];
 
@@ -29,7 +29,7 @@ export function WhyOrdra() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            This isn't another ERP you'll abandon in a month.
+            This isn't another ERP your team will abandon.
           </h2>
         </AnimateIn>
 
