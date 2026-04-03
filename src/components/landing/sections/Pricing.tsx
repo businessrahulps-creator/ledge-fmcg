@@ -26,7 +26,7 @@ const plans = [
     features: [
       "Up to 15 users",
       "Unlimited orders",
-      "Multi-godown stock",
+      "Multi-warehouse stock",
       "Dealer & sales analytics",
       "Payment tracking (UPI, cheque, cash)",
       "Priority WhatsApp support",
