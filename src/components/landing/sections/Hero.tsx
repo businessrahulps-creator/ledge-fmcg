@@ -64,7 +64,7 @@ function DashboardMockup() {
             <div className="w-6 h-6 rounded-full bg-midnight flex items-center justify-center text-white text-[9px] font-bold">O</div>
             <span className="text-xs font-semibold text-midnight">Ordra</span>
           </div>
-          {["Dashboard", "Orders", "Distributors", "Stock", "Payments"].map((item, i) => (
+          {["Dashboard", "Orders", "Dealers", "Stock", "Reports"].map((item, i) => (
             <motion.div
               key={item}
               className={`text-[11px] px-2 py-1.5 rounded-md cursor-default ${i === 0 ? "bg-white font-medium text-midnight shadow-sm" : "text-graphite"}`}
