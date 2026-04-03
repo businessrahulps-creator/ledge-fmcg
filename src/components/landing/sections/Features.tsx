@@ -6,37 +6,37 @@ const features = [
     icon: LayoutGrid,
     title: "Your business, at a glance",
     description:
-      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, dispatches completed. Filter by day to spot patterns. Maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
+      "Open your dashboard to instantly track daily revenue, total orders, and dispatch statuses without calling anyone.",
   },
   {
     icon: ClipboardCheck,
     title: "Orders that track themselves",
     description:
-      "Your salesperson selects the dealer, picks products from your rate list, confirms pricing. Done in under a minute. Every order moves through Pending → Dispatched → Delivered with clear status badges. You see it happen live.",
+      "Watch every order move cleanly from pending to dispatched to delivered in real time.",
   },
   {
     icon: Users,
-    title: "Every dealer, every salesperson, one tap",
+    title: "Complete dealer intelligence",
     description:
-      "Tap a dealer and see their region, last 20 orders, outstanding payments, and lifetime value. Tap a salesperson and see their territory, today's orders, and whether they've actually been active this week. No more keeping this in your head.",
+      "Access lifetime value, outstanding payments, and past order history for any retail dealer immediately.",
   },
   {
     icon: Package,
-    title: "Stock across warehouses, at a glance",
+    title: "Multi-warehouse visibility",
     description:
-      "Real inventory across all your warehouses. Color-coded health indicators tell you what's running low before it costs you an order. No more calling the warehouse guy to ask 'kitna maal bacha hai.'",
+      "Monitor inventory health across all your locations with alerts to prevent unexpected stock-outs.",
   },
   {
     icon: IndianRupee,
-    title: "Payments the way India pays",
+    title: "Native payment tracking",
     description:
-      "Cash, UPI, cheque, credit. Tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
+      "Track cash, UPI, and cheque collections exactly how Indian distribution businesses operate.",
   },
   {
     icon: CloudOff,
-    title: "Runs on any phone. No app store needed.",
+    title: "Zero-friction installation",
     description:
-      "Ordra runs as a full app on any phone. No Play Store, no heavy downloads. Your salesperson taps a link, adds it to their home screen, and they're ready. Fast, light, and built for phones your field team actually carries.",
+      "Give your field team a fast, lightweight web app that installs directly to their home screen in seconds.",
   },
 ];
 
@@ -45,12 +45,9 @@ export function Features() {
     <section className="bg-[#FAFAFA] py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-4 tracking-[-0.03em]">
-            What your team actually gets.
+          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
+            Built for the way your business actually runs.
           </h2>
-          <p className="font-body text-lg text-graphite text-center mb-16">
-            Every feature exists because an FMCG founder asked for it.
-          </p>
         </AnimateIn>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

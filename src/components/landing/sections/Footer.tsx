@@ -3,15 +3,15 @@ import { Linkedin, Twitter, Youtube } from "lucide-react";
 const columns = [
   {
     title: "Product",
-    links: ["Features", "Pricing", "Changelog", "Roadmap"],
+    links: ["Features", "Pricing", "Updates"],
   },
   {
     title: "Company",
-    links: ["About Us", "Blog", "Careers", "Contact"],
+    links: ["About Us", "Contact"],
   },
   {
     title: "Resources",
-    links: ["Help Center", "WhatsApp Support", "Setup Guide", "API Docs (Soon)"],
+    links: ["Help Center", "WhatsApp Support", "Setup Guide"],
   },
   {
     title: "Legal",
@@ -55,7 +55,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <span className="font-heading font-bold text-lg text-midnight">Ordra</span>
             <span className="font-body text-sm text-lp-zinc">
-              © 2026 AxisVale Systems Pvt. Ltd.
+              © 2026 Ordra. All rights reserved.
             </span>
           </div>
 

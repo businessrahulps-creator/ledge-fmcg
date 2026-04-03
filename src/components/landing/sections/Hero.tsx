@@ -150,22 +150,16 @@ export function Hero() {
             className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
             {...fadeUp(0)}
           >
-            You shouldn't have to call 6 people
-          </motion.h1>
-          <motion.h1
-            className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
-            {...fadeUp(0.1)}
-          >
-            to know how today went.
+            Stop chasing your field team for today's numbers.
           </motion.h1>
 
           <motion.p
             className="font-body text-[17px] md:text-[20px] text-graphite leading-[1.6] max-w-xl mt-6"
             {...fadeUp(0.2)}
           >
-            Your salespeople place orders on their phone. You see every order,
-            every dealer, every rupee, live on your dashboard.
-            Replaces your WhatsApp groups, Excel sheets, and nightly phone calls.
+            Your team captures orders on their phones. You track every dealer,
+            dispatch, and payment live from your desk. Escape the chaos of
+            scattered WhatsApp chats and fragile spreadsheets.
           </motion.p>
 
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
@@ -173,15 +167,22 @@ export function Hero() {
               to="/signup"
               className="font-body font-semibold text-white bg-ink hover:bg-ink-light px-8 py-3.5 rounded-full hover:scale-[1.02] transition-all duration-150"
             >
-              Try Ordra Free
+              Start Free Trial
             </Link>
             <a
               href="#features"
               className="font-body font-medium text-midnight border border-fog hover:border-midnight px-8 py-3.5 rounded-full transition-all duration-150"
             >
-              Watch a 2-min demo
+              Watch a 2-Minute Demo
             </a>
           </motion.div>
+
+          <motion.p
+            className="font-body text-sm text-lp-zinc mt-6"
+            {...fadeUp(0.4)}
+          >
+            Powering over 10 crore monthly orders for 50+ growing FMCG businesses.
+          </motion.p>
 
         </div>
 

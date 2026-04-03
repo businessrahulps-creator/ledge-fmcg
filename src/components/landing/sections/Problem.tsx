@@ -4,27 +4,27 @@ import { AnimateIn } from "../AnimateIn";
 const cards = [
   {
     icon: MessageCircle,
-    title: "The WhatsApp Scroll",
+    title: "The WhatsApp puzzle",
     description:
-      "It's 9pm. You're scrolling through group chats trying to piece together what your 6 salespeople sold today. One sent a photo of a handwritten list. Another typed 'sent 40 cases to Sharma ji.' A third never replied. You won't know today's real number until tomorrow. Maybe.",
+      "You spend your evenings deciphering text messages and handwritten notes just to calculate the day's business. You never know the actual revenue until the next morning.",
   },
   {
     icon: Table,
-    title: "The Sheet Nobody Trusts",
+    title: "The fragile spreadsheet",
     description:
-      "Somewhere, there's an Excel file. It has stock numbers from last week, payment statuses that 'someone will update,' and a pivot table only your office manager understands. When she takes leave, the whole system stops.",
+      "Your inventory and payment data live in a static file that is always outdated. When your office manager takes a day off, your entire operational flow grinds to a halt.",
   },
   {
     icon: Compass,
-    title: "Decisions Made on Feeling",
+    title: "The inventory blind spot",
     description:
-      "Which dealer is growing? Which salesperson hasn't visited their territory in a week? Which product has been sitting in your Surat warehouse for 45 days? You don't know. Not because you don't care. Because your current tools don't tell you.",
+      "You have no immediate way of knowing which warehouse is stocking out or which items are sitting idle. You make critical inventory decisions based entirely on gut feeling.",
   },
   {
     icon: Laptop,
-    title: "Software That Wasn't Built For You",
+    title: "The adoption failure",
     description:
-      "You tried Tally. You tried Zoho. Maybe your CA set something up. Your salespeople opened it once, complained, and went back to WhatsApp. The software cost ₹2 lakh. Adoption cost you more.",
+      "You paid for expensive enterprise software, but your field team found it too complicated. You ended up paying a premium for a system your own people abandoned.",
   },
 ];
 
@@ -36,7 +36,7 @@ export function Problem() {
         <div className="lg:col-span-4 lg:sticky lg:top-32 self-start">
           <AnimateIn>
             <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight leading-[1.08] tracking-[-0.03em]">
-              You know this routine.
+              Distribution is complex enough. Your software shouldn't make it worse.
             </h2>
           </AnimateIn>
         </div>
@@ -56,13 +56,6 @@ export function Problem() {
               </div>
             </AnimateIn>
           ))}
-
-          <AnimateIn delay={0.32}>
-            <p className="mt-8 font-body font-medium text-lg text-accent-indigo text-center lg:text-left">
-              None of this is your fault. Your tools were never designed for how
-              Indian distribution actually works. Ordra was.
-            </p>
-          </AnimateIn>
         </div>
       </div>
     </section>

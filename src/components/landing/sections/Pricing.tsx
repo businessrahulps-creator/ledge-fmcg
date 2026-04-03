@@ -14,7 +14,7 @@ const plans = [
       "1 warehouse",
       "Basic dashboard",
     ],
-    cta: "Start Free →",
+    cta: "Start Free",
     highlighted: false,
     ctaStyle: "border border-fog text-midnight hover:border-midnight",
   },
@@ -27,11 +27,10 @@ const plans = [
       "Up to 15 users",
       "Unlimited orders",
       "Multi-warehouse stock",
-      "Dealer & sales analytics",
-      "Payment tracking (UPI, cheque, cash)",
-      "Priority WhatsApp support",
+      "Dealer analytics",
+      "Payment tracking",
     ],
-    cta: "Start 14-Day Trial →",
+    cta: "Start 14-Day Trial",
     highlighted: true,
     ctaStyle: "bg-ink text-white hover:bg-ink-light",
   },
@@ -43,12 +42,11 @@ const plans = [
     features: [
       "Unlimited users",
       "Everything in Growth",
-      "Advanced reports & export",
-      "Custom role permissions",
-      "Dedicated onboarding",
-      "API access (coming soon)",
+      "Advanced reports",
+      "Custom permissions",
+      "Dedicated support",
     ],
-    cta: "Start 14-Day Trial →",
+    cta: "Start 14-Day Trial",
     highlighted: false,
     ctaStyle: "border border-fog text-midnight hover:border-midnight",
   },
@@ -60,10 +58,9 @@ const plans = [
     features: [
       "Custom integrations (Tally, SAP)",
       "Multi-brand support",
-      "SLA & dedicated manager",
       "On-premise option",
     ],
-    cta: "Talk to Us →",
+    cta: "Talk to Us",
     highlighted: false,
     ctaStyle: "border border-fog text-midnight hover:border-midnight",
   },
@@ -152,7 +149,7 @@ export function Pricing() {
             All plans include PWA install and automatic updates.
           </p>
           <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
-            Need help choosing? Chat on WhatsApp →
+            Need help choosing? Chat on WhatsApp
           </p>
         </div>
       </div>
