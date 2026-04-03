@@ -6,7 +6,7 @@ const features = [
     icon: LayoutGrid,
     title: "Your business, at a glance",
     description:
-      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns — maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
+      "Open Ordra and see four numbers: today's revenue, orders placed, pending dispatches, deliveries completed. Filter by day to spot patterns. Maybe Tuesdays are slow in your Pune territory. Now you know, and you didn't have to call anyone.",
   },
   {
     icon: ClipboardCheck,
