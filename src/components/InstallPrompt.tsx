@@ -8,7 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const STORAGE_KEY = "ordra-install-state"; // "dismissed" | "never" | undefined
+const STORAGE_KEY = "ledge-install-state"; // "dismissed" | "never" | undefined
 
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
