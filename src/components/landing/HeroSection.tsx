@@ -36,7 +36,7 @@ function DashboardMockup() {
           <div className="w-3 h-3 rounded-full bg-[#22C55E]/60" />
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="px-4 py-1 rounded-md bg-[#16161F] text-[#55556A] text-xs">app.ordra.in/dashboard</div>
+          <div className="px-4 py-1 rounded-md bg-[#16161F] text-[#55556A] text-xs">app.ledge.in/dashboard</div>
         </div>
       </div>
 
