@@ -15,6 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
+        heading: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
         xs: ["12px", { lineHeight: "16px" }],
@@ -81,6 +83,22 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        midnight: "var(--midnight)",
+        charcoal: "var(--charcoal)",
+        violet: {
+          DEFAULT: "var(--violet)",
+          hover: "var(--violet-hover)",
+          wash: "var(--violet-wash)",
+          glow: "var(--violet-glow)",
+        },
+        snow: "var(--snow)",
+        cream: "var(--cream)",
+        onyx: "var(--onyx)",
+        graphite: "var(--graphite)",
+        "lp-zinc": "var(--lp-zinc)",
+        silver: "var(--silver)",
+        fog: "var(--fog)",
+        "slate-border": "var(--slate-border)",
       },
       borderRadius: {
         lg: "var(--radius)",

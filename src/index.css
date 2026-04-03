@@ -4,6 +4,27 @@
 
 @layer base {
   :root {
+    /* Landing page tokens */
+    --midnight: #09090B;
+    --charcoal: #18181B;
+    --violet: #7C3AED;
+    --violet-hover: #6D28D9;
+    --violet-wash: #EDE9FE;
+    --violet-glow: rgba(124, 58, 237, 0.10);
+    --snow: #FAFAFA;
+    --cream: #F5F3EF;
+    --lp-white: #FFFFFF;
+    --onyx: #1E1E22;
+    --graphite: #3F3F46;
+    --lp-zinc: #71717A;
+    --silver: #A1A1AA;
+    --fog: #E4E4E7;
+    --slate-border: #27272A;
+    --lp-emerald: #10B981;
+    --lp-amber: #F59E0B;
+    --lp-rose: #EF4444;
+
+
     --background: 0 0% 98%;
     --foreground: 0 0% 7%;
 
