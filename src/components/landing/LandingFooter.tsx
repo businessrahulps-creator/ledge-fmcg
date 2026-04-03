@@ -12,7 +12,7 @@ export function LandingFooter() {
       title: "Company",
       links: [
         { label: "About", href: "#" },
-        { label: "Contact", href: "mailto:hello@ordra.in" },
+        { label: "Contact", href: "mailto:hello@ledge.in" },
       ],
     },
     {

@@ -54,10 +54,10 @@ export interface Order {
 }
 
 export const salespersons: Salesperson[] = [
-  { id: "s1", name: "Rajesh Kumar", phone: "+91 98100 55555", email: "rajesh@ordra.in", region: "North", totalOrders: 89, totalValue: 1820000 },
-  { id: "s2", name: "Amit Shah", phone: "+91 97120 66666", email: "amit@ordra.in", region: "West", totalOrders: 72, totalValue: 1450000 },
-  { id: "s3", name: "Priya Verma", phone: "+91 94150 77777", email: "priya@ordra.in", region: "Central", totalOrders: 58, totalValue: 1120000 },
-  { id: "s4", name: "Deepak Joshi", phone: "+91 99490 88888", email: "deepak@ordra.in", region: "South", totalOrders: 34, totalValue: 680000 },
+  { id: "s1", name: "Rajesh Kumar", phone: "+91 98100 55555", email: "rajesh@ledge.in", region: "North", totalOrders: 89, totalValue: 1820000 },
+  { id: "s2", name: "Amit Shah", phone: "+91 97120 66666", email: "amit@ledge.in", region: "West", totalOrders: 72, totalValue: 1450000 },
+  { id: "s3", name: "Priya Verma", phone: "+91 94150 77777", email: "priya@ledge.in", region: "Central", totalOrders: 58, totalValue: 1120000 },
+  { id: "s4", name: "Deepak Joshi", phone: "+91 99490 88888", email: "deepak@ledge.in", region: "South", totalOrders: 34, totalValue: 680000 },
 ];
 
 export const distributors: Distributor[] = [
