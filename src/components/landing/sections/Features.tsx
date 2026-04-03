@@ -16,7 +16,7 @@ const features = [
   },
   {
     icon: Users,
-    title: "Every dealer, every salesperson — one tap",
+    title: "Every dealer, every salesperson, one tap",
     description:
       "Tap a dealer and see their region, last 20 orders, outstanding payments, and lifetime value. Tap a salesperson and see their territory, today's orders, and whether they've actually been active this week. No more keeping this in your head.",
   },
