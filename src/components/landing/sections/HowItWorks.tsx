@@ -99,7 +99,7 @@ function StockMockup() {
         {rows.map((r) => (
           <div key={r.product} className="grid grid-cols-4 items-center py-1">
             <span className="text-[10px] text-midnight truncate pr-1">{r.product}</span>
-            <span className="text-[10px] text-graphite">{r.godown}</span>
+            <span className="text-[10px] text-graphite">{r.warehouse}</span>
             <span className="text-[10px] text-midnight text-right">{r.qty}</span>
             <div className="text-right">
               <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${r.color}`}>{r.health}</span>
