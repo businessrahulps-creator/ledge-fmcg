@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { forwardRef, useState, useEffect, useRef, ReactNode } from "react";
 import { motion, useInView } from "framer-motion";
 
 interface AnimateInProps {
@@ -7,22 +7,24 @@ interface AnimateInProps {
   delay?: number;
 }
 
-export function AnimateIn({ children, className, delay = 0 }: AnimateInProps) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
+  function AnimateIn({ children, className, delay = 0 }, _ref) {
+    const innerRef = useRef(null);
+    const isInView = useInView(innerRef, { once: true, margin: "-80px" });
 
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 16 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
+    return (
+      <motion.div
+        ref={innerRef}
+        initial={{ opacity: 0, y: 16 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5, delay, ease: "easeOut" }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
 
 export function useCountUp(end: number, isInView: boolean, duration = 2000) {
   const [count, setCount] = useState(0);
