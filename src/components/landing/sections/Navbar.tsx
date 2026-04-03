@@ -1,9 +1,102 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Menu } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+const links = [
+  { label: "Features", href: "#features" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "About", href: "#about" },
+];
+
 export function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-midnight/95 backdrop-blur-md border-b border-slate-border h-16 flex items-center">
-      <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
-        <span className="font-heading font-bold text-xl text-white">Ordra</span>
-        <span className="text-silver text-sm font-body">Navbar — placeholder</span>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
+        scrolled
+          ? "bg-midnight/95 backdrop-blur-md border-b border-slate-border"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-[1200px] mx-auto w-full px-6 flex items-center justify-between">
+        {/* Logo */}
+        <a href="#" className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+            <span className="text-white text-xs font-heading font-bold leading-none">O</span>
+          </div>
+          <span className="font-heading font-bold text-xl text-white">Ordra</span>
+        </a>
+
+        {/* Center links — desktop */}
+        <div className="hidden md:flex items-center gap-8">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="font-body font-medium text-[15px] text-silver hover:text-white transition-colors duration-200"
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+
+        {/* CTA — desktop */}
+        <div className="hidden md:block">
+          <Link
+            to="/signup"
+            className="inline-flex items-center bg-violet text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-violet-hover transition-colors duration-200"
+          >
+            Start Free Trial
+          </Link>
+        </div>
+
+        {/* Mobile hamburger */}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <button className="md:hidden text-white p-2 -mr-2" aria-label="Open menu">
+              <Menu size={24} />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="bg-midnight border-slate-border w-72 flex flex-col">
+            <SheetHeader>
+              <SheetTitle className="text-white font-heading">Menu</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-6 mt-8 flex-1">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="font-body font-medium text-lg text-silver hover:text-white transition-colors"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+            <Link
+              to="/signup"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center justify-center bg-violet text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-violet-hover transition-colors mb-4"
+            >
+              Start Free Trial
+            </Link>
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );
