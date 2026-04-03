@@ -30,7 +30,7 @@ const features = [
     icon: IndianRupee,
     title: "Payments the way India pays",
     description:
-      "Cash, UPI, cheque, credit — tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
+      "Cash, UPI, cheque, credit. Tracked how your business actually works. See what's been paid, what's partial, what's overdue at a glance. Replace the separate khata you've been maintaining since 2016.",
   },
   {
     icon: CloudOff,
