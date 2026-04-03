@@ -18,7 +18,7 @@ const cards = [
     icon: Compass,
     title: "Decisions Made on Feeling",
     description:
-      "Which dealer is growing? Which salesperson hasn't visited their territory in a week? Which product has been sitting in your Surat godown for 45 days? You don't know. Not because you don't care. Because your current tools don't tell you.",
+      "Which dealer is growing? Which salesperson hasn't visited their territory in a week? Which product has been sitting in your Surat warehouse for 45 days? You don't know. Not because you don't care. Because your current tools don't tell you.",
   },
   {
     icon: Laptop,

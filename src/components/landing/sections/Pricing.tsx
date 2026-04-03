@@ -149,7 +149,7 @@ export function Pricing() {
 
         <div className="text-center mt-10 space-y-2">
           <p className="font-body text-[15px] text-lp-zinc">
-            All plans include offline mode, PWA install, and automatic updates.
+            All plans include PWA install and automatic updates.
           </p>
           <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
             Need help choosing? Chat on WhatsApp →

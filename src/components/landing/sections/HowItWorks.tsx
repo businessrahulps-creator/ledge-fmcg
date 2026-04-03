@@ -132,7 +132,7 @@ const steps = [
     badge: "Step 3",
     title: "You spot what matters before it becomes a problem.",
     description:
-      "Your Surat godown is at 12% stock on your best-selling SKU. Your newest salesperson hasn't logged an order in 3 days. A dealer's payment has been partial for 2 weeks. Ordra surfaces these things. You act on data, not hunches.",
+      "Your Surat warehouse is at 12% stock on your best-selling SKU. Your newest salesperson hasn't logged an order in 3 days. A dealer's payment has been partial for 2 weeks. Ordra surfaces these things. You act on data, not hunches.",
     mockup: StockMockup,
     reversed: false,
   },

@@ -169,7 +169,7 @@ export function Hero() {
             {...fadeUp(0.2)}
           >
             Your salespeople place orders on their phone. You see every order,
-            every dealer, every rupee, live on your dashboard.. Works offline.
+            every dealer, every rupee, live on your dashboard.
             Replaces your WhatsApp groups, Excel sheets, and nightly phone calls.
           </motion.p>
 
