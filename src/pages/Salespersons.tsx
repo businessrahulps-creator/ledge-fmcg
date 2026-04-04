@@ -42,11 +42,14 @@ export default function Salespersons() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const filtered = items.filter(
+  const isLoading = usePageLoading();
+  const debouncedSearch = useDebounce(search);
+
+  const filtered = useMemo(() => items.filter(
     (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.region.toLowerCase().includes(search.toLowerCase())
-  );
+      s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      s.region.toLowerCase().includes(debouncedSearch.toLowerCase())
+  ), [items, debouncedSearch]);
 
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
