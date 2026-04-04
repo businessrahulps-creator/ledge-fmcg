@@ -157,7 +157,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addProduct, updateProduct, deleteProduct,
         addLocation, updateLocation, deleteLocation,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
-        nextOrderNumber,
+        nextOrderNumber, previewOrderNumber,
       }}
     >
       {children}

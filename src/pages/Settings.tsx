@@ -349,6 +349,31 @@ export default function Settings() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Prefix Change Confirmation Dialog */}
+        <AlertDialog open={showPrefixConfirm} onOpenChange={setShowPrefixConfirm}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">⚠️ Change Order Prefix</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm space-y-2">
+                <span className="block">Changing the Order Prefix will only apply to <strong className="text-foreground">NEW</strong> orders from now on.</span>
+                <span className="block">All existing orders will keep their current numbers forever.</span>
+                <span className="block">This change cannot be undone for past orders.</span>
+                <span className="block mt-2 font-mono text-[11px] rounded-md bg-muted/50 px-2 py-1.5 border border-border/50">
+                  Current: {savedPrefix}-2026-{String(api.orders.previewNumber().split("-").pop()).padStart(4, "0")}<br />
+                  New: {orderPrefix}-2026-{String(api.orders.previewNumber().split("-").pop()).padStart(4, "0")}
+                </span>
+                <span className="block font-medium text-foreground">Are you sure?</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { saveCompany(); setShowPrefixConfirm(false); }}>
+                Yes, Change Prefix
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Logout Confirmation Dialog */}
         <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
