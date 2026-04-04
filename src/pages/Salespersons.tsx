@@ -180,6 +180,10 @@ export default function Salespersons() {
             <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
             <p className="mt-3 text-sm font-medium">No team members found</p>
             <p className="text-xs text-muted-foreground">Add your first team member to get started</p>
+            <Button size="sm" className="mt-3" onClick={openNew}>
+              <Plus className="h-4 w-4" />
+              Add Team Member
+            </Button>
           </div>
         )}
 

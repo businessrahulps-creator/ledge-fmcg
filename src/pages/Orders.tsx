@@ -229,6 +229,12 @@ export default function Orders() {
               <p className="text-xs text-muted-foreground">
                 Try adjusting your search or filters
               </p>
+              <Link to="/orders/new">
+                <Button size="sm" className="mt-3">
+                  <Plus className="h-4 w-4" />
+                  Create your first order
+                </Button>
+              </Link>
             </div>
           )}
         </div>

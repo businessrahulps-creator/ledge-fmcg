@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
@@ -64,6 +64,8 @@ export default function NewOrder() {
   const nextOrderNumber = api.orders.nextNumber;
   const { addNotification } = useNotifications();
 
+  const firstProductRef = useRef<HTMLButtonElement>(null);
+
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
@@ -80,6 +82,14 @@ export default function NewOrder() {
   const [vehicle, setVehicle] = useState("");
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Auto-focus first product select when dealer is chosen
+  useEffect(() => {
+    if (selectedDealer) {
+      setTimeout(() => firstProductRef.current?.focus(), 100);
+    }
+  }, [selectedDealer]);
+
 
   const addLine = () => {
     setLines((prev) => [
@@ -256,7 +266,7 @@ export default function NewOrder() {
                             value={line.productId}
                             onValueChange={(v) => updateLine(line.id, "productId", v)}
                           >
-                            <SelectTrigger className="h-11 rounded-lg md:h-12">
+                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-11 rounded-lg md:h-12">
                               <SelectValue placeholder="Select product" />
                             </SelectTrigger>
                             <SelectContent>
