@@ -1,12 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast.error("Login failed", { description: error.message });
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -24,7 +46,7 @@ export default function Login() {
 
         {/* Form */}
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
@@ -32,6 +54,8 @@ export default function Login() {
                 type="email"
                 placeholder="you@company.com"
                 className="h-12 rounded-lg"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -48,6 +72,8 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="h-12 rounded-lg pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -59,11 +85,10 @@ export default function Login() {
               </div>
             </div>
 
-            <Link to="/dashboard">
-              <Button className="w-full" size="default">
-                Sign in
-              </Button>
-            </Link>
+            <Button className="w-full" size="default" type="submit" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Sign in
+            </Button>
           </form>
         </div>
 
