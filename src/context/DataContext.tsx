@@ -24,6 +24,10 @@ interface DataContextType {
   locations: GodownLocation[];
   stockItems: StockItem[];
 
+  orderPrefix: string;
+  orderSequence: number;
+  setOrderPrefix: (prefix: string) => void;
+
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
 
@@ -49,6 +53,7 @@ interface DataContextType {
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
 
   nextOrderNumber: () => string;
+  previewOrderNumber: () => string;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -66,6 +71,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [locations, setLocations] = useState<GodownLocation[]>(initialLocations);
   const [stockItems, setStockItems] = useState<StockItem[]>(initialStockItems);
+  const [orderPrefix, setOrderPrefix] = useState("ORD");
+
+  // Seed sequence from existing orders
+  const [orderSequence, setOrderSequence] = useState(() => {
+    const maxNum = initialOrders.reduce((max, o) => {
+      const match = o.orderNumber.match(/\w+-\d{4}-(\d+)/);
+      return match ? Math.max(max, parseInt(match[1])) : max;
+    }, 0);
+    return maxNum + 1;
+  });
 
   const addOrder = useCallback((order: Order) => setOrders((prev) => [order, ...prev]), []);
   const updateOrder = useCallback((id: string, updates: Partial<Order>) =>
@@ -119,25 +134,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
       return { ...p, totalSold };
     }), [products, orders]);
 
+  const previewOrderNumber = useCallback(() => {
+    const year = new Date().getFullYear();
+    return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
+  }, [orderPrefix, orderSequence]);
+
   const nextOrderNumber = useCallback(() => {
-    const maxNum = orders.reduce((max, o) => {
-      const match = o.orderNumber.match(/ORD-\d{4}-(\d+)/);
-      return match ? Math.max(max, parseInt(match[1])) : max;
-    }, 0);
-    return `ORD-${new Date().getFullYear()}-${String(maxNum + 1).padStart(3, "0")}`;
-  }, [orders]);
+    const year = new Date().getFullYear();
+    const num = `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
+    setOrderSequence((prev) => prev + 1);
+    return num;
+  }, [orderPrefix, orderSequence]);
 
   return (
     <DataContext.Provider
       value={{
         orders, distributors: computedDistributors, salespersons: computedSalespersons, products: computedProducts, locations, stockItems,
+        orderPrefix, orderSequence, setOrderPrefix,
         addOrder, updateOrder,
         addDistributor, updateDistributor, deleteDistributor,
         addSalesperson, updateSalesperson, deleteSalesperson,
         addProduct, updateProduct, deleteProduct,
         addLocation, updateLocation, deleteLocation,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
-        nextOrderNumber,
+        nextOrderNumber, previewOrderNumber,
       }}
     >
       {children}

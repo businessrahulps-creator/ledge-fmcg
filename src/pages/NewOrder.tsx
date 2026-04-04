@@ -208,11 +208,16 @@ export default function NewOrder() {
           >
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold tracking-tight md:text-2xl">New Order</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Create a new sales order
             </p>
+          </div>
+          <div className="glass-card px-3 py-1.5 rounded-lg shrink-0">
+            <span className="text-[10px] text-muted-foreground md:text-xs font-mono">
+              {api.orders.previewNumber()}
+            </span>
           </div>
         </div>
 

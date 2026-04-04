@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useApi } from "@/services/api";
 
 interface TeamMember {
   id: string;
@@ -52,8 +53,12 @@ export default function Settings() {
   const { toast } = useToast();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
+  const api = useApi();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
+  const savedPrefix = api.orders.prefix();
+  const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
   const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
   const [team, setTeam] = useState<TeamMember[]>([
     { id: "t1", name: "Admin User", email: "admin@acmefmcg.in", role: "super_admin" },
@@ -64,7 +69,18 @@ export default function Settings() {
   const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
 
+  const handleSaveClick = () => {
+    if (orderPrefix !== savedPrefix) {
+      setShowPrefixConfirm(true);
+      return;
+    }
+    saveCompany();
+  };
+
   const saveCompany = () => {
+    if (orderPrefix !== savedPrefix) {
+      api.orders.setPrefix(orderPrefix);
+    }
     toast({ title: "Settings saved", description: "Company profile has been updated." });
   };
 
@@ -141,7 +157,21 @@ export default function Settings() {
                   <Textarea value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} className="min-h-[100px] rounded-lg" />
                 </div>
 
-                <Button onClick={saveCompany}>Save Changes</Button>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Order Prefix</Label>
+                  <Input
+                    value={orderPrefix}
+                    onChange={(e) => setOrderPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                    maxLength={10}
+                    className="h-11 rounded-lg md:h-12 max-w-[200px] font-mono"
+                    placeholder="ORD"
+                  />
+                  <p className="text-[10px] text-muted-foreground md:text-xs">
+                    This will be used in all future order numbers (e.g. {orderPrefix || "ORD"}-2026-0042)
+                  </p>
+                </div>
+
+                <Button onClick={handleSaveClick}>Save Changes</Button>
               </div>
             </motion.div>
           </TabsContent>
@@ -314,6 +344,31 @@ export default function Settings() {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                 Remove
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Prefix Change Confirmation Dialog */}
+        <AlertDialog open={showPrefixConfirm} onOpenChange={setShowPrefixConfirm}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">⚠️ Change Order Prefix</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm space-y-2">
+                <span className="block">Changing the Order Prefix will only apply to <strong className="text-foreground">NEW</strong> orders from now on.</span>
+                <span className="block">All existing orders will keep their current numbers forever.</span>
+                <span className="block">This change cannot be undone for past orders.</span>
+                <span className="block mt-2 font-mono text-[11px] rounded-md bg-muted/50 px-2 py-1.5 border border-border/50">
+                  Current: {savedPrefix}-2026-{String(api.orders.previewNumber().split("-").pop()).padStart(4, "0")}<br />
+                  New: {orderPrefix}-2026-{String(api.orders.previewNumber().split("-").pop()).padStart(4, "0")}
+                </span>
+                <span className="block font-medium text-foreground">Are you sure?</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { saveCompany(); setShowPrefixConfirm(false); }}>
+                Yes, Change Prefix
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

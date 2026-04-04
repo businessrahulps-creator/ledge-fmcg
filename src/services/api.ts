@@ -13,6 +13,9 @@ export function useApi() {
       updateStatus: (id: string, status: Partial<Pick<Order, "paymentStatus" | "deliveryStatus">>) =>
         data.updateOrder(id, status),
       nextNumber: () => data.nextOrderNumber(),
+      prefix: () => data.orderPrefix,
+      setPrefix: (p: string) => data.setOrderPrefix(p),
+      previewNumber: () => data.previewOrderNumber(),
     },
     dealers: {
       list: () => data.distributors,
