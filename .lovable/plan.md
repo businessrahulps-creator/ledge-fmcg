@@ -1,38 +1,39 @@
 
 
-# Fix Quantity Input Bug in New Order
+# Order Prefix Feature in Settings
 
-## Problem
-The quantity input uses `type="number"` with `value={line.quantity}` (always a number) and `parseInt(e.target.value) || 0`. This causes leading zeros ("01") because the numeric state `1` gets prepended when typing, and the `type="number"` input doesn't clean display values properly.
+## Overview
+Add a configurable order prefix to Settings → Company tab, stored in DataContext. The prefix feeds into order number generation. Existing orders are never mutated.
 
-## Solution
-Track quantity as a **string** for display, parse to number only for calculations. Single file edit in `src/pages/NewOrder.tsx`.
+## Changes
 
-### Changes
+### 1. `src/context/DataContext.tsx`
+- Add two new state fields: `orderPrefix` (string, default `"ORD"`) and `orderSequence` (number, initialized from max existing order sequence + 1)
+- Add `setOrderPrefix(prefix: string)` and expose `orderPrefix` + `orderSequence` on context
+- Update `nextOrderNumber()` to return `${orderPrefix}-${year}-${padded sequence}` and increment `orderSequence`
+- The regex for initial sequence extraction stays, but only runs once to seed the counter
 
-**1. Add a `quantityStr` field to `OrderLineState`**
-```ts
-interface OrderLineState {
-  id: string;
-  productId: string;
-  quantity: number;       // used for calculations
-  quantityStr: string;    // used for display
-  unitPrice: number;
-}
-```
-Default: `quantity: 1, quantityStr: "1"`.
+### 2. `src/services/api.ts`
+- Expose `orders.prefix()` → returns current prefix
+- Expose `orders.setPrefix(p: string)` → calls context setter
+- Expose `orders.previewNumber()` → returns what next order number would look like (for the badge)
 
-**2. Update the quantity `<Input>`**
-- Switch to `type="text"` with `inputMode="numeric"` (mobile numeric keyboard)
-- `value={line.quantityStr}`
-- `onChange`: strip non-digits, parse to int, clamp to ≥ 0, set both `quantity` and `quantityStr`
-- `onBlur`: if empty, reset to "0" / 0
+### 3. `src/pages/Settings.tsx`
+- Add `orderPrefix` state (local, initialized from context via `useApi`)
+- Add "Order Prefix" text input below Company Name: max 10 chars, auto-uppercase, helper text as specified
+- Add `showPrefixConfirm` state for the confirmation dialog
+- On "Save Changes" click: if prefix changed, show confirmation AlertDialog with the exact warning text. On confirm, call `api.orders.setPrefix()` then save. If prefix unchanged, save directly.
+- The confirmation dialog shows current→new example using actual next sequence number
 
-**3. Update `updateLine`**
-Add a branch for `"quantity"` that keeps both fields in sync. When called from product-select or price changes, behavior stays the same.
+### 4. `src/pages/NewOrder.tsx`
+- Add a read-only badge at the top (below the back button / title area) showing "Order Number Preview: [PREFIX]-2026-XXXX" using `api.orders.previewNumber()`
+- Styled as a subtle `glass-card` inline badge with `text-xs text-muted-foreground`
 
-**4. Update `addLine` and initial state**
-Set `quantityStr: "1"` alongside `quantity: 1`.
-
-No other files affected. Line totals, order total, and save logic all read `line.quantity` (the number) — unchanged.
+## File Summary
+| Action | File |
+|--------|------|
+| Edit | `src/context/DataContext.tsx` — add prefix state, sequence counter, updated nextOrderNumber |
+| Edit | `src/services/api.ts` — expose prefix/setPrefix/previewNumber |
+| Edit | `src/pages/Settings.tsx` — prefix input + confirmation dialog |
+| Edit | `src/pages/NewOrder.tsx` — order number preview badge |
 
