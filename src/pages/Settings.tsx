@@ -53,8 +53,12 @@ export default function Settings() {
   const { toast } = useToast();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
+  const api = useApi();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
+  const savedPrefix = api.orders.prefix();
+  const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
   const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
   const [team, setTeam] = useState<TeamMember[]>([
     { id: "t1", name: "Admin User", email: "admin@acmefmcg.in", role: "super_admin" },
