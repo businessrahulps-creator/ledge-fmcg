@@ -1,34 +1,38 @@
 
 
-# Set Custom PWA App Icon
+# Fix Signup Page Button Issues
 
-## Overview
-Replace the existing PWA icons with the uploaded image (the colorful checkmark icon) so it appears as the app icon when users install Ledge from their browser.
+## Problems
+1. The `<Link>` wrapping the button (line 62) is inside `space-y-5` but has no top margin — the button overlaps the password field.
+2. The `<Sparkles>` icon (line 64) appears before "Start free trial" — needs to be removed.
 
-## Steps
+## Fix
 
-### 1. Copy uploaded image to public directory
-Copy the uploaded icon to the project and generate the three required PWA icon sizes:
-- `public/pwa-192.png` (192x192)
-- `public/pwa-512.png` (512x512)
-- `public/pwa-maskable-512.png` (512x512, same image — it already has padding suitable for maskable use)
+**File: `src/pages/Signup.tsx`** (lines 62–67)
 
-### 2. Set as favicon
-Also update `public/favicon.ico` and add a PNG favicon reference in `index.html` so the browser tab icon matches.
+Add `mt-2` to the Link wrapper, remove the Sparkles icon, and remove the unused `Sparkles` import.
 
-### 3. Update InstallPrompt icon
-In `src/components/InstallPrompt.tsx`, replace the "L" text logo in the install prompt with the actual app icon image for a polished look.
+```tsx
+// Before
+<Link to="/dashboard">
+  <Button className="w-full" size="default">
+    <Sparkles className="h-4 w-4" />
+    Start free trial
+  </Button>
+</Link>
 
-## Technical Details
-- Use ImageMagick (`nix run nixpkgs#imagemagick`) to resize the uploaded PNG to 192x192 and 512x512
-- The uploaded image has a transparent background and rounded corners — it's already well-suited for PWA icons
-- No changes to `vite.config.ts` needed; icon filenames remain the same
+// After
+<Link to="/dashboard" className="block mt-2">
+  <Button className="w-full" size="default">
+    Start free trial
+  </Button>
+</Link>
+```
 
-## Files Modified
-- `public/pwa-192.png` — replaced
-- `public/pwa-512.png` — replaced
-- `public/pwa-maskable-512.png` — replaced
-- `public/favicon.ico` — replaced
-- `index.html` — add PNG favicon link
-- `src/components/InstallPrompt.tsx` — use icon image instead of "L" text
+Also update the import on line 6 to remove `Sparkles`:
+```tsx
+import { Eye, EyeOff } from "lucide-react";
+```
+
+Two edits, one file.
 
