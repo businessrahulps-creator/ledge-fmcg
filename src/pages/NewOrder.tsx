@@ -64,6 +64,8 @@ export default function NewOrder() {
   const nextOrderNumber = api.orders.nextNumber;
   const { addNotification } = useNotifications();
 
+  const firstProductRef = useRef<HTMLButtonElement>(null);
+
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
