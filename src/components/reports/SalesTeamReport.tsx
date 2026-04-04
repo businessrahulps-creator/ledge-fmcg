@@ -6,7 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/ui/status-badge";
 
 export function SalesTeamReport() {
-  const { orders, salespersons } = useData();
+  const api = useApi();
+  const orders = api.orders.list();
+  const salespersons = api.salespersons.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const filteredOrders = filterByTimePeriod(orders, period);
 

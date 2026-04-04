@@ -27,7 +27,12 @@ import {
 import { toast } from "sonner";
 
 export default function Distributors() {
-  const { distributors: items, orders, addDistributor, updateDistributor, deleteDistributor } = useData();
+  const api = useApi();
+  const items = api.dealers.list();
+  const orders = api.orders.list();
+  const addDistributor = api.dealers.create;
+  const updateDistributor = api.dealers.update;
+  const deleteDistributor = api.dealers.remove;
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Distributor | null>(null);

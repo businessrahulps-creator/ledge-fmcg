@@ -49,11 +49,20 @@ function HealthBadge({ health }: { health: string }) {
 }
 
 export default function Stock() {
-  const {
-    products, addProduct, updateProduct, deleteProduct: deleteProductCtx,
-    locations, addLocation, updateLocation, deleteLocation,
-    stockItems: stockItemsList, addStockItem, updateStockItem, deleteStockItem: deleteStockItemCtx, setStockItems,
-  } = useData();
+  const api = useApi();
+  const products = api.products.list();
+  const addProduct = api.products.create;
+  const updateProduct = api.products.update;
+  const deleteProductCtx = api.products.remove;
+  const locations = api.stock.locations.list();
+  const addLocation = api.stock.locations.create;
+  const updateLocation = api.stock.locations.update;
+  const deleteLocation = api.stock.locations.remove;
+  const stockItemsList = api.stock.items.list();
+  const addStockItem = api.stock.items.create;
+  const updateStockItem = api.stock.items.update;
+  const deleteStockItemCtx = api.stock.items.remove;
+  const setStockItems = api.stock.items.setAll;
 
   const [productSearch, setProductSearch] = useState("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);

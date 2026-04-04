@@ -27,7 +27,12 @@ import {
 import { toast } from "sonner";
 
 export default function Salespersons() {
-  const { salespersons: items, orders, addSalesperson, updateSalesperson, deleteSalesperson } = useData();
+  const api = useApi();
+  const items = api.salespersons.list();
+  const orders = api.orders.list();
+  const addSalesperson = api.salespersons.create;
+  const updateSalesperson = api.salespersons.update;
+  const deleteSalesperson = api.salespersons.remove;
   const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState<Salesperson | null>(null);
   const [isNew, setIsNew] = useState(false);

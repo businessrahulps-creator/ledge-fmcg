@@ -17,7 +17,10 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
-  const { orders, distributors, products } = useData();
+  const api = useApi();
+  const orders = api.orders.list();
+  const distributors = api.dealers.list();
+  const products = api.products.list();
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
 

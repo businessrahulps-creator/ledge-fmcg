@@ -53,7 +53,9 @@ const deliveryStatuses = [
 ];
 
 export default function Orders() {
-  const { orders, updateOrder } = useData();
+  const api = useApi();
+  const orders = api.orders.list();
+  const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
   const [search, setSearch] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryFilter, setDeliveryFilter] = useState("all");

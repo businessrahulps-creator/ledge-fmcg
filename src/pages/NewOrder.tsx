@@ -56,7 +56,12 @@ const statusColors: Record<string, string> = {
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { products, distributors, salespersons, addOrder, nextOrderNumber } = useData();
+  const api = useApi();
+  const products = api.products.list();
+  const distributors = api.dealers.list();
+  const salespersons = api.salespersons.list();
+  const addOrder = api.orders.create;
+  const nextOrderNumber = api.orders.nextNumber;
   const { addNotification } = useNotifications();
 
   const [lines, setLines] = useState<OrderLineState[]>([
