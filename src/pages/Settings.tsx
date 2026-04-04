@@ -387,7 +387,7 @@ export default function Settings() {
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => navigate("/")} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction onClick={async () => { await signOut(); navigate("/login"); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                 Log Out
               </AlertDialogAction>
             </AlertDialogFooter>
