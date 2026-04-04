@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
 import {
   orders as initialOrders,
   distributors as initialDistributors,
@@ -101,6 +101,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const deleteStockItemFn = useCallback((id: string) =>
     setStockItems((prev) => prev.filter((x) => x.id !== id)), []);
 
+  const computedDistributors = useMemo(() =>
+    distributors.map(d => {
+      const dOrders = orders.filter(o => o.distributorId === d.id);
+      return { ...d, totalOrders: dOrders.length, totalValue: dOrders.reduce((s, o) => s + o.total, 0) };
+    }), [distributors, orders]);
+
+  const computedSalespersons = useMemo(() =>
+    salespersons.map(s => {
+      const sOrders = orders.filter(o => o.salespersonId === s.id);
+      return { ...s, totalOrders: sOrders.length, totalValue: sOrders.reduce((sum, o) => sum + o.total, 0) };
+    }), [salespersons, orders]);
+
+  const computedProducts = useMemo(() =>
+    products.map(p => {
+      const totalSold = orders.reduce((sum, o) => sum + o.lines.filter(l => l.productId === p.id).reduce((s, l) => s + l.quantity, 0), 0);
+      return { ...p, totalSold };
+    }), [products, orders]);
+
   const nextOrderNumber = useCallback(() => {
     const maxNum = orders.reduce((max, o) => {
       const match = o.orderNumber.match(/ORD-\d{4}-(\d+)/);
@@ -112,7 +130,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   return (
     <DataContext.Provider
       value={{
-        orders, distributors, salespersons, products, locations, stockItems,
+        orders, distributors: computedDistributors, salespersons: computedSalespersons, products: computedProducts, locations, stockItems,
         addOrder, updateOrder,
         addDistributor, updateDistributor, deleteDistributor,
         addSalesperson, updateSalesperson, deleteSalesperson,
