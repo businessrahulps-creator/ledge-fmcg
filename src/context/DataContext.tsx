@@ -24,6 +24,10 @@ interface DataContextType {
   locations: GodownLocation[];
   stockItems: StockItem[];
 
+  orderPrefix: string;
+  orderSequence: number;
+  setOrderPrefix: (prefix: string) => void;
+
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
 
@@ -49,6 +53,7 @@ interface DataContextType {
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
 
   nextOrderNumber: () => string;
+  previewOrderNumber: () => string;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
