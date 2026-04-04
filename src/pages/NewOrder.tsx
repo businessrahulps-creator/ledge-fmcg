@@ -483,35 +483,6 @@ export default function NewOrder() {
           </div>
         </div>
 
-        {/* Success overlay */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-              onClick={() => {
-                setShowSuccess(false);
-                navigate("/orders");
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.35, type: "spring", stiffness: 200 }}
-                className="flex flex-col items-center gap-3"
-              >
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <CheckCircle2 className="h-10 w-10 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold">Order Created!</h2>
-                <p className="text-sm text-muted-foreground">Tap anywhere to go to orders</p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </AppLayout>
   );
