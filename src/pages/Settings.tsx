@@ -157,7 +157,21 @@ export default function Settings() {
                   <Textarea value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} className="min-h-[100px] rounded-lg" />
                 </div>
 
-                <Button onClick={saveCompany}>Save Changes</Button>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Order Prefix</Label>
+                  <Input
+                    value={orderPrefix}
+                    onChange={(e) => setOrderPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                    maxLength={10}
+                    className="h-11 rounded-lg md:h-12 max-w-[200px] font-mono"
+                    placeholder="ORD"
+                  />
+                  <p className="text-[10px] text-muted-foreground md:text-xs">
+                    This will be used in all future order numbers (e.g. {orderPrefix || "ORD"}-2026-0042)
+                  </p>
+                </div>
+
+                <Button onClick={handleSaveClick}>Save Changes</Button>
               </div>
             </motion.div>
           </TabsContent>
