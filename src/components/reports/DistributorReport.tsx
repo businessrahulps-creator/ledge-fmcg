@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
