@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatCurrency, type Order } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
