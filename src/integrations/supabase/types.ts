@@ -541,6 +541,10 @@ export type Database = {
         Returns: boolean
       }
       seed_company_data: { Args: { p_company_id: string }; Returns: undefined }
+      setup_new_company: {
+        Args: { p_company_name: string; p_full_name: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "super_admin" | "sales_manager" | "accountant" | "salesperson"

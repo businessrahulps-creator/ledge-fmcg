@@ -40,34 +40,12 @@ export default function Signup() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Signup failed");
 
-      const userId = authData.user.id;
-
-      // 2. Create company
-      const { data: company, error: companyError } = await supabase
-        .from("companies")
-        .insert({ name: companyName })
-        .select()
-        .single();
-      if (companyError) throw companyError;
-
-      // 3. Link profile to company
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ company_id: company.id, full_name: fullName })
-        .eq("user_id", userId);
-      if (profileError) throw profileError;
-
-      // 4. Assign super_admin role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: userId, role: "super_admin" as any });
-      if (roleError) throw roleError;
-
-      // 5. Seed sample data
-      const { error: seedError } = await supabase.rpc("seed_company_data", {
-        p_company_id: company.id,
+      // 2. Single RPC handles company + profile + role + seed data
+      const { error: setupError } = await supabase.rpc("setup_new_company", {
+        p_company_name: companyName,
+        p_full_name: fullName,
       });
-      if (seedError) console.error("Seed error:", seedError);
+      if (setupError) throw setupError;
 
       toast.success("Welcome to Ledge!", { description: "Your workspace is ready." });
       navigate("/dashboard");
