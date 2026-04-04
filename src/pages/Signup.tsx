@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -59,9 +59,8 @@ export default function Signup() {
               </div>
             </div>
 
-            <Link to="/dashboard">
+            <Link to="/dashboard" className="block mt-2">
               <Button className="w-full" size="default">
-                <Sparkles className="h-4 w-4" />
                 Start free trial
               </Button>
             </Link>
