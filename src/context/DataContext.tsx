@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 import type { Order, Distributor, Salesperson, Product, OrderLine } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 
@@ -179,6 +180,106 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [companyId]);
 
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel(`company-${companyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => {
+        // Refetch orders on any change from other clients
+        refetchOrders();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => {
+        refetchDistributors();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => {
+        refetchSalespersons();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => {
+        refetchProducts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => {
+        refetchGodowns();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => {
+        refetchStockItems();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId]);
+
+  // Lightweight refetch helpers for realtime
+  const refetchOrders = useCallback(async () => {
+    if (!companyId) return;
+    const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", companyId).order("created_at", { ascending: false });
+    if (!ordersData) return;
+    const orderIds = ordersData.map(o => o.id);
+    let allLines: any[] = [];
+    if (orderIds.length > 0) {
+      const { data: linesData } = await supabase.from("order_lines").select("*").in("order_id", orderIds);
+      allLines = linesData || [];
+    }
+    setOrders(ordersData.map(o => {
+      const oLines: OrderLine[] = allLines.filter(l => l.order_id === o.id).map(l => ({
+        productId: l.product_id, productName: l.product_name,
+        quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
+      }));
+      return {
+        id: o.id, orderNumber: o.order_number, date: o.date,
+        distributorId: o.distributor_id, distributorName: o.distributor_name,
+        salespersonId: o.salesperson_id, salesperson: o.salesperson_name,
+        lines: oLines, total: Number(o.total),
+        paymentMode: o.payment_mode as Order["paymentMode"],
+        paymentStatus: o.payment_status as Order["paymentStatus"],
+        dispatchDate: o.dispatch_date, vehicle: o.vehicle, driverName: o.driver_name,
+        deliveryStatus: o.delivery_status as Order["deliveryStatus"],
+        dispatchRemarks: o.dispatch_remarks,
+      };
+    }));
+  }, [companyId]);
+
+  const refetchDistributors = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId);
+    if (data) setDistributors(data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: 0, totalValue: 0 })));
+  }, [companyId]);
+
+  const refetchSalespersons = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase.from("salespersons").select("*").eq("company_id", companyId);
+    if (data) setSalespersons(data.map(s => ({ id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: 0, totalValue: 0 })));
+  }, [companyId]);
+
+  const refetchProducts = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase.from("products").select("*").eq("company_id", companyId);
+    if (data) setProducts(data.map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: 0 })));
+  }, [companyId]);
+
+  const refetchGodowns = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase.from("godowns").select("*").eq("company_id", companyId);
+    if (data) setLocations(data.map(g => ({ id: g.id, name: g.name, address: g.address, isActive: g.is_active })));
+  }, [companyId]);
+
+  const refetchStockItems = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase.from("stock_items").select("*").eq("company_id", companyId);
+    if (data) setStockItems(data.map(si => {
+      const prod = rawProducts.find(p => p.id === si.product_id);
+      const gd = locations.find(g => g.id === si.godown_id);
+      return {
+        id: si.id, productId: si.product_id, godownId: si.godown_id,
+        productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",
+        godownName: gd?.name || "",
+        quantity: si.quantity, threshold: si.threshold, basePrice: prod?.basePrice || 0,
+        lastDeductedDate: si.last_deducted_date,
+      };
+    }));
+  }, [companyId, rawProducts, locations]);
+
   // --- CRUD operations ---
 
   const addOrder = useCallback(async (order: Order) => {
@@ -213,7 +314,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       dispatch_remarks: order.dispatchRemarks,
     }).select().single();
 
-    if (error || !inserted) return;
+    if (error || !inserted) {
+      toast.error("Failed to create order", { description: error?.message });
+      return;
+    }
 
     // Insert order lines
     if (order.lines.length > 0) {
@@ -245,7 +349,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = updates.dispatchRemarks;
 
     if (Object.keys(dbUpdates).length > 0) {
-      await supabase.from("orders").update(dbUpdates).eq("id", id);
+      const { error } = await supabase.from("orders").update(dbUpdates).eq("id", id);
+      if (error) { toast.error("Failed to update order", { description: error.message }); return; }
     }
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
   }, []);
@@ -253,9 +358,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const addDistributor = useCallback(async (d: Distributor) => {
     if (!companyId) return;
-    const { data } = await supabase.from("distributors").insert({
+    const { data, error } = await supabase.from("distributors").insert({
       company_id: companyId, name: d.name, location: d.location, contact: d.contact,
     }).select().single();
+    if (error) { toast.error("Failed to add dealer", { description: error.message }); return; }
     if (data) setDistributors(prev => [...prev, { ...d, id: data.id }]);
   }, [companyId]);
 

@@ -6,6 +6,7 @@ export function useApi() {
   const data = useData();
 
   return {
+    loading: data.loading,
     orders: {
       list: () => data.orders,
       create: (order: Order) => data.addOrder(order),

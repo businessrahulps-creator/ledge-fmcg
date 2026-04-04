@@ -99,7 +99,7 @@ export default function Stock() {
   const getProductStock = (productId: string) =>
     stockItemsList.filter((si) => si.productId === productId).reduce((sum, si) => sum + si.quantity, 0);
 
-  const isLoading = usePageLoading();
+  const isLoading = usePageLoading(api.loading);
   const debouncedProductSearch = useDebounce(productSearch);
   const debouncedWarehouseSearch = useDebounce(warehouseSearch);
 

@@ -20,7 +20,7 @@ function getGreeting() {
 
 export default function Dashboard() {
   const api = useApi();
-  const isLoading = usePageLoading();
+  const isLoading = usePageLoading(api.loading);
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();

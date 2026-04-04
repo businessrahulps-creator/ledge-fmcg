@@ -95,7 +95,7 @@ export default function Orders() {
     setSelectedOrder(null);
   };
 
-  const isLoading = usePageLoading();
+  const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
   const filtered = useMemo(() => orders.filter((o) => {

@@ -42,7 +42,7 @@ export default function Salespersons() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const isLoading = usePageLoading();
+  const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
   const filtered = useMemo(() => items.filter(
