@@ -1,46 +1,38 @@
 
 
-# Indian Rupee Formatting, Auto-Focus & Empty State CTAs
+# Fix Quantity Input Bug in New Order
 
-## 1. Fix ₹ formatting to proper Indian style (₹1,23,456.78)
+## Problem
+The quantity input uses `type="number"` with `value={line.quantity}` (always a number) and `parseInt(e.target.value) || 0`. This causes leading zeros ("01") because the numeric state `1` gets prepended when typing, and the `type="number"` input doesn't clean display values properly.
 
-**File: `src/data/mock-data.ts`** (line 174–179)
+## Solution
+Track quantity as a **string** for display, parse to number only for calculations. Single file edit in `src/pages/NewOrder.tsx`.
 
-The `formatCurrency` function already uses `en-IN` locale and `INR` currency — so the grouping (1,23,456) is correct. The only issue is `maximumFractionDigits: 0` which drops paise. Change to `minimumFractionDigits: 0, maximumFractionDigits: 2` so decimals show only when meaningful (e.g. ₹1,23,456 stays clean, but ₹99.50 renders correctly).
+### Changes
 
-No other files need changes — all 12 consumers import this single function.
+**1. Add a `quantityStr` field to `OrderLineState`**
+```ts
+interface OrderLineState {
+  id: string;
+  productId: string;
+  quantity: number;       // used for calculations
+  quantityStr: string;    // used for display
+  unitPrice: number;
+}
+```
+Default: `quantity: 1, quantityStr: "1"`.
 
-## 2. Auto-focus first product row after selecting dealer
+**2. Update the quantity `<Input>`**
+- Switch to `type="text"` with `inputMode="numeric"` (mobile numeric keyboard)
+- `value={line.quantityStr}`
+- `onChange`: strip non-digits, parse to int, clamp to ≥ 0, set both `quantity` and `quantityStr`
+- `onBlur`: if empty, reset to "0" / 0
 
-**File: `src/pages/NewOrder.tsx`**
+**3. Update `updateLine`**
+Add a branch for `"quantity"` that keeps both fields in sync. When called from product-select or price changes, behavior stays the same.
 
-Add a `useRef` on the first product Select trigger. When `selectedDealer` changes from empty to a value, call `ref.current?.focus()` via a `useEffect`. This scrolls the user straight to the product selection step.
+**4. Update `addLine` and initial state**
+Set `quantityStr: "1"` alongside `quantity: 1`.
 
-## 3. Improve empty state CTAs on mobile
-
-**Files: `src/pages/Orders.tsx`, `src/pages/Distributors.tsx`, `src/pages/Salespersons.tsx`, `src/pages/Stock.tsx`**
-
-Each page has an empty state block with just text ("No dealers found / Add your first dealer to get started"). Add a prominent CTA button below each:
-
-| Page | Button label | Action |
-|------|-------------|--------|
-| Orders | "Create your first order" | Navigate to `/orders/new` |
-| Distributors | "Add Dealer" | Open the add-dealer dialog |
-| Salespersons | "Add Team Member" | Open the add-salesperson dialog |
-| Stock (Products) | "Add Product" | Open the add-product dialog |
-
-Buttons will use the existing `Button` component with `size="sm"` and a `Plus` icon, styled with `mt-3` spacing to sit naturally below the empty text.
-
-## Summary
-
-| Action | File | What |
-|--------|------|------|
-| Edit | `src/data/mock-data.ts` | Fix `maximumFractionDigits` to 2 |
-| Edit | `src/pages/NewOrder.tsx` | Auto-focus product select on dealer pick |
-| Edit | `src/pages/Orders.tsx` | Add "Create first order" CTA button |
-| Edit | `src/pages/Distributors.tsx` | Add "Add Dealer" CTA button |
-| Edit | `src/pages/Salespersons.tsx` | Add "Add Team Member" CTA button |
-| Edit | `src/pages/Stock.tsx` | Add "Add Product" CTA button |
-
-6 files, all small edits.
+No other files affected. Line totals, order total, and save logic all read `line.quantity` (the number) — unchanged.
 
