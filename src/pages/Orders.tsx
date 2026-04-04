@@ -108,6 +108,10 @@ export default function Orders() {
     return matchesSearch && matchesPayment && matchesDelivery;
   }), [orders, debouncedSearch, paymentFilter, deliveryFilter]);
 
+  if (isLoading) {
+    return <AppLayout><TablePageSkeleton /></AppLayout>;
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">

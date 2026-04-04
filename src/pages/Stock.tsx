@@ -255,6 +255,10 @@ export default function Stock() {
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
 
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton cards={4} /></AppLayout>;
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">

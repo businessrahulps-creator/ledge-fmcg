@@ -102,6 +102,10 @@ export default function Salespersons() {
   const profilePerson = items.find((s) => s.id === profileId);
   const profileOrders = orders.filter((o) => o.salespersonId === profileId);
 
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton /></AppLayout>;
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">

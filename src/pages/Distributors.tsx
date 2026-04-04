@@ -93,6 +93,10 @@ export default function Distributors() {
     setDeleteId(null);
   };
 
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton /></AppLayout>;
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
