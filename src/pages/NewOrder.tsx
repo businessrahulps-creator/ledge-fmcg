@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import {
   Select,
   SelectContent,
