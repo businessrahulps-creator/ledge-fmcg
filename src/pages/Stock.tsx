@@ -365,6 +365,10 @@ export default function Stock() {
                     <Package className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                     <p className="mt-3 text-sm font-medium">No products found</p>
                     <p className="text-xs text-muted-foreground">Add your first product to get started</p>
+                    <Button size="sm" className="mt-3" onClick={openNewProduct}>
+                      <Plus className="h-4 w-4" />
+                      Add Product
+                    </Button>
                   </div>
                 )}
               </div>
