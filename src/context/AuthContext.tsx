@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -17,6 +17,7 @@ interface AuthContextType {
   profile: Profile | null;
   companyId: string | null;
   loading: boolean;
+  authReady: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -34,52 +35,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    if (data) setProfile(data as Profile);
-    return data as Profile | null;
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (data && mountedRef.current) setProfile(data as Profile);
+      return data as Profile | null;
+    } catch {
+      // Profile fetch failure should never affect auth state
+      return null;
+    }
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) {
+      try { await fetchProfile(user.id); } catch { /* ignore */ }
+    }
   }, [user, fetchProfile]);
 
   useEffect(() => {
-    // Set up auth listener FIRST
+    // 1. Set up listener FIRST (no async work inside callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, sess) => {
+      (_event, sess) => {
+        if (!mountedRef.current) return;
         setSession(sess);
         setUser(sess?.user ?? null);
-        if (sess?.user) {
-          // Use setTimeout to avoid Supabase deadlock
-          setTimeout(() => fetchProfile(sess.user.id), 0);
-        } else {
+        if (!sess?.user) {
           setProfile(null);
+        } else {
+          // Fire-and-forget profile fetch — never awaited in callback
+          setTimeout(() => fetchProfile(sess.user.id), 0);
         }
         setLoading(false);
+        setAuthReady(true);
       }
     );
 
-    // THEN check existing session
+    // 2. THEN restore existing session
     supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      if (!mountedRef.current) return;
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
         fetchProfile(sess.user.id);
       }
       setLoading(false);
+      setAuthReady(true);
     });
 
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch { /* ignore */ }
     setUser(null);
     setSession(null);
     setProfile(null);
@@ -89,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user, session, profile,
       companyId: profile?.company_id ?? null,
-      loading, signOut, refreshProfile,
+      loading, authReady, signOut, refreshProfile,
     }}>
       {children}
     </AuthContext.Provider>

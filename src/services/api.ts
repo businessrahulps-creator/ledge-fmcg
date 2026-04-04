@@ -1,6 +1,7 @@
 import { useData } from "@/context/DataContext";
 import type { Order, Distributor, Salesperson, Product } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
+import type { AddOrderResult } from "@/context/DataContext";
 
 export function useApi() {
   const data = useData();
@@ -9,7 +10,7 @@ export function useApi() {
     loading: data.loading,
     orders: {
       list: () => data.orders,
-      create: (order: Order) => data.addOrder(order),
+      create: (order: Order): Promise<AddOrderResult> => data.addOrder(order),
       update: (id: string, updates: Partial<Order>) => data.updateOrder(id, updates),
       updateStatus: (id: string, status: Partial<Pick<Order, "paymentStatus" | "deliveryStatus">>) =>
         data.updateOrder(id, status),

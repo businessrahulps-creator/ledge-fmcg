@@ -21,12 +21,23 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error("Login failed", { description: error.message });
-    } else {
-      navigate("/dashboard");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Invalid credentials", { description: "Please check your email and password." });
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.error("Email not verified", { description: "Please check your inbox and verify your email first." });
+        } else {
+          toast.error("Login failed", { description: error.message });
+        }
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      toast.error("Connection error", { description: "Please check your internet connection and try again." });
+    } finally {
+      setLoading(false);
     }
   };
 
