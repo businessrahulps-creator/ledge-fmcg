@@ -5,6 +5,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Link } from "react-router-dom";
 import { useApi } from "@/services/api";
+import { usePageLoading } from "@/hooks/use-loading";
+import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -18,11 +20,16 @@ function getGreeting() {
 
 export default function Dashboard() {
   const api = useApi();
+  const isLoading = usePageLoading();
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
+
+  if (isLoading) {
+    return <AppLayout><DashboardSkeleton /></AppLayout>;
+  }
 
   // Parse date as local timezone to avoid UTC offset shifting the day
   const filteredOrders = orders.filter((o) => {

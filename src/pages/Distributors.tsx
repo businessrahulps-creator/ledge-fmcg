@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePageLoading } from "@/hooks/use-loading";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
 import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -39,11 +42,14 @@ export default function Distributors() {
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const filtered = items.filter(
+  const isLoading = usePageLoading();
+  const debouncedSearch = useDebounce(search);
+
+  const filtered = useMemo(() => items.filter(
     (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.location.toLowerCase().includes(search.toLowerCase())
-  );
+      d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      d.location.toLowerCase().includes(debouncedSearch.toLowerCase())
+  ), [items, debouncedSearch]);
 
   const selected = items.find((d) => d.id === selectedId);
   const selectedOrders = orders.filter((o) => o.distributorId === selectedId);
@@ -86,6 +92,10 @@ export default function Distributors() {
     toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
     setDeleteId(null);
   };
+
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton /></AppLayout>;
+  }
 
   return (
     <AppLayout>

@@ -1,4 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePageLoading } from "@/hooks/use-loading";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,11 +99,15 @@ export default function Stock() {
   const getProductStock = (productId: string) =>
     stockItemsList.filter((si) => si.productId === productId).reduce((sum, si) => sum + si.quantity, 0);
 
-  const filteredProducts = products.filter(
+  const isLoading = usePageLoading();
+  const debouncedProductSearch = useDebounce(productSearch);
+  const debouncedWarehouseSearch = useDebounce(warehouseSearch);
+
+  const filteredProducts = useMemo(() => products.filter(
     (p) =>
-      p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-      p.sku.toLowerCase().includes(productSearch.toLowerCase())
-  );
+      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()) ||
+      p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase())
+  ), [products, debouncedProductSearch]);
 
   const openNewProduct = () => {
     setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, totalSold: 0 });
@@ -192,15 +199,15 @@ export default function Stock() {
     setEditStockItem(null);
   };
 
-  const warehouseInventory = selectedWarehouse
+  const warehouseInventory = useMemo(() => selectedWarehouse
     ? stockItemsList
         .filter((si) => si.godownId === selectedWarehouse)
         .filter(
           (si) =>
-            si.productName.toLowerCase().includes(warehouseSearch.toLowerCase()) ||
-            si.sku.toLowerCase().includes(warehouseSearch.toLowerCase())
+            si.productName.toLowerCase().includes(debouncedWarehouseSearch.toLowerCase()) ||
+            si.sku.toLowerCase().includes(debouncedWarehouseSearch.toLowerCase())
         )
-    : [];
+    : [], [selectedWarehouse, stockItemsList, debouncedWarehouseSearch]);
 
   const handleAddStock = () => {
     if (!addStockProductId || !selectedWarehouse) {
@@ -247,6 +254,10 @@ export default function Stock() {
   };
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
+
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton cards={4} /></AppLayout>;
+  }
 
   return (
     <AppLayout>

@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePageLoading } from "@/hooks/use-loading";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,11 +42,14 @@ export default function Salespersons() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const filtered = items.filter(
+  const isLoading = usePageLoading();
+  const debouncedSearch = useDebounce(search);
+
+  const filtered = useMemo(() => items.filter(
     (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.region.toLowerCase().includes(search.toLowerCase())
-  );
+      s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      s.region.toLowerCase().includes(debouncedSearch.toLowerCase())
+  ), [items, debouncedSearch]);
 
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
@@ -95,6 +101,10 @@ export default function Salespersons() {
 
   const profilePerson = items.find((s) => s.id === profileId);
   const profileOrders = orders.filter((o) => o.salespersonId === profileId);
+
+  if (isLoading) {
+    return <AppLayout><ListPageSkeleton /></AppLayout>;
+  }
 
   return (
     <AppLayout>

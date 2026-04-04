@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePageLoading } from "@/hooks/use-loading";
+import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
 import { Plus, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -92,14 +95,22 @@ export default function Orders() {
     setSelectedOrder(null);
   };
 
-  const filtered = orders.filter((o) => {
+  const isLoading = usePageLoading();
+  const debouncedSearch = useDebounce(search);
+
+  const filtered = useMemo(() => orders.filter((o) => {
+    const q = debouncedSearch.toLowerCase();
     const matchesSearch =
-      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.distributorName.toLowerCase().includes(search.toLowerCase());
+      o.orderNumber.toLowerCase().includes(q) ||
+      o.distributorName.toLowerCase().includes(q);
     const matchesPayment = paymentFilter === "all" || o.paymentStatus === paymentFilter;
     const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
     return matchesSearch && matchesPayment && matchesDelivery;
-  });
+  }), [orders, debouncedSearch, paymentFilter, deliveryFilter]);
+
+  if (isLoading) {
+    return <AppLayout><TablePageSkeleton /></AppLayout>;
+  }
 
   return (
     <AppLayout>
