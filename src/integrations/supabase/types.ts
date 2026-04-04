@@ -526,6 +526,13 @@ export type Database = {
     }
     Functions: {
       get_company_id: { Args: never; Returns: string }
+      get_next_order_number: {
+        Args: { target_company_id: string }
+        Returns: {
+          prefix: string
+          seq: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -533,6 +540,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      seed_company_data: { Args: { p_company_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "super_admin" | "sales_manager" | "accountant" | "salesperson"
