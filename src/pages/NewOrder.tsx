@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,6 @@ export default function NewOrder() {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
@@ -186,8 +185,6 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
-      setShowSuccess(true);
-
       const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
       setTimeout(() => {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
@@ -197,7 +194,9 @@ export default function NewOrder() {
       }, 700);
 
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
-      toast.success("Order saved!", { description: `${result.orderNumber} created successfully.` });
+      toast.success(`Order #${result.orderNumber} created successfully!`);
+
+      setTimeout(() => navigate("/orders"), 2000);
     }
     // If !result.success, toast was already shown by DataContext
   };
@@ -469,17 +468,12 @@ export default function NewOrder() {
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
                 onClick={handleSave}
-                disabled={isSaving || showSuccess}
+                disabled={isSaving}
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
-                  </>
-                ) : showSuccess ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Order Saved!
                   </>
                 ) : (
                   <>Save Order</>
@@ -489,35 +483,6 @@ export default function NewOrder() {
           </div>
         </div>
 
-        {/* Success overlay */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-              onClick={() => {
-                setShowSuccess(false);
-                navigate("/orders");
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.35, type: "spring", stiffness: 200 }}
-                className="flex flex-col items-center gap-3"
-              >
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <CheckCircle2 className="h-10 w-10 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold">Order Created!</h2>
-                <p className="text-sm text-muted-foreground">Tap anywhere to go to orders</p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </AppLayout>
   );
