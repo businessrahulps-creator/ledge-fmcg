@@ -24,6 +24,7 @@ interface OrderLineState {
   id: string;
   productId: string;
   quantity: number;
+  quantityStr: string;
   unitPrice: number;
 }
 
