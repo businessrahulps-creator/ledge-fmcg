@@ -42,11 +42,14 @@ export default function Distributors() {
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const filtered = items.filter(
+  const isLoading = usePageLoading();
+  const debouncedSearch = useDebounce(search);
+
+  const filtered = useMemo(() => items.filter(
     (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.location.toLowerCase().includes(search.toLowerCase())
-  );
+      d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      d.location.toLowerCase().includes(debouncedSearch.toLowerCase())
+  ), [items, debouncedSearch]);
 
   const selected = items.find((d) => d.id === selectedId);
   const selectedOrders = orders.filter((o) => o.distributorId === selectedId);
