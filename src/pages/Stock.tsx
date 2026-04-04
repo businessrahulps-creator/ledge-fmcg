@@ -1,4 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePageLoading } from "@/hooks/use-loading";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
