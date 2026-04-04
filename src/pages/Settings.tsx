@@ -55,6 +55,7 @@ export default function Settings() {
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
+  const { signOut } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
