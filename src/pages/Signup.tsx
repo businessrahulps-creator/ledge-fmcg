@@ -59,9 +59,8 @@ export default function Signup() {
               </div>
             </div>
 
-            <Link to="/dashboard">
+            <Link to="/dashboard" className="block mt-2">
               <Button className="w-full" size="default">
-                <Sparkles className="h-4 w-4" />
                 Start free trial
               </Button>
             </Link>
