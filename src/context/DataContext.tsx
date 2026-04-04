@@ -349,7 +349,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = updates.dispatchRemarks;
 
     if (Object.keys(dbUpdates).length > 0) {
-      await supabase.from("orders").update(dbUpdates).eq("id", id);
+      const { error } = await supabase.from("orders").update(dbUpdates).eq("id", id);
+      if (error) { toast.error("Failed to update order", { description: error.message }); return; }
     }
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
   }, []);
