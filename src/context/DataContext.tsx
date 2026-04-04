@@ -314,7 +314,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       dispatch_remarks: order.dispatchRemarks,
     }).select().single();
 
-    if (error || !inserted) return;
+    if (error || !inserted) {
+      toast.error("Failed to create order", { description: error?.message });
+      return;
+    }
 
     // Insert order lines
     if (order.lines.length > 0) {
