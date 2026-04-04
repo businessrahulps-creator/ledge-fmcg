@@ -83,6 +83,14 @@ export default function NewOrder() {
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
 
+  // Auto-focus first product select when dealer is chosen
+  useEffect(() => {
+    if (selectedDealer) {
+      setTimeout(() => firstProductRef.current?.focus(), 100);
+    }
+  }, [selectedDealer]);
+
+
   const addLine = () => {
     setLines((prev) => [
       ...prev,
