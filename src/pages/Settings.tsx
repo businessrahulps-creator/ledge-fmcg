@@ -69,7 +69,18 @@ export default function Settings() {
   const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
 
+  const handleSaveClick = () => {
+    if (orderPrefix !== savedPrefix) {
+      setShowPrefixConfirm(true);
+      return;
+    }
+    saveCompany();
+  };
+
   const saveCompany = () => {
+    if (orderPrefix !== savedPrefix) {
+      api.orders.setPrefix(orderPrefix);
+    }
     toast({ title: "Settings saved", description: "Company profile has been updated." });
   };
 
