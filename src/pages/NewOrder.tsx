@@ -24,6 +24,7 @@ interface OrderLineState {
   id: string;
   productId: string;
   quantity: number;
+  quantityStr: string;
   unitPrice: number;
 }
 
@@ -67,7 +68,7 @@ export default function NewOrder() {
   const firstProductRef = useRef<HTMLButtonElement>(null);
 
   const [lines, setLines] = useState<OrderLineState[]>([
-    { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
+    { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
   ]);
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
@@ -94,7 +95,7 @@ export default function NewOrder() {
   const addLine = () => {
     setLines((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
+      { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
     ]);
   };
 
@@ -107,12 +108,28 @@ export default function NewOrder() {
     setLines((prev) =>
       prev.map((l) => {
         if (l.id !== id) return l;
+        if (field === "quantity") {
+          // value is the raw string from input
+          const raw = String(value).replace(/[^0-9]/g, "");
+          const num = raw === "" ? 0 : parseInt(raw, 10);
+          return { ...l, quantity: num, quantityStr: raw };
+        }
         const updated = { ...l, [field]: value };
         if (field === "productId") {
           const product = products.find((p) => p.id === value);
           if (product) updated.unitPrice = product.basePrice;
         }
         return updated;
+      })
+    );
+  };
+
+  const handleQuantityBlur = (id: string) => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (l.id !== id) return l;
+        const qty = l.quantity || 0;
+        return { ...l, quantity: qty, quantityStr: String(qty) };
       })
     );
   };
@@ -280,10 +297,11 @@ export default function NewOrder() {
                           <div className="space-y-1">
                             <Label className="text-[10px] text-muted-foreground md:text-xs">Qty</Label>
                             <Input
-                              type="number"
-                              min={1}
-                              value={line.quantity}
-                              onChange={(e) => updateLine(line.id, "quantity", parseInt(e.target.value) || 0)}
+                              type="text"
+                              inputMode="numeric"
+                              value={line.quantityStr}
+                              onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
+                              onBlur={() => handleQuantityBlur(line.id)}
                               className="h-11 rounded-lg md:h-12"
                             />
                           </div>
