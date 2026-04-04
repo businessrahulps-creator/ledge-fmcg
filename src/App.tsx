@@ -30,8 +30,9 @@ function OnlineStatusWatcher() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) {
+  const { user, loading, authReady } = useAuth();
+  // Don't redirect until auth is fully restored
+  if (loading || !authReady) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

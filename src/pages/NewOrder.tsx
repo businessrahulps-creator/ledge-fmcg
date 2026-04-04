@@ -62,7 +62,6 @@ export default function NewOrder() {
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
   const addOrder = api.orders.create;
-  const nextOrderNumber = api.orders.nextNumber;
   const { addNotification } = useNotifications();
 
   const firstProductRef = useRef<HTMLButtonElement>(null);
@@ -74,6 +73,7 @@ export default function NewOrder() {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
@@ -109,7 +109,6 @@ export default function NewOrder() {
       prev.map((l) => {
         if (l.id !== id) return l;
         if (field === "quantity") {
-          // value is the raw string from input
           const raw = String(value).replace(/[^0-9]/g, "");
           const num = raw === "" ? 0 : parseInt(raw, 10);
           return { ...l, quantity: num, quantityStr: raw };
@@ -137,7 +136,7 @@ export default function NewOrder() {
   const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (!selectedDealer) {
       toast.error("Dealer required", { description: "Please select a dealer for this order." });
@@ -155,10 +154,9 @@ export default function NewOrder() {
     const dealer = distributors.find((d) => d.id === selectedDealer);
     const sp = salespersons.find((s) => s.id === selectedSalesperson);
 
-    const orderNum = nextOrderNumber();
     const order = {
       id: `o${Date.now()}`,
-      orderNumber: orderNum,
+      orderNumber: "", // Will be set by addOrder via RPC
       date: orderDate,
       distributorId: selectedDealer,
       distributorName: dealer?.name || "",
@@ -184,18 +182,24 @@ export default function NewOrder() {
       dispatchRemarks: remarks,
     };
 
-    addOrder(order);
+    const result = await addOrder(order);
+    setIsSaving(false);
 
-    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
-    setTimeout(() => {
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
-    }, 300);
-    setTimeout(() => {
-      confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
-    }, 700);
+    if (result.success) {
+      setShowSuccess(true);
 
-    addNotification("order_placed", "New Order Created", `${orderNum} for ${dealer?.name} has been placed.`);
-    setTimeout(() => navigate("/orders"), 2500);
+      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
+      setTimeout(() => {
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
+      }, 300);
+      setTimeout(() => {
+        confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
+      }, 700);
+
+      addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
+      toast.success("Order saved!", { description: `${result.orderNumber} created successfully.` });
+    }
+    // If !result.success, toast was already shown by DataContext
   };
 
   return (
@@ -465,12 +469,17 @@ export default function NewOrder() {
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isSaving || showSuccess}
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
+                  </>
+                ) : showSuccess ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Order Saved!
                   </>
                 ) : (
                   <>Save Order</>
@@ -482,24 +491,29 @@ export default function NewOrder() {
 
         {/* Success overlay */}
         <AnimatePresence>
-          {isSaving && (
+          {showSuccess && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
               className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              onClick={() => {
+                setShowSuccess(false);
+                navigate("/orders");
+              }}
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.35, type: "spring", stiffness: 200 }}
+                transition={{ delay: 0.4, duration: 0.35, type: "spring", stiffness: 200 }}
                 className="flex flex-col items-center gap-3"
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
                   <CheckCircle2 className="h-10 w-10 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold">Order Created!</h2>
-                <p className="text-sm text-muted-foreground">Redirecting to orders…</p>
+                <p className="text-sm text-muted-foreground">Tap anywhere to go to orders</p>
               </motion.div>
             </motion.div>
           )}
