@@ -14,16 +14,531 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          address: string
+          created_at: string
+          gstin: string
+          id: string
+          name: string
+          next_order_sequence: number
+          order_prefix: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          created_at?: string
+          gstin?: string
+          id?: string
+          name: string
+          next_order_sequence?: number
+          order_prefix?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          gstin?: string
+          id?: string
+          name?: string
+          next_order_sequence?: number
+          order_prefix?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      distributors: {
+        Row: {
+          company_id: string
+          contact: string
+          created_at: string
+          id: string
+          location: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contact?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contact?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      godowns: {
+        Row: {
+          address: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "godowns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_lines: {
+        Row: {
+          created_at: string
+          id: string
+          line_total: number
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          line_total: number
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          line_total?: number
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          company_id: string
+          created_at: string
+          date: string
+          delivery_status: Database["public"]["Enums"]["delivery_status"]
+          dispatch_date: string | null
+          dispatch_remarks: string
+          distributor_id: string
+          distributor_name: string
+          driver_name: string
+          id: string
+          order_number: string
+          payment_mode: Database["public"]["Enums"]["payment_mode"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          salesperson_id: string
+          salesperson_name: string
+          total: number
+          updated_at: string
+          vehicle: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date?: string
+          delivery_status?: Database["public"]["Enums"]["delivery_status"]
+          dispatch_date?: string | null
+          dispatch_remarks?: string
+          distributor_id: string
+          distributor_name: string
+          driver_name?: string
+          id?: string
+          order_number: string
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          salesperson_id: string
+          salesperson_name: string
+          total?: number
+          updated_at?: string
+          vehicle?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date?: string
+          delivery_status?: Database["public"]["Enums"]["delivery_status"]
+          dispatch_date?: string | null
+          dispatch_remarks?: string
+          distributor_id?: string
+          distributor_name?: string
+          driver_name?: string
+          id?: string
+          order_number?: string
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          salesperson_id?: string
+          salesperson_name?: string
+          total?: number
+          updated_at?: string
+          vehicle?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespersons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          base_price: number
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          sku: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          sku: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sku?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salespersons: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          region: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email?: string
+          id?: string
+          name: string
+          phone?: string
+          region?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          region?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salespersons_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_deductions: {
+        Row: {
+          company_id: string
+          created_at: string
+          date: string
+          godown_id: string
+          id: string
+          order_id: string
+          product_id: string
+          quantity_deducted: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date?: string
+          godown_id: string
+          id?: string
+          order_id: string
+          product_id: string
+          quantity_deducted: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date?: string
+          godown_id?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          quantity_deducted?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_deductions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_deductions_godown_id_fkey"
+            columns: ["godown_id"]
+            isOneToOne: false
+            referencedRelation: "godowns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_deductions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_deductions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          godown_id: string
+          id: string
+          last_deducted_date: string | null
+          product_id: string
+          quantity: number
+          threshold: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          godown_id: string
+          id?: string
+          last_deducted_date?: string | null
+          product_id: string
+          quantity?: number
+          threshold?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          godown_id?: string
+          id?: string
+          last_deducted_date?: string | null
+          product_id?: string
+          quantity?: number
+          threshold?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_items_godown_id_fkey"
+            columns: ["godown_id"]
+            isOneToOne: false
+            referencedRelation: "godowns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_company_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "sales_manager" | "accountant" | "salesperson"
+      delivery_status: "pending" | "dispatched" | "delivered"
+      payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
+      payment_status: "paid" | "partial" | "pending"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +665,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "sales_manager", "accountant", "salesperson"],
+      delivery_status: ["pending", "dispatched", "delivered"],
+      payment_mode: ["cash", "bank_transfer", "cheque", "upi"],
+      payment_status: ["paid", "partial", "pending"],
+    },
   },
 } as const
