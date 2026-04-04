@@ -358,9 +358,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const addDistributor = useCallback(async (d: Distributor) => {
     if (!companyId) return;
-    const { data } = await supabase.from("distributors").insert({
+    const { data, error } = await supabase.from("distributors").insert({
       company_id: companyId, name: d.name, location: d.location, contact: d.contact,
     }).select().single();
+    if (error) { toast.error("Failed to add dealer", { description: error.message }); return; }
     if (data) setDistributors(prev => [...prev, { ...d, id: data.id }]);
   }, [companyId]);
 
