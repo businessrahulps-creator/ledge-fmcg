@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, formatNumber, type Distributor } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import {
   Dialog,
   DialogContent,
