@@ -1,96 +1,115 @@
 
+# Critical auth/session stability fix
 
-# Replace Mock Data with Real Supabase Integration
+## What I found in the current code
+1. `src/pages/NewOrder.tsx`
+   - `addOrder(order)` is called without `await`.
+   - The page always runs `setTimeout(() => navigate("/orders"), 2500)`, which violates your “stay on same page” requirement.
+   - `isSaving` drives both the pending state and the success overlay, so the page stays in a fake “saving” state until navigation happens.
 
-## Overview
-Replace the in-memory DataContext and mock API with real Supabase queries, wire up auth, and auto-seed sample data on first signup. All UI stays unchanged.
+2. `src/context/DataContext.tsx`
+   - `addOrder` does multiple backend calls (`get_next_order_number` → `orders` insert → `order_lines` insert) without a single guarded flow.
+   - Most CRUD methods do not consistently `try/catch`, return results, or prevent optimistic UI updates on failure.
+   - Realtime subscriptions refetch blindly, have no subscribe-status/error handling, and do not listen to `order_lines`, which can create inconsistent order state right after first save.
 
-## Architecture
+3. `src/context/AuthContext.tsx`
+   - `onAuthStateChange` is `async`, which is a known source of auth race conditions.
+   - There is no proper “auth ready” gate before data fetching starts.
+   - Profile fetch errors are ignored, which can leave session state looking like a logout.
 
-```text
-Auth Flow:
-  Signup → supabase.auth.signUp() → trigger creates profile
-        → edge function seeds company + data + links profile
-  Login  → supabase.auth.signInWithPassword()
-  Session → AuthContext wraps app, redirects unauthenticated users
+4. `src/pages/Login.tsx`
+   - Login is minimal and does not verify/restabilize session state after sign-in.
+   - Errors are surfaced, but the flow is not hardened against stale local auth state or transient backend session issues.
 
-Data Flow:
-  AuthContext (session/user/companyId)
-    └─ DataContext (fetches from Supabase, provides same interface)
-         └─ useApi() hook (unchanged API surface for all pages)
-```
+## Implementation plan
 
-## Changes
+### 1. Stabilize auth state first
+Update `src/context/AuthContext.tsx` to:
+- Remove `async` work from `onAuthStateChange`.
+- Restore session with `getSession()` first, then fetch profile in a separate guarded effect.
+- Add a true auth readiness gate so protected routes don’t redirect during session restoration.
+- Wrap profile fetch, refresh, and sign-out in `try/catch`.
+- Never clear `user/session` because of profile/data errors; only clear on explicit sign-out or auth loss.
 
-### 1. Migration: Add INSERT policy + seed function
-- Add INSERT policy on `companies` for authenticated users (needed for signup flow)
-- Create a `seed_company_data(company_id uuid)` PL/pgSQL function (SECURITY DEFINER) that inserts 7 distributors, 4 salespersons, 8 products, 3 godowns, stock items, and 10 sample orders with order_lines. Updates `companies.next_order_sequence` to 11.
-- Add INSERT policy on `profiles` for users to insert their own profile (the trigger handles it, but we need the policy for updates during signup)
+### 2. Make order creation fully awaited and non-navigating
+Update `src/pages/NewOrder.tsx` to:
+- Make `handleSave` `async`.
+- `await` the order creation call and only celebrate on actual success.
+- Remove forced navigation to `/orders`.
+- Split state into:
+  - `isSaving` for request-in-flight
+  - `showSuccess` for temporary confetti/success UI
+- Keep the user on the same page after save, with toast/confetti intact.
 
-### 2. New: `src/context/AuthContext.tsx`
-- Manages Supabase auth session via `onAuthStateChange` + `getSession`
-- Exposes: `user`, `session`, `profile` (with `company_id`), `companyId`, `loading`, `signOut`
-- On session change, fetches profile from `profiles` table
-- If profile has no `company_id`, shows onboarding or redirects
+### 3. Harden the order creation path in DataContext
+Refactor `src/context/DataContext.tsx` so `addOrder`:
+- Returns a `Promise<{ success: boolean; orderNumber?: string; error?: string }>` instead of fire-and-forget.
+- Uses one guarded flow with `try/catch/finally`.
+- Only updates local state after all required inserts succeed.
+- Refetches authoritative order data after creation instead of relying on partial optimistic state.
+- Handles backend/RPC errors with user-friendly toasts but never touches auth state.
 
-### 3. Refactor: `src/context/DataContext.tsx`
-- Remove all mock data imports and `useState` with initial mock arrays
-- Fetch all data from Supabase on mount using `companyId` from AuthContext
-- Each entity (orders, distributors, salespersons, products, godowns, stock_items) fetched via `supabase.from(table).select()`
-- Orders fetch includes a separate query for `order_lines`
-- CRUD methods now call Supabase (`insert`, `update`, `delete`) then refresh local state
-- `nextOrderNumber()` uses an atomic RPC: `UPDATE companies SET next_order_sequence = next_order_sequence + 1 WHERE id = $1 RETURNING order_prefix, next_order_sequence - 1`
-- Computed values (totalOrders, totalValue, totalSold) still calculated client-side from fetched data
-- Keep the same TypeScript interfaces exported from `mock-data.ts` (Distributor, Product, etc.) so pages don't need changes
+### 4. Stabilize realtime subscriptions
+Refactor the realtime effect in `src/context/DataContext.tsx` to:
+- Subscribe only after auth is ready and `companyId` exists.
+- Add subscription status handling (`SUBSCRIBED`, `CHANNEL_ERROR`, `TIMED_OUT`, `CLOSED`).
+- Subscribe to `order_lines` as well as `orders`, `distributors`, `salespersons`, `products`, `godowns`, and `stock_items`.
+- Route all realtime callbacks through safe refetch helpers with `try/catch`.
+- Cleanly tear down and recreate channels when company/session changes.
 
-### 4. Refactor: `src/pages/Login.tsx`
-- Add real `supabase.auth.signInWithPassword()` call
-- Show loading state, handle errors with toast
-- Navigate to `/dashboard` on success
+### 5. Add safer data-loading behavior
+Improve `src/context/DataContext.tsx` loading/fetch logic to:
+- Clear stale company data when there is no active company/session.
+- Guard against stale async responses with a mounted/request token pattern.
+- Avoid setting “logged out” UI because of a failed table query.
+- Keep `loading` tied to actual initial fetch completion, not partial state.
 
-### 5. Refactor: `src/pages/Signup.tsx`
-- Call `supabase.auth.signUp()` with `full_name` and `company_name` in metadata
-- After signup: create company row, update profile with `company_id`, insert `user_roles` (super_admin), call `seed_company_data(company_id)` RPC
-- Navigate to `/dashboard`
-- Enable auto-confirm for email signups (since this is a trial flow)
+### 6. Make login resilient
+Update `src/pages/Login.tsx` to:
+- Wrap sign-in in `try/catch`.
+- After successful sign-in, confirm session restoration before navigating.
+- Show clearer messages for invalid credentials vs transient backend errors.
+- Avoid false “Login failed” states caused by stale client session state.
 
-### 6. Refactor: `src/App.tsx`
-- Wrap routes with `AuthProvider`
-- Protected routes (dashboard, orders, etc.) redirect to `/login` if not authenticated
-- Public routes: `/`, `/login`, `/signup`
+### 7. Tighten the API surface
+Update `src/services/api.ts` to:
+- Reflect async return types for create/update operations that must be awaited.
+- Keep the UI-facing API shape familiar, but make order creation explicitly promise-based.
 
-### 7. Update: `src/services/api.ts`
-- Keep the same `useApi()` hook interface
-- It still reads from DataContext (which now fetches from Supabase)
-- No changes needed if DataContext exposes the same shape
+## Recommended backend adjustment
+I would also tighten the order-number/database side while fixing this:
+- Keep `get_next_order_number` usable only for the signed-in user’s own company.
+- Prefer a single backend function for “create order + lines + number generation” if the current multi-call flow still proves fragile after code hardening.
 
-### 8. Keep unchanged: `src/data/mock-data.ts`
-- Keep interfaces and `formatCurrency`/`formatNumber` utility functions (used everywhere)
-- Remove exported mock data arrays (or leave them unused)
+This is not just a security improvement; it also removes race conditions around first-order creation.
 
-## Migration SQL (key parts)
-- `ALTER TABLE companies ENABLE ROW LEVEL SECURITY;` (already done)
-- INSERT policy for companies: authenticated users can insert if no existing company
-- `seed_company_data()` function with all realistic Indian FMCG data
-- Atomic order number function: `get_next_order_number(company_id uuid)`
+## Files to change
+- `src/context/AuthContext.tsx`
+- `src/context/DataContext.tsx`
+- `src/services/api.ts`
+- `src/pages/NewOrder.tsx`
+- `src/pages/Login.tsx`
+- `src/App.tsx` (only if ProtectedRoute needs the new auth-ready flag)
+- Optional backend migration for safer order-creation RPC
 
-## Files Summary
-| Action | File | What |
-|--------|------|------|
-| Create | Migration SQL | INSERT policies, seed function, order number RPC |
-| Create | `src/context/AuthContext.tsx` | Auth state management |
-| Rewrite | `src/context/DataContext.tsx` | Supabase-backed data fetching |
-| Edit | `src/pages/Login.tsx` | Real auth |
-| Edit | `src/pages/Signup.tsx` | Real auth + company creation + seed |
-| Edit | `src/App.tsx` | AuthProvider wrapper + route protection |
-| Edit | `src/data/mock-data.ts` | Keep interfaces/utils, remove mock arrays |
-| Edit | `src/services/api.ts` | Minor adjustments if needed |
-| Config | Auth settings | Enable auto-confirm email |
+## Verification I will run after implementation
+1. Sign up with a fresh email.
+2. Confirm workspace/profile/company load normally with seeded data.
+3. Create the first order.
+4. Confirm:
+   - no forced navigation
+   - no refresh
+   - no logout
+   - confetti/toast stay on the page
+5. Refresh the app and confirm the order persists.
+6. Sign out and sign back in with the same credentials.
+7. Confirm login succeeds and all seeded + newly created data is still visible.
+8. Confirm realtime still updates data without throwing session/auth issues.
 
-## Important Notes
-- All existing UI components, animations, confetti, ₹ formatting, PWA behavior remain 100% untouched
-- The `useApi()` hook surface stays identical — pages don't need changes
-- Stock page helpers (`getStockHealth`, `generateSparklineData`) stay in `godown-data.ts`
-- Order creation is atomic: prefix + sequence fetched and incremented in one DB call
-- Sample seed data matches current mock data quality (Indian names, cities, FMCG products)
-
+## Expected outcome
+After this fix:
+- first order creation will no longer kick the user out
+- the app will stay on the current page after save
+- session persistence will survive RPC/data mutations
+- login will remain valid after order creation and refresh
+- realtime updates will no longer be able to destabilize auth state
