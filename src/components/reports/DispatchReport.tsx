@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { formatCurrency, type Order } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function DispatchReport() {
-  const { orders } = useData();
+  const api = useApi();
+  const orders = api.orders.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Order | null>(null);

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { formatCurrency } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 export function SalesTeamReport() {
-  const { orders, salespersons } = useData();
+  const api = useApi();
+  const orders = api.orders.list();
+  const salespersons = api.salespersons.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const filteredOrders = filterByTimePeriod(orders, period);
 

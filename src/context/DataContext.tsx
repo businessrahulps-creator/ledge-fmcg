@@ -124,7 +124,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const match = o.orderNumber.match(/ORD-\d{4}-(\d+)/);
       return match ? Math.max(max, parseInt(match[1])) : max;
     }, 0);
-    return `ORD-2026-${String(maxNum + 1).padStart(3, "0")}`;
+    return `ORD-${new Date().getFullYear()}-${String(maxNum + 1).padStart(3, "0")}`;
   }, [orders]);
 
   return (

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import {
   Select,
   SelectContent,
@@ -56,7 +56,12 @@ const statusColors: Record<string, string> = {
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { products, distributors, salespersons, addOrder, nextOrderNumber } = useData();
+  const api = useApi();
+  const products = api.products.list();
+  const distributors = api.dealers.list();
+  const salespersons = api.salespersons.list();
+  const addOrder = api.orders.create;
+  const nextOrderNumber = api.orders.nextNumber;
   const { addNotification } = useNotifications();
 
   const [lines, setLines] = useState<OrderLineState[]>([
