@@ -71,6 +71,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [locations, setLocations] = useState<GodownLocation[]>(initialLocations);
   const [stockItems, setStockItems] = useState<StockItem[]>(initialStockItems);
+  const [orderPrefix, setOrderPrefix] = useState("ORD");
+
+  // Seed sequence from existing orders
+  const [orderSequence, setOrderSequence] = useState(() => {
+    const maxNum = initialOrders.reduce((max, o) => {
+      const match = o.orderNumber.match(/\w+-\d{4}-(\d+)/);
+      return match ? Math.max(max, parseInt(match[1])) : max;
+    }, 0);
+    return maxNum + 1;
+  });
 
   const addOrder = useCallback((order: Order) => setOrders((prev) => [order, ...prev]), []);
   const updateOrder = useCallback((id: string, updates: Partial<Order>) =>
