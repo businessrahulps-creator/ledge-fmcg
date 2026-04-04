@@ -199,15 +199,15 @@ export default function Stock() {
     setEditStockItem(null);
   };
 
-  const warehouseInventory = selectedWarehouse
+  const warehouseInventory = useMemo(() => selectedWarehouse
     ? stockItemsList
         .filter((si) => si.godownId === selectedWarehouse)
         .filter(
           (si) =>
-            si.productName.toLowerCase().includes(warehouseSearch.toLowerCase()) ||
-            si.sku.toLowerCase().includes(warehouseSearch.toLowerCase())
+            si.productName.toLowerCase().includes(debouncedWarehouseSearch.toLowerCase()) ||
+            si.sku.toLowerCase().includes(debouncedWarehouseSearch.toLowerCase())
         )
-    : [];
+    : [], [selectedWarehouse, stockItemsList, debouncedWarehouseSearch]);
 
   const handleAddStock = () => {
     if (!addStockProductId || !selectedWarehouse) {
