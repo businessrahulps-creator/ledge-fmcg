@@ -1,64 +1,46 @@
 
 
-# Loading States + Debounced Search
+# Indian Rupee Formatting, Auto-Focus & Empty State CTAs
 
-## What We're Building
-1. **Skeleton loading states** on Dashboard, Orders, Distributors, Salespersons, and Stock pages — frosted glass skeleton cards that shimmer for 300ms on mount
-2. **Debounced search inputs** (300ms) on all 4 list pages: Orders, Distributors, Salespersons, Stock (2 inputs)
-3. A reusable `useDebounce` hook and a `PageSkeleton` component set
+## 1. Fix ₹ formatting to proper Indian style (₹1,23,456.78)
 
-## Changes
+**File: `src/data/mock-data.ts`** (line 174–179)
 
-### 1. Create `src/hooks/use-debounce.ts`
-A simple generic `useDebounce<T>(value, delay)` hook that returns the debounced value after `delay` ms.
+The `formatCurrency` function already uses `en-IN` locale and `INR` currency — so the grouping (1,23,456) is correct. The only issue is `maximumFractionDigits: 0` which drops paise. Change to `minimumFractionDigits: 0, maximumFractionDigits: 2` so decimals show only when meaningful (e.g. ₹1,23,456 stays clean, but ₹99.50 renders correctly).
 
-### 2. Create `src/hooks/use-loading.ts`
-A `usePageLoading()` hook that returns `isLoading: true` for the first 300ms after mount, then `false`. This simulates the API latency that will exist once Supabase is connected.
+No other files need changes — all 12 consumers import this single function.
 
-### 3. Create `src/components/ui/page-skeleton.tsx`
-Reusable skeleton components styled with the frosted glass aesthetic:
-- `DashboardSkeleton` — skeleton KPI cards (2x2 grid), skeleton bar charts, skeleton order rows
-- `ListPageSkeleton` — skeleton search bar + N skeleton card rows (for Distributors, Salespersons, Stock)
-- `TablePageSkeleton` — skeleton search bar + skeleton table rows (for Orders)
+## 2. Auto-focus first product row after selecting dealer
 
-All skeletons use `glass-card` classes + the existing `Skeleton` component with `bg-muted/50` for the frosted look.
+**File: `src/pages/NewOrder.tsx`**
 
-### 4. Update `src/pages/Dashboard.tsx`
-- Import `usePageLoading`
-- If `isLoading`, render `DashboardSkeleton` inside `AppLayout`
-- Otherwise render existing content (no other changes)
+Add a `useRef` on the first product Select trigger. When `selectedDealer` changes from empty to a value, call `ref.current?.focus()` via a `useEffect`. This scrolls the user straight to the product selection step.
 
-### 5. Update `src/pages/Orders.tsx`
-- Import `useDebounce` and `usePageLoading`
-- Replace direct `search` usage in filter logic with `debouncedSearch`
-- Show `TablePageSkeleton` while loading
+## 3. Improve empty state CTAs on mobile
 
-### 6. Update `src/pages/Distributors.tsx`
-- Import `useDebounce` and `usePageLoading`
-- Debounce the search value for filtering
-- Show `ListPageSkeleton` while loading
+**Files: `src/pages/Orders.tsx`, `src/pages/Distributors.tsx`, `src/pages/Salespersons.tsx`, `src/pages/Stock.tsx`**
 
-### 7. Update `src/pages/Salespersons.tsx`
-Same pattern as Distributors.
+Each page has an empty state block with just text ("No dealers found / Add your first dealer to get started"). Add a prominent CTA button below each:
 
-### 8. Update `src/pages/Stock.tsx`
-- Debounce both `productSearch` and `warehouseSearch`
-- Show `ListPageSkeleton` while loading
+| Page | Button label | Action |
+|------|-------------|--------|
+| Orders | "Create your first order" | Navigate to `/orders/new` |
+| Distributors | "Add Dealer" | Open the add-dealer dialog |
+| Salespersons | "Add Team Member" | Open the add-salesperson dialog |
+| Stock (Products) | "Add Product" | Open the add-product dialog |
 
-## Technical Notes
-- Search inputs remain controlled (instant typing feedback). Only the *filtered results* use the debounced value — no UI jank.
-- The 300ms fake delay via `usePageLoading` will be trivially replaceable with real async loading states (e.g., TanStack Query `isLoading`) when Supabase is connected.
-- Skeleton components use `backdrop-blur-xl bg-card/60 border-white/10` to match the existing glass-card aesthetic.
+Buttons will use the existing `Button` component with `size="sm"` and a `Plus` icon, styled with `mt-3` spacing to sit naturally below the empty text.
 
-## File Summary
-| Action | File |
-|--------|------|
-| Create | `src/hooks/use-debounce.ts` |
-| Create | `src/hooks/use-loading.ts` |
-| Create | `src/components/ui/page-skeleton.tsx` |
-| Edit | `src/pages/Dashboard.tsx` |
-| Edit | `src/pages/Orders.tsx` |
-| Edit | `src/pages/Distributors.tsx` |
-| Edit | `src/pages/Salespersons.tsx` |
-| Edit | `src/pages/Stock.tsx` |
+## Summary
+
+| Action | File | What |
+|--------|------|------|
+| Edit | `src/data/mock-data.ts` | Fix `maximumFractionDigits` to 2 |
+| Edit | `src/pages/NewOrder.tsx` | Auto-focus product select on dealer pick |
+| Edit | `src/pages/Orders.tsx` | Add "Create first order" CTA button |
+| Edit | `src/pages/Distributors.tsx` | Add "Add Dealer" CTA button |
+| Edit | `src/pages/Salespersons.tsx` | Add "Add Team Member" CTA button |
+| Edit | `src/pages/Stock.tsx` | Add "Add Product" CTA button |
+
+6 files, all small edits.
 
