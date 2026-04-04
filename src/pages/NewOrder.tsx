@@ -185,8 +185,6 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
-      setShowSuccess(true);
-
       const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
       setTimeout(() => {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
@@ -196,7 +194,9 @@ export default function NewOrder() {
       }, 700);
 
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
-      toast.success("Order saved!", { description: `${result.orderNumber} created successfully.` });
+      toast.success(`Order #${result.orderNumber} created successfully!`);
+
+      setTimeout(() => navigate("/orders"), 2000);
     }
     // If !result.success, toast was already shown by DataContext
   };
