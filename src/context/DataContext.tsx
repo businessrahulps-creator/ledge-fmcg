@@ -134,13 +134,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       return { ...p, totalSold };
     }), [products, orders]);
 
+  const previewOrderNumber = useCallback(() => {
+    const year = new Date().getFullYear();
+    return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
+  }, [orderPrefix, orderSequence]);
+
   const nextOrderNumber = useCallback(() => {
-    const maxNum = orders.reduce((max, o) => {
-      const match = o.orderNumber.match(/ORD-\d{4}-(\d+)/);
-      return match ? Math.max(max, parseInt(match[1])) : max;
-    }, 0);
-    return `ORD-${new Date().getFullYear()}-${String(maxNum + 1).padStart(3, "0")}`;
-  }, [orders]);
+    const year = new Date().getFullYear();
+    const num = `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
+    setOrderSequence((prev) => prev + 1);
+    return num;
+  }, [orderPrefix, orderSequence]);
 
   return (
     <DataContext.Provider
