@@ -1,12 +1,82 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!companyName || !fullName || !email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Sign up
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, company_name: companyName },
+        },
+      });
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Signup failed");
+
+      const userId = authData.user.id;
+
+      // 2. Create company
+      const { data: company, error: companyError } = await supabase
+        .from("companies")
+        .insert({ name: companyName })
+        .select()
+        .single();
+      if (companyError) throw companyError;
+
+      // 3. Link profile to company
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ company_id: company.id, full_name: fullName })
+        .eq("user_id", userId);
+      if (profileError) throw profileError;
+
+      // 4. Assign super_admin role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "super_admin" as any });
+      if (roleError) throw roleError;
+
+      // 5. Seed sample data
+      const { error: seedError } = await supabase.rpc("seed_company_data", {
+        p_company_id: company.id,
+      });
+      if (seedError) console.error("Seed error:", seedError);
+
+      toast.success("Welcome to Ledge!", { description: "Your workspace is ready." });
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error("Signup failed", { description: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -24,20 +94,23 @@ export default function Signup() {
 
         {/* Form */}
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="company" className="text-sm font-medium">Company name</Label>
-              <Input id="company" placeholder="Acme FMCG Pvt. Ltd." className="h-12 rounded-lg" />
+              <Input id="company" placeholder="Acme FMCG Pvt. Ltd." className="h-12 rounded-lg"
+                value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">Your name</Label>
-              <Input id="name" placeholder="Rajesh Kumar" className="h-12 rounded-lg" />
+              <Input id="name" placeholder="Rajesh Kumar" className="h-12 rounded-lg"
+                value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Work email</Label>
-              <Input id="email" type="email" placeholder="rajesh@acmefmcg.in" className="h-12 rounded-lg" />
+              <Input id="email" type="email" placeholder="rajesh@acmefmcg.in" className="h-12 rounded-lg"
+                value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div className="space-y-2">
@@ -48,6 +121,8 @@ export default function Signup() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Min. 8 characters"
                   className="h-12 rounded-lg pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -59,11 +134,10 @@ export default function Signup() {
               </div>
             </div>
 
-            <Link to="/dashboard" className="block mt-2">
-              <Button className="w-full" size="default">
-                Start free trial
-              </Button>
-            </Link>
+            <Button className="w-full mt-2" size="default" type="submit" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Start free trial
+            </Button>
           </form>
         </div>
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ export default function Settings() {
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
+  const { signOut } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
@@ -385,7 +387,7 @@ export default function Settings() {
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => navigate("/")} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction onClick={async () => { await signOut(); navigate("/login"); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                 Log Out
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { NotificationProvider } from "@/hooks/use-notifications";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -28,37 +29,52 @@ function OnlineStatusWatcher() {
   return null;
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <DataProvider>
-          <NotificationProvider>
-            <Toaster />
-            <Sonner />
-            <InstallPrompt />
-            <OnlineStatusWatcher />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/orders/new" element={<NewOrder />} />
-                <Route path="/distributors" element={<Distributors />} />
-                <Route path="/stock" element={<Stock />} />
-                <Route path="/salespersons" element={<Salespersons />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/products" element={<Navigate to="/stock" replace />} />
-                <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
-                <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </NotificationProvider>
-        </DataProvider>
+        <AuthProvider>
+          <DataProvider>
+            <NotificationProvider>
+              <Toaster />
+              <Sonner />
+              <InstallPrompt />
+              <OnlineStatusWatcher />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                  <Route path="/orders/new" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
+                  <Route path="/distributors" element={<ProtectedRoute><Distributors /></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
+                  <Route path="/salespersons" element={<ProtectedRoute><Salespersons /></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  <Route path="/products" element={<Navigate to="/stock" replace />} />
+                  <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
+                  <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </NotificationProvider>
+          </DataProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>
