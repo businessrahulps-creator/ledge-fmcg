@@ -99,11 +99,15 @@ export default function Stock() {
   const getProductStock = (productId: string) =>
     stockItemsList.filter((si) => si.productId === productId).reduce((sum, si) => sum + si.quantity, 0);
 
-  const filteredProducts = products.filter(
+  const isLoading = usePageLoading();
+  const debouncedProductSearch = useDebounce(productSearch);
+  const debouncedWarehouseSearch = useDebounce(warehouseSearch);
+
+  const filteredProducts = useMemo(() => products.filter(
     (p) =>
-      p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-      p.sku.toLowerCase().includes(productSearch.toLowerCase())
-  );
+      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()) ||
+      p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase())
+  ), [products, debouncedProductSearch]);
 
   const openNewProduct = () => {
     setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, totalSold: 0 });
