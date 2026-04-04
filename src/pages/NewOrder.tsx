@@ -266,7 +266,7 @@ export default function NewOrder() {
                             value={line.productId}
                             onValueChange={(v) => updateLine(line.id, "productId", v)}
                           >
-                            <SelectTrigger className="h-11 rounded-lg md:h-12">
+                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-11 rounded-lg md:h-12">
                               <SelectValue placeholder="Select product" />
                             </SelectTrigger>
                             <SelectContent>
