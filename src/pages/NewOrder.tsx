@@ -468,17 +468,12 @@ export default function NewOrder() {
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
                 onClick={handleSave}
-                disabled={isSaving || showSuccess}
+                disabled={isSaving}
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
-                  </>
-                ) : showSuccess ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Order Saved!
                   </>
                 ) : (
                   <>Save Order</>
