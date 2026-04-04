@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, formatNumber, type Salesperson } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import {
   Dialog,
   DialogContent,
