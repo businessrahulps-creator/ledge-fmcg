@@ -108,12 +108,28 @@ export default function NewOrder() {
     setLines((prev) =>
       prev.map((l) => {
         if (l.id !== id) return l;
+        if (field === "quantity") {
+          // value is the raw string from input
+          const raw = String(value).replace(/[^0-9]/g, "");
+          const num = raw === "" ? 0 : parseInt(raw, 10);
+          return { ...l, quantity: num, quantityStr: raw };
+        }
         const updated = { ...l, [field]: value };
         if (field === "productId") {
           const product = products.find((p) => p.id === value);
           if (product) updated.unitPrice = product.basePrice;
         }
         return updated;
+      })
+    );
+  };
+
+  const handleQuantityBlur = (id: string) => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (l.id !== id) return l;
+        const qty = l.quantity || 0;
+        return { ...l, quantity: qty, quantityStr: String(qty) };
       })
     );
   };
