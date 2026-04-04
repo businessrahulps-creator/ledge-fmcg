@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
-import { useData } from "@/context/DataContext";
+import { useApi } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
