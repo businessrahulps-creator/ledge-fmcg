@@ -74,19 +74,20 @@ function DashboardMockup() {
           {/* Mini chart */}
           <div className="bg-white rounded-xl border border-fog p-3 mb-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
             <div className="text-[9px] text-graphite mb-2">This Week</div>
-            <div className="flex items-end gap-1 h-10">
+            <div className="flex items-end gap-2 h-10">
               {barHeights.map((h, i) => (
                 <motion.div
                   key={i}
-                  className="flex-1 bg-midnight/10 rounded-sm overflow-hidden cursor-default"
+                  className="flex-1 rounded-t overflow-hidden cursor-default"
                   style={{ height: `${h}%` }}
                   whileHover={{ scale: 1.08 }}
                   transition={{ type: "spring", stiffness: 400, damping: 15 }}
                 >
                   <motion.div
-                    className="w-full bg-midnight rounded-sm"
-                    initial={{ height: 0 }}
-                    animate={{ height: `${Math.min(h + 10, 100)}%` }}
+                    className="w-full h-full bg-indigo-500 rounded-t"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    style={{ transformOrigin: "bottom" }}
                     transition={{ duration: 0.6, delay: 1.0 + i * 0.07, ease: "easeOut" }}
                   />
                 </motion.div>

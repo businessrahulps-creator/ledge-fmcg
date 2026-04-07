@@ -75,9 +75,9 @@ function DashboardMiniMockup() {
           </div>
           <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
             <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
-            <div className="flex items-end gap-1.5 h-12">
+          <div className="flex items-end gap-2 h-12">
               {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
-                <div key={i} className="flex-1 bg-midnight rounded-sm" style={{ height: `${h}%` }} />
+                <div key={i} className="flex-1 bg-indigo-500 rounded-t" style={{ height: `${h}%` }} />
               ))}
             </div>
             <div className="flex justify-between mt-1">
