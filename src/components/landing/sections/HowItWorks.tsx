@@ -54,7 +54,7 @@ function DashboardMiniMockup() {
     <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="grid grid-cols-2 gap-2 mb-3">
         {kpis.map((k) => (
-          <div key={k.label} className="bg-[#FAFAFA] rounded-xl p-3 border border-fog">
+          <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
             <div className="text-[9px] text-graphite">{k.label}</div>
             <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
           </div>
