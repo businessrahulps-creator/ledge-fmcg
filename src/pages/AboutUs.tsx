@@ -145,7 +145,7 @@ export default function AboutUs() {
               </div>
               <a
                 href="mailto:ashaoviyaps@gmail.com"
-                className="inline-flex items-center bg-ink text-white px-8 py-3 rounded-full font-body font-semibold text-sm hover:bg-ink-light transition-colors duration-200 mt-2"
+                className="inline-flex items-center bg-indigo-600 text-white px-8 py-3 rounded-full font-body font-semibold text-sm hover:bg-indigo-700 transition-colors duration-200 mt-2"
               >
                 Get in Touch
               </a>
