@@ -60,7 +60,7 @@ function DashboardMiniMockup() {
           </div>
         ))}
       </div>
-      <div className="bg-[#FAFAFA] rounded-xl border border-fog p-3">
+      <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
         <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
         <div className="flex items-end gap-1.5 h-12">
           {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
