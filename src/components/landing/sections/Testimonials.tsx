@@ -48,7 +48,7 @@ export function Testimonials() {
                   <p className="font-body text-base text-graphite leading-[1.7] flex-1">
                     {t.quote}
                   </p>
-                  <div className="mt-6 pt-6 border-t border-fog">
+                  <div className="mt-6 pt-6 border-t border-indigo-50">
                     <p className="font-body font-bold text-base text-midnight">
                       {t.name}
                     </p>

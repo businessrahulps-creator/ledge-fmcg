@@ -52,7 +52,7 @@ export function TrustBar() {
 
         {/* Pull Quote */}
         <AnimateIn delay={0.15} className="mt-12">
-          <div className="bg-cream rounded-2xl p-8 max-w-2xl mx-auto relative">
+          <div className="bg-violet-50/50 rounded-2xl p-8 max-w-2xl mx-auto relative">
             <span className="absolute top-4 left-6 text-6xl font-serif text-ink opacity-30 leading-none select-none">
               "
             </span>

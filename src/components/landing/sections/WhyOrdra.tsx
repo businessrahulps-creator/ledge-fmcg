@@ -36,7 +36,7 @@ export function WhyOrdra() {
         <div className="max-w-3xl mx-auto space-y-12">
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
-              <div className="border-l-4 border-ink pl-8">
+              <div className="border-l-4 border-indigo-500 pl-8">
                 <h3 className="font-heading font-bold text-[24px] text-midnight mb-4">
                   {block.title}
                 </h3>

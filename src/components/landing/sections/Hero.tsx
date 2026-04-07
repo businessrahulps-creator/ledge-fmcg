@@ -33,7 +33,7 @@ function DashboardMockup() {
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       {/* Browser chrome */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-fog bg-[#FAFAFA]">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-indigo-50 bg-indigo-50/30">
         <div className="flex gap-1.5">
           {["#FECACA", "#FDE68A", "#BBF7D0"].map((c, i) => (
             <motion.div
