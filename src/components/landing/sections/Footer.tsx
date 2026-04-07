@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const columns = [
   {
     title: "Product",
-    links: ["Features", "Pricing", "Updates"],
+    links: ["Features", "Pricing"],
   },
   {
     title: "Company",
