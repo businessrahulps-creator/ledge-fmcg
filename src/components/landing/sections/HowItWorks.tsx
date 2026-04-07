@@ -140,7 +140,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-16 md:py-32">
+    <section id="how-it-works" className="bg-white py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">

@@ -12,7 +12,7 @@ import { Footer } from "@/components/landing/sections/Footer";
 
 export default function Index() {
   return (
-    <div className="font-body antialiased">
+    <div className="font-body antialiased scroll-smooth">
       <Navbar />
       <Hero />
       <TrustBar />
