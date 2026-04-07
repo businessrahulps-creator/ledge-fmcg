@@ -1,39 +1,24 @@
 
 
-# Fix Landing Page Navigation Links
+# Fix Testimonial Cards Equal Height
 
 ## Problem
-The navbar has three links — Features (`#features`), Pricing (`#pricing`), About (`#about`) — but **none of the landing page sections have `id` attributes**, so clicking them does nothing. Also, "About" doesn't map to any section on the page.
+The 4th testimonial card appears larger because it has a shorter quote, causing the `h-full` class to not equalize heights across grid rows. The 2x2 grid only equalizes within each row — the second row's cards stretch differently than the first row's.
 
 ## Fix
 
-### 1. Update nav links to match actual sections
-Replace the links array in `src/components/landing/sections/Navbar.tsx`:
+**File: `src/components/landing/sections/Testimonials.tsx`**
 
-| Current | New |
-|---------|-----|
-| Features → `#features` | Features → `#features` |
-| Pricing → `#pricing` | Pricing → `#pricing` |
-| About → `#about` | How It Works → `#how-it-works` |
+Add `flex` to the outer wrapper div so `h-full` on the inner card works correctly within the grid, and add `min-h` or use CSS grid's implicit equal-row behavior by ensuring the grid items stretch uniformly:
 
-"About" has no corresponding section. Replace it with "How It Works" which is a real section users would want to jump to. Alternatively, we could add a "Log in" link here.
+- Change the outer `<div>` wrapper to include `className="h-full"` 
+- Add `flex flex-col` to the card so content flows evenly
+- Add `flex-1` to the quote paragraph so all cards stretch to the same height regardless of quote length
 
-### 2. Add `id` attributes to landing sections
-Add anchor IDs to the wrapper elements in these files:
-
-- `src/components/landing/sections/Features.tsx` → `id="features"`
-- `src/components/landing/sections/Pricing.tsx` → `id="pricing"`
-- `src/components/landing/sections/HowItWorks.tsx` → `id="how-it-works"`
-
-### 3. Add smooth scrolling
-Add `scroll-behavior: smooth` to the landing page wrapper in `src/pages/Index.tsx` so clicking nav links produces a smooth scroll instead of a jarring jump.
+This ensures all 4 cards in the 2x2 grid render at equal height.
 
 ## Files to Change
 | File | Change |
 |------|--------|
-| `src/components/landing/sections/Navbar.tsx` | Update links array (replace "About" with "How It Works") |
-| `src/components/landing/sections/Features.tsx` | Add `id="features"` to section wrapper |
-| `src/components/landing/sections/Pricing.tsx` | Add `id="pricing"` to section wrapper |
-| `src/components/landing/sections/HowItWorks.tsx` | Add `id="how-it-works"` to section wrapper |
-| `src/pages/Index.tsx` | Add `scroll-smooth` class to root div |
+| `src/components/landing/sections/Testimonials.tsx` | Add `h-full` to wrapper div, `flex flex-col` to card, `flex-1` to quote |
 
