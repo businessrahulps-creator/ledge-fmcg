@@ -170,7 +170,7 @@ export function Hero() {
             </Link>
             <a
               href="#features"
-              className="font-body font-medium text-sm text-midnight border border-fog hover:border-midnight px-6 py-2.5 rounded-full transition-all duration-150"
+              className="font-body font-medium text-sm text-indigo-700 border border-indigo-200 hover:border-indigo-400 px-6 py-2.5 rounded-full transition-all duration-150"
             >
               Watch a 2-Minute Demo
             </a>
