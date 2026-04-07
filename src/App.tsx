@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Stock from "./pages/Stock";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const queryClient = new QueryClient();
 
