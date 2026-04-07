@@ -39,12 +39,21 @@ export function Footer() {
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <a
-                      href="#"
-                      className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                    >
-                      {link}
-                    </a>
+                    {link === "Privacy Policy" ? (
+                      <Link
+                        to="/privacy-policy"
+                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                      >
+                        {link}
+                      </Link>
+                    ) : (
+                      <a
+                        href="#"
+                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                      >
+                        {link}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
