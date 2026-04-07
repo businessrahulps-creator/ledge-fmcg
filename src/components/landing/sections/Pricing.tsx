@@ -85,8 +85,8 @@ export function Pricing() {
               <div
                 className={`bg-white rounded-2xl p-8 flex flex-col h-full ${
                   plan.highlighted
-                    ? "border-2 border-ink relative"
-                    : "border border-fog"
+                    ? "border-2 border-indigo-500 relative shadow-[0_0_20px_rgba(79,70,229,0.1)]"
+                    : "border border-indigo-100"
                 }`}
               >
                 {plan.highlighted && (
