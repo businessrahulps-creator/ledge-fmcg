@@ -30,7 +30,7 @@ const companies = [
 
 export function TrustBar() {
   return (
-    <section className="bg-[#FAFAFA] py-20">
+    <section className="bg-indigo-50/30 py-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
         <div className="overflow-hidden">
