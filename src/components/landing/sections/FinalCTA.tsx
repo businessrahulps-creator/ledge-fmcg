@@ -4,7 +4,7 @@ import { AnimateIn } from "../AnimateIn";
 
 export function FinalCTA() {
   return (
-    <section className="bg-[#FAFAFA] py-20 md:py-32">
+    <section className="bg-gradient-to-b from-indigo-50 to-white py-20 md:py-32">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <AnimateIn>
           <h2 className="font-heading font-extrabold text-[28px] md:text-[48px] text-midnight max-w-3xl mx-auto leading-[1.1]">
