@@ -27,13 +27,13 @@ function DashboardMockup() {
 
   return (
     <motion.div
-      className="bg-white rounded-2xl border border-fog overflow-hidden"
-      style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.06)" }}
+      className="bg-white rounded-2xl border border-indigo-100 overflow-hidden"
+      style={{ boxShadow: "0 8px 40px rgba(79,70,229,0.08)" }}
       whileHover={{ boxShadow: "0 12px 50px rgba(0,0,0,0.10)", y: -2 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       {/* Browser chrome */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-fog bg-[#FAFAFA]">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-indigo-50 bg-indigo-50/30">
         <div className="flex gap-1.5">
           {["#FECACA", "#FDE68A", "#BBF7D0"].map((c, i) => (
             <motion.div
@@ -141,7 +141,7 @@ function DashboardMockup() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen bg-white flex items-center pt-16 px-6">
+    <section className="min-h-screen flex items-center pt-16 px-6" style={{ background: "radial-gradient(ellipse at 50% 0%, #EDE9FE 0%, #F5F3FF 30%, #FFFFFF 70%)" }}>
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left — Text */}
         <div>
@@ -164,13 +164,13 @@ export function Hero() {
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-sm text-white bg-ink hover:bg-ink-light px-6 py-2.5 rounded-full hover:scale-[1.02] transition-all duration-150"
+              className="font-body font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2.5 rounded-full hover:scale-[1.02] transition-all duration-150"
             >
               Start Free Trial
             </Link>
             <a
               href="#features"
-              className="font-body font-medium text-sm text-midnight border border-fog hover:border-midnight px-6 py-2.5 rounded-full transition-all duration-150"
+              className="font-body font-medium text-sm text-indigo-700 border border-indigo-200 hover:border-indigo-400 px-6 py-2.5 rounded-full transition-all duration-150"
             >
               Watch a 2-Minute Demo
             </a>

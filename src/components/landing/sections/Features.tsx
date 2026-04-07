@@ -42,7 +42,7 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="bg-[#FAFAFA] py-16 md:py-32">
+    <section id="features" className="bg-violet-50/20 py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
@@ -53,7 +53,7 @@ export function Features() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <AnimateIn key={feature.title} delay={i * 0.08}>
-              <div className="bg-white border border-fog rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4D4D8]">
+              <div className="bg-white border border-indigo-100 rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-200">
                 <feature.icon size={24} className="text-accent-indigo mb-5" strokeWidth={1.5} />
                 <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
                   {feature.title}

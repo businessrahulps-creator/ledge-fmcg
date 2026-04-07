@@ -56,7 +56,7 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             to="/signup"
-            className="inline-flex items-center bg-ink text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-ink-light transition-colors duration-200"
+            className="inline-flex items-center bg-indigo-600 text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-indigo-700 transition-colors duration-200"
           >
             Start Free Trial
           </Link>
@@ -88,7 +88,7 @@ export function Navbar() {
             <Link
               to="/signup"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center bg-ink text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-ink-light transition-colors mb-4"
+              className="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-indigo-700 transition-colors mb-4"
             >
               Start Free Trial
             </Link>

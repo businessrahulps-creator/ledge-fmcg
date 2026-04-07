@@ -16,7 +16,7 @@ const plans = [
     ],
     cta: "Start Free",
     highlighted: false,
-    ctaStyle: "border border-fog text-midnight hover:border-midnight",
+    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
   {
     name: "Growth",
@@ -32,7 +32,7 @@ const plans = [
     ],
     cta: "Start 14-Day Trial",
     highlighted: true,
-    ctaStyle: "bg-ink text-white hover:bg-ink-light",
+    ctaStyle: "bg-indigo-600 text-white hover:bg-indigo-700",
   },
   {
     name: "Scale",
@@ -48,7 +48,7 @@ const plans = [
     ],
     cta: "Start 14-Day Trial",
     highlighted: false,
-    ctaStyle: "border border-fog text-midnight hover:border-midnight",
+    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
   {
     name: "Enterprise",
@@ -62,7 +62,7 @@ const plans = [
     ],
     cta: "Talk to Us",
     highlighted: false,
-    ctaStyle: "border border-fog text-midnight hover:border-midnight",
+    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
 ];
 
@@ -85,12 +85,12 @@ export function Pricing() {
               <div
                 className={`bg-white rounded-2xl p-8 flex flex-col h-full ${
                   plan.highlighted
-                    ? "border-2 border-ink relative"
-                    : "border border-fog"
+                    ? "border-2 border-indigo-500 relative shadow-[0_0_20px_rgba(79,70,229,0.1)]"
+                    : "border border-indigo-100"
                 }`}
               >
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-ink text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                     Most Popular
                   </span>
                 )}

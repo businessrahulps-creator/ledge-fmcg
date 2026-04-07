@@ -30,7 +30,7 @@ const cards = [
 
 export function Problem() {
   return (
-    <section className="bg-cream py-16 md:py-32">
+    <section className="bg-violet-50/30 py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16">
         {/* Left — Sticky headline */}
         <div className="lg:col-span-4 lg:sticky lg:top-32 self-start">
@@ -45,7 +45,7 @@ export function Problem() {
         <div className="lg:col-span-8 space-y-6">
           {cards.map((card, i) => (
             <AnimateIn key={card.title} delay={i * 0.08}>
-              <div className="bg-white rounded-2xl p-8 border border-fog">
+              <div className="bg-white rounded-2xl p-8 border border-indigo-100">
                 <card.icon className="text-accent-indigo mb-4" size={24} />
                 <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
                   {card.title}

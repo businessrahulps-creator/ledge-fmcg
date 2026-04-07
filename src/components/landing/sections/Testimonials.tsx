@@ -29,7 +29,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="bg-cream py-16 md:py-32">
+    <section className="bg-indigo-50/20 py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
@@ -41,14 +41,14 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <div key={t.name} className="h-full">
               <AnimateIn delay={i * 0.1} className="h-full">
-                <div className="bg-white rounded-2xl p-8 border border-fog h-full flex flex-col">
-                  <span className="font-heading font-extrabold text-6xl text-ink opacity-20 leading-none block mb-2">
+                <div className="bg-white rounded-2xl p-8 border border-indigo-100 h-full flex flex-col">
+                  <span className="font-heading font-extrabold text-6xl text-indigo-400 opacity-30 leading-none block mb-2">
                     "
                   </span>
                   <p className="font-body text-base text-graphite leading-[1.7] flex-1">
                     {t.quote}
                   </p>
-                  <div className="mt-6 pt-6 border-t border-fog">
+                  <div className="mt-6 pt-6 border-t border-indigo-50">
                     <p className="font-body font-bold text-base text-midnight">
                       {t.name}
                     </p>

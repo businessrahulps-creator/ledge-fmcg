@@ -25,7 +25,7 @@ const blocks = [
 
 export function WhyOrdra() {
   return (
-    <section className="bg-snow py-16 md:py-32">
+    <section className="bg-white py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
@@ -36,7 +36,7 @@ export function WhyOrdra() {
         <div className="max-w-3xl mx-auto space-y-12">
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
-              <div className="border-l-4 border-ink pl-8">
+              <div className="border-l-4 border-indigo-500 pl-8">
                 <h3 className="font-heading font-bold text-[24px] text-midnight mb-4">
                   {block.title}
                 </h3>

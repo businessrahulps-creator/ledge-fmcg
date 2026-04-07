@@ -3,7 +3,7 @@ import { AnimateIn } from "../AnimateIn";
 /* ── Step 1: Order Creation Phone Mockup ── */
 function OrderMockup() {
   return (
-    <div className="bg-white rounded-2xl border border-fog p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+    <div className="bg-white rounded-2xl border border-indigo-100 p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="text-[11px] font-semibold text-midnight mb-3">New Order</div>
       <div className="space-y-2.5">
         <div>
@@ -29,11 +29,11 @@ function OrderMockup() {
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-between pt-1 border-t border-fog">
+        <div className="flex items-center justify-between pt-1 border-t border-indigo-50">
           <span className="text-[10px] text-graphite">Total</span>
           <span className="text-xs font-semibold text-midnight">₹12,000</span>
         </div>
-        <div className="bg-ink text-white text-[10px] font-medium text-center py-2 rounded-lg">
+        <div className="bg-indigo-600 text-white text-[10px] font-medium text-center py-2 rounded-lg">
           Place Order
         </div>
       </div>
@@ -51,16 +51,16 @@ function DashboardMiniMockup() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-fog p-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+    <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="grid grid-cols-2 gap-2 mb-3">
         {kpis.map((k) => (
-          <div key={k.label} className="bg-[#FAFAFA] rounded-xl p-3 border border-fog">
+          <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
             <div className="text-[9px] text-graphite">{k.label}</div>
             <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
           </div>
         ))}
       </div>
-      <div className="bg-[#FAFAFA] rounded-xl border border-fog p-3">
+      <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
         <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
         <div className="flex items-end gap-1.5 h-12">
           {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
@@ -87,10 +87,10 @@ function StockMockup() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-fog p-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+    <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="text-[11px] font-semibold text-midnight mb-3">Stock Health</div>
       <div className="space-y-1.5">
-        <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-fog">
+        <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-indigo-50">
           <span>Product</span>
           <span>Warehouse</span>
           <span className="text-right">Qty</span>
@@ -155,7 +155,7 @@ export function HowItWorks() {
               <AnimateIn key={step.badge} delay={i * 0.1}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="bg-accent-wash text-accent-indigo text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4">
+                    <span className="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4">
                       {step.badge}
                     </span>
                     <h3 className="font-heading font-bold text-[24px] md:text-[28px] text-midnight">
