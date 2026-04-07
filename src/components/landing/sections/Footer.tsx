@@ -22,7 +22,7 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-white py-16 border-t border-fog">
+    <footer className="bg-indigo-50/10 py-16 border-t border-indigo-100">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {columns.map((col) => (
