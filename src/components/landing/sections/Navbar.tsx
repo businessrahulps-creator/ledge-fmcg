@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/sheet";
 
 const links = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export function Navbar() {
@@ -35,9 +35,9 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center">
+        <Link to="/" className="flex items-center">
           <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-midnight">Ledge</span>
-        </a>
+        </Link>
 
         {/* Center links — desktop */}
         <div className="hidden md:flex items-center gap-8">

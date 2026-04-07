@@ -1,19 +1,20 @@
 import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const linkMap: Record<string, string> = {
+  "Features": "/#features",
+  "Pricing": "/#pricing",
+  "About Us": "/about-us",
+  "Contact": "/contact",
+  "Privacy Policy": "/privacy-policy",
+  "Terms of Service": "/terms-of-service",
+  "Refund Policy": "/refund-policy",
+};
+
 const columns = [
-  {
-    title: "Product",
-    links: ["Features", "Pricing"],
-  },
-  {
-    title: "Company",
-    links: ["About Us", "Contact"],
-  },
-  {
-    title: "Legal",
-    links: ["Privacy Policy", "Terms of Service", "Refund Policy"],
-  },
+  { title: "Product", links: ["Features", "Pricing"] },
+  { title: "Company", links: ["About Us", "Contact"] },
+  { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Refund Policy"] },
 ];
 
 const socials = [
@@ -33,49 +34,12 @@ export function Footer() {
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link}>
-                    {link === "About Us" ? (
-                      <Link
-                        to="/about-us"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Privacy Policy" ? (
-                      <Link
-                        to="/privacy-policy"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Terms of Service" ? (
-                      <Link
-                        to="/terms-of-service"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Contact" ? (
-                      <Link
-                        to="/contact"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Refund Policy" ? (
-                      <Link
-                        to="/refund-policy"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : (
-                      <a
-                        href="#"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </a>
-                    )}
+                    <Link
+                      to={linkMap[link] || "/"}
+                      className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                    >
+                      {link}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -85,7 +49,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-indigo-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</span>
+            <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</Link>
             <span className="font-body text-sm text-lp-zinc">
               © 2026 Ledge. All rights reserved.
             </span>
