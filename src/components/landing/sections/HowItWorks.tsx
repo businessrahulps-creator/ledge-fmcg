@@ -2,9 +2,9 @@ import { AnimateIn } from "../AnimateIn";
 import { BrowserFrame, PhoneFrame, GradientStage } from "../DeviceFrames";
 
 /* ── Step 1: Order Creation Phone Mockup ── */
-function OrderMockup() {
+function OrderMockupContent() {
   return (
-    <div className="bg-white rounded-2xl border border-indigo-100 p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
+    <div className="p-5">
       <div className="text-[11px] font-semibold text-midnight mb-3">New Order</div>
       <div className="space-y-2.5">
         <div>
@@ -39,6 +39,16 @@ function OrderMockup() {
         </div>
       </div>
     </div>
+  );
+}
+
+function OrderMockup() {
+  return (
+    <GradientStage variant="lavender">
+      <PhoneFrame>
+        <OrderMockupContent />
+      </PhoneFrame>
+    </GradientStage>
   );
 }
 
