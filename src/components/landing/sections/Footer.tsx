@@ -1,19 +1,20 @@
 import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const linkMap: Record<string, string> = {
+  "Features": "/#features",
+  "Pricing": "/#pricing",
+  "About Us": "/about-us",
+  "Contact": "/contact",
+  "Privacy Policy": "/privacy-policy",
+  "Terms of Service": "/terms-of-service",
+  "Refund Policy": "/refund-policy",
+};
+
 const columns = [
-  {
-    title: "Product",
-    links: ["Features", "Pricing"],
-  },
-  {
-    title: "Company",
-    links: ["About Us", "Contact"],
-  },
-  {
-    title: "Legal",
-    links: ["Privacy Policy", "Terms of Service", "Refund Policy"],
-  },
+  { title: "Product", links: ["Features", "Pricing"] },
+  { title: "Company", links: ["About Us", "Contact"] },
+  { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Refund Policy"] },
 ];
 
 const socials = [
