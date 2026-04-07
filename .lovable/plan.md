@@ -1,60 +1,47 @@
 
 
-# Selective Visual Refresh — Soft Purple Gradient Aesthetic
+# Landing Page Audit & Fix Plan
 
-## What Changes
+## Issues Found
 
-A targeted reskin of the landing page to adopt the soft lavender/purple gradient aesthetic from the screenshot you shared, while keeping the existing content, structure, and component architecture intact.
+### 1. Logo doesn't navigate home
+**Navbar.tsx line 38**: Logo uses `<a href="#">` — this only scrolls to page top on the landing page. On sub-pages (About Us, Contact, Privacy Policy, Terms, Refund Policy), clicking the logo does nothing useful.
+**Fix**: Change to `<Link to="/">` so it always navigates to the home page.
 
-## Design Direction
+### 2. Footer logo doesn't link home
+**Footer.tsx line 88**: The "Ledge" wordmark in the footer bottom bar is plain text with no link.
+**Fix**: Wrap in `<Link to="/">`.
 
-**Current:** High-contrast monochrome — `bg-white`, `bg-cream`, `bg-[#FAFAFA]`, black `bg-ink` buttons, flat `border-fog` cards.
+### 3. Footer "Features" and "Pricing" links are broken on sub-pages
+**Footer.tsx lines 71-76**: "Features" and "Pricing" use `<a href="#">` — they should link to `/#features` and `/#pricing` so they work from any page.
+**Fix**: Map these to `<Link to="/#features">` and `<Link to="/#pricing">` (or use `<a href="/#features">`).
 
-**New:** Soft purple gradient warmth — gentle lavender washes as section backgrounds, subtle purple-tinted gradients on the hero, frosted glass-like cards with light purple borders, and indigo-purple accent buttons instead of pure black.
+### 4. Navbar anchor links broken on sub-pages
+**Navbar.tsx lines 44-51**: The nav links (`#features`, `#how-it-works`, `#pricing`) use `<a href="#...">` — these only work on the landing page. On sub-pages they do nothing.
+**Fix**: Change to full paths (`/#features`, `/#how-it-works`, `/#pricing`).
 
-## Color Palette Shift
+### 5. Same issue in mobile nav
+**Navbar.tsx lines 77-85**: Mobile sheet links have the same `href="#..."` problem.
+**Fix**: Same as above.
 
-| Token | Current | New |
-|-------|---------|-----|
-| Hero BG | `bg-white` | Soft radial gradient: white center → lavender-50 edges |
-| Section alternation | `bg-white` / `bg-cream` / `bg-[#FAFAFA]` | `bg-white` / `bg-violet-50/30` / `bg-indigo-50/20` |
-| Primary CTA button | `bg-ink` (black) | `bg-indigo-600` with hover `bg-indigo-700` |
-| Secondary CTA | `border-fog text-midnight` | `border-indigo-200 text-indigo-700` |
-| Card borders | `border-fog` (gray) | `border-indigo-100` or `border-purple-100` |
-| Icon accent color | `text-accent-indigo` (#4F46E5) | Keep as-is — already fits |
-| Step badges | `bg-accent-wash text-accent-indigo` | `bg-purple-100 text-purple-700` |
-| Highlighted pricing card | `border-2 border-ink` | `border-2 border-indigo-500` with faint purple glow |
-| "Most Popular" badge | `bg-ink text-white` | `bg-indigo-600 text-white` |
-| Final CTA section | `bg-[#FAFAFA]` | Soft gradient: `bg-gradient-to-b from-indigo-50 to-white` |
+### 6. Console warning: FinalCTA ref issue
+FinalCTA and Footer are getting refs passed to them (likely from framer-motion or parent). They are plain function components that don't accept refs.
+**Fix**: This is cosmetic (no user-facing bug), but can be resolved by not passing refs or wrapping with `forwardRef` if needed. Low priority — note only.
+
+### 7. AboutUs "Get in Touch" button uses old color token
+**AboutUs.tsx line 148**: Button uses `bg-ink` which was the old black color, now mapped to indigo via CSS. Should verify it renders correctly with the new palette, or update to `bg-indigo-600` for consistency.
 
 ## Files to Change
 
-| File | What |
-|------|------|
-| `src/index.css` | Add new CSS custom properties for the purple palette; update `--accent` to indigo-600 |
-| `src/components/landing/sections/Hero.tsx` | Hero background → soft radial gradient; CTA buttons → indigo; dashboard mockup chrome tint |
-| `src/components/landing/sections/TrustBar.tsx` | Section bg → `bg-indigo-50/30` |
-| `src/components/landing/sections/Problem.tsx` | Section bg → `bg-violet-50/30`; card borders → `border-indigo-100` |
-| `src/components/landing/sections/HowItWorks.tsx` | Step badges → purple tint; mockup borders soften to `border-indigo-100` |
-| `src/components/landing/sections/Features.tsx` | Section bg → `bg-violet-50/20`; card borders → `border-indigo-100`; hover border → indigo-200 |
-| `src/components/landing/sections/WhyOrdra.tsx` | Left border accent → `border-indigo-500`; section bg → `bg-white` |
-| `src/components/landing/sections/Testimonials.tsx` | Section bg → `bg-indigo-50/20`; quote mark → indigo tint |
-| `src/components/landing/sections/Pricing.tsx` | Highlighted card → indigo border + subtle glow; CTA buttons → indigo |
-| `src/components/landing/sections/FinalCTA.tsx` | Gradient background; CTA button → indigo |
-| `src/components/landing/sections/Navbar.tsx` | CTA button → indigo; scrolled bg keeps white/blur |
-| `src/components/landing/sections/Footer.tsx` | Subtle `bg-indigo-50/10` tint; border → indigo-100 |
+| File | Changes |
+|------|---------|
+| `src/components/landing/sections/Navbar.tsx` | Logo → `<Link to="/">`; nav links → `/#features` etc. |
+| `src/components/landing/sections/Footer.tsx` | Logo → `<Link to="/">`; Features/Pricing links → proper routes; simplify link rendering with a map |
+| `src/pages/AboutUs.tsx` | Update CTA button class from `bg-ink` to `bg-indigo-600` for consistency |
 
 ## What Stays the Same
-
-- All content and copy
-- Typography system (Plus Jakarta Sans headings, Inter body)
-- Component architecture and animation system
-- Page structure and section ordering
-- Dashboard/phone mockups (structure unchanged, just border color tweaks)
-- Mobile responsiveness
-- All routing and navigation
-
-## Visual Result
-
-The page will feel lighter, warmer, and more modern — shifting from a stark monochrome SaaS look to a softer, approachable purple-gradient aesthetic that matches the screenshot you liked, while keeping Ledge's professional Indian-market positioning intact.
+- All page content and copy
+- All styling and visual design
+- All routing in App.tsx (already correct)
+- Section `id` attributes (already correct: `features`, `how-it-works`, `pricing`)
 
