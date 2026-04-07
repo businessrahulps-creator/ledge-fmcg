@@ -1,24 +1,26 @@
 
 
-# Fix Testimonial Cards Equal Height
+# Add Privacy Policy Page
 
-## Problem
-The 4th testimonial card appears larger because it has a shorter quote, causing the `h-full` class to not equalize heights across grid rows. The 2x2 grid only equalizes within each row — the second row's cards stretch differently than the first row's.
+## What We'll Do
 
-## Fix
-
-**File: `src/components/landing/sections/Testimonials.tsx`**
-
-Add `flex` to the outer wrapper div so `h-full` on the inner card works correctly within the grid, and add `min-h` or use CSS grid's implicit equal-row behavior by ensuring the grid items stretch uniformly:
-
-- Change the outer `<div>` wrapper to include `className="h-full"` 
-- Add `flex flex-col` to the card so content flows evenly
-- Add `flex-1` to the quote paragraph so all cards stretch to the same height regardless of quote length
-
-This ensures all 4 cards in the 2x2 grid render at equal height.
+Create a dedicated `/privacy-policy` page with the Navbar and Footer from the landing page, displaying the provided privacy policy content in a clean, readable layout. Then update the Footer to link "Privacy Policy" to this new route.
 
 ## Files to Change
-| File | Change |
-|------|--------|
-| `src/components/landing/sections/Testimonials.tsx` | Add `h-full` to wrapper div, `flex flex-col` to card, `flex-1` to quote |
+
+| Action | File | What |
+|--------|------|------|
+| Create | `src/pages/PrivacyPolicy.tsx` | New page with Navbar + Footer wrapping the privacy policy content, styled with proper typography (headings, paragraphs, lists, dividers) matching the landing page aesthetic |
+| Edit | `src/components/landing/sections/Footer.tsx` | Update the "Legal" column to use `<Link to="/privacy-policy">` for the Privacy Policy item instead of `href="#"` |
+| Edit | `src/App.tsx` | Add `<Route path="/privacy-policy" element={<PrivacyPolicy />} />` |
+
+## Design Approach
+
+- Reuse `<Navbar />` and `<Footer />` from the landing sections for consistent header/footer
+- Content area: `max-w-3xl mx-auto px-6 py-24` with proper spacing
+- Headings use `font-heading text-midnight`, body uses `font-body text-graphite`
+- Horizontal rules between sections using `border-fog`
+- Lists styled with bullet points and proper indentation
+- Bold text for emphasis (email addresses, key terms)
+- `scroll-smooth` on wrapper like the landing page
 
