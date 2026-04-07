@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { BrowserFrame, GradientStage } from "../DeviceFrames";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20 },
