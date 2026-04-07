@@ -29,7 +29,7 @@ function OrderMockup() {
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-between pt-1 border-t border-fog">
+        <div className="flex items-center justify-between pt-1 border-t border-indigo-50">
           <span className="text-[10px] text-graphite">Total</span>
           <span className="text-xs font-semibold text-midnight">₹12,000</span>
         </div>
