@@ -19,7 +19,7 @@ export function FinalCTA() {
         <div className="flex justify-center gap-4 mt-10 flex-wrap">
           <Link
             to="/signup"
-            className="bg-ink text-white px-8 py-4 rounded-full font-semibold hover:bg-ink-light hover:scale-[1.02] transition-all duration-200 inline-flex items-center text-base"
+            className="bg-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-indigo-700 hover:scale-[1.02] transition-all duration-200 inline-flex items-center text-base"
           >
             Start Free. Takes 2 Minutes
           </Link>

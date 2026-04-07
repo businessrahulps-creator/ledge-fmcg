@@ -83,7 +83,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-fog flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-8 border-t border-indigo-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</span>
             <span className="font-body text-sm text-lp-zinc">

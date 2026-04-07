@@ -90,7 +90,7 @@ function StockMockup() {
     <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="text-[11px] font-semibold text-midnight mb-3">Stock Health</div>
       <div className="space-y-1.5">
-        <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-fog">
+        <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-indigo-50">
           <span>Product</span>
           <span>Warehouse</span>
           <span className="text-right">Qty</span>
