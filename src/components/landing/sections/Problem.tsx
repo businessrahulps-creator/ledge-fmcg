@@ -30,7 +30,7 @@ const cards = [
 
 export function Problem() {
   return (
-    <section className="bg-cream py-16 md:py-32">
+    <section className="bg-violet-50/30 py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16">
         {/* Left — Sticky headline */}
         <div className="lg:col-span-4 lg:sticky lg:top-32 self-start">
