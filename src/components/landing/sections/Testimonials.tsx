@@ -41,7 +41,7 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <div key={t.name} className="h-full">
               <AnimateIn delay={i * 0.1} className="h-full">
-                <div className="bg-white rounded-2xl p-8 border border-fog h-full flex flex-col">
+                <div className="bg-white rounded-2xl p-8 border border-indigo-100 h-full flex flex-col">
                   <span className="font-heading font-extrabold text-6xl text-ink opacity-20 leading-none block mb-2">
                     "
                   </span>
