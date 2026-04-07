@@ -32,7 +32,7 @@ const plans = [
     ],
     cta: "Start 14-Day Trial",
     highlighted: true,
-    ctaStyle: "bg-ink text-white hover:bg-ink-light",
+    ctaStyle: "bg-indigo-600 text-white hover:bg-indigo-700",
   },
   {
     name: "Scale",
