@@ -141,7 +141,7 @@ function DashboardMockup() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen bg-white flex items-center pt-16 px-6">
+    <section className="min-h-screen flex items-center pt-16 px-6" style={{ background: "radial-gradient(ellipse at 50% 0%, #EDE9FE 0%, #F5F3FF 30%, #FFFFFF 70%)" }}>
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left — Text */}
         <div>
