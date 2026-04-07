@@ -24,6 +24,7 @@ import Stock from "./pages/Stock";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import AboutUs from "./pages/AboutUs";
 
 const queryClient = new QueryClient();
 
