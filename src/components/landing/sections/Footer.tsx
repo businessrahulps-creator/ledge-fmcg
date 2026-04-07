@@ -49,7 +49,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-indigo-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</span>
+            <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</Link>
             <span className="font-body text-sm text-lp-zinc">
               © 2026 Ledge. All rights reserved.
             </span>
