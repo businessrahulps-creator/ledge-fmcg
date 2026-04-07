@@ -39,13 +39,13 @@ export function Testimonials() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {testimonials.map((t, i) => (
-            <div key={t.name}>
-              <AnimateIn delay={i * 0.1}>
-                <div className="bg-white rounded-2xl p-8 border border-fog h-full">
+            <div key={t.name} className="h-full">
+              <AnimateIn delay={i * 0.1} className="h-full">
+                <div className="bg-white rounded-2xl p-8 border border-fog h-full flex flex-col">
                   <span className="font-heading font-extrabold text-6xl text-ink opacity-20 leading-none block mb-2">
                     "
                   </span>
-                  <p className="font-body text-base text-graphite leading-[1.7]">
+                  <p className="font-body text-base text-graphite leading-[1.7] flex-1">
                     {t.quote}
                   </p>
                   <div className="mt-6 pt-6 border-t border-fog">
