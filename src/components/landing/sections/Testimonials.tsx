@@ -42,7 +42,7 @@ export function Testimonials() {
             <div key={t.name} className="h-full">
               <AnimateIn delay={i * 0.1} className="h-full">
                 <div className="bg-white rounded-2xl p-8 border border-indigo-100 h-full flex flex-col">
-                  <span className="font-heading font-extrabold text-6xl text-ink opacity-20 leading-none block mb-2">
+                  <span className="font-heading font-extrabold text-6xl text-indigo-400 opacity-30 leading-none block mb-2">
                     "
                   </span>
                   <p className="font-body text-base text-graphite leading-[1.7] flex-1">
