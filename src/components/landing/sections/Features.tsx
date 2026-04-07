@@ -1,9 +1,9 @@
-import { LayoutGrid, ClipboardCheck, Users, Package, IndianRupee, CloudOff } from "lucide-react";
+import { BarChart3, ClipboardCheck, Users, Package, IndianRupee, CloudOff } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 
 const features = [
   {
-    icon: LayoutGrid,
+    icon: BarChart3,
     title: "Your business, at a glance",
     description:
       "Open your dashboard to instantly track daily revenue, total orders, and dispatch statuses without calling anyone.",
