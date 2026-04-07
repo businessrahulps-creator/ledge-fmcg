@@ -3,7 +3,7 @@ import { AnimateIn } from "../AnimateIn";
 /* ── Step 1: Order Creation Phone Mockup ── */
 function OrderMockup() {
   return (
-    <div className="bg-white rounded-2xl border border-fog p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+    <div className="bg-white rounded-2xl border border-indigo-100 p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
       <div className="text-[11px] font-semibold text-midnight mb-3">New Order</div>
       <div className="space-y-2.5">
         <div>
