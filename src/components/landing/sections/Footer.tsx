@@ -34,49 +34,12 @@ export function Footer() {
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link}>
-                    {link === "About Us" ? (
-                      <Link
-                        to="/about-us"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Privacy Policy" ? (
-                      <Link
-                        to="/privacy-policy"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Terms of Service" ? (
-                      <Link
-                        to="/terms-of-service"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Contact" ? (
-                      <Link
-                        to="/contact"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : link === "Refund Policy" ? (
-                      <Link
-                        to="/refund-policy"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </Link>
-                    ) : (
-                      <a
-                        href="#"
-                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                      >
-                        {link}
-                      </a>
-                    )}
+                    <Link
+                      to={linkMap[link] || "/"}
+                      className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                    >
+                      {link}
+                    </Link>
                   </li>
                 ))}
               </ul>
