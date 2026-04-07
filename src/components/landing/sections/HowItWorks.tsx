@@ -1,4 +1,5 @@
 import { AnimateIn } from "../AnimateIn";
+import { BrowserFrame, PhoneFrame, GradientStage } from "../DeviceFrames";
 
 /* ── Step 1: Order Creation Phone Mockup ── */
 function OrderMockup() {

@@ -173,9 +173,11 @@ export function Hero() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full max-w-lg mx-auto"
-          style={{ transform: "perspective(1200px) rotateY(-4deg)" }}
+          style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
         >
-          <DashboardMockup />
+          <GradientStage variant="indigo">
+            <DashboardMockup />
+          </GradientStage>
         </motion.div>
       </div>
     </section>
