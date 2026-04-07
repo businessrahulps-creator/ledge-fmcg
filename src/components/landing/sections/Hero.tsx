@@ -164,7 +164,7 @@ export function Hero() {
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-sm text-white bg-ink hover:bg-ink-light px-6 py-2.5 rounded-full hover:scale-[1.02] transition-all duration-150"
+              className="font-body font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2.5 rounded-full hover:scale-[1.02] transition-all duration-150"
             >
               Start Free Trial
             </Link>
