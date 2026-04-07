@@ -11,10 +11,6 @@ const columns = [
     links: ["About Us", "Contact"],
   },
   {
-    title: "Resources",
-    links: ["Help Center", "WhatsApp Support", "Setup Guide"],
-  },
-  {
     title: "Legal",
     links: ["Privacy Policy", "Terms of Service", "Refund Policy"],
   },
