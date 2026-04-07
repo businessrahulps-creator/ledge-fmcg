@@ -54,6 +54,13 @@ export function Footer() {
                       >
                         {link}
                       </Link>
+                    ) : link === "Contact" ? (
+                      <Link
+                        to="/contact"
+                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                      >
+                        {link}
+                      </Link>
                     ) : link === "Refund Policy" ? (
                       <Link
                         to="/refund-policy"
