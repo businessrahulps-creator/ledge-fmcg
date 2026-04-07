@@ -46,6 +46,13 @@ export function Footer() {
                       >
                         {link}
                       </Link>
+                    ) : link === "Terms of Service" ? (
+                      <Link
+                        to="/terms-of-service"
+                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                      >
+                        {link}
+                      </Link>
                     ) : (
                       <a
                         href="#"
