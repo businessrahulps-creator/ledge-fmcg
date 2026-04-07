@@ -16,7 +16,7 @@ const plans = [
     ],
     cta: "Start Free",
     highlighted: false,
-    ctaStyle: "border border-fog text-midnight hover:border-midnight",
+    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
   {
     name: "Growth",
