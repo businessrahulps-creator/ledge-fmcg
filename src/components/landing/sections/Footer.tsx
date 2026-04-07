@@ -53,6 +53,13 @@ export function Footer() {
                       >
                         {link}
                       </Link>
+                    ) : link === "Refund Policy" ? (
+                      <Link
+                        to="/refund-policy"
+                        className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                      >
+                        {link}
+                      </Link>
                     ) : (
                       <a
                         href="#"
