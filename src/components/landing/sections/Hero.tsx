@@ -27,8 +27,8 @@ function DashboardMockup() {
 
   return (
     <motion.div
-      className="bg-white rounded-2xl border border-fog overflow-hidden"
-      style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.06)" }}
+      className="bg-white rounded-2xl border border-indigo-100 overflow-hidden"
+      style={{ boxShadow: "0 8px 40px rgba(79,70,229,0.08)" }}
       whileHover={{ boxShadow: "0 12px 50px rgba(0,0,0,0.10)", y: -2 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
