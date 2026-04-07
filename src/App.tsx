@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import Stock from "./pages/Stock";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const queryClient = new QueryClient();
 
