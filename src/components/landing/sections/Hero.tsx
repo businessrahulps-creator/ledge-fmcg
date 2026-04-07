@@ -116,7 +116,8 @@ function DashboardMockup() {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </BrowserFrame>
   );
 }
 
