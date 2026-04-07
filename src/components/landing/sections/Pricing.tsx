@@ -68,7 +68,7 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section className="bg-white py-16 md:py-32">
+    <section id="pricing" className="bg-white py-16 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-2 tracking-[-0.03em]">
