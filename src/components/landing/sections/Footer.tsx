@@ -17,9 +17,7 @@ const columns = [
 ];
 
 const socials = [
-  { icon: Linkedin, href: "#" },
-  { icon: Twitter, href: "#" },
-  { icon: Youtube, href: "#" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/asha-ps-6b0673207/" },
 ];
 
 export function Footer() {
