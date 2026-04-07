@@ -1,8 +1,8 @@
 
 
-# Remove Resources Column from Footer
+# Remove "Updates" from Footer
 
-**File: `src/components/landing/sections/Footer.tsx`**
+**File: `src/components/landing/sections/Footer.tsx`** (line 7)
 
-Remove the "Resources" object from the `columns` array (the one containing "Help Center", "WhatsApp Support", "Setup Guide"). This changes the grid from 4 columns to 3.
+Change `["Features", "Pricing", "Updates"]` to `["Features", "Pricing"]` in the Product column.
 
