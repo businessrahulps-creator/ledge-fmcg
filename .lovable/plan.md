@@ -1,30 +1,39 @@
 
 
-# Fix: "duplicate key violates unique constraint orders_order_number_key"
+# Fix Landing Page Navigation Links
 
-## Root Cause
-
-The `orders` table has a `UNIQUE (order_number)` constraint that is **global** — not scoped per company. Since all companies use the same prefix format (`ORD-2026-XXXX`), when two companies reach the same sequence number, the insert fails.
+## Problem
+The navbar has three links — Features (`#features`), Pricing (`#pricing`), About (`#about`) — but **none of the landing page sections have `id` attributes**, so clicking them does nothing. Also, "About" doesn't map to any section on the page.
 
 ## Fix
 
-One migration with two changes:
+### 1. Update nav links to match actual sections
+Replace the links array in `src/components/landing/sections/Navbar.tsx`:
 
-1. **Drop** the global `orders_order_number_key` unique constraint
-2. **Add** a compound unique constraint on `(company_id, order_number)` — order numbers only need to be unique within a company
+| Current | New |
+|---------|-----|
+| Features → `#features` | Features → `#features` |
+| Pricing → `#pricing` | Pricing → `#pricing` |
+| About → `#about` | How It Works → `#how-it-works` |
 
-```sql
-ALTER TABLE orders DROP CONSTRAINT orders_order_number_key;
-ALTER TABLE orders ADD CONSTRAINT orders_company_order_number_key UNIQUE (company_id, order_number);
-```
+"About" has no corresponding section. Replace it with "How It Works" which is a real section users would want to jump to. Alternatively, we could add a "Log in" link here.
 
-No code changes needed — the `addOrder` logic in `DataContext.tsx` already scopes order number generation per company via `get_next_order_number(target_company_id)`.
+### 2. Add `id` attributes to landing sections
+Add anchor IDs to the wrapper elements in these files:
 
-## Files Changed
-| Action | File |
-|--------|------|
-| Create | Migration SQL (one file) |
+- `src/components/landing/sections/Features.tsx` → `id="features"`
+- `src/components/landing/sections/Pricing.tsx` → `id="pricing"`
+- `src/components/landing/sections/HowItWorks.tsx` → `id="how-it-works"`
 
-## Result
-Order creation will work for all companies independently, even when they share the same prefix/sequence range.
+### 3. Add smooth scrolling
+Add `scroll-behavior: smooth` to the landing page wrapper in `src/pages/Index.tsx` so clicking nav links produces a smooth scroll instead of a jarring jump.
+
+## Files to Change
+| File | Change |
+|------|--------|
+| `src/components/landing/sections/Navbar.tsx` | Update links array (replace "About" with "How It Works") |
+| `src/components/landing/sections/Features.tsx` | Add `id="features"` to section wrapper |
+| `src/components/landing/sections/Pricing.tsx` | Add `id="pricing"` to section wrapper |
+| `src/components/landing/sections/HowItWorks.tsx` | Add `id="how-it-works"` to section wrapper |
+| `src/pages/Index.tsx` | Add `scroll-smooth` class to root div |
 
