@@ -33,7 +33,7 @@ function OrderMockup() {
           <span className="text-[10px] text-graphite">Total</span>
           <span className="text-xs font-semibold text-midnight">₹12,000</span>
         </div>
-        <div className="bg-ink text-white text-[10px] font-medium text-center py-2 rounded-lg">
+        <div className="bg-indigo-600 text-white text-[10px] font-medium text-center py-2 rounded-lg">
           Place Order
         </div>
       </div>
