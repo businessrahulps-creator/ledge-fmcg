@@ -1,4 +1,4 @@
-import { LayoutGrid, ClipboardCheck, Users, Package, IndianRupee, CloudOff } from "lucide-react";
+import { BarChart3, ClipboardCheck, Users, Package, IndianRupee, CloudOff } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 
 const features = [
