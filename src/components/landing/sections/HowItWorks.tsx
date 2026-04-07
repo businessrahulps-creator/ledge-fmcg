@@ -155,7 +155,7 @@ export function HowItWorks() {
               <AnimateIn key={step.badge} delay={i * 0.1}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="bg-accent-wash text-accent-indigo text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4">
+                    <span className="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4">
                       {step.badge}
                     </span>
                     <h3 className="font-heading font-bold text-[24px] md:text-[28px] text-midnight">
