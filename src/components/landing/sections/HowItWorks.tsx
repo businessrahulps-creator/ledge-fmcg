@@ -62,29 +62,33 @@ function DashboardMiniMockup() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        {kpis.map((k) => (
-          <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
-            <div className="text-[9px] text-graphite">{k.label}</div>
-            <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
+    <GradientStage variant="indigo">
+      <BrowserFrame url="app.ledge.in/dashboard">
+        <div className="p-5">
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {kpis.map((k) => (
+              <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
+                <div className="text-[9px] text-graphite">{k.label}</div>
+                <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
-        <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
-        <div className="flex items-end gap-1.5 h-12">
-          {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
-            <div key={i} className="flex-1 bg-midnight rounded-sm" style={{ height: `${h}%` }} />
-          ))}
+          <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
+            <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
+            <div className="flex items-end gap-1.5 h-12">
+              {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
+                <div key={i} className="flex-1 bg-midnight rounded-sm" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+            <div className="flex justify-between mt-1">
+              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                <span key={i} className="flex-1 text-center text-[7px] text-graphite">{d}</span>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex justify-between mt-1">
-          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-            <span key={i} className="flex-1 text-center text-[7px] text-graphite">{d}</span>
-          ))}
-        </div>
-      </div>
-    </div>
+      </BrowserFrame>
+    </GradientStage>
   );
 }
 
