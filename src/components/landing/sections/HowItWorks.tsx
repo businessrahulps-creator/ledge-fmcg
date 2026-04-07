@@ -1,9 +1,10 @@
 import { AnimateIn } from "../AnimateIn";
+import { BrowserFrame, PhoneFrame, GradientStage } from "../DeviceFrames";
 
 /* ── Step 1: Order Creation Phone Mockup ── */
-function OrderMockup() {
+function OrderMockupContent() {
   return (
-    <div className="bg-white rounded-2xl border border-indigo-100 p-5 max-w-xs mx-auto" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
+    <div className="p-5">
       <div className="text-[11px] font-semibold text-midnight mb-3">New Order</div>
       <div className="space-y-2.5">
         <div>
@@ -41,6 +42,16 @@ function OrderMockup() {
   );
 }
 
+function OrderMockup() {
+  return (
+    <GradientStage variant="lavender">
+      <PhoneFrame>
+        <OrderMockupContent />
+      </PhoneFrame>
+    </GradientStage>
+  );
+}
+
 /* ── Step 2: Dashboard KPI Mockup ── */
 function DashboardMiniMockup() {
   const kpis = [
@@ -51,29 +62,33 @@ function DashboardMiniMockup() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        {kpis.map((k) => (
-          <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
-            <div className="text-[9px] text-graphite">{k.label}</div>
-            <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
+    <GradientStage variant="indigo">
+      <BrowserFrame url="app.ledge.in/dashboard">
+        <div className="p-5">
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {kpis.map((k) => (
+              <div key={k.label} className="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100">
+                <div className="text-[9px] text-graphite">{k.label}</div>
+                <div className={`text-sm font-semibold ${k.color}`}>{k.value}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
-        <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
-        <div className="flex items-end gap-1.5 h-12">
-          {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
-            <div key={i} className="flex-1 bg-midnight rounded-sm" style={{ height: `${h}%` }} />
-          ))}
+          <div className="bg-indigo-50/30 rounded-xl border border-indigo-100 p-3">
+            <div className="text-[9px] text-graphite mb-2">Weekly Trend</div>
+            <div className="flex items-end gap-1.5 h-12">
+              {[35, 55, 45, 72, 60, 48, 85].map((h, i) => (
+                <div key={i} className="flex-1 bg-midnight rounded-sm" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+            <div className="flex justify-between mt-1">
+              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                <span key={i} className="flex-1 text-center text-[7px] text-graphite">{d}</span>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex justify-between mt-1">
-          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-            <span key={i} className="flex-1 text-center text-[7px] text-graphite">{d}</span>
-          ))}
-        </div>
-      </div>
-    </div>
+      </BrowserFrame>
+    </GradientStage>
   );
 }
 
@@ -87,27 +102,31 @@ function StockMockup() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-indigo-100 p-5" style={{ boxShadow: "0 2px 12px rgba(79,70,229,0.06)" }}>
-      <div className="text-[11px] font-semibold text-midnight mb-3">Stock Health</div>
-      <div className="space-y-1.5">
-        <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-indigo-50">
-          <span>Product</span>
-          <span>Warehouse</span>
-          <span className="text-right">Qty</span>
-          <span className="text-right">Status</span>
-        </div>
-        {rows.map((r) => (
-          <div key={r.product} className="grid grid-cols-4 items-center py-1">
-            <span className="text-[10px] text-midnight truncate pr-1">{r.product}</span>
-            <span className="text-[10px] text-graphite">{r.warehouse}</span>
-            <span className="text-[10px] text-midnight text-right">{r.qty}</span>
-            <div className="text-right">
-              <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${r.color}`}>{r.health}</span>
+    <GradientStage variant="emerald">
+      <BrowserFrame url="app.ledge.in/stock">
+        <div className="p-5">
+          <div className="text-[11px] font-semibold text-midnight mb-3">Stock Health</div>
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-4 text-[8px] text-graphite uppercase tracking-wider pb-1 border-b border-indigo-50">
+              <span>Product</span>
+              <span>Warehouse</span>
+              <span className="text-right">Qty</span>
+              <span className="text-right">Status</span>
             </div>
+            {rows.map((r) => (
+              <div key={r.product} className="grid grid-cols-4 items-center py-1">
+                <span className="text-[10px] text-midnight truncate pr-1">{r.product}</span>
+                <span className="text-[10px] text-graphite">{r.warehouse}</span>
+                <span className="text-[10px] text-midnight text-right">{r.qty}</span>
+                <div className="text-right">
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${r.color}`}>{r.health}</span>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
+      </BrowserFrame>
+    </GradientStage>
   );
 }
 

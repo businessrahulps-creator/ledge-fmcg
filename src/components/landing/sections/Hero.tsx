@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { BrowserFrame, GradientStage } from "../DeviceFrames";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20 },
@@ -26,31 +27,11 @@ function DashboardMockup() {
   const barHeights = [40, 65, 50, 80, 70, 55, 90];
 
   return (
-    <motion.div
-      className="bg-white rounded-2xl border border-indigo-100 overflow-hidden"
-      style={{ boxShadow: "0 8px 40px rgba(79,70,229,0.08)" }}
-      whileHover={{ boxShadow: "0 12px 50px rgba(0,0,0,0.10)", y: -2 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-    >
-      {/* Browser chrome */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-indigo-50 bg-indigo-50/30">
-        <div className="flex gap-1.5">
-          {["#FECACA", "#FDE68A", "#BBF7D0"].map((c, i) => (
-            <motion.div
-              key={i}
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: "#E4E4E7" }}
-              whileHover={{ backgroundColor: c, scale: 1.3 }}
-              transition={{ duration: 0.2 }}
-            />
-          ))}
-        </div>
-        <div className="flex-1 mx-8">
-          <div className="h-5 bg-[#F4F4F5] rounded-md flex items-center justify-center">
-            <span className="text-[10px] text-[#A1A1AA]">app.ledge.in/dashboard</span>
-          </div>
-        </div>
-      </div>
+    <BrowserFrame url="app.ledge.in/dashboard">
+      <motion.div
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
 
       <div className="flex">
         {/* Sidebar */}
@@ -135,7 +116,8 @@ function DashboardMockup() {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </BrowserFrame>
   );
 }
 
@@ -191,9 +173,11 @@ export function Hero() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full max-w-lg mx-auto"
-          style={{ transform: "perspective(1200px) rotateY(-4deg)" }}
+          style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
         >
-          <DashboardMockup />
+          <GradientStage variant="indigo">
+            <DashboardMockup />
+          </GradientStage>
         </motion.div>
       </div>
     </section>
