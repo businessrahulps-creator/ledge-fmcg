@@ -1,8 +1,8 @@
 
 
-# Remove "Updates" from Footer
+# Remove Social Icons, Keep Only LinkedIn
 
-**File: `src/components/landing/sections/Footer.tsx`** (line 7)
+**File: `src/components/landing/sections/Footer.tsx`**
 
-Change `["Features", "Pricing", "Updates"]` to `["Features", "Pricing"]` in the Product column.
+Update the `socials` array to contain only the LinkedIn entry, linking to `https://www.linkedin.com/in/asha-ps-6b0673207/`. Remove Twitter and Youtube imports.
 
