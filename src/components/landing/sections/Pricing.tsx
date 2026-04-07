@@ -62,7 +62,7 @@ const plans = [
     ],
     cta: "Talk to Us",
     highlighted: false,
-    ctaStyle: "border border-fog text-midnight hover:border-midnight",
+    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
 ];
 
