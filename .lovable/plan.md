@@ -1,29 +1,23 @@
 
 
-# Clean Up Test Data
+# Fix Footer Feature & Pricing Links
 
-## Current State
+## Problem
 
-| Table | Records | Content |
-|-------|---------|---------|
-| auth.users | 1 | `testuser-e2e@example.com` |
-| companies | 1 | Test company |
-| user_roles | 1 | Role for test user |
-| profiles | 0 | (trigger-created, already gone) |
-| Everything else | 0 | Already empty |
+The "Features" and "Pricing" links in the footer use `/#features` and `/#pricing` with React Router's `<Link>` component. Since the user is already on `/`, React Router navigates to `/` but does **not** scroll to the anchor — it treats the hash as a route change, not a scroll target.
 
-## Plan
+## Solution
 
-Run a single database migration that deletes all data in the correct order (respecting dependencies), then deletes the test auth user:
+For these two links, instead of `<Link>`, use a plain `<a href="#features">` / `<a href="#pricing">` tag when the link starts with `/#`. This lets the browser handle native anchor scrolling. For links to other pages (`/about-us`, `/contact`, etc.), keep using `<Link>`.
 
-1. **Delete in order**: `stock_deductions` → `order_lines` → `orders` → `stock_items` → `godowns` → `distributors` → `salespersons` → `products` → `user_roles` → `profiles` → `companies`
-2. **Delete the test auth user** (`26677e5d-95ee-4ff1-b46f-d13e7707b098`) from `auth.users`
-3. **Reset the order sequence** is handled automatically since the company row is deleted
+## Changes
 
-After this, the database will be completely empty and ready for a fresh signup with your real account.
+**File: `src/components/landing/sections/Footer.tsx`**
 
-## What Stays the Same
-- All database tables, functions, triggers, and RLS policies remain intact
-- The app code is unchanged
-- Signing up will create a new company and seed fresh demo data automatically (via the existing `setup_new_company` + `seed_company_data` flow)
+- Update the render logic inside the `col.links.map()` to check if `linkMap[link]` starts with `/#`
+- If yes, render a plain `<a>` tag with `href` set to the hash portion (e.g. `#features`)
+- If no, render the existing `<Link>` component
+- Same styling on both
+
+This is a single-file, ~10-line change.
 
