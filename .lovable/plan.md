@@ -1,56 +1,35 @@
 
 
-# Fix Post-Signup Race Condition and Settings Hardcoded Company Name
+# Add GSTIN Input Field to Settings
 
-## Problem A: Race Condition
+## What
+Add a visible GSTIN text input to the Company tab in Settings. The backend logic (fetch + save) is already wired — this is purely a UI addition.
 
-After signup, `navigate("/dashboard")` fires immediately. The `AuthContext` has already set the user, but `profile` (and thus `companyId`) hasn't been refreshed yet — `onAuthStateChange` fires a deferred `fetchProfile`, but the dashboard renders before it completes. `DataContext` sees `companyId === null` and shows empty state.
+## Change
 
-**Fix**: In `Signup.tsx`, after `setup_new_company` succeeds, call `refreshProfile()` from `useAuth()` before navigating. This ensures `companyId` is populated in context before the dashboard mounts.
+**File: `src/pages/Settings.tsx`**
 
-```
-// In Signup.tsx handleSubmit, after setup_new_company RPC:
-await refreshProfile();   // <-- forces profile reload, sets companyId
-navigate("/dashboard");
-```
+Insert a GSTIN input field between the Address textarea and the Order Prefix input. Approximately 12 lines:
 
-**File**: `src/pages/Signup.tsx` — import `useAuth`, call `refreshProfile()` before `navigate`.
-
-## Problem B: Hardcoded Company Name in Settings
-
-Line 61 of `Settings.tsx`: `useState("Acme FMCG Pvt. Ltd.")` is static. The company name, address, and GSTIN should be fetched from the `companies` table.
-
-**Fix**: Add a `useEffect` that fetches the company record using `companyId` from `useAuth()`, then populates the form fields. The save button should also persist changes back to the `companies` table via Supabase update.
-
-```
-// In Settings.tsx:
-const { companyId } = useAuth();
-
-useEffect(() => {
-  if (!companyId) return;
-  supabase.from("companies").select("name, address, gstin").eq("id", companyId).single()
-    .then(({ data }) => {
-      if (data) {
-        setCompanyName(data.name);
-        setCompanyAddress(data.address);
-      }
-    });
-}, [companyId]);
+```tsx
+<div className="space-y-1.5 md:space-y-2">
+  <Label className="text-xs md:text-sm">GSTIN</Label>
+  <Input
+    value={companyGstin}
+    onChange={(e) => setCompanyGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))}
+    maxLength={15}
+    className="h-11 rounded-lg md:h-12 max-w-[300px] font-mono"
+    placeholder="22AAAAA0000A1Z5"
+  />
+  <p className="text-[10px] text-muted-foreground md:text-xs">
+    15-digit GST Identification Number
+  </p>
+</div>
 ```
 
-Also update `saveCompany` to persist name/address/GSTIN back:
-```
-await supabase.from("companies").update({ name: companyName, address: companyAddress }).eq("id", companyId);
-```
+- Auto-uppercases input, strips non-alphanumeric characters, caps at 15 chars
+- No database migration, no RLS changes, no new dependencies
 
-**File**: `src/pages/Settings.tsx` — add `useEffect` for fetch, update `saveCompany` to write back.
-
-## Changes Summary
-
-| File | Change |
-|------|--------|
-| `src/pages/Signup.tsx` | Import `useAuth`, call `refreshProfile()` before navigate |
-| `src/pages/Settings.tsx` | Fetch company from DB on mount, persist on save |
-
-Two files, minimal changes, no schema modifications needed.
+## Testing
+Spot-check only: open Settings, verify field renders, enter a GSTIN, save, refresh, confirm persistence.
 
