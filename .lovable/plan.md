@@ -1,36 +1,74 @@
 
+## Fix Edit Inventory Dialog Properly
 
-# Fix Edit Inventory Dialog Layout
+### What’s actually wrong
+Yes, we are on the same page now: this is not a leftover scrollbar issue. The dialog is still being forced wider internally, so multiple rows look like they are spilling out.
 
-## Problem
-The `overflow-hidden` we just added to `DialogContent` is clipping the footer buttons — "Save Changes" is cut off on the right. The three buttons ("Remove from Warehouse", "Cancel", "Save Changes") are too wide to fit in one row at this viewport size.
+### Root cause
+The current footer fix is still wrong for this dialog:
 
-## Fix
+- `DialogFooter` has a built-in `sm:flex-row`
+- this dialog is capped at `sm:max-w-md`, so it stays relatively narrow
+- the three buttons can never fit in one row inside that width
+- once the footer becomes too wide, the dialog’s `grid` layout sizes itself from that wide child, which makes the product card and inputs appear to overflow too
 
-### 1. `src/components/ui/dialog.tsx` — revert `overflow-hidden`
-Remove `overflow-hidden` from the base `DialogContent` class. It was too aggressive — it clips content like footer buttons. The original overflow issue was specific to the product info card, not the dialog itself.
+So the real issue is: the footer layout is still expanding the dialog content width.
 
-### 2. `src/pages/Stock.tsx` — keep `overflow-hidden` on the product card (already done), and fix footer buttons
-- Keep `overflow-hidden` on the product info `<div>` (line 664) — that fixes the original overflow
-- Update the `DialogFooter` (line 693) to stack buttons vertically on small screens so they don't overflow:
+## Implementation plan
+
+### 1. Keep the global dialog component as-is
+**File:** `src/components/ui/dialog.tsx`
+
+No further global dialog changes. The base component is not the problem anymore.
+
+### 2. Make the Edit Inventory footer permanently two-row
+**File:** `src/pages/Stock.tsx`
+
+Update only the Edit Inventory dialog footer so it never switches back to a single row.
+
+Use a layout like this:
 
 ```tsx
-<DialogFooter className="flex-col gap-2">
-  <Button variant="destructive" onClick={deleteStockItemFn} className="w-full sm:w-auto sm:mr-auto">
+<DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0">
+  <Button
+    variant="destructive"
+    onClick={deleteStockItemFn}
+    className="w-full"
+  >
     Remove from Warehouse
   </Button>
-  <div className="flex gap-2 w-full sm:w-auto">
-    <Button variant="outline" onClick={() => setEditStockItem(null)} className="flex-1 sm:flex-initial">Cancel</Button>
-    <Button onClick={saveStockItemFn} className="flex-1 sm:flex-initial">Save Changes</Button>
+
+  <div className="grid w-full grid-cols-2 gap-2">
+    <Button
+      variant="outline"
+      onClick={() => setEditStockItem(null)}
+      className="w-full"
+    >
+      Cancel
+    </Button>
+    <Button onClick={saveStockItemFn} className="w-full">
+      Save Changes
+    </Button>
   </div>
 </DialogFooter>
 ```
 
-This stacks "Remove from Warehouse" full-width on top, with "Cancel" and "Save Changes" side by side below on mobile, and reverts to a single row on wider screens.
+### 3. Keep the product card overflow fix
+Keep this line unchanged:
 
-## Summary
-| File | Change |
-|------|--------|
-| `src/components/ui/dialog.tsx` | Remove `overflow-hidden` from base DialogContent |
-| `src/pages/Stock.tsx` | Restructure footer buttons to prevent horizontal overflow |
+```tsx
+<div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
+```
 
+That still helps contain the product info card cleanly.
+
+## Why this will fix the screenshot
+- the footer will stop trying to become a horizontal 3-button row
+- the dialog’s grid width will no longer be stretched by the footer
+- the product card, threshold input, and action buttons will all align inside the modal again
+
+## Files affected
+- `src/pages/Stock.tsx`
+
+## Technical note
+The key correction is overriding the inherited responsive footer behavior with `sm:flex-col sm:space-x-0`, because this modal stays narrow even on larger screens. The previous assumption that it could safely return to a single-row footer was incorrect for a `max-w-md` dialog.
