@@ -1,83 +1,69 @@
 
 
-# Phase 1: RLS Audit, Trigger Fix, and Multi-Tenant Testing
+# Phase 1 E2E Testing Plan
 
-## Root Cause Found
+## Step 1: Clean Up Orphaned Data
 
-The `on_auth_user_created()` function exists but **no trigger is attached to `auth.users`**. When a new user signs up:
-1. No profile row is created automatically
-2. `get_company_id()` returns NULL for that user
-3. Every RLS policy that uses `get_company_id()` evaluates to FALSE
-4. The user sees zero data and cannot insert anything
+Delete the orphaned "MP AGENCIES" company and the stale `user_roles` entry for the orphaned user `oviyaashaps@gmail.com` (user_id `f75a594f-ea28-43ca-ab35-b7666b11377b`). The auth user itself can remain — it has no profile or company link so it's harmless.
 
-The first account only worked because `setup_new_company` manually updates the profile. But the profile must exist first (created by the trigger) for the UPDATE to succeed.
-
-## Additional RLS Issue
-
-The `companies` table INSERT policy uses `WITH CHECK (true)` — any authenticated user can insert unlimited company rows. This should be tightened.
-
-## Plan
-
-### Step 1: Database Migration — Fix Trigger + Tighten RLS
-
-Single migration that:
-
-1. **Creates the missing trigger** on `auth.users` to call `on_auth_user_created()` on INSERT
-2. **Replaces the companies INSERT policy** from `WITH CHECK (true)` to `WITH CHECK (auth.uid() IS NOT NULL AND NOT EXISTS (SELECT 1 FROM profiles WHERE user_id = auth.uid() AND company_id IS NOT NULL))` — users can only create a company if they don't already have one
-3. **Adds a `seed_company_data` call inside `setup_new_company`** so seed data is created atomically (verify this is already happening — if not, add it)
-
+Using the insert tool (data operations):
 ```sql
--- 1. Create the missing trigger
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.on_auth_user_created();
-
--- 2. Tighten companies INSERT policy
-DROP POLICY "Authenticated users can create a company" ON companies;
-CREATE POLICY "Authenticated users can create a company" ON companies
-  FOR INSERT TO authenticated
-  WITH CHECK (true);  
-  -- Keep permissive: setup_new_company (SECURITY DEFINER) handles actual creation;
-  -- direct inserts are blocked by the function's idempotency check
+DELETE FROM user_roles WHERE user_id = 'f75a594f-ea28-43ca-ab35-b7666b11377b';
+DELETE FROM companies WHERE id = '7b957ec3-2c5a-4e47-9cb6-cc1f56e89846';
 ```
 
-Actually, since `setup_new_company` is SECURITY DEFINER and bypasses RLS, and direct company creation from the client should go through that RPC, the current INSERT policy is acceptable. The trigger is the critical fix.
+## Step 2: Browser E2E Isolation Tests
 
-### Step 2: Verify `setup_new_company` calls `seed_company_data`
+Sequential browser-based testing for all 5 accounts. Each test logs in, verifies data counts, performs a mutation, logs out, and cross-checks isolation.
 
-Looking at the function — it does NOT call `seed_company_data`. The Signup.tsx code only calls `setup_new_company`. Seed data is never created for new accounts.
+### Test Suite A: Account 1 (test1@getledge.in / TestCo Kerala)
+1. Navigate to `/login`, sign in
+2. Verify dashboard loads — check distributor count (7), product count (8), order count (8)
+3. Navigate to Distributors → create "E2E Test Dealer Kerala"
+4. Navigate to New Order → create a test order
+5. Sign out
 
-**Fix**: Add `PERFORM seed_company_data(v_company_id);` at the end of `setup_new_company`, before the RETURN.
+### Test Suite B: Account 2 (test2@getledge.in / TestCo Bangalore)
+1. Login → verify dashboard shows TestCo Bangalore data (7 dist, 8 prod, 8 orders)
+2. Navigate to Distributors → confirm "E2E Test Dealer Kerala" is NOT visible (isolation check)
+3. Navigate to Orders → confirm the Kerala test order is NOT visible
+4. Sign out
 
-### Step 3: Test Account Seeding (Edge Function)
+### Test Suite C-E: Accounts 3-5
+1. Login each account → verify own data loads
+2. Confirm no Kerala test data leaks
+3. Sign out
 
-Create an edge function `seed-test-accounts` that:
-- Creates 5 test users via Supabase Admin API (service role key)
-- Calls `setup_new_company` for each (which now also seeds data)
-- Accounts: test1@getledge.in through test5@getledge.in
-- Companies: "TestCo Kerala", "TestCo Bangalore", "TestCo Mumbai", "TestCo Delhi", "TestCo Chennai"
+### Test Suite F: Reports Isolation
+1. Login as test1 → Reports page → verify data matches own company
+2. Login as test2 → Reports page → verify different data, no Kerala bleed
 
-### Step 4: Browser Tests
+## Step 3: Fresh Signup Flow
 
-Sequentially test each account:
-1. Login flow
-2. Dashboard loads with correct company data
-3. Create a distributor — verify not visible when logged in as another account
-4. Order creation pipeline
-5. Reports show only own data
+1. Navigate to `/signup`
+2. Sign up as `test6@getledge.in` with password `TestLedge@2026!`, company "TestCo Pune"
+3. Verify auto-redirect to dashboard
+4. Check that profile was created, company was created, seed data was seeded (7 distributors, 8 products, etc.)
+5. Verify isolation from all other accounts
 
-### Summary of Changes
+## Step 4: Output Report
 
-| What | Why |
-|------|-----|
-| Add trigger `on_auth_user_created` on `auth.users` | Profile row never created for new signups |
-| Update `setup_new_company` to call `seed_company_data` | New accounts get empty workspace with no demo data |
-| Create `seed-test-accounts` edge function | Generate 5 isolated test accounts |
-| Run browser tests per account | Verify tenant isolation end-to-end |
+A structured PASS/FAIL table covering:
 
-### Files Affected
-- **Migration SQL** (new): trigger creation + function update
-- **`supabase/functions/seed-test-accounts/index.ts`** (new): test seeding endpoint
-- No frontend code changes needed
+| Account | Login | Dashboard Data | Create Dist | Create Order | Isolation | Reports | Result |
+|---------|-------|----------------|-------------|--------------|-----------|---------|--------|
+
+Plus explicit data leakage assertions and any warnings.
+
+## Technical Notes
+
+- The trigger `on_auth_user_created` is confirmed active on `auth.users`
+- `setup_new_company` now calls `seed_company_data` internally
+- RLS policies use `get_company_id()` (SECURITY DEFINER) which queries profiles
+- App code double-scopes with `.eq("company_id", companyId)` — belt and suspenders
+- Email confirmation may block the test6 signup — if so, we'll note it and test via edge function instead
+
+## Files Changed
+- No code changes — this is a testing + cleanup task
+- Database: 2 DELETE statements for orphaned data
 
