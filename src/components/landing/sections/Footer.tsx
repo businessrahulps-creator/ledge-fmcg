@@ -32,15 +32,29 @@ export function Footer() {
                 {col.title}
               </h4>
               <ul className="space-y-3">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <Link
-                      to={linkMap[link] || "/"}
-                      className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
-                    >
-                      {link}
-                    </Link>
-                  </li>
+                {col.links.map((link) => {
+                  const href = linkMap[link] || "/";
+                  const isAnchor = href.startsWith("/#");
+                  return (
+                    <li key={link}>
+                      {isAnchor ? (
+                        <a
+                          href={href.replace("/", "")}
+                          className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                        >
+                          {link}
+                        </a>
+                      ) : (
+                        <Link
+                          to={href}
+                          className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                        >
+                          {link}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                }
                 ))}
               </ul>
             </div>
