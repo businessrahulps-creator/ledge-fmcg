@@ -1,41 +1,36 @@
 
 
-# Fix Edit Inventory Dialog Overflow
+# Fix Edit Inventory Dialog Layout
 
 ## Problem
-The Edit Inventory dialog content is **overflowing** outside the dialog box boundaries — the product info card and form fields visually break out of the rounded container. This is not just a scrollbar issue; the content is escaping the dialog bounds.
-
-## Root Cause
-The `DialogContent` base class uses `grid` layout with `gap-4`, but lacks `overflow-hidden`. Combined with the `rounded-xl` on the Stock page's dialog, inner content can bleed past the rounded corners. The `p-6` padding in the base dialog plus `p-3` on the product card may also cause the content to push beyond the container width on smaller viewports.
+The `overflow-hidden` we just added to `DialogContent` is clipping the footer buttons — "Save Changes" is cut off on the right. The three buttons ("Remove from Warehouse", "Cancel", "Save Changes") are too wide to fit in one row at this viewport size.
 
 ## Fix
 
-**File: `src/pages/Stock.tsx`**, line 664
+### 1. `src/components/ui/dialog.tsx` — revert `overflow-hidden`
+Remove `overflow-hidden` from the base `DialogContent` class. It was too aggressive — it clips content like footer buttons. The original overflow issue was specific to the product info card, not the dialog itself.
 
-Add `overflow-hidden` to the product info container to clip content within the rounded border:
-
-```tsx
-// Before
-<div className="rounded-lg border border-border bg-muted/20 p-3">
-
-// After  
-<div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
-```
-
-**File: `src/components/ui/dialog.tsx`**, line 39
-
-Add `overflow-hidden` to the base `DialogContent` class so all dialogs clip content within their rounded borders:
+### 2. `src/pages/Stock.tsx` — keep `overflow-hidden` on the product card (already done), and fix footer buttons
+- Keep `overflow-hidden` on the product info `<div>` (line 664) — that fixes the original overflow
+- Update the `DialogFooter` (line 693) to stack buttons vertically on small screens so they don't overflow:
 
 ```tsx
-// Add overflow-hidden after sm:rounded-lg
-"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 overflow-hidden data-[state=open]:animate-in ..."
+<DialogFooter className="flex-col gap-2">
+  <Button variant="destructive" onClick={deleteStockItemFn} className="w-full sm:w-auto sm:mr-auto">
+    Remove from Warehouse
+  </Button>
+  <div className="flex gap-2 w-full sm:w-auto">
+    <Button variant="outline" onClick={() => setEditStockItem(null)} className="flex-1 sm:flex-initial">Cancel</Button>
+    <Button onClick={saveStockItemFn} className="flex-1 sm:flex-initial">Save Changes</Button>
+  </div>
+</DialogFooter>
 ```
+
+This stacks "Remove from Warehouse" full-width on top, with "Cancel" and "Save Changes" side by side below on mobile, and reverts to a single row on wider screens.
 
 ## Summary
 | File | Change |
 |------|--------|
-| `src/components/ui/dialog.tsx` | Add `overflow-hidden` to DialogContent base class |
-| `src/pages/Stock.tsx` | Add `overflow-hidden` to product info card |
-
-Two single-word class additions. No logic changes.
+| `src/components/ui/dialog.tsx` | Remove `overflow-hidden` from base DialogContent |
+| `src/pages/Stock.tsx` | Restructure footer buttons to prevent horizontal overflow |
 
