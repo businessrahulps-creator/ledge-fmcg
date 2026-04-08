@@ -661,7 +661,7 @@ export default function Stock() {
             </DialogHeader>
             {editStockItem && (
               <div className="space-y-3 md:space-y-4">
-                <div className="rounded-lg border border-border bg-muted/20 p-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
                   <span className="text-[10px] text-muted-foreground md:text-xs">Product</span>
                   <p className="mt-0.5 text-sm font-medium">{editStockItem.productName}</p>
                   <p className="text-[10px] text-muted-foreground font-mono">{editStockItem.sku}</p>
