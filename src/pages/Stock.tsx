@@ -690,13 +690,13 @@ export default function Stock() {
                 </div>
               </div>
             )}
-            <DialogFooter className="flex-col gap-2">
-              <Button variant="destructive" onClick={deleteStockItemFn} className="w-full sm:w-auto sm:mr-auto">
+            <DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0">
+              <Button variant="destructive" onClick={deleteStockItemFn} className="w-full">
                 Remove from Warehouse
               </Button>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button variant="outline" onClick={() => setEditStockItem(null)} className="flex-1 sm:flex-initial">Cancel</Button>
-                <Button onClick={saveStockItemFn} className="flex-1 sm:flex-initial">Save Changes</Button>
+              <div className="grid w-full grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
+                <Button onClick={saveStockItemFn} className="w-full">Save Changes</Button>
               </div>
             </DialogFooter>
           </DialogContent>
