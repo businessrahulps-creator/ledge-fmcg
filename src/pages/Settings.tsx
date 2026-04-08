@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMember {
   id: string;
@@ -55,13 +56,30 @@ export default function Settings() {
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
-  const { signOut } = useAuth();
+  const { signOut, companyId } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
-  const [companyName, setCompanyName] = useState("Acme FMCG Pvt. Ltd.");
+  const [companyName, setCompanyName] = useState("");
   const savedPrefix = api.orders.prefix();
   const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
-  const [companyAddress, setCompanyAddress] = useState("42, Industrial Area, Phase 2\nGurgaon, Haryana 122001");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyGstin, setCompanyGstin] = useState("");
+
+  useEffect(() => {
+    if (!companyId) return;
+    supabase
+      .from("companies")
+      .select("name, address, gstin")
+      .eq("id", companyId)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setCompanyName(data.name || "");
+          setCompanyAddress(data.address || "");
+          setCompanyGstin(data.gstin || "");
+        }
+      });
+  }, [companyId]);
   const [team, setTeam] = useState<TeamMember[]>([
     { id: "t1", name: "Admin User", email: "admin@acmefmcg.in", role: "super_admin" },
     { id: "t2", name: "Rajesh Kumar", email: "rajesh@acmefmcg.in", role: "sales_manager" },
@@ -79,9 +97,19 @@ export default function Settings() {
     saveCompany();
   };
 
-  const saveCompany = () => {
+  const saveCompany = async () => {
     if (orderPrefix !== savedPrefix) {
       api.orders.setPrefix(orderPrefix);
+    }
+    if (companyId) {
+      const { error } = await supabase
+        .from("companies")
+        .update({ name: companyName, address: companyAddress, gstin: companyGstin })
+        .eq("id", companyId);
+      if (error) {
+        toast({ title: "Error saving", description: error.message, variant: "destructive" });
+        return;
+      }
     }
     toast({ title: "Settings saved", description: "Company profile has been updated." });
   };

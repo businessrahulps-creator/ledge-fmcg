@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 export default function Signup() {
@@ -15,6 +16,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { refreshProfile } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,9 @@ export default function Signup() {
         p_full_name: fullName,
       });
       if (setupError) throw setupError;
+
+      // Force profile reload so companyId is available before dashboard mounts
+      await refreshProfile();
 
       toast.success("Welcome to Ledge!", { description: "Your workspace is ready." });
       navigate("/dashboard");
