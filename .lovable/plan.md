@@ -1,35 +1,41 @@
 
 
-# Add GSTIN Input Field to Settings
+# Fix Edit Inventory Dialog Overflow
 
-## What
-Add a visible GSTIN text input to the Company tab in Settings. The backend logic (fetch + save) is already wired — this is purely a UI addition.
+## Problem
+The Edit Inventory dialog content is **overflowing** outside the dialog box boundaries — the product info card and form fields visually break out of the rounded container. This is not just a scrollbar issue; the content is escaping the dialog bounds.
 
-## Change
+## Root Cause
+The `DialogContent` base class uses `grid` layout with `gap-4`, but lacks `overflow-hidden`. Combined with the `rounded-xl` on the Stock page's dialog, inner content can bleed past the rounded corners. The `p-6` padding in the base dialog plus `p-3` on the product card may also cause the content to push beyond the container width on smaller viewports.
 
-**File: `src/pages/Settings.tsx`**
+## Fix
 
-Insert a GSTIN input field between the Address textarea and the Order Prefix input. Approximately 12 lines:
+**File: `src/pages/Stock.tsx`**, line 664
+
+Add `overflow-hidden` to the product info container to clip content within the rounded border:
 
 ```tsx
-<div className="space-y-1.5 md:space-y-2">
-  <Label className="text-xs md:text-sm">GSTIN</Label>
-  <Input
-    value={companyGstin}
-    onChange={(e) => setCompanyGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))}
-    maxLength={15}
-    className="h-11 rounded-lg md:h-12 max-w-[300px] font-mono"
-    placeholder="22AAAAA0000A1Z5"
-  />
-  <p className="text-[10px] text-muted-foreground md:text-xs">
-    15-digit GST Identification Number
-  </p>
-</div>
+// Before
+<div className="rounded-lg border border-border bg-muted/20 p-3">
+
+// After  
+<div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
 ```
 
-- Auto-uppercases input, strips non-alphanumeric characters, caps at 15 chars
-- No database migration, no RLS changes, no new dependencies
+**File: `src/components/ui/dialog.tsx`**, line 39
 
-## Testing
-Spot-check only: open Settings, verify field renders, enter a GSTIN, save, refresh, confirm persistence.
+Add `overflow-hidden` to the base `DialogContent` class so all dialogs clip content within their rounded borders:
+
+```tsx
+// Add overflow-hidden after sm:rounded-lg
+"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 overflow-hidden data-[state=open]:animate-in ..."
+```
+
+## Summary
+| File | Change |
+|------|--------|
+| `src/components/ui/dialog.tsx` | Add `overflow-hidden` to DialogContent base class |
+| `src/pages/Stock.tsx` | Add `overflow-hidden` to product info card |
+
+Two single-word class additions. No logic changes.
 
