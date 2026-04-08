@@ -188,6 +188,20 @@ export default function Settings() {
                 </div>
 
                 <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">GSTIN</Label>
+                  <Input
+                    value={companyGstin}
+                    onChange={(e) => setCompanyGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))}
+                    maxLength={15}
+                    className="h-11 rounded-lg md:h-12 max-w-[300px] font-mono"
+                    placeholder="22AAAAA0000A1Z5"
+                  />
+                  <p className="text-[10px] text-muted-foreground md:text-xs">
+                    15-digit GST Identification Number
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Prefix</Label>
                   <Input
                     value={orderPrefix}
