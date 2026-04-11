@@ -345,7 +345,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
                 // Stock deduction if dispatched/delivered
                 if (p.godownId && (p.deliveryStatus === "dispatched" || p.deliveryStatus === "delivered")) {
-                  await deductStockForOrder(inserted.id, p.lines, p.godownId, p.companyId);
+                  if (deductStockRef.current) await deductStockRef.current(inserted.id, p.lines, p.godownId, p.companyId);
                 }
               } else if (mutation.type === "insert") {
                 const { error } = await supabase.from(mutation.table as any).insert(mutation.payload);
