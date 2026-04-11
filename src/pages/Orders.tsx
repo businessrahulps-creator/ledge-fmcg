@@ -58,6 +58,7 @@ const deliveryStatuses = [
 export default function Orders() {
   const api = useApi();
   const orders = api.orders.list();
+  const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
   const [search, setSearch] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
@@ -70,6 +71,7 @@ export default function Orders() {
   const [editDispatchDate, setEditDispatchDate] = useState("");
   const [editVehicle, setEditVehicle] = useState("");
   const [editDriver, setEditDriver] = useState("");
+  const [editGodown, setEditGodown] = useState("");
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -79,10 +81,18 @@ export default function Orders() {
     setEditDispatchDate(order.dispatchDate || "");
     setEditVehicle(order.vehicle || "");
     setEditDriver(order.driverName || "");
+    setEditGodown(order.godownId || "");
   };
 
   const saveOrder = () => {
     if (!selectedOrder) return;
+
+    // Require godown if changing to dispatched/delivered
+    if ((editDelivery === "dispatched" || editDelivery === "delivered") && !editGodown) {
+      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
+      return;
+    }
+
     updateOrder(selectedOrder.id, {
       paymentMode: editPaymentMode as Order["paymentMode"],
       paymentStatus: editPayment as Order["paymentStatus"],
@@ -90,6 +100,7 @@ export default function Orders() {
       dispatchDate: editDispatchDate || null,
       vehicle: editVehicle,
       driverName: editDriver,
+      godownId: editGodown || undefined,
     });
     toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
     setSelectedOrder(null);
