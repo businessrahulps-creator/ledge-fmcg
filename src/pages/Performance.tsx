@@ -367,7 +367,7 @@ export default function Performance() {
                   Custom
                 </button>
               </div>
-              <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full" onClick={() => setPdfOpen(true)}>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full shrink-0" onClick={() => setPdfOpen(true)}>
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Export</span>
               </Button>
