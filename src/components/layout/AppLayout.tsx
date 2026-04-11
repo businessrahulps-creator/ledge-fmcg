@@ -45,7 +45,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              {userRole && (
+                <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
+                  {userRole.replace("_", " ")}
+                </Badge>
+              )}
               <NotificationCenter />
             </div>
           </header>
