@@ -1,0 +1,1 @@
+ALTER TABLE orders ADD COLUMN godown_id uuid REFERENCES godowns(id);
