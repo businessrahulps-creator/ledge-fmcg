@@ -560,6 +560,7 @@ export default function Stock() {
           </TabsContent>
         </Tabs>
 
+        {!isAccountant && (<>
         {/* Add/Edit Product Dialog */}
         <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
