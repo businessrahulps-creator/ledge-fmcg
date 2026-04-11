@@ -313,11 +313,12 @@ export default function Settings() {
             </motion.div>
           </TabsContent>
 
-          {/* Team Tab */}
           <TabsContent value="team">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground md:text-sm">{team.length} team members</p>
+                <p className="text-xs text-muted-foreground md:text-sm">
+                  {teamLoading ? "Loading…" : `${team.length} team members`}
+                </p>
                 <Button onClick={openNewMember} size="sm" className="md:size-default">
                   <Plus className="h-4 w-4" />
                   Add Member
@@ -325,6 +326,9 @@ export default function Settings() {
               </div>
 
               <div className="glass-card overflow-hidden">
+                {team.length === 0 && !teamLoading && (
+                  <div className="px-6 py-8 text-center text-sm text-muted-foreground">No team members found.</div>
+                )}
                 {team.map((m) => (
                   <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 row-hover md:px-6 md:py-4">
                     <div className="flex items-center gap-3">
@@ -335,6 +339,7 @@ export default function Settings() {
                         <p className="text-sm font-medium truncate">{m.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-muted-foreground truncate md:text-xs">{m.email}</p>
+                          {m.phone && <p className="hidden sm:block text-[10px] text-muted-foreground md:text-xs">· {m.phone}</p>}
                           <span className={`hidden sm:inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium md:px-3 md:text-xs ${
                             m.role === "super_admin" ? "bg-primary/15 text-primary" :
                             m.role === "sales_manager" ? "bg-success/15 text-success" :
@@ -356,7 +361,7 @@ export default function Settings() {
                       <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => { setEditMember({ ...m }); setIsNewMember(false); }}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      {m.role !== "super_admin" && (
+                      {m.userId !== user?.id && (
                         <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
