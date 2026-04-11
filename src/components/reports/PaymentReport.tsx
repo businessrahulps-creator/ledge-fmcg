@@ -9,7 +9,7 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
@@ -212,7 +212,7 @@ export function PaymentReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Total", value: formatCurrency(totalAmount) },
+                { label: "Total", value: formatCurrencyPdf(totalAmount) },
                 { label: "Orders", value: String(filtered.length) },
               ]}
               columns={[
@@ -227,7 +227,7 @@ export function PaymentReport() {
                 o.orderNumber,
                 o.distributorName,
                 formatIndianDate(o.date),
-                formatCurrency(o.total),
+                formatCurrencyPdf(o.total),
                 o.paymentStatus,
                 o.paymentMode.replace("_", " "),
               ])}

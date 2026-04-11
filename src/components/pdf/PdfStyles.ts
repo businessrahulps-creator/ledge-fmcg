@@ -43,8 +43,9 @@ export const pdfStyles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    border: "0.5pt solid #999",
-    padding: 8,
+    border: "0.5pt solid #D4D4D4",
+    backgroundColor: "#F9F9F9",
+    padding: 10,
   },
   summaryLabel: {
     fontSize: 7,
@@ -64,10 +65,10 @@ export const pdfStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#000",
+    backgroundColor: "#1A1A1A",
     color: "#fff",
-    paddingVertical: 5,
-    paddingHorizontal: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   tableHeaderCell: {
     fontSize: 7,
@@ -77,16 +78,16 @@ export const pdfStyles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: "row",
-    paddingVertical: 5,
-    paddingHorizontal: 6,
-    borderBottom: "0.5pt solid #ddd",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderBottom: "0.5pt solid #E5E5E5",
   },
   tableRowAlt: {
     flexDirection: "row",
-    paddingVertical: 5,
-    paddingHorizontal: 6,
-    borderBottom: "0.5pt solid #ddd",
-    backgroundColor: "#F5F5F5",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderBottom: "0.5pt solid #E5E5E5",
+    backgroundColor: "#FAFAFA",
   },
   tableCell: {
     fontSize: 8,

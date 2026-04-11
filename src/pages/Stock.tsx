@@ -8,7 +8,7 @@ import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { Button } from "@/components/ui/button";
@@ -863,7 +863,7 @@ export default function Stock() {
                 showTable={sel.table}
                 summary={[
                   { label: "Products", value: String(filteredProducts.length) },
-                  { label: "Total Stock Value", value: formatCurrency(totalValue) },
+                  { label: "Total Stock Value", value: formatCurrencyPdf(totalValue) },
                 ]}
                 columns={[
                   { header: "Product", width: "28%" },
@@ -877,7 +877,7 @@ export default function Stock() {
                   p.name,
                   p.sku,
                   p.unit,
-                  formatCurrency(p.basePrice),
+                  formatCurrencyPdf(p.basePrice),
                   String(p.totalSold),
                   String(getProductStock(p.id)),
                 ])}
@@ -907,7 +907,7 @@ export default function Stock() {
                 showTable={sel.table}
                 summary={[
                   { label: "Products", value: String(warehouseInventory.length) },
-                  { label: "Total Value", value: formatCurrency(totalValue) },
+                  { label: "Total Value", value: formatCurrencyPdf(totalValue) },
                 ]}
                 columns={[
                   { header: "Product", width: "24%" },
@@ -926,8 +926,8 @@ export default function Stock() {
                     String(si.quantity),
                     String(si.threshold),
                     health.charAt(0).toUpperCase() + health.slice(1),
-                    formatCurrency(si.basePrice),
-                    formatCurrency(si.quantity * si.basePrice),
+                    formatCurrencyPdf(si.basePrice),
+                    formatCurrencyPdf(si.quantity * si.basePrice),
                   ];
                 })}
               />

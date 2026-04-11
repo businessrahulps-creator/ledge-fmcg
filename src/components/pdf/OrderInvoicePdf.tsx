@@ -2,7 +2,7 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
-import { formatCurrency } from "@/data/mock-data";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
 import { formatIndianDate } from "@/utils/formatDate";
 import type { Order } from "@/data/mock-data";
 
@@ -69,17 +69,17 @@ export function OrderInvoicePdf({
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
               <Text style={[s.tableCellBold, { width: "45%" }]}>{line.productName}</Text>
               <Text style={[s.tableCellRight, { width: "15%" }]}>{line.quantity}</Text>
-              <Text style={[s.tableCellRight, { width: "15%" }]}>{formatCurrency(line.unitPrice)}</Text>
-              <Text style={[s.tableCellRightBold, { width: "20%" }]}>{formatCurrency(line.lineTotal)}</Text>
+              <Text style={[s.tableCellRight, { width: "15%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRightBold, { width: "20%" }]}>{formatCurrencyPdf(line.lineTotal)}</Text>
             </View>
           ))}
         </View>
 
         {/* Total */}
-        <View style={{ alignItems: "flex-end", marginTop: 4, borderTop: "1pt solid #000", paddingTop: 8 }}>
+        <View style={{ alignItems: "flex-end", marginTop: 8, backgroundColor: "#F9F9F9", padding: 12, border: "0.5pt solid #D4D4D4" }}>
           <View style={{ flexDirection: "row", gap: 20 }}>
             <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>Grand Total</Text>
-            <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>{formatCurrency(order.total)}</Text>
+            <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>{formatCurrencyPdf(order.total)}</Text>
           </View>
         </View>
 

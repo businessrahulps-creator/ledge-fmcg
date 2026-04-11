@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
@@ -192,7 +192,7 @@ export function DistributorReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
                 { label: "Orders", value: String(totalOrders) },
                 { label: "Dealers", value: String(data.length) },
               ]}
@@ -202,7 +202,7 @@ export function DistributorReport() {
                 { header: "Orders", width: "15%", align: "right" },
                 { header: "Revenue", width: "25%", align: "right" },
               ]}
-              rows={data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrency(d.revenue)])}
+              rows={data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrencyPdf(d.revenue)])}
             />
           );
         }}
