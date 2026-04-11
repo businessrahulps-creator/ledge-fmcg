@@ -320,7 +320,17 @@ export default function Settings() {
     setSaving(false);
   };
 
-  const trialDaysLeft = 11;
+  const trialDaysLeft = useMemo(() => {
+    if (!trialEndsAt) return 0;
+    return Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000));
+  }, [trialEndsAt]);
+
+  const trialExpired = trialDaysLeft === 0;
+  const trialProgressPercent = Math.max(0, Math.min(100, (trialDaysLeft / 30) * 100));
+  const trialProgressColor = trialExpired ? "bg-destructive" : trialDaysLeft <= 3 ? "bg-destructive" : trialDaysLeft <= 7 ? "bg-warning" : "bg-success";
+  const trialEndFormatted = trialEndsAt
+    ? trialEndsAt.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })
+    : "—";
 
   return (
     <AppLayout>
