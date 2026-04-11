@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
-import { Plus, Search, Filter, Trash2, Download, FileText } from "lucide-react";
+import { Plus, Search, Filter, Trash2, Download, FileText, Share2 } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
@@ -513,10 +513,24 @@ export default function Orders() {
                         <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} />
                       );
                     }}
-                  >
-                    <FileText className="mr-1.5 h-3.5 w-3.5" />
-                    Invoice PDF
-                  </Button>
+                   >
+                     <FileText className="mr-1.5 h-3.5 w-3.5" />
+                     <span className="hidden sm:inline">Invoice PDF</span>
+                   </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => {
+                       const order = selectedOrder;
+                       const lines = order.lines.map(l => `${l.productName} x${l.quantity}`).join(", ");
+                       const msg = `Invoice ${order.orderNumber}\nDealer: ${order.distributorName}\nTotal: ₹${order.total.toLocaleString("en-IN")}\nItems: ${lines}`;
+                       const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                       window.open(url, "_blank");
+                     }}
+                   >
+                     <Share2 className="mr-1.5 h-3.5 w-3.5" />
+                     <span className="hidden sm:inline">WhatsApp</span>
+                   </Button>
                   <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
                   <Button onClick={saveOrder}>Save Changes</Button>
                 </DialogFooter>
