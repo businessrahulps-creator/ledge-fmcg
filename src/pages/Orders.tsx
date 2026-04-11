@@ -180,7 +180,8 @@ export default function Orders() {
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
-              className="flex-1 sm:flex-none"
+              size="icon"
+              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               onClick={() => {
                 const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
                 exportCsv(
@@ -204,18 +205,19 @@ export default function Orders() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span >Export CSV</span>
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
             <Button
               variant="outline"
-              className="flex-1 sm:flex-none"
+              size="icon"
+              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
-              <span >Export PDF</span>
+              <span className="hidden sm:inline">Export PDF</span>
             </Button>
-            <Link to="/orders/new">
-              <Button className="w-full sm:w-auto">
+            <Link to="/orders/new" className="flex-1 sm:flex-none">
+              <Button className="w-full">
                 <Plus className="h-4 w-4" />
                 New Order
               </Button>
@@ -224,7 +226,7 @@ export default function Orders() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -234,28 +236,30 @@ export default function Orders() {
               className="h-10 rounded-lg pl-10"
             />
           </div>
-          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
-              <SelectValue placeholder="Payment" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Payments</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="partial">Partial</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-            <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
-              <SelectValue placeholder="Delivery" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Delivery</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="dispatched">Dispatched</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+                <SelectValue placeholder="Payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
+              <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+                <SelectValue placeholder="Delivery" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Delivery</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="dispatched">Dispatched</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Table */}
