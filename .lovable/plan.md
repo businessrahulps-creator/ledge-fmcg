@@ -1,25 +1,31 @@
 
 
-# Fix: Revenue KPI Number Truncation
+# Fix: Revenue KPI Number Line-Break on Desktop
 
 ## Problem
-The Revenue KPI card shows "₹1,3..." because `truncate` (text-overflow: ellipsis) is applied to all KPI values. While it prevents overflow, it makes the most important number on the dashboard unreadable.
+At 1280px desktop, the Revenue KPI card shows "₹1,33,62" on line 1 and "0" on line 2. The `break-all` class causes the number to break mid-value, which looks broken.
 
-## Solution
-Remove `truncate` from KPI values and instead use responsive font sizing that naturally fits the container. Revenue values in INR (e.g., "₹1,34,567") are longer than simple counts, so the font size should scale down gracefully.
+## Root Cause
+Line 102 in `Dashboard.tsx`: `break-all` allows line breaks at any character. Combined with `md:text-3xl` (30px), the Indian-formatted currency string "₹1,33,620" exceeds the ~280px card width in a 4-column grid.
 
-## Changes
+## Fix (single line change)
 
-**`src/pages/Dashboard.tsx`** (line 102):
-- Remove `truncate` from the KPI value `<p>` tag
-- Use smaller base size with responsive scaling: `text-lg sm:text-xl md:text-3xl`
-- Keep `tabular-nums` and `tracking-tight` for clean number rendering
-- Add `break-all` as a safety net so numbers wrap rather than overflow
+**`src/pages/Dashboard.tsx` line 102:**
+- Remove `break-all`
+- Add `whitespace-nowrap` to prevent wrapping
+- Change font sizing to `text-lg sm:text-xl md:text-2xl` (drop from `3xl` to `2xl` on desktop so the value fits)
 
-**`src/data/mock-data.ts`** (line 62):
-- Change `maximumFractionDigits` from `2` to `0` to drop decimal places — KPI cards don't need paisa-level precision, and shorter strings fit better
+```
+// Before
+<p className="text-lg sm:text-xl md:text-3xl font-bold tracking-tight tabular-nums break-all">{kpi.value}</p>
 
-## What stays the same
-- All other KPI cards (Orders, Pending, Dispatched) are unaffected since their values are short
-- No data flow, formatting logic, or component structure changes
+// After  
+<p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap">{kpi.value}</p>
+```
+
+This ensures the number stays on one line and fits the card at all screen widths. The size reduction from `text-3xl` (30px) to `text-2xl` (24px) on desktop is minimal and still reads as a prominent metric.
+
+### No other changes needed
+- Mobile already works perfectly (verified at 375px)
+- All other KPI values (8, 3, 2) are short and unaffected
 
