@@ -1,74 +1,138 @@
 
 
-# Notification Persistence to Database
+# Fix Computed Aggregates on Entities (Bug #5)
 
-## Overview
-Replace in-memory notification context with a Supabase-backed `notifications` table, including realtime subscription for cross-tab/device sync.
+## Problem
+Dealers, salespersons, and products all show `totalOrders: 0`, `totalValue: 0`, `totalSold: 0` because the DataContext hardcodes these to 0 when mapping DB rows.
 
-## 1. Database migration — Create `notifications` table
+## Approach
+Add aggregate columns to the DB tables, populate them with a trigger that fires on order/order_line changes, and read the real values in DataContext.
+
+## 1. Database Migration
+
+Add columns and trigger:
 
 ```sql
-CREATE TABLE public.notifications (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  type text NOT NULL DEFAULT 'general',
-  title text NOT NULL,
-  message text NOT NULL,
-  read boolean NOT NULL DEFAULT false,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+-- Add aggregate columns
+ALTER TABLE distributors ADD COLUMN total_orders integer NOT NULL DEFAULT 0;
+ALTER TABLE distributors ADD COLUMN total_value numeric NOT NULL DEFAULT 0;
 
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE salespersons ADD COLUMN total_orders integer NOT NULL DEFAULT 0;
+ALTER TABLE salespersons ADD COLUMN total_value numeric NOT NULL DEFAULT 0;
 
--- Users see notifications for their company
-CREATE POLICY "Users can view company notifications"
-  ON public.notifications FOR SELECT TO authenticated
-  USING (company_id = get_company_id());
+ALTER TABLE products ADD COLUMN total_sold integer NOT NULL DEFAULT 0;
 
--- Authenticated users can insert notifications for their company
-CREATE POLICY "Users can insert company notifications"
-  ON public.notifications FOR INSERT TO authenticated
-  WITH CHECK (company_id = get_company_id());
+-- Trigger function: recalculates aggregates for affected distributor/salesperson/products
+CREATE OR REPLACE FUNCTION refresh_entity_aggregates()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = 'public' AS $$
+DECLARE
+  v_order RECORD;
+  v_company_id uuid;
+BEGIN
+  -- Determine the order row to work with
+  IF TG_TABLE_NAME = 'orders' THEN
+    IF TG_OP = 'DELETE' THEN v_order := OLD; ELSE v_order := NEW; END IF;
+    v_company_id := v_order.company_id;
 
--- Users can update (mark read) their company notifications
-CREATE POLICY "Users can update company notifications"
-  ON public.notifications FOR UPDATE TO authenticated
-  USING (company_id = get_company_id())
-  WITH CHECK (company_id = get_company_id());
+    -- Update distributor
+    UPDATE distributors SET
+      total_orders = COALESCE(sub.cnt, 0),
+      total_value = COALESCE(sub.val, 0)
+    FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
+          FROM orders WHERE distributor_id = v_order.distributor_id) sub
+    WHERE id = v_order.distributor_id;
 
--- Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+    -- Also update OLD distributor if it changed
+    IF TG_OP = 'UPDATE' AND OLD.distributor_id <> NEW.distributor_id THEN
+      UPDATE distributors SET
+        total_orders = COALESCE(sub.cnt, 0),
+        total_value = COALESCE(sub.val, 0)
+      FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
+            FROM orders WHERE distributor_id = OLD.distributor_id) sub
+      WHERE id = OLD.distributor_id;
+    END IF;
+
+    -- Update salesperson
+    UPDATE salespersons SET
+      total_orders = COALESCE(sub.cnt, 0),
+      total_value = COALESCE(sub.val, 0)
+    FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
+          FROM orders WHERE salesperson_id = v_order.salesperson_id) sub
+    WHERE id = v_order.salesperson_id;
+
+    IF TG_OP = 'UPDATE' AND OLD.salesperson_id <> NEW.salesperson_id THEN
+      UPDATE salespersons SET
+        total_orders = COALESCE(sub.cnt, 0),
+        total_value = COALESCE(sub.val, 0)
+      FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
+            FROM orders WHERE salesperson_id = OLD.salesperson_id) sub
+      WHERE id = OLD.salesperson_id;
+    END IF;
+
+  ELSIF TG_TABLE_NAME = 'order_lines' THEN
+    -- Update product total_sold from all order_lines
+    IF TG_OP = 'DELETE' THEN
+      UPDATE products SET total_sold = COALESCE(sub.qty, 0)
+      FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = OLD.product_id) sub
+      WHERE id = OLD.product_id;
+    ELSE
+      UPDATE products SET total_sold = COALESCE(sub.qty, 0)
+      FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = NEW.product_id) sub
+      WHERE id = NEW.product_id;
+      IF TG_OP = 'UPDATE' AND OLD.product_id <> NEW.product_id THEN
+        UPDATE products SET total_sold = COALESCE(sub.qty, 0)
+        FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = OLD.product_id) sub
+        WHERE id = OLD.product_id;
+      END IF;
+    END IF;
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+-- Attach triggers
+CREATE TRIGGER trg_orders_aggregates AFTER INSERT OR UPDATE OR DELETE ON orders
+  FOR EACH ROW EXECUTE FUNCTION refresh_entity_aggregates();
+
+CREATE TRIGGER trg_order_lines_aggregates AFTER INSERT OR UPDATE OR DELETE ON order_lines
+  FOR EACH ROW EXECUTE FUNCTION refresh_entity_aggregates();
+
+-- Backfill existing data
+UPDATE distributors d SET
+  total_orders = sub.cnt, total_value = sub.val
+FROM (SELECT distributor_id, COUNT(*) cnt, COALESCE(SUM(total),0) val FROM orders GROUP BY distributor_id) sub
+WHERE d.id = sub.distributor_id;
+
+UPDATE salespersons s SET
+  total_orders = sub.cnt, total_value = sub.val
+FROM (SELECT salesperson_id, COUNT(*) cnt, COALESCE(SUM(total),0) val FROM orders GROUP BY salesperson_id) sub
+WHERE s.id = sub.salesperson_id;
+
+UPDATE products p SET total_sold = sub.qty
+FROM (SELECT product_id, COALESCE(SUM(quantity),0) qty FROM order_lines GROUP BY product_id) sub
+WHERE p.id = sub.product_id;
 ```
 
-## 2. Update `src/hooks/use-notifications.tsx`
+## 2. Update DataContext (`src/context/DataContext.tsx`)
 
-- Remove seed data and in-memory state.
-- Import `supabase` client and `useAuth` for `companyId`.
-- On mount: fetch notifications from DB ordered by `created_at DESC`.
-- `addNotification`: insert row into `notifications` table with company_id from auth context.
-- `markAsRead`: update `read = true` where `id = notifId`.
-- `markAllAsRead`: update `read = true` where `company_id = companyId AND read = false`.
-- Subscribe to realtime `postgres_changes` on `notifications` table — on INSERT, prepend to local state; on UPDATE, update local state.
-- Cleanup subscription on unmount.
-- Map DB column `message` → UI field `description`, `created_at` → `timestamp`.
+Replace hardcoded `0` with real column values in 6 places:
 
-## 3. Update callers (no API changes needed)
-
-The `addNotification(type, title, description)` signature stays identical. Callers in `NewOrder.tsx` and `Settings.tsx` remain unchanged. The function now inserts into DB instead of pushing to local state (realtime subscription handles UI update).
-
-## 4. `NotificationCenter.tsx` — No changes needed
-
-The component already reads from `useNotifications()` hook which will now return DB-backed data with the same interface.
+- `fetchAll` distributor mapping: `totalOrders: d.total_orders, totalValue: Number(d.total_value)`
+- `fetchAll` salesperson mapping: same pattern
+- `fetchAll` product mapping: `totalSold: p.total_sold`
+- `safeRefetchDistributors`: same
+- `safeRefetchSalespersons`: same
+- `safeRefetchProducts`: same
 
 ## Files changed
 | File | Change |
 |------|--------|
-| Migration SQL | Create `notifications` table + RLS + realtime |
-| `src/hooks/use-notifications.tsx` | Replace in-memory with Supabase queries + realtime |
+| Migration SQL | Add columns, trigger function, triggers, backfill |
+| `src/context/DataContext.tsx` | Read real aggregate columns (6 mapping locations) |
 
 ## What stays untouched
-- `NotificationCenter.tsx` — identical UI, animations, badges
-- `NewOrder.tsx`, `Settings.tsx` — same `addNotification` calls
-- All other pages, components, DataContext
+- All UI pages (Dealers, Sales Team, Stock, Products) — unchanged
+- Dashboard and Reports — unchanged
+- All other DataContext logic
 
