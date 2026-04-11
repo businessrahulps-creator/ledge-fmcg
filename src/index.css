@@ -30,10 +30,10 @@
     --accent-indigo: #4F46E5;
 
 
-    --background: 0 0% 98%;
+    --background: 0 0% 97.5%;
     --foreground: 0 0% 7%;
 
-    --card: 0 0% 100%;
+    --card: 40 20% 99.5%;
     --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
@@ -42,7 +42,7 @@
     --primary: 0 0% 7%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
+    --secondary: 0 0% 95.5%;
     --secondary-foreground: 0 0% 20%;
 
     --muted: 0 0% 94%;
@@ -60,8 +60,8 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --border: 0 0% 92%;
-    --input: 0 0% 92%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 0 0% 7%;
 
     --radius: 0.75rem;
@@ -152,12 +152,12 @@
 
 @layer utilities {
   .glass-card {
-    @apply rounded-2xl bg-card border border-border/60 shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)] transition-all duration-200
+    @apply rounded-2xl bg-card border border-border/60 shadow-[0_1px_6px_-1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.04)] transition-all duration-200
            dark:border-border/50 dark:shadow-none;
   }
 
   .row-hover {
-    @apply transition-all duration-200 ease-out hover:bg-muted/30;
+    @apply transition-all duration-200 ease-out hover:bg-muted/40;
   }
 
   .card-hover {
