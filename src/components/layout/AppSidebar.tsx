@@ -6,6 +6,7 @@ import {
   UserRound,
   Package,
   ChartNoAxesCombined,
+  TrendingUp,
   Settings,
   UserCheck,
 } from "lucide-react";
@@ -39,6 +40,7 @@ const manageNav = [
 
 const analyzeNav = [
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+  { title: "Performance", url: "/performance", icon: TrendingUp },
 ];
 
 const bottomNav = [
