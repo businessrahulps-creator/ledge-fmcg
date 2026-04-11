@@ -52,7 +52,8 @@ function HealthBadge({ health }: { health: string }) {
   };
   const labels: Record<string, string> = { healthy: "Healthy", low: "Low", critical: "Critical" };
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${styles[health] || ""}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${styles[health] || ""}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${health === "healthy" ? "bg-emerald-500" : health === "low" ? "bg-amber-500" : "bg-red-500"}`} />
       {labels[health] || health}
     </span>
   );
@@ -392,10 +393,10 @@ export default function Stock() {
                     <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3 card-hover">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{p.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-mono">{p.sku} · {p.unit}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{p.sku} · {p.unit}</p>
                         <div className="mt-1 flex items-center gap-3">
                           <span className="text-xs font-semibold">{formatCurrency(p.basePrice)}</span>
-                          <span className="text-[10px] font-medium text-muted-foreground">
+                          <span className="text-xs font-medium text-muted-foreground">
                             Stock: {formatNumber(getProductStock(p.id))}
                           </span>
                         </div>

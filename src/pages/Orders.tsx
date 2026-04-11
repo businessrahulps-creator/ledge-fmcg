@@ -295,23 +295,23 @@ export default function Orders() {
 
           <div className="space-y-0 md:hidden">
             {paginatedOrders.map((order) => (
-              <div
-                key={order.id}
-                onClick={() => openOrder(order)}
-                className="border-b border-border/50 px-4 py-2.5 card-hover cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-foreground">{order.orderNumber}</span>
-                  <span className="text-xs font-medium">{formatCurrency(order.total)}</span>
+                <div
+                  key={order.id}
+                  onClick={() => openOrder(order)}
+                  className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
+                    <span className="text-sm font-medium">{formatCurrency(order.total)}</span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {order.distributorName} · {formatIndianDate(order.date)}
+                  </p>
+                  <div className="mt-2 flex gap-1.5">
+                    <StatusBadge status={order.paymentStatus} />
+                    <StatusBadge status={order.deliveryStatus} />
+                  </div>
                 </div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {order.distributorName} · {formatIndianDate(order.date)}
-                </p>
-                <div className="mt-1.5 flex gap-1.5">
-                  <StatusBadge status={order.paymentStatus} />
-                  <StatusBadge status={order.deliveryStatus} />
-                </div>
-              </div>
             ))}
           </div>
 
@@ -345,19 +345,19 @@ export default function Orders() {
                 <div className="space-y-4 md:space-y-5">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
+                      <span className="text-xs text-muted-foreground">Date</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selectedOrder.date)}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Dealer</span>
+                      <span className="text-xs text-muted-foreground">Dealer</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.distributorName}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Sales Person</span>
+                      <span className="text-xs text-muted-foreground">Sales Person</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.salesperson}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Total</span>
+                      <span className="text-xs text-muted-foreground">Total</span>
                       <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total)}</p>
                     </div>
                   </div>
@@ -367,7 +367,7 @@ export default function Orders() {
                     <div className="rounded-lg border border-border overflow-hidden">
                       <table className="w-full text-xs md:text-sm">
                         <thead>
-                          <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
+                          <tr className="border-b border-border text-left text-xs text-muted-foreground">
                             <th className="px-3 py-2 font-medium md:px-4">Product</th>
                             <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
                             <th className="px-3 py-2 font-medium text-right md:px-4">Price</th>
@@ -493,46 +493,52 @@ export default function Orders() {
                     </div>
                   </div>
                 </div>
-                <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="mr-auto"
-                    disabled={selectedOrder.deliveryStatus === "delivered"}
-                    onClick={() => { setDeleteTarget(selectedOrder); setDeleteConfirmText(""); }}
-                  >
-                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                    {selectedOrder.deliveryStatus === "delivered" ? "Cannot delete delivered" : "Delete Order"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      downloadPdf(
-                        pdfFilename("invoice", selectedOrder.orderNumber),
-                        <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} logoUrl={companyInfo.logoUrl} />
-                      );
-                    }}
-                   >
-                     <FileText className="mr-1.5 h-3.5 w-3.5" />
-                     <span className="hidden sm:inline">Invoice PDF</span>
-                   </Button>
-                   <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={() => {
-                       const order = selectedOrder;
-                       const lines = order.lines.map(l => `${l.productName} x${l.quantity}`).join(", ");
-                       const msg = `Invoice ${order.orderNumber}\nDealer: ${order.distributorName}\nTotal: ₹${order.total.toLocaleString("en-IN")}\nItems: ${lines}`;
-                       const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                       window.open(url, "_blank");
-                     }}
-                   >
-                     <Share2 className="mr-1.5 h-3.5 w-3.5" />
-                     <span className="hidden sm:inline">WhatsApp</span>
-                   </Button>
-                  <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
-                  <Button onClick={saveOrder}>Save Changes</Button>
+                <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+                  <div className="flex gap-2 sm:mr-auto">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={selectedOrder.deliveryStatus === "delivered"}
+                      onClick={() => { setDeleteTarget(selectedOrder); setDeleteConfirmText(""); }}
+                      aria-label="Delete order"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Download invoice PDF"
+                      onClick={() => {
+                        downloadPdf(
+                          pdfFilename("invoice", selectedOrder.orderNumber),
+                          <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} logoUrl={companyInfo.logoUrl} />
+                        );
+                      }}
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Invoice</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Share via WhatsApp"
+                      onClick={() => {
+                        const order = selectedOrder;
+                        const lines = order.lines.map(l => `${l.productName} x${l.quantity}`).join(", ");
+                        const msg = `Invoice ${order.orderNumber}\nDealer: ${order.distributorName}\nTotal: ₹${order.total.toLocaleString("en-IN")}\nItems: ${lines}`;
+                        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                        window.open(url, "_blank");
+                      }}
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Share</span>
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
+                    <Button onClick={saveOrder}>Save Changes</Button>
+                  </div>
                 </DialogFooter>
               </>
             )}
