@@ -26,6 +26,7 @@ interface DataContextType {
 
   addOrder: (order: Order) => Promise<AddOrderResult>;
   updateOrder: (id: string, updates: Partial<Order>) => void;
+  deleteOrder: (id: string) => Promise<boolean>;
 
   addDistributor: (d: Distributor) => void;
   updateDistributor: (d: Distributor) => void;
@@ -470,6 +471,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
   }, [orders, companyId, deductStockForOrder]);
 
+  const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      // 1. Delete stock_deductions (trigger restores stock automatically)
+      const { error: sdErr } = await supabase.from("stock_deductions").delete().eq("order_id", id);
+      if (sdErr) throw sdErr;
+      // 2. Delete order_lines
+      const { error: olErr } = await supabase.from("order_lines").delete().eq("order_id", id);
+      if (olErr) throw olErr;
+      // 3. Delete the order
+      const { error: oErr } = await supabase.from("orders").delete().eq("id", id);
+      if (oErr) throw oErr;
+      // Optimistic removal
+      setOrders(prev => prev.filter(o => o.id !== id));
+      return true;
+    } catch (err: any) {
+      toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
+      return false;
+    }
+  }, []);
+
   // Distributors
   const addDistributor = useCallback(async (d: Distributor) => {
     if (!companyId) return;
@@ -641,7 +662,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         orders, distributors: computedDistributors, salespersons: computedSalespersons,
         products: computedProducts, locations, stockItems, loading,
         orderPrefix, orderSequence, setOrderPrefix,
-        addOrder, updateOrder,
+        addOrder, updateOrder, deleteOrder,
         addDistributor, updateDistributor, deleteDistributor,
         addSalesperson, updateSalesperson, deleteSalesperson,
         addProduct, updateProduct, deleteProduct,

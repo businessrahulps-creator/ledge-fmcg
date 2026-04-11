@@ -3,7 +3,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -72,6 +81,9 @@ export default function Orders() {
   const [editVehicle, setEditVehicle] = useState("");
   const [editDriver, setEditDriver] = useState("");
   const [editGodown, setEditGodown] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -104,6 +116,19 @@ export default function Orders() {
     });
     toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
     setSelectedOrder(null);
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const ok = await api.orders.delete(deleteTarget.id);
+    setDeleteLoading(false);
+    if (ok) {
+      toast.success("Order deleted", { description: `${deleteTarget.orderNumber} has been deleted.` });
+      setDeleteTarget(null);
+      setDeleteConfirmText("");
+      setSelectedOrder(null);
+    }
   };
 
   const isLoading = usePageLoading(api.loading);
@@ -409,7 +434,17 @@ export default function Orders() {
                     </div>
                   </div>
                 </div>
-                <DialogFooter className="gap-2 sm:gap-0">
+                <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="mr-auto"
+                    disabled={selectedOrder.deliveryStatus === "delivered"}
+                    onClick={() => { setDeleteTarget(selectedOrder); setDeleteConfirmText(""); }}
+                  >
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                    {selectedOrder.deliveryStatus === "delivered" ? "Cannot delete delivered" : "Delete Order"}
+                  </Button>
                   <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
                   <Button onClick={saveOrder}>Save Changes</Button>
                 </DialogFooter>
@@ -417,6 +452,40 @@ export default function Orders() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(""); } }}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Order</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete <span className="font-semibold text-foreground">{deleteTarget?.orderNumber}</span> and restore any deducted stock. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2 py-2">
+              <Label className="text-xs text-muted-foreground">
+                Type <span className="font-mono font-semibold text-foreground">{deleteTarget?.orderNumber}</span> to confirm
+              </Label>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder={deleteTarget?.orderNumber || ""}
+                className="h-11 rounded-lg font-mono"
+                autoFocus
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => { setDeleteTarget(null); setDeleteConfirmText(""); }}>Cancel</AlertDialogCancel>
+              <Button
+                variant="destructive"
+                disabled={deleteConfirmText !== deleteTarget?.orderNumber || deleteLoading}
+                onClick={handleDeleteOrder}
+              >
+                {deleteLoading ? "Deleting…" : "Delete Order"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
