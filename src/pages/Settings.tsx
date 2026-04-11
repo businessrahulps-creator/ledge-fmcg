@@ -644,7 +644,7 @@ export default function Settings() {
                                     if (result.ok) {
                                       sonnerToast.success("Mutation synced successfully");
                                     } else {
-                                      sonnerToast.error("Sync failed", { description: result.error });
+                                      sonnerToast.error("Sync failed", { description: !result.ok ? result.error : "" });
                                     }
                                   }}
                                 >
