@@ -63,7 +63,7 @@ export default function Dashboard() {
       <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <div>
-          <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
+          <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase md:text-sm">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
           <h1 className="text-xl font-bold tracking-tight mt-0.5 md:text-2xl">{getGreeting()} 👋</h1>
@@ -97,10 +97,8 @@ export default function Dashboard() {
               transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
               className="glass-card p-5"
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
-              </div>
-              <p className="text-xl font-semibold tracking-tight">{kpi.value}</p>
+             <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
+              <p className="text-2xl font-bold tracking-tight">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
@@ -221,7 +219,7 @@ export default function Dashboard() {
                     key={o.id}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.06 }}
+                    transition={{ delay: Math.min(i, 8) * 0.06 }}
                     className="glass-card card-hover p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -229,7 +227,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
+                      <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                       <div className="flex gap-1.5">
                         <StatusBadge status={o.paymentStatus} />
                         <StatusBadge status={o.deliveryStatus} />
