@@ -2,7 +2,7 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
-import { formatCurrency } from "@/data/mock-data";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
 import { formatIndianDate } from "@/utils/formatDate";
 import type { Order } from "@/data/mock-data";
 

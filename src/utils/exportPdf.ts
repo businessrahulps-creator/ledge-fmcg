@@ -1,6 +1,15 @@
 import React from "react";
 import { toast } from "sonner";
 
+/** Helvetica-safe currency formatter for PDF rendering (uses "Rs." instead of ₹) */
+export function formatCurrencyPdf(amount: number): string {
+  const formatted = new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+  return `Rs. ${formatted}`;
+}
+
 export async function downloadPdf(filename: string, document: React.ReactElement) {
   try {
     const { pdf } = await import("@react-pdf/renderer");
