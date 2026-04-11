@@ -479,9 +479,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // 2. Delete order_lines
       const { error: olErr } = await supabase.from("order_lines").delete().eq("order_id", id);
       if (olErr) throw olErr;
-      // 3. Delete the order
-      const { error: oErr } = await supabase.from("orders").delete().eq("id", id);
+      // 3. Delete the order and verify it was actually removed
+      const { data: deleted, error: oErr } = await supabase.from("orders").delete().eq("id", id).select("id");
       if (oErr) throw oErr;
+      if (!deleted || deleted.length === 0) {
+        throw new Error("Order could not be deleted — you may not have permission.");
+      }
       // Optimistic removal
       setOrders(prev => prev.filter(o => o.id !== id));
       return true;
