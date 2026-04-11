@@ -166,7 +166,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </AnimatePresence>
 
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
-            <div className="mx-auto max-w-5xl min-w-0 animate-stagger-fade">
+            <div className="mx-auto max-w-5xl min-w-0">
               {children}
             </div>
           </main>
