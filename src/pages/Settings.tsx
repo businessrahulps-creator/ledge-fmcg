@@ -744,6 +744,32 @@ export default function Settings() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Clear Queue Confirmation Dialog */}
+        <AlertDialog open={showClearQueueConfirm} onOpenChange={setShowClearQueueConfirm}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">Clear Sync Queue</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm">
+                This will permanently discard <span className="font-semibold text-foreground">{queuedMutations.length}</span> pending offline change{queuedMutations.length !== 1 ? "s" : ""}. These changes will not be synced to the server. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={async () => {
+                  await clearQueue();
+                  setQueuedMutations([]);
+                  setShowClearQueueConfirm(false);
+                  sonnerToast.success("Queue cleared", { description: "All pending changes have been discarded." });
+                }}
+              >
+                Clear All
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Logout Confirmation Dialog */}
         <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
