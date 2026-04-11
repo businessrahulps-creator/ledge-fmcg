@@ -73,6 +73,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
             <div className="ml-auto flex items-center gap-3">
+              <LiveClock />
               {userRole && (
                 <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
                   {userRole.replace("_", " ")}
