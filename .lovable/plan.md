@@ -1,43 +1,51 @@
 
 
-# Fix Bug #14: Handle Supabase 1,000-Row Query Limit
+# Add Pagination to Entity Lists (Bug #15)
 
-## Problem
-All list queries in `DataContext.tsx` rely on the Supabase default 1,000-row limit. Large datasets will be silently truncated.
+## Approach
+Client-side pagination over the already-loaded data arrays. DataContext remains unchanged — it already fetches all rows (up to 9,999 via bug #14). Each page component manages its own page state, paginates the filtered results, and resets to page 1 when search/filters change.
+
+This is the correct approach because:
+- Realtime updates refresh full arrays in DataContext — server-side pagination would conflict
+- Datasets in FMCG are typically hundreds, not millions
+- Search/filter already operates on full arrays client-side
 
 ## Changes
 
-### 1. `src/context/DataContext.tsx` — `fetchAll` function (lines 189-196)
-Add `.range(0, 9999)` and `.order()` to every list query:
+### 1. New reusable hook: `src/hooks/use-pagination.ts`
+Simple hook that accepts `totalItems` and `pageSize` (default 10), returns `{ page, totalPages, from, to, setPage, nextPage, prevPage, resetPage }`. Resets page to 1 when totalItems changes.
 
-```
-distributors  → .order("name").range(0, 9999)
-salespersons  → .order("name").range(0, 9999)
-products      → .order("name").range(0, 9999)
-godowns       → .order("name").range(0, 9999)
-stock_items   → .order("created_at", { ascending: false }).range(0, 9999)
-orders        → already has .order() → add .range(0, 9999)
-```
+### 2. New component: `src/components/ui/list-pagination.tsx`
+Clean pagination bar using existing `Pagination*` components from `src/components/ui/pagination.tsx`. Shows Previous/Next + up to 5 page number buttons + ellipsis. Mobile-friendly (compact on small screens). Props: `page`, `totalPages`, `onPageChange`.
 
-### 2. `src/context/DataContext.tsx` — `order_lines` query (lines 236-237)
-Add `.range(0, 9999)` to the order_lines `.in()` query.
+### 3. Update `src/pages/Orders.tsx`
+- Add `usePagination(filtered.length)` after the `filtered` memo
+- Slice `filtered` by `[from, to]` for rendering
+- Reset page when `debouncedSearch`, `paymentFilter`, or `deliveryFilter` change
+- Render `<ListPagination>` after the table/card list, inside the glass-card
 
-### 3. `src/context/DataContext.tsx` — All `safeRefetch*` functions (lines 394-479)
-Apply matching `.order()` and `.range(0, 9999)` to each:
-- `safeRefetchOrders` (line 397): add `.range(0, 9999)` to orders query; add `.range(0, 9999)` to order_lines query (line 402)
-- `safeRefetchDistributors` (line 414): add `.order("name").range(0, 9999)`
-- `safeRefetchSalespersons` (line 426): add `.order("name").range(0, 9999)`
-- `safeRefetchProducts` (line 438): add `.order("name").range(0, 9999)`
-- `safeRefetchGodowns` (line 450): add `.order("name").range(0, 9999)`
-- `safeRefetchStockItems` (line 462): add `.order("created_at", { ascending: false }).range(0, 9999)`
+### 4. Update `src/pages/Distributors.tsx`
+- Add `usePagination(filtered.length)` after the `filtered` memo
+- Slice `filtered` for the grid render
+- Render `<ListPagination>` after the grid
 
-### 4. `src/hooks/use-notifications.tsx` — Already handled
-Already uses `.limit(50)` — no change needed.
+### 5. Update `src/pages/Salespersons.tsx`
+- Same pattern as Distributors
 
-### Files touched
-- `src/context/DataContext.tsx` only
+### 6. Update `src/pages/Stock.tsx` (two places)
+- **Products tab**: Paginate `filteredProducts`, render `<ListPagination>` after product table
+- **Warehouse inventory**: Paginate `warehouseInventory`, render `<ListPagination>` after inventory table. Reset page when `selectedWarehouse` changes.
 
-### Not changed
-- No UI changes, no pagination, no new features
-- All realtime subscriptions, filters, and search logic remain unchanged
+## Files touched
+- `src/hooks/use-pagination.ts` (new)
+- `src/components/ui/list-pagination.tsx` (new)
+- `src/pages/Orders.tsx`
+- `src/pages/Distributors.tsx`
+- `src/pages/Salespersons.tsx`
+- `src/pages/Stock.tsx`
+
+## Not changed
+- DataContext.tsx — no modifications
+- Dashboard, Reports, Settings, NewOrder — untouched
+- All existing UI (cards, tables, search, filters, badges) — preserved exactly
 
