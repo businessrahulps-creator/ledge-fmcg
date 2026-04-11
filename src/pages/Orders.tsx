@@ -480,7 +480,7 @@ export default function Orders() {
                           type="date"
                           value={editDispatchDate}
                           onChange={(e) => setEditDispatchDate(e.target.value)}
-                          className="h-11 rounded-lg md:h-12"
+                          className="h-10 rounded-lg md:h-12"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -489,7 +489,7 @@ export default function Orders() {
                           value={editVehicle}
                           onChange={(e) => setEditVehicle(e.target.value)}
                           placeholder="e.g. MH-01-AB-1234"
-                          className="h-11 rounded-lg md:h-12"
+                          className="h-10 rounded-lg md:h-12"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -498,7 +498,7 @@ export default function Orders() {
                           value={editDriver}
                           onChange={(e) => setEditDriver(e.target.value)}
                           placeholder="Driver name"
-                          className="h-11 rounded-lg md:h-12"
+                          className="h-10 rounded-lg md:h-12"
                         />
                       </div>
                     </div>

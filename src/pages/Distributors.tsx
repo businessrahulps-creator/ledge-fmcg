@@ -20,6 +20,7 @@ import { useApi } from "@/services/api";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -227,6 +228,7 @@ export default function Distributors() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
+              <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
             </DialogHeader>
             {editItem && (
               <div className="space-y-3 md:space-y-4">
@@ -277,6 +279,7 @@ export default function Distributors() {
                 <DialogHeader>
                   <div className="flex items-center justify-between">
                     <DialogTitle className="text-base md:text-lg">{selected.name}</DialogTitle>
+                    <DialogDescription className="sr-only">Dealer profile details</DialogDescription>
                     <Button
                       variant="outline"
                       size="sm"
