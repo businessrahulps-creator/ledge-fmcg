@@ -89,7 +89,7 @@ export default function Dashboard() {
         </div>
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           {kpis.map((kpi, i) => (
             <motion.div
               key={kpi.label}
