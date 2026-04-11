@@ -56,6 +56,7 @@ export function DistributorReport() {
           <Button
             variant="outline"
             size="sm"
+            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
             onClick={() => {
               exportCsv(
                 csvFilename("dealer-report"),
@@ -65,11 +66,11 @@ export function DistributorReport() {
             }}
           >
             <Download className="h-3.5 w-3.5" />
-            <span >Export CSV</span>
+            <span className="hidden sm:inline">Export CSV</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setPdfOpen(true)}>
+          <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
             <FileText className="h-3.5 w-3.5" />
-            <span >Export PDF</span>
+            <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
       </div>

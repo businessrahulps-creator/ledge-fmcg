@@ -189,7 +189,7 @@ export default function Distributors() {
               <div className="mt-3 flex items-center justify-between border-t border-border pt-3 md:mt-4 md:pt-4">
                 <div className="flex items-center gap-1.5 text-xs md:text-sm">
                   <ShoppingCart className="h-3 w-3 text-muted-foreground md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                  <span>{d.totalOrders} orders</span>
+                  <span>{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
                 </div>
                 <span className="text-xs font-semibold md:text-sm">{formatCurrency(d.totalValue)}</span>
               </div>
