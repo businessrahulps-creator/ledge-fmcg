@@ -1,29 +1,22 @@
 
 
-# Add Sync Queue Viewer Tab in Settings
+# Add Individual Delete to Sync Queue Viewer
 
 ## Overview
-Add a new "Sync Queue" tab to the Settings page that displays all pending offline mutations from IndexedDB, showing their type, table, timestamp, and payload summary.
+Add a delete button to each row in the sync queue table, allowing users to remove individual pending mutations.
 
 ## Changes
 
 ### `src/pages/Settings.tsx`
-- Import `getQueue`, `clearQueue`, `QueuedMutation` from `@/lib/offline-store`
-- Import `Clock`, `Database`, `Trash2` (reuse existing) icons
-- Add state: `queuedMutations` array, loaded on mount and refreshed every 3 seconds
-- Add a new `TabsTrigger` value `"sync"` labeled "Sync Queue" with a badge showing count when > 0
-- Add corresponding `TabsContent` with a card containing:
-  - A table listing each queued mutation: **Type** (insert/update/delete badge), **Table** name, **Timestamp** (formatted with Indian locale `toLocaleString("en-IN")`), and a truncated **Payload** preview
-  - A "Clear Queue" button (with confirmation) that calls `clearQueue()` and refreshes
-  - Empty state: "No pending changes" message when queue is empty
-- Polling `useEffect` that calls `getQueue()` every 3s to stay current
+1. **Import `removeFromQueue`** — add it to the existing import from `@/lib/offline-store` (line 6).
+2. **Add delete handler** — async function that calls `removeFromQueue(id)` then refreshes the queue state.
+3. **Add delete column** — new table header + a small icon button (Trash2, already imported) in each row that calls the handler. No confirmation dialog needed for single items — the "Clear All" already has one.
 
 ### No other files changed
-All queue utilities already exist in `offline-store.ts`.
+`removeFromQueue` already exists in `offline-store.ts`.
 
-## Technical Notes
-- Uses existing `getQueue`/`clearQueue` from offline-store — no new dependencies
-- Timestamps rendered via `new Date(ts).toLocaleString("en-IN")` for Indian locale
-- Payload shown as truncated `JSON.stringify` (first 80 chars) to keep rows compact
-- Badge on tab trigger uses the same pill style as the offline banner pending count
+## Technical Details
+- The delete button uses `variant="ghost"` + `size="icon"` with the existing `Trash2` icon at `h-3.5 w-3.5`.
+- After removing, re-fetch via `getQueue()` to update state immediately (no need to wait for the 3s poll).
+- Column header labeled "Action", right-aligned, always visible.
 
