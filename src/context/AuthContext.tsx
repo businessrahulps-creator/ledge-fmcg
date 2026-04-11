@@ -54,10 +54,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId)
         .single();
       if (data && mountedRef.current) setProfile(data as Profile);
-      return data as Profile | null;
     } catch {
       // Profile fetch failure should never affect auth state
-      return null;
+    }
+    // Fetch role
+    try {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
+      if (roleData && mountedRef.current) setUserRole(roleData.role);
+    } catch {
+      if (mountedRef.current) setUserRole(null);
     }
   }, []);
 
