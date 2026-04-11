@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -40,9 +40,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMember {
   id: string;
+  userId: string;
   name: string;
   email: string;
+  phone: string;
   role: "super_admin" | "sales_manager" | "accountant";
+  roleId: string;
 }
 
 const roleLabels: Record<string, string> = {
@@ -56,7 +59,7 @@ export default function Settings() {
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
-  const { signOut, companyId } = useAuth();
+  const { signOut, companyId, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("");
@@ -80,14 +83,62 @@ export default function Settings() {
         }
       });
   }, [companyId]);
-  const [team, setTeam] = useState<TeamMember[]>([
-    { id: "t1", name: "Admin User", email: "admin@acmefmcg.in", role: "super_admin" },
-    { id: "t2", name: "Rajesh Kumar", email: "rajesh@acmefmcg.in", role: "sales_manager" },
-    { id: "t3", name: "Sneha Agarwal", email: "sneha@acmefmcg.in", role: "accountant" },
-  ]);
+
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [teamLoading, setTeamLoading] = useState(true);
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
   const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const loadTeam = useCallback(async () => {
+    if (!companyId) return;
+    setTeamLoading(true);
+    try {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, user_id, full_name, email, phone")
+        .eq("company_id", companyId);
+
+      if (!profiles || profiles.length === 0) {
+        setTeam([]);
+        setTeamLoading(false);
+        return;
+      }
+
+      const userIds = profiles.map((p) => p.user_id);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("id, user_id, role")
+        .in("user_id", userIds);
+
+      const roleMap = new Map<string, { roleId: string; role: string }>(
+        (roles || []).map((r) => [r.user_id, { roleId: r.id, role: r.role }])
+      );
+
+      const members: TeamMember[] = profiles
+        .filter((p) => roleMap.has(p.user_id))
+        .map((p) => {
+          const r = roleMap.get(p.user_id)!;
+          return {
+            id: p.id,
+            userId: p.user_id,
+            name: p.full_name || "",
+            email: p.email || "",
+            phone: p.phone || "",
+            role: r.role as TeamMember["role"],
+            roleId: r.roleId,
+          };
+        });
+
+      setTeam(members);
+    } catch {
+      // silent
+    }
+    setTeamLoading(false);
+  }, [companyId]);
+
+  useEffect(() => { loadTeam(); }, [loadTeam]);
 
   const handleSaveClick = () => {
     if (orderPrefix !== savedPrefix) {
@@ -115,28 +166,70 @@ export default function Settings() {
   };
 
   const openNewMember = () => {
-    setEditMember({ id: `t${Date.now()}`, name: "", email: "", role: "sales_manager" });
+    setEditMember({ id: "", userId: "", name: "", email: "", phone: "", role: "sales_manager", roleId: "" });
     setIsNewMember(true);
   };
 
-  const saveMember = () => {
-    if (!editMember?.name || !editMember?.email) return;
-    if (isNewMember) {
-      setTeam((prev) => [...prev, editMember]);
-      toast({ title: "Member added", description: `${editMember.name} has been added.` });
-    } else {
-      setTeam((prev) => prev.map((m) => (m.id === editMember.id ? editMember : m)));
-      toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+  const saveMember = async () => {
+    if (!editMember?.name || !editMember?.email || !companyId) return;
+    setSaving(true);
+    try {
+      if (isNewMember) {
+        const newUserId = crypto.randomUUID();
+        const { error: profileError } = await supabase.from("profiles").insert({
+          user_id: newUserId,
+          full_name: editMember.name,
+          email: editMember.email,
+          phone: editMember.phone,
+          company_id: companyId,
+        });
+        if (profileError) throw profileError;
+
+        const { error: roleError } = await supabase.from("user_roles").insert({
+          user_id: newUserId,
+          role: editMember.role,
+        });
+        if (roleError) throw roleError;
+
+        toast({ title: "Member added", description: `${editMember.name} has been added.` });
+        addNotification("team_update", "Team Member Added", `${editMember.name} was added to the team.`);
+      } else {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ full_name: editMember.name, phone: editMember.phone })
+          .eq("id", editMember.id);
+        if (profileError) throw profileError;
+
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .update({ role: editMember.role })
+          .eq("id", editMember.roleId);
+        if (roleError) throw roleError;
+
+        toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+      }
+      setEditMember(null);
+      await loadTeam();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed to save member", variant: "destructive" });
     }
-    setEditMember(null);
+    setSaving(false);
   };
 
-  const confirmRemoveMember = () => {
+  const confirmRemoveMember = async () => {
     if (!deleteMember) return;
-    setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
-    toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
-    addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
-    setDeleteMember(null);
+    setSaving(true);
+    try {
+      await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
+      await supabase.from("profiles").delete().eq("id", deleteMember.id);
+      toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+      addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
+      setDeleteMember(null);
+      await loadTeam();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed to remove member", variant: "destructive" });
+    }
+    setSaving(false);
   };
 
   const trialDaysLeft = 11;
@@ -220,11 +313,12 @@ export default function Settings() {
             </motion.div>
           </TabsContent>
 
-          {/* Team Tab */}
           <TabsContent value="team">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground md:text-sm">{team.length} team members</p>
+                <p className="text-xs text-muted-foreground md:text-sm">
+                  {teamLoading ? "Loading…" : `${team.length} team members`}
+                </p>
                 <Button onClick={openNewMember} size="sm" className="md:size-default">
                   <Plus className="h-4 w-4" />
                   Add Member
@@ -232,6 +326,9 @@ export default function Settings() {
               </div>
 
               <div className="glass-card overflow-hidden">
+                {team.length === 0 && !teamLoading && (
+                  <div className="px-6 py-8 text-center text-sm text-muted-foreground">No team members found.</div>
+                )}
                 {team.map((m) => (
                   <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 row-hover md:px-6 md:py-4">
                     <div className="flex items-center gap-3">
@@ -242,6 +339,7 @@ export default function Settings() {
                         <p className="text-sm font-medium truncate">{m.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-muted-foreground truncate md:text-xs">{m.email}</p>
+                          {m.phone && <p className="hidden sm:block text-[10px] text-muted-foreground md:text-xs">· {m.phone}</p>}
                           <span className={`hidden sm:inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium md:px-3 md:text-xs ${
                             m.role === "super_admin" ? "bg-primary/15 text-primary" :
                             m.role === "sales_manager" ? "bg-success/15 text-success" :
@@ -263,7 +361,7 @@ export default function Settings() {
                       <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => { setEditMember({ ...m }); setIsNewMember(false); }}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      {m.role !== "super_admin" && (
+                      {m.userId !== user?.id && (
                         <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -339,7 +437,22 @@ export default function Settings() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Email</Label>
-                  <Input value={editMember.email} onChange={(e) => setEditMember({ ...editMember, email: e.target.value })} className="h-11 rounded-lg md:h-12" />
+                  <Input
+                    value={editMember.email}
+                    onChange={(e) => setEditMember({ ...editMember, email: e.target.value })}
+                    className="h-11 rounded-lg md:h-12"
+                    disabled={!isNewMember}
+                  />
+                  {!isNewMember && <p className="text-[10px] text-muted-foreground">Email cannot be changed after creation</p>}
+                </div>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Phone</Label>
+                  <Input
+                    value={editMember.phone}
+                    onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })}
+                    className="h-11 rounded-lg md:h-12"
+                    placeholder="+91 98765 43210"
+                  />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Role</Label>
@@ -358,7 +471,7 @@ export default function Settings() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
-              <Button onClick={saveMember}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
+              <Button onClick={saveMember} disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
