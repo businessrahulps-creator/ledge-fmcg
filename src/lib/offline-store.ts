@@ -49,7 +49,7 @@ export async function clearCache(companyId: string) {
 export interface QueuedMutation {
   id: string;
   timestamp: number;
-  type: "insert" | "update" | "delete";
+  type: "insert" | "update" | "delete" | "insert_order_atomic";
   table: string;
   payload: any;
 }

@@ -146,6 +146,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
+  const deductStockRef = useRef<((orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>) | null>(null);
 
   // Clear data when no company
   useEffect(() => {
@@ -296,20 +297,79 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
 
         let synced = 0;
+        const MAX_RETRIES = 3;
+
         for (const mutation of queue) {
-          try {
-            if (mutation.type === "insert") {
-              await supabase.from(mutation.table as any).insert(mutation.payload);
-            } else if (mutation.type === "update") {
-              const { id: rowId, ...rest } = mutation.payload;
-              await supabase.from(mutation.table as any).update(rest).eq("id", rowId);
-            } else if (mutation.type === "delete") {
-              await supabase.from(mutation.table as any).delete().eq("id", mutation.payload.id);
+          let succeeded = false;
+          for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+              if (mutation.type === "insert_order_atomic") {
+                // Replay order creation via the same RPC used online
+                const p = mutation.payload;
+                const { data: rpcData, error: rpcError } = await supabase.rpc("insert_order_atomic", {
+                  p_company_id: p.companyId,
+                  p_date: p.date,
+                  p_distributor_id: p.distributorId,
+                  p_distributor_name: sanitizeInput(p.distributorName),
+                  p_salesperson_id: p.salespersonId,
+                  p_salesperson_name: sanitizeInput(p.salesperson),
+                  p_total: p.total,
+                  p_payment_mode: p.paymentMode,
+                  p_payment_status: p.paymentStatus,
+                  p_dispatch_date: p.dispatchDate || null,
+                  p_vehicle: sanitizeInput(p.vehicle || ""),
+                  p_driver_name: sanitizeInput(p.driverName || ""),
+                  p_delivery_status: p.deliveryStatus,
+                  p_dispatch_remarks: sanitizeInput(p.dispatchRemarks || ""),
+                  p_godown_id: p.godownId || null,
+                });
+                if (rpcError) throw rpcError;
+
+                const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+                if (!inserted) throw new Error("Atomic insert returned no data");
+
+                // Insert order lines
+                if (p.lines && p.lines.length > 0) {
+                  const { error: linesError } = await supabase.from("order_lines").insert(
+                    p.lines.map((l: any) => ({
+                      order_id: inserted.id,
+                      product_id: l.productId,
+                      product_name: sanitizeInput(l.productName),
+                      quantity: l.quantity,
+                      unit_price: l.unitPrice,
+                      line_total: l.lineTotal,
+                    }))
+                  );
+                  if (linesError) throw linesError;
+                }
+
+                // Stock deduction if dispatched/delivered
+                if (p.godownId && (p.deliveryStatus === "dispatched" || p.deliveryStatus === "delivered")) {
+                  if (deductStockRef.current) await deductStockRef.current(inserted.id, p.lines, p.godownId, p.companyId);
+                }
+              } else if (mutation.type === "insert") {
+                const { error } = await supabase.from(mutation.table as any).insert(mutation.payload);
+                if (error) throw error;
+              } else if (mutation.type === "update") {
+                const { id: rowId, ...rest } = mutation.payload;
+                const { error } = await supabase.from(mutation.table as any).update(rest).eq("id", rowId);
+                if (error) throw error;
+              } else if (mutation.type === "delete") {
+                const { error } = await supabase.from(mutation.table as any).delete().eq("id", mutation.payload.id);
+                if (error) throw error;
+              }
+              succeeded = true;
+              break; // success, stop retrying
+            } catch (err) {
+              console.error(`Sync mutation failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation, err);
+              if (attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 1000 * attempt)); // backoff
+              }
             }
+          }
+          if (succeeded) {
             await removeFromQueue(mutation.id);
             synced++;
-          } catch (err) {
-            console.error("Sync mutation failed:", mutation, err);
           }
         }
 
@@ -330,6 +390,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         // Refresh all data from server
         const token = ++fetchTokenRef.current;
         await fetchAll(companyId, token);
+        await safeRefetchOrders();
+        await safeRefetchStockItems();
       } finally {
         isSyncingRef.current = false;
       }
@@ -558,6 +620,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [safeRefetchStockItems]);
+  deductStockRef.current = deductStockForOrder;
 
   // --- Offline-aware CRUD operations ---
 
@@ -573,8 +636,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setOrders(prev => [newOrder, ...prev]);
       setOrderSequence(prev => prev + 1);
       await enqueueMutation({
-        type: "insert", table: "orders",
-        payload: { _offlineOrder: true, order: { ...order, orderNumber: offlineNumber } },
+        type: "insert_order_atomic",
+        table: "orders",
+        payload: {
+          companyId,
+          date: order.date,
+          distributorId: order.distributorId,
+          distributorName: order.distributorName,
+          salespersonId: order.salespersonId,
+          salesperson: order.salesperson,
+          total: order.total,
+          paymentMode: order.paymentMode,
+          paymentStatus: order.paymentStatus,
+          dispatchDate: order.dispatchDate || null,
+          vehicle: order.vehicle,
+          driverName: order.driverName,
+          deliveryStatus: order.deliveryStatus,
+          dispatchRemarks: order.dispatchRemarks,
+          godownId: order.godownId || null,
+          lines: order.lines,
+        },
       });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return { success: true, orderNumber: offlineNumber };
