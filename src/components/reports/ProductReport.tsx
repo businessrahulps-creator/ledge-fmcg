@@ -70,12 +70,6 @@ export function ProductReport() {
           </Button>
         </div>
       </div>
-          <span className="whitespace-nowrap text-muted-foreground">
-            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
-          </span>
-          <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
-        </div>
-      </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
           <table className="w-full text-sm">
