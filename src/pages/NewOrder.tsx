@@ -61,6 +61,7 @@ export default function NewOrder() {
   const products = api.products.list();
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
+  const godowns = api.stock.locations.list().filter(g => g.isActive);
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
 
@@ -73,6 +74,7 @@ export default function NewOrder() {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedGodown, setSelectedGodown] = useState("");
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
@@ -82,6 +84,13 @@ export default function NewOrder() {
   const [vehicle, setVehicle] = useState("");
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Auto-select godown if only one exists
+  useEffect(() => {
+    if (godowns.length === 1 && !selectedGodown) {
+      setSelectedGodown(godowns[0].id);
+    }
+  }, [godowns, selectedGodown]);
 
   // Auto-focus first product select when dealer is chosen
   useEffect(() => {
