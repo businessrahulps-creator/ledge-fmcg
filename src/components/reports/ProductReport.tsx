@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function ProductReport() {
   const api = useApi();
@@ -45,6 +48,12 @@ export function ProductReport() {
           return { ...o, qty: line.quantity, lineTotal: line.lineTotal };
         })
     : [];
+  const [pdfOpen, setPdfOpen] = useState(false);
+  const rptSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Product table" },
+  ];
 
   return (
     <div className="space-y-4 overflow-x-hidden">
@@ -70,6 +79,10 @@ export function ProductReport() {
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPdfOpen(true)}>
+            <FileText className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
       </div>
@@ -172,6 +185,36 @@ export function ProductReport() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        sections={rptSections}
+        title="Export Product Report PDF"
+        onGenerate={(sel) => {
+          downloadPdf(
+            pdfFilename("product-report"),
+            <ReportPdf
+              title="Product Report"
+              subtitle={periodLabel(period)}
+              showCompany={sel.company}
+              showSummary={sel.summary}
+              showTable={sel.table}
+              summary={[
+                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Units Sold", value: formatNumber(totalQty) },
+              ]}
+              columns={[
+                { header: "Product", width: "35%" },
+                { header: "SKU", width: "20%" },
+                { header: "Qty Sold", width: "20%", align: "right" },
+                { header: "Revenue", width: "25%", align: "right" },
+              ]}
+              rows={data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrency(p.revenue)])}
+            />
+          );
+        }}
+      />
     </div>
   );
 }

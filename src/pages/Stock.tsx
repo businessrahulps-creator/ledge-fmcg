@@ -6,8 +6,11 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,6 +93,14 @@ export default function Stock() {
   const [addStockOpen, setAddStockOpen] = useState(false);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
+  const [productsPdfOpen, setProductsPdfOpen] = useState(false);
+  const [inventoryPdfOpen, setInventoryPdfOpen] = useState(false);
+
+  const stockPdfSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Data table" },
+  ];
 
   const inventoryRef = useRef<HTMLDivElement>(null);
 
@@ -324,6 +335,14 @@ export default function Stock() {
                   <Download className="h-4 w-4" />
                   <span className="hidden sm:inline">Export CSV</span>
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => setProductsPdfOpen(true)}
+                >
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export PDF</span>
+                </Button>
               </div>
 
               <div className="glass-card overflow-hidden">
@@ -541,6 +560,14 @@ export default function Stock() {
                           >
                             <Download className="h-4 w-4" />
                             <span className="hidden sm:inline">Export CSV</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="shrink-0"
+                            onClick={() => setInventoryPdfOpen(true)}
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="hidden sm:inline">Export PDF</span>
                           </Button>
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
@@ -813,6 +840,90 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
         </>)}
+        <ExportPdfModal
+          open={productsPdfOpen}
+          onOpenChange={setProductsPdfOpen}
+          sections={stockPdfSections}
+          title="Export Products PDF"
+          onGenerate={(sel) => {
+            const totalValue = filteredProducts.reduce((s, p) => s + p.basePrice * getProductStock(p.id), 0);
+            downloadPdf(
+              pdfFilename("products"),
+              <ReportPdf
+                title="Products Report"
+                subtitle={`${filteredProducts.length} products`}
+                showCompany={sel.company}
+                showSummary={sel.summary}
+                showTable={sel.table}
+                summary={[
+                  { label: "Products", value: String(filteredProducts.length) },
+                  { label: "Total Stock Value", value: formatCurrency(totalValue) },
+                ]}
+                columns={[
+                  { header: "Product", width: "28%" },
+                  { header: "SKU", width: "15%" },
+                  { header: "Unit", width: "10%" },
+                  { header: "Base Price", width: "15%", align: "right" },
+                  { header: "Sold", width: "12%", align: "right" },
+                  { header: "Stock", width: "12%", align: "right" },
+                ]}
+                rows={filteredProducts.map((p) => [
+                  p.name,
+                  p.sku,
+                  p.unit,
+                  formatCurrency(p.basePrice),
+                  String(p.totalSold),
+                  String(getProductStock(p.id)),
+                ])}
+              />
+            );
+          }}
+        />
+        <ExportPdfModal
+          open={inventoryPdfOpen}
+          onOpenChange={setInventoryPdfOpen}
+          sections={stockPdfSections}
+          title="Export Inventory PDF"
+          onGenerate={(sel) => {
+            const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "Warehouse";
+            const totalValue = warehouseInventory.reduce((s, si) => s + si.quantity * si.basePrice, 0);
+            downloadPdf(
+              pdfFilename("inventory", whName.toLowerCase().replace(/\s+/g, "-")),
+              <ReportPdf
+                title={`Inventory — ${whName}`}
+                subtitle={`${warehouseInventory.length} products`}
+                showCompany={sel.company}
+                showSummary={sel.summary}
+                showTable={sel.table}
+                summary={[
+                  { label: "Products", value: String(warehouseInventory.length) },
+                  { label: "Total Value", value: formatCurrency(totalValue) },
+                ]}
+                columns={[
+                  { header: "Product", width: "24%" },
+                  { header: "SKU", width: "12%" },
+                  { header: "Qty", width: "10%", align: "right" },
+                  { header: "Threshold", width: "10%", align: "right" },
+                  { header: "Health", width: "12%" },
+                  { header: "Price", width: "14%", align: "right" },
+                  { header: "Value", width: "14%", align: "right" },
+                ]}
+                rows={warehouseInventory.map((si) => {
+                  const health = getStockHealth(si.quantity, si.threshold);
+                  return [
+                    si.productName,
+                    si.sku,
+                    String(si.quantity),
+                    String(si.threshold),
+                    health.charAt(0).toUpperCase() + health.slice(1),
+                    formatCurrency(si.basePrice),
+                    formatCurrency(si.quantity * si.basePrice),
+                  ];
+                })}
+              />
+            );
+          }}
+        />
       </div>
     </AppLayout>
   );

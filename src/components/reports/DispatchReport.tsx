@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
@@ -9,6 +9,9 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function DispatchReport() {
   const api = useApi();
@@ -19,6 +22,12 @@ export function DispatchReport() {
 
   const periodFiltered = filterByTimePeriod(orders, period);
   const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.deliveryStatus === filter);
+  const [pdfOpen, setPdfOpen] = useState(false);
+  const rptSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Dispatch table" },
+  ];
 
   return (
     <div className="space-y-4 overflow-x-hidden">
@@ -61,6 +70,10 @@ export function DispatchReport() {
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPdfOpen(true)}>
+            <FileText className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
       </div>
@@ -188,6 +201,46 @@ export function DispatchReport() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        sections={rptSections}
+        title="Export Dispatch Report PDF"
+        onGenerate={(sel) => {
+          downloadPdf(
+            pdfFilename("dispatch-report"),
+            <ReportPdf
+              title="Dispatch Report"
+              subtitle={periodLabel(period)}
+              showCompany={sel.company}
+              showSummary={sel.summary}
+              showTable={sel.table}
+              summary={[
+                { label: "Orders", value: String(filtered.length) },
+              ]}
+              columns={[
+                { header: "Order", width: "14%" },
+                { header: "Dealer", width: "18%" },
+                { header: "Date", width: "14%" },
+                { header: "Dispatch", width: "14%" },
+                { header: "Vehicle", width: "14%" },
+                { header: "Driver", width: "14%" },
+                { header: "Status", width: "12%" },
+              ]}
+              rows={filtered.map((o) => [
+                o.orderNumber,
+                o.distributorName,
+                formatIndianDate(o.date),
+                formatIndianDate(o.dispatchDate),
+                o.vehicle || "—",
+                o.driverName || "—",
+                o.deliveryStatus,
+              ])}
+            />
+          );
+        }}
+      />
     </div>
   );
 }
