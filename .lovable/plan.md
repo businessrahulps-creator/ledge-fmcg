@@ -1,24 +1,28 @@
 
 
-# Fix: Mobile Pill Bar Overflow
+# Fix Chart Colors to Match Design System
 
 ## Problem
-On mobile (390px), the period pill bar shows only "Today" through "YTD" — the "Custom" pill and "Export" button are clipped off-screen with no way to scroll or access them.
+The Performance page charts use ad-hoc colors that clash with the Ledge design system:
+- **Product Velocity**: `hsl(38, 92%, 50%)` — bright orange/amber
+- **Sales Team Ranking**: `hsl(262, 83%, 58%)` — bright purple/violet
+- **Payment Split**: raw green/amber/red HSL values instead of design tokens
 
-## Solution
-Make the pill container horizontally scrollable on mobile with `overflow-x-auto` and hide the scrollbar for a clean look. Move the Export button below or make it part of the scrollable row.
+The design system uses a navy primary (`--primary: 224 55% 22%`), with semantic tokens for success, warning, and destructive states.
 
 ## Changes — `src/pages/Performance.tsx`
 
-1. **Pill container** (~line 350): Add `overflow-x-auto` and `scrollbar-hide` (or `-webkit-scrollbar` hide via inline style) to the flex row containing the pills + Export button, so the entire row is swipeable on mobile.
+1. **Payment Split colors** (line 100-104): Replace raw HSL with design tokens:
+   - `paid` → `hsl(var(--success))` (emerald)
+   - `partial` → `hsl(var(--warning))` (amber)
+   - `pending` → `hsl(var(--destructive))` (red)
 
-2. **Alternatively**, wrap pills in a scrollable div and keep Export outside:
-   ```
-   Row 1: [scrollable: Today | 7D | 30D | 90D | 6M | YTD | Custom]  [Export]
-   ```
-   With `flex-shrink-0` on the Export button so it stays visible, and the pill bar scrolls independently.
+2. **Product Velocity bar** (line 699): Replace `hsl(38, 92%, 50%)` with `hsl(var(--primary))` — consistent navy blue matching Top Dealers chart.
 
-3. Add `whitespace-nowrap` to prevent pills from wrapping awkwardly at intermediate sizes.
+3. **Sales Team Ranking bar** (line 743): Replace `hsl(262, 83%, 58%)` with `hsl(var(--primary))` — same navy blue for visual consistency across all bar charts.
 
-This is a ~3-line CSS change, no logic modifications.
+4. **Top Dealers bar** (line 646): Already uses `hsl(var(--primary))` — no change needed.
+
+## Result
+All bar charts use the primary navy color; the donut chart uses semantic success/warning/destructive tokens. Unified, clean look matching the rest of the app.
 
