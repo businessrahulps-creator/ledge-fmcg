@@ -152,6 +152,11 @@ export default function NewOrder() {
       return;
     }
 
+    if (!selectedSalesperson) {
+      toast.error("Sales person required", { description: "Please select a sales person for this order." });
+      return;
+    }
+
     const validLines = lines.filter((l) => l.productId && l.quantity > 0);
     if (validLines.length === 0) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
@@ -254,8 +259,8 @@ export default function NewOrder() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
-                  <Select value={selectedDealer} onValueChange={setSelectedDealer}>
-                    <SelectTrigger className={`h-11 rounded-lg md:h-12 ${!selectedDealer ? "" : ""}`}>
+                   <Select value={selectedDealer} onValueChange={setSelectedDealer}>
+                     <SelectTrigger className="h-10 rounded-lg md:h-12">
                       <SelectValue placeholder="Select dealer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -266,7 +271,7 @@ export default function NewOrder() {
                   </Select>
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Sales Person</Label>
+                  <Label className="text-xs md:text-sm">Sales Person *</Label>
                   <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
                     <SelectTrigger className="h-10 rounded-lg md:h-12">
                       <SelectValue placeholder="Select sales person" />
