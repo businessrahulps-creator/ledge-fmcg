@@ -1,31 +1,38 @@
 
 
-# Fix: Revenue KPI Number Line-Break on Desktop
+# Perplexity-Style Collapsed Sidebar
 
 ## Problem
-At 1280px desktop, the Revenue KPI card shows "₹1,33,62" on line 1 and "0" on line 2. The `break-all` class causes the number to break mid-value, which looks broken.
+The collapsed sidebar shows bare icons floating in a narrow column — no labels, no visual containers — making it hard to identify items and looking unfinished compared to the expanded state.
 
-## Root Cause
-Line 102 in `Dashboard.tsx`: `break-all` allows line breaks at any character. Combined with `md:text-3xl` (30px), the Indian-formatted currency string "₹1,33,620" exceeds the ~280px card width in a 4-column grid.
+## Perplexity's Approach
+Each collapsed nav item is a vertically stacked column: icon inside a subtle rounded background circle, with a tiny label underneath. Items are centered and well-spaced, creating a dock-like feel.
 
-## Fix (single line change)
+## Solution
 
-**`src/pages/Dashboard.tsx` line 102:**
-- Remove `break-all`
-- Add `whitespace-nowrap` to prevent wrapping
-- Change font sizing to `text-lg sm:text-xl md:text-2xl` (drop from `3xl` to `2xl` on desktop so the value fits)
+**File: `src/components/layout/AppSidebar.tsx`**
 
-```
-// Before
-<p className="text-lg sm:text-xl md:text-3xl font-bold tracking-tight tabular-nums break-all">{kpi.value}</p>
+Update `renderNavItem` so that when `collapsed`, each item renders as a centered column layout:
 
-// After  
-<p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap">{kpi.value}</p>
+```text
+  ┌─────────┐
+  │  (icon) │  ← 36×36 rounded-xl bg on hover/active
+  │  Label  │  ← text-[10px] font-medium, truncated
+  └─────────┘
 ```
 
-This ensures the number stays on one line and fits the card at all screen widths. The size reduction from `text-3xl` (30px) to `text-2xl` (24px) on desktop is minimal and still reads as a prominent metric.
+Specific changes:
+1. When collapsed, switch the NavLink layout from `flex items-center gap-3` (horizontal) to `flex flex-col items-center gap-0.5` (vertical stack)
+2. Icon gets a wrapper `div` with `h-9 w-9 flex items-center justify-center rounded-xl` — active state gets `bg-sidebar-accent`, hover gets `hover:bg-sidebar-accent/50`
+3. Always show a tiny label: `<span className="text-[10px] font-medium leading-tight">` — even when collapsed
+4. Apply same pattern to the Settings footer item
+5. Increase `SidebarGroup` vertical spacing slightly when collapsed for breathing room
 
-### No other changes needed
-- Mobile already works perfectly (verified at 375px)
-- All other KPI values (8, 3, 2) are short and unaffected
+**File: `src/components/ui/sidebar.tsx`**
+- Widen `SIDEBAR_WIDTH_ICON` from `"3rem"` to `"4.5rem"` so labels fit without clipping
+
+## What stays the same
+- Expanded sidebar is completely unchanged
+- All nav links, routes, icons, active detection, logo logic, realtime subscription — untouched
+- Mobile sheet sidebar unchanged (it always shows expanded)
 
