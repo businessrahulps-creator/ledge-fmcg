@@ -5,6 +5,8 @@ import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatCurrency } from "@/data/mock-data";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
@@ -13,7 +15,15 @@ import {
   ShoppingCart,
   Percent,
   Users,
+  CalendarIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   AreaChart,
   Area,
