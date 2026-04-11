@@ -1,39 +1,43 @@
 
 
-# Clean Mock Data Files to Type-Only Exports
+# Fix Bug #14: Handle Supabase 1,000-Row Query Limit
 
-## What we're doing
-Stripping `src/data/mock-data.ts` and `src/data/godown-data.ts` down to only the exports that are actually used across the codebase, removing all hardcoded sample data arrays.
+## Problem
+All list queries in `DataContext.tsx` rely on the Supabase default 1,000-row limit. Large datasets will be silently truncated.
 
 ## Changes
 
-### 1. `src/data/mock-data.ts`
-**Keep:**
-- Interfaces: `Distributor`, `Product`, `Salesperson`, `OrderLine`, `Order`
-- Utility functions: `formatCurrency`, `formatNumber` (pure formatting helpers, no static data)
+### 1. `src/context/DataContext.tsx` — `fetchAll` function (lines 189-196)
+Add `.range(0, 9999)` and `.order()` to every list query:
 
-**Remove:**
-- `salespersons` array
-- `distributors` array
-- `products` array
-- `orders` array
+```
+distributors  → .order("name").range(0, 9999)
+salespersons  → .order("name").range(0, 9999)
+products      → .order("name").range(0, 9999)
+godowns       → .order("name").range(0, 9999)
+stock_items   → .order("created_at", { ascending: false }).range(0, 9999)
+orders        → already has .order() → add .range(0, 9999)
+```
 
-### 2. `src/data/godown-data.ts`
-**Keep:**
-- Interfaces: `GodownLocation`, `StockItem`, `StockDeduction`
-- Type: `StockHealth`
-- Function: `getStockHealth` (pure logic, used in `Stock.tsx`)
+### 2. `src/context/DataContext.tsx` — `order_lines` query (lines 236-237)
+Add `.range(0, 9999)` to the order_lines `.in()` query.
 
-**Remove:**
-- `godownLocations` array
-- `stockItems` array
-- `stockDeductions` array
-- `generateSparklineData` function
-- `getGodownStats` function (references removed arrays)
-- `getOverallStats` function (references removed arrays)
-- `getTimeAgo` function
-- `import { products } from "./mock-data"` (top-level import no longer needed)
+### 3. `src/context/DataContext.tsx` — All `safeRefetch*` functions (lines 394-479)
+Apply matching `.order()` and `.range(0, 9999)` to each:
+- `safeRefetchOrders` (line 397): add `.range(0, 9999)` to orders query; add `.range(0, 9999)` to order_lines query (line 402)
+- `safeRefetchDistributors` (line 414): add `.order("name").range(0, 9999)`
+- `safeRefetchSalespersons` (line 426): add `.order("name").range(0, 9999)`
+- `safeRefetchProducts` (line 438): add `.order("name").range(0, 9999)`
+- `safeRefetchGodowns` (line 450): add `.order("name").range(0, 9999)`
+- `safeRefetchStockItems` (line 462): add `.order("created_at", { ascending: false }).range(0, 9999)`
 
-### 3. Import fixes
-No import changes needed — all consumers already import only types and pure functions that are being retained.
+### 4. `src/hooks/use-notifications.tsx` — Already handled
+Already uses `.limit(50)` — no change needed.
+
+### Files touched
+- `src/context/DataContext.tsx` only
+
+### Not changed
+- No UI changes, no pagination, no new features
+- All realtime subscriptions, filters, and search logic remain unchanged
 
