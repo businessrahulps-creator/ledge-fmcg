@@ -870,6 +870,8 @@ export default function Performance() {
           await downloadPdf(pdfFilename("performance", periodLabel.replace(/\s+/g, "_")), doc);
         }}
       />
+      </div>
+      </div>
     </AppLayout>
   );
 }
