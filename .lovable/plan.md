@@ -1,49 +1,35 @@
 
 
-# Fix Bug #20: Eliminate Order-Number Sequence Gaps
+# Fix Indian Date Locale: DD/MM/YYYY Everywhere
 
-## Problem
-The current flow calls `get_next_order_number` (which increments `companies.next_order_sequence`) in a **separate** RPC from the order insert. If the insert fails, the sequence is already consumed, creating gaps.
+## What changes
+Create a utility function `formatIndianDate` and replace all raw `{o.date}`, `{order.date}`, `{selected.date}`, `{selectedOrder.date}`, `{o.dispatchDate}`, `{selected.dispatchDate}` renders with it.
 
-## Approach
-Replace the two-step flow (get number → insert) with a single atomic RPC that increments the sequence AND inserts the order in one transaction. On failure, the entire transaction rolls back — no gap.
-
-## Changes
-
-### 1. New DB Migration: Create `insert_order_atomic` RPC
-A `SECURITY DEFINER` PL/pgSQL function that:
-- Accepts all order fields as parameters
-- Increments `companies.next_order_sequence` and formats `{prefix}-{year}-{seq}`
-- Inserts the order row with the generated number
-- Returns the inserted row (id, order_number)
-- On unique constraint violation on `order_number`, retries up to 3 times (re-fetching sequence)
-- All in one transaction — rollback on any failure means no gap
-
-```sql
-CREATE OR REPLACE FUNCTION public.insert_order_atomic(
-  p_company_id uuid, p_date date, p_distributor_id uuid, p_distributor_name text,
-  p_salesperson_id uuid, p_salesperson_name text, p_total numeric,
-  p_payment_mode payment_mode, p_payment_status payment_status,
-  p_dispatch_date date, p_vehicle text, p_driver_name text,
-  p_delivery_status delivery_status, p_dispatch_remarks text,
-  p_godown_id uuid
-) RETURNS TABLE(id uuid, order_number text) ...
+## New file: `src/utils/formatDate.ts`
+```ts
+export const formatIndianDate = (date: string | Date | null): string => {
+  if (!date) return "—";
+  const d = typeof date === "string" ? new Date(date + (date.length === 10 ? "T00:00:00" : "")) : date;
+  if (isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    timeZone: "Asia/Kolkata"
+  }).format(d);
+};
 ```
 
-The existing `get_next_order_number` RPC is kept for backward compatibility (preview number display) but is no longer called during order creation.
+## Files modified (import + find-replace `{x.date}` → `{formatIndianDate(x.date)}`)
 
-### 2. Edit `src/context/DataContext.tsx` — Use atomic RPC
-In `addOrder`:
-- Remove the `get_next_order_number` RPC call
-- Replace the separate `.insert("orders")` with a single `supabase.rpc("insert_order_atomic", {...})` call
-- The RPC returns `{id, order_number}` — use those for the order lines insert and local state update
-- Update `setOrderSequence` from the returned sequence number
+| File | Occurrences |
+|------|------------|
+| `src/pages/Dashboard.tsx` | 2 — table `{order.date}`, mobile card `{o.date}` |
+| `src/pages/Orders.tsx` | 4 — table, mobile card, detail dialog date, detail dialog (already covered) |
+| `src/pages/Distributors.tsx` | 2 — dealer order table + mobile card |
+| `src/components/reports/DistributorReport.tsx` | 1 — order table |
+| `src/components/reports/PaymentReport.tsx` | 2 — table + mobile card |
+| `src/components/reports/DispatchReport.tsx` | 3 — table, mobile card, detail dialog (date + dispatchDate) |
 
-### 3. Preview number stays unchanged
-`previewOrderNumber` and `nextOrderNumber` still read from local `orderPrefix`/`orderSequence` state, which is synced on data load. No changes needed.
+Total: ~14 occurrences across 6 files, plus 1 new utility file.
 
-## Scope
-- New migration: `insert_order_atomic` function
-- Modified: `src/context/DataContext.tsx` (addOrder function, ~15 lines changed)
-- No UI changes, no other files touched
+No changes to data layer, routing, or any other logic.
 
