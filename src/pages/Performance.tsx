@@ -98,9 +98,9 @@ function pctChange(current: number, previous: number): number | null {
 }
 
 const PAYMENT_COLORS: Record<string, string> = {
-  paid: "hsl(142, 71%, 45%)",
-  partial: "hsl(38, 92%, 50%)",
-  pending: "hsl(0, 84%, 60%)",
+  paid: "hsl(var(--success))",
+  partial: "hsl(var(--warning))",
+  pending: "hsl(var(--destructive))",
 };
 
 function formatCompact(n: number): string {
@@ -696,7 +696,7 @@ export default function Performance() {
                       fontSize: "12px",
                     }}
                   />
-                  <Bar dataKey="qty" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} barSize={32} />
+                  <Bar dataKey="qty" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={32} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -740,7 +740,7 @@ export default function Performance() {
                   />
                   <Bar
                     dataKey="revenue"
-                    fill="hsl(262, 83%, 58%)"
+                    fill="hsl(var(--primary))"
                     radius={[0, 4, 4, 0]}
                     barSize={24}
                     cursor="pointer"
