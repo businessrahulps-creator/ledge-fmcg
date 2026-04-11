@@ -80,12 +80,15 @@ function getCutoffDate(period: TimePeriod): Date {
       cutoff.setMonth(0, 1);
       cutoff.setHours(0, 0, 0, 0);
       break;
+    case "custom":
+      return new Date(0);
   }
   return cutoff;
 }
 
 /** Get the previous period cutoff for comparison */
 function getPreviousCutoff(period: TimePeriod, currentCutoff: Date): Date {
+  if (period === "custom") return new Date(0);
   const prev = new Date(currentCutoff);
   const now = new Date();
   const diffMs = now.getTime() - currentCutoff.getTime();
@@ -127,8 +130,12 @@ export default function Performance() {
   const stockItems = api.stock.items.list();
 
   const handleRefresh = useCallback(async () => {
-    await new Promise((r) => setTimeout(r, 600));
-  }, []);
+    if (api.refreshAll) {
+      await api.refreshAll();
+    } else {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }, [api]);
 
   const { containerRef, pullDistance, refreshing } = usePullToRefresh({
     onRefresh: handleRefresh,
@@ -764,17 +771,11 @@ export default function Performance() {
                       fontSize: "12px",
                     }}
                   />
-                  <Bar
+                   <Bar
                     dataKey="revenue"
                     fill="hsl(var(--primary))"
                     radius={[0, 4, 4, 0]}
                     barSize={24}
-                    cursor="pointer"
-                    onClick={(data: any) => {
-                      if (data?.name) {
-                        navigate(`/orders?dealer=${encodeURIComponent(data.name)}`);
-                      }
-                    }}
                   />
                 </BarChart>
               </ResponsiveContainer>
