@@ -496,9 +496,10 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground md:text-sm">
                   {teamLoading ? "Loading…" : `${team.length} team members`}
                 </p>
-                <Button onClick={openNewMember} size="sm" className="md:size-default">
+                <Button size="sm" className="md:size-default" disabled>
                   <Plus className="h-4 w-4" />
-                  Add Member
+                  Invite Member
+                  <span className="ml-1 text-[10px] font-normal opacity-60">Coming soon</span>
                 </Button>
               </div>
 
