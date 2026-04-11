@@ -340,46 +340,48 @@ export default function Performance() {
           </div>
 
           {/* Time period pills + Export */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => setPdfOpen(true)}>
-              <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-            <div className="flex gap-1 rounded-full bg-muted/50 p-1">
-              {PERIOD_OPTIONS.map((opt) => (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1 rounded-full bg-muted/50 p-1">
+                {PERIOD_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setPeriod(opt.value)}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      period === opt.value && period !== "custom"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
                 <button
-                  key={opt.value}
-                  onClick={() => setPeriod(opt.value)}
+                  onClick={() => setPeriod("custom")}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    period === opt.value && period !== "custom"
+                    period === "custom"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {opt.label}
+                  Custom
                 </button>
-              ))}
-              <button
-                onClick={() => setPeriod("custom")}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  period === "custom"
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Custom
-              </button>
+              </div>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full" onClick={() => setPdfOpen(true)}>
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Export</span>
+              </Button>
             </div>
 
             {period === "custom" && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customFrom && "text-muted-foreground"
                       )}
                     >
@@ -397,14 +399,14 @@ export default function Performance() {
                     />
                   </PopoverContent>
                 </Popover>
-                <span className="text-xs text-muted-foreground">to</span>
+                <span className="text-sm text-muted-foreground">to</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customTo && "text-muted-foreground"
                       )}
                     >
