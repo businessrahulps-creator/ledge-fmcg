@@ -139,7 +139,7 @@ export default function Dashboard() {
               <Link to="/stock" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
-              {topProducts.map((p) => (
+              {topProducts.map((p, index) => (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
