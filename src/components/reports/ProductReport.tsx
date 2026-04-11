@@ -11,7 +11,7 @@ import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function ProductReport() {
-  const api = useApi();
+  const { companyInfo } = api;
   const orders = api.orders.list();
   const products = api.products.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -195,6 +195,9 @@ export function ProductReport() {
           downloadPdf(
             pdfFilename("product-report"),
             <ReportPdf
+              companyName={companyInfo.name}
+              companyAddress={companyInfo.address}
+              gstin={companyInfo.gstin}
               title="Product Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}
