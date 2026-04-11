@@ -375,6 +375,19 @@ export default function NewOrder() {
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Source Warehouse {(deliveryStatus === "dispatched" || deliveryStatus === "delivered") ? "*" : ""}</Label>
+                  <Select value={selectedGodown} onValueChange={setSelectedGodown}>
+                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                      <SelectValue placeholder="Select warehouse" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {godowns.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dispatch Date</Label>
                   <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-11 rounded-lg md:h-12" />
                 </div>
