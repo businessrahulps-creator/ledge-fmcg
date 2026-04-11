@@ -126,6 +126,14 @@ export default function Performance() {
   const products = api.products.list();
   const stockItems = api.stock.items.list();
 
+  const handleRefresh = useCallback(async () => {
+    await new Promise((r) => setTimeout(r, 600));
+  }, []);
+
+  const { containerRef, pullDistance, refreshing } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   const cutoff = useMemo(() => getCutoffDate(period), [period]);
 
   const filteredOrders = useMemo(
