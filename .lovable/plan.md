@@ -1,27 +1,39 @@
 
 
-# Add Retry Single Mutation Button to Sync Queue
+# Clean Mock Data Files to Type-Only Exports
 
-## Overview
-Add a retry button next to each delete button in the sync queue table, allowing users to manually retry individual failed mutations without waiting for the automatic sync cycle.
+## What we're doing
+Stripping `src/data/mock-data.ts` and `src/data/godown-data.ts` down to only the exports that are actually used across the codebase, removing all hardcoded sample data arrays.
 
 ## Changes
 
-### `src/lib/offline-store.ts`
-- Export a new `replaySingleMutation` async function that:
-  1. Takes a `QueuedMutation`
-  2. Executes the appropriate Supabase call (insert/update/delete) — same logic as the flush loop in DataContext (lines 286-294)
-  3. On success: removes from queue via `removeFromQueue`, returns `{ ok: true }`
-  4. On failure: returns `{ ok: false, error }` (keeps mutation in queue)
+### 1. `src/data/mock-data.ts`
+**Keep:**
+- Interfaces: `Distributor`, `Product`, `Salesperson`, `OrderLine`, `Order`
+- Utility functions: `formatCurrency`, `formatNumber` (pure formatting helpers, no static data)
 
-### `src/pages/Settings.tsx`
-- Import `replaySingleMutation` and `RotateCw` icon from lucide-react
-- Add a retry button (ghost, icon, `h-7 w-7`) with the `RotateCw` icon next to each delete button in the Action column
-- On click: call `replaySingleMutation(m)`, show success/error toast, refresh queue state
-- Wrap both buttons in a `flex gap-1` container
+**Remove:**
+- `salespersons` array
+- `distributors` array
+- `products` array
+- `orders` array
 
-## Technical Notes
-- The replay function imports `supabase` directly from `@/integrations/supabase/client` to keep it self-contained
-- Only works when online — button checks `navigator.onLine` and shows a toast if offline
-- No spinner needed — the operation is fast (single DB call)
+### 2. `src/data/godown-data.ts`
+**Keep:**
+- Interfaces: `GodownLocation`, `StockItem`, `StockDeduction`
+- Type: `StockHealth`
+- Function: `getStockHealth` (pure logic, used in `Stock.tsx`)
+
+**Remove:**
+- `godownLocations` array
+- `stockItems` array
+- `stockDeductions` array
+- `generateSparklineData` function
+- `getGodownStats` function (references removed arrays)
+- `getOverallStats` function (references removed arrays)
+- `getTimeAgo` function
+- `import { products } from "./mock-data"` (top-level import no longer needed)
+
+### 3. Import fixes
+No import changes needed — all consumers already import only types and pure functions that are being retained.
 
