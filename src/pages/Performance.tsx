@@ -292,24 +292,28 @@ export default function Performance() {
       value: formatCurrency(totalRevenue),
       icon: IndianRupee,
       accent: "border-l-emerald-500",
+      change: period !== "custom" ? pctChange(totalRevenue, prevRevenue) : null,
     },
     {
       label: "Orders",
       value: totalOrderCount.toString(),
       icon: ShoppingCart,
       accent: "border-l-blue-500",
+      change: period !== "custom" ? pctChange(totalOrderCount, prevOrderCount) : null,
     },
     {
       label: "Avg Order",
       value: formatCurrency(avgOrderValue),
       icon: TrendingUp,
       accent: "border-l-amber-500",
+      change: period !== "custom" ? pctChange(avgOrderValue, prevAvg) : null,
     },
     {
       label: "Collection",
       value: `${collectionRate.toFixed(0)}%`,
       icon: Percent,
       accent: "border-l-indigo-500",
+      change: period !== "custom" ? pctChange(collectionRate, prevCollection) : null,
     },
   ];
 
