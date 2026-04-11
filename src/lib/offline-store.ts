@@ -82,3 +82,27 @@ export async function removeFromQueue(id: string) {
 export async function clearQueue() {
   await set(QUEUE_KEY, []);
 }
+
+// --- Replay single mutation ---
+
+export async function replaySingleMutation(
+  mutation: QueuedMutation
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  try {
+    let res: any;
+    if (mutation.type === "insert") {
+      res = await supabase.from(mutation.table as any).insert(mutation.payload);
+    } else if (mutation.type === "update") {
+      const { id: rowId, ...rest } = mutation.payload;
+      res = await supabase.from(mutation.table as any).update(rest).eq("id", rowId);
+    } else if (mutation.type === "delete") {
+      res = await supabase.from(mutation.table as any).delete().eq("id", mutation.payload.id);
+    }
+    if (res?.error) throw res.error;
+    await removeFromQueue(mutation.id);
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
