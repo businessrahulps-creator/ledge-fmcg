@@ -1,33 +1,27 @@
 
 
-# Add PDF Export to Performance Page
+# UX Fix: Performance Header Layout
 
-## What
-Add an "Export PDF" button to the Performance page header that opens the existing `ExportPdfModal`, letting users choose which sections to include (KPI summary, top dealers, top products, sales team ranking). The PDF uses the existing `ReportPdf` component with multiple pages/tables.
+## Issue
+The uploaded screenshots show the desired layout:
+1. **Screenshot 1**: Pills and "Custom" button on one row, date pickers ("From" / "To") on a **separate row below** the pills — not inline beside them
+2. **Screenshot 2**: Clean pill bar with generous spacing, the active pill (30D) clearly distinct
 
-## Changes — `src/pages/Performance.tsx`
+Current code puts the Export button, pills, and date pickers all in one `flex-wrap` container, causing cramped inline layout.
 
-1. **Add imports**: `Download` from lucide-react, `ExportPdfModal`/`PdfSection`, `ReportPdf`, `downloadPdf`/`pdfFilename`/`formatCurrencyPdf`.
+## Changes — `src/pages/Performance.tsx` (lines 342-428)
 
-2. **Add state**: `const [pdfOpen, setPdfOpen] = useState(false)`.
+1. **Separate the date pickers from the pill row**: Move the `period === "custom"` date picker block outside and below the pill container, into its own row beneath the pills.
 
-3. **Add Export button** next to the period pills in the header area — a small outline button with a Download icon.
+2. **Move Export button**: Place it after the pills (right side) or keep it where it is but ensure visual separation.
 
-4. **Add `ExportPdfModal`** at bottom of JSX with sections:
-   - `company` — Company header
-   - `summary` — KPI summary cards (Revenue, Orders, Avg Order, Collection)
-   - `dealers` — Top Dealers table
-   - `products` — Top Products table
-   - `salesTeam` — Sales Team Ranking table
+3. **Layout structure**:
+```
+Row 1: [Performance title/subtitle]  [pill bar]  [Export btn]
+Row 2 (conditional): [From picker] to [To picker]   ← only when Custom selected
+```
 
-5. **`onGenerate` callback** builds a `ReportPdf` with:
-   - Title: "Performance Report"
-   - Subtitle: current period label (e.g. "Last 30 Days")
-   - Summary: the 4 KPI values
-   - Table: Top Dealers (primary table — most useful in PDF)
-   - For additional tables (products, sales team), generate a multi-section layout using the existing `ReportPdf` structure
+4. **Date picker styling**: Use `rounded-full` buttons (matching pill aesthetic) with slightly more padding (`h-9 w-[140px]`) and `text-sm` instead of `text-xs` for consistency.
 
-Since `ReportPdf` supports one table per page, the simplest approach is to use the dealers table as the primary table and include KPIs in the summary row. This matches the pattern used across all other reports.
-
-No new files needed — purely follows existing patterns from DistributorReport, PaymentReport, etc.
+This is a layout-only change (~15 lines moved/adjusted), no logic changes.
 
