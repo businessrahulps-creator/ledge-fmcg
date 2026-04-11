@@ -8,6 +8,7 @@ import {
   cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue, clearQueue,
   type CacheableEntity,
 } from "@/lib/offline-store";
+import { sanitizeInput } from "@/utils/sanitize";
 
 export interface AddOrderResult {
   success: boolean;
