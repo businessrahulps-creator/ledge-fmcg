@@ -141,6 +141,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [orderSequence, setOrderSequence] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 
@@ -187,11 +188,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const { data: company } = await supabase
-        .from("companies").select("order_prefix, next_order_sequence").eq("id", cId).single();
+        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin").eq("id", cId).single();
       if (token !== fetchTokenRef.current) return;
       if (company) {
         setOrderPrefixState(company.order_prefix);
         setOrderSequence(company.next_order_sequence);
+        setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "" });
       }
 
       // Override Supabase default 1,000-row limit with .range(0, 9999) on all list queries
@@ -892,6 +894,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         orders, distributors: computedDistributors, salespersons: computedSalespersons,
         products: computedProducts, locations, stockItems, loading, isOfflineData,
+        companyInfo,
         orderPrefix, orderSequence, setOrderPrefix,
         addOrder, updateOrder, deleteOrder,
         addDistributor: distCrud.add, updateDistributor: distCrud.update, deleteDistributor: distCrud.remove,
