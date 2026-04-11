@@ -1,51 +1,43 @@
 
 
-# Add Pagination to Entity Lists (Bug #15)
+# Fix Bug #16: Stale State in safeRefetchStockItems
 
-## Approach
-Client-side pagination over the already-loaded data arrays. DataContext remains unchanged — it already fetches all rows (up to 9,999 via bug #14). Each page component manages its own page state, paginates the filtered results, and resets to page 1 when search/filters change.
+## Problem
+`safeRefetchStockItems` (line 466-487 in DataContext.tsx) joins stock_items with `rawProducts` and `locations` from React state via closure. During rapid updates, these can be stale, causing missing product names, SKUs, and godown names.
 
-This is the correct approach because:
-- Realtime updates refresh full arrays in DataContext — server-side pagination would conflict
-- Datasets in FMCG are typically hundreds, not millions
-- Search/filter already operates on full arrays client-side
+## Fix
+Inside `safeRefetchStockItems`, fetch `products` and `godowns` tables fresh from Supabase alongside `stock_items`, then join using the fresh data. Remove `rawProducts` and `locations` from the dependency array.
 
 ## Changes
 
-### 1. New reusable hook: `src/hooks/use-pagination.ts`
-Simple hook that accepts `totalItems` and `pageSize` (default 10), returns `{ page, totalPages, from, to, setPage, nextPage, prevPage, resetPage }`. Resets page to 1 when totalItems changes.
+**File: `src/context/DataContext.tsx`** — Edit `safeRefetchStockItems` (lines 466-487):
 
-### 2. New component: `src/components/ui/list-pagination.tsx`
-Clean pagination bar using existing `Pagination*` components from `src/components/ui/pagination.tsx`. Shows Previous/Next + up to 5 page number buttons + ellipsis. Mobile-friendly (compact on small screens). Props: `page`, `totalPages`, `onPageChange`.
+1. Add parallel fetches for `products` and `godowns` alongside the existing `stock_items` fetch
+2. Use the freshly fetched products/godowns arrays for the join mapping instead of `rawProducts`/`locations`
+3. Change dependency array to `[companyId]` only
 
-### 3. Update `src/pages/Orders.tsx`
-- Add `usePagination(filtered.length)` after the `filtered` memo
-- Slice `filtered` by `[from, to]` for rendering
-- Reset page when `debouncedSearch`, `paymentFilter`, or `deliveryFilter` change
-- Render `<ListPagination>` after the table/card list, inside the glass-card
+```text
+Before:
+  const { data } = await supabase.from("stock_items")...
+  const prod = rawProducts.find(...)
+  const gd = locations.find(...)
+  }, [companyId, rawProducts, locations]);
 
-### 4. Update `src/pages/Distributors.tsx`
-- Add `usePagination(filtered.length)` after the `filtered` memo
-- Slice `filtered` for the grid render
-- Render `<ListPagination>` after the grid
+After:
+  const [siRes, prodRes, gdRes] = await Promise.all([
+    supabase.from("stock_items").select("*").eq(...)...,
+    supabase.from("products").select("*").eq(...)...,
+    supabase.from("godowns").select("*").eq(...)...,
+  ]);
+  const prods = prodRes.data || [];
+  const gds = gdRes.data || [];
+  // join using prods/gds instead of rawProducts/locations
+  }, [companyId]);
+```
 
-### 5. Update `src/pages/Salespersons.tsx`
-- Same pattern as Distributors
-
-### 6. Update `src/pages/Stock.tsx` (two places)
-- **Products tab**: Paginate `filteredProducts`, render `<ListPagination>` after product table
-- **Warehouse inventory**: Paginate `warehouseInventory`, render `<ListPagination>` after inventory table. Reset page when `selectedWarehouse` changes.
-
-## Files touched
-- `src/hooks/use-pagination.ts` (new)
-- `src/components/ui/list-pagination.tsx` (new)
-- `src/pages/Orders.tsx`
-- `src/pages/Distributors.tsx`
-- `src/pages/Salespersons.tsx`
-- `src/pages/Stock.tsx`
-
-## Not changed
-- DataContext.tsx — no modifications
-- Dashboard, Reports, Settings, NewOrder — untouched
-- All existing UI (cards, tables, search, filters, badges) — preserved exactly
+## Scope
+- Only `safeRefetchStockItems` in DataContext.tsx is modified
+- No UI, no other pages, no other functions changed
+- Realtime subscription unchanged
+- Health badges, totals, all UI identical
 
