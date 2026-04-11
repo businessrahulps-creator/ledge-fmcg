@@ -295,9 +295,13 @@ export default function Salespersons() {
                       profileOrders.forEach((o) => {
                         rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
                       });
+                      const columns = [
+                        { header: "Field", width: "40%" },
+                        { header: "Value", width: "60%" },
+                      ];
                       downloadPdf(
                         pdfFilename("salesperson", profilePerson.name.replace(/\s+/g, "-")),
-                        ReportPdf({ title: profilePerson.name, subtitle: "Team Member Profile", headers: ["Field", "Value"], rows, companyName: "" })
+                        ReportPdf({ title: profilePerson.name, subtitle: "Team Member Profile", columns, rows, companyName: "" })
                       );
                     }}
                   >
