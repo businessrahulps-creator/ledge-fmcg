@@ -514,7 +514,7 @@ export default function Orders() {
                       aria-label="Delete order"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                      <span >{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
+                      <span>{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -528,7 +528,7 @@ export default function Orders() {
                       }}
                     >
                       <FileText className="h-3.5 w-3.5" />
-                      <span >Invoice</span>
+                      <span>Invoice</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -539,16 +539,18 @@ export default function Orders() {
                         const lines = order.lines.map(l => `${l.productName} x${l.quantity}`).join(", ");
                         const msg = `Invoice ${order.orderNumber}\nDealer: ${order.distributorName}\nTotal: ₹${order.total.toLocaleString("en-IN")}\nItems: ${lines}`;
                         const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                        window.open(url, "_blank");
+                        window.open(url, "_blank", "noopener,noreferrer");
                       }}
                     >
                       <Share2 className="h-3.5 w-3.5" />
-                      <span >Share</span>
+                      <span>Share</span>
                     </Button>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
-                    <Button onClick={saveOrder}>Save Changes</Button>
+                    <Button onClick={saveOrder} disabled={isSaving}>
+                      {isSaving ? "Saving…" : "Save Changes"}
+                    </Button>
                   </div>
                 </DialogFooter>
               </>
