@@ -530,7 +530,7 @@ export default function Stock() {
                         {warehouseInventory.map((si) => {
                           const health = getStockHealth(si.quantity, si.threshold);
                           return (
-                            <div key={si.id} onClick={() => setEditStockItem({ ...si })} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer">
+                            <div key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 px-4 py-3 card-hover ${isAccountant ? "" : "cursor-pointer"}`}>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium truncate">{si.productName}</span>
                                 <HealthBadge health={health} />
