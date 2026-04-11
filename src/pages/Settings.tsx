@@ -74,6 +74,18 @@ export default function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
+  const [queuedMutations, setQueuedMutations] = useState<QueuedMutation[]>([]);
+  const [showClearQueueConfirm, setShowClearQueueConfirm] = useState(false);
+
+  useEffect(() => {
+    const loadQueue = async () => {
+      const queue = await getQueue();
+      setQueuedMutations(queue);
+    };
+    loadQueue();
+    const interval = setInterval(loadQueue, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!companyId) return;
