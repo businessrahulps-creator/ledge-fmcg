@@ -86,8 +86,8 @@ export function AppSidebar() {
         <SidebarMenuButton asChild isActive={isActive}>
           <NavLink
             to={item.url}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "border-l-2 border-primary bg-sidebar-accent" : ""}`}
-            activeClassName="text-primary font-medium"
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}
+            activeClassName="text-foreground"
           >
             <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
             {!collapsed && <span>{item.title}</span>}
@@ -119,7 +119,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         {/* Overview section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Overview</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-3 mb-1">Overview</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {overviewNav.map(renderNavItem)}
@@ -129,7 +129,7 @@ export function AppSidebar() {
 
         {/* Manage section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Manage</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-3 mb-1">Manage</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {manageNav.map(renderNavItem)}
@@ -139,7 +139,7 @@ export function AppSidebar() {
 
         {/* Analyze section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Analyze</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-3 mb-1">Analyze</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {analyzeNav.map(renderNavItem)}
@@ -157,8 +157,8 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink
                     to={item.url}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "border-l-2 border-primary bg-sidebar-accent" : ""}`}
-                    activeClassName="text-primary font-medium"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}
+                    activeClassName="text-foreground"
                   >
                     <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                     {!collapsed && <span>{item.title}</span>}
