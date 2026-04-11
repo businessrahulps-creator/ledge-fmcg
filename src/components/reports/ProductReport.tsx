@@ -199,6 +199,7 @@ export function ProductReport() {
               companyName={companyInfo.name}
               companyAddress={companyInfo.address}
               gstin={companyInfo.gstin}
+              logoUrl={companyInfo.logoUrl}
               title="Product Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

@@ -205,6 +205,7 @@ export function PaymentReport() {
               companyName={companyInfo.name}
               companyAddress={companyInfo.address}
               gstin={companyInfo.gstin}
+              logoUrl={companyInfo.logoUrl}
               title="Payment Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

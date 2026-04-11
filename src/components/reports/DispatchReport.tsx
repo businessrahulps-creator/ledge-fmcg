@@ -215,6 +215,7 @@ export function DispatchReport() {
               companyName={companyInfo.name}
               companyAddress={companyInfo.address}
               gstin={companyInfo.gstin}
+              logoUrl={companyInfo.logoUrl}
               title="Dispatch Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

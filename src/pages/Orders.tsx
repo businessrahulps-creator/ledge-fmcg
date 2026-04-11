@@ -510,7 +510,7 @@ export default function Orders() {
                     onClick={() => {
                       downloadPdf(
                         pdfFilename("invoice", selectedOrder.orderNumber),
-                        <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} />
+                        <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} logoUrl={companyInfo.logoUrl} />
                       );
                     }}
                    >
@@ -585,6 +585,7 @@ export default function Orders() {
                 companyName={companyInfo.name}
                 companyAddress={companyInfo.address}
                 gstin={companyInfo.gstin}
+                logoUrl={companyInfo.logoUrl}
                 title="Orders Report"
                 subtitle={`${filtered.length} orders`}
                 showCompany={sel.company}

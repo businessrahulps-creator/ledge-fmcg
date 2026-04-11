@@ -854,6 +854,7 @@ export default function Stock() {
                 companyName={companyInfo.name}
                 companyAddress={companyInfo.address}
                 gstin={companyInfo.gstin}
+                logoUrl={companyInfo.logoUrl}
                 title="Products Report"
                 subtitle={`${filteredProducts.length} products`}
                 showCompany={sel.company}
@@ -897,6 +898,7 @@ export default function Stock() {
                 companyName={companyInfo.name}
                 companyAddress={companyInfo.address}
                 gstin={companyInfo.gstin}
+                logoUrl={companyInfo.logoUrl}
                 title={`Inventory — ${whName}`}
                 subtitle={`${warehouseInventory.length} products`}
                 showCompany={sel.company}

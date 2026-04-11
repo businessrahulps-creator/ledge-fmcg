@@ -185,6 +185,7 @@ export function DistributorReport() {
               companyName={companyInfo.name}
               companyAddress={companyInfo.address}
               gstin={companyInfo.gstin}
+              logoUrl={companyInfo.logoUrl}
               title="Dealer Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

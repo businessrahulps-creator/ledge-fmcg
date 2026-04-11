@@ -186,6 +186,7 @@ export function SalesTeamReport() {
               companyName={companyInfo.name}
               companyAddress={companyInfo.address}
               gstin={companyInfo.gstin}
+              logoUrl={companyInfo.logoUrl}
               title="Sales Team Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}
