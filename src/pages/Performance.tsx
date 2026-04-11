@@ -341,7 +341,7 @@ export default function Performance() {
 
           {/* Time period pills + Export */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               <div className="flex gap-1 rounded-full bg-muted/50 p-1">
                 {PERIOD_OPTIONS.map((opt) => (
                   <button
