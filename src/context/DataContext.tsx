@@ -620,6 +620,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [safeRefetchStockItems]);
+  deductStockRef.current = deductStockForOrder;
 
   // --- Offline-aware CRUD operations ---
 
