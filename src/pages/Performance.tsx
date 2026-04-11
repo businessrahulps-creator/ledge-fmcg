@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
@@ -16,6 +17,7 @@ import {
   Percent,
   Users,
   CalendarIcon,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,6 +41,9 @@ import {
   Bar,
   ReferenceLine,
 } from "recharts";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 
 type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
 
@@ -111,6 +116,7 @@ export default function Performance() {
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
   const [dailyTarget, setDailyTarget] = useState<number>(30000);
+  const [pdfOpen, setPdfOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
@@ -333,8 +339,12 @@ export default function Performance() {
             </p>
           </div>
 
-          {/* Time period pills */}
+          {/* Time period pills + Export */}
           <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => setPdfOpen(true)}>
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
             <div className="flex gap-1 rounded-full bg-muted/50 p-1">
               {PERIOD_OPTIONS.map((opt) => (
                 <button
@@ -772,6 +782,87 @@ export default function Performance() {
           </div>
         )}
       </div>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        title="Export Performance Report"
+        sections={[
+          { id: "company", label: "Company Header" },
+          { id: "summary", label: "KPI Summary" },
+          { id: "dealers", label: "Top Dealers" },
+          { id: "products", label: "Top Products" },
+          { id: "salesTeam", label: "Sales Team Ranking" },
+        ] satisfies PdfSection[]}
+        onGenerate={async (sel) => {
+          const periodLabel =
+            period === "custom"
+              ? customFrom && customTo
+                ? `${format(customFrom, "dd MMM yyyy")} – ${format(customTo, "dd MMM yyyy")}`
+                : "Custom Range"
+              : PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? period;
+
+          const summary = [
+            { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
+            { label: "Orders", value: totalOrderCount.toString() },
+            { label: "Avg Order", value: formatCurrencyPdf(avgOrderValue) },
+            { label: "Collection Rate", value: `${collectionRate.toFixed(0)}%` },
+          ];
+
+          const columns = sel.dealers
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Dealer", width: "52%" },
+                { header: "Revenue", width: "40%", align: "right" as const },
+              ]
+            : sel.products
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Product", width: "52%" },
+                { header: "Qty Sold", width: "40%", align: "right" as const },
+              ]
+            : sel.salesTeam
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Salesperson", width: "52%" },
+                { header: "Revenue", width: "40%", align: "right" as const },
+              ]
+            : [];
+
+          const rows = sel.dealers
+            ? topDealers.map((d, i) => [
+                (i + 1).toString(),
+                d.name,
+                formatCurrencyPdf(d.revenue),
+              ])
+            : sel.products
+            ? productVelocity.map((p, i) => [
+                (i + 1).toString(),
+                p.name,
+                p.qty.toString(),
+              ])
+            : sel.salesTeam
+            ? salesRanking.map((s, i) => [
+                (i + 1).toString(),
+                s.name,
+                formatCurrencyPdf(s.revenue),
+              ])
+            : [];
+
+          const doc = React.createElement(ReportPdf, {
+            title: "Performance Report",
+            subtitle: periodLabel,
+            columns,
+            rows,
+            summary: sel.summary ? summary : [],
+            showCompany: !!sel.company,
+            showSummary: !!sel.summary,
+            showTable: !!(sel.dealers || sel.products || sel.salesTeam),
+          });
+
+          await downloadPdf(pdfFilename("performance", periodLabel.replace(/\s+/g, "_")), doc);
+        }}
+      />
     </AppLayout>
   );
 }
