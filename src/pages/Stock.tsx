@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
@@ -52,6 +53,7 @@ function HealthBadge({ health }: { health: string }) {
 }
 
 export default function Stock() {
+  const { isAccountant } = useAuth();
   const api = useApi();
   const products = api.products.list();
   const addProduct = api.products.create;
@@ -286,10 +288,12 @@ export default function Stock() {
                     className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
                   />
                 </div>
-                <Button onClick={openNewProduct} className="w-full sm:w-auto">
-                  <Plus className="h-4 w-4" />
-                  Add Product
-                </Button>
+                {!isAccountant && (
+                  <Button onClick={openNewProduct} className="w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    Add Product
+                  </Button>
+                )}
               </div>
 
               <div className="glass-card overflow-hidden">
@@ -303,7 +307,7 @@ export default function Stock() {
                         <th className="px-6 py-3 font-medium text-right">Base Price</th>
                         <th className="px-6 py-3 font-medium text-right">Total Sold</th>
                         <th className="px-6 py-3 font-medium text-right">Total Stock</th>
-                        <th className="px-6 py-3 font-medium text-right">Actions</th>
+                        {!isAccountant && <th className="px-6 py-3 font-medium text-right">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -315,16 +319,18 @@ export default function Stock() {
                           <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.basePrice)}</td>
                           <td className="px-6 py-4 text-right text-muted-foreground">{formatNumber(p.totalSold)}</td>
                           <td className="px-6 py-4 text-right font-semibold">{formatNumber(getProductStock(p.id))}</td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </td>
+                          {!isAccountant && (
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -344,14 +350,16 @@ export default function Stock() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-1 shrink-0 ml-2">
-                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      {!isAccountant && (
+                        <div className="flex gap-1 shrink-0 ml-2">
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -361,10 +369,12 @@ export default function Stock() {
                     <Package className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                     <p className="mt-3 text-sm font-medium">No products found</p>
                     <p className="text-xs text-muted-foreground">Add your first product to get started</p>
-                    <Button size="sm" className="mt-3" onClick={openNewProduct}>
-                      <Plus className="h-4 w-4" />
-                      Add Product
-                    </Button>
+                    {!isAccountant && (
+                      <Button size="sm" className="mt-3" onClick={openNewProduct}>
+                        <Plus className="h-4 w-4" />
+                        Add Product
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -378,10 +388,12 @@ export default function Stock() {
                 <p className="text-xs text-muted-foreground md:text-sm">
                   {activeLocations.length} active warehouse{activeLocations.length !== 1 ? "s" : ""}
                 </p>
-                <Button onClick={openNewWarehouse} className="w-full sm:w-auto">
-                  <Plus className="h-4 w-4" />
-                  Add Warehouse
-                </Button>
+                {!isAccountant && (
+                  <Button onClick={openNewWarehouse} className="w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    Add Warehouse
+                  </Button>
+                )}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
@@ -410,14 +422,16 @@ export default function Stock() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-0.5">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        {!isAccountant && (
+                          <div className="flex gap-0.5">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs md:text-sm">
                         <span className="text-muted-foreground">{stats.totalSKUs} products</span>
@@ -469,10 +483,12 @@ export default function Stock() {
                             className="h-10 rounded-lg pl-10 md:max-w-xs"
                           />
                         </div>
-                        <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
-                          <PackagePlus className="h-4 w-4" />
-                          Add Stock
-                        </Button>
+                        {!isAccountant && (
+                          <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
+                            <PackagePlus className="h-4 w-4" />
+                            Add Stock
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -493,7 +509,7 @@ export default function Stock() {
                             {warehouseInventory.map((si) => {
                               const health = getStockHealth(si.quantity, si.threshold);
                               return (
-                                <tr key={si.id} onClick={() => setEditStockItem({ ...si })} className="border-b border-border/50 row-hover cursor-pointer">
+                                <tr key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${isAccountant ? "" : "cursor-pointer"}`}>
                                   <td className="px-6 py-4 font-medium">{si.productName}</td>
                                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{si.sku}</td>
                                   <td className={`px-6 py-4 text-right font-semibold ${health === "critical" ? "text-red-500" : health === "low" ? "text-amber-600" : ""}`}>
@@ -514,7 +530,7 @@ export default function Stock() {
                         {warehouseInventory.map((si) => {
                           const health = getStockHealth(si.quantity, si.threshold);
                           return (
-                            <div key={si.id} onClick={() => setEditStockItem({ ...si })} className="border-b border-border/50 px-4 py-3 card-hover cursor-pointer">
+                            <div key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 px-4 py-3 card-hover ${isAccountant ? "" : "cursor-pointer"}`}>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium truncate">{si.productName}</span>
                                 <HealthBadge health={health} />
@@ -544,6 +560,7 @@ export default function Stock() {
           </TabsContent>
         </Tabs>
 
+        {!isAccountant && (<>
         {/* Add/Edit Product Dialog */}
         <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
@@ -735,6 +752,7 @@ export default function Stock() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </>)}
       </div>
     </AppLayout>
   );

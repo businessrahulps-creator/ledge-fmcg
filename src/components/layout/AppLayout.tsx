@@ -5,6 +5,8 @@ import { useLocation, Link } from "react-router-dom";
 import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
+import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -17,6 +19,7 @@ const allMobileNav = [
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
+  const { userRole } = useAuth();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +45,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              {userRole && (
+                <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
+                  {userRole.replace("_", " ")}
+                </Badge>
+              )}
               <NotificationCenter />
             </div>
           </header>

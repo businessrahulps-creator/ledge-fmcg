@@ -16,6 +16,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   companyId: string | null;
+  userRole: string | null;
+  isAccountant: boolean;
   loading: boolean;
   authReady: boolean;
   signOut: () => Promise<void>;
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authReady, setAuthReady] = useState(false);
   const mountedRef = useRef(true);
@@ -51,10 +54,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId)
         .single();
       if (data && mountedRef.current) setProfile(data as Profile);
-      return data as Profile | null;
     } catch {
       // Profile fetch failure should never affect auth state
-      return null;
+    }
+    // Fetch role
+    try {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
+      if (roleData && mountedRef.current) setUserRole(roleData.role);
+    } catch {
+      if (mountedRef.current) setUserRole(null);
     }
   }, []);
 
@@ -104,12 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setUserRole(null);
   }, []);
 
   return (
     <AuthContext.Provider value={{
       user, session, profile,
       companyId: profile?.company_id ?? null,
+      userRole,
+      isAccountant: userRole === "accountant",
       loading, authReady, signOut, refreshProfile,
     }}>
       {children}
