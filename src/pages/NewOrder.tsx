@@ -157,6 +157,12 @@ export default function NewOrder() {
       return;
     }
 
+    // Require godown if dispatching/delivering
+    if ((deliveryStatus === "dispatched" || deliveryStatus === "delivered") && !selectedGodown) {
+      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
+      return;
+    }
+
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
@@ -188,6 +194,7 @@ export default function NewOrder() {
       driverName,
       deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
       dispatchRemarks: remarks,
+      godownId: selectedGodown || undefined,
     };
 
     const result = await addOrder(order);
