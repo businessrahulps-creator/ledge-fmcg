@@ -470,7 +470,7 @@ export default function Settings() {
 
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Company Name</Label>
-                  <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="h-11 rounded-lg md:h-12" />
+                  <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="h-10 rounded-lg" />
                 </div>
 
                 <div className="space-y-1.5 md:space-y-2">
@@ -484,7 +484,7 @@ export default function Settings() {
                     value={companyGstin}
                     onChange={(e) => setCompanyGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))}
                     maxLength={15}
-                    className="h-11 rounded-lg md:h-12 max-w-[300px] font-mono"
+                    className="h-10 rounded-lg max-w-[300px] font-mono"
                     placeholder="22AAAAA0000A1Z5"
                   />
                   <p className="text-[10px] text-muted-foreground md:text-xs">
@@ -498,7 +498,7 @@ export default function Settings() {
                     value={orderPrefix}
                     onChange={(e) => setOrderPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
                     maxLength={10}
-                    className="h-11 rounded-lg md:h-12 max-w-[200px] font-mono"
+                    className="h-10 rounded-lg max-w-[200px] font-mono"
                     placeholder="ORD"
                   />
                   <p className="text-[10px] text-muted-foreground md:text-xs">
@@ -771,14 +771,14 @@ export default function Settings() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name</Label>
-                  <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} className="h-11 rounded-lg md:h-12" />
+                  <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Email</Label>
                   <Input
                     value={editMember.email}
                     onChange={(e) => setEditMember({ ...editMember, email: e.target.value })}
-                    className="h-11 rounded-lg md:h-12"
+                    className="h-10 rounded-lg"
                     disabled={!isNewMember}
                   />
                   {!isNewMember && <p className="text-[10px] text-muted-foreground">Email cannot be changed after creation</p>}
@@ -788,14 +788,14 @@ export default function Settings() {
                   <Input
                     value={editMember.phone}
                     onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })}
-                    className="h-11 rounded-lg md:h-12"
+                    className="h-10 rounded-lg"
                     placeholder="+91 98765 43210"
                   />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Role</Label>
                   <Select value={editMember.role} onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}>
-                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                    <SelectTrigger className="h-10 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

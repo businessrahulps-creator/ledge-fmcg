@@ -159,7 +159,7 @@ export default function Salespersons() {
             placeholder="Search sales team..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
+            className="h-10 rounded-lg pl-10 md:max-w-md"
           />
         </div>
 
@@ -230,21 +230,21 @@ export default function Salespersons() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name *</Label>
-                  <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Rajesh Kumar" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Rajesh Kumar" className="h-10 rounded-lg" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Phone *</Label>
-                    <Input value={editItem.phone} onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} placeholder="+91 98100 55555" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editItem.phone} onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Region *</Label>
-                    <Input value={editItem.region} onChange={(e) => setEditItem({ ...editItem, region: e.target.value })} placeholder="North" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editItem.region} onChange={(e) => setEditItem({ ...editItem, region: e.target.value })} placeholder="North" className="h-10 rounded-lg" />
                   </div>
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Email</Label>
-                  <Input value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="name@company.com" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="name@company.com" className="h-10 rounded-lg" />
                 </div>
               </div>
               <DialogFooter className="gap-2 sm:gap-0">
