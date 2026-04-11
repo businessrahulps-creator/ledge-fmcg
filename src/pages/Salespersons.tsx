@@ -167,7 +167,7 @@ export default function Salespersons() {
               key={s.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3 }}
+              transition={{ delay: Math.min(i, 8) * 0.05, duration: 0.3 }}
               onClick={() => setProfileId(s.id)}
               className="cursor-pointer glass-card card-hover p-4 md:p-6"
             >
@@ -178,22 +178,22 @@ export default function Salespersons() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold md:text-base">{s.name}</h3>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground md:text-xs">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground md:text-xs">
                       <MapPin className="h-3 w-3" strokeWidth={1.5} />
                       {s.region}
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-0.5 md:gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9" onClick={(e) => openEdit(s, e)}>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive md:h-9 md:w-9" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground md:mt-3 md:text-xs">
+              <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground md:mt-3">
                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs md:mt-4 md:pt-4 md:text-sm">
@@ -281,19 +281,19 @@ export default function Salespersons() {
               <div className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Phone</span>
+                    <span className="text-xs text-muted-foreground">Phone</span>
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Email</span>
+                    <span className="text-xs text-muted-foreground">Email</span>
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Region</span>
+                    <span className="text-xs text-muted-foreground">Region</span>
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Total Value</span>
+                    <span className="text-xs text-muted-foreground">Total Value</span>
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
                   </div>
                 </div>
@@ -329,7 +329,7 @@ export default function Salespersons() {
                               <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
                             </div>
                             <div className="mt-0.5 flex items-center gap-2">
-                              <span className="text-[10px] text-muted-foreground">{o.distributorName}</span>
+                              <span className="text-xs text-muted-foreground">{o.distributorName}</span>
                               <StatusBadge status={o.paymentStatus} />
                             </div>
                           </div>

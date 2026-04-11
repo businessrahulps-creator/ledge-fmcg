@@ -158,7 +158,7 @@ export default function Distributors() {
               key={d.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3 }}
+              transition={{ delay: Math.min(i, 8) * 0.05, duration: 0.3 }}
               onClick={() => setSelectedId(d.id)}
               className="cursor-pointer glass-card card-hover p-4 md:p-6"
             >
@@ -174,11 +174,11 @@ export default function Distributors() {
                     {d.contact}
                   </div>
                 </div>
-                <div className="flex gap-0.5">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => openEdit(d, e)}>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -266,19 +266,19 @@ export default function Distributors() {
                 <div className="space-y-4 md:space-y-6">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Location</span>
+                      <span className="text-xs text-muted-foreground">Location</span>
                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.location}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Contact</span>
+                      <span className="text-xs text-muted-foreground">Contact</span>
                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.contact}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Total Orders</span>
+                      <span className="text-xs text-muted-foreground">Total Orders</span>
                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatNumber(selected.totalOrders)}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-[10px] text-muted-foreground md:text-xs">Total Value</span>
+                      <span className="text-xs text-muted-foreground">Total Value</span>
                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(selected.totalValue)}</p>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ export default function Distributors() {
                                 <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
                               </div>
                               <div className="mt-0.5 flex items-center gap-2">
-                                <span className="text-[10px] text-muted-foreground">{formatIndianDate(o.date)}</span>
+                                <span className="text-xs text-muted-foreground">{formatIndianDate(o.date)}</span>
                                 <StatusBadge status={o.paymentStatus} />
                               </div>
                             </div>
