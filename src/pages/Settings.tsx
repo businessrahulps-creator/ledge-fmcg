@@ -668,10 +668,14 @@ export default function Settings() {
                                     }
                                     const result = await replaySingleMutation(m);
                                     if (result.ok) {
-                                      setRetryStatus(prev => ({ ...prev, [m.id]: "success" }));
+                                      const updated = { ...retryStatus, [m.id]: "success" as const };
+                                      setRetryStatus(updated);
+                                      await saveRetryStatus(updated);
                                       sonnerToast.success("Mutation synced successfully");
                                     } else {
-                                      setRetryStatus(prev => ({ ...prev, [m.id]: "failed" }));
+                                      const updated = { ...retryStatus, [m.id]: "failed" as const };
+                                      setRetryStatus(updated);
+                                      await saveRetryStatus(updated);
                                       const errMsg = "error" in result ? result.error : "Unknown error";
                                       sonnerToast.error("Sync failed", { description: errMsg });
                                     }
