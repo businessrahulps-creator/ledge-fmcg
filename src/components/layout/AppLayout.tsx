@@ -1,13 +1,14 @@
-import { ReactNode, useRef, useEffect } from "react";
+import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { getQueue } from "@/lib/offline-store";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -24,6 +25,29 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+
+  const refreshPendingCount = useCallback(async () => {
+    const q = await getQueue();
+    setPendingCount(q.length);
+  }, []);
+
+  // Poll pending count every 2s when offline
+  useEffect(() => {
+    refreshPendingCount();
+    if (!online) {
+      const id = setInterval(refreshPendingCount, 2000);
+      return () => clearInterval(id);
+    } else if (pendingCount > 0) {
+      setSyncing(true);
+      const timeout = setTimeout(() => {
+        setSyncing(false);
+        setPendingCount(0);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [online, refreshPendingCount]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -57,12 +81,38 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          {!online && (
-            <div className="flex items-center justify-center gap-1.5 bg-amber-500/10 py-1 text-center text-xs text-amber-600 dark:text-amber-400">
-              <WifiOff className="h-3 w-3" />
-              Offline — using cached data
-            </div>
-          )}
+          <AnimatePresence>
+            {(!online || syncing) && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`flex items-center justify-center gap-1.5 py-1 text-center text-xs ${
+                  syncing
+                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                }`}
+              >
+                {syncing ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Syncing changes…
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3" />
+                    Offline — using cached data
+                    {pendingCount > 0 && (
+                      <span className="ml-1 inline-flex items-center rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                        {pendingCount} pending
+                      </span>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0 animate-fade-in">
