@@ -1,50 +1,28 @@
 
 
-# Fix Bug #18: Add Input Sanitization to All Forms
+# Fix Bug #19: Per-Page Error Boundaries
 
 ## Problem
-No text inputs are sanitized before being written to the database, allowing potential HTML/script injection, control characters, and excessive whitespace.
-
-## Approach
-Create a reusable `sanitizeInput` utility and apply it at the data layer (where values are mapped to DB columns), keeping UI and validation unchanged.
+A crash in any page component (e.g. Dashboard, Orders) takes down the entire app including navigation and sidebar.
 
 ## Changes
 
-### 1. Create `src/utils/sanitize.ts`
-New file with a single exported function:
-```typescript
-export function sanitizeInput(value: string): string {
-  return value
-    .replace(/<[^>]*>/g, '')        // strip HTML/script tags
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // strip control chars (keep \t \n \r)
-    .replace(/\s+/g, ' ')           // collapse multiple whitespace
-    .trim();
-}
+### 1. Create `src/components/PageErrorBoundary.tsx`
+A class component similar to the existing `ErrorBoundary` but with a page-scoped fallback that preserves the surrounding layout (sidebar/header). Shows a centered card with an error message and "Reload Page" button. Logs errors to console with `"PageErrorBoundary caught:"` prefix.
+
+### 2. Edit `src/App.tsx` — Wrap 8 protected routes
+Import `PageErrorBoundary` and wrap each page component inside `ProtectedRoute`:
+
+```
+<ProtectedRoute><PageErrorBoundary><Dashboard /></PageErrorBoundary></ProtectedRoute>
 ```
 
-### 2. Edit `src/context/DataContext.tsx` — Sanitize CRUD mappers
-Apply `sanitizeInput` to string fields in each `toDbInsert`/`toDbUpdate` mapper:
+Applied to: Dashboard, Orders, NewOrder, Distributors, Stock, Salespersons, Reports, Settings.
 
-- **Distributors** (lines 762-766): sanitize `name`, `location`, `contact`
-- **Salespersons** (lines 769-773): sanitize `name`, `phone`, `email`, `region`
-- **Products** (lines 776-780): sanitize `name`, `sku`, `unit`
-- **Godowns** (lines 783-787): sanitize `name`, `address`
-
-Apply to **addOrder** (lines 592-608): sanitize `distributor_name`, `salesperson_name`, `vehicle`, `driver_name`, `dispatch_remarks`, and each order line's `product_name`.
-
-Apply to **updateOrder** (lines 649-656): sanitize `vehicle`, `driverName`, `dispatchRemarks` when present in updates.
-
-### 3. Edit `src/pages/Settings.tsx` — Sanitize company & team saves
-- Company save (~line 271): sanitize `companyName`, `companyAddress`, `companyGstin`
-- Order prefix save: sanitize prefix value
-- Team member edit (~line 312): sanitize `editMember.name`, `editMember.phone`
-
-### 4. Edit `src/pages/Stock.tsx` — Sanitize stock item fields if any text inputs exist
-Stock items only have numeric fields (quantity, threshold) — no text sanitization needed.
+The top-level `ErrorBoundary` remains for catastrophic failures. Public routes (login, signup, landing, legal pages) are not wrapped since they're simple and low-risk.
 
 ## Scope
-- New file: `src/utils/sanitize.ts`
-- Modified: `src/context/DataContext.tsx`, `src/pages/Settings.tsx`
-- No UI, validation, or rendering changes
-- All existing behavior preserved
+- New file: `src/components/PageErrorBoundary.tsx`
+- Modified: `src/App.tsx` (import + 8 route wraps)
+- No other files touched
 
