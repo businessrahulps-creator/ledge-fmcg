@@ -118,6 +118,19 @@ export default function Orders() {
     setSelectedOrder(null);
   };
 
+  const handleDeleteOrder = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const ok = await api.orders.delete(deleteTarget.id);
+    setDeleteLoading(false);
+    if (ok) {
+      toast.success("Order deleted", { description: `${deleteTarget.orderNumber} has been deleted.` });
+      setDeleteTarget(null);
+      setDeleteConfirmText("");
+      setSelectedOrder(null);
+    }
+  };
+
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
