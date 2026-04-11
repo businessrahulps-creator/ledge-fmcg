@@ -792,9 +792,11 @@ export default function Performance() {
         sections={[
           { id: "company", label: "Company Header" },
           { id: "summary", label: "KPI Summary" },
-          { id: "dealers", label: "Top Dealers" },
-          { id: "products", label: "Top Products" },
-          { id: "salesTeam", label: "Sales Team Ranking" },
+          { id: "revenueTrend", label: "Revenue Trend (chart)" },
+          { id: "paymentSplit", label: "Payment Split (chart)" },
+          { id: "dealers", label: "Top Dealers (bar chart)" },
+          { id: "products", label: "Top Products (bar chart)" },
+          { id: "salesTeam", label: "Sales Team Ranking (bar chart)" },
         ] satisfies PdfSection[]}
         onGenerate={async (sel) => {
           const periodTag = PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? period;
@@ -810,62 +812,33 @@ export default function Performance() {
             periodLabel = `${periodTag} · ${format(start, "dd MMM yyyy")} – ${format(new Date(), "dd MMM yyyy")}`;
           }
 
-          const summary = [
-            { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
-            { label: "Orders", value: totalOrderCount.toString() },
-            { label: "Avg Order", value: formatCurrencyPdf(avgOrderValue) },
-            { label: "Collection Rate", value: `${collectionRate.toFixed(0)}%` },
-          ];
+          const { companyInfo } = api;
 
-          const columns = sel.dealers
-            ? [
-                { header: "#", width: "8%" },
-                { header: "Dealer", width: "52%" },
-                { header: "Revenue", width: "40%", align: "right" as const },
-              ]
-            : sel.products
-            ? [
-                { header: "#", width: "8%" },
-                { header: "Product", width: "52%" },
-                { header: "Qty Sold", width: "40%", align: "right" as const },
-              ]
-            : sel.salesTeam
-            ? [
-                { header: "#", width: "8%" },
-                { header: "Salesperson", width: "52%" },
-                { header: "Revenue", width: "40%", align: "right" as const },
-              ]
-            : [];
-
-          const rows = sel.dealers
-            ? topDealers.map((d, i) => [
-                (i + 1).toString(),
-                d.name,
-                formatCurrencyPdf(d.revenue),
-              ])
-            : sel.products
-            ? productVelocity.map((p, i) => [
-                (i + 1).toString(),
-                p.name,
-                p.qty.toString(),
-              ])
-            : sel.salesTeam
-            ? salesRanking.map((s, i) => [
-                (i + 1).toString(),
-                s.name,
-                formatCurrencyPdf(s.revenue),
-              ])
-            : [];
-
-          const doc = React.createElement(ReportPdf, {
+          const doc = React.createElement(PerformanceReportPdf, {
             title: "Performance Report",
             subtitle: periodLabel,
-            columns,
-            rows,
-            summary: sel.summary ? summary : [],
-            showCompany: !!sel.company,
-            showSummary: !!sel.summary,
-            showTable: !!(sel.dealers || sel.products || sel.salesTeam),
+            companyName: companyInfo.name,
+            companyAddress: companyInfo.address,
+            gstin: companyInfo.gstin,
+            logoUrl: companyInfo.logoUrl,
+            show: sel,
+            data: {
+              summary: [
+                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
+                { label: "Orders", value: totalOrderCount.toString() },
+                { label: "Avg Order", value: formatCurrencyPdf(avgOrderValue) },
+                { label: "Collection Rate", value: `${collectionRate.toFixed(0)}%` },
+              ],
+              revenueTrend,
+              paymentSplit: paymentSplit.map((p) => ({
+                name: p.name,
+                value: p.value,
+                status: p.name.toLowerCase(),
+              })),
+              topDealers,
+              productVelocity,
+              salesRanking,
+            },
           });
 
           await downloadPdf(pdfFilename("performance", periodLabel.replace(/\s+/g, "_")), doc);

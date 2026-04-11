@@ -54,7 +54,7 @@ function HBar({
 }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-      <Text style={{ fontSize: 8, width: "35%" }} numberOfLines={1}>
+      <Text style={{ fontSize: 8, width: "35%" }}>
         {lbl}
       </Text>
       <View style={{ flex: 1, height: 10, backgroundColor: C.barBg, borderRadius: 2 }}>
