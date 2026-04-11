@@ -480,12 +480,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Stock Items
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!companyId) return;
-    const { data, error } = await supabase.from("stock_items").insert({
+    const { data, error } = await supabase.from("stock_items").upsert({
       company_id: companyId, product_id: si.productId, godown_id: si.godownId,
       quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
-    }).select().single();
+    }, { onConflict: "company_id,product_id,godown_id" }).select().single();
     if (error) { toast.error("Failed to add stock item", { description: error.message }); return; }
-    if (data) setStockItems(prev => [...prev, { ...si, id: data.id }]);
+    if (data) {
+      setStockItems(prev => {
+        const exists = prev.some(x => x.id === data.id);
+        if (exists) return prev.map(x => x.id === data.id ? { ...si, id: data.id } : x);
+        return [...prev, { ...si, id: data.id }];
+      });
+    }
   }, [companyId]);
 
   const updateStockItem = useCallback(async (si: StockItem) => {
