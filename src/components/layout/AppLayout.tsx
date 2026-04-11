@@ -81,12 +81,38 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          {!online && (
-            <div className="flex items-center justify-center gap-1.5 bg-amber-500/10 py-1 text-center text-xs text-amber-600 dark:text-amber-400">
-              <WifiOff className="h-3 w-3" />
-              Offline — using cached data
-            </div>
-          )}
+          <AnimatePresence>
+            {(!online || syncing) && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`flex items-center justify-center gap-1.5 py-1 text-center text-xs ${
+                  syncing
+                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                }`}
+              >
+                {syncing ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Syncing changes…
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3" />
+                    Offline — using cached data
+                    {pendingCount > 0 && (
+                      <span className="ml-1 inline-flex items-center rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                        {pendingCount} pending
+                      </span>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0 animate-fade-in">
