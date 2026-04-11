@@ -107,9 +107,9 @@ export default function Dashboard() {
         <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
           {/* Top Dealers */}
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
-              <Link to="/distributors" className="text-xs text-muted-foreground font-medium">View all</Link>
+              <Link to="/distributors" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.map((d) => (
@@ -133,9 +133,9 @@ export default function Dashboard() {
 
           {/* Top Products */}
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
-              <Link to="/stock" className="text-xs text-muted-foreground font-medium">View all</Link>
+              <Link to="/stock" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.map((p) => (
@@ -160,9 +160,9 @@ export default function Dashboard() {
 
         {/* Recent Orders */}
         <section className="pb-8">
-          <div className="flex items-center justify-between mb-3">
+           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
-            <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
+            <Link to="/orders" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
           </div>
 
           {recentOrders.length === 0 ? (
