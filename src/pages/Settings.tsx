@@ -415,7 +415,7 @@ export default function Settings() {
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     )}
-                    <p className="text-[10px] text-muted-foreground md:text-xs">PNG, JPG up to 2MB</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG up to 2MB</p>
                   </div>
                 </div>
 

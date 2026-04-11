@@ -234,7 +234,7 @@ export default function NewOrder() {
             </p>
           </div>
           <div className="glass-card px-3 py-1.5 rounded-lg shrink-0">
-            <span className="text-[10px] text-muted-foreground md:text-xs font-mono">
+            <span className="text-xs text-muted-foreground font-mono">
               {api.orders.previewNumber()}
             </span>
           </div>
@@ -302,7 +302,7 @@ export default function NewOrder() {
                     >
                       <div className="grid gap-3 sm:grid-cols-12 sm:items-end">
                         <div className="space-y-1 sm:col-span-4">
-                          <Label className="text-[10px] text-muted-foreground md:text-xs">Product</Label>
+                          <Label className="text-xs text-muted-foreground">Product</Label>
                           <Select
                             value={line.productId}
                             onValueChange={(v) => updateLine(line.id, "productId", v)}
@@ -319,7 +319,7 @@ export default function NewOrder() {
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-muted-foreground md:text-xs">Qty</Label>
+                            <Label className="text-xs text-muted-foreground">Qty</Label>
                             <Input
                               type="text"
                               inputMode="numeric"
@@ -330,7 +330,7 @@ export default function NewOrder() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-muted-foreground md:text-xs">Price (₹)</Label>
+                            <Label className="text-xs text-muted-foreground">Price (₹)</Label>
                             <Input
                               type="number"
                               value={line.unitPrice}
@@ -339,7 +339,7 @@ export default function NewOrder() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-muted-foreground md:text-xs">Total</Label>
+                            <Label className="text-xs text-muted-foreground">Total</Label>
                             <div className="flex h-11 items-center rounded-lg border border-border bg-muted/30 px-3 text-xs font-medium md:h-12 md:text-sm">
                               {formatCurrency(getLineTotal(line))}
                             </div>
