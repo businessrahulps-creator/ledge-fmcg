@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
@@ -124,7 +126,7 @@ export default function Distributors() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
-          {filtered.map((d, i) => (
+          {paginatedDealers.map((d, i) => (
             <motion.div
               key={d.id}
               initial={{ opacity: 0, y: 12 }}
@@ -164,6 +166,8 @@ export default function Distributors() {
             </motion.div>
           ))}
         </div>
+
+        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">

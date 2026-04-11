@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/use-debounce";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -111,6 +113,9 @@ export default function Stock() {
       p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase())
   ), [products, debouncedProductSearch]);
 
+  const productsPagination = usePagination(filteredProducts.length);
+  const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
+
   const openNewProduct = () => {
     setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, totalSold: 0 });
     setIsNewProduct(true);
@@ -210,6 +215,9 @@ export default function Stock() {
             si.sku.toLowerCase().includes(debouncedWarehouseSearch.toLowerCase())
         )
     : [], [selectedWarehouse, stockItemsList, debouncedWarehouseSearch]);
+
+  const inventoryPagination = usePagination(warehouseInventory.length);
+  const paginatedInventory = useMemo(() => warehouseInventory.slice(inventoryPagination.from, inventoryPagination.to), [warehouseInventory, inventoryPagination.from, inventoryPagination.to]);
 
   const handleAddStock = () => {
     if (!addStockProductId || !selectedWarehouse) {
@@ -311,7 +319,7 @@ export default function Stock() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProducts.map((p) => (
+                      {paginatedProducts.map((p) => (
                         <tr key={p.id} className="group border-b border-border/50 row-hover">
                           <td className="px-6 py-4 font-medium">{p.name}</td>
                           <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{p.sku}</td>
@@ -338,7 +346,7 @@ export default function Stock() {
                 </div>
 
                 <div className="space-y-0 md:hidden">
-                  {filteredProducts.map((p) => (
+                  {paginatedProducts.map((p) => (
                     <div key={p.id} className="flex items-center justify-between border-b border-border/50 px-4 py-3 card-hover">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{p.name}</p>
@@ -363,6 +371,8 @@ export default function Stock() {
                     </div>
                   ))}
                 </div>
+
+                <ListPagination page={productsPagination.page} totalPages={productsPagination.totalPages} onPageChange={productsPagination.setPage} />
 
                 {filteredProducts.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -506,7 +516,7 @@ export default function Stock() {
                             </tr>
                           </thead>
                           <tbody>
-                            {warehouseInventory.map((si) => {
+                            {paginatedInventory.map((si) => {
                               const health = getStockHealth(si.quantity, si.threshold);
                               return (
                                 <tr key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${isAccountant ? "" : "cursor-pointer"}`}>
@@ -527,7 +537,7 @@ export default function Stock() {
                         </table>
                       </div>
                       <div className="md:hidden">
-                        {warehouseInventory.map((si) => {
+                        {paginatedInventory.map((si) => {
                           const health = getStockHealth(si.quantity, si.threshold);
                           return (
                             <div key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 px-4 py-3 card-hover ${isAccountant ? "" : "cursor-pointer"}`}>
@@ -545,6 +555,7 @@ export default function Stock() {
                           );
                         })}
                       </div>
+                      <ListPagination page={inventoryPagination.page} totalPages={inventoryPagination.totalPages} onPageChange={inventoryPagination.setPage} />
                       {warehouseInventory.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
                           <Package className="h-8 w-8 text-muted-foreground/50" strokeWidth={1.5} />

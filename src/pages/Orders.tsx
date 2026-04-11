@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
@@ -144,6 +146,9 @@ export default function Orders() {
     return matchesSearch && matchesPayment && matchesDelivery;
   }), [orders, debouncedSearch, paymentFilter, deliveryFilter]);
 
+  const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
+  const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
+
   if (isLoading) {
     return <AppLayout><TablePageSkeleton /></AppLayout>;
   }
@@ -217,7 +222,7 @@ export default function Orders() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((order) => (
+                {paginatedOrders.map((order) => (
                   <tr
                     key={order.id}
                     onClick={() => openOrder(order)}
@@ -237,7 +242,7 @@ export default function Orders() {
           </div>
 
           <div className="space-y-0 md:hidden">
-            {filtered.map((order) => (
+            {paginatedOrders.map((order) => (
               <div
                 key={order.id}
                 onClick={() => openOrder(order)}
@@ -257,6 +262,8 @@ export default function Orders() {
               </div>
             ))}
           </div>
+
+          <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
