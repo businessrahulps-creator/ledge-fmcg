@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           gstin: string
           id: string
+          logo_url: string
           name: string
           next_order_sequence: number
           order_prefix: string
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           gstin?: string
           id?: string
+          logo_url?: string
           name: string
           next_order_sequence?: number
           order_prefix?: string
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string
           gstin?: string
           id?: string
+          logo_url?: string
           name?: string
           next_order_sequence?: number
           order_prefix?: string
