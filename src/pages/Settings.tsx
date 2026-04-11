@@ -539,7 +539,7 @@ export default function Settings() {
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Unlimited</p>
                   </div>
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => sonnerToast.info("Billing integration coming soon — contact support")}>
                   Upgrade Plan
                 </Button>
               </div>
