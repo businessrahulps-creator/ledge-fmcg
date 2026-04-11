@@ -118,12 +118,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium">{d.name}</span>
                     <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/40"
+                      className="h-full rounded-full bg-foreground/20 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -144,12 +144,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
                     <span className="text-xs text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/30"
+                      className="h-full rounded-full bg-muted-foreground/20 dark:bg-muted-foreground/30"
                     />
                   </div>
                 </div>
