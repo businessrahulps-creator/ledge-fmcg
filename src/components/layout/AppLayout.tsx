@@ -38,6 +38,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
   const online = useOnlineStatus();
+  const { canInstall, isIOS, isStandalone, dismissed, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
+  const showDesktopInstall = canInstall && !isStandalone && !dismissed && !permanentlyDismissed;
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
 

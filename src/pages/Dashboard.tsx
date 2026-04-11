@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -9,6 +9,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
 import { ListChecks, Plus } from "lucide-react";
+import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -23,6 +24,9 @@ function getGreeting() {
 export default function Dashboard() {
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
+
+  // Track dashboard visits for PWA install prompt milestone
+  useEffect(() => { trackDashboardVisit(); }, []);
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
