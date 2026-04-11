@@ -351,6 +351,7 @@ export default function Orders() {
               <>
                 <DialogHeader>
                   <DialogTitle className="text-base md:text-lg">{selectedOrder.orderNumber}</DialogTitle>
+                  <DialogDescription className="sr-only">View and edit order details</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-5">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
