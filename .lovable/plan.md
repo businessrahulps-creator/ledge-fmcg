@@ -1,75 +1,54 @@
 
 
-# Automated Stock Deduction on Dispatch/Delivery
+# Team Management Persistence in Settings
 
 ## Overview
-When an order's delivery status becomes "dispatched" or "delivered", automatically deduct stock from the selected warehouse and record deductions in `stock_deductions`.
+Replace hardcoded team member list with real data from `profiles` + `user_roles` tables, with full CRUD persisted to the database.
+
+## Approach
+All changes stay within `src/pages/Settings.tsx` — no DataContext changes needed. The team tab will directly query Supabase for profiles joined with user_roles filtered by the current company_id.
 
 ## Changes
 
-### 1. Database migration: Add `godown_id` column to `orders` table
-```sql
-ALTER TABLE orders ADD COLUMN godown_id uuid;
-```
-Nullable for backward compatibility with existing orders.
+### 1. Settings.tsx — Team data loading
+- Replace the hardcoded `useState<TeamMember[]>([...])` with an empty array + a `loadTeam()` function that queries:
+  ```sql
+  SELECT p.id, p.full_name, p.email, p.phone, ur.role, ur.id as role_id
+  FROM profiles p
+  JOIN user_roles ur ON ur.user_id = p.user_id
+  WHERE p.company_id = companyId
+  ```
+- Call `loadTeam()` on mount and after every CRUD operation.
+- Update `TeamMember` interface to include `phone`, `userId`, and `roleId`.
 
-### 2. Update Order type (`src/data/mock-data.ts`)
-Add `godownId?: string` to the `Order` interface.
+### 2. Settings.tsx — Add member (dialog + save)
+- Add a `phone` field to the add/edit dialog.
+- On "Add Member": insert into `profiles` (full_name, email, phone, company_id, user_id = gen_random_uuid()) and then insert into `user_roles` (user_id, role).
+- Note: since we're not doing full auth invitation, we create a profile row with a generated user_id. This is a placeholder approach per spec.
 
-### 3. Update `mapOrders` in DataContext to include `godownId`
-Map `o.godown_id` to `godownId` when reading orders from DB.
+**Wait** — `profiles.user_id` references `auth.users(id)`. We can't insert arbitrary UUIDs. Let me re-check.
 
-### 4. Update `addOrder` in DataContext (`src/context/DataContext.tsx`)
-- Include `godown_id` in the insert statement.
-- After successful order insert, if `deliveryStatus` is "dispatched" or "delivered" AND `godownId` is set:
-  - For each order line, insert into `stock_deductions` and update `stock_items` quantity (subtract).
-  - Check if any stock would go negative — show warning toast but proceed.
-  - Update local `stockItems` state optimistically.
+Actually, looking at the schema, `profiles.user_id` has no FK constraint listed in the schema dump. And `user_roles.user_id` also has no FK listed. So we can insert placeholder UUIDs. But `on_auth_user_created` trigger creates profiles automatically. For team management without auth invitation, we'll create profile + role rows with a generated UUID as `user_id`.
 
-### 5. Update `updateOrder` in DataContext
-- Accept `godownId` in updates and persist `godown_id`.
-- When `deliveryStatus` changes TO "dispatched"/"delivered" (from "pending"):
-  - Need the order's lines and godownId. Fetch from local state.
-  - Perform the same deduction logic (insert `stock_deductions`, update `stock_items`).
-  - Show negative-stock warning toast if applicable.
-- Do NOT re-deduct if order was already dispatched/delivered (check previous status).
+### 3. Settings.tsx — Edit member
+- Update `profiles` row (full_name, phone) and `user_roles` row (role) using the stored IDs.
+- Email is read-only on edit (since it's tied to identity).
 
-### 6. New Order page (`src/pages/NewOrder.tsx`)
-- Add `selectedGodown` state.
-- Add "Source Warehouse" dropdown in the Dispatch Details section, showing only active godowns.
-- Auto-select if only one active godown exists.
-- Require godown selection when delivery status is "dispatched" or "delivered".
-- Pass `godownId` in the order object sent to `addOrder`.
+### 4. Settings.tsx — Delete member  
+- Delete from `user_roles` where `id = roleId`, then delete from `profiles` where `id = profileId`.
+- Cannot delete yourself (super_admin protection already in UI).
 
-### 7. Order detail dialog (`src/pages/Orders.tsx`)
-- Add `editGodown` state, initialized from `selectedOrder.godownId`.
-- Add "Source Warehouse" dropdown in the dialog.
-- Pass `godownId` in the updates to `updateOrder`.
-- The `saveOrder` function needs access to the order's previous delivery status to determine if deduction should happen — compare `selectedOrder.deliveryStatus` with `editDelivery`.
-
-### 8. Expose `deductStockForOrder` helper in DataContext
-A private helper function used by both `addOrder` and `updateOrder`:
-```typescript
-async function deductStockForOrder(
-  orderId: string, lines: OrderLine[], godownId: string, companyId: string
-)
-```
-- For each line: upsert `stock_deductions`, update `stock_items` quantity.
-- Check for negative stock and show warning toast.
-- Update local `stockItems` state.
-
-## What stays untouched
-- Confetti, notifications, realtime subscriptions
-- Health badges, warehouse UI
-- Orders that remain "pending" — no deduction
-- All existing RLS policies (stock_deductions already has correct RLS)
+### 5. No database migration needed
+- All tables and RLS policies already exist and support the required operations.
 
 ## Files changed
 | File | Change |
 |------|--------|
-| Migration SQL | Add `godown_id` column to `orders` |
-| `src/data/mock-data.ts` | Add `godownId?` to Order interface |
-| `src/context/DataContext.tsx` | Add deduction logic in addOrder/updateOrder, map godownId |
-| `src/pages/NewOrder.tsx` | Add Source Warehouse dropdown |
-| `src/pages/Orders.tsx` | Add Source Warehouse dropdown in edit dialog, pass previous status |
+| `src/pages/Settings.tsx` | Replace hardcoded team with Supabase queries, add phone field to dialog, wire CRUD to DB |
+
+## What stays untouched
+- Company tab, Subscription tab — no changes
+- DataContext — no changes needed
+- All other pages and components
+- Existing RLS policies (profiles and user_roles already have correct policies)
 
