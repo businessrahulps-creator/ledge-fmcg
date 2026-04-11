@@ -7,7 +7,7 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
@@ -193,7 +193,7 @@ export function SalesTeamReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
                 { label: "Orders", value: String(totalOrders) },
                 { label: "Members", value: String(data.length) },
               ]}
@@ -203,7 +203,7 @@ export function SalesTeamReport() {
                 { header: "Orders", width: "15%", align: "right" },
                 { header: "Revenue", width: "30%", align: "right" },
               ]}
-              rows={data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrency(s.revenue)])}
+              rows={data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrencyPdf(s.revenue)])}
             />
           );
         }}

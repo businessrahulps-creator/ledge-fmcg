@@ -6,7 +6,7 @@ import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
@@ -206,7 +206,7 @@ export function ProductReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
                 { label: "Units Sold", value: formatNumber(totalQty) },
               ]}
               columns={[
@@ -215,7 +215,7 @@ export function ProductReport() {
                 { header: "Qty Sold", width: "20%", align: "right" },
                 { header: "Revenue", width: "25%", align: "right" },
               ]}
-              rows={data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrency(p.revenue)])}
+              rows={data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrencyPdf(p.revenue)])}
             />
           );
         }}
