@@ -6,8 +6,11 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,6 +93,14 @@ export default function Stock() {
   const [addStockOpen, setAddStockOpen] = useState(false);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
+  const [productsPdfOpen, setProductsPdfOpen] = useState(false);
+  const [inventoryPdfOpen, setInventoryPdfOpen] = useState(false);
+
+  const stockPdfSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Data table" },
+  ];
 
   const inventoryRef = useRef<HTMLDivElement>(null);
 
@@ -324,6 +335,14 @@ export default function Stock() {
                   <Download className="h-4 w-4" />
                   <span className="hidden sm:inline">Export CSV</span>
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => setProductsPdfOpen(true)}
+                >
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export PDF</span>
+                </Button>
               </div>
 
               <div className="glass-card overflow-hidden">
@@ -541,6 +560,14 @@ export default function Stock() {
                           >
                             <Download className="h-4 w-4" />
                             <span className="hidden sm:inline">Export CSV</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="shrink-0"
+                            onClick={() => setInventoryPdfOpen(true)}
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="hidden sm:inline">Export PDF</span>
                           </Button>
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">

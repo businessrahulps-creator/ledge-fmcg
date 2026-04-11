@@ -5,8 +5,12 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
-import { Plus, Search, Filter, Trash2, Download } from "lucide-react";
+import { Plus, Search, Filter, Trash2, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { OrderInvoicePdf } from "@/components/pdf/OrderInvoicePdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,6 +92,13 @@ export default function Orders() {
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+
+  const ordersPdfSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Orders table" },
+  ];
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -193,6 +204,14 @@ export default function Orders() {
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export CSV</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => setPdfModalOpen(true)}
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Export PDF</span>
             </Button>
             <Link to="/orders/new">
               <Button className="w-full sm:w-auto">
@@ -484,6 +503,19 @@ export default function Orders() {
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                     {selectedOrder.deliveryStatus === "delivered" ? "Cannot delete delivered" : "Delete Order"}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      downloadPdf(
+                        pdfFilename("invoice", selectedOrder.orderNumber),
+                        <OrderInvoicePdf order={selectedOrder} />
+                      );
+                    }}
+                  >
+                    <FileText className="mr-1.5 h-3.5 w-3.5" />
+                    Invoice PDF
+                  </Button>
                   <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
                   <Button onClick={saveOrder}>Save Changes</Button>
                 </DialogFooter>
@@ -525,6 +557,47 @@ export default function Orders() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <ExportPdfModal
+          open={pdfModalOpen}
+          onOpenChange={setPdfModalOpen}
+          sections={ordersPdfSections}
+          onGenerate={(sel) => {
+            const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
+            const totalAmount = filtered.reduce((s, o) => s + o.total, 0);
+            downloadPdf(
+              pdfFilename("orders"),
+              <ReportPdf
+                title="Orders Report"
+                subtitle={`${filtered.length} orders`}
+                showCompany={sel.company}
+                showSummary={sel.summary}
+                showTable={sel.table}
+                summary={[
+                  { label: "Total Orders", value: String(filtered.length) },
+                  { label: "Total Amount", value: formatCurrency(totalAmount) },
+                ]}
+                columns={[
+                  { header: "Order #", width: "12%" },
+                  { header: "Date", width: "12%" },
+                  { header: "Dealer", width: "20%" },
+                  { header: "Sales Person", width: "16%" },
+                  { header: "Amount", width: "14%", align: "right" },
+                  { header: "Payment", width: "12%" },
+                  { header: "Delivery", width: "14%" },
+                ]}
+                rows={filtered.map((o) => [
+                  o.orderNumber,
+                  formatIndianDate(o.date),
+                  o.distributorName,
+                  o.salesperson,
+                  formatCurrency(o.total),
+                  o.paymentStatus,
+                  o.deliveryStatus,
+                ])}
+              />
+            );
+          }}
+        />
       </div>
     </AppLayout>
   );
