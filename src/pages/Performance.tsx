@@ -430,6 +430,25 @@ export default function Performance() {
               <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground">
                 {kpi.value}
               </p>
+              {kpi.change !== null && (
+                <div className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${
+                  kpi.change > 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : kpi.change < 0
+                    ? "text-red-500 dark:text-red-400"
+                    : "text-muted-foreground"
+                }`}>
+                  {kpi.change > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : kpi.change < 0 ? (
+                    <TrendingDown className="h-3 w-3" />
+                  ) : null}
+                  <span>
+                    {kpi.change > 0 ? "+" : ""}
+                    {kpi.change.toFixed(0)}% vs prev
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
