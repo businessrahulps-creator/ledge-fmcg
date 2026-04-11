@@ -1,23 +1,29 @@
 
 
-# UX Fix: Time Period Filter Pills
+# Add Revenue Target Line to Performance Chart
 
-## Issue
-The current pills use `rounded-md` with tight spacing and small text (`text-xs`, `px-3 py-1.5`). The screenshot reference shows a cleaner design with:
-- Fully rounded pills (`rounded-full`)
-- More generous padding for better touch targets
-- Slightly larger text for readability
-- Cleaner visual separation between active/inactive states
+## What
+Add a dashed horizontal reference line to the Revenue Trend chart representing a daily revenue target. Include a small inline input above the chart so users can set their own target value.
 
-## Changes
+## Changes — `src/pages/Performance.tsx`
 
-**File: `src/pages/Performance.tsx` (lines 336-359)**
+1. **Import `ReferenceLine`** from recharts (add to existing import on line 28-40).
 
-Update the pill container and button styles:
-- Container: `rounded-full` instead of `rounded-lg`, slightly more padding
-- Buttons: `rounded-full`, `px-4 py-2`, `text-sm` for better touch targets and visual match
-- Active state: keep `bg-primary text-primary-foreground shadow-sm` with `rounded-full`
-- Inactive state: keep `text-muted-foreground hover:text-foreground`
+2. **Add target state** near other state declarations (~line 54):
+   - `const [dailyTarget, setDailyTarget] = useState<number>(30000)` — default ₹30K/day as a sensible FMCG default.
 
-This is a ~5-line CSS-only change, no logic modifications.
+3. **Update chart header** (line 459-461): Add an inline editable target input next to the "Revenue Trend" title — a small `₹` prefixed number input styled to match the card aesthetic.
+
+4. **Add `<ReferenceLine>`** inside the `<AreaChart>` (after the `<Area>` on line 500):
+   ```tsx
+   <ReferenceLine
+     y={dailyTarget}
+     stroke="hsl(var(--destructive))"
+     strokeDasharray="6 4"
+     strokeWidth={1.5}
+     label={{ value: `Target: ${formatCompact(dailyTarget)}`, position: "right", fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+   />
+   ```
+
+This is a small, self-contained change — ~15 lines added, no new files.
 
