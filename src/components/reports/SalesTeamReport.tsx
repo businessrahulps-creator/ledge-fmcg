@@ -172,8 +172,6 @@ export function SalesTeamReport() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
-      </Dialog>
 
       <ExportPdfModal
         open={pdfOpen}
