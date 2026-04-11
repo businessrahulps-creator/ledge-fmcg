@@ -99,7 +99,7 @@ export default function Dashboard() {
               className="glass-card p-5 md:p-7 min-w-0"
             >
               <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
-              <p className="text-xl md:text-3xl font-bold tracking-tight tabular-nums truncate">{kpi.value}</p>
+              <p className="text-lg sm:text-xl md:text-3xl font-bold tracking-tight tabular-nums break-all">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
