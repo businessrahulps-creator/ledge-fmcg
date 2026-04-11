@@ -146,6 +146,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
+  const deductStockRef = useRef<((orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>) | null>(null);
 
   // Clear data when no company
   useEffect(() => {
@@ -402,7 +403,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // Also sync immediately if we're online and there's a queue
     syncQueue();
     return () => { window.removeEventListener("online", handleOnline); };
-  }, [companyId, fetchAll, deductStockForOrder]);
+  }, [companyId, fetchAll]);
 
   // Realtime subscriptions — only after auth ready + companyId
   // Pause when offline, resume when online
