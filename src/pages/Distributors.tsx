@@ -374,6 +374,38 @@ export default function Distributors() {
             )}
           </DialogContent>
         </Dialog>
+
+        <ExportPdfModal
+          open={pdfOpen}
+          onOpenChange={setPdfOpen}
+          title="Export Dealers PDF"
+          sections={[
+            { id: "summary", label: "Summary (total dealers, orders, value)" },
+            { id: "dealerList", label: "Dealer List" },
+          ] satisfies PdfSection[]}
+          onGenerate={async (sel) => {
+            const rows: string[][] = [];
+            if (sel.summary) {
+              rows.push(["Total Dealers", String(filtered.length)]);
+              rows.push(["Total Orders", String(filtered.reduce((s, d) => s + d.totalOrders, 0))]);
+              rows.push(["Total Value", formatCurrency(filtered.reduce((s, d) => s + d.totalValue, 0))]);
+              rows.push(["", ""]);
+            }
+            if (sel.dealerList) {
+              filtered.forEach((d) => {
+                rows.push([d.name, `${d.location} · ${d.contact} · ${d.totalOrders} orders · ${formatCurrency(d.totalValue)}`]);
+              });
+            }
+            const columns = [
+              { header: "Name", width: "35%" },
+              { header: "Details", width: "65%" },
+            ];
+            downloadPdf(
+              pdfFilename("dealers"),
+              ReportPdf({ title: "Dealer Report", subtitle: `${filtered.length} dealers`, columns, rows, companyName: "" })
+            );
+          }}
+        />
       </div>
     </AppLayout>
   );
