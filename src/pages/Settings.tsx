@@ -40,9 +40,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMember {
   id: string;
+  userId: string;
   name: string;
   email: string;
+  phone: string;
   role: "super_admin" | "sales_manager" | "accountant";
+  roleId: string;
 }
 
 const roleLabels: Record<string, string> = {
@@ -56,7 +59,7 @@ export default function Settings() {
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
-  const { signOut, companyId } = useAuth();
+  const { signOut, companyId, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("");
@@ -80,14 +83,62 @@ export default function Settings() {
         }
       });
   }, [companyId]);
-  const [team, setTeam] = useState<TeamMember[]>([
-    { id: "t1", name: "Admin User", email: "admin@acmefmcg.in", role: "super_admin" },
-    { id: "t2", name: "Rajesh Kumar", email: "rajesh@acmefmcg.in", role: "sales_manager" },
-    { id: "t3", name: "Sneha Agarwal", email: "sneha@acmefmcg.in", role: "accountant" },
-  ]);
+
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [teamLoading, setTeamLoading] = useState(true);
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
   const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [isNewMember, setIsNewMember] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const loadTeam = useCallback(async () => {
+    if (!companyId) return;
+    setTeamLoading(true);
+    try {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, user_id, full_name, email, phone")
+        .eq("company_id", companyId);
+
+      if (!profiles || profiles.length === 0) {
+        setTeam([]);
+        setTeamLoading(false);
+        return;
+      }
+
+      const userIds = profiles.map((p) => p.user_id);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("id, user_id, role")
+        .in("user_id", userIds);
+
+      const roleMap = new Map(
+        (roles || []).map((r) => [r.user_id, { roleId: r.id, role: r.role }])
+      );
+
+      const members: TeamMember[] = profiles
+        .filter((p) => roleMap.has(p.user_id))
+        .map((p) => {
+          const r = roleMap.get(p.user_id)!;
+          return {
+            id: p.id,
+            userId: p.user_id,
+            name: p.full_name || "",
+            email: p.email || "",
+            phone: p.phone || "",
+            role: r.role as TeamMember["role"],
+            roleId: r.roleId,
+          };
+        });
+
+      setTeam(members);
+    } catch {
+      // silent
+    }
+    setTeamLoading(false);
+  }, [companyId]);
+
+  useEffect(() => { loadTeam(); }, [loadTeam]);
 
   const handleSaveClick = () => {
     if (orderPrefix !== savedPrefix) {
