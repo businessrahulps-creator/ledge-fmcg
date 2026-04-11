@@ -797,12 +797,18 @@ export default function Performance() {
           { id: "salesTeam", label: "Sales Team Ranking" },
         ] satisfies PdfSection[]}
         onGenerate={async (sel) => {
-          const periodLabel =
-            period === "custom"
-              ? customFrom && customTo
-                ? `${format(customFrom, "dd MMM yyyy")} – ${format(customTo, "dd MMM yyyy")}`
-                : "Custom Range"
-              : PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? period;
+          const periodTag = PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? period;
+          let periodLabel: string;
+          if (period === "custom") {
+            periodLabel = customFrom && customTo
+              ? `${format(customFrom, "dd MMM yyyy")} – ${format(customTo, "dd MMM yyyy")}`
+              : "Custom Range";
+          } else if (period === "today") {
+            periodLabel = `${periodTag} · ${format(new Date(), "dd MMM yyyy")}`;
+          } else {
+            const start = getCutoffDate(period);
+            periodLabel = `${periodTag} · ${format(start, "dd MMM yyyy")} – ${format(new Date(), "dd MMM yyyy")}`;
+          }
 
           const summary = [
             { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
