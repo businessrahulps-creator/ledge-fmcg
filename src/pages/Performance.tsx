@@ -342,7 +342,7 @@ export default function Performance() {
           {/* Time period pills + Export */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-1 rounded-full bg-muted/50 p-1">
+              <div className="flex gap-1 rounded-full bg-muted/50 p-1 whitespace-nowrap shrink-0">
                 {PERIOD_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
