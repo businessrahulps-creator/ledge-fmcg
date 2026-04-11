@@ -1,27 +1,24 @@
 
 
-# UX Fix: Performance Header Layout
+# Fix: Mobile Pill Bar Overflow
 
-## Issue
-The uploaded screenshots show the desired layout:
-1. **Screenshot 1**: Pills and "Custom" button on one row, date pickers ("From" / "To") on a **separate row below** the pills — not inline beside them
-2. **Screenshot 2**: Clean pill bar with generous spacing, the active pill (30D) clearly distinct
+## Problem
+On mobile (390px), the period pill bar shows only "Today" through "YTD" — the "Custom" pill and "Export" button are clipped off-screen with no way to scroll or access them.
 
-Current code puts the Export button, pills, and date pickers all in one `flex-wrap` container, causing cramped inline layout.
+## Solution
+Make the pill container horizontally scrollable on mobile with `overflow-x-auto` and hide the scrollbar for a clean look. Move the Export button below or make it part of the scrollable row.
 
-## Changes — `src/pages/Performance.tsx` (lines 342-428)
+## Changes — `src/pages/Performance.tsx`
 
-1. **Separate the date pickers from the pill row**: Move the `period === "custom"` date picker block outside and below the pill container, into its own row beneath the pills.
+1. **Pill container** (~line 350): Add `overflow-x-auto` and `scrollbar-hide` (or `-webkit-scrollbar` hide via inline style) to the flex row containing the pills + Export button, so the entire row is swipeable on mobile.
 
-2. **Move Export button**: Place it after the pills (right side) or keep it where it is but ensure visual separation.
+2. **Alternatively**, wrap pills in a scrollable div and keep Export outside:
+   ```
+   Row 1: [scrollable: Today | 7D | 30D | 90D | 6M | YTD | Custom]  [Export]
+   ```
+   With `flex-shrink-0` on the Export button so it stays visible, and the pill bar scrolls independently.
 
-3. **Layout structure**:
-```
-Row 1: [Performance title/subtitle]  [pill bar]  [Export btn]
-Row 2 (conditional): [From picker] to [To picker]   ← only when Custom selected
-```
+3. Add `whitespace-nowrap` to prevent pills from wrapping awkwardly at intermediate sizes.
 
-4. **Date picker styling**: Use `rounded-full` buttons (matching pill aesthetic) with slightly more padding (`h-9 w-[140px]`) and `text-sm` instead of `text-xs` for consistency.
-
-This is a layout-only change (~15 lines moved/adjusted), no logic changes.
+This is a ~3-line CSS change, no logic modifications.
 
