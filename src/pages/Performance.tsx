@@ -339,8 +339,12 @@ export default function Performance() {
             </p>
           </div>
 
-          {/* Time period pills */}
+          {/* Time period pills + Export */}
           <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => setPdfOpen(true)}>
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
             <div className="flex gap-1 rounded-full bg-muted/50 p-1">
               {PERIOD_OPTIONS.map((opt) => (
                 <button
