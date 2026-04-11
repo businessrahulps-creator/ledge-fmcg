@@ -37,6 +37,7 @@ import {
   Cell,
   BarChart,
   Bar,
+  ReferenceLine,
 } from "recharts";
 
 type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
@@ -109,6 +110,7 @@ export default function Performance() {
   const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
+  const [dailyTarget, setDailyTarget] = useState<number>(30000);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
@@ -456,9 +458,25 @@ export default function Performance() {
         {/* Charts Row 1: Revenue Trend + Payment Split */}
         <div className="grid gap-4 md:grid-cols-5">
           <div className="glass-card rounded-xl p-4 md:col-span-3">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">
-              Revenue Trend
-            </h3>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">
+                Revenue Trend
+              </h3>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Target</span>
+                <div className="flex items-center rounded-md border border-border bg-background px-2 py-1">
+                  <span className="mr-0.5 text-muted-foreground">₹</span>
+                  <input
+                    type="number"
+                    value={dailyTarget}
+                    onChange={(e) => setDailyTarget(Number(e.target.value) || 0)}
+                    className="w-16 bg-transparent text-xs text-foreground outline-none"
+                    min={0}
+                    step={5000}
+                  />
+                </div>
+              </div>
+            </div>
             {revenueTrend.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={revenueTrend}>
@@ -498,6 +516,20 @@ export default function Performance() {
                     strokeWidth={2}
                     fill="url(#revGrad)"
                   />
+                  {dailyTarget > 0 && (
+                    <ReferenceLine
+                      y={dailyTarget}
+                      stroke="hsl(var(--destructive))"
+                      strokeDasharray="6 4"
+                      strokeWidth={1.5}
+                      label={{
+                        value: `Target: ${formatCompact(dailyTarget)}`,
+                        position: "right",
+                        fontSize: 11,
+                        fill: "hsl(var(--muted-foreground))",
+                      }}
+                    />
+                  )}
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
