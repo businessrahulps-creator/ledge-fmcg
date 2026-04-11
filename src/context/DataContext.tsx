@@ -141,17 +141,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (token !== fetchTokenRef.current) return;
 
         const dists: Distributor[] = (distRes.data || []).map(d => ({
-          id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: 0, totalValue: 0,
+          id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
         }));
         setDistributors(dists);
 
         const sps: Salesperson[] = (spRes.data || []).map(s => ({
-          id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: 0, totalValue: 0,
+          id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0),
         }));
         setSalespersons(sps);
 
         const prods: Product[] = (prodRes.data || []).map(p => ({
-          id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: 0,
+          id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: (p as any).total_sold ?? 0,
         }));
         setProducts(prods);
 
@@ -251,7 +251,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!companyId) return;
     try {
       const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId);
-      if (data) setDistributors(data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: 0, totalValue: 0 })));
+      if (data) setDistributors(data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0) })));
     } catch { /* ignore */ }
   }, [companyId]);
 
@@ -259,7 +259,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!companyId) return;
     try {
       const { data } = await supabase.from("salespersons").select("*").eq("company_id", companyId);
-      if (data) setSalespersons(data.map(s => ({ id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: 0, totalValue: 0 })));
+      if (data) setSalespersons(data.map(s => ({ id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0) })));
     } catch { /* ignore */ }
   }, [companyId]);
 
@@ -267,7 +267,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!companyId) return;
     try {
       const { data } = await supabase.from("products").select("*").eq("company_id", companyId);
-      if (data) setProducts(data.map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: 0 })));
+      if (data) setProducts(data.map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: (p as any).total_sold ?? 0 })));
     } catch { /* ignore */ }
   }, [companyId]);
 
