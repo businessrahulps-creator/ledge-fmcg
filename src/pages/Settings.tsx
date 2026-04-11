@@ -112,7 +112,7 @@ export default function Settings() {
         .select("id, user_id, role")
         .in("user_id", userIds);
 
-      const roleMap = new Map(
+      const roleMap = new Map<string, { roleId: string; role: string }>(
         (roles || []).map((r) => [r.user_id, { roleId: r.id, role: r.role }])
       );
 
