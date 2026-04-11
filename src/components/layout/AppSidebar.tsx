@@ -72,20 +72,23 @@ export function AppSidebar() {
     return () => { supabase.removeChannel(channel); };
   }, [companyId]);
 
-  const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => (
-    <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild isActive={location.pathname.startsWith(item.url)}>
-        <NavLink
-          to={item.url}
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent"
-          activeClassName="bg-sidebar-accent text-primary font-medium"
-        >
-          <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-          {!collapsed && <span>{item.title}</span>}
-        </NavLink>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
-  );
+  const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
+    const isActive = location.pathname.startsWith(item.url);
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild isActive={isActive}>
+          <NavLink
+            to={item.url}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "border-l-2 border-primary bg-sidebar-accent" : ""}`}
+            activeClassName="text-primary font-medium"
+          >
+            <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+            {!collapsed && <span>{item.title}</span>}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-card">
@@ -93,10 +96,14 @@ export function AppSidebar() {
         <Link to="/dashboard" className="flex items-center gap-3">
           {logoUrl ? (
             <img src={logoUrl} alt="Company logo" className="h-7 w-7 rounded-md object-cover shrink-0" />
-          ) : null}
-          {collapsed ? (
-            !logoUrl && <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">L</span>
           ) : (
+            collapsed ? (
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary shrink-0">
+                L
+              </span>
+            ) : null
+          )}
+          {!collapsed && (
             <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
           )}
         </Link>
@@ -114,20 +121,23 @@ export function AppSidebar() {
 
       <SidebarFooter className="px-2 pb-4">
         <SidebarMenu>
-          {bottomNav.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <NavLink
-                  to={item.url}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent"
-                  activeClassName="bg-sidebar-accent text-primary font-medium"
-                >
-                  <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-                  {!collapsed && <span>{item.title}</span>}
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {bottomNav.map((item) => {
+            const isActive = location.pathname.startsWith(item.url);
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to={item.url}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "border-l-2 border-primary bg-sidebar-accent" : ""}`}
+                    activeClassName="text-primary font-medium"
+                  >
+                    <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                    {!collapsed && <span>{item.title}</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
