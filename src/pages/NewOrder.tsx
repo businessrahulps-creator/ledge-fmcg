@@ -250,7 +250,7 @@ export default function NewOrder() {
               <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className="h-11 rounded-lg md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
@@ -268,7 +268,7 @@ export default function NewOrder() {
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Sales Person</Label>
                   <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
-                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                    <SelectTrigger className="h-10 rounded-lg md:h-12">
                       <SelectValue placeholder="Select sales person" />
                     </SelectTrigger>
                     <SelectContent>
@@ -309,7 +309,7 @@ export default function NewOrder() {
                             value={line.productId}
                             onValueChange={(v) => updateLine(line.id, "productId", v)}
                           >
-                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-11 rounded-lg md:h-12">
+                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-10 rounded-lg md:h-12">
                               <SelectValue placeholder="Select product" />
                             </SelectTrigger>
                             <SelectContent>
@@ -328,7 +328,7 @@ export default function NewOrder() {
                               value={line.quantityStr}
                               onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
                               onBlur={() => handleQuantityBlur(line.id)}
-                              className="h-11 rounded-lg md:h-12"
+                              className="h-10 rounded-lg md:h-12"
                             />
                           </div>
                           <div className="space-y-1">
@@ -337,7 +337,7 @@ export default function NewOrder() {
                               type="number"
                               value={line.unitPrice}
                               onChange={(e) => updateLine(line.id, "unitPrice", parseFloat(e.target.value) || 0)}
-                              className="h-11 rounded-lg md:h-12"
+                              className="h-10 rounded-lg md:h-12"
                             />
                           </div>
                           <div className="space-y-1">
@@ -379,7 +379,7 @@ export default function NewOrder() {
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Source Warehouse {(deliveryStatus === "dispatched" || deliveryStatus === "delivered") ? "*" : ""}</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
-                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                    <SelectTrigger className="h-10 rounded-lg md:h-12">
                       <SelectValue placeholder="Select warehouse" />
                     </SelectTrigger>
                     <SelectContent>
@@ -391,15 +391,15 @@ export default function NewOrder() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dispatch Date</Label>
-                  <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-11 rounded-lg md:h-12" />
+                  <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
-                  <Input placeholder="e.g. MH-01-AB-1234" value={vehicle} onChange={(e) => setVehicle(e.target.value)} className="h-11 rounded-lg md:h-12" />
+                  <Input placeholder="e.g. MH-01-AB-1234" value={vehicle} onChange={(e) => setVehicle(e.target.value)} className="h-10 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Driver Name</Label>
-                  <Input placeholder="Optional" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="h-11 rounded-lg md:h-12" />
+                  <Input placeholder="Optional" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="h-10 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Delivery Status</Label>

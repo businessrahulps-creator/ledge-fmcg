@@ -451,7 +451,7 @@ export default function Orders() {
                     <div className="space-y-1.5">
                       <Label className="text-xs md:text-sm">Source Warehouse {(editDelivery === "dispatched" || editDelivery === "delivered") ? "*" : ""}</Label>
                       <Select value={editGodown} onValueChange={setEditGodown}>
-                        <SelectTrigger className="h-11 rounded-lg md:h-12">
+                        <SelectTrigger className="h-10 rounded-lg">
                           <SelectValue placeholder="Select warehouse" />
                         </SelectTrigger>
                         <SelectContent>
