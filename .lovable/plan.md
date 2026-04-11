@@ -1,28 +1,25 @@
 
 
-# Fix Chart Colors to Match Design System
+# Add Date Range Subtitle to Performance PDF
 
 ## Problem
-The Performance page charts use ad-hoc colors that clash with the Ledge design system:
-- **Product Velocity**: `hsl(38, 92%, 50%)` — bright orange/amber
-- **Sales Team Ranking**: `hsl(262, 83%, 58%)` — bright purple/violet
-- **Payment Split**: raw green/amber/red HSL values instead of design tokens
-
-The design system uses a navy primary (`--primary: 224 55% 22%`), with semantic tokens for success, warning, and destructive states.
+The PDF subtitle currently shows only the period label (e.g. "30D", "7D", "YTD"). It should show the actual date range like "01 Apr 2026 – 11 Apr 2026" so the printed report is self-documenting.
 
 ## Changes — `src/pages/Performance.tsx`
 
-1. **Payment Split colors** (line 100-104): Replace raw HSL with design tokens:
-   - `paid` → `hsl(var(--success))` (emerald)
-   - `partial` → `hsl(var(--warning))` (amber)
-   - `pending` → `hsl(var(--destructive))` (red)
+**Single change in the `onGenerate` callback (~line 800-805):**
 
-2. **Product Velocity bar** (line 699): Replace `hsl(38, 92%, 50%)` with `hsl(var(--primary))` — consistent navy blue matching Top Dealers chart.
+Replace the `periodLabel` logic to always compute and show the actual date range, regardless of whether the period is "custom" or a preset:
 
-3. **Sales Team Ranking bar** (line 743): Replace `hsl(262, 83%, 58%)` with `hsl(var(--primary))` — same navy blue for visual consistency across all bar charts.
+- For **custom**: keep existing `format(customFrom) – format(customTo)` logic
+- For **presets** (today, 7d, 30d, etc.): use `getCutoffDate(period)` to compute the start date and `new Date()` as the end date, then format as `"30D · 12 Mar 2026 – 11 Apr 2026"`
 
-4. **Top Dealers bar** (line 646): Already uses `hsl(var(--primary))` — no change needed.
+This gives the PDF subtitle like:
+- `"Today · 11 Apr 2026"`
+- `"7D · 04 Apr 2026 – 11 Apr 2026"`
+- `"01 Mar 2026 – 11 Apr 2026"` (custom)
 
-## Result
-All bar charts use the primary navy color; the donut chart uses semantic success/warning/destructive tokens. Unified, clean look matching the rest of the app.
+The `getCutoffDate` function already exists at line 59 and computes the exact cutoff for each period — we just reuse it.
+
+No new files, no logic changes to filtering. ~5 lines modified in the `onGenerate` callback.
 
