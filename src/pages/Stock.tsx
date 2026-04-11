@@ -422,14 +422,16 @@ export default function Stock() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-0.5">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        {!isAccountant && (
+                          <div className="flex gap-0.5">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs md:text-sm">
                         <span className="text-muted-foreground">{stats.totalSKUs} products</span>
