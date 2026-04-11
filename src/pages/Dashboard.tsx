@@ -200,7 +200,7 @@ export default function Dashboard() {
               <div className="hidden md:block glass-card overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                     <tr className="border-b border-border bg-muted/40 text-left text-xs text-muted-foreground">
+                     <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
                        <th className="px-6 py-3 font-semibold">Order</th>
                        <th className="px-6 py-3 font-semibold">Dealer</th>
                        <th className="px-6 py-3 font-semibold">Date</th>
