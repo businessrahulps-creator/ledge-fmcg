@@ -8,6 +8,7 @@ import {
   cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue, clearQueue,
   type CacheableEntity,
 } from "@/lib/offline-store";
+import { sanitizeInput } from "@/utils/sanitize";
 
 export interface AddOrderResult {
   success: boolean;
@@ -594,17 +595,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         order_number: orderNumber,
         date: order.date,
         distributor_id: order.distributorId,
-        distributor_name: order.distributorName,
+        distributor_name: sanitizeInput(order.distributorName),
         salesperson_id: order.salespersonId,
-        salesperson_name: order.salesperson,
+        salesperson_name: sanitizeInput(order.salesperson),
         total: order.total,
         payment_mode: order.paymentMode,
         payment_status: order.paymentStatus,
         dispatch_date: order.dispatchDate || null,
-        vehicle: order.vehicle,
-        driver_name: order.driverName,
+        vehicle: sanitizeInput(order.vehicle),
+        driver_name: sanitizeInput(order.driverName),
         delivery_status: order.deliveryStatus,
-        dispatch_remarks: order.dispatchRemarks,
+        dispatch_remarks: sanitizeInput(order.dispatchRemarks),
         godown_id: order.godownId || null,
       }).select().single();
 
@@ -617,7 +618,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           order.lines.map(l => ({
             order_id: inserted.id,
             product_id: l.productId,
-            product_name: l.productName,
+            product_name: sanitizeInput(l.productName),
             quantity: l.quantity,
             unit_price: l.unitPrice,
             line_total: l.lineTotal,
@@ -651,9 +652,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.paymentStatus !== undefined) dbUpdates.payment_status = updates.paymentStatus;
     if (updates.deliveryStatus !== undefined) dbUpdates.delivery_status = updates.deliveryStatus;
     if (updates.dispatchDate !== undefined) dbUpdates.dispatch_date = updates.dispatchDate;
-    if (updates.vehicle !== undefined) dbUpdates.vehicle = updates.vehicle;
-    if (updates.driverName !== undefined) dbUpdates.driver_name = updates.driverName;
-    if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = updates.dispatchRemarks;
+    if (updates.vehicle !== undefined) dbUpdates.vehicle = sanitizeInput(updates.vehicle);
+    if (updates.driverName !== undefined) dbUpdates.driver_name = sanitizeInput(updates.driverName);
+    if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = sanitizeInput(updates.dispatchRemarks);
     if (updates.godownId !== undefined) dbUpdates.godown_id = updates.godownId || null;
 
     // Offline: optimistic + queue
@@ -761,29 +762,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const distCrud = useMemo(() => makeOfflineCrud<Distributor>(
     "distributors", setDistributors,
-    d => ({ name: d.name, location: d.location, contact: d.contact }),
-    d => ({ name: d.name, location: d.location, contact: d.contact }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
   ), [companyId]);
 
   // Salespersons
   const spCrud = useMemo(() => makeOfflineCrud<Salesperson>(
     "salespersons", setSalespersons,
-    s => ({ name: s.name, phone: s.phone, email: s.email, region: s.region }),
-    s => ({ name: s.name, phone: s.phone, email: s.email, region: s.region }),
+    s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
+    s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
   ), [companyId]);
 
   // Products
   const prodCrud = useMemo(() => makeOfflineCrud<Product>(
     "products", setProducts,
-    p => ({ name: p.name, sku: p.sku, unit: p.unit, base_price: p.basePrice }),
-    p => ({ name: p.name, sku: p.sku, unit: p.unit, base_price: p.basePrice }),
+    p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
+    p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
   ), [companyId]);
 
   // Locations (Godowns)
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
     "godowns", setLocations,
-    l => ({ name: l.name, address: l.address, is_active: l.isActive }),
-    l => ({ name: l.name, address: l.address, is_active: l.isActive }),
+    l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
+    l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
   ), [companyId]);
 
   // Stock Items — special (upsert)

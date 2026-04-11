@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { sanitizeInput } from "@/utils/sanitize";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -263,12 +264,12 @@ export default function Settings() {
 
   const saveCompany = async () => {
     if (orderPrefix !== savedPrefix) {
-      api.orders.setPrefix(orderPrefix);
+      api.orders.setPrefix(sanitizeInput(orderPrefix));
     }
     if (companyId) {
       const { error } = await supabase
         .from("companies")
-        .update({ name: companyName, address: companyAddress, gstin: companyGstin })
+        .update({ name: sanitizeInput(companyName), address: sanitizeInput(companyAddress), gstin: sanitizeInput(companyGstin) })
         .eq("id", companyId);
       if (error) {
         toast({ title: "Error saving", description: error.message, variant: "destructive" });
@@ -291,9 +292,9 @@ export default function Settings() {
         const newUserId = crypto.randomUUID();
         const { error: profileError } = await supabase.from("profiles").insert({
           user_id: newUserId,
-          full_name: editMember.name,
-          email: editMember.email,
-          phone: editMember.phone,
+          full_name: sanitizeInput(editMember.name),
+          email: sanitizeInput(editMember.email),
+          phone: sanitizeInput(editMember.phone),
           company_id: companyId,
         });
         if (profileError) throw profileError;
@@ -309,7 +310,7 @@ export default function Settings() {
       } else {
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ full_name: editMember.name, phone: editMember.phone })
+          .update({ full_name: sanitizeInput(editMember.name), phone: sanitizeInput(editMember.phone) })
           .eq("id", editMember.id);
         if (profileError) throw profileError;
 
