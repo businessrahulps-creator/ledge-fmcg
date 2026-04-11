@@ -402,7 +402,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // Also sync immediately if we're online and there's a queue
     syncQueue();
     return () => { window.removeEventListener("online", handleOnline); };
-  }, [companyId, fetchAll]);
+  }, [companyId, fetchAll, deductStockForOrder]);
 
   // Realtime subscriptions — only after auth ready + companyId
   // Pause when offline, resume when online
