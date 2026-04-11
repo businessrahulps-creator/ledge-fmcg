@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -72,11 +72,13 @@ export default function Settings() {
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
+
   useEffect(() => {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url")
+      .select("name, address, gstin, logo_url, trial_ends_at")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -85,8 +87,24 @@ export default function Settings() {
           setCompanyAddress(data.address || "");
           setCompanyGstin(data.gstin || "");
           setLogoUrl(data.logo_url || "");
+          if (data.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
         }
       });
+
+    // Realtime subscription for trial updates
+    const channel = supabase
+      .channel(`company-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "companies", filter: `id=eq.${companyId}` },
+        (payload) => {
+          const d = payload.new as any;
+          if (d.trial_ends_at) setTrialEndsAt(new Date(d.trial_ends_at));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [companyId]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,7 +320,17 @@ export default function Settings() {
     setSaving(false);
   };
 
-  const trialDaysLeft = 11;
+  const trialDaysLeft = useMemo(() => {
+    if (!trialEndsAt) return 0;
+    return Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000));
+  }, [trialEndsAt]);
+
+  const trialExpired = trialDaysLeft === 0;
+  const trialProgressPercent = Math.max(0, Math.min(100, (trialDaysLeft / 30) * 100));
+  const trialProgressColor = trialExpired ? "bg-destructive" : trialDaysLeft <= 3 ? "bg-destructive" : trialDaysLeft <= 7 ? "bg-warning" : "bg-success";
+  const trialEndFormatted = trialEndsAt
+    ? trialEndsAt.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })
+    : "—";
 
   return (
     <AppLayout>
@@ -462,19 +490,29 @@ export default function Settings() {
           {/* Subscription Tab */}
           <TabsContent value="subscription">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 md:p-6">
+              <div className={`rounded-xl border p-4 md:p-6 ${trialExpired ? "border-destructive/30 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
                 <div className="flex items-center gap-3">
-                  <Crown className="h-5 w-5 text-primary md:h-6 md:w-6" strokeWidth={1.5} />
+                  {trialExpired ? (
+                    <AlertTriangle className="h-5 w-5 text-destructive md:h-6 md:w-6" strokeWidth={1.5} />
+                  ) : (
+                    <Crown className="h-5 w-5 text-primary md:h-6 md:w-6" strokeWidth={1.5} />
+                  )}
                   <div>
-                    <h3 className="text-sm font-semibold md:text-base">Free Trial</h3>
-                    <p className="text-xs text-muted-foreground md:text-sm">{trialDaysLeft} days remaining</p>
+                    <h3 className="text-sm font-semibold md:text-base">
+                      {trialExpired ? "Trial Expired" : "Free Trial"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground md:text-sm">
+                      {trialExpired ? "Your free trial has ended" : `${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-3 h-2 w-full rounded-full bg-muted md:mt-4">
-                  <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${((14 - trialDaysLeft) / 14) * 100}%` }} />
+                  <div className={`h-2 rounded-full ${trialProgressColor} transition-all`} style={{ width: `${trialProgressPercent}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground md:mt-3 md:text-sm">
-                  Your 14-day free trial is active. All features are unlocked.
+                  {trialExpired
+                    ? "Upgrade to a paid plan to continue using all features."
+                    : "Your 30-day free trial is active. All features are unlocked."}
                 </p>
               </div>
 
@@ -486,11 +524,11 @@ export default function Settings() {
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Current Plan</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Free Trial</p>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{trialExpired ? "Trial Expired" : "Free Trial"}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Trial Ends</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">April 11, 2026</p>
+                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{trialEndFormatted}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Team Members</span>
@@ -501,7 +539,7 @@ export default function Settings() {
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Unlimited</p>
                   </div>
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => sonnerToast.info("Billing integration coming soon — contact support")}>
                   Upgrade Plan
                 </Button>
               </div>

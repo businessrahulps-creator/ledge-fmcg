@@ -24,6 +24,7 @@ export type Database = {
           name: string
           next_order_sequence: number
           order_prefix: string
+          trial_ends_at: string | null
           updated_at: string
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           name: string
           next_order_sequence?: number
           order_prefix?: string
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -46,6 +48,7 @@ export type Database = {
           name?: string
           next_order_sequence?: number
           order_prefix?: string
+          trial_ends_at?: string | null
           updated_at?: string
         }
         Relationships: []
