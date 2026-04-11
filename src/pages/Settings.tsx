@@ -93,7 +93,7 @@ export default function Settings() {
 
     // Realtime subscription for trial updates
     const channel = supabase
-      .channel(`company-${companyId}`)
+      .channel(`settings-trial-${companyId}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "companies", filter: `id=eq.${companyId}` },
