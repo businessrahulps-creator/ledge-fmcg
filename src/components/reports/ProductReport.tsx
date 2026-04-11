@@ -53,6 +53,28 @@ export function ProductReport() {
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
         </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("product-report"),
+                ["Product", "SKU", "Qty Sold", "Revenue"],
+                data.map((p) => [p.name, p.sku, String(p.qtySold), formatCurrency(p.revenue)])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+        </div>
+      </div>
+          <span className="whitespace-nowrap text-muted-foreground">
+            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
+          </span>
+          <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
+        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">

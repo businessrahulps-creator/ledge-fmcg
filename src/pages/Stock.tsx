@@ -303,6 +303,27 @@ export default function Stock() {
                     Add Product
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    exportCsv(
+                      csvFilename("products"),
+                      ["Product Name", "SKU", "Unit", "Base Price", "Total Sold", "Total Stock"],
+                      filteredProducts.map((p) => [
+                        p.name,
+                        p.sku,
+                        p.unit,
+                        formatCurrency(p.basePrice),
+                        String(p.totalSold),
+                        String(getProductStock(p.id)),
+                      ])
+                    );
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                </Button>
               </div>
 
               <div className="glass-card overflow-hidden">

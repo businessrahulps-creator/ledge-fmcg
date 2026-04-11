@@ -40,6 +40,29 @@ export function SalesTeamReport() {
           <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
           <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
         </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("sales-team-report"),
+                ["Name", "Region", "Phone", "Orders", "Revenue"],
+                data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+        </div>
+      </div>
+          <span className="whitespace-nowrap text-muted-foreground">
+            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
+          </span>
+          <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
+          <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
+        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">

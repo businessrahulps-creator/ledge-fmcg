@@ -39,6 +39,29 @@ export function DistributorReport() {
           <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
           <span className="whitespace-nowrap text-muted-foreground">{data.length} dealers</span>
         </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("dealer-report"),
+                ["Dealer", "Location", "Contact", "Orders", "Revenue"],
+                data.map((d) => [d.name, d.location, d.contact, String(d.orderCount), formatCurrency(d.revenue)])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+        </div>
+      </div>
+          <span className="whitespace-nowrap text-muted-foreground">
+            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
+          </span>
+          <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
+          <span className="whitespace-nowrap text-muted-foreground">{data.length} dealers</span>
+        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">

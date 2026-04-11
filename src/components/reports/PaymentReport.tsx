@@ -38,6 +38,29 @@ export function PaymentReport() {
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
         </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("payment-report"),
+                ["Order", "Dealer", "Date", "Amount", "Payment Status", "Payment Mode"],
+                filtered.map((o) => [
+                  o.orderNumber,
+                  o.distributorName,
+                  formatIndianDate(o.date),
+                  formatCurrency(o.total),
+                  o.paymentStatus,
+                  o.paymentMode.replace("_", " "),
+                ])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
