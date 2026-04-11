@@ -5,6 +5,8 @@ import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatCurrency } from "@/data/mock-data";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
@@ -13,7 +15,15 @@ import {
   ShoppingCart,
   Percent,
   Users,
+  CalendarIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   AreaChart,
   Area,
@@ -29,7 +39,7 @@ import {
   Bar,
 } from "recharts";
 
-type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd";
+type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
 
 const PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
   { value: "today", label: "Today" },
@@ -85,7 +95,8 @@ export default function Performance() {
   const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
-
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
+  const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
@@ -98,9 +109,18 @@ export default function Performance() {
     () =>
       orders.filter((o) => {
         const d = new Date(o.date + "T00:00:00");
+        if (period === "custom") {
+          if (customFrom && d < customFrom) return false;
+          if (customTo) {
+            const end = new Date(customTo);
+            end.setHours(23, 59, 59, 999);
+            if (d > end) return false;
+          }
+          return !!(customFrom || customTo);
+        }
         return d >= cutoff;
       }),
-    [orders, cutoff]
+    [orders, cutoff, period, customFrom, customTo]
   );
 
   // KPIs
@@ -273,20 +293,87 @@ export default function Performance() {
           </div>
 
           {/* Time period pills */}
-          <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
-            {PERIOD_OPTIONS.map((opt) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
+              {PERIOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPeriod(opt.value)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                    period === opt.value && period !== "custom"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
               <button
-                key={opt.value}
-                onClick={() => setPeriod(opt.value)}
+                onClick={() => setPeriod("custom")}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                  period === opt.value
+                  period === "custom"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {opt.label}
+                Custom
               </button>
-            ))}
+            </div>
+
+            {period === "custom" && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        !customFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customFrom}
+                      onSelect={setCustomFrom}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground">to</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        !customTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customTo ? format(customTo, "dd/MM/yyyy") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customTo}
+                      onSelect={setCustomTo}
+                      disabled={(date) => customFrom ? date < customFrom : false}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
         </div>
 
