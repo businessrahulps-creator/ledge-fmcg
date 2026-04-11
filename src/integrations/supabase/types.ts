@@ -55,6 +55,8 @@ export type Database = {
           id: string
           location: string
           name: string
+          total_orders: number
+          total_value: number
           updated_at: string
         }
         Insert: {
@@ -64,6 +66,8 @@ export type Database = {
           id?: string
           location?: string
           name: string
+          total_orders?: number
+          total_value?: number
           updated_at?: string
         }
         Update: {
@@ -73,6 +77,8 @@ export type Database = {
           id?: string
           location?: string
           name?: string
+          total_orders?: number
+          total_value?: number
           updated_at?: string
         }
         Relationships: [
@@ -307,6 +313,7 @@ export type Database = {
           id: string
           name: string
           sku: string
+          total_sold: number
           unit: string
           updated_at: string
         }
@@ -317,6 +324,7 @@ export type Database = {
           id?: string
           name: string
           sku: string
+          total_sold?: number
           unit?: string
           updated_at?: string
         }
@@ -327,6 +335,7 @@ export type Database = {
           id?: string
           name?: string
           sku?: string
+          total_sold?: number
           unit?: string
           updated_at?: string
         }
@@ -390,6 +399,8 @@ export type Database = {
           name: string
           phone: string
           region: string
+          total_orders: number
+          total_value: number
           updated_at: string
         }
         Insert: {
@@ -400,6 +411,8 @@ export type Database = {
           name: string
           phone?: string
           region?: string
+          total_orders?: number
+          total_value?: number
           updated_at?: string
         }
         Update: {
@@ -410,6 +423,8 @@ export type Database = {
           name?: string
           phone?: string
           region?: string
+          total_orders?: number
+          total_value?: number
           updated_at?: string
         }
         Relationships: [
