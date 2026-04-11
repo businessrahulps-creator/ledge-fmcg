@@ -840,6 +840,90 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
         </>)}
+        <ExportPdfModal
+          open={productsPdfOpen}
+          onOpenChange={setProductsPdfOpen}
+          sections={stockPdfSections}
+          title="Export Products PDF"
+          onGenerate={(sel) => {
+            const totalValue = filteredProducts.reduce((s, p) => s + p.basePrice * getProductStock(p.id), 0);
+            downloadPdf(
+              pdfFilename("products"),
+              <ReportPdf
+                title="Products Report"
+                subtitle={`${filteredProducts.length} products`}
+                showCompany={sel.company}
+                showSummary={sel.summary}
+                showTable={sel.table}
+                summary={[
+                  { label: "Products", value: String(filteredProducts.length) },
+                  { label: "Total Stock Value", value: formatCurrency(totalValue) },
+                ]}
+                columns={[
+                  { header: "Product", width: "28%" },
+                  { header: "SKU", width: "15%" },
+                  { header: "Unit", width: "10%" },
+                  { header: "Base Price", width: "15%", align: "right" },
+                  { header: "Sold", width: "12%", align: "right" },
+                  { header: "Stock", width: "12%", align: "right" },
+                ]}
+                rows={filteredProducts.map((p) => [
+                  p.name,
+                  p.sku,
+                  p.unit,
+                  formatCurrency(p.basePrice),
+                  String(p.totalSold),
+                  String(getProductStock(p.id)),
+                ])}
+              />
+            );
+          }}
+        />
+        <ExportPdfModal
+          open={inventoryPdfOpen}
+          onOpenChange={setInventoryPdfOpen}
+          sections={stockPdfSections}
+          title="Export Inventory PDF"
+          onGenerate={(sel) => {
+            const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "Warehouse";
+            const totalValue = warehouseInventory.reduce((s, si) => s + si.quantity * si.basePrice, 0);
+            downloadPdf(
+              pdfFilename("inventory", whName.toLowerCase().replace(/\s+/g, "-")),
+              <ReportPdf
+                title={`Inventory — ${whName}`}
+                subtitle={`${warehouseInventory.length} products`}
+                showCompany={sel.company}
+                showSummary={sel.summary}
+                showTable={sel.table}
+                summary={[
+                  { label: "Products", value: String(warehouseInventory.length) },
+                  { label: "Total Value", value: formatCurrency(totalValue) },
+                ]}
+                columns={[
+                  { header: "Product", width: "24%" },
+                  { header: "SKU", width: "12%" },
+                  { header: "Qty", width: "10%", align: "right" },
+                  { header: "Threshold", width: "10%", align: "right" },
+                  { header: "Health", width: "12%" },
+                  { header: "Price", width: "14%", align: "right" },
+                  { header: "Value", width: "14%", align: "right" },
+                ]}
+                rows={warehouseInventory.map((si) => {
+                  const health = getStockHealth(si.quantity, si.threshold);
+                  return [
+                    si.productName,
+                    si.sku,
+                    String(si.quantity),
+                    String(si.threshold),
+                    health.charAt(0).toUpperCase() + health.slice(1),
+                    formatCurrency(si.basePrice),
+                    formatCurrency(si.quantity * si.basePrice),
+                  ];
+                })}
+              />
+            );
+          }}
+        />
       </div>
     </AppLayout>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
@@ -8,6 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function DistributorReport() {
   const api = useApi();
@@ -30,6 +33,12 @@ export function DistributorReport() {
   const totalOrders = data.reduce((s, d) => s + d.orderCount, 0);
 
   const selectedOrders = selected ? filteredOrders.filter((o) => o.distributorId === selected.id) : [];
+  const [pdfOpen, setPdfOpen] = useState(false);
+  const rptSections: PdfSection[] = [
+    { id: "company", label: "Company header" },
+    { id: "summary", label: "Summary statistics" },
+    { id: "table", label: "Dealer table" },
+  ];
 
   return (
     <div className="space-y-4 overflow-x-hidden">
@@ -56,6 +65,10 @@ export function DistributorReport() {
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPdfOpen(true)}>
+            <FileText className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
       </div>
@@ -158,6 +171,37 @@ export function DistributorReport() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        sections={rptSections}
+        title="Export Dealer Report PDF"
+        onGenerate={(sel) => {
+          downloadPdf(
+            pdfFilename("dealer-report"),
+            <ReportPdf
+              title="Dealer Report"
+              subtitle={periodLabel(period)}
+              showCompany={sel.company}
+              showSummary={sel.summary}
+              showTable={sel.table}
+              summary={[
+                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Orders", value: String(totalOrders) },
+                { label: "Dealers", value: String(data.length) },
+              ]}
+              columns={[
+                { header: "Dealer", width: "30%" },
+                { header: "Location", width: "30%" },
+                { header: "Orders", width: "15%", align: "right" },
+                { header: "Revenue", width: "25%", align: "right" },
+              ]}
+              rows={data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrency(d.revenue)])}
+            />
+          );
+        }}
+      />
     </div>
   );
 }
