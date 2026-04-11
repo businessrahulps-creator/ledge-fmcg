@@ -82,6 +82,7 @@ function formatCompact(n: number): string {
 
 export default function Performance() {
   const api = useApi();
+  const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
 
