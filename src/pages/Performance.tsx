@@ -137,6 +137,20 @@ export default function Performance() {
     [orders, cutoff, period, customFrom, customTo]
   );
 
+  // Previous period for comparison
+  const prevCutoff = useMemo(() => getPreviousCutoff(period, cutoff), [period, cutoff]);
+
+  const prevOrders = useMemo(
+    () =>
+      period === "custom"
+        ? []
+        : orders.filter((o) => {
+            const d = new Date(o.date + "T00:00:00");
+            return d >= prevCutoff && d < cutoff;
+          }),
+    [orders, prevCutoff, cutoff, period]
+  );
+
   // KPIs
   const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
   const totalOrderCount = filteredOrders.length;
@@ -144,6 +158,13 @@ export default function Performance() {
   const paidOrders = filteredOrders.filter((o) => o.paymentStatus === "paid");
   const collectionRate =
     totalOrderCount > 0 ? (paidOrders.length / totalOrderCount) * 100 : 0;
+
+  // Previous KPIs
+  const prevRevenue = prevOrders.reduce((s, o) => s + o.total, 0);
+  const prevOrderCount = prevOrders.length;
+  const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
+  const prevPaid = prevOrders.filter((o) => o.paymentStatus === "paid");
+  const prevCollection = prevOrderCount > 0 ? (prevPaid.length / prevOrderCount) * 100 : 0;
 
   // Revenue trend — group by date
   const revenueTrend = useMemo(() => {
