@@ -264,7 +264,7 @@ export default function Settings() {
 
   const saveCompany = async () => {
     if (orderPrefix !== savedPrefix) {
-      api.orders.setPrefix(orderPrefix);
+      api.orders.setPrefix(sanitizeInput(orderPrefix));
     }
     if (companyId) {
       const { error } = await supabase
