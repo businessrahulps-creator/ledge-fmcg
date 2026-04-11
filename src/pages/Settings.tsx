@@ -22,6 +22,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -746,6 +747,7 @@ export default function Settings() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewMember ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
+              <DialogDescription className="sr-only">{isNewMember ? "Add a new team member" : "Edit team member details"}</DialogDescription>
             </DialogHeader>
             {editMember && (
               <div className="space-y-3 md:space-y-4">

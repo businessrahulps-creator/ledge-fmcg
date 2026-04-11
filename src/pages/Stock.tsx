@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -659,6 +660,7 @@ export default function Stock() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewProduct ? "Add Product" : "Edit Product"}</DialogTitle>
+              <DialogDescription className="sr-only">{isNewProduct ? "Add a new product" : "Edit product details"}</DialogDescription>
             </DialogHeader>
             {editProduct && (
               <div className="space-y-3 md:space-y-4">
@@ -710,6 +712,7 @@ export default function Stock() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewWarehouse ? "Add Warehouse" : "Edit Warehouse"}</DialogTitle>
+              <DialogDescription className="sr-only">{isNewWarehouse ? "Add a new warehouse" : "Edit warehouse details"}</DialogDescription>
             </DialogHeader>
             {editWarehouse && (
               <div className="space-y-3 md:space-y-4">
@@ -764,6 +767,7 @@ export default function Stock() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
+              <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
             </DialogHeader>
             {editStockItem && (
               <div className="space-y-3 md:space-y-4">
@@ -813,6 +817,7 @@ export default function Stock() {
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">Add Stock</DialogTitle>
+              <DialogDescription className="sr-only">Add a new stock item to a warehouse</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 md:space-y-4">
               <div className="space-y-1.5 md:space-y-2">

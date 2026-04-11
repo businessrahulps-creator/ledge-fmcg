@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -60,6 +61,7 @@ export function ExportPdfModal({
             <FileText className="h-4 w-4" />
             {title}
           </DialogTitle>
+          <DialogDescription className="sr-only">Choose sections to include in the PDF export</DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-2">
           {loading ? (

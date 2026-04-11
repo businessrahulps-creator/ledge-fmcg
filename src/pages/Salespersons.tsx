@@ -19,6 +19,7 @@ import { useApi } from "@/services/api";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -227,6 +228,7 @@ export default function Salespersons() {
             <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
+                <DialogDescription className="sr-only">{isNew ? "Add a new team member" : "Edit team member details"}</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -280,7 +282,8 @@ export default function Salespersons() {
             <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
+                   <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
+                   <DialogDescription className="sr-only">Team member profile details</DialogDescription>
                   <Button
                     variant="outline"
                     size="sm"

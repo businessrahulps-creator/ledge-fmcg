@@ -347,7 +347,7 @@ export default function NewOrder() {
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Total</Label>
-                            <div className="flex h-11 items-center rounded-lg border border-border bg-muted/30 px-3 text-xs font-medium md:h-12 md:text-sm">
+                            <div className="flex h-10 items-center rounded-lg border border-border bg-muted/30 px-3 text-xs font-medium md:h-12 md:text-sm">
                               {formatCurrency(getLineTotal(line))}
                             </div>
                           </div>
