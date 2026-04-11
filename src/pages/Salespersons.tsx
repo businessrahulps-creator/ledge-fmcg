@@ -5,7 +5,8 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin, Download } from "lucide-react";
+import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -121,10 +122,33 @@ export default function Salespersons() {
               Manage your sales team
             </p>
           </div>
-          <Button onClick={openNew} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
-            Add Member
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => {
+                exportCsv(
+                  csvFilename("sales-team"),
+                  ["Name", "Phone", "Email", "Region", "Total Orders", "Total Value"],
+                  filtered.map((s) => [
+                    s.name,
+                    s.phone,
+                    s.email,
+                    s.region,
+                    String(s.totalOrders),
+                    formatCurrency(s.totalValue),
+                  ])
+                );
+              }}
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
+            </Button>
+            <Button onClick={openNew} className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4" />
+              Add Member
+            </Button>
+          </div>
         </div>
 
         <div className="relative">

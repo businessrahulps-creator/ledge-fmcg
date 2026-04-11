@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -6,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
+import { exportCsv, csvFilename } from "@/utils/exportCsv";
 
 export function DispatchReport() {
   const api = useApi();
@@ -34,6 +37,31 @@ export function DispatchReport() {
         </Select>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
+        </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("dispatch-report"),
+                ["Order", "Dealer", "Date", "Dispatch Date", "Vehicle", "Driver", "Delivery Status", "Amount"],
+                filtered.map((o) => [
+                  o.orderNumber,
+                  o.distributorName,
+                  formatIndianDate(o.date),
+                  formatIndianDate(o.dispatchDate),
+                  o.vehicle || "",
+                  o.driverName || "",
+                  o.deliveryStatus,
+                  formatCurrency(o.total),
+                ])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
         </div>
       </div>
       <div className="glass-card overflow-hidden">

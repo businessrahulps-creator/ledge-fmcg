@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { exportCsv, csvFilename } from "@/utils/exportCsv";
 
 export function SalesTeamReport() {
   const api = useApi();
@@ -39,6 +42,22 @@ export function SalesTeamReport() {
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
           <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
+        </div>
+        <div className="sm:ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              exportCsv(
+                csvFilename("sales-team-report"),
+                ["Name", "Region", "Phone", "Orders", "Revenue"],
+                data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
+              );
+            }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
         </div>
       </div>
       <div className="glass-card overflow-hidden">

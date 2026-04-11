@@ -5,7 +5,8 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -113,10 +114,32 @@ export default function Distributors() {
               Manage your dealer network
             </p>
           </div>
-          <Button onClick={openNew} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
-            Add Dealer
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => {
+                exportCsv(
+                  csvFilename("dealers"),
+                  ["Name", "Location", "Contact", "Total Orders", "Total Value"],
+                  filtered.map((d) => [
+                    d.name,
+                    d.location,
+                    d.contact,
+                    String(d.totalOrders),
+                    formatCurrency(d.totalValue),
+                  ])
+                );
+              }}
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
+            </Button>
+            <Button onClick={openNew} className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4" />
+              Add Dealer
+            </Button>
+          </div>
         </div>
 
         <div className="relative">
