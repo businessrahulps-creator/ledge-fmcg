@@ -22,6 +22,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Stock from "./pages/Stock";
+import Performance from "./pages/Performance";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -77,6 +78,7 @@ const App = () => (
                   <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Stock /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Performance /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
