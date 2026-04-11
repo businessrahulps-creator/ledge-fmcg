@@ -30,6 +30,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { formatIndianDate } from "@/utils/formatDate";
 
 export default function Distributors() {
   const api = useApi();
@@ -276,7 +277,7 @@ export default function Distributors() {
                             {selectedOrders.map((o) => (
                               <tr key={o.id} className="border-b border-border/50">
                                 <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
+                                <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(o.date)}</td>
                                 <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total)}</td>
                                 <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
                               </tr>
@@ -291,7 +292,7 @@ export default function Distributors() {
                                 <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
                               </div>
                               <div className="mt-0.5 flex items-center gap-2">
-                                <span className="text-[10px] text-muted-foreground">{o.date}</span>
+                                <span className="text-[10px] text-muted-foreground">{formatIndianDate(o.date)}</span>
                                 <StatusBadge status={o.paymentStatus} />
                               </div>
                             </div>

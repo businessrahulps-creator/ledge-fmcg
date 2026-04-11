@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatIndianDate } from "@/utils/formatDate";
 
 export function DispatchReport() {
   const api = useApi();
@@ -55,7 +56,7 @@ export function DispatchReport() {
                 <tr key={o.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => setSelected(o)}>
                   <td className="px-6 py-4 font-medium text-primary">{o.orderNumber}</td>
                   <td className="px-6 py-4">{o.distributorName}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{o.dispatchDate || "—"}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(o.dispatchDate)}</td>
                   <td className="px-6 py-4 text-muted-foreground">{o.vehicle || "—"}</td>
                   <td className="px-6 py-4 text-muted-foreground">{o.driverName || "—"}</td>
                   <td className="px-6 py-4"><StatusBadge status={o.deliveryStatus} /></td>
@@ -73,7 +74,7 @@ export function DispatchReport() {
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">{o.orderNumber}</span>
                 <div className="shrink-0"><StatusBadge status={o.deliveryStatus} /></div>
               </div>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {o.dispatchDate || "No dispatch date"}</p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {formatIndianDate(o.dispatchDate)}</p>
               <p className="truncate text-xs text-muted-foreground">{o.vehicle || "No vehicle"}</p>
             </div>
           ))}
@@ -95,7 +96,7 @@ export function DispatchReport() {
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
-                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.date}</p>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selected.date)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Delivery Status</span>
@@ -110,7 +111,7 @@ export function DispatchReport() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Dispatch Date</span>
-                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.dispatchDate || "—"}</p>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selected.dispatchDate)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Vehicle</span>

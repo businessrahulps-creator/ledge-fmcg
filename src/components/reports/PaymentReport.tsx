@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatIndianDate } from "@/utils/formatDate";
 
 export function PaymentReport() {
   const api = useApi();
@@ -58,7 +59,7 @@ export function PaymentReport() {
                 <tr key={o.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => setSelected(o)}>
                   <td className="px-6 py-4 font-medium text-primary">{o.orderNumber}</td>
                   <td className="px-6 py-4">{o.distributorName}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{o.date}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(o.date)}</td>
                   <td className="px-6 py-4 text-right font-medium">{formatCurrency(o.total)}</td>
                   <td className="px-6 py-4"><StatusBadge status={o.paymentStatus} /></td>
                   <td className="px-6 py-4 capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</td>
@@ -75,7 +76,7 @@ export function PaymentReport() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">{o.orderNumber}</span>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {o.date}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {formatIndianDate(o.date)}</p>
                 </div>
                 <span className="shrink-0 text-sm font-medium">{formatCurrency(o.total)}</span>
               </div>
@@ -99,7 +100,7 @@ export function PaymentReport() {
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
-                    <p className="mt-0.5 text-xs font-medium md:text-sm">{selected.date}</p>
+                    <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selected.date)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Dealer</span>

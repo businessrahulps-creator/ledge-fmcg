@@ -38,6 +38,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { formatIndianDate } from "@/utils/formatDate";
 
 const statusColors: Record<string, string> = {
   paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
@@ -229,7 +230,7 @@ export default function Orders() {
                     className="group border-b border-border/50 row-hover cursor-pointer"
                   >
                     <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                     <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
@@ -253,7 +254,7 @@ export default function Orders() {
                   <span className="text-xs font-medium">{formatCurrency(order.total)}</span>
                 </div>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {order.distributorName} · {order.date}
+                  {order.distributorName} · {formatIndianDate(order.date)}
                 </p>
                 <div className="mt-1.5 flex gap-1.5">
                   <StatusBadge status={order.paymentStatus} />
@@ -294,7 +295,7 @@ export default function Orders() {
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
                       <span className="text-[10px] text-muted-foreground md:text-xs">Date</span>
-                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.date}</p>
+                      <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selectedOrder.date)}</p>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/20 p-3">
                       <span className="text-[10px] text-muted-foreground md:text-xs">Dealer</span>
