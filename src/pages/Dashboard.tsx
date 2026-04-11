@@ -107,10 +107,10 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, type: "spring", stiffness: 280 + i * 15, damping: 22 + i * 2 }}
-              className="glass-card p-5 md:p-7 min-w-0"
+              className={`glass-card p-5 md:p-7 min-w-0 ${kpiAccents[i]}`}
             >
-              <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
-              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap">{kpi.value}</p>
+              <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
+                      className="h-full rounded-full bg-primary/30 dark:bg-primary/40"
                     />
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
+                      className="h-full rounded-full bg-primary/30 dark:bg-primary/40"
                     />
                   </div>
                 </div>
