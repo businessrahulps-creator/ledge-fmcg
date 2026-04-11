@@ -1,138 +1,72 @@
 
 
-# Fix Computed Aggregates on Entities (Bug #5)
+# Role-Based Access Control — Accountant View-Only on Stock
 
-## Problem
-Dealers, salespersons, and products all show `totalOrders: 0`, `totalValue: 0`, `totalSold: 0` because the DataContext hardcodes these to 0 when mapping DB rows.
+## Overview
+Add role awareness to the AuthContext, restrict the Stock page UI for accountants, tighten RLS policies, and show a role badge in the header.
 
-## Approach
-Add aggregate columns to the DB tables, populate them with a trigger that fires on order/order_line changes, and read the real values in DataContext.
+## 1. AuthContext — expose user role
 
-## 1. Database Migration
+Add `userRole` state to `AuthContext`. After fetching the profile, query `user_roles` table for the current user and expose the role string (e.g. `"accountant"`, `"super_admin"`, `"sales_manager"`).
 
-Add columns and trigger:
+**File**: `src/context/AuthContext.tsx`
+- Add `userRole: string | null` to state and context type
+- After `fetchProfile`, do a secondary fetch: `supabase.from('user_roles').select('role').eq('user_id', userId).single()` → set `userRole`
+- Expose `userRole` and a convenience `isAccountant` boolean in the context value
+
+## 2. Stock page — conditional UI for accountants
+
+**File**: `src/pages/Stock.tsx`
+- Import `useAuth` and read `isAccountant`
+- **Products tab**: hide "Add Product" button, hide edit/delete action buttons in table rows and mobile cards, hide empty-state "Add Product" button
+- **Warehouses tab**: hide "Add Warehouse" button, hide edit/delete buttons on warehouse cards
+- **Inventory section**: hide "Add Stock" button, make inventory rows non-clickable (no edit dialog)
+- All read-only views (lists, search, health badges, totals) remain visible
+- Do NOT render any of the edit/add/delete Dialogs when `isAccountant` is true
+
+## 3. Role badge in header
+
+**File**: `src/components/layout/AppLayout.tsx`
+- Import `useAuth`, read `userRole`
+- Show a small Badge next to the notification bell displaying the role (e.g. "Accountant", "Super Admin")
+
+## 4. Database migration — tighten RLS
+
+Restrict `INSERT`, `UPDATE`, `DELETE` on `products`, `godowns`, and `stock_items` to exclude accountant role. Modify existing policies to add `NOT has_role(auth.uid(), 'accountant')` condition.
 
 ```sql
--- Add aggregate columns
-ALTER TABLE distributors ADD COLUMN total_orders integer NOT NULL DEFAULT 0;
-ALTER TABLE distributors ADD COLUMN total_value numeric NOT NULL DEFAULT 0;
+-- Products: restrict write operations
+DROP POLICY "Company members can insert products" ON products;
+CREATE POLICY "Non-accountant members can insert products" ON products
+  FOR INSERT TO authenticated
+  WITH CHECK (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
 
-ALTER TABLE salespersons ADD COLUMN total_orders integer NOT NULL DEFAULT 0;
-ALTER TABLE salespersons ADD COLUMN total_value numeric NOT NULL DEFAULT 0;
+DROP POLICY "Company members can update products" ON products;
+CREATE POLICY "Non-accountant members can update products" ON products
+  FOR UPDATE TO authenticated
+  USING (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'))
+  WITH CHECK (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
 
-ALTER TABLE products ADD COLUMN total_sold integer NOT NULL DEFAULT 0;
+DROP POLICY "Company members can delete products" ON products;
+CREATE POLICY "Non-accountant members can delete products" ON products
+  FOR DELETE TO authenticated
+  USING (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
 
--- Trigger function: recalculates aggregates for affected distributor/salesperson/products
-CREATE OR REPLACE FUNCTION refresh_entity_aggregates()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = 'public' AS $$
-DECLARE
-  v_order RECORD;
-  v_company_id uuid;
-BEGIN
-  -- Determine the order row to work with
-  IF TG_TABLE_NAME = 'orders' THEN
-    IF TG_OP = 'DELETE' THEN v_order := OLD; ELSE v_order := NEW; END IF;
-    v_company_id := v_order.company_id;
-
-    -- Update distributor
-    UPDATE distributors SET
-      total_orders = COALESCE(sub.cnt, 0),
-      total_value = COALESCE(sub.val, 0)
-    FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
-          FROM orders WHERE distributor_id = v_order.distributor_id) sub
-    WHERE id = v_order.distributor_id;
-
-    -- Also update OLD distributor if it changed
-    IF TG_OP = 'UPDATE' AND OLD.distributor_id <> NEW.distributor_id THEN
-      UPDATE distributors SET
-        total_orders = COALESCE(sub.cnt, 0),
-        total_value = COALESCE(sub.val, 0)
-      FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
-            FROM orders WHERE distributor_id = OLD.distributor_id) sub
-      WHERE id = OLD.distributor_id;
-    END IF;
-
-    -- Update salesperson
-    UPDATE salespersons SET
-      total_orders = COALESCE(sub.cnt, 0),
-      total_value = COALESCE(sub.val, 0)
-    FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
-          FROM orders WHERE salesperson_id = v_order.salesperson_id) sub
-    WHERE id = v_order.salesperson_id;
-
-    IF TG_OP = 'UPDATE' AND OLD.salesperson_id <> NEW.salesperson_id THEN
-      UPDATE salespersons SET
-        total_orders = COALESCE(sub.cnt, 0),
-        total_value = COALESCE(sub.val, 0)
-      FROM (SELECT COUNT(*) cnt, COALESCE(SUM(total),0) val 
-            FROM orders WHERE salesperson_id = OLD.salesperson_id) sub
-      WHERE id = OLD.salesperson_id;
-    END IF;
-
-  ELSIF TG_TABLE_NAME = 'order_lines' THEN
-    -- Update product total_sold from all order_lines
-    IF TG_OP = 'DELETE' THEN
-      UPDATE products SET total_sold = COALESCE(sub.qty, 0)
-      FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = OLD.product_id) sub
-      WHERE id = OLD.product_id;
-    ELSE
-      UPDATE products SET total_sold = COALESCE(sub.qty, 0)
-      FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = NEW.product_id) sub
-      WHERE id = NEW.product_id;
-      IF TG_OP = 'UPDATE' AND OLD.product_id <> NEW.product_id THEN
-        UPDATE products SET total_sold = COALESCE(sub.qty, 0)
-        FROM (SELECT COALESCE(SUM(quantity),0) qty FROM order_lines WHERE product_id = OLD.product_id) sub
-        WHERE id = OLD.product_id;
-      END IF;
-    END IF;
-  END IF;
-
-  RETURN NULL;
-END;
-$$;
-
--- Attach triggers
-CREATE TRIGGER trg_orders_aggregates AFTER INSERT OR UPDATE OR DELETE ON orders
-  FOR EACH ROW EXECUTE FUNCTION refresh_entity_aggregates();
-
-CREATE TRIGGER trg_order_lines_aggregates AFTER INSERT OR UPDATE OR DELETE ON order_lines
-  FOR EACH ROW EXECUTE FUNCTION refresh_entity_aggregates();
-
--- Backfill existing data
-UPDATE distributors d SET
-  total_orders = sub.cnt, total_value = sub.val
-FROM (SELECT distributor_id, COUNT(*) cnt, COALESCE(SUM(total),0) val FROM orders GROUP BY distributor_id) sub
-WHERE d.id = sub.distributor_id;
-
-UPDATE salespersons s SET
-  total_orders = sub.cnt, total_value = sub.val
-FROM (SELECT salesperson_id, COUNT(*) cnt, COALESCE(SUM(total),0) val FROM orders GROUP BY salesperson_id) sub
-WHERE s.id = sub.salesperson_id;
-
-UPDATE products p SET total_sold = sub.qty
-FROM (SELECT product_id, COALESCE(SUM(quantity),0) qty FROM order_lines GROUP BY product_id) sub
-WHERE p.id = sub.product_id;
+-- Same pattern for godowns and stock_items (6 more policies)
 ```
 
-## 2. Update DataContext (`src/context/DataContext.tsx`)
-
-Replace hardcoded `0` with real column values in 6 places:
-
-- `fetchAll` distributor mapping: `totalOrders: d.total_orders, totalValue: Number(d.total_value)`
-- `fetchAll` salesperson mapping: same pattern
-- `fetchAll` product mapping: `totalSold: p.total_sold`
-- `safeRefetchDistributors`: same
-- `safeRefetchSalespersons`: same
-- `safeRefetchProducts`: same
+SELECT policies remain unchanged — accountants can still read everything and receive realtime updates.
 
 ## Files changed
 | File | Change |
 |------|--------|
-| Migration SQL | Add columns, trigger function, triggers, backfill |
-| `src/context/DataContext.tsx` | Read real aggregate columns (6 mapping locations) |
+| `src/context/AuthContext.tsx` | Add `userRole` / `isAccountant` to context |
+| `src/pages/Stock.tsx` | Conditionally hide all write UI for accountants |
+| `src/components/layout/AppLayout.tsx` | Show role badge in header |
+| Migration SQL | Tighten 9 RLS policies on products, godowns, stock_items |
 
 ## What stays untouched
-- All UI pages (Dealers, Sales Team, Stock, Products) — unchanged
-- Dashboard and Reports — unchanged
-- All other DataContext logic
+- All other pages (Orders, Dealers, Sales Team, Reports, Settings, Dashboard)
+- Realtime subscriptions (SELECT policies unchanged)
+- DataContext, services/api
 
