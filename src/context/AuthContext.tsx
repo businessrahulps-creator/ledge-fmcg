@@ -16,6 +16,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   companyId: string | null;
+  userRole: string | null;
+  isAccountant: boolean;
   loading: boolean;
   authReady: boolean;
   signOut: () => Promise<void>;
