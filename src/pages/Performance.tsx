@@ -39,7 +39,7 @@ import {
   Bar,
 } from "recharts";
 
-type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd";
+type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
 
 const PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
   { value: "today", label: "Today" },
@@ -95,7 +95,8 @@ export default function Performance() {
   const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
-
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
+  const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
@@ -108,9 +109,18 @@ export default function Performance() {
     () =>
       orders.filter((o) => {
         const d = new Date(o.date + "T00:00:00");
+        if (period === "custom") {
+          if (customFrom && d < customFrom) return false;
+          if (customTo) {
+            const end = new Date(customTo);
+            end.setHours(23, 59, 59, 999);
+            if (d > end) return false;
+          }
+          return !!(customFrom || customTo);
+        }
         return d >= cutoff;
       }),
-    [orders, cutoff]
+    [orders, cutoff, period, customFrom, customTo]
   );
 
   // KPIs
