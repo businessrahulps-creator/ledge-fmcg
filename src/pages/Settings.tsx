@@ -72,11 +72,13 @@ export default function Settings() {
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
+
   useEffect(() => {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url")
+      .select("name, address, gstin, logo_url, trial_ends_at")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -85,8 +87,24 @@ export default function Settings() {
           setCompanyAddress(data.address || "");
           setCompanyGstin(data.gstin || "");
           setLogoUrl(data.logo_url || "");
+          if (data.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
         }
       });
+
+    // Realtime subscription for trial updates
+    const channel = supabase
+      .channel(`company-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "companies", filter: `id=eq.${companyId}` },
+        (payload) => {
+          const d = payload.new as any;
+          if (d.trial_ends_at) setTrialEndsAt(new Date(d.trial_ends_at));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [companyId]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
