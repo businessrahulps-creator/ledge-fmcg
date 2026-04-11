@@ -5,8 +5,10 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -261,7 +263,32 @@ export default function Distributors() {
             {selected && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-base md:text-lg">{selected.name}</DialogTitle>
+                  <div className="flex items-center justify-between">
+                    <DialogTitle className="text-base md:text-lg">{selected.name}</DialogTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5"
+                      onClick={() => {
+                        const rows = [
+                          ["Location", selected.location],
+                          ["Contact", selected.contact],
+                          ["Total Orders", String(selected.totalOrders)],
+                          ["Total Value", formatCurrencyPdf(selected.totalValue)],
+                        ];
+                        selectedOrders.forEach((o) => {
+                          rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
+                        });
+                        downloadPdf(
+                          pdfFilename("dealer", selected.name.replace(/\s+/g, "-")),
+                          ReportPdf({ title: selected.name, subtitle: "Dealer Profile", headers: ["Field", "Value"], rows, companyName: "" })
+                        );
+                      }}
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      Export PDF
+                    </Button>
+                  </div>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-6">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">

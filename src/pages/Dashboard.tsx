@@ -218,9 +218,9 @@ export default function Dashboard() {
                 {recentOrders.map((o, i) => (
                   <motion.div
                     key={o.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i, 8) * 0.06 }}
+                    initial={{ opacity: 0, y: i % 2 === 0 ? 16 : 0, x: i % 2 === 0 ? 0 : -8 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
                     className="glass-card card-hover p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
