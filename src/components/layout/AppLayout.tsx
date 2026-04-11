@@ -19,6 +19,7 @@ const allMobileNav = [
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
+  const { userRole } = useAuth();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
