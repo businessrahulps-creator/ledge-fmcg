@@ -97,6 +97,7 @@ export default function Orders() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const ordersPdfSections: PdfSection[] = [
     { id: "company", label: "Company header" },
