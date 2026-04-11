@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { cacheData, getCachedData } from "@/lib/offline-store";
 
 export type NotificationType = "order_placed" | "stock_alert" | "team_update" | "general";
 
@@ -51,51 +52,86 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Fetch on mount / when companyId changes
+  // Fetch on mount / when companyId changes, with offline cache fallback
+  // Realtime: pause when offline, resume when online
   useEffect(() => {
     if (!companyId) {
       setNotifications([]);
       return;
     }
 
-    const load = async () => {
-      const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (data) setNotifications(data.map(mapDbToNotif));
-    };
-    load();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    // Realtime subscription
-    const channel = supabase
-      .channel("notifications-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const row = payload.new as DbNotification;
-          setNotifications((prev) => {
-            if (prev.some((n) => n.id === row.id)) return prev;
-            return [mapDbToNotif(row), ...prev];
-          });
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from("notifications")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(50);
+        if (data) {
+          const mapped = data.map(mapDbToNotif);
+          setNotifications(mapped);
+          cacheData(companyId, "notifications", mapped);
         }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "notifications" },
-        (payload) => {
-          const row = payload.new as DbNotification;
-          setNotifications((prev) =>
-            prev.map((n) => (n.id === row.id ? mapDbToNotif(row) : n))
-          );
+      } catch {
+        // Offline — load from cache
+        if (!navigator.onLine) {
+          const cached = await getCachedData<Notification[]>(companyId, "notifications");
+          if (cached) setNotifications(cached);
         }
-      )
-      .subscribe();
+      }
+    };
+
+    const subscribe = () => {
+      if (!navigator.onLine) return;
+      channel = supabase
+        .channel("notifications-realtime")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications" },
+          (payload) => {
+            const row = payload.new as DbNotification;
+            setNotifications((prev) => {
+              if (prev.some((n) => n.id === row.id)) return prev;
+              return [mapDbToNotif(row), ...prev];
+            });
+          }
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "notifications" },
+          (payload) => {
+            const row = payload.new as DbNotification;
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === row.id ? mapDbToNotif(row) : n))
+            );
+          }
+        )
+        .subscribe();
+    };
+
+    const handleOffline = () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+    };
+
+    const handleOnline = () => {
+      load();
+      subscribe();
+    };
+
+    load();
+    subscribe();
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
 
     return () => {
-      supabase.removeChannel(channel);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [companyId]);
 
@@ -109,13 +145,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         title,
         message: description,
       });
-      // Realtime subscription will add it to local state
     },
     [companyId, user]
   );
 
   const markAsRead = useCallback(async (id: string) => {
-    // Optimistic update
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     await supabase.from("notifications").update({ read: true }).eq("id", id);
   }, []);

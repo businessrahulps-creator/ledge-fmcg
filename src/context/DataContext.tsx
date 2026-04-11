@@ -300,7 +300,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
 
         if (synced > 0) {
-          toast.success("Back online — changes synced", {
+          toast.success("Back online — all changes synced", {
             description: `${synced} change${synced > 1 ? "s" : ""} synced successfully`,
             duration: 3000,
           });
@@ -330,39 +330,64 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [companyId, fetchAll]);
 
   // Realtime subscriptions — only after auth ready + companyId
+  // Pause when offline, resume when online
   useEffect(() => {
     if (!companyId || !authReady) return;
 
-    const channel = supabase
-      .channel(`company-${companyId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchOrders();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_lines' }, () => {
-        safeRefetchOrders();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchDistributors();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchSalespersons();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchProducts();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchGodowns();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => {
-        safeRefetchStockItems();
-      })
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('Realtime channel error — will retry automatically');
-        }
-      });
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    return () => { supabase.removeChannel(channel); };
+    const subscribe = () => {
+      if (!navigator.onLine) return;
+      channel = supabase
+        .channel(`company-${companyId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchOrders();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'order_lines' }, () => {
+          safeRefetchOrders();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchDistributors();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchSalespersons();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchProducts();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchGodowns();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchStockItems();
+        })
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Realtime channel error — will retry automatically');
+          }
+        });
+    };
+
+    const handleOffline = () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+    };
+
+    const handleOnline = () => {
+      subscribe();
+    };
+
+    subscribe();
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [companyId, authReady]);
 
   // Safe refetch helpers wrapped in try/catch
