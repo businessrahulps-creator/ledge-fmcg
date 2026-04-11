@@ -1,25 +1,45 @@
 
 
-# Add Pending Sync Badge Indicator
+# Bug #11 Enhancement: Complete Offline Support
 
-## Overview
-Show a small badge count on the offline banner indicating how many mutations are queued for sync. When offline with pending changes, users see "Offline — 3 changes pending sync".
+## Current State
+The core offline system is already implemented and functional:
+- IndexedDB caching via `idb-keyval` for all DataContext entities
+- Mutation queue with offline CRUD for orders, distributors, salespersons, products, godowns, stock items
+- Sync-on-reconnect with queue replay
+- Offline banner with pending count and syncing animation
+- Online/offline detection with toasts
+
+## Remaining Gaps
+
+### 1. Notifications not cached offline
+`use-notifications.tsx` fetches from Supabase but has no IDB fallback — notifications disappear when offline.
+
+### 2. Realtime not paused/resumed on connectivity change
+The realtime channel stays subscribed when offline (causing console errors) and doesn't explicitly reconnect. Should unsubscribe when offline and resubscribe when online — both in DataContext and NotificationProvider.
+
+### 3. "Back online — all changes synced" toast wording
+The sync toast in DataContext already says "Back online — changes synced" but the spec wants "Back online — all changes synced". Minor text fix.
 
 ## Changes
 
-### `src/components/layout/AppLayout.tsx`
-- Import `getQueue` from `offline-store.ts`
-- Add a `pendingCount` state, polled every 2 seconds (via `setInterval`) when offline
-- Also refresh count on mount and when `online` status changes
-- Update the offline banner to show the count: `"Offline — using cached data"` becomes `"Offline — using cached data · 3 pending"` when count > 0
-- Show the count as a small pill/badge inline in the banner text
-- When back online and count was > 0, briefly show "Syncing..." before the banner disappears
+### `src/lib/offline-store.ts`
+- Add `"notifications"` to the `ENTITIES` tuple so notifications can be cached.
 
-### No other files changed
-The `getQueue()` function already exists in `offline-store.ts` — just need to call it from the layout.
+### `src/hooks/use-notifications.tsx`
+- After fetching notifications, cache them to IDB via `cacheData(companyId, "notifications", ...)`.
+- In the fetch `catch`/failure path, load cached notifications from IDB when `!navigator.onLine`.
+- Wrap realtime subscription: only subscribe when `navigator.onLine`; listen for `online`/`offline` events to teardown and re-create the channel.
+
+### `src/context/DataContext.tsx`
+- **Realtime pause/resume**: wrap the realtime `useEffect` to check `navigator.onLine`. Add `online`/`offline` event listeners inside the effect to unsubscribe/resubscribe the channel dynamically.
+- Fix sync toast text: "Back online — all changes synced".
+
+### `src/components/layout/AppLayout.tsx`
+- No changes needed — banner already works correctly.
 
 ## Technical Notes
-- Polling every 2s is lightweight since `getQueue` is a single IDB read
-- Count resets naturally when sync clears the queue on reconnect
-- Badge disappears with the banner when back online
+- Realtime pause: on `offline` event, call `supabase.removeChannel(channel)`. On `online` event, re-create and subscribe the channel. This prevents console errors and unnecessary retry loops.
+- Notifications cache uses the same `cacheData`/`getCachedData` pattern as other entities.
+- All existing online flows remain 100% unchanged — changes are additive guards.
 
