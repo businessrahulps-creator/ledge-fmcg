@@ -77,6 +77,20 @@ function getCutoffDate(period: TimePeriod): Date {
   return cutoff;
 }
 
+/** Get the previous period cutoff for comparison */
+function getPreviousCutoff(period: TimePeriod, currentCutoff: Date): Date {
+  const prev = new Date(currentCutoff);
+  const now = new Date();
+  const diffMs = now.getTime() - currentCutoff.getTime();
+  prev.setTime(currentCutoff.getTime() - diffMs);
+  return prev;
+}
+
+function pctChange(current: number, previous: number): number | null {
+  if (previous === 0) return current > 0 ? 100 : null;
+  return ((current - previous) / previous) * 100;
+}
+
 const PAYMENT_COLORS: Record<string, string> = {
   paid: "hsl(142, 71%, 45%)",
   partial: "hsl(38, 92%, 50%)",
@@ -123,6 +137,20 @@ export default function Performance() {
     [orders, cutoff, period, customFrom, customTo]
   );
 
+  // Previous period for comparison
+  const prevCutoff = useMemo(() => getPreviousCutoff(period, cutoff), [period, cutoff]);
+
+  const prevOrders = useMemo(
+    () =>
+      period === "custom"
+        ? []
+        : orders.filter((o) => {
+            const d = new Date(o.date + "T00:00:00");
+            return d >= prevCutoff && d < cutoff;
+          }),
+    [orders, prevCutoff, cutoff, period]
+  );
+
   // KPIs
   const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
   const totalOrderCount = filteredOrders.length;
@@ -130,6 +158,13 @@ export default function Performance() {
   const paidOrders = filteredOrders.filter((o) => o.paymentStatus === "paid");
   const collectionRate =
     totalOrderCount > 0 ? (paidOrders.length / totalOrderCount) * 100 : 0;
+
+  // Previous KPIs
+  const prevRevenue = prevOrders.reduce((s, o) => s + o.total, 0);
+  const prevOrderCount = prevOrders.length;
+  const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
+  const prevPaid = prevOrders.filter((o) => o.paymentStatus === "paid");
+  const prevCollection = prevOrderCount > 0 ? (prevPaid.length / prevOrderCount) * 100 : 0;
 
   // Revenue trend — group by date
   const revenueTrend = useMemo(() => {
@@ -257,24 +292,28 @@ export default function Performance() {
       value: formatCurrency(totalRevenue),
       icon: IndianRupee,
       accent: "border-l-emerald-500",
+      change: period !== "custom" ? pctChange(totalRevenue, prevRevenue) : null,
     },
     {
       label: "Orders",
       value: totalOrderCount.toString(),
       icon: ShoppingCart,
       accent: "border-l-blue-500",
+      change: period !== "custom" ? pctChange(totalOrderCount, prevOrderCount) : null,
     },
     {
       label: "Avg Order",
       value: formatCurrency(avgOrderValue),
       icon: TrendingUp,
       accent: "border-l-amber-500",
+      change: period !== "custom" ? pctChange(avgOrderValue, prevAvg) : null,
     },
     {
       label: "Collection",
       value: `${collectionRate.toFixed(0)}%`,
       icon: Percent,
       accent: "border-l-indigo-500",
+      change: period !== "custom" ? pctChange(collectionRate, prevCollection) : null,
     },
   ];
 
@@ -391,6 +430,25 @@ export default function Performance() {
               <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground">
                 {kpi.value}
               </p>
+              {kpi.change !== null && (
+                <div className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${
+                  kpi.change > 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : kpi.change < 0
+                    ? "text-red-500 dark:text-red-400"
+                    : "text-muted-foreground"
+                }`}>
+                  {kpi.change > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : kpi.change < 0 ? (
+                    <TrendingDown className="h-3 w-3" />
+                  ) : null}
+                  <span>
+                    {kpi.change > 0 ? "+" : ""}
+                    {kpi.change.toFixed(0)}% vs prev
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
