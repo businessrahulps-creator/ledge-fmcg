@@ -72,21 +72,6 @@ export function SalesTeamReport() {
             <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              exportCsv(
-                csvFilename("sales-team-report"),
-                ["Name", "Region", "Phone", "Orders", "Revenue"],
-                data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
-              );
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
@@ -187,6 +172,39 @@ export function SalesTeamReport() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+      </Dialog>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        sections={rptSections}
+        title="Export Sales Team Report PDF"
+        onGenerate={(sel) => {
+          downloadPdf(
+            pdfFilename("sales-team-report"),
+            <ReportPdf
+              title="Sales Team Report"
+              subtitle={periodLabel(period)}
+              showCompany={sel.company}
+              showSummary={sel.summary}
+              showTable={sel.table}
+              summary={[
+                { label: "Revenue", value: formatCurrency(totalRevenue) },
+                { label: "Orders", value: String(totalOrders) },
+                { label: "Members", value: String(data.length) },
+              ]}
+              columns={[
+                { header: "Name", width: "30%" },
+                { header: "Region", width: "25%" },
+                { header: "Orders", width: "15%", align: "right" },
+                { header: "Revenue", width: "30%", align: "right" },
+              ]}
+              rows={data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrency(s.revenue)])}
+            />
+          );
+        }}
+      />
     </div>
   );
 }
