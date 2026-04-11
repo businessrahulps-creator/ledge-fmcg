@@ -116,6 +116,7 @@ export default function Performance() {
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
   const [dailyTarget, setDailyTarget] = useState<number>(30000);
+  const [pdfOpen, setPdfOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
