@@ -61,6 +61,7 @@ export default function NewOrder() {
   const products = api.products.list();
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
+  const godowns = api.stock.locations.list().filter(g => g.isActive);
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
 
@@ -73,6 +74,7 @@ export default function NewOrder() {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedGodown, setSelectedGodown] = useState("");
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
@@ -82,6 +84,13 @@ export default function NewOrder() {
   const [vehicle, setVehicle] = useState("");
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Auto-select godown if only one exists
+  useEffect(() => {
+    if (godowns.length === 1 && !selectedGodown) {
+      setSelectedGodown(godowns[0].id);
+    }
+  }, [godowns, selectedGodown]);
 
   // Auto-focus first product select when dealer is chosen
   useEffect(() => {
@@ -148,6 +157,12 @@ export default function NewOrder() {
       return;
     }
 
+    // Require godown if dispatching/delivering
+    if ((deliveryStatus === "dispatched" || deliveryStatus === "delivered") && !selectedGodown) {
+      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
+      return;
+    }
+
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
@@ -179,6 +194,7 @@ export default function NewOrder() {
       driverName,
       deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
       dispatchRemarks: remarks,
+      godownId: selectedGodown || undefined,
     };
 
     const result = await addOrder(order);
@@ -358,6 +374,19 @@ export default function NewOrder() {
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Source Warehouse {(deliveryStatus === "dispatched" || deliveryStatus === "delivered") ? "*" : ""}</Label>
+                  <Select value={selectedGodown} onValueChange={setSelectedGodown}>
+                    <SelectTrigger className="h-11 rounded-lg md:h-12">
+                      <SelectValue placeholder="Select warehouse" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {godowns.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dispatch Date</Label>
                   <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-11 rounded-lg md:h-12" />

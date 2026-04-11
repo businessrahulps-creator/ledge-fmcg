@@ -182,6 +182,7 @@ export type Database = {
           distributor_id: string
           distributor_name: string
           driver_name: string
+          godown_id: string | null
           id: string
           order_number: string
           payment_mode: Database["public"]["Enums"]["payment_mode"]
@@ -202,6 +203,7 @@ export type Database = {
           distributor_id: string
           distributor_name: string
           driver_name?: string
+          godown_id?: string | null
           id?: string
           order_number: string
           payment_mode?: Database["public"]["Enums"]["payment_mode"]
@@ -222,6 +224,7 @@ export type Database = {
           distributor_id?: string
           distributor_name?: string
           driver_name?: string
+          godown_id?: string | null
           id?: string
           order_number?: string
           payment_mode?: Database["public"]["Enums"]["payment_mode"]
@@ -245,6 +248,13 @@ export type Database = {
             columns: ["distributor_id"]
             isOneToOne: false
             referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_godown_id_fkey"
+            columns: ["godown_id"]
+            isOneToOne: false
+            referencedRelation: "godowns"
             referencedColumns: ["id"]
           },
           {

@@ -83,6 +83,7 @@ function mapOrders(ordersData: any[], allLines: any[]): Order[] {
       driverName: o.driver_name,
       deliveryStatus: o.delivery_status as Order["deliveryStatus"],
       dispatchRemarks: o.dispatch_remarks,
+      godownId: o.godown_id || undefined,
     };
   });
 }
@@ -296,6 +297,71 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [companyId, rawProducts, locations]);
 
+  // --- Stock deduction helper ---
+  const deductStockForOrder = useCallback(async (
+    orderId: string, lines: OrderLine[], godownId: string, cId: string
+  ) => {
+    const today = new Date().toISOString().split("T")[0];
+    let hasNegative = false;
+
+    for (const line of lines) {
+      // Insert stock_deduction record
+      await supabase.from("stock_deductions").insert({
+        company_id: cId,
+        order_id: orderId,
+        product_id: line.productId,
+        godown_id: godownId,
+        quantity_deducted: line.quantity,
+        date: today,
+      });
+
+      // Find matching stock_item and decrement
+      const existing = stockItems.find(
+        si => si.productId === line.productId && si.godownId === godownId
+      );
+      if (existing) {
+        const newQty = existing.quantity - line.quantity;
+        if (newQty < 0) hasNegative = true;
+        await supabase.from("stock_items").update({
+          quantity: newQty,
+          last_deducted_date: today,
+        }).eq("id", existing.id);
+        // Optimistic local update
+        setStockItems(prev => prev.map(si =>
+          si.id === existing.id ? { ...si, quantity: newQty, lastDeductedDate: today } : si
+        ));
+      } else {
+        // No stock record — create one with negative qty
+        hasNegative = true;
+        const { data } = await supabase.from("stock_items").insert({
+          company_id: cId,
+          product_id: line.productId,
+          godown_id: godownId,
+          quantity: -line.quantity,
+          threshold: 0,
+          last_deducted_date: today,
+        }).select().single();
+        if (data) {
+          const prod = rawProducts.find(p => p.id === line.productId);
+          const gd = locations.find(g => g.id === godownId);
+          setStockItems(prev => [...prev, {
+            id: data.id, productId: line.productId, godownId,
+            productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",
+            godownName: gd?.name || "",
+            quantity: -line.quantity, threshold: 0, basePrice: prod?.basePrice || 0,
+            lastDeductedDate: today,
+          }]);
+        }
+      }
+    }
+
+    if (hasNegative) {
+      toast.warning("Negative stock warning", {
+        description: "Some products now have negative stock in this warehouse. This is allowed but please reconcile inventory.",
+      });
+    }
+  }, [stockItems, rawProducts, locations]);
+
   // --- CRUD operations ---
 
   const addOrder = useCallback(async (order: Order): Promise<AddOrderResult> => {
@@ -331,6 +397,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         driver_name: order.driverName,
         delivery_status: order.deliveryStatus,
         dispatch_remarks: order.dispatchRemarks,
+        godown_id: order.godownId || null,
       }).select().single();
 
       if (error || !inserted) {
@@ -352,6 +419,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (linesError) throw linesError;
       }
 
+      // Auto-deduct stock if dispatched/delivered
+      if (order.godownId && (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered")) {
+        await deductStockForOrder(inserted.id, order.lines, order.godownId, companyId);
+      }
+
       // Add to local state optimistically
       const newOrder: Order = { ...order, id: inserted.id, orderNumber };
       setOrders(prev => [newOrder, ...prev]);
@@ -362,9 +434,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to create order", { description: msg });
       return { success: false, error: msg };
     }
-  }, [companyId]);
+  }, [companyId, deductStockForOrder]);
 
   const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
+    // Find the current order to check previous delivery status
+    const currentOrder = orders.find(o => o.id === id);
+    const previousDelivery = currentOrder?.deliveryStatus || "pending";
+    const newDelivery = updates.deliveryStatus || previousDelivery;
+
     const dbUpdates: Record<string, any> = {};
     if (updates.paymentMode !== undefined) dbUpdates.payment_mode = updates.paymentMode;
     if (updates.paymentStatus !== undefined) dbUpdates.payment_status = updates.paymentStatus;
@@ -373,13 +450,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.vehicle !== undefined) dbUpdates.vehicle = updates.vehicle;
     if (updates.driverName !== undefined) dbUpdates.driver_name = updates.driverName;
     if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = updates.dispatchRemarks;
+    if (updates.godownId !== undefined) dbUpdates.godown_id = updates.godownId || null;
 
     if (Object.keys(dbUpdates).length > 0) {
       const { error } = await supabase.from("orders").update(dbUpdates as any).eq("id", id);
       if (error) { toast.error("Failed to update order", { description: error.message }); return; }
     }
+
+    // Deduct stock if transitioning from pending to dispatched/delivered
+    const godownId = updates.godownId || currentOrder?.godownId;
+    if (
+      previousDelivery === "pending" &&
+      (newDelivery === "dispatched" || newDelivery === "delivered") &&
+      godownId && currentOrder && companyId
+    ) {
+      await deductStockForOrder(id, currentOrder.lines, godownId, companyId);
+    }
+
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-  }, []);
+  }, [orders, companyId, deductStockForOrder]);
 
   // Distributors
   const addDistributor = useCallback(async (d: Distributor) => {
