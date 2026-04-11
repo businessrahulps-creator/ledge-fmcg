@@ -752,6 +752,7 @@ export default function Stock() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </>)}
       </div>
     </AppLayout>
   );
