@@ -307,7 +307,7 @@ export default function Stock() {
                     placeholder="Search products..."
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
-                    className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
+                    className="h-10 rounded-lg pl-10 md:max-w-md"
                   />
                 </div>
                 {!isAccountant && (
@@ -660,21 +660,21 @@ export default function Stock() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Product Name *</Label>
-                  <Input value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-10 rounded-lg" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">SKU *</Label>
-                    <Input value={editProduct.sku} onChange={(e) => setEditProduct({ ...editProduct, sku: e.target.value })} placeholder="RIC-BAS-5K" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editProduct.sku} onChange={(e) => setEditProduct({ ...editProduct, sku: e.target.value })} placeholder="RIC-BAS-5K" className="h-10 rounded-lg" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Unit</Label>
-                    <Input value={editProduct.unit} onChange={(e) => setEditProduct({ ...editProduct, unit: e.target.value })} placeholder="Pack" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editProduct.unit} onChange={(e) => setEditProduct({ ...editProduct, unit: e.target.value })} placeholder="Pack" className="h-10 rounded-lg" />
                   </div>
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Base Price (₹) *</Label>
-                  <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-11 rounded-lg md:h-12" />
+                  <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-10 rounded-lg" />
                 </div>
               </div>
             )}
@@ -711,11 +711,11 @@ export default function Stock() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Warehouse Name *</Label>
-                  <Input value={editWarehouse.name} onChange={(e) => setEditWarehouse({ ...editWarehouse, name: e.target.value })} placeholder="e.g. Main Warehouse — Kochi" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editWarehouse.name} onChange={(e) => setEditWarehouse({ ...editWarehouse, name: e.target.value })} placeholder="e.g. Main Warehouse — Kochi" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Address</Label>
-                  <Input value={editWarehouse.address} onChange={(e) => setEditWarehouse({ ...editWarehouse, address: e.target.value })} placeholder="Full address" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editWarehouse.address} onChange={(e) => setEditWarehouse({ ...editWarehouse, address: e.target.value })} placeholder="Full address" className="h-10 rounded-lg" />
                 </div>
               </div>
             )}
@@ -776,7 +776,7 @@ export default function Stock() {
                       min={0}
                       value={editStockItem.quantity}
                       onChange={(e) => setEditStockItem({ ...editStockItem, quantity: parseInt(e.target.value) || 0 })}
-                      className="h-11 rounded-lg md:h-12"
+                      className="h-10 rounded-lg"
                     />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
@@ -786,7 +786,7 @@ export default function Stock() {
                       min={0}
                       value={editStockItem.threshold}
                       onChange={(e) => setEditStockItem({ ...editStockItem, threshold: parseInt(e.target.value) || 0 })}
-                      className="h-11 rounded-lg md:h-12"
+                      className="h-10 rounded-lg"
                     />
                   </div>
                 </div>
@@ -814,7 +814,7 @@ export default function Stock() {
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Product *</Label>
                 <Select value={addStockProductId} onValueChange={setAddStockProductId}>
-                  <SelectTrigger className="h-11 rounded-lg md:h-12">
+                  <SelectTrigger className="h-10 rounded-lg">
                     <SelectValue placeholder="Select product" />
                   </SelectTrigger>
                   <SelectContent>
@@ -831,7 +831,7 @@ export default function Stock() {
                   min={1}
                   value={addStockQty}
                   onChange={(e) => setAddStockQty(parseInt(e.target.value) || 0)}
-                  className="h-11 rounded-lg md:h-12"
+                  className="h-10 rounded-lg"
                 />
               </div>
             </div>

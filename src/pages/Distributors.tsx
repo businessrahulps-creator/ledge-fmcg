@@ -150,7 +150,7 @@ export default function Distributors() {
             placeholder="Search dealers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
+            className="h-10 rounded-lg pl-10 md:max-w-md"
           />
         </div>
 
@@ -220,16 +220,16 @@ export default function Distributors() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer Name *</Label>
-                  <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-11 rounded-lg md:h-12" />
+                  <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-10 rounded-lg" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Location</Label>
-                    <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-10 rounded-lg" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Contact *</Label>
-                    <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-11 rounded-lg md:h-12" />
+                    <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                   </div>
                 </div>
               </div>

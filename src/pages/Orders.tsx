@@ -231,11 +231,11 @@ export default function Orders() {
               placeholder="Search orders..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 rounded-lg pl-10 md:h-12"
+              className="h-10 rounded-lg pl-10"
             />
           </div>
           <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-            <SelectTrigger className="h-11 w-full rounded-lg sm:w-44 md:h-12">
+            <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
               <SelectValue placeholder="Payment" />
             </SelectTrigger>
             <SelectContent>
@@ -246,7 +246,7 @@ export default function Orders() {
             </SelectContent>
           </Select>
           <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-            <SelectTrigger className="h-11 w-full rounded-lg sm:w-44 md:h-12">
+            <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
               <SelectValue placeholder="Delivery" />
             </SelectTrigger>
             <SelectContent>
@@ -451,7 +451,7 @@ export default function Orders() {
                     <div className="space-y-1.5">
                       <Label className="text-xs md:text-sm">Source Warehouse {(editDelivery === "dispatched" || editDelivery === "delivered") ? "*" : ""}</Label>
                       <Select value={editGodown} onValueChange={setEditGodown}>
-                        <SelectTrigger className="h-11 rounded-lg md:h-12">
+                        <SelectTrigger className="h-10 rounded-lg">
                           <SelectValue placeholder="Select warehouse" />
                         </SelectTrigger>
                         <SelectContent>

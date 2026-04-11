@@ -65,10 +65,10 @@ export const pdfStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#1A1A1A",
+    backgroundColor: "#374151",
     color: "#fff",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
   },
   tableHeaderCell: {
     fontSize: 7,

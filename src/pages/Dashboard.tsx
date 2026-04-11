@@ -48,6 +48,13 @@ export default function Dashboard() {
   const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
+  const kpiAccents = [
+    "border-l-4 border-l-emerald-500",
+    "border-l-4 border-l-blue-500",
+    "border-l-4 border-l-amber-500",
+    "border-l-4 border-l-indigo-500",
+  ];
+
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue) },
     { label: "Orders", value: totalOrders.toString() },
@@ -82,7 +89,7 @@ export default function Dashboard() {
                 aria-label={DAY_LABELS[i]}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   i === selectedDay
-                    ? "bg-foreground/85 text-background shadow-md"
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -100,10 +107,10 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, type: "spring", stiffness: 280 + i * 15, damping: 22 + i * 2 }}
-              className="glass-card p-5 md:p-7 min-w-0"
+              className={`glass-card p-5 md:p-7 min-w-0 ${kpiAccents[i]}`}
             >
-              <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
-              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap">{kpi.value}</p>
+              <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
@@ -128,7 +135,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
+                      className="h-full rounded-full bg-primary/30 dark:bg-primary/40"
                     />
                   </div>
                 </div>
@@ -154,7 +161,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
+                      className="h-full rounded-full bg-primary/30 dark:bg-primary/40"
                     />
                   </div>
                 </div>
@@ -193,7 +200,7 @@ export default function Dashboard() {
               <div className="hidden md:block glass-card overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                     <tr className="border-b border-border bg-muted/40 text-left text-xs text-muted-foreground">
+                     <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
                        <th className="px-6 py-3 font-semibold">Order</th>
                        <th className="px-6 py-3 font-semibold">Dealer</th>
                        <th className="px-6 py-3 font-semibold">Date</th>
@@ -222,8 +229,8 @@ export default function Dashboard() {
                 {recentOrders.map((o, i) => (
                   <motion.div
                     key={o.id}
-                    initial={{ opacity: 0, y: i % 2 === 0 ? 16 : 0, x: i % 2 === 0 ? 0 : -8 }}
-                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
                     className="glass-card card-hover p-4"
                   >
