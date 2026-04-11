@@ -8,6 +8,7 @@ import { NotificationProvider } from "@/hooks/use-notifications";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
