@@ -1,72 +1,36 @@
 
 
-# Role-Based Access Control — Accountant View-Only on Stock
+# Company Logo Upload — Bug #7 Fix
 
 ## Overview
-Add role awareness to the AuthContext, restrict the Stock page UI for accountants, tighten RLS policies, and show a role badge in the header.
+Make the "Upload Logo" button functional in Settings → Company tab. Add storage bucket, DB column, file upload logic, logo display in sidebar header.
 
-## 1. AuthContext — expose user role
+## 1. Database Migration
+- Add `logo_url text` column (default `''`) to `companies` table
+- Create `company-logos` storage bucket (public)
+- Add RLS policies on `storage.objects` for the bucket: authenticated users can upload/update/delete in their company path, anyone can read (public bucket)
 
-Add `userRole` state to `AuthContext`. After fetching the profile, query `user_roles` table for the current user and expose the role string (e.g. `"accountant"`, `"super_admin"`, `"sales_manager"`).
+## 2. Settings Page (`src/pages/Settings.tsx`)
+- Add hidden `<input type="file" accept="image/*">` ref
+- Wire "Upload Logo" button to trigger file picker
+- On file select: validate ≤2MB, upload to `logos/${companyId}/${filename}`, get public URL, update `companies.logo_url`
+- Add `logoUrl` state, fetch it alongside other company fields
+- Display uploaded logo in the placeholder area (replace Building2 icon)
+- Add "Remove Logo" button (visible when logo exists) that clears `logo_url` and optionally deletes the file
+- Use Sonner `toast` for success/error feedback (switch from `useToast` for these operations)
 
-**File**: `src/context/AuthContext.tsx`
-- Add `userRole: string | null` to state and context type
-- After `fetchProfile`, do a secondary fetch: `supabase.from('user_roles').select('role').eq('user_id', userId).single()` → set `userRole`
-- Expose `userRole` and a convenience `isAccountant` boolean in the context value
+## 3. Sidebar Header (`src/components/layout/AppSidebar.tsx`)
+- Import `useAuth` to get `companyId`
+- Fetch `logo_url` from companies table (or subscribe to realtime)
+- Display small logo image next to "Ledge" text when available
 
-## 2. Stock page — conditional UI for accountants
+## 4. Realtime
+- Enable realtime on `companies` table so logo updates propagate across tabs
 
-**File**: `src/pages/Stock.tsx`
-- Import `useAuth` and read `isAccountant`
-- **Products tab**: hide "Add Product" button, hide edit/delete action buttons in table rows and mobile cards, hide empty-state "Add Product" button
-- **Warehouses tab**: hide "Add Warehouse" button, hide edit/delete buttons on warehouse cards
-- **Inventory section**: hide "Add Stock" button, make inventory rows non-clickable (no edit dialog)
-- All read-only views (lists, search, health badges, totals) remain visible
-- Do NOT render any of the edit/add/delete Dialogs when `isAccountant` is true
-
-## 3. Role badge in header
-
-**File**: `src/components/layout/AppLayout.tsx`
-- Import `useAuth`, read `userRole`
-- Show a small Badge next to the notification bell displaying the role (e.g. "Accountant", "Super Admin")
-
-## 4. Database migration — tighten RLS
-
-Restrict `INSERT`, `UPDATE`, `DELETE` on `products`, `godowns`, and `stock_items` to exclude accountant role. Modify existing policies to add `NOT has_role(auth.uid(), 'accountant')` condition.
-
-```sql
--- Products: restrict write operations
-DROP POLICY "Company members can insert products" ON products;
-CREATE POLICY "Non-accountant members can insert products" ON products
-  FOR INSERT TO authenticated
-  WITH CHECK (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
-
-DROP POLICY "Company members can update products" ON products;
-CREATE POLICY "Non-accountant members can update products" ON products
-  FOR UPDATE TO authenticated
-  USING (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'))
-  WITH CHECK (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
-
-DROP POLICY "Company members can delete products" ON products;
-CREATE POLICY "Non-accountant members can delete products" ON products
-  FOR DELETE TO authenticated
-  USING (company_id = get_company_id() AND NOT has_role(auth.uid(), 'accountant'));
-
--- Same pattern for godowns and stock_items (6 more policies)
-```
-
-SELECT policies remain unchanged — accountants can still read everything and receive realtime updates.
-
-## Files changed
+## Files Changed
 | File | Change |
 |------|--------|
-| `src/context/AuthContext.tsx` | Add `userRole` / `isAccountant` to context |
-| `src/pages/Stock.tsx` | Conditionally hide all write UI for accountants |
-| `src/components/layout/AppLayout.tsx` | Show role badge in header |
-| Migration SQL | Tighten 9 RLS policies on products, godowns, stock_items |
-
-## What stays untouched
-- All other pages (Orders, Dealers, Sales Team, Reports, Settings, Dashboard)
-- Realtime subscriptions (SELECT policies unchanged)
-- DataContext, services/api
+| Migration SQL | Add `logo_url` column, create storage bucket + policies |
+| `src/pages/Settings.tsx` | File upload, logo display, remove logo |
+| `src/components/layout/AppSidebar.tsx` | Show company logo in header |
 
