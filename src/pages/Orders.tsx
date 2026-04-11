@@ -7,7 +7,7 @@ import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
 import { Plus, Search, Filter, Trash2, Download, FileText, Share2 } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { OrderInvoicePdf } from "@/components/pdf/OrderInvoicePdf";
@@ -599,7 +599,7 @@ export default function Orders() {
                 showTable={sel.table}
                 summary={[
                   { label: "Total Orders", value: String(filtered.length) },
-                  { label: "Total Amount", value: formatCurrency(totalAmount) },
+                  { label: "Total Amount", value: formatCurrencyPdf(totalAmount) },
                 ]}
                 columns={[
                   { header: "Order #", width: "12%" },
@@ -615,7 +615,7 @@ export default function Orders() {
                   formatIndianDate(o.date),
                   o.distributorName,
                   o.salesperson,
-                  formatCurrency(o.total),
+                  formatCurrencyPdf(o.total),
                   o.paymentStatus,
                   o.deliveryStatus,
                 ])}
