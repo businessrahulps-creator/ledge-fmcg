@@ -1,13 +1,14 @@
-import { ReactNode, useRef, useEffect } from "react";
+import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff } from "lucide-react";
-import { motion } from "framer-motion";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { getQueue } from "@/lib/offline-store";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
