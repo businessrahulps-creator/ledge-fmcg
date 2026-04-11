@@ -53,6 +53,7 @@ function HealthBadge({ health }: { health: string }) {
 }
 
 export default function Stock() {
+  const { isAccountant } = useAuth();
   const api = useApi();
   const products = api.products.list();
   const addProduct = api.products.create;
