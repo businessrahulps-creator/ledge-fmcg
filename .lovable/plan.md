@@ -1,45 +1,29 @@
 
 
-# Bug #11 Enhancement: Complete Offline Support
+# Add Sync Queue Viewer Tab in Settings
 
-## Current State
-The core offline system is already implemented and functional:
-- IndexedDB caching via `idb-keyval` for all DataContext entities
-- Mutation queue with offline CRUD for orders, distributors, salespersons, products, godowns, stock items
-- Sync-on-reconnect with queue replay
-- Offline banner with pending count and syncing animation
-- Online/offline detection with toasts
-
-## Remaining Gaps
-
-### 1. Notifications not cached offline
-`use-notifications.tsx` fetches from Supabase but has no IDB fallback — notifications disappear when offline.
-
-### 2. Realtime not paused/resumed on connectivity change
-The realtime channel stays subscribed when offline (causing console errors) and doesn't explicitly reconnect. Should unsubscribe when offline and resubscribe when online — both in DataContext and NotificationProvider.
-
-### 3. "Back online — all changes synced" toast wording
-The sync toast in DataContext already says "Back online — changes synced" but the spec wants "Back online — all changes synced". Minor text fix.
+## Overview
+Add a new "Sync Queue" tab to the Settings page that displays all pending offline mutations from IndexedDB, showing their type, table, timestamp, and payload summary.
 
 ## Changes
 
-### `src/lib/offline-store.ts`
-- Add `"notifications"` to the `ENTITIES` tuple so notifications can be cached.
+### `src/pages/Settings.tsx`
+- Import `getQueue`, `clearQueue`, `QueuedMutation` from `@/lib/offline-store`
+- Import `Clock`, `Database`, `Trash2` (reuse existing) icons
+- Add state: `queuedMutations` array, loaded on mount and refreshed every 3 seconds
+- Add a new `TabsTrigger` value `"sync"` labeled "Sync Queue" with a badge showing count when > 0
+- Add corresponding `TabsContent` with a card containing:
+  - A table listing each queued mutation: **Type** (insert/update/delete badge), **Table** name, **Timestamp** (formatted with Indian locale `toLocaleString("en-IN")`), and a truncated **Payload** preview
+  - A "Clear Queue" button (with confirmation) that calls `clearQueue()` and refreshes
+  - Empty state: "No pending changes" message when queue is empty
+- Polling `useEffect` that calls `getQueue()` every 3s to stay current
 
-### `src/hooks/use-notifications.tsx`
-- After fetching notifications, cache them to IDB via `cacheData(companyId, "notifications", ...)`.
-- In the fetch `catch`/failure path, load cached notifications from IDB when `!navigator.onLine`.
-- Wrap realtime subscription: only subscribe when `navigator.onLine`; listen for `online`/`offline` events to teardown and re-create the channel.
-
-### `src/context/DataContext.tsx`
-- **Realtime pause/resume**: wrap the realtime `useEffect` to check `navigator.onLine`. Add `online`/`offline` event listeners inside the effect to unsubscribe/resubscribe the channel dynamically.
-- Fix sync toast text: "Back online — all changes synced".
-
-### `src/components/layout/AppLayout.tsx`
-- No changes needed — banner already works correctly.
+### No other files changed
+All queue utilities already exist in `offline-store.ts`.
 
 ## Technical Notes
-- Realtime pause: on `offline` event, call `supabase.removeChannel(channel)`. On `online` event, re-create and subscribe the channel. This prevents console errors and unnecessary retry loops.
-- Notifications cache uses the same `cacheData`/`getCachedData` pattern as other entities.
-- All existing online flows remain 100% unchanged — changes are additive guards.
+- Uses existing `getQueue`/`clearQueue` from offline-store — no new dependencies
+- Timestamps rendered via `new Date(ts).toLocaleString("en-IN")` for Indian locale
+- Payload shown as truncated `JSON.stringify` (first 80 chars) to keep rows compact
+- Badge on tab trigger uses the same pill style as the offline banner pending count
 
