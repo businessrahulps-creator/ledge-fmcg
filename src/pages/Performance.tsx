@@ -77,6 +77,20 @@ function getCutoffDate(period: TimePeriod): Date {
   return cutoff;
 }
 
+/** Get the previous period cutoff for comparison */
+function getPreviousCutoff(period: TimePeriod, currentCutoff: Date): Date {
+  const prev = new Date(currentCutoff);
+  const now = new Date();
+  const diffMs = now.getTime() - currentCutoff.getTime();
+  prev.setTime(currentCutoff.getTime() - diffMs);
+  return prev;
+}
+
+function pctChange(current: number, previous: number): number | null {
+  if (previous === 0) return current > 0 ? 100 : null;
+  return ((current - previous) / previous) * 100;
+}
+
 const PAYMENT_COLORS: Record<string, string> = {
   paid: "hsl(142, 71%, 45%)",
   partial: "hsl(38, 92%, 50%)",
