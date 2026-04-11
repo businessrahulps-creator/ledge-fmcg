@@ -333,12 +333,12 @@ export default function Performance() {
 
           {/* Time period pills */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
+            <div className="flex gap-1 rounded-full bg-muted/50 p-1">
               {PERIOD_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setPeriod(opt.value)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                     period === opt.value && period !== "custom"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -349,7 +349,7 @@ export default function Performance() {
               ))}
               <button
                 onClick={() => setPeriod("custom")}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                   period === "custom"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
