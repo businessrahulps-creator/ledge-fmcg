@@ -871,7 +871,6 @@ export default function Performance() {
         }}
       />
       </div>
-      </div>
     </AppLayout>
   );
 }
