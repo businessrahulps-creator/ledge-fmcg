@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 export type NotificationType = "order_placed" | "stock_alert" | "team_update" | "general";
 
@@ -21,55 +23,112 @@ interface NotificationContextValue {
 
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
-let idCounter = 0;
-const genId = () => `notif-${++idCounter}-${Date.now()}`;
+interface DbNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  company_id: string;
+  user_id: string;
+}
 
-const seedNotifications: Notification[] = [
-  {
-    id: "seed-1",
-    type: "order_placed",
-    title: "New Order Received",
-    description: "Order #1042 from Sharma Traders has been placed.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    read: false,
-  },
-  {
-    id: "seed-2",
-    type: "stock_alert",
-    title: "Low Stock Alert",
-    description: "Premium Cement (50kg) is running low — only 12 bags left.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    read: false,
-  },
-  {
-    id: "seed-3",
-    type: "team_update",
-    title: "Team Member Added",
-    description: "Ravi Kumar joined as Sales Manager.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    read: true,
-  },
-];
+function mapDbToNotif(row: DbNotification): Notification {
+  return {
+    id: row.id,
+    type: (row.type as NotificationType) || "general",
+    title: row.title,
+    description: row.message,
+    timestamp: new Date(row.created_at),
+    read: row.read,
+  };
+}
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(seedNotifications);
+  const { user, companyId } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const addNotification = useCallback((type: NotificationType, title: string, description: string) => {
-    setNotifications((prev) => [
-      { id: genId(), type, title, description, timestamp: new Date(), read: false },
-      ...prev,
-    ]);
-  }, []);
+  // Fetch on mount / when companyId changes
+  useEffect(() => {
+    if (!companyId) {
+      setNotifications([]);
+      return;
+    }
 
-  const markAsRead = useCallback((id: string) => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (data) setNotifications(data.map(mapDbToNotif));
+    };
+    load();
+
+    // Realtime subscription
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const row = payload.new as DbNotification;
+          setNotifications((prev) => {
+            if (prev.some((n) => n.id === row.id)) return prev;
+            return [mapDbToNotif(row), ...prev];
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notifications" },
+        (payload) => {
+          const row = payload.new as DbNotification;
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === row.id ? mapDbToNotif(row) : n))
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId]);
+
+  const addNotification = useCallback(
+    async (type: NotificationType, title: string, description: string) => {
+      if (!companyId || !user) return;
+      await supabase.from("notifications").insert({
+        company_id: companyId,
+        user_id: user.id,
+        type,
+        title,
+        message: description,
+      });
+      // Realtime subscription will add it to local state
+    },
+    [companyId, user]
+  );
+
+  const markAsRead = useCallback(async (id: string) => {
+    // Optimistic update
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
   }, []);
 
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
+    if (!companyId) return;
+    await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("company_id", companyId)
+      .eq("read", false);
+  }, [companyId]);
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
