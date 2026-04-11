@@ -186,7 +186,7 @@ export function AppSidebar() {
                       className="flex flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors"
                       activeClassName="text-foreground"
                     >
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-primary/10 text-primary" : "hover:bg-sidebar-accent/50"}`}>
                         <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                       </div>
                       <span className="text-[10px] font-medium leading-tight text-muted-foreground truncate max-w-[56px]">
@@ -202,9 +202,12 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink
                     to={item.url}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-sidebar-accent ${isActive ? "bg-sidebar-accent" : ""}`}
-                    activeClassName="text-foreground"
+                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "bg-primary/[0.06] font-semibold text-primary" : "font-medium text-foreground/80"}`}
+                    activeClassName="text-primary"
                   >
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-primary" />
+                    )}
                     <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                     <span>{item.title}</span>
                   </NavLink>

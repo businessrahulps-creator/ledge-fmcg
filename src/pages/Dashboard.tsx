@@ -48,6 +48,13 @@ export default function Dashboard() {
   const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
+  const kpiAccents = [
+    "border-l-4 border-l-emerald-500",
+    "border-l-4 border-l-blue-500",
+    "border-l-4 border-l-amber-500",
+    "border-l-4 border-l-indigo-500",
+  ];
+
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue) },
     { label: "Orders", value: totalOrders.toString() },
@@ -82,7 +89,7 @@ export default function Dashboard() {
                 aria-label={DAY_LABELS[i]}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   i === selectedDay
-                    ? "bg-foreground/85 text-background shadow-md"
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}
               >
