@@ -297,7 +297,7 @@ export default function Distributors() {
                         ];
                         downloadPdf(
                           pdfFilename("dealer", selected.name.replace(/\s+/g, "-")),
-                          ReportPdf({ title: selected.name, subtitle: "Dealer Profile", columns, rows, companyName: "" })
+                          ReportPdf({ title: selected.name, subtitle: "Dealer Profile", columns, rows, companyName: api.companyInfo.name })
                         );
                       }}
                     >
