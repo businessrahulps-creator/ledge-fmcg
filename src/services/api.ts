@@ -8,6 +8,7 @@ export function useApi() {
 
   return {
     loading: data.loading,
+    companyInfo: data.companyInfo,
     orders: {
       list: () => data.orders,
       create: (order: Order): Promise<AddOrderResult> => data.addOrder(order),

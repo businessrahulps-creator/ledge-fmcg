@@ -13,6 +13,7 @@ import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function SalesTeamReport() {
   const api = useApi();
+  const { companyInfo } = api;
   const orders = api.orders.list();
   const salespersons = api.salespersons.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
@@ -182,6 +183,9 @@ export function SalesTeamReport() {
           downloadPdf(
             pdfFilename("sales-team-report"),
             <ReportPdf
+              companyName={companyInfo.name}
+              companyAddress={companyInfo.address}
+              gstin={companyInfo.gstin}
               title="Sales Team Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

@@ -74,6 +74,7 @@ const deliveryStatuses = [
 
 export default function Orders() {
   const api = useApi();
+  const { companyInfo } = api;
   const orders = api.orders.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
@@ -509,7 +510,7 @@ export default function Orders() {
                     onClick={() => {
                       downloadPdf(
                         pdfFilename("invoice", selectedOrder.orderNumber),
-                        <OrderInvoicePdf order={selectedOrder} />
+                        <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} />
                       );
                     }}
                   >
@@ -567,6 +568,9 @@ export default function Orders() {
             downloadPdf(
               pdfFilename("orders"),
               <ReportPdf
+                companyName={companyInfo.name}
+                companyAddress={companyInfo.address}
+                gstin={companyInfo.gstin}
                 title="Orders Report"
                 subtitle={`${filtered.length} orders`}
                 showCompany={sel.company}

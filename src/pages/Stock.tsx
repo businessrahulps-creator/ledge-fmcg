@@ -61,6 +61,7 @@ function HealthBadge({ health }: { health: string }) {
 export default function Stock() {
   const { isAccountant } = useAuth();
   const api = useApi();
+  const { companyInfo } = api;
   const products = api.products.list();
   const addProduct = api.products.create;
   const updateProduct = api.products.update;
@@ -850,6 +851,9 @@ export default function Stock() {
             downloadPdf(
               pdfFilename("products"),
               <ReportPdf
+                companyName={companyInfo.name}
+                companyAddress={companyInfo.address}
+                gstin={companyInfo.gstin}
                 title="Products Report"
                 subtitle={`${filteredProducts.length} products`}
                 showCompany={sel.company}
@@ -890,6 +894,9 @@ export default function Stock() {
             downloadPdf(
               pdfFilename("inventory", whName.toLowerCase().replace(/\s+/g, "-")),
               <ReportPdf
+                companyName={companyInfo.name}
+                companyAddress={companyInfo.address}
+                gstin={companyInfo.gstin}
                 title={`Inventory — ${whName}`}
                 subtitle={`${warehouseInventory.length} products`}
                 showCompany={sel.company}

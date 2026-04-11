@@ -15,6 +15,7 @@ import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function DispatchReport() {
   const api = useApi();
+  const { companyInfo } = api;
   const orders = api.orders.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
@@ -211,6 +212,9 @@ export function DispatchReport() {
           downloadPdf(
             pdfFilename("dispatch-report"),
             <ReportPdf
+              companyName={companyInfo.name}
+              companyAddress={companyInfo.address}
+              gstin={companyInfo.gstin}
               title="Dispatch Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}

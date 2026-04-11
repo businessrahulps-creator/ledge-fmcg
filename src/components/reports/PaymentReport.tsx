@@ -15,6 +15,7 @@ import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function PaymentReport() {
   const api = useApi();
+  const { companyInfo } = api;
   const orders = api.orders.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
@@ -201,6 +202,9 @@ export function PaymentReport() {
           downloadPdf(
             pdfFilename("payment-report"),
             <ReportPdf
+              companyName={companyInfo.name}
+              companyAddress={companyInfo.address}
+              gstin={companyInfo.gstin}
               title="Payment Report"
               subtitle={periodLabel(period)}
               showCompany={sel.company}
