@@ -57,6 +57,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
 
+          {!online && (
+            <div className="flex items-center justify-center gap-1.5 bg-amber-500/10 py-1 text-center text-xs text-amber-600 dark:text-amber-400">
+              <WifiOff className="h-3 w-3" />
+              Offline — using cached data
+            </div>
+          )}
+
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0 animate-fade-in">
               {children}
