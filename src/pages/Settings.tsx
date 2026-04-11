@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,12 +68,15 @@ export default function Settings() {
   const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyGstin, setCompanyGstin] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin")
+      .select("name, address, gstin, logo_url")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -80,9 +84,75 @@ export default function Settings() {
           setCompanyName(data.name || "");
           setCompanyAddress(data.address || "");
           setCompanyGstin(data.gstin || "");
+          setLogoUrl(data.logo_url || "");
         }
       });
   }, [companyId]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !companyId) return;
+    if (file.size > 2 * 1024 * 1024) {
+      sonnerToast.error("File too large", { description: "Logo must be under 2MB." });
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      sonnerToast.error("Invalid file type", { description: "Please upload an image file." });
+      return;
+    }
+    setLogoUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `logos/${companyId}/logo.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("company-logos")
+        .getPublicUrl(path);
+
+      const { error: updateError } = await supabase
+        .from("companies")
+        .update({ logo_url: publicUrl })
+        .eq("id", companyId);
+      if (updateError) throw updateError;
+
+      setLogoUrl(publicUrl);
+      sonnerToast.success("Logo uploaded", { description: "Company logo has been updated." });
+    } catch (err: any) {
+      sonnerToast.error("Upload failed", { description: err?.message || "Could not upload logo." });
+    }
+    setLogoUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!companyId) return;
+    setLogoUploading(true);
+    try {
+      // List and delete all files in the company's logo folder
+      const { data: files } = await supabase.storage
+        .from("company-logos")
+        .list(`logos/${companyId}`);
+      if (files && files.length > 0) {
+        await supabase.storage
+          .from("company-logos")
+          .remove(files.map((f) => `logos/${companyId}/${f.name}`));
+      }
+      const { error } = await supabase
+        .from("companies")
+        .update({ logo_url: "" })
+        .eq("id", companyId);
+      if (error) throw error;
+      setLogoUrl("");
+      sonnerToast.success("Logo removed", { description: "Company logo has been removed." });
+    } catch (err: any) {
+      sonnerToast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
+    }
+    setLogoUploading(false);
+  };
 
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [teamLoading, setTeamLoading] = useState(true);
@@ -257,16 +327,32 @@ export default function Settings() {
           <TabsContent value="company">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
               <div className="glass-card p-4 space-y-4 md:p-6 md:space-y-6">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 md:h-16 md:w-16">
-                    <Building2 className="h-6 w-6 text-muted-foreground md:h-7 md:w-7" strokeWidth={1.5} />
+                  <div className="relative flex h-14 w-14 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 md:h-16 md:w-16 overflow-hidden">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Company logo" className="h-full w-full object-cover" />
+                    ) : (
+                      <Building2 className="h-6 w-6 text-muted-foreground md:h-7 md:w-7" strokeWidth={1.5} />
+                    )}
                   </div>
-                  <div>
-                    <Button variant="outline" size="sm">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" disabled={logoUploading} onClick={() => fileInputRef.current?.click()}>
                       <Upload className="h-3.5 w-3.5" />
-                      Upload Logo
+                      {logoUploading ? "Uploading…" : "Upload Logo"}
                     </Button>
-                    <p className="mt-1 text-[10px] text-muted-foreground md:text-xs">PNG, JPG up to 2MB</p>
+                    {logoUrl && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" disabled={logoUploading} onClick={handleRemoveLogo}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    <p className="text-[10px] text-muted-foreground md:text-xs">PNG, JPG up to 2MB</p>
                   </div>
                 </div>
 
