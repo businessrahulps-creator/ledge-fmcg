@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle } from "lucide-react";
-import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, QueuedMutation } from "@/lib/offline-store";
+import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,17 @@ export default function Settings() {
     const loadQueue = async () => {
       const queue = await getQueue();
       setQueuedMutations(queue);
+      const stored = await getRetryStatus();
+      // Clean up statuses for mutations no longer in queue
+      const queueIds = new Set(queue.map(m => m.id));
+      const cleaned: Record<string, "success" | "failed"> = {};
+      for (const [id, status] of Object.entries(stored)) {
+        if (queueIds.has(id)) cleaned[id] = status;
+      }
+      setRetryStatus(cleaned);
+      if (Object.keys(cleaned).length !== Object.keys(stored).length) {
+        await saveRetryStatus(cleaned);
+      }
     };
     loadQueue();
     const interval = setInterval(loadQueue, 3000);
@@ -657,10 +668,14 @@ export default function Settings() {
                                     }
                                     const result = await replaySingleMutation(m);
                                     if (result.ok) {
-                                      setRetryStatus(prev => ({ ...prev, [m.id]: "success" }));
+                                      const updated = { ...retryStatus, [m.id]: "success" as const };
+                                      setRetryStatus(updated);
+                                      await saveRetryStatus(updated);
                                       sonnerToast.success("Mutation synced successfully");
                                     } else {
-                                      setRetryStatus(prev => ({ ...prev, [m.id]: "failed" }));
+                                      const updated = { ...retryStatus, [m.id]: "failed" as const };
+                                      setRetryStatus(updated);
+                                      await saveRetryStatus(updated);
                                       const errMsg = "error" in result ? result.error : "Unknown error";
                                       sonnerToast.error("Sync failed", { description: errMsg });
                                     }

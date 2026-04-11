@@ -55,6 +55,25 @@ export interface QueuedMutation {
 }
 
 const QUEUE_KEY = "queue:mutations";
+const RETRY_STATUS_KEY = "queue:retryStatus";
+
+export type RetryStatusMap = Record<string, "success" | "failed">;
+
+export async function getRetryStatus(): Promise<RetryStatusMap> {
+  try {
+    return (await get<RetryStatusMap>(RETRY_STATUS_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+export async function setRetryStatus(status: RetryStatusMap) {
+  try {
+    await set(RETRY_STATUS_KEY, status);
+  } catch (e) {
+    console.warn("IDB retry status write failed:", e);
+  }
+}
 
 export async function enqueueMutation(mutation: Omit<QueuedMutation, "id" | "timestamp">) {
   const queue = await getQueue();
