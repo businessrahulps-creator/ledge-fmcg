@@ -222,11 +222,7 @@ export default function Stock() {
       (si) => si.productId === addStockProductId && si.godownId === selectedWarehouse
     );
     if (existing) {
-      setStockItems((prev) =>
-        prev.map((si) =>
-          si.id === existing.id ? { ...si, quantity: si.quantity + addStockQty } : si
-        )
-      );
+      updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
     } else {
       const product = products.find((p) => p.id === addStockProductId);
       const warehouse = locations.find((l) => l.id === selectedWarehouse);
