@@ -28,6 +28,7 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Dashboard /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Orders /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><NewOrder /></PageErrorBoundary></ProtectedRoute>} />

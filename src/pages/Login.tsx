@@ -60,7 +60,7 @@ export default function Login() {
     setResetLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: window.location.origin,
+        redirectTo: window.location.origin + '/reset-password',
       });
       if (error) {
         toast.error("Something went wrong", { description: error.message });

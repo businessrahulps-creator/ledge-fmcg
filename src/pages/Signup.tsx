@@ -71,7 +71,7 @@ export default function Signup() {
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Create your workspace</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Start your 14-day free trial — no card required
+            Start your 30-day free trial — no card required
           </p>
         </div>
 

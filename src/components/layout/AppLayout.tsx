@@ -25,13 +25,13 @@ const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Performance", url: "/performance", icon: TrendingUp },
 ];
 
 const moreItems = [
   { title: "Dealers", url: "/distributors", icon: Store },
   { title: "Team", url: "/salespersons", icon: UsersRound },
-  { title: "Performance", url: "/performance", icon: TrendingUp },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

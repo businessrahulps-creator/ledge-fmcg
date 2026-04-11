@@ -65,6 +65,7 @@ interface DataContextType {
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
+  refreshAll: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -356,9 +357,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => {
           safeRefetchOrders();
         })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'order_lines' }, () => {
-          safeRefetchOrders();
-        })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => {
           safeRefetchDistributors();
         })
@@ -483,7 +481,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("products").select("*").eq("company_id", companyId).order("name").range(0, 9999),
         supabase.from("godowns").select("*").eq("company_id", companyId).order("name").range(0, 9999),
       ]);
-      const freshProducts = (prodRes.data || []).map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: p.base_price }));
+      const freshProducts = (prodRes.data || []).map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price) }));
       const freshGodowns = (gdRes.data || []).map(g => ({ id: g.id, name: g.name }));
       const siData = siRes.data;
       if (siData) {
@@ -511,6 +509,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const today = new Date().toISOString().split("T")[0];
     let hasNegative = false;
 
+    // Fetch fresh stock items to avoid stale closure
+    const { data: freshStockData } = await supabase
+      .from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId);
+    const freshStock = freshStockData || [];
+
     for (const line of lines) {
       await supabase.from("stock_deductions").insert({
         company_id: cId,
@@ -521,8 +524,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         date: today,
       });
 
-      const existing = stockItems.find(
-        si => si.productId === line.productId && si.godownId === godownId
+      const existing = freshStock.find(
+        si => si.product_id === line.productId && si.godown_id === godownId
       );
       if (existing) {
         const newQty = existing.quantity - line.quantity;
@@ -531,39 +534,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
           quantity: newQty,
           last_deducted_date: today,
         }).eq("id", existing.id);
-        setStockItems(prev => prev.map(si =>
-          si.id === existing.id ? { ...si, quantity: newQty, lastDeductedDate: today } : si
-        ));
+        // Update fresh stock in-loop for subsequent lines
+        existing.quantity = newQty;
       } else {
         hasNegative = true;
-        const { data } = await supabase.from("stock_items").insert({
+        await supabase.from("stock_items").insert({
           company_id: cId,
           product_id: line.productId,
           godown_id: godownId,
           quantity: -line.quantity,
           threshold: 0,
           last_deducted_date: today,
-        }).select().single();
-        if (data) {
-          const prod = rawProducts.find(p => p.id === line.productId);
-          const gd = locations.find(g => g.id === godownId);
-          setStockItems(prev => [...prev, {
-            id: data.id, productId: line.productId, godownId,
-            productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",
-            godownName: gd?.name || "",
-            quantity: -line.quantity, threshold: 0, basePrice: prod?.basePrice || 0,
-            lastDeductedDate: today,
-          }]);
-        }
+        });
       }
     }
+
+    // Refresh local state from DB
+    await safeRefetchStockItems();
 
     if (hasNegative) {
       toast.warning("Negative stock warning", {
         description: "Some products now have negative stock in this warehouse. This is allowed but please reconcile inventory.",
       });
     }
-  }, [stockItems, rawProducts, locations]);
+  }, [safeRefetchStockItems]);
 
   // --- Offline-aware CRUD operations ---
 
@@ -705,12 +699,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         throw new Error("Order could not be deleted — you may not have permission.");
       }
       setOrders(prev => prev.filter(o => o.id !== id));
+      // Refresh stock state since stock_deductions trigger restores stock
+      await safeRefetchStockItems();
       return true;
     } catch (err: any) {
       toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
       return false;
     }
-  }, []);
+  }, [safeRefetchStockItems]);
 
   // --- Generic offline-aware CRUD wrapper for simple entities ---
   function makeOfflineCrud<T extends { id: string }>(
@@ -890,6 +886,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
+  const refreshAll = useCallback(async () => {
+    if (!companyId) return;
+    const token = ++fetchTokenRef.current;
+    await fetchAll(companyId, token);
+  }, [companyId, fetchAll]);
+
   return (
     <DataContext.Provider
       value={{
@@ -903,7 +905,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addProduct: prodCrud.add, updateProduct: prodCrud.update, deleteProduct: prodCrud.remove,
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
-        nextOrderNumber, previewOrderNumber,
+        nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
       {children}
