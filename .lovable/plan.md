@@ -1,36 +1,27 @@
 
 
-# Company Logo Upload — Bug #7 Fix
+# Forgot Password Flow — Bug #8 Fix
 
 ## Overview
-Make the "Upload Logo" button functional in Settings → Company tab. Add storage bucket, DB column, file upload logic, logo display in sidebar header.
+Add a dialog modal to the Login page for password reset, triggered by the existing "Forgot password?" button.
 
-## 1. Database Migration
-- Add `logo_url text` column (default `''`) to `companies` table
-- Create `company-logos` storage bucket (public)
-- Add RLS policies on `storage.objects` for the bucket: authenticated users can upload/update/delete in their company path, anyone can read (public bucket)
+## Changes (single file: `src/pages/Login.tsx`)
 
-## 2. Settings Page (`src/pages/Settings.tsx`)
-- Add hidden `<input type="file" accept="image/*">` ref
-- Wire "Upload Logo" button to trigger file picker
-- On file select: validate ≤2MB, upload to `logos/${companyId}/${filename}`, get public URL, update `companies.logo_url`
-- Add `logoUrl` state, fetch it alongside other company fields
-- Display uploaded logo in the placeholder area (replace Building2 icon)
-- Add "Remove Logo" button (visible when logo exists) that clears `logo_url` and optionally deletes the file
-- Use Sonner `toast` for success/error feedback (switch from `useToast` for these operations)
+1. **Add state**: `forgotOpen` (boolean), `resetEmail` (string, initialized from login email), `resetLoading` (boolean)
 
-## 3. Sidebar Header (`src/components/layout/AppSidebar.tsx`)
-- Import `useAuth` to get `companyId`
-- Fetch `logo_url` from companies table (or subscribe to realtime)
-- Display small logo image next to "Ledge" text when available
+2. **Wire the "Forgot password?" button** (line 76) to open the dialog and pre-fill `resetEmail` with current `email` value
 
-## 4. Realtime
-- Enable realtime on `companies` table so logo updates propagate across tabs
+3. **Add reset handler**: calls `supabase.auth.resetPasswordForEmail(resetEmail, { redirectTo: window.location.origin })`, shows success toast regardless, error toast on network failure, closes dialog on success
 
-## Files Changed
-| File | Change |
-|------|--------|
-| Migration SQL | Add `logo_url` column, create storage bucket + policies |
-| `src/pages/Settings.tsx` | File upload, logo display, remove logo |
-| `src/components/layout/AppSidebar.tsx` | Show company logo in header |
+4. **Add Dialog** using existing `Dialog`/`DialogContent`/`DialogHeader`/`DialogTitle`/`DialogDescription` components:
+   - Email input (pre-filled)
+   - "Send Reset Link" button with loading spinner
+   - Closes on success
+
+5. **Imports**: Add `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription` from `@/components/ui/dialog`
+
+## No other files touched
+- No AuthContext changes
+- No new routes or pages
+- Login form, show/hide password, and all existing UI unchanged
 
