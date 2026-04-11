@@ -437,7 +437,22 @@ export default function Settings() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Email</Label>
-                  <Input value={editMember.email} onChange={(e) => setEditMember({ ...editMember, email: e.target.value })} className="h-11 rounded-lg md:h-12" />
+                  <Input
+                    value={editMember.email}
+                    onChange={(e) => setEditMember({ ...editMember, email: e.target.value })}
+                    className="h-11 rounded-lg md:h-12"
+                    disabled={!isNewMember}
+                  />
+                  {!isNewMember && <p className="text-[10px] text-muted-foreground">Email cannot be changed after creation</p>}
+                </div>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Phone</Label>
+                  <Input
+                    value={editMember.phone}
+                    onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })}
+                    className="h-11 rounded-lg md:h-12"
+                    placeholder="+91 98765 43210"
+                  />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Role</Label>
@@ -456,7 +471,7 @@ export default function Settings() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
-              <Button onClick={saveMember}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
+              <Button onClick={saveMember} disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
