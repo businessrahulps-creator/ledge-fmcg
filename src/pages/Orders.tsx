@@ -116,7 +116,7 @@ export default function Orders() {
     setEditGodown(order.godownId || "");
   };
 
-  const saveOrder = () => {
+  const saveOrder = async () => {
     if (!selectedOrder) return;
 
     // Require godown if changing to dispatched/delivered
@@ -125,7 +125,8 @@ export default function Orders() {
       return;
     }
 
-    updateOrder(selectedOrder.id, {
+    setIsSaving(true);
+    await updateOrder(selectedOrder.id, {
       paymentMode: editPaymentMode as Order["paymentMode"],
       paymentStatus: editPayment as Order["paymentStatus"],
       deliveryStatus: editDelivery as Order["deliveryStatus"],
@@ -134,6 +135,7 @@ export default function Orders() {
       driverName: editDriver,
       godownId: editGodown || undefined,
     });
+    setIsSaving(false);
     toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
     setSelectedOrder(null);
   };
