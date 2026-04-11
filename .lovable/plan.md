@@ -1,29 +1,33 @@
 
 
-# Add Revenue Target Line to Performance Chart
+# Add PDF Export to Performance Page
 
 ## What
-Add a dashed horizontal reference line to the Revenue Trend chart representing a daily revenue target. Include a small inline input above the chart so users can set their own target value.
+Add an "Export PDF" button to the Performance page header that opens the existing `ExportPdfModal`, letting users choose which sections to include (KPI summary, top dealers, top products, sales team ranking). The PDF uses the existing `ReportPdf` component with multiple pages/tables.
 
 ## Changes — `src/pages/Performance.tsx`
 
-1. **Import `ReferenceLine`** from recharts (add to existing import on line 28-40).
+1. **Add imports**: `Download` from lucide-react, `ExportPdfModal`/`PdfSection`, `ReportPdf`, `downloadPdf`/`pdfFilename`/`formatCurrencyPdf`.
 
-2. **Add target state** near other state declarations (~line 54):
-   - `const [dailyTarget, setDailyTarget] = useState<number>(30000)` — default ₹30K/day as a sensible FMCG default.
+2. **Add state**: `const [pdfOpen, setPdfOpen] = useState(false)`.
 
-3. **Update chart header** (line 459-461): Add an inline editable target input next to the "Revenue Trend" title — a small `₹` prefixed number input styled to match the card aesthetic.
+3. **Add Export button** next to the period pills in the header area — a small outline button with a Download icon.
 
-4. **Add `<ReferenceLine>`** inside the `<AreaChart>` (after the `<Area>` on line 500):
-   ```tsx
-   <ReferenceLine
-     y={dailyTarget}
-     stroke="hsl(var(--destructive))"
-     strokeDasharray="6 4"
-     strokeWidth={1.5}
-     label={{ value: `Target: ${formatCompact(dailyTarget)}`, position: "right", fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-   />
-   ```
+4. **Add `ExportPdfModal`** at bottom of JSX with sections:
+   - `company` — Company header
+   - `summary` — KPI summary cards (Revenue, Orders, Avg Order, Collection)
+   - `dealers` — Top Dealers table
+   - `products` — Top Products table
+   - `salesTeam` — Sales Team Ranking table
 
-This is a small, self-contained change — ~15 lines added, no new files.
+5. **`onGenerate` callback** builds a `ReportPdf` with:
+   - Title: "Performance Report"
+   - Subtitle: current period label (e.g. "Last 30 Days")
+   - Summary: the 4 KPI values
+   - Table: Top Dealers (primary table — most useful in PDF)
+   - For additional tables (products, sales team), generate a multi-section layout using the existing `ReportPdf` structure
+
+Since `ReportPdf` supports one table per page, the simplest approach is to use the dealers table as the primary table and include KPIs in the summary row. This matches the pattern used across all other reports.
+
+No new files needed — purely follows existing patterns from DistributorReport, PaymentReport, etc.
 
