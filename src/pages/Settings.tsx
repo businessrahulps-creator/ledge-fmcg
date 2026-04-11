@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database } from "lucide-react";
+import { getQueue, clearQueue, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,18 @@ export default function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
+  const [queuedMutations, setQueuedMutations] = useState<QueuedMutation[]>([]);
+  const [showClearQueueConfirm, setShowClearQueueConfirm] = useState(false);
+
+  useEffect(() => {
+    const loadQueue = async () => {
+      const queue = await getQueue();
+      setQueuedMutations(queue);
+    };
+    loadQueue();
+    const interval = setInterval(loadQueue, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!companyId) return;
@@ -348,6 +361,15 @@ export default function Settings() {
               <TabsTrigger value="company" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Company</TabsTrigger>
               <TabsTrigger value="team" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Team</TabsTrigger>
               <TabsTrigger value="subscription" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Subscription</TabsTrigger>
+              <TabsTrigger value="sync" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm flex items-center gap-1.5">
+                <Database className="h-3 w-3" />
+                Sync Queue
+                {queuedMutations.length > 0 && (
+                  <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                    {queuedMutations.length}
+                  </span>
+                )}
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -545,6 +567,73 @@ export default function Settings() {
               </div>
             </motion.div>
           </TabsContent>
+          {/* Sync Queue Tab */}
+          <TabsContent value="sync">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
+              <div className="glass-card p-4 space-y-4 md:p-6 md:space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                    <h3 className="text-sm font-semibold md:text-base">Pending Offline Changes</h3>
+                  </div>
+                  {queuedMutations.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setShowClearQueueConfirm(true)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Clear Queue
+                    </Button>
+                  )}
+                </div>
+
+                {queuedMutations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Clock className="h-8 w-8 text-muted-foreground/40 mb-2" strokeWidth={1.5} />
+                    <p className="text-sm text-muted-foreground">No pending changes</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Offline mutations will appear here when you're disconnected</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto -mx-4 px-4 md:-mx-6 md:px-6">
+                    <table className="w-full caption-bottom text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3">Type</th>
+                          <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3">Table</th>
+                          <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3">Timestamp</th>
+                          <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3 hidden sm:table-cell">Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {queuedMutations.map((m) => (
+                          <tr key={m.id} className="border-b last:border-b-0 row-hover">
+                            <td className="p-2 align-middle md:p-3">
+                              <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                m.type === "insert" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" :
+                                m.type === "update" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" :
+                                "bg-destructive/15 text-destructive"
+                              }`}>
+                                {m.type}
+                              </span>
+                            </td>
+                            <td className="p-2 align-middle text-xs font-mono md:p-3">{m.table}</td>
+                            <td className="p-2 align-middle text-xs text-muted-foreground md:p-3">
+                              {new Date(m.timestamp).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "medium" })}
+                            </td>
+                            <td className="p-2 align-middle text-xs text-muted-foreground font-mono truncate max-w-[200px] hidden sm:table-cell md:p-3">
+                              {JSON.stringify(m.payload).slice(0, 80)}{JSON.stringify(m.payload).length > 80 ? "…" : ""}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </TabsContent>
         </Tabs>
 
         {/* Add/Edit Member Dialog */}
@@ -650,6 +739,32 @@ export default function Settings() {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={() => { saveCompany(); setShowPrefixConfirm(false); }}>
                 Yes, Change Prefix
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Clear Queue Confirmation Dialog */}
+        <AlertDialog open={showClearQueueConfirm} onOpenChange={setShowClearQueueConfirm}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-base md:text-lg">Clear Sync Queue</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs md:text-sm">
+                This will permanently discard <span className="font-semibold text-foreground">{queuedMutations.length}</span> pending offline change{queuedMutations.length !== 1 ? "s" : ""}. These changes will not be synced to the server. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={async () => {
+                  await clearQueue();
+                  setQueuedMutations([]);
+                  setShowClearQueueConfirm(false);
+                  sonnerToast.success("Queue cleared", { description: "All pending changes have been discarded." });
+                }}
+              >
+                Clear All
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
