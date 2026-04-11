@@ -5,6 +5,8 @@ import { useLocation, Link } from "react-router-dom";
 import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
+import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
