@@ -66,11 +66,11 @@ export function SalesTeamReport() {
             }}
           >
             <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
+            <span >Export CSV</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setPdfOpen(true)}>
             <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
+            <span >Export PDF</span>
           </Button>
         </div>
       </div>

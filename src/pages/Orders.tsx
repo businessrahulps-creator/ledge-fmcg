@@ -204,7 +204,7 @@ export default function Orders() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span >Export CSV</span>
             </Button>
             <Button
               variant="outline"
@@ -212,7 +212,7 @@ export default function Orders() {
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Export PDF</span>
+              <span >Export PDF</span>
             </Button>
             <Link to="/orders/new">
               <Button className="w-full sm:w-auto">
@@ -503,7 +503,7 @@ export default function Orders() {
                       aria-label="Delete order"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
+                      <span >{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -517,7 +517,7 @@ export default function Orders() {
                       }}
                     >
                       <FileText className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Invoice</span>
+                      <span >Invoice</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -532,7 +532,7 @@ export default function Orders() {
                       }}
                     >
                       <Share2 className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Share</span>
+                      <span >Share</span>
                     </Button>
                   </div>
                   <div className="flex gap-2">

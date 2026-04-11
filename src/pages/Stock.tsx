@@ -335,7 +335,7 @@ export default function Stock() {
                   }}
                 >
                   <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">Export CSV</span>
+                  <span >Export CSV</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -343,7 +343,7 @@ export default function Stock() {
                   onClick={() => setProductsPdfOpen(true)}
                 >
                   <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Export PDF</span>
+                  <span >Export PDF</span>
                 </Button>
               </div>
 
@@ -561,7 +561,7 @@ export default function Stock() {
                             }}
                           >
                             <Download className="h-4 w-4" />
-                            <span className="hidden sm:inline">Export CSV</span>
+                            <span >Export CSV</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -569,7 +569,7 @@ export default function Stock() {
                             onClick={() => setInventoryPdfOpen(true)}
                           >
                             <FileText className="h-4 w-4" />
-                            <span className="hidden sm:inline">Export PDF</span>
+                            <span >Export PDF</span>
                           </Button>
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
