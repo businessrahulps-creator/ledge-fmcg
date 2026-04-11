@@ -1,41 +1,31 @@
 
 
-# Order Deletion — Bug #9 Fix
+# Bug #10: Real 30-Day Free Trial
 
 ## Overview
-Add DELETE capability for orders: RLS policies, a `deleteOrder` function in DataContext, stock restoration logic, and UI with type-to-confirm dialog.
+Replace the hardcoded `trialDaysLeft = 11` stub with a real `trial_ends_at` column on `companies`, set automatically on signup.
 
 ## 1. Database Migration
-- Add DELETE policy on `orders` table: `company_id = get_company_id()`
-- Add DELETE policy on `order_lines` table: via join to orders `company_id = get_company_id()`
-- Add DELETE policy on `stock_deductions` table: `company_id = get_company_id()`
-- Create a trigger function `restore_stock_on_deduction_delete` on `stock_deductions` that, on DELETE, adds `quantity_deducted` back to the matching `stock_items` row
-- Attach trigger to `stock_deductions` table (AFTER DELETE FOR EACH ROW)
+- Add `trial_ends_at timestamptz` column to `companies` (nullable, default `now() + interval '30 days'`)
+- Backfill existing rows: `UPDATE companies SET trial_ends_at = now() + interval '30 days' WHERE trial_ends_at IS NULL`
+- Update `setup_new_company` function to set `trial_ends_at = now() + interval '30 days'` in the company INSERT
 
-## 2. DataContext (`src/context/DataContext.tsx`)
-- Add `deleteOrder` to interface and provider
-- Implementation:
-  1. Delete stock_deductions for the order (trigger restores stock automatically)
-  2. Delete order_lines for the order
-  3. Delete the order itself
-  4. Optimistic local state removal
-- Expose via context value
+## 2. Settings.tsx Changes
+- In the company fetch (line 79), add `trial_ends_at` to the select
+- Store `trialEndsAt` in state (replace hardcoded `trialDaysLeft = 11`)
+- Calculate `remainingDays = Math.max(0, Math.ceil((trialEndsAt - now) / 86400000))`
+- Progress bar: `(remainingDays / 30) * 100`, color: green >7, yellow 3–7, red <3
+- Display formatted trial end date and exact days left
+- If expired (0 days): show "Trial Expired" state with CTA
+- "Upgrade Plan" button: show toast "Billing integration coming soon — contact support"
+- Subscribe to realtime changes on `companies` table for the company row to update trial status across tabs
 
-## 3. API layer (`src/services/api.ts`)
-- Add `orders.delete: (id: string) => data.deleteOrder(id)`
-
-## 4. Orders Page (`src/pages/Orders.tsx`)
-- Add `AlertDialog` for type-to-confirm deletion (user must type the order number)
-- Add "Delete Order" button in the order detail dialog footer (red/destructive variant)
-- Disable the delete button if order is "delivered" (with tooltip/warning)
-- On confirm: call `api.orders.delete(id)`, show success toast, close dialogs
-- State: `deleteTarget` (Order | null), `deleteConfirmText` (string)
+## 3. Enable Realtime
+- Migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.companies`
 
 ## Files Changed
 | File | Change |
 |------|--------|
-| Migration SQL | DELETE policies on orders, order_lines, stock_deductions + stock restore trigger |
-| `src/context/DataContext.tsx` | Add `deleteOrder` function |
-| `src/services/api.ts` | Expose `orders.delete` |
-| `src/pages/Orders.tsx` | Delete button + confirmation dialog |
+| Migration SQL | Add column, backfill, update RPC, enable realtime |
+| `src/pages/Settings.tsx` | Fetch & display real trial data, realtime subscription |
 
