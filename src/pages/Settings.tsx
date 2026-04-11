@@ -3,7 +3,7 @@ import { sanitizeInput } from "@/utils/sanitize";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
 interface TeamMember {
   id: string;
@@ -764,6 +765,9 @@ export default function Settings() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Install App Card — mobile only, shown when not installed */}
+        <InstallAppCard />
+
         {/* Logout Section */}
         <div className="glass-card p-4 md:p-6 max-w-2xl">
           <div className="flex items-center justify-between">
