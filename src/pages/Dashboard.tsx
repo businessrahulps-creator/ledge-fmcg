@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
+import { formatIndianDate } from "@/utils/formatDate";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -203,7 +204,7 @@ export default function Dashboard() {
                       <tr key={order.id} className="border-b border-border/50 row-hover">
                         <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
-                        <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
@@ -228,7 +229,7 @@ export default function Dashboard() {
                       <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {o.date}</span>
+                      <span className="text-[10px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                       <div className="flex gap-1.5">
                         <StatusBadge status={o.paymentStatus} />
                         <StatusBadge status={o.deliveryStatus} />

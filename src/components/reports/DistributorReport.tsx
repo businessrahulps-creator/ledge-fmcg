@@ -4,6 +4,7 @@ import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { formatIndianDate } from "@/utils/formatDate";
 
 export function DistributorReport() {
   const api = useApi();
@@ -124,7 +125,7 @@ export function DistributorReport() {
                         {selectedOrders.map((o) => (
                           <tr key={o.id} className="border-b border-border/50">
                             <td className="px-2 py-2.5 max-w-[90px] truncate font-medium md:px-4">{o.orderNumber}</td>
-                            <td className="px-2 py-2.5 text-muted-foreground md:px-4">{o.date}</td>
+                            <td className="px-2 py-2.5 text-muted-foreground md:px-4">{formatIndianDate(o.date)}</td>
                             <td className="px-2 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
                             <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total)}</td>
                           </tr>
