@@ -26,6 +26,7 @@ interface ReportPdfProps {
   companyName?: string;
   companyAddress?: string;
   gstin?: string;
+  logoUrl?: string;
 }
 
 export function ReportPdf({
@@ -40,6 +41,7 @@ export function ReportPdf({
   companyName,
   companyAddress,
   gstin,
+  logoUrl,
 }: ReportPdfProps) {
   return (
     <Document>
@@ -51,6 +53,7 @@ export function ReportPdf({
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}
+          logoUrl={logoUrl}
         />
 
         {showSummary && summary.length > 0 && (

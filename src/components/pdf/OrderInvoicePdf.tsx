@@ -11,6 +11,7 @@ interface OrderInvoicePdfProps {
   companyName?: string;
   companyAddress?: string;
   gstin?: string;
+  logoUrl?: string;
 }
 
 export function OrderInvoicePdf({
@@ -18,6 +19,7 @@ export function OrderInvoicePdf({
   companyName,
   companyAddress,
   gstin,
+  logoUrl,
 }: OrderInvoicePdfProps) {
   return (
     <Document>
@@ -27,6 +29,7 @@ export function OrderInvoicePdf({
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}
+          logoUrl={logoUrl}
         />
 
         {/* Order details */}
