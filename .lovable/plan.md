@@ -1,66 +1,79 @@
 
 
-# Google Material Design 3 + Linear Hybrid — Fresh UI/UX Audit & Polish Plan
+# Performance Page — Design & Implementation Plan
 
-## Audit Summary
+## Business Value
 
-After thoroughly examining every page on desktop (1280px) and mobile (390px), the app is already in **solid 7/10 territory**. The previous passes fixed the most critical mobile overflow issues, added KPI accent borders, sidebar active indicators, and standardized button heights. Here is what remains:
+Indian FMCG distributor owners need answers to these daily questions:
+- **"Is my revenue growing or shrinking?"** → Revenue trend line over time
+- **"Which dealers are slowing down?"** → Dealer activity ranking with churn risk flags
+- **"Which products sell fastest?"** → Product velocity chart
+- **"Where is my money stuck?"** → Payment collection rate (paid vs pending vs partial)
+- **"Is my stock going to run out?"** → Stock health overview with critical alerts
+- **"Which salesperson is performing?"** → Sales team efficiency comparison
 
-### What's Already Good
-- Sidebar active state with left accent bar and primary color — clean, clear
-- Mobile bottom nav with pill animation — polished
-- KPI cards with color-coded left borders — effective visual hierarchy
-- Icon-only export buttons on mobile — no more text clipping
-- Day selector using primary color — consistent
-- Order cards, table layouts, and status badges — well-structured
-- Overall spacing and typography hierarchy — comfortable
+The Performance page turns raw data already in DataContext into instant visual answers.
 
-### Remaining Issues Found
+## Architecture
 
-**1. New Order form — Payment Mode buttons inconsistent with rest of app**
-The payment mode and status toggle buttons use a custom pill style with borders that feels disconnected from the rest of the UI. The "Pending" payment status button uses a red outline that's very prominent. These should feel more like segmented controls.
+### Navigation
+- Add "Performance" to the sidebar `analyzeNav` array with a `TrendingUp` icon
+- Add to mobile bottom nav's "More" dropdown (keeps primary nav at 4 items)
+- New route `/performance` in `App.tsx`
 
-**2. Progress bars too faint**
-Top Dealers and Top Products progress bars use `bg-primary/30` which is very subtle on light backgrounds. Needs slightly more opacity (40-50%) to be readable.
+### Page Structure
 
-**3. Reports page — Export buttons not icon-only on mobile**
-The Reports page uses full-text export buttons that will likely overflow on narrow screens, same pattern that was already fixed on other pages.
+```text
+┌─────────────────────────────────────────────┐
+│ Performance                                 │
+│ Real-time business intelligence             │
+│                                             │
+│ [Time Filter: 7D ▾] [Dealer ▾] [Person ▾]  │
+├─────────────────────────────────────────────┤
+│ KPI Row: Revenue | Orders | Avg Order |     │
+│          Collection Rate                    │
+├──────────────────────┬──────────────────────┤
+│ Revenue Trend        │ Payment Split        │
+│ (Area Chart)         │ (Donut Chart)        │
+├──────────────────────┴──────────────────────┤
+│ Top Dealers by Revenue (Horizontal Bar)     │
+├──────────────────────┬──────────────────────┤
+│ Product Velocity     │ Sales Team Ranking   │
+│ (Bar Chart)          │ (Bar Chart)          │
+├─────────────────────────────────────────────┤
+│ ⚠ Actionable Insights (Alert Cards)        │
+│  • "Stock critically low: Tea Powder..."    │
+│  • "Dealer X: 0 orders in last 30 days"     │
+└─────────────────────────────────────────────┘
+```
 
-**4. "1 orders" grammatical issue on dealer cards**
-Dealer cards show "1 orders" instead of "1 order" — minor but noticeable for quality feel.
+### Data Source
+All data comes from existing `useApi()` hook — orders, dealers, salespersons, products, stockItems. No new database queries needed. Filtering by time period is done client-side (same pattern as `TimePeriodFilter`).
 
-**5. Glass card shadow could be subtler on mobile**
-The `glass-card` shadow is fine on desktop but on mobile cards that stack vertically, the shadows create visual noise. A slightly lighter shadow on mobile would feel calmer.
+### Charts (Recharts)
+Uses the existing shadcn `ChartContainer` + `ChartTooltip` wrapper from `src/components/ui/chart.tsx`. Six visualizations:
+1. **Revenue Trend** — `AreaChart` grouped by day/week
+2. **Payment Split** — `PieChart` (paid/partial/pending)
+3. **Top Dealers** — Horizontal `BarChart`
+4. **Product Velocity** — `BarChart` by units sold
+5. **Sales Team** — `BarChart` by revenue
+6. **Insights** — Computed alert cards (stock health, dealer churn risk)
 
-**6. Login/Signup pages — not audited via browser but should verify dot-grid background alignment**
+### Files to Create/Modify
 
-**7. PDF table header already fixed to `#374151`** — this is good and professional now.
+| File | Action |
+|------|--------|
+| `src/pages/Performance.tsx` | **Create** — Main page with filters, KPIs, charts, insights |
+| `src/components/layout/AppSidebar.tsx` | **Edit** — Add Performance to `analyzeNav` |
+| `src/App.tsx` | **Edit** — Add `/performance` route |
 
----
+### Design System Compliance
+- Uses `AppLayout`, `glass-card`, KPI accent borders, `h-10` buttons
+- Indian locale: `formatCurrency()`, `formatIndianDate()`
+- Responsive: charts stack vertically on mobile, filters use `grid grid-cols-2`
+- Consistent with existing color palette (emerald, blue, amber, indigo accents)
+- Loading skeleton while data loads
 
-## Improvement Plan
-
-### Pass 1: Reports page — Icon-only export buttons on mobile
-**File:** `src/pages/Reports.tsx`  
-Apply the same `hidden sm:inline` label pattern used on Orders, Dealers, Stock pages.
-
-### Pass 2: Progress bar visibility improvement
-**File:** `src/pages/Dashboard.tsx`  
-Change progress bar fill from `bg-primary/30` to `bg-primary/50` for better visibility.
-
-### Pass 3: Grammar fix — "1 orders" → "1 order"
-**File:** `src/pages/Distributors.tsx`  
-Use conditional pluralization for order count display.
-
-### Pass 4: New Order payment buttons — subtle refinement
-**File:** `src/pages/NewOrder.tsx`  
-Minor refinement: reduce border width visual weight on payment toggle buttons to feel more cohesive with the glass-card aesthetic.
-
-### Hybrid Role Comparison Note
-A Material Design 3-only approach would push toward filled/tonal button segmented controls and more elevation layering. A Linear-only approach would keep everything extremely flat. The hybrid recognizes: (a) the existing glass-card system is already premium and consistent — no need to add MD3 elevation tokens, (b) the sidebar active state is already Linear-quality, (c) the mobile nav pill is already iOS-quality. The main wins from this hybrid lens are the **small consistency gaps** (Reports exports, progress bar contrast, grammar) rather than wholesale aesthetic changes.
-
-### Technical Constraints
-- Tailwind + shadcn/ui only, no new dependencies
-- All existing classNames and behavior preserved
-- Purely visual/text fixes, no logic changes
+### Time Filters
+`Today | 7D | 30D | 90D | 6M | YTD` as pill toggles (not a dropdown — faster for quick switching)
 
