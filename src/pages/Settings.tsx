@@ -604,6 +604,7 @@ export default function Settings() {
                           <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3">Table</th>
                           <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3">Timestamp</th>
                           <th className="h-10 px-2 text-left align-middle text-xs font-medium text-muted-foreground md:px-3 hidden sm:table-cell">Payload</th>
+                          <th className="h-10 px-2 text-right align-middle text-xs font-medium text-muted-foreground md:px-3 w-10">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -624,6 +625,20 @@ export default function Settings() {
                             </td>
                             <td className="p-2 align-middle text-xs text-muted-foreground font-mono truncate max-w-[200px] hidden sm:table-cell md:p-3">
                               {JSON.stringify(m.payload).slice(0, 80)}{JSON.stringify(m.payload).length > 80 ? "…" : ""}
+                            </td>
+                            <td className="p-2 align-middle text-right md:p-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                onClick={async () => {
+                                  await removeFromQueue(m.id);
+                                  const queue = await getQueue();
+                                  setQueuedMutations(queue);
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
                             </td>
                           </tr>
                         ))}
