@@ -186,13 +186,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setOrderSequence(company.next_order_sequence);
       }
 
+      // Override Supabase default 1,000-row limit with .range(0, 9999) on all list queries
       const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes] = await Promise.all([
-        supabase.from("distributors").select("*").eq("company_id", cId),
-        supabase.from("salespersons").select("*").eq("company_id", cId),
-        supabase.from("products").select("*").eq("company_id", cId),
-        supabase.from("godowns").select("*").eq("company_id", cId),
-        supabase.from("stock_items").select("*").eq("company_id", cId),
-        supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }),
+        supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
+        supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
+        supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
+        supabase.from("godowns").select("*").eq("company_id", cId).order("name").range(0, 9999),
+        supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -233,8 +234,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       if (orderIds.length > 0) {
+        // Override default 1,000-row limit for order lines
         const { data: linesData } = await supabase
-          .from("order_lines").select("*").in("order_id", orderIds);
+          .from("order_lines").select("*").in("order_id", orderIds).range(0, 9999);
         allLines = linesData || [];
       }
       if (token !== fetchTokenRef.current) return;
@@ -394,12 +396,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchOrders = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", companyId).order("created_at", { ascending: false });
+      // Override default 1,000-row limit
+      const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
       if (!ordersData) return;
       const orderIds = ordersData.map(o => o.id);
       let allLines: any[] = [];
       if (orderIds.length > 0) {
-        const { data: linesData } = await supabase.from("order_lines").select("*").in("order_id", orderIds);
+        const { data: linesData } = await supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999);
         allLines = linesData || [];
       }
       const mapped = mapOrders(ordersData, allLines);
@@ -411,7 +414,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchDistributors = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId);
+      // Override default 1,000-row limit
+      const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0) }));
         setDistributors(mapped);
@@ -423,7 +427,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchSalespersons = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data } = await supabase.from("salespersons").select("*").eq("company_id", companyId);
+      // Override default 1,000-row limit
+      const { data } = await supabase.from("salespersons").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(s => ({ id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0) }));
         setSalespersons(mapped);
@@ -435,7 +440,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchProducts = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data } = await supabase.from("products").select("*").eq("company_id", companyId);
+      // Override default 1,000-row limit
+      const { data } = await supabase.from("products").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: (p as any).total_sold ?? 0 }));
         setProducts(mapped);
@@ -447,7 +453,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchGodowns = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data } = await supabase.from("godowns").select("*").eq("company_id", companyId);
+      // Override default 1,000-row limit
+      const { data } = await supabase.from("godowns").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(g => ({ id: g.id, name: g.name, address: g.address, isActive: g.is_active }));
         setLocations(mapped);
@@ -459,7 +466,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchStockItems = useCallback(async () => {
     if (!companyId) return;
     try {
-      const { data } = await supabase.from("stock_items").select("*").eq("company_id", companyId);
+      // Override default 1,000-row limit
+      const { data } = await supabase.from("stock_items").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
       if (data) {
         const mapped = data.map(si => {
           const prod = rawProducts.find(p => p.id === si.product_id);
