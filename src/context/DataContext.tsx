@@ -637,8 +637,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [companyId, deductStockForOrder, orderPrefix, orderSequence]);
 
+  const ordersRef = useRef(orders);
+  ordersRef.current = orders;
+
   const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
-    const currentOrder = orders.find(o => o.id === id);
+    const currentOrder = ordersRef.current.find(o => o.id === id);
     const previousDelivery = currentOrder?.deliveryStatus || "pending";
     const newDelivery = updates.deliveryStatus || previousDelivery;
 
@@ -677,7 +680,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-  }, [orders, companyId, deductStockForOrder]);
+  }, [companyId, deductStockForOrder]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
     // Offline: not supported — too complex (stock restore, cascading deletes)
