@@ -185,10 +185,10 @@ export default function Salespersons() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -280,22 +280,22 @@ export default function Salespersons() {
               </DialogHeader>
               <div className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-xs text-muted-foreground">Phone</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-xs text-muted-foreground">Email</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-xs text-muted-foreground">Region</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
-                  </div>
-                  <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                    <span className="text-xs text-muted-foreground">Total Value</span>
-                    <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
-                  </div>
+                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                     <span className="text-xs text-muted-foreground">Phone</span>
+                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
+                   </div>
+                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                     <span className="text-xs text-muted-foreground">Email</span>
+                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
+                   </div>
+                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                     <span className="text-xs text-muted-foreground">Region</span>
+                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
+                   </div>
+                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                     <span className="text-xs text-muted-foreground">Total Value</span>
+                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
+                   </div>
                 </div>
                 <div>
                   <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>

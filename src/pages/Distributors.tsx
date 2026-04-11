@@ -175,10 +175,10 @@ export default function Distributors() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -265,22 +265,22 @@ export default function Distributors() {
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-6">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-xs text-muted-foreground">Location</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.location}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-xs text-muted-foreground">Contact</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.contact}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-xs text-muted-foreground">Total Orders</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatNumber(selected.totalOrders)}</p>
-                    </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3 md:p-4">
-                      <span className="text-xs text-muted-foreground">Total Value</span>
-                      <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(selected.totalValue)}</p>
-                    </div>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                       <span className="text-xs text-muted-foreground">Location</span>
+                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.location}</p>
+                     </div>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                       <span className="text-xs text-muted-foreground">Contact</span>
+                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{selected.contact}</p>
+                     </div>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                       <span className="text-xs text-muted-foreground">Total Orders</span>
+                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatNumber(selected.totalOrders)}</p>
+                     </div>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                       <span className="text-xs text-muted-foreground">Total Value</span>
+                       <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(selected.totalValue)}</p>
+                     </div>
                   </div>
 
                   <div>

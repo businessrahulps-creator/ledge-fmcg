@@ -76,7 +76,7 @@ export default function Signup() {
         </div>
 
         {/* Form */}
-        <div className="rounded-xl border border-border bg-card p-8 shadow-md">
+        <div className="rounded-xl border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="company" className="text-sm font-medium">Company name</Label>

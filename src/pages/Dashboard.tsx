@@ -8,6 +8,7 @@ import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
+import { ListChecks, Plus } from "lucide-react";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -75,7 +76,7 @@ export default function Dashboard() {
                 key={i}
                 onClick={() => setSelectedDay(i)}
                 aria-label={DAY_LABELS[i]}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 ${
+                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   i === selectedDay
                     ? "bg-foreground text-background shadow-sm"
                     : "bg-muted/60 text-muted-foreground hover:bg-muted"
@@ -95,7 +96,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
-              className="glass-card p-5 md:p-6"
+              className="glass-card p-5 md:p-7"
             >
               <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
               <p className="text-2xl md:text-3xl font-bold tracking-tight">{kpi.value}</p>
@@ -109,7 +110,7 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
-              <Link to="/distributors" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
+              <Link to="/distributors" className="text-xs text-muted-foreground/70 font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.map((d) => (
@@ -118,12 +119,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium">{d.name}</span>
                     <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
                   </div>
-                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
+                   <div className="h-1.5 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-foreground/20 dark:bg-foreground/30"
+                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -135,7 +136,7 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
-              <Link to="/stock" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
+              <Link to="/stock" className="text-xs text-muted-foreground/70 font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.map((p) => (
@@ -144,12 +145,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
                     <span className="text-xs text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
                   </div>
-                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
+                   <div className="h-1.5 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-muted-foreground/20 dark:bg-muted-foreground/30"
+                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -162,13 +163,13 @@ export default function Dashboard() {
         <section className="pb-8">
            <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
-            <Link to="/orders" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
+            <Link to="/orders" className="text-xs text-muted-foreground/70 font-medium hover:text-foreground transition-colors">View all →</Link>
           </div>
 
           {recentOrders.length === 0 ? (
             <div className="glass-card p-10 text-center flex flex-col items-center gap-3">
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/60"><path d="M16 6H3"/><path d="M21 12H8"/><path d="M21 18H8"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+                <ListChecks className="h-5 w-5 text-muted-foreground/60" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm font-medium">No orders on {DAY_LABELS[selectedDay]}</p>
@@ -178,7 +179,7 @@ export default function Dashboard() {
                 to="/orders/new"
                 className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                <Plus className="h-3.5 w-3.5" />
                 Create Order
               </Link>
             </div>
@@ -188,13 +189,13 @@ export default function Dashboard() {
               <div className="hidden md:block glass-card overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-6 py-3 font-medium">Order</th>
-                      <th className="px-6 py-3 font-medium">Dealer</th>
-                      <th className="px-6 py-3 font-medium">Date</th>
-                      <th className="px-6 py-3 font-medium text-right">Amount</th>
-                      <th className="px-6 py-3 font-medium">Payment</th>
-                      <th className="px-6 py-3 font-medium">Delivery</th>
+                     <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                       <th className="px-6 py-3 font-semibold">Order</th>
+                       <th className="px-6 py-3 font-semibold">Dealer</th>
+                       <th className="px-6 py-3 font-semibold">Date</th>
+                       <th className="px-6 py-3 font-semibold text-right">Amount</th>
+                       <th className="px-6 py-3 font-semibold">Payment</th>
+                       <th className="px-6 py-3 font-semibold">Delivery</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -213,7 +214,7 @@ export default function Dashboard() {
               </div>
 
               {/* Mobile cards */}
-              <div className="space-y-2.5 md:hidden">
+              <div className="space-y-3 md:hidden">
                 {recentOrders.map((o, i) => (
                   <motion.div
                     key={o.id}

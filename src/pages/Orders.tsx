@@ -263,14 +263,14 @@ export default function Orders() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-6 py-3 font-medium">Order #</th>
-                  <th className="px-6 py-3 font-medium">Date</th>
-                  <th className="px-6 py-3 font-medium">Dealer</th>
-                  <th className="px-6 py-3 font-medium">Sales Person</th>
-                  <th className="px-6 py-3 font-medium text-right">Amount</th>
-                  <th className="px-6 py-3 font-medium">Payment</th>
-                  <th className="px-6 py-3 font-medium">Delivery</th>
+                 <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                  <th className="px-6 py-3 font-semibold">Order #</th>
+                  <th className="px-6 py-3 font-semibold">Date</th>
+                  <th className="px-6 py-3 font-semibold">Dealer</th>
+                  <th className="px-6 py-3 font-semibold">Sales Person</th>
+                  <th className="px-6 py-3 font-semibold text-right">Amount</th>
+                  <th className="px-6 py-3 font-semibold">Payment</th>
+                  <th className="px-6 py-3 font-semibold">Delivery</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,7 +293,7 @@ export default function Orders() {
             </table>
           </div>
 
-          <div className="space-y-0 md:hidden">
+          <div className="divide-y divide-border/50 md:hidden">
             {paginatedOrders.map((order) => (
                 <div
                   key={order.id}
@@ -344,20 +344,20 @@ export default function Orders() {
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-5">
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-xs text-muted-foreground">Date</span>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3">
+                       <span className="text-xs text-muted-foreground">Date</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selectedOrder.date)}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-xs text-muted-foreground">Dealer</span>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3">
+                       <span className="text-xs text-muted-foreground">Dealer</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.distributorName}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-xs text-muted-foreground">Sales Person</span>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3">
+                       <span className="text-xs text-muted-foreground">Sales Person</span>
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.salesperson}</p>
                     </div>
-                    <div className="rounded-lg border border-border bg-muted/20 p-3">
-                      <span className="text-xs text-muted-foreground">Total</span>
+                     <div className="rounded-lg border border-border bg-muted/30 p-3">
+                       <span className="text-xs text-muted-foreground">Total</span>
                       <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total)}</p>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ export default function Orders() {
                           <button
                             key={m.value}
                             onClick={() => setEditPaymentMode(m.value)}
-                            className={`rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
+                            className={`rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
                               editPaymentMode === m.value
                                 ? "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
@@ -417,7 +417,7 @@ export default function Orders() {
                           <button
                             key={s.value}
                             onClick={() => setEditPayment(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
+                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
                               editPayment === s.value
                                 ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
@@ -436,7 +436,7 @@ export default function Orders() {
                           <button
                             key={s.value}
                             onClick={() => setEditDelivery(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all md:text-sm ${
+                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
                               editDelivery === s.value
                                 ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
                                 : "border-border text-muted-foreground hover:border-foreground/20"
