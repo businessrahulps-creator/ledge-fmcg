@@ -116,12 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setUserRole(null);
   }, []);
 
   return (
     <AuthContext.Provider value={{
       user, session, profile,
       companyId: profile?.company_id ?? null,
+      userRole,
+      isAccountant: userRole === "accountant",
       loading, authReady, signOut, refreshProfile,
     }}>
       {children}
