@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { exportCsv, csvFilename } from "@/utils/exportCsv";
 
 export function ProductReport() {
   const api = useApi();
