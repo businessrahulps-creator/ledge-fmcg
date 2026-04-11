@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -81,6 +82,7 @@ function formatCompact(n: number): string {
 
 export default function Performance() {
   const api = useApi();
+  const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
 
@@ -450,7 +452,18 @@ export default function Performance() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
+                <Bar
+                  dataKey="revenue"
+                  fill="hsl(var(--primary))"
+                  radius={[0, 4, 4, 0]}
+                  barSize={24}
+                  cursor="pointer"
+                  onClick={(data: any) => {
+                    if (data?.name) {
+                      navigate(`/orders?dealer=${encodeURIComponent(data.name)}`);
+                    }
+                  }}
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -536,7 +549,18 @@ export default function Performance() {
                       fontSize: "12px",
                     }}
                   />
-                  <Bar dataKey="revenue" fill="hsl(262, 83%, 58%)" radius={[0, 4, 4, 0]} barSize={24} />
+                  <Bar
+                    dataKey="revenue"
+                    fill="hsl(262, 83%, 58%)"
+                    radius={[0, 4, 4, 0]}
+                    barSize={24}
+                    cursor="pointer"
+                    onClick={(data: any) => {
+                      if (data?.name) {
+                        navigate(`/orders?dealer=${encodeURIComponent(data.name)}`);
+                      }
+                    }}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
