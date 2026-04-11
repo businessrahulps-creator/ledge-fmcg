@@ -166,28 +166,70 @@ export default function Settings() {
   };
 
   const openNewMember = () => {
-    setEditMember({ id: `t${Date.now()}`, name: "", email: "", role: "sales_manager" });
+    setEditMember({ id: "", userId: "", name: "", email: "", phone: "", role: "sales_manager", roleId: "" });
     setIsNewMember(true);
   };
 
-  const saveMember = () => {
-    if (!editMember?.name || !editMember?.email) return;
-    if (isNewMember) {
-      setTeam((prev) => [...prev, editMember]);
-      toast({ title: "Member added", description: `${editMember.name} has been added.` });
-    } else {
-      setTeam((prev) => prev.map((m) => (m.id === editMember.id ? editMember : m)));
-      toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+  const saveMember = async () => {
+    if (!editMember?.name || !editMember?.email || !companyId) return;
+    setSaving(true);
+    try {
+      if (isNewMember) {
+        const newUserId = crypto.randomUUID();
+        const { error: profileError } = await supabase.from("profiles").insert({
+          user_id: newUserId,
+          full_name: editMember.name,
+          email: editMember.email,
+          phone: editMember.phone,
+          company_id: companyId,
+        });
+        if (profileError) throw profileError;
+
+        const { error: roleError } = await supabase.from("user_roles").insert({
+          user_id: newUserId,
+          role: editMember.role,
+        });
+        if (roleError) throw roleError;
+
+        toast({ title: "Member added", description: `${editMember.name} has been added.` });
+        addNotification("team_update", "Team Member Added", `${editMember.name} was added to the team.`);
+      } else {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ full_name: editMember.name, phone: editMember.phone })
+          .eq("id", editMember.id);
+        if (profileError) throw profileError;
+
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .update({ role: editMember.role })
+          .eq("id", editMember.roleId);
+        if (roleError) throw roleError;
+
+        toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+      }
+      setEditMember(null);
+      await loadTeam();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed to save member", variant: "destructive" });
     }
-    setEditMember(null);
+    setSaving(false);
   };
 
-  const confirmRemoveMember = () => {
+  const confirmRemoveMember = async () => {
     if (!deleteMember) return;
-    setTeam((prev) => prev.filter((t) => t.id !== deleteMember.id));
-    toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
-    addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
-    setDeleteMember(null);
+    setSaving(true);
+    try {
+      await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
+      await supabase.from("profiles").delete().eq("id", deleteMember.id);
+      toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+      addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
+      setDeleteMember(null);
+      await loadTeam();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed to remove member", variant: "destructive" });
+    }
+    setSaving(false);
   };
 
   const trialDaysLeft = 11;
