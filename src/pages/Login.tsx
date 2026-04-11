@@ -6,12 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +48,30 @@ export default function Login() {
       toast.error("Connection error", { description: "Please check your internet connection and try again." });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: window.location.origin,
+      });
+      if (error) {
+        toast.error("Something went wrong", { description: error.message });
+      } else {
+        toast.success("Password reset link sent to your email");
+        setForgotOpen(false);
+      }
+    } catch {
+      toast.error("Network error", { description: "Please check your connection and try again." });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -73,7 +107,14 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <button type="button" className="text-xs text-primary hover:underline">
+                <button
+                  type="button"
+                  className="text-xs text-primary hover:underline"
+                  onClick={() => {
+                    setResetEmail(email);
+                    setForgotOpen(true);
+                  }}
+                >
                   Forgot password?
                 </button>
               </div>
@@ -110,6 +151,36 @@ export default function Login() {
           </Link>
         </p>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset your password</DialogTitle>
+            <DialogDescription>
+              Enter your email address and we'll send you a link to reset your password.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email" className="text-sm font-medium">Email</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="you@company.com"
+                className="h-12 rounded-lg"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <Button className="w-full" type="submit" disabled={resetLoading}>
+              {resetLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Send Reset Link
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
