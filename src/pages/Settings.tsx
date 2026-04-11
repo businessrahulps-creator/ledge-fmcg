@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database } from "lucide-react";
-import { getQueue, clearQueue, removeFromQueue, QueuedMutation } from "@/lib/offline-store";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw } from "lucide-react";
+import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -627,18 +627,43 @@ export default function Settings() {
                               {JSON.stringify(m.payload).slice(0, 80)}{JSON.stringify(m.payload).length > 80 ? "…" : ""}
                             </td>
                             <td className="p-2 align-middle text-right md:p-3">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                onClick={async () => {
-                                  await removeFromQueue(m.id);
-                                  const queue = await getQueue();
-                                  setQueuedMutations(queue);
-                                }}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                  title="Retry"
+                                  onClick={async () => {
+                                    if (!navigator.onLine) {
+                                      sonnerToast.error("You're offline — reconnect to retry");
+                                      return;
+                                    }
+                                    const result = await replaySingleMutation(m);
+                                    const queue = await getQueue();
+                                    setQueuedMutations(queue);
+                                    if (result.ok) {
+                                      sonnerToast.success("Mutation synced successfully");
+                                    } else {
+                                      sonnerToast.error("Sync failed", { description: result.error });
+                                    }
+                                  }}
+                                >
+                                  <RotateCw className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                  title="Delete"
+                                  onClick={async () => {
+                                    await removeFromQueue(m.id);
+                                    const queue = await getQueue();
+                                    setQueuedMutations(queue);
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
