@@ -1,54 +1,44 @@
 
 
-# Final QA & Production Readiness Plan
+# Surgical Fix: Offline Mutation Queue
 
-## Audit Findings
+## Root Cause
 
-### Critical
+The offline order creation queues a payload with `{ _offlineOrder: true, order: {...} }` (line 576-578), but the sync replay loop (lines 300-308) does a raw `supabase.from(mutation.table).insert(mutation.payload)`. This sends the `_offlineOrder` wrapper object directly to the `orders` table, which fails because the columns don't match. The order gets stuck in the queue forever.
 
-**C1. Missing `DialogDescription` on all non-Orders `Dialog` components**
-Console warning persists: "Missing `Description` or `aria-describedby`" for `DialogContent`. The Orders page was fixed but the following pages still have `Dialog` components without `DialogDescription`:
-- `Distributors.tsx`: Add/Edit dialog (line 227), Dealer Profile dialog (line 273)
-- `Stock.tsx`: Add/Edit Product dialog, Add/Edit Warehouse dialog, Edit Stock Item dialog, Add Stock dialog
-- `Salespersons.tsx`: Add/Edit dialog
-- `Settings.tsx`: Add/Edit Team Member dialog, Logo upload dialog
+Additionally, order lines are never queued separately, so even if the order insert succeeded, the lines would be lost.
 
-**Fix**: Add `<DialogDescription className="sr-only">...</DialogDescription>` to every `Dialog` that lacks one. Import `DialogDescription` where missing.
+## Fix (2 files, surgical)
 
-### High
+### 1. `src/lib/offline-store.ts` — Add order-aware replay
 
-**H1. Inconsistent input heights in Orders detail dialog**
-Dispatch fields (lines 483, 492, 499) use `h-11` while other inputs and selects use `h-10`. In `NewOrder.tsx`, the total display div uses `h-11` (line 350) while sibling inputs use `h-10`.
-**Fix**: Standardize to `h-10` base, `md:h-12` for desktop across all inputs in both files.
+Add a new mutation type `"insert_order_atomic"` to `replaySingleMutation` that:
+- Calls the `insert_order_atomic` RPC (same as online path)
+- Inserts order lines after getting the real order ID
+- Handles stock deduction if the order was dispatched/delivered
+- Retries up to 3 times on failure
 
-**H2. `statusColors` map is defined but previous audit incorrectly flagged it as unused**
-Both `Orders.tsx` and `NewOrder.tsx` actively use `statusColors` for the toggle button styling. No action needed — this was a false positive from the previous audit. Confirming here for accuracy.
+### 2. `src/context/DataContext.tsx` — Fix queue + replay
 
-### Medium
+**Enqueue fix (line 575-578):**
+- Change the queued mutation type from `"insert"` to `"insert_order_atomic"`
+- Store the full order object (with lines, godownId, delivery status) as the payload instead of the broken `_offlineOrder` wrapper
 
-**M1. ExportPdfModal missing `DialogDescription`**
-Check if the PDF export modal also triggers the warning.
+**Sync replay (lines 288-336):**
+- Detect `"insert_order_atomic"` mutations and call the proper RPC + lines insert + stock deduction
+- Add retry logic (max 3 attempts per mutation)
+- After full replay, call `safeRefetchOrders()` and `safeRefetchStockItems()` explicitly
 
-## Implementation Plan
+### Files Changed
 
-1. Add `DialogDescription` (visually hidden) to all `Dialog` components across `Distributors.tsx`, `Stock.tsx`, `Salespersons.tsx`, `Settings.tsx`
-2. Fix input height inconsistencies in `Orders.tsx` detail dialog (`h-11` → `h-10`) and `NewOrder.tsx` total display (`h-11` → `h-10`)
-3. Check and fix `ExportPdfModal.tsx` if missing `DialogDescription`
+| File | Change |
+|------|--------|
+| `src/context/DataContext.tsx` | Fix enqueue payload format for orders; add order-specific replay in syncQueue with retry (3 attempts); call safeRefetch after sync |
+| `src/lib/offline-store.ts` | Add `"insert_order_atomic"` type to `QueuedMutation` union |
 
-## Files Changed
-
-| File | Changes |
-|------|---------|
-| `src/pages/Distributors.tsx` | Add `DialogDescription` import + sr-only instances |
-| `src/pages/Stock.tsx` | Add `DialogDescription` import + sr-only instances |
-| `src/pages/Salespersons.tsx` | Add `DialogDescription` import + sr-only instances |
-| `src/pages/Settings.tsx` | Add `DialogDescription` import + sr-only instances |
-| `src/components/pdf/ExportPdfModal.tsx` | Add `DialogDescription` if missing |
-| `src/pages/Orders.tsx` | Fix `h-11` → `h-10` on dispatch inputs |
-| `src/pages/NewOrder.tsx` | Fix `h-11` → `h-10` on total display div |
-
-## What Does NOT Change
-- All existing functionality, data flow, routing, and component behavior
-- Design tokens, colors, glassmorphic aesthetic
-- Database schema, RLS policies, edge functions
+### What Does NOT Change
+- All UI, buttons, modals, visual elements
+- Online mutation paths (already working)
+- Generic CRUD offline queue (distributors, salespersons, etc. — already correct)
+- Design tokens, routing, components
 
