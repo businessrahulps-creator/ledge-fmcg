@@ -53,6 +53,9 @@ export default function Distributors() {
       d.location.toLowerCase().includes(debouncedSearch.toLowerCase())
   ), [items, debouncedSearch]);
 
+  const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
+  const paginatedDealers = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
+
   const selected = items.find((d) => d.id === selectedId);
   const selectedOrders = orders.filter((o) => o.distributorId === selectedId);
   const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;

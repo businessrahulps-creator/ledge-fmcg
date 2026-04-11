@@ -53,6 +53,9 @@ export default function Salespersons() {
       s.region.toLowerCase().includes(debouncedSearch.toLowerCase())
   ), [items, debouncedSearch]);
 
+  const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
+  const paginatedSales = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
+
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
   const openNew = () => {
