@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-          <header className="sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border bg-card/80 px-3 backdrop-blur-sm md:h-16 md:px-6">
+          <header className="sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6">
             <SidebarTrigger className="mr-4 hidden md:flex" />
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>

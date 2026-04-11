@@ -60,16 +60,16 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-8 md:space-y-10">
         {/* Header */}
         <div>
-          <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase md:text-sm">
+          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="text-xl font-bold tracking-tight mt-0.5 md:text-2xl">{getGreeting()} 👋</h1>
+          <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()} 👋</h1>
 
           {/* Day-of-week row */}
-          <div className="flex gap-2.5 mt-4">
+          <div className="flex gap-2.5 mt-5">
             {DAYS.map((d, i) => (
               <button
                 key={i}
@@ -77,8 +77,8 @@ export default function Dashboard() {
                 aria-label={DAY_LABELS[i]}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 ${
                   i === selectedDay
-                    ? "bg-foreground text-background shadow-md"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-foreground text-background shadow-sm"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {d}
@@ -88,17 +88,17 @@ export default function Dashboard() {
         </div>
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
           {kpis.map((kpi, i) => (
             <motion.div
               key={kpi.label}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
-              className="glass-card p-5"
+              className="glass-card p-5 md:p-6"
             >
-             <p className="text-xs text-muted-foreground font-medium mb-1">{kpi.label}</p>
-              <p className="text-2xl font-bold tracking-tight">{kpi.value}</p>
+              <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
+              <p className="text-2xl md:text-3xl font-bold tracking-tight">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
@@ -107,9 +107,9 @@ export default function Dashboard() {
         <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
           {/* Top Dealers */}
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
-              <Link to="/distributors" className="text-xs text-muted-foreground font-medium">View all</Link>
+              <Link to="/distributors" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.map((d) => (
@@ -118,12 +118,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium">{d.name}</span>
                     <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-gradient-to-r from-foreground/80 to-foreground/40"
+                      className="h-full rounded-full bg-foreground/20 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -133,9 +133,9 @@ export default function Dashboard() {
 
           {/* Top Products */}
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
-              <Link to="/stock" className="text-xs text-muted-foreground font-medium">View all</Link>
+              <Link to="/stock" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.map((p) => (
@@ -144,12 +144,12 @@ export default function Dashboard() {
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
                     <span className="text-xs text-muted-foreground shrink-0">{formatNumber(p.totalSold)} sold</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-1 rounded-full bg-muted/60 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/30"
+                      className="h-full rounded-full bg-muted-foreground/20 dark:bg-muted-foreground/30"
                     />
                   </div>
                 </div>
@@ -160,9 +160,9 @@ export default function Dashboard() {
 
         {/* Recent Orders */}
         <section className="pb-8">
-          <div className="flex items-center justify-between mb-3">
+           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
-            <Link to="/orders" className="text-xs text-muted-foreground font-medium">View all</Link>
+            <Link to="/orders" className="text-xs text-muted-foreground/60 font-medium hover:text-muted-foreground transition-colors">View all</Link>
           </div>
 
           {recentOrders.length === 0 ? (

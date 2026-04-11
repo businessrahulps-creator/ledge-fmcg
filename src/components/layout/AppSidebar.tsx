@@ -14,6 +14,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -25,12 +26,18 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-const mainNav = [
+const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: IndianRupee },
+];
+
+const manageNav = [
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Dealers", url: "/distributors", icon: UserRound },
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },
+];
+
+const analyzeNav = [
   { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
@@ -110,10 +117,32 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
+        {/* Overview section */}
         <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Overview</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNav.map(renderNavItem)}
+              {overviewNav.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Manage section */}
+        <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Manage</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {manageNav.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Analyze section */}
+        <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-3 mb-1">Analyze</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {analyzeNav.map(renderNavItem)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
