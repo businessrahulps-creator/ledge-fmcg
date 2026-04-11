@@ -329,48 +329,27 @@ export default function Settings() {
   };
 
   const openNewMember = () => {
-    setEditMember({ id: "", userId: "", name: "", email: "", phone: "", role: "sales_manager", roleId: "" });
-    setIsNewMember(true);
+    // Invite-by-email not yet implemented; show placeholder
   };
 
   const saveMember = async () => {
     if (!editMember?.name || !editMember?.email || !companyId) return;
+    if (isNewMember) return; // New member creation disabled
     setSaving(true);
     try {
-      if (isNewMember) {
-        const newUserId = crypto.randomUUID();
-        const { error: profileError } = await supabase.from("profiles").insert({
-          user_id: newUserId,
-          full_name: sanitizeInput(editMember.name),
-          email: sanitizeInput(editMember.email),
-          phone: sanitizeInput(editMember.phone),
-          company_id: companyId,
-        });
-        if (profileError) throw profileError;
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ full_name: sanitizeInput(editMember.name), phone: sanitizeInput(editMember.phone) })
+        .eq("id", editMember.id);
+      if (profileError) throw profileError;
 
-        const { error: roleError } = await supabase.from("user_roles").insert({
-          user_id: newUserId,
-          role: editMember.role,
-        });
-        if (roleError) throw roleError;
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .update({ role: editMember.role })
+        .eq("id", editMember.roleId);
+      if (roleError) throw roleError;
 
-        toast({ title: "Member added", description: `${editMember.name} has been added.` });
-        addNotification("team_update", "Team Member Added", `${editMember.name} was added to the team.`);
-      } else {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ full_name: sanitizeInput(editMember.name), phone: sanitizeInput(editMember.phone) })
-          .eq("id", editMember.id);
-        if (profileError) throw profileError;
-
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .update({ role: editMember.role })
-          .eq("id", editMember.roleId);
-        if (roleError) throw roleError;
-
-        toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
-      }
+      toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
       setEditMember(null);
       await loadTeam();
     } catch (err: any) {

@@ -886,6 +886,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
+  const refreshAll = useCallback(async () => {
+    if (!companyId) return;
+    const token = ++fetchTokenRef.current;
+    await fetchAll(companyId, token);
+  }, [companyId, fetchAll]);
+
   return (
     <DataContext.Provider
       value={{
@@ -899,7 +905,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addProduct: prodCrud.add, updateProduct: prodCrud.update, deleteProduct: prodCrud.remove,
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
-        nextOrderNumber, previewOrderNumber,
+        nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
       {children}

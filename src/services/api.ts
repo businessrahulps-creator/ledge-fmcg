@@ -9,6 +9,7 @@ export function useApi() {
   return {
     loading: data.loading,
     companyInfo: data.companyInfo,
+    refreshAll: data.refreshAll,
     orders: {
       list: () => data.orders,
       create: (order: Order): Promise<AddOrderResult> => data.addOrder(order),

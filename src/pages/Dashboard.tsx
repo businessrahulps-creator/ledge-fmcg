@@ -38,9 +38,19 @@ export default function Dashboard() {
   }
 
   // Parse date as local timezone to avoid UTC offset shifting the day
+  // Only show orders from the current week (Mon-Sun containing today)
   const filteredOrders = orders.filter((o) => {
-    const orderDay = new Date(o.date + "T00:00:00").getDay();
-    return orderDay === selectedDay;
+    const orderDate = new Date(o.date + "T00:00:00");
+    if (orderDate.getDay() !== selectedDay) return false;
+    // Current week boundary: find the most recent occurrence of selectedDay
+    const diff = (today.getDay() - selectedDay + 7) % 7;
+    const target = new Date(today);
+    target.setDate(today.getDate() - diff);
+    target.setHours(0, 0, 0, 0);
+    // Only show if the order date matches this week's occurrence
+    return orderDate.getFullYear() === target.getFullYear() &&
+      orderDate.getMonth() === target.getMonth() &&
+      orderDate.getDate() === target.getDate();
   });
 
   const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
