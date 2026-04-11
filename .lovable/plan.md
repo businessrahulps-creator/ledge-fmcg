@@ -1,105 +1,80 @@
 
 
-# UI/UX Stress-Test Audit & Polish Plan
-## Current State: 8/10 → Target: 10/10
+# Comprehensive UI/UX Polish Plan — Ledge 10/10 Elevation
+
+## Audit Findings
+
+### Critical Issues (User-Reported)
+1. **Sidebar nav text too thin** — Currently `text-sm` with no explicit font-weight on the `<span>`. The `activeClassName="text-primary font-medium"` only applies on active state; inactive items have no weight class, defaulting to 400.
+2. **Ugly left border-l-2 active indicator** — `border-l-2 border-primary` on active nav items creates a harsh black bar. Should be replaced with a subtle full-width rounded background pill (Linear-style).
+3. **Revenue KPI overflow** — `formatCurrency(totalRevenue)` can produce long strings like `₹12,34,567.00`. The container uses `text-2xl md:text-3xl` with no overflow handling — breaks on narrow cards.
+4. **Flat black-and-white palette** — The light mode uses `--primary: 0 0% 7%` (near-black) and `--background: 0 0% 98%` (near-white). No intermediate surface layers or subtle accent tones for depth.
+
+### Secondary Findings
+5. **Glass-card shadow too faint** — `shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)]` is nearly invisible.
+6. **Progress bars blend in** — `bg-foreground/25` is too subtle against muted backgrounds.
+7. **Table header row** lacks sufficient visual separation from data rows.
+8. **Sidebar section labels** (`text-muted-foreground/50`) are nearly invisible.
+9. **Day picker buttons** — active state `bg-foreground text-background` is stark; could use softer treatment.
+10. **"View all →" links** — `text-muted-foreground/70` is too faint for an actionable element.
 
 ---
 
-## AUDIT FINDINGS
+## Implementation Plan (7 Passes)
 
-### A. Typography & Hierarchy Issues
-1. **KPI card labels** (`text-[11px]`) are too small on desktop — feels data-sparse
-2. **Section headers** ("Top Dealers", "Top Products") at `text-sm` are undersized on desktop — lack weight distinction from body text
-3. **Page subtitles** ("Manage and track all sales orders") feel disconnected — gap between title and subtitle is inconsistent across pages (`mt-0.5` vs `mt-1`)
+### Pass 1: Design Tokens — Depth & Warmth (`src/index.css`)
+- Add a new `--surface-raised` token (`0 0% 100%` light, slightly lighter than card in dark) for cards that need lift
+- Bump `--muted` from `0 0% 94%` to `0 0% 96%` for gentler backgrounds
+- Upgrade `.glass-card` shadow to `shadow-[0_1px_6px_-1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.04)]` (layered, more realistic)
+- Add `.glass-card:hover` subtle shadow lift for interactive cards
+- Strengthen `.row-hover` to `hover:bg-muted/40`
 
-### B. Spacing & Breathing Room
-4. **KPI cards** — unequal padding between mobile (`p-5`) and the visual weight of the `text-2xl`/`text-3xl` numbers. Cards feel slightly cramped vertically
-5. **Dashboard day-picker buttons** — `gap-2.5` makes them float disconnected on wider screens. Should self-contain better
-6. **Progress bars** in Dealers/Products sections — `h-1` is nearly invisible, hard to parse at a glance
-7. **Mobile order cards** — `space-y-2.5` gap between cards is tight; no visual separation beyond the gap
+### Pass 2: Sidebar Navigation (`src/components/layout/AppSidebar.tsx`)
+- Change nav item text to `font-semibold` (weight 600) for all states
+- **Remove** `border-l-2 border-primary` active indicator entirely
+- Replace with a subtle rounded pill background: active items get `bg-sidebar-accent text-foreground font-semibold` with a smooth `rounded-lg` fill (Linear-style)
+- Active icon gets `text-foreground` instead of `text-primary`
+- Section labels: bump from `text-muted-foreground/50` to `text-muted-foreground/60`
+- Settings footer nav: same treatment, remove border-l-2
 
-### C. Interactive Feedback & Touch
-8. **Button default variant** has `hover:-translate-y-0.5` lift — this is jarring and non-standard for a business app. Linear/Apple never lifts buttons
-9. **Day-picker buttons** lack focus-visible ring — keyboard-inaccessible
-10. **Ghost icon buttons** (edit/delete on Dealer cards) — `h-10 w-10` is good, but lack visible pressed state (`active:scale`)
-11. **Status toggle buttons** in Order dialog — no `active:scale` feedback, feels dead on press
-12. **"View all" links** — no underline or arrow hint that they're navigable; too low contrast at `text-muted-foreground/60`
+### Pass 3: KPI Revenue Overflow Fix (`src/pages/Dashboard.tsx`)
+- Add `truncate` or `text-[clamp(1.25rem,4vw,2.5rem)]` responsive sizing to KPI values
+- Wrap KPI value in a container with `min-w-0 overflow-hidden`
+- Use `tabular-nums` for consistent number width
+- Reduce Revenue number font size on mobile to prevent overflow: `text-xl md:text-3xl`
 
-### D. Visual Consistency
-13. **Auth pages** — Login/Signup cards use `shadow-md` while the rest of the app uses `.glass-card` with `shadow-[0_1px_3px]`. Inconsistent depth language
-14. **Notification center button** — `h-9 w-9` is smaller than sidebar icon buttons. Header icons should be uniform
-15. **Dialog widths** — Order dialog is `sm:max-w-2xl`, Dealer edit is `sm:max-w-md`. This is correct, but the inner padding (`space-y-4`) varies without reason
-16. **Info cards** in dialogs (Date, Dealer, etc.) use `bg-muted/20` which is barely visible in light mode — feels like a missing element
+### Pass 4: Palette Depth (`src/index.css`)
+- Light mode: shift `--background` to `0 0% 97.5%` (slightly warmer)
+- Add a subtle warm tint to `--card`: `40 20% 99%` (barely perceptible cream)
+- Adjust `--border` to `0 0% 90%` for slightly more visible borders
+- `--muted-foreground` stays at `0 0% 45%` but labels get bumped to `text-muted-foreground` (not `/60` or `/50`)
+- Progress bar fills: change from `bg-foreground/25` to `bg-foreground/35` for visibility
 
-### E. Mobile-Specific Issues
-17. **Bottom nav** — the "More" label sits at the same visual weight as primary items. No visual cue that it's a menu vs. a destination
-18. **Mobile KPI grid** — 2-col grid with `gap-4` creates uneven visual weight between Revenue (large number) and Orders (small number)
-19. **Pagination on mobile** — "X / Y" text is too subtle at `text-xs text-muted-foreground`
+### Pass 5: Interactive Polish
+- Day picker active state: soften from pure `bg-foreground` to `bg-foreground/90`
+- "View all →" links: bump to `text-muted-foreground hover:text-foreground` (drop the `/70`)
+- Status toggle buttons in Orders dialog: ensure `active:scale-[0.97]` and `transition-all`
 
-### F. Missing Polish Details
-20. **No active:scale on primary buttons** — feels flat on mobile tap
-21. **Table headers** — `font-medium` is too light for the header role; should be `font-semibold` or use a subtle background wash
-22. **Empty states** — Dashboard empty state icon is raw SVG inline, not matching the lucide icon system used everywhere else
-23. **Progress bar animation** — eases in nicely but the bar color `bg-foreground/20` is too subtle in light mode
+### Pass 6: Table Headers
+- Already have `bg-muted/30` — bump to `bg-muted/40` for more separation
+- Ensure `font-semibold` on all `<th>` elements across Dashboard, Orders, and dialog tables
 
----
-
-## IMPLEMENTATION PLAN
-
-### Pass 1: Design Token & Global Refinements (`src/index.css`, `src/components/ui/button.tsx`)
-- Remove `hover:-translate-y-0.5` from default button variant (finding #8)
-- Add `active:scale-[0.98]` to default and outline button variants for tactile mobile press feedback
-- Bump `.glass-card` shadow slightly for light mode: `shadow-[0_1px_4px_-1px_rgba(0,0,0,0.06)]`
-- Add `.row-hover` subtle active state
-- Improve table header styling with slightly more weight
-
-### Pass 2: Dashboard Polish (`src/pages/Dashboard.tsx`)
-- KPI cards: add `md:p-7` for more desktop breathing room, bump desktop values to `md:text-3xl`
-- Progress bars: increase to `h-1.5` and use `bg-foreground/25` for better visibility
-- "View all" links: add a subtle `→` arrow and bump to `text-muted-foreground/70` with `hover:text-foreground` 
-- Empty state: replace inline SVG with lucide `ListChecks` icon
-- Day picker: add `focus-visible:ring-2 focus-visible:ring-ring` for keyboard accessibility
-
-### Pass 3: Orders Page (`src/pages/Orders.tsx`)
-- Status toggle buttons: add `active:scale-[0.97]` and `focus-visible:ring-2`
-- Table headers: add `bg-muted/30` background wash for better visual separation
-- Mobile order cards: slightly increase vertical gap to `space-y-3`
-
-### Pass 4: Dealers & Salespersons (`src/pages/Distributors.tsx`, `src/pages/Salespersons.tsx`)
-- Icon buttons: add `active:scale-95` for press feedback
-- Dialog info cards: bump `bg-muted/20` to `bg-muted/30` for visibility
-
-### Pass 5: Auth Pages (`src/pages/Login.tsx`, `src/pages/Signup.tsx`)
-- Replace `shadow-md` with `shadow-sm` to match glass-card depth language
-- Add `backdrop-blur-sm` to auth card for subtle frosted glass hint
-
-### Pass 6: Layout & Navigation (`src/components/layout/AppLayout.tsx`, `AppSidebar.tsx`)
-- Notification bell: normalize to same size as other header elements
-- Mobile bottom nav "More" button: add a subtle dot indicator or different icon weight to hint it's a menu
-
-### Pass 7: Micro-interaction polish
-- Status toggle buttons in Order/NewOrder dialogs: add `transition-all` and `active:scale-[0.97]`
-- All `card-hover` elements: ensure they have `active:scale-[0.98]` for mobile press
+### Pass 7: Auth Pages Consistency
+- Login/Signup cards already have `shadow-sm backdrop-blur-sm` — keep as-is
+- No changes needed here (already aligned from previous pass)
 
 ---
 
-### Files Modified (no new files)
-- `src/index.css` — glass-card shadow, row-hover active state
-- `src/components/ui/button.tsx` — remove lift, add active:scale
-- `src/pages/Dashboard.tsx` — KPI spacing, progress bars, view-all arrows, empty state, day-picker a11y
-- `src/pages/Orders.tsx` — table headers, status buttons, mobile card spacing
-- `src/pages/Distributors.tsx` — icon button press, dialog card contrast
-- `src/pages/Salespersons.tsx` — icon button press, dialog card contrast
-- `src/pages/Login.tsx` — shadow consistency
-- `src/pages/Signup.tsx` — shadow consistency
-- `src/components/layout/AppLayout.tsx` — notification size, bottom nav hint
+### Files Modified
+- `src/index.css` — glass-card shadow, palette depth, progress bar visibility
+- `src/components/layout/AppSidebar.tsx` — font-semibold nav text, remove border-l-2, pill active state
+- `src/pages/Dashboard.tsx` — KPI overflow fix, progress bar contrast, link contrast
 
 ### What Will NOT Change
-- All data flow, API calls, realtime subscriptions
-- All routing, auth, RBAC logic
-- All pagination, CSV export, PDF export
-- All Indian date formatting, IST clock
-- All component structure and prop interfaces
-- Dark mode token values
-- Mobile bottom nav structure and routing
+- All data flow, API calls, realtime subscriptions, RBAC
+- All routing, auth, pagination, CSV/PDF export
+- Indian date formatting, IST clock
+- Dark mode token values (only light mode depth adjustments)
+- Component structure, prop interfaces
+- No icon library change (Lucide stays — Tabler would require dependency addition and is not worth the risk for a polish pass)
 
