@@ -3,7 +3,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link } from "react-router-dom";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
