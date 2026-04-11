@@ -288,10 +288,12 @@ export default function Stock() {
                     className="h-11 rounded-lg pl-10 md:h-12 md:max-w-md"
                   />
                 </div>
-                <Button onClick={openNewProduct} className="w-full sm:w-auto">
-                  <Plus className="h-4 w-4" />
-                  Add Product
-                </Button>
+                {!isAccountant && (
+                  <Button onClick={openNewProduct} className="w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    Add Product
+                  </Button>
+                )}
               </div>
 
               <div className="glass-card overflow-hidden">
@@ -305,7 +307,7 @@ export default function Stock() {
                         <th className="px-6 py-3 font-medium text-right">Base Price</th>
                         <th className="px-6 py-3 font-medium text-right">Total Sold</th>
                         <th className="px-6 py-3 font-medium text-right">Total Stock</th>
-                        <th className="px-6 py-3 font-medium text-right">Actions</th>
+                        {!isAccountant && <th className="px-6 py-3 font-medium text-right">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -317,16 +319,18 @@ export default function Stock() {
                           <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.basePrice)}</td>
                           <td className="px-6 py-4 text-right text-muted-foreground">{formatNumber(p.totalSold)}</td>
                           <td className="px-6 py-4 text-right font-semibold">{formatNumber(getProductStock(p.id))}</td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </td>
+                          {!isAccountant && (
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -346,14 +350,16 @@ export default function Stock() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-1 shrink-0 ml-2">
-                        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      {!isAccountant && (
+                        <div className="flex gap-1 shrink-0 ml-2">
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
