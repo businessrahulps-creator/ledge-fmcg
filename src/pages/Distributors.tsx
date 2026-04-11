@@ -135,7 +135,7 @@ export default function Distributors() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span >Export CSV</span>
             </Button>
             <Button onClick={openNew} className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4" />
