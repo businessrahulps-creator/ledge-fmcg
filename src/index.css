@@ -30,26 +30,26 @@
     --accent-indigo: #4F46E5;
 
 
-    --background: 40 8% 97.5%;
-    --foreground: 220 20% 12%;
+    --background: 0 0% 97%;
+    --foreground: 0 0% 11%;
 
-    --card: 40 15% 99.5%;
-    --card-foreground: 220 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
+    --popover-foreground: 0 0% 11%;
 
     --primary: 217 91% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 95%;
-    --secondary-foreground: 220 20% 20%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 18%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 8% 42%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 44%;
 
-    --accent: 220 10% 95%;
-    --accent-foreground: 220 20% 12%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -60,8 +60,8 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
     --ring: 217 91% 53%;
 
     --radius: 0.75rem;
@@ -72,35 +72,35 @@
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96%;
     --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 0 0% 92%;
+    --sidebar-border: 0 0% 91%;
     --sidebar-ring: 0 0% 7%;
 
     --surface: 0 0% 100%;
-    --surface-border: 0 0% 92%;
+    --surface-border: 0 0% 91%;
 
     --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   }
 
   .dark {
-    --background: 240 25% 5%;
-    --foreground: 240 33% 95%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
 
-    --card: 240 16% 9%;
-    --card-foreground: 240 33% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
 
-    --popover: 240 16% 9%;
-    --popover-foreground: 240 33% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 93%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 21% 15%;
-    --secondary-foreground: 240 33% 95%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 93%;
 
-    --muted: 240 21% 15%;
-    --muted-foreground: 240 7% 45%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 52%;
 
-    --accent: 224 100% 62%;
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -112,21 +112,21 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --border: 240 21% 15%;
-    --input: 240 21% 15%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
     --ring: 217 91% 60%;
 
-    --sidebar-background: 240 25% 5%;
-    --sidebar-foreground: 240 33% 95%;
-    --sidebar-primary: 224 100% 62%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 93%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 21% 12%;
-    --sidebar-accent-foreground: 240 33% 95%;
-    --sidebar-border: 240 21% 15%;
-    --sidebar-ring: 224 100% 62%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 0 0% 17%;
+    --sidebar-ring: 217 91% 60%;
 
-    --surface: 240 16% 9%;
-    --surface-border: 240 21% 15%;
+    --surface: 0 0% 10%;
+    --surface-border: 0 0% 17%;
   }
 }
 
@@ -152,8 +152,8 @@
 
 @layer utilities {
   .glass-card {
-    @apply rounded-2xl bg-card border border-border/60 shadow-[0_2px_12px_-2px_rgba(120,90,50,0.06),0_1px_3px_-1px_rgba(0,0,0,0.04)] transition-all duration-200
-           dark:border-border/50 dark:shadow-none;
+    @apply rounded-2xl bg-card border border-border/60 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-200
+           dark:border-border/50 dark:shadow-[0_1px_2px_rgba(0,0,0,0.2)];
   }
 
   .row-hover {
@@ -162,7 +162,7 @@
 
   .card-hover {
     @apply transition-all duration-200 ease-out 
-           hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] hover:border-border/80
+           hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] hover:border-border/80
            active:scale-[0.98] active:shadow-sm;
   }
 
