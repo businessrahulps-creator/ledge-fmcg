@@ -6,11 +6,6 @@ export async function downloadPdf(filename: string, document: React.ReactElement
     const { pdf } = await import("@react-pdf/renderer");
     const blob = await pdf(document).toBlob();
     const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.type ? globalThis.document.createElement("a") : null!, {
-      href: url,
-      download: filename,
-    });
-    // Safer: always use globalThis.document
     const link = globalThis.document.createElement("a");
     link.href = url;
     link.download = filename;
