@@ -83,6 +83,7 @@ function mapOrders(ordersData: any[], allLines: any[]): Order[] {
       driverName: o.driver_name,
       deliveryStatus: o.delivery_status as Order["deliveryStatus"],
       dispatchRemarks: o.dispatch_remarks,
+      godownId: o.godown_id || undefined,
     };
   });
 }

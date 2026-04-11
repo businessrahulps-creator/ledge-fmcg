@@ -51,6 +51,7 @@ export interface Order {
   driverName: string;
   deliveryStatus: "pending" | "dispatched" | "delivered";
   dispatchRemarks: string;
+  godownId?: string;
 }
 
 export const salespersons: Salesperson[] = [
