@@ -293,20 +293,87 @@ export default function Performance() {
           </div>
 
           {/* Time period pills */}
-          <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
-            {PERIOD_OPTIONS.map((opt) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-1 rounded-lg bg-muted/50 p-1">
+              {PERIOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPeriod(opt.value)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                    period === opt.value && period !== "custom"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
               <button
-                key={opt.value}
-                onClick={() => setPeriod(opt.value)}
+                onClick={() => setPeriod("custom")}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                  period === opt.value
+                  period === "custom"
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {opt.label}
+                Custom
               </button>
-            ))}
+            </div>
+
+            {period === "custom" && (
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        !customFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customFrom}
+                      onSelect={setCustomFrom}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground">to</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 w-[130px] justify-start text-left text-xs font-normal",
+                        !customTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {customTo ? format(customTo, "dd/MM/yyyy") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customTo}
+                      onSelect={setCustomTo}
+                      disabled={(date) => customFrom ? date < customFrom : false}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
         </div>
 
