@@ -119,7 +119,8 @@ export default function Distributors() {
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
-              className="flex-1 sm:flex-none"
+              size="icon"
+              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               onClick={() => {
                 exportCsv(
                   csvFilename("dealers"),
@@ -135,7 +136,7 @@ export default function Distributors() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span >Export CSV</span>
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
             <Button onClick={openNew} className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4" />

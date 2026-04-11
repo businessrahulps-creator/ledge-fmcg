@@ -310,41 +310,45 @@ export default function Stock() {
                     className="h-10 rounded-lg pl-10 md:max-w-md"
                   />
                 </div>
-                {!isAccountant && (
-                  <Button onClick={openNewProduct} className="w-full sm:w-auto">
-                    <Plus className="h-4 w-4" />
-                    Add Product
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+                    onClick={() => {
+                      exportCsv(
+                        csvFilename("products"),
+                        ["Product Name", "SKU", "Unit", "Base Price", "Total Sold", "Total Stock"],
+                        filteredProducts.map((p) => [
+                          p.name,
+                          p.sku,
+                          p.unit,
+                          formatCurrency(p.basePrice),
+                          String(p.totalSold),
+                          String(getProductStock(p.id)),
+                        ])
+                      );
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export CSV</span>
                   </Button>
-                )}
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                  onClick={() => {
-                    exportCsv(
-                      csvFilename("products"),
-                      ["Product Name", "SKU", "Unit", "Base Price", "Total Sold", "Total Stock"],
-                      filteredProducts.map((p) => [
-                        p.name,
-                        p.sku,
-                        p.unit,
-                        formatCurrency(p.basePrice),
-                        String(p.totalSold),
-                        String(getProductStock(p.id)),
-                      ])
-                    );
-                  }}
-                >
-                  <Download className="h-4 w-4" />
-                  <span >Export CSV</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                  onClick={() => setProductsPdfOpen(true)}
-                >
-                  <FileText className="h-4 w-4" />
-                  <span >Export PDF</span>
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+                    onClick={() => setProductsPdfOpen(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export PDF</span>
+                  </Button>
+                  {!isAccountant && (
+                    <Button onClick={openNewProduct} className="flex-1 sm:flex-none">
+                      <Plus className="h-4 w-4" />
+                      Add Product
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <div className="glass-card overflow-hidden">
