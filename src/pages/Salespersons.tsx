@@ -5,8 +5,10 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin, Download } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -276,7 +278,37 @@ export default function Salespersons() {
           <Dialog open onOpenChange={() => setProfileId(null)}>
             <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
               <DialogHeader>
-                <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-base md:text-lg">{profilePerson.name}</DialogTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5"
+                    onClick={() => {
+                      const rows = [
+                        ["Phone", profilePerson.phone],
+                        ["Email", profilePerson.email || "—"],
+                        ["Region", profilePerson.region],
+                        ["Total Orders", String(profilePerson.totalOrders)],
+                        ["Total Value", formatCurrencyPdf(profilePerson.totalValue)],
+                      ];
+                      profileOrders.forEach((o) => {
+                        rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
+                      });
+                      const columns = [
+                        { header: "Field", width: "40%" },
+                        { header: "Value", width: "60%" },
+                      ];
+                      downloadPdf(
+                        pdfFilename("salesperson", profilePerson.name.replace(/\s+/g, "-")),
+                        ReportPdf({ title: profilePerson.name, subtitle: "Team Member Profile", columns, rows, companyName: "" })
+                      );
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Export PDF
+                  </Button>
+                </div>
               </DialogHeader>
               <div className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-2 gap-3 md:gap-4">

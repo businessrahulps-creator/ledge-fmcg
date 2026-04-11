@@ -137,6 +137,10 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        "stagger-fade": {
+          "0%": { opacity: "0", transform: "translateY(6px) scale(0.99)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
@@ -148,6 +152,7 @@ export default {
         "count-up": "count-up 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
         "fade-in": "fade-in 0.2s ease-out",
+        "stagger-fade": "stagger-fade 0.35s cubic-bezier(0.25, 0.1, 0.25, 1) forwards",
         marquee: "marquee 30s linear infinite",
       },
     },

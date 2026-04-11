@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, MoreHorizontal, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
+import { House, ClipboardList, Package, BarChart3, MoreHorizontal, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
@@ -19,9 +19,9 @@ import {
 
 const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: IndianRupee },
+  { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 
 const moreItems = [
@@ -118,7 +118,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </AnimatePresence>
 
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
-            <div className="mx-auto max-w-5xl min-w-0 animate-fade-in">
+            <div className="mx-auto max-w-5xl min-w-0 animate-stagger-fade">
               {children}
             </div>
           </main>
@@ -147,10 +147,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       />
                     )}
                     <item.icon
-                      className={`relative z-10 h-5 w-5 transition-all duration-200 ${isActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
+                      className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
                       strokeWidth={isActive ? 1.8 : 1.5}
                     />
-                    <span className={`relative z-10 text-[10px] transition-all duration-200 whitespace-nowrap ${isActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
+                    <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
                       {item.title}
                     </span>
                   </Link>
@@ -173,10 +173,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       />
                     )}
                     <MoreHorizontal
-                      className={`relative z-10 h-5 w-5 transition-all duration-200 ${isMoreActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
+                      className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isMoreActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
                       strokeWidth={isMoreActive ? 1.8 : 1.5}
                     />
-                    <span className={`relative z-10 text-[10px] transition-all duration-200 whitespace-nowrap ${isMoreActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
+                    <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isMoreActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
                       More
                     </span>
                   </button>

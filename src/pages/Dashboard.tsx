@@ -78,7 +78,7 @@ export default function Dashboard() {
                 aria-label={DAY_LABELS[i]}
                 className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   i === selectedDay
-                    ? "bg-foreground/90 text-background shadow-sm"
+                    ? "bg-foreground/85 text-background shadow-md"
                     : "bg-muted/60 text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -93,9 +93,9 @@ export default function Dashboard() {
           {kpis.map((kpi, i) => (
             <motion.div
               key={kpi.label}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 280 + i * 15, damping: 22 + i * 2 }}
               className="glass-card p-5 md:p-7 min-w-0"
             >
               <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
@@ -113,7 +113,7 @@ export default function Dashboard() {
               <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
-              {topDistributors.map((d) => (
+              {topDistributors.map((d, index) => (
                 <div key={d.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium">{d.name}</span>
@@ -123,8 +123,8 @@ export default function Dashboard() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-foreground/35 dark:bg-foreground/30"
+                      transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
+                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export default function Dashboard() {
               <Link to="/stock" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
-              {topProducts.map((p) => (
+              {topProducts.map((p, index) => (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
@@ -149,8 +149,8 @@ export default function Dashboard() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full rounded-full bg-foreground/35 dark:bg-foreground/30"
+                      transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
+                      className="h-full rounded-full bg-foreground/25 dark:bg-foreground/30"
                     />
                   </div>
                 </div>
@@ -218,9 +218,9 @@ export default function Dashboard() {
                 {recentOrders.map((o, i) => (
                   <motion.div
                     key={o.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i, 8) * 0.06 }}
+                    initial={{ opacity: 0, y: i % 2 === 0 ? 16 : 0, x: i % 2 === 0 ? 0 : -8 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
                     className="glass-card card-hover p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
