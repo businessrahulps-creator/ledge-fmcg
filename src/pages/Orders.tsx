@@ -81,6 +81,9 @@ export default function Orders() {
   const [editVehicle, setEditVehicle] = useState("");
   const [editDriver, setEditDriver] = useState("");
   const [editGodown, setEditGodown] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const openOrder = (order: Order) => {
     setSelectedOrder(order);
