@@ -23,6 +23,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     const container = scrollRef.current;
