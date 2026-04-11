@@ -16,6 +16,12 @@ export interface AddOrderResult {
   error?: string;
 }
 
+export interface CompanyInfo {
+  name: string;
+  address: string;
+  gstin: string;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
@@ -25,6 +31,7 @@ interface DataContextType {
   stockItems: StockItem[];
   loading: boolean;
   isOfflineData: boolean;
+  companyInfo: CompanyInfo;
 
   orderPrefix: string;
   orderSequence: number;
