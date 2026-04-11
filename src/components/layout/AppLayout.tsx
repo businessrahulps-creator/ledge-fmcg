@@ -25,6 +25,29 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+
+  const refreshPendingCount = useCallback(async () => {
+    const q = await getQueue();
+    setPendingCount(q.length);
+  }, []);
+
+  // Poll pending count every 2s when offline
+  useEffect(() => {
+    refreshPendingCount();
+    if (!online) {
+      const id = setInterval(refreshPendingCount, 2000);
+      return () => clearInterval(id);
+    } else if (pendingCount > 0) {
+      setSyncing(true);
+      const timeout = setTimeout(() => {
+        setSyncing(false);
+        setPendingCount(0);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [online, refreshPendingCount]);
 
   useEffect(() => {
     const container = scrollRef.current;
