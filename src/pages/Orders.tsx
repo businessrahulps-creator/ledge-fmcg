@@ -73,6 +73,7 @@ const deliveryStatuses = [
 ];
 
 export default function Orders() {
+  const api = useApi();
   const { companyInfo } = api;
   const orders = api.orders.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);

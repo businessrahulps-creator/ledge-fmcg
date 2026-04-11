@@ -13,6 +13,7 @@ import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal
 import { ReportPdf } from "@/components/pdf/ReportPdf";
 
 export function DistributorReport() {
+  const api = useApi();
   const { companyInfo } = api;
   const orders = api.orders.list();
   const distributors = api.dealers.list();
