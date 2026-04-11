@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database } from "lucide-react";
-import { getQueue, clearQueue, QueuedMutation } from "@/lib/offline-store";
+import { getQueue, clearQueue, removeFromQueue, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 import { Input } from "@/components/ui/input";
