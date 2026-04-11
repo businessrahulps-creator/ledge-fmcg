@@ -42,7 +42,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { PerformanceReportPdf } from "@/components/pdf/PerformanceReportPdf";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 
 type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
@@ -369,7 +369,7 @@ export default function Performance() {
               </div>
               <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full shrink-0" onClick={() => setPdfOpen(true)}>
                 <Download className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Export</span>
+                <span>Export</span>
               </Button>
             </div>
 
