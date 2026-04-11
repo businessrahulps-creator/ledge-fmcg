@@ -1,81 +1,55 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { X, Download, Share, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-const STORAGE_KEY = "ledge-install-state"; // "dismissed" | "never" | undefined
-
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-}
-
-function isStandalone() {
-  return window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true;
-}
+import { useInstallPrompt, hasReachedMilestone } from "@/hooks/use-install-prompt";
 
 export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showIOS, setShowIOS] = useState(false);
+  const {
+    canInstall,
+    isIOS,
+    isStandalone,
+    dismissed,
+    permanentlyDismissed,
+    triggerInstall,
+    dismiss,
+    dismissForever,
+  } = useInstallPrompt();
+
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Don't show in iframe / standalone / permanently dismissed
-    try { if (window.self !== window.top) return; } catch { return; }
-    if (isStandalone()) return;
-    const state = localStorage.getItem(STORAGE_KEY);
-    if (state === "never") return;
+    if (!canInstall || isStandalone || permanentlyDismissed) return;
 
-    // For Android/Chrome — listen for native prompt
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    // Check milestone periodically (user may reach it while on page)
+    const check = () => {
+      if (hasReachedMilestone() && !dismissed) {
+        setVisible(true);
+      }
     };
-    window.addEventListener("beforeinstallprompt", handler);
 
-    // For iOS — show manual instructions after delay
-    if (isIOS() && state !== "never") {
-      const timer = setTimeout(() => setShowIOS(true), 3000);
-      return () => { clearTimeout(timer); window.removeEventListener("beforeinstallprompt", handler); };
-    }
+    // Initial check after 2s delay
+    const timer = setTimeout(check, 2000);
+    // Re-check every 10s in case milestones are reached
+    const interval = setInterval(check, 10000);
 
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [canInstall, isStandalone, permanentlyDismissed, dismissed]);
 
-  // Show prompt 3s after the native event fires (or iOS detection)
+  // Hide when dismissed
   useEffect(() => {
-    if (!deferredPrompt && !showIOS) return;
-    const state = localStorage.getItem(STORAGE_KEY);
-    if (state === "never") return;
-    const timer = setTimeout(() => setVisible(true), deferredPrompt ? 3000 : 0);
-    return () => clearTimeout(timer);
-  }, [deferredPrompt, showIOS]);
+    if (dismissed) setVisible(false);
+  }, [dismissed]);
 
-  const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setDeferredPrompt(null);
-      setVisible(false);
-    }
-  }, [deferredPrompt]);
+  const handleInstall = async () => {
+    const accepted = await triggerInstall();
+    if (accepted) setVisible(false);
+  };
 
-  const handleLater = useCallback(() => {
-    setVisible(false);
-    localStorage.setItem(STORAGE_KEY, "dismissed");
-  }, []);
-
-  const handleNever = useCallback(() => {
-    setVisible(false);
-    localStorage.setItem(STORAGE_KEY, "never");
-  }, []);
-
-  const showPrompt = visible && (!!deferredPrompt || showIOS);
+  const showPrompt = visible && canInstall && !dismissed;
 
   return (
     <AnimatePresence>
@@ -88,28 +62,25 @@ export function InstallPrompt() {
           className="fixed bottom-24 left-3 right-3 z-[60] md:bottom-6 md:left-auto md:right-6 md:w-[360px]"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-background/70 p-4 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-border/20 dark:bg-background/50">
-            {/* Close button */}
             <button
-              onClick={handleLater}
+              onClick={dismiss}
               className="absolute right-3 top-3 rounded-full p-1 text-muted-foreground/60 transition-colors hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="flex items-start gap-3">
-              {/* App icon */}
               <img src="/pwa-192.png" alt="Ledge" className="h-12 w-12 shrink-0 rounded-xl shadow-sm" />
 
               <div className="min-w-0 flex-1 pr-4">
                 <p className="text-sm font-semibold">Install Ledge App</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {showIOS
-                    ? "Add to your home screen for instant access — works offline too"
-                    : "Open Ledge instantly from your home screen — works even without internet"}
+                  {isIOS
+                    ? "Install Ledge as an app for fast offline access to orders, stock, and reports — even in godowns."
+                    : "Install Ledge as an app for fast offline access to orders, stock, and reports — even in godowns."}
                 </p>
 
-                {/* iOS-specific instructions */}
-                {showIOS && (
+                {isIOS && (
                   <div className="mt-3 space-y-2">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
@@ -126,16 +97,15 @@ export function InstallPrompt() {
                   </div>
                 )}
 
-                {/* Action buttons */}
                 <div className="mt-3 flex items-center gap-2">
-                  {!showIOS && (
+                  {!isIOS && (
                     <Button size="sm" className="h-8 rounded-lg bg-gradient-to-r from-primary to-primary/80 px-4 text-xs shadow-sm" onClick={handleInstall}>
                       <Download className="mr-1 h-3.5 w-3.5" />
-                      Install Ledge App
+                      Install App
                     </Button>
                   )}
                   <button
-                    onClick={handleNever}
+                    onClick={dismissForever}
                     className="text-[11px] text-muted-foreground/60 transition-colors hover:text-muted-foreground"
                   >
                     Don't show again

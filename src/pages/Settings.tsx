@@ -3,7 +3,7 @@ import { sanitizeInput } from "@/utils/sanitize";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle } from "lucide-react";
+import { Building2, Upload, Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
 interface TeamMember {
   id: string;
@@ -56,6 +57,54 @@ const roleLabels: Record<string, string> = {
   sales_manager: "Sales Manager",
   accountant: "Accountant",
 };
+
+function InstallAppCard() {
+  const { canInstall, isIOS, isStandalone, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
+
+  if (isStandalone || permanentlyDismissed || !canInstall) return null;
+
+  return (
+    <div className="glass-card p-4 md:p-6 max-w-2xl md:hidden">
+      <div className="flex items-start gap-3">
+        <img src="/pwa-192.png" alt="Ledge" className="h-12 w-12 shrink-0 rounded-xl shadow-sm" />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold">Install Ledge App</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Fast offline access to orders, stock, and reports — even in godowns.
+          </p>
+
+          {isIOS ? (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                  <Share className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span>Tap the <strong className="text-foreground">Share</strong> button</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                  <Smartphone className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span>Select <strong className="text-foreground">Add to Home Screen</strong></span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3">
+              <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => triggerInstall()}>
+                <Download className="h-3.5 w-3.5" />
+                Install App
+              </Button>
+            </div>
+          )}
+
+          <button onClick={dismissForever} className="mt-2 text-[11px] text-muted-foreground/60 hover:text-muted-foreground">
+            Don't show again
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Settings() {
   const { toast } = useToast();
@@ -764,6 +813,9 @@ export default function Settings() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Install App Card — mobile only, shown when not installed */}
+        <InstallAppCard />
+
         {/* Logout Section */}
         <div className="glass-card p-4 md:p-6 max-w-2xl">
           <div className="flex items-center justify-between">

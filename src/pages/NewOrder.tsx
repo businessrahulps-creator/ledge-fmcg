@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
+import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
 
 interface OrderLineState {
   id: string;
@@ -209,6 +210,7 @@ export default function NewOrder() {
         confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
       }, 700);
 
+      trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
       toast.success(`Order #${result.orderNumber} created successfully!`);
 

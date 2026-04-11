@@ -10,6 +10,10 @@ import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { getQueue } from "@/lib/offline-store";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
+import { Button } from "@/components/ui/button";
+import { Download, Share, Plus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +38,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
   const online = useOnlineStatus();
+  const { canInstall, isIOS, isStandalone, dismissed, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
+  const showDesktopInstall = canInstall && !isStandalone && !dismissed && !permanentlyDismissed;
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
 
@@ -79,6 +85,47 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
                   {userRole.replace("_", " ")}
                 </Badge>
+              )}
+              {/* Desktop Install App button */}
+              {showDesktopInstall && (
+                <div className="hidden md:block">
+                  {isIOS ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                          <Download className="h-3.5 w-3.5" />
+                          Install App
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72 p-4" align="end">
+                        <p className="text-sm font-semibold mb-2">Install Ledge App</p>
+                        <p className="text-xs text-muted-foreground mb-3">Fast offline access to orders, stock, and reports — even in godowns.</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                              <Share className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <span>Tap <strong className="text-foreground">Share</strong></span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                              <Plus className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <span>Select <strong className="text-foreground">Add to Home Screen</strong></span>
+                          </div>
+                        </div>
+                        <button onClick={dismissForever} className="mt-3 text-[11px] text-muted-foreground/60 hover:text-muted-foreground">
+                          Don't show again
+                        </button>
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={triggerInstall}>
+                      <Download className="h-3.5 w-3.5" />
+                      Install App
+                    </Button>
+                  )}
+                </div>
               )}
               <NotificationCenter />
             </div>
