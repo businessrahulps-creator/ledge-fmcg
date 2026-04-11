@@ -2,11 +2,12 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings } from "lucide-react";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
