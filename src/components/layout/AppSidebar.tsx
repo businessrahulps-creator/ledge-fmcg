@@ -81,6 +81,28 @@ export function AppSidebar() {
 
   const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive = location.pathname.startsWith(item.url);
+
+    if (collapsed) {
+      return (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild isActive={isActive}>
+            <NavLink
+              to={item.url}
+              className="flex flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors"
+              activeClassName="text-foreground"
+            >
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}>
+                <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+              </div>
+              <span className="text-[10px] font-medium leading-tight text-muted-foreground truncate max-w-[56px]">
+                {item.title}
+              </span>
+            </NavLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    }
+
     return (
       <SidebarMenuItem key={item.title}>
         <SidebarMenuButton asChild isActive={isActive}>
@@ -90,7 +112,7 @@ export function AppSidebar() {
             activeClassName="text-foreground"
           >
             <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-            {!collapsed && <span>{item.title}</span>}
+            <span>{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -152,6 +174,26 @@ export function AppSidebar() {
         <SidebarMenu>
           {bottomNav.map((item) => {
             const isActive = location.pathname.startsWith(item.url);
+            if (collapsed) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className="flex flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors"
+                      activeClassName="text-foreground"
+                    >
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}>
+                        <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                      </div>
+                      <span className="text-[10px] font-medium leading-tight text-muted-foreground truncate max-w-[56px]">
+                        {item.title}
+                      </span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
@@ -161,7 +203,7 @@ export function AppSidebar() {
                     activeClassName="text-foreground"
                   >
                     <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-                    {!collapsed && <span>{item.title}</span>}
+                    <span>{item.title}</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
