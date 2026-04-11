@@ -70,14 +70,14 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
-                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                  <Route path="/orders/new" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
-                  <Route path="/distributors" element={<ProtectedRoute><Distributors /></ProtectedRoute>} />
-                  <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
-                  <Route path="/salespersons" element={<ProtectedRoute><Salespersons /></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Dashboard /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Orders /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><NewOrder /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><Distributors /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Stock /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
