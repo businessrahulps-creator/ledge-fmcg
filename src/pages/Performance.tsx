@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
@@ -16,6 +17,7 @@ import {
   Percent,
   Users,
   CalendarIcon,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,6 +41,9 @@ import {
   Bar,
   ReferenceLine,
 } from "recharts";
+import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 
 type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
 
