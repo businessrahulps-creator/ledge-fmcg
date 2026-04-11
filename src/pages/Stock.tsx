@@ -505,23 +505,50 @@ export default function Stock() {
                       <h3 className="text-sm font-semibold md:text-base">
                         Inventory — {locations.find((l) => l.id === selectedWarehouse)?.name}
                       </h3>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1 sm:flex-initial">
-                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            placeholder="Search inventory..."
-                            value={warehouseSearch}
-                            onChange={(e) => setWarehouseSearch(e.target.value)}
-                            className="h-10 rounded-lg pl-10 md:max-w-xs"
-                          />
-                        </div>
-                        {!isAccountant && (
-                          <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
-                            <PackagePlus className="h-4 w-4" />
-                            Add Stock
+                        <div className="flex gap-2">
+                          <div className="relative flex-1 sm:flex-initial">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                              placeholder="Search inventory..."
+                              value={warehouseSearch}
+                              onChange={(e) => setWarehouseSearch(e.target.value)}
+                              className="h-10 rounded-lg pl-10 md:max-w-xs"
+                            />
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="shrink-0"
+                            onClick={() => {
+                              const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "warehouse";
+                              exportCsv(
+                                csvFilename(`inventory-${whName.toLowerCase().replace(/\s+/g, "-")}`),
+                                ["Product Name", "SKU", "Unit", "Quantity", "Threshold", "Health", "Base Price", "Stock Value"],
+                                warehouseInventory.map((si) => {
+                                  const health = getStockHealth(si.quantity, si.threshold);
+                                  return [
+                                    si.productName,
+                                    si.sku,
+                                    si.unit,
+                                    String(si.quantity),
+                                    String(si.threshold),
+                                    health.charAt(0).toUpperCase() + health.slice(1),
+                                    formatCurrency(si.basePrice),
+                                    formatCurrency(si.quantity * si.basePrice),
+                                  ];
+                                })
+                              );
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
+                            <span className="hidden sm:inline">Export CSV</span>
                           </Button>
-                        )}
-                      </div>
+                          {!isAccountant && (
+                            <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
+                              <PackagePlus className="h-4 w-4" />
+                              Add Stock
+                            </Button>
+                          )}
+                        </div>
                     </div>
 
                     <div className="glass-card overflow-hidden">
