@@ -85,7 +85,7 @@ export function InstallPrompt() {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 100, opacity: 0, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-20 left-3 right-3 z-[60] md:bottom-6 md:left-auto md:right-6 md:w-[360px]"
+          className="fixed bottom-24 left-3 right-3 z-[60] md:bottom-6 md:left-auto md:right-6 md:w-[360px]"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-background/70 p-4 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-border/20 dark:bg-background/50">
             {/* Close button */}
@@ -101,11 +101,11 @@ export function InstallPrompt() {
               <img src="/pwa-192.png" alt="Ledge" className="h-12 w-12 shrink-0 rounded-xl shadow-sm" />
 
               <div className="min-w-0 flex-1 pr-4">
-                <p className="text-sm font-semibold">Install Ledge</p>
+                <p className="text-sm font-semibold">Install Ledge App</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {showIOS
-                    ? "Add to your home screen for the best experience"
-                    : "Install for instant access, offline support & a native feel"}
+                    ? "Add to your home screen for instant access — works offline too"
+                    : "Open Ledge instantly from your home screen — works even without internet"}
                 </p>
 
                 {/* iOS-specific instructions */}
@@ -129,9 +129,9 @@ export function InstallPrompt() {
                 {/* Action buttons */}
                 <div className="mt-3 flex items-center gap-2">
                   {!showIOS && (
-                    <Button size="sm" className="h-8 rounded-lg px-4 text-xs" onClick={handleInstall}>
+                    <Button size="sm" className="h-8 rounded-lg bg-gradient-to-r from-primary to-primary/80 px-4 text-xs shadow-sm" onClick={handleInstall}>
                       <Download className="mr-1 h-3.5 w-3.5" />
-                      Install
+                      Install Ledge App
                     </Button>
                   )}
                   <button
