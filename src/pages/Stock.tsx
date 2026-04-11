@@ -483,10 +483,12 @@ export default function Stock() {
                             className="h-10 rounded-lg pl-10 md:max-w-xs"
                           />
                         </div>
-                        <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
-                          <PackagePlus className="h-4 w-4" />
-                          Add Stock
-                        </Button>
+                        {!isAccountant && (
+                          <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
+                            <PackagePlus className="h-4 w-4" />
+                            Add Stock
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -507,7 +509,7 @@ export default function Stock() {
                             {warehouseInventory.map((si) => {
                               const health = getStockHealth(si.quantity, si.threshold);
                               return (
-                                <tr key={si.id} onClick={() => setEditStockItem({ ...si })} className="border-b border-border/50 row-hover cursor-pointer">
+                                <tr key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${isAccountant ? "" : "cursor-pointer"}`}>
                                   <td className="px-6 py-4 font-medium">{si.productName}</td>
                                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{si.sku}</td>
                                   <td className={`px-6 py-4 text-right font-semibold ${health === "critical" ? "text-red-500" : health === "low" ? "text-amber-600" : ""}`}>
