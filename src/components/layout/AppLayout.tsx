@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, BarChart3, MoreHorizontal, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
+import { House, ClipboardList, Package, BarChart3, MoreHorizontal, Store, UsersRound, Settings, WifiOff, RefreshCw, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
@@ -31,6 +31,7 @@ const primaryMobileNav = [
 const moreItems = [
   { title: "Dealers", url: "/distributors", icon: Store },
   { title: "Team", url: "/salespersons", icon: UsersRound },
+  { title: "Performance", url: "/performance", icon: TrendingUp },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
