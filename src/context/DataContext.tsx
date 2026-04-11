@@ -577,41 +577,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { data: seqData, error: seqError } = await supabase.rpc("get_next_order_number", {
-        target_company_id: companyId,
+      // Atomic RPC: increments sequence + inserts order in one transaction
+      const { data: rpcData, error: rpcError } = await supabase.rpc("insert_order_atomic", {
+        p_company_id: companyId,
+        p_date: order.date,
+        p_distributor_id: order.distributorId,
+        p_distributor_name: sanitizeInput(order.distributorName),
+        p_salesperson_id: order.salespersonId,
+        p_salesperson_name: sanitizeInput(order.salesperson),
+        p_total: order.total,
+        p_payment_mode: order.paymentMode,
+        p_payment_status: order.paymentStatus,
+        p_dispatch_date: order.dispatchDate || null,
+        p_vehicle: sanitizeInput(order.vehicle),
+        p_driver_name: sanitizeInput(order.driverName),
+        p_delivery_status: order.deliveryStatus,
+        p_dispatch_remarks: sanitizeInput(order.dispatchRemarks),
+        p_godown_id: order.godownId || null,
       });
-      if (seqError) throw seqError;
 
-      let orderNumber = order.orderNumber;
-      if (seqData && seqData.length > 0) {
-        const { prefix, seq } = seqData[0];
-        const year = new Date().getFullYear();
-        orderNumber = `${prefix}-${year}-${String(seq).padStart(4, "0")}`;
-        setOrderSequence(seq + 1);
-      }
+      if (rpcError) throw rpcError;
 
-      const { data: inserted, error } = await supabase.from("orders").insert({
-        company_id: companyId,
-        order_number: orderNumber,
-        date: order.date,
-        distributor_id: order.distributorId,
-        distributor_name: sanitizeInput(order.distributorName),
-        salesperson_id: order.salespersonId,
-        salesperson_name: sanitizeInput(order.salesperson),
-        total: order.total,
-        payment_mode: order.paymentMode,
-        payment_status: order.paymentStatus,
-        dispatch_date: order.dispatchDate || null,
-        vehicle: sanitizeInput(order.vehicle),
-        driver_name: sanitizeInput(order.driverName),
-        delivery_status: order.deliveryStatus,
-        dispatch_remarks: sanitizeInput(order.dispatchRemarks),
-        godown_id: order.godownId || null,
-      }).select().single();
+      const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+      if (!inserted) throw new Error("Atomic insert returned no data");
 
-      if (error || !inserted) {
-        throw error || new Error("Insert returned no data");
-      }
+      const orderNumber = inserted.order_number;
+      setOrderSequence(inserted.seq + 1);
 
       if (order.lines.length > 0) {
         const { error: linesError } = await supabase.from("order_lines").insert(
