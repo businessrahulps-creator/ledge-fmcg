@@ -782,6 +782,87 @@ export default function Performance() {
           </div>
         )}
       </div>
+
+      <ExportPdfModal
+        open={pdfOpen}
+        onOpenChange={setPdfOpen}
+        title="Export Performance Report"
+        sections={[
+          { id: "company", label: "Company Header" },
+          { id: "summary", label: "KPI Summary" },
+          { id: "dealers", label: "Top Dealers" },
+          { id: "products", label: "Top Products" },
+          { id: "salesTeam", label: "Sales Team Ranking" },
+        ] satisfies PdfSection[]}
+        onGenerate={async (sel) => {
+          const periodLabel =
+            period === "custom"
+              ? customFrom && customTo
+                ? `${format(customFrom, "dd MMM yyyy")} – ${format(customTo, "dd MMM yyyy")}`
+                : "Custom Range"
+              : PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? period;
+
+          const summary = [
+            { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
+            { label: "Orders", value: totalOrderCount.toString() },
+            { label: "Avg Order", value: formatCurrencyPdf(avgOrderValue) },
+            { label: "Collection Rate", value: `${collectionRate.toFixed(0)}%` },
+          ];
+
+          const columns = sel.dealers
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Dealer", width: "52%" },
+                { header: "Revenue", width: "40%", align: "right" as const },
+              ]
+            : sel.products
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Product", width: "52%" },
+                { header: "Qty Sold", width: "40%", align: "right" as const },
+              ]
+            : sel.salesTeam
+            ? [
+                { header: "#", width: "8%" },
+                { header: "Salesperson", width: "52%" },
+                { header: "Revenue", width: "40%", align: "right" as const },
+              ]
+            : [];
+
+          const rows = sel.dealers
+            ? topDealers.map((d, i) => [
+                (i + 1).toString(),
+                d.name,
+                formatCurrencyPdf(d.revenue),
+              ])
+            : sel.products
+            ? productVelocity.map((p, i) => [
+                (i + 1).toString(),
+                p.name,
+                p.qty.toString(),
+              ])
+            : sel.salesTeam
+            ? salesRanking.map((s, i) => [
+                (i + 1).toString(),
+                s.name,
+                formatCurrencyPdf(s.revenue),
+              ])
+            : [];
+
+          const doc = React.createElement(ReportPdf, {
+            title: "Performance Report",
+            subtitle: periodLabel,
+            columns,
+            rows,
+            summary: sel.summary ? summary : [],
+            showCompany: !!sel.company,
+            showSummary: !!sel.summary,
+            showTable: !!(sel.dealers || sel.products || sel.salesTeam),
+          });
+
+          await downloadPdf(pdfFilename("performance", periodLabel.replace(/\s+/g, "_")), doc);
+        }}
+      />
     </AppLayout>
   );
 }
