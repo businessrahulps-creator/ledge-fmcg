@@ -5,6 +5,7 @@ import { useLocation, Link } from "react-router-dom";
 import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
+import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -71,7 +72,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-3">
+              <LiveClock />
               {userRole && (
                 <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
                   {userRole.replace("_", " ")}
