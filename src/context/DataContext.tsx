@@ -466,12 +466,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchStockItems = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
-      const { data } = await supabase.from("stock_items").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
-      if (data) {
-        const mapped = data.map(si => {
-          const prod = rawProducts.find(p => p.id === si.product_id);
-          const gd = locations.find(g => g.id === si.godown_id);
+      // Fetch stock_items, products, and godowns in parallel to avoid stale closure state
+      const [siRes, prodRes, gdRes] = await Promise.all([
+        supabase.from("stock_items").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("products").select("*").eq("company_id", companyId).order("name").range(0, 9999),
+        supabase.from("godowns").select("*").eq("company_id", companyId).order("name").range(0, 9999),
+      ]);
+      const freshProducts = (prodRes.data || []).map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: p.base_price }));
+      const freshGodowns = (gdRes.data || []).map(g => ({ id: g.id, name: g.name }));
+      const siData = siRes.data;
+      if (siData) {
+        const mapped = siData.map(si => {
+          const prod = freshProducts.find(p => p.id === si.product_id);
+          const gd = freshGodowns.find(g => g.id === si.godown_id);
           return {
             id: si.id, productId: si.product_id, godownId: si.godown_id,
             productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",
@@ -484,7 +491,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         cacheData(companyId, "stockItems", mapped);
       }
     } catch { /* ignore */ }
-  }, [companyId, rawProducts, locations]);
+  }, [companyId]);
 
   // --- Stock deduction helper ---
   const deductStockForOrder = useCallback(async (
