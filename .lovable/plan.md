@@ -1,74 +1,49 @@
 
-## Fix Edit Inventory Dialog Properly
 
-### What’s actually wrong
-Yes, we are on the same page now: this is not a leftover scrollbar issue. The dialog is still being forced wider internally, so multiple rows look like they are spilling out.
+# Fix Stock Quantity Persistence Bug
 
-### Root cause
-The current footer fix is still wrong for this dialog:
+## Problem
+In `src/pages/Stock.tsx`, the `handleAddStock` function (line 224-229) handles the case where a product already exists in a warehouse by calling `setStockItems()` — a local React state setter. This never writes to the database, so changes are lost on refresh.
 
-- `DialogFooter` has a built-in `sm:flex-row`
-- this dialog is capped at `sm:max-w-md`, so it stays relatively narrow
-- the three buttons can never fit in one row inside that width
-- once the footer becomes too wide, the dialog’s `grid` layout sizes itself from that wide child, which makes the product card and inputs appear to overflow too
+The Edit Inventory dialog's save handler (`saveStockItemFn`) already correctly calls `updateStockItem()`, which persists to Supabase. No change needed there.
 
-So the real issue is: the footer layout is still expanding the dialog content width.
+## Fix — Single surgical edit in `src/pages/Stock.tsx`
 
-## Implementation plan
+Replace lines 224-229 in `handleAddStock`:
 
-### 1. Keep the global dialog component as-is
-**File:** `src/components/ui/dialog.tsx`
-
-No further global dialog changes. The base component is not the problem anymore.
-
-### 2. Make the Edit Inventory footer permanently two-row
-**File:** `src/pages/Stock.tsx`
-
-Update only the Edit Inventory dialog footer so it never switches back to a single row.
-
-Use a layout like this:
-
+**Before (broken):**
 ```tsx
-<DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0">
-  <Button
-    variant="destructive"
-    onClick={deleteStockItemFn}
-    className="w-full"
-  >
-    Remove from Warehouse
-  </Button>
-
-  <div className="grid w-full grid-cols-2 gap-2">
-    <Button
-      variant="outline"
-      onClick={() => setEditStockItem(null)}
-      className="w-full"
-    >
-      Cancel
-    </Button>
-    <Button onClick={saveStockItemFn} className="w-full">
-      Save Changes
-    </Button>
-  </div>
-</DialogFooter>
+if (existing) {
+  setStockItems((prev) =>
+    prev.map((si) =>
+      si.id === existing.id ? { ...si, quantity: si.quantity + addStockQty } : si
+    )
+  );
+}
 ```
 
-### 3. Keep the product card overflow fix
-Keep this line unchanged:
-
+**After (persisted):**
 ```tsx
-<div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
+if (existing) {
+  updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
+}
 ```
 
-That still helps contain the product info card cleanly.
+That's it. `updateStockItem` in DataContext already:
+1. Writes to Supabase (`stock_items.update`)
+2. Updates local state optimistically
+3. Shows error toast on failure
+4. Triggers realtime subscription which calls `safeRefetchStockItems` for multi-tab sync
 
-## Why this will fix the screenshot
-- the footer will stop trying to become a horizontal 3-button row
-- the dialog’s grid width will no longer be stretched by the footer
-- the product card, threshold input, and action buttons will all align inside the modal again
+## What stays untouched
+- Edit Inventory dialog (`saveStockItemFn`) — already correct
+- Health badges, realtime subscriptions, UI layout — no changes
+- `addStockItem` path for new items — already correct (line 231-248)
+- Validation (lines 213-220) — already correct
+- Success toast (line 250) — already in place
 
-## Files affected
-- `src/pages/Stock.tsx`
+## Files changed
+| File | Change |
+|------|--------|
+| `src/pages/Stock.tsx` | Replace `setStockItems` with `updateStockItem` call (lines 224-229) |
 
-## Technical note
-The key correction is overriding the inherited responsive footer behavior with `sm:flex-col sm:space-x-0`, because this modal stays narrow even on larger screens. The previous assumption that it could safely return to a single-row footer was incorrect for a `max-w-md` dialog.
