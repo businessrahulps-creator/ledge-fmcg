@@ -165,12 +165,42 @@ export default function Orders() {
               Manage and track all sales orders
             </p>
           </div>
-          <Link to="/orders/new">
-            <Button className="w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              New Order
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => {
+                const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
+                exportCsv(
+                  csvFilename("orders"),
+                  ["Order #", "Date", "Dealer", "Sales Person", "Amount", "Payment Mode", "Payment Status", "Delivery Status", "Dispatch Date", "Vehicle", "Driver", "Warehouse"],
+                  filtered.map((o) => [
+                    o.orderNumber,
+                    formatIndianDate(o.date),
+                    o.distributorName,
+                    o.salesperson,
+                    formatCurrency(o.total),
+                    o.paymentMode.replace("_", " "),
+                    o.paymentStatus,
+                    o.deliveryStatus,
+                    formatIndianDate(o.dispatchDate),
+                    o.vehicle || "",
+                    o.driverName || "",
+                    o.godownId ? (godownMap[o.godownId] || "") : "",
+                  ])
+                );
+              }}
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
-          </Link>
+            <Link to="/orders/new">
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                New Order
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Filters */}
