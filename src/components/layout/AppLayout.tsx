@@ -2,11 +2,12 @@ import { ReactNode, useRef, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings } from "lucide-react";
+import { House, IndianRupee, Package, ChartNoAxesCombined, Store, UsersRound, Settings, WifiOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 const allMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -22,6 +23,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -54,6 +56,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <NotificationCenter />
             </div>
           </header>
+
+          {!online && (
+            <div className="flex items-center justify-center gap-1.5 bg-amber-500/10 py-1 text-center text-xs text-amber-600 dark:text-amber-400">
+              <WifiOff className="h-3 w-3" />
+              Offline — using cached data
+            </div>
+          )}
 
           <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0 animate-fade-in">
