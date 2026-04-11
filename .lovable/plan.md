@@ -1,49 +1,31 @@
 
 
-# Fix Stock Quantity Persistence Bug
+# Fix: Duplicate stock_items + Remove seed data from new signups
 
-## Problem
-In `src/pages/Stock.tsx`, the `handleAddStock` function (line 224-229) handles the case where a product already exists in a warehouse by calling `setStockItems()` — a local React state setter. This never writes to the database, so changes are lost on refresh.
+## Changes
 
-The Edit Inventory dialog's save handler (`saveStockItemFn`) already correctly calls `updateStockItem()`, which persists to Supabase. No change needed there.
-
-## Fix — Single surgical edit in `src/pages/Stock.tsx`
-
-Replace lines 224-229 in `handleAddStock`:
-
-**Before (broken):**
-```tsx
-if (existing) {
-  setStockItems((prev) =>
-    prev.map((si) =>
-      si.id === existing.id ? { ...si, quantity: si.quantity + addStockQty } : si
-    )
-  );
-}
+### 1. Database migration: Add unique constraint on stock_items
+```sql
+ALTER TABLE stock_items
+ADD CONSTRAINT stock_items_company_product_godown_unique
+UNIQUE (company_id, product_id, godown_id);
 ```
 
-**After (persisted):**
-```tsx
-if (existing) {
-  updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
-}
-```
+### 2. Update `addStockItem` in `src/context/DataContext.tsx` (lines 481-489)
+Change `.insert()` to `.upsert()` with `onConflict: "company_id,product_id,godown_id"`. On conflict, the upserted row replaces quantity and threshold with the new values. The caller (`handleAddStock` in Stock.tsx) already computes `existing.quantity + addStockQty` before calling this, so the upsert value is correct.
 
-That's it. `updateStockItem` in DataContext already:
-1. Writes to Supabase (`stock_items.update`)
-2. Updates local state optimistically
-3. Shows error toast on failure
-4. Triggers realtime subscription which calls `safeRefetchStockItems` for multi-tab sync
+### 3. Database migration: Remove seed data from `setup_new_company` RPC
+Replace the `setup_new_company` function to remove the `PERFORM seed_company_data(p_company_id)` call. The function will still create the company, link the profile, and assign super_admin — just no demo data.
 
-## What stays untouched
-- Edit Inventory dialog (`saveStockItemFn`) — already correct
-- Health badges, realtime subscriptions, UI layout — no changes
-- `addStockItem` path for new items — already correct (line 231-248)
-- Validation (lines 213-220) — already correct
-- Success toast (line 250) — already in place
-
-## Files changed
+### Files changed
 | File | Change |
 |------|--------|
-| `src/pages/Stock.tsx` | Replace `setStockItems` with `updateStockItem` call (lines 224-229) |
+| Migration SQL | Add unique constraint + replace `setup_new_company` without seed call |
+| `src/context/DataContext.tsx` | `addStockItem`: `.insert()` → `.upsert()` with `onConflict` |
+
+### What stays untouched
+- `handleAddStock` in Stock.tsx — no change
+- `updateStockItem` — no change
+- Health badges, realtime, UI — no change
+- Existing accounts with data — unaffected
 
