@@ -452,7 +452,18 @@ export default function Performance() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
+                <Bar
+                  dataKey="revenue"
+                  fill="hsl(var(--primary))"
+                  radius={[0, 4, 4, 0]}
+                  barSize={24}
+                  cursor="pointer"
+                  onClick={(data: any) => {
+                    if (data?.name) {
+                      navigate(`/orders?dealer=${encodeURIComponent(data.name)}`);
+                    }
+                  }}
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (
