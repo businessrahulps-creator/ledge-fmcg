@@ -39,16 +39,11 @@ export async function exportFullBackup() {
   const zip = new JSZip();
   let fileCount = 0;
 
-  const checkTruncation = (name: string, data: unknown[] | null) => {
-    if (data && data.length === 1000) truncatedTables.push(name);
-  };
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("*, order_lines(*)")
-    .order("date", { ascending: false });
+  const orders = await fetchAll((from, to) =>
+    supabase.from("orders").select("*, order_lines(*)").order("date", { ascending: false }).range(from, to)
+  );
 
-  checkTruncation("orders", orders);
-  if (orders?.length) {
+  if (orders.length) {
     const headers = [
       "Order #", "Date", "Dealer", "Salesperson", "Total (₹)",
       "Payment Mode", "Payment Status", "Delivery Status",
@@ -171,12 +166,6 @@ export async function exportFullBackup() {
     return;
   }
 
-  if (truncatedTables.length > 0) {
-    toast.warning("Large dataset detected", {
-      description: `Some tables (${truncatedTables.join(", ")}) may be truncated at 1,000 rows. Contact support for a full export.`,
-      duration: 8000,
-    });
-  }
 
   const blob = await zip.generateAsync({ type: "blob" });
   const today = new Date().toISOString().slice(0, 10);
