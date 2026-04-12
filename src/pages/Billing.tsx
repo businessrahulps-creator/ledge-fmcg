@@ -75,6 +75,7 @@ export default function Billing() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [saving, setSaving] = useState(false);
+  const [orderPickerOpen, setOrderPickerOpen] = useState(false);
 
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
