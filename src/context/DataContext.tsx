@@ -291,6 +291,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 
+  // Activity log shorthand
+  const log = useCallback((entityType: string, entityId: string, action: string, summary: string, metadata?: Record<string, any>) => {
+    if (!companyId || !user) return;
+    logActivity({
+      companyId, userId: user.id, userName: profile?.full_name || user.email || "",
+      entityType, entityId, action, summary, metadata,
+    });
+  }, [companyId, user, profile]);
+
   // Clear data when no company
   useEffect(() => {
     if (authReady && !companyId) {
