@@ -616,6 +616,45 @@ export default function NewOrder() {
               </div>
             </section>
 
+            {/* Schemes Applied */}
+            {appliedSchemes.length > 0 && (
+              <section className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20 md:p-5">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <h2 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                    Schemes Applied
+                  </h2>
+                </div>
+                <div className="space-y-2">
+                  {appliedSchemes.map(({ scheme, savings, label }) => (
+                    <div key={scheme.id} className="flex items-center justify-between text-xs">
+                      <div className="min-w-0">
+                        <p className="font-medium text-emerald-700 dark:text-emerald-300 truncate">{scheme.name}</p>
+                        <p className="text-emerald-600/70 dark:text-emerald-400/70">{label}</p>
+                      </div>
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-300 shrink-0 ml-2">
+                        -{formatCurrency(savings)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2.5 border-t border-emerald-200 dark:border-emerald-800 pt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                      -{formatCurrency(totalSchemeSavings)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Effective Total</span>
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                      {formatCurrency(Math.max(0, orderTotal - totalSchemeSavings))}
+                    </span>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Save button */}
             <div className="sticky bottom-24 z-10 md:static">
               <Button
