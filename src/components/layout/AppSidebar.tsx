@@ -35,7 +35,6 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { ActivityLog } from "@/components/layout/ActivityLog";
-import { useOnboarding } from "@/hooks/use-onboarding";
 
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
