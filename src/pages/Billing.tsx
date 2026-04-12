@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, Unlink, ArrowRightLeft } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, Unlink, ArrowRightLeft, Pencil } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,10 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -45,6 +49,14 @@ const docTypeBadgeColors: Record<DocType, string> = {
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const isDraftType = (dt: DocType) => dt === "gst_invoice" || dt === "credit_note";
 
+/** Determines if a document can be edited/deleted */
+const isEditable = (inv: Invoice) => {
+  // Estimates, Proformas, plain Invoices are always editable (informal docs)
+  if (inv.docType === "estimate" || inv.docType === "proforma" || inv.docType === "invoice") return true;
+  // GST Invoice & Credit Note only editable while in draft
+  return inv.status === "draft";
+};
+
 interface LineInput {
   productName: string;
   hsnCode: string;
@@ -63,6 +75,13 @@ export default function Billing() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [saving, setSaving] = useState(false);
+
+  // Edit mode
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+
+  // Confirmation dialogs
+  const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
+  const [confirmFinalize, setConfirmFinalize] = useState<Invoice | null>(null);
 
   // Form state
   const [docType, setDocType] = useState<DocType>("gst_invoice");
@@ -87,6 +106,7 @@ export default function Billing() {
     setGstRate(18);
     setNotes("");
     setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]);
+    setEditingInvoice(null);
   };
 
   const handlePullOrder = (orderId: string) => {
@@ -103,6 +123,27 @@ export default function Billing() {
       unit: "Pack",
       unitPrice: l.unitPrice,
     })));
+  };
+
+  const handleEdit = (inv: Invoice) => {
+    setEditingInvoice(inv);
+    setDocType(inv.docType);
+    setSourceOrderId(inv.sourceOrderId || "");
+    setBuyerName(inv.buyerName);
+    setBuyerAddress(inv.buyerAddress);
+    setBuyerGstin(inv.buyerGstin);
+    setBuyerStateCode(inv.buyerStateCode);
+    setSupplyType(inv.supplyType as "intra_state" | "inter_state");
+    setGstRate(inv.gstRate);
+    setNotes(inv.notes || "");
+    setLines(inv.lines.map(l => ({
+      productName: l.productName,
+      hsnCode: l.hsnCode || "",
+      quantity: l.quantity,
+      unit: l.unit,
+      unitPrice: l.unitPrice,
+    })));
+    setShowCreate(true);
   };
 
   // Calculations
@@ -139,7 +180,7 @@ export default function Billing() {
       taxableValue: round2(l.quantity * l.unitPrice),
     }));
 
-    const result = await api.invoices.create({
+    const commonData = {
       docType,
       invoiceDate: new Date().toISOString().split("T")[0],
       sourceOrderId: sourceOrderId || undefined,
@@ -169,16 +210,32 @@ export default function Billing() {
       roundOff: calculated.roundOff,
       amountInWords: numberToWords(calculated.grandTotal),
       notes,
-      status: isDraftType(docType) ? "draft" : "final",
       lines: invoiceLines,
-    });
+    };
 
-    setSaving(false);
-    if (result) {
-      const statusLabel = isDraftType(docType) ? "created as draft" : "created";
-      toast.success("Document created", { description: `${docTypeLabels[docType]} ${result.invoiceNumber} ${statusLabel}.` });
+    if (editingInvoice) {
+      // Update existing
+      await api.invoices.update(editingInvoice.id, {
+        ...commonData,
+        status: editingInvoice.status, // preserve existing status
+      });
+      setSaving(false);
+      toast.success("Document updated", { description: `${editingInvoice.invoiceNumber} saved.` });
       setShowCreate(false);
       resetForm();
+    } else {
+      // Create new
+      const result = await api.invoices.create({
+        ...commonData,
+        status: isDraftType(docType) ? "draft" : "final",
+      });
+      setSaving(false);
+      if (result) {
+        const statusLabel = isDraftType(docType) ? "created as draft" : "created";
+        toast.success("Document created", { description: `${docTypeLabels[docType]} ${result.invoiceNumber} ${statusLabel}.` });
+        setShowCreate(false);
+        resetForm();
+      }
     }
   };
 
@@ -186,12 +243,13 @@ export default function Billing() {
     if (inv.status === "final") return;
     await api.invoices.update(inv.id, { status: "final" });
     toast.success("Document finalized", { description: `${inv.invoiceNumber} is now locked and immutable.` });
+    setConfirmFinalize(null);
   };
 
   const handleDelete = async (inv: Invoice) => {
-    if (inv.status === "final") { toast.error("Cannot delete a finalized document"); return; }
     await api.invoices.remove(inv.id);
     toast.success("Document deleted");
+    setConfirmDelete(null);
   };
 
   const handleConvertToGst = (inv: Invoice) => {
@@ -277,6 +335,12 @@ export default function Billing() {
     return list;
   }, [invoices, filterType, search]);
 
+  const isEditMode = !!editingInvoice;
+  const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
+  const dialogDesc = isEditMode
+    ? `Editing ${editingInvoice?.invoiceNumber}. Changes will be saved immediately.`
+    : "Create an invoice, estimate, or credit note. GST documents start as drafts for review.";
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
@@ -355,13 +419,17 @@ export default function Billing() {
                       <TableCell className="text-sm">{inv.buyerName}</TableCell>
                       <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
                       <TableCell>
-                        {inv.status === "final" ? (
+                        {inv.status === "final" && isDraftType(inv.docType) ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                             <Lock className="h-2.5 w-2.5" /> Final
                           </span>
-                        ) : (
+                        ) : inv.status === "draft" ? (
                           <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
                             Draft
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            —
                           </span>
                         )}
                       </TableCell>
@@ -370,20 +438,25 @@ export default function Billing() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
                             <Download className="h-3.5 w-3.5" />
                           </Button>
+                          {isEditable(inv) && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
                           {(inv.docType === "estimate" || inv.docType === "proforma") && (
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
                               <ArrowRightLeft className="h-3.5 w-3.5" />
                             </Button>
                           )}
-                          {inv.status === "draft" && (
-                            <>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleFinalize(inv)} title="Finalize">
-                                <Lock className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(inv)} title="Delete">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
+                          {isDraftType(inv.docType) && inv.status === "draft" && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
+                              <Lock className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          {isEditable(inv) && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(inv)} title="Delete">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           )}
                         </div>
                       </TableCell>
@@ -396,20 +469,20 @@ export default function Billing() {
         </motion.div>
       </div>
 
-      {/* Create Document Dialog */}
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+      {/* Create / Edit Document Dialog */}
+      <Dialog open={showCreate} onOpenChange={(open) => { if (!open) { setShowCreate(false); resetForm(); } else { setShowCreate(true); } }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>New Document</DialogTitle>
-            <DialogDescription>Create an invoice, estimate, or credit note. GST documents start as drafts for review.</DialogDescription>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogDescription>{dialogDesc}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5">
             {/* Document Type */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">Document Type</Label>
-                <Select value={docType} onValueChange={v => setDocType(v as DocType)}>
+                <Select value={docType} onValueChange={v => setDocType(v as DocType)} disabled={isEditMode}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(docTypeLabels).map(([k, v]) => (
@@ -426,12 +499,14 @@ export default function Billing() {
                       <Link2 className="h-3 w-3" />
                       Linked to {orders.find(o => o.id === sourceOrderId)?.orderNumber}
                     </span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSourceOrderId(""); setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]); setBuyerName(""); setBuyerAddress(""); }} title="Unlink order">
-                      <Unlink className="h-3.5 w-3.5" />
-                    </Button>
+                    {!isEditMode && (
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSourceOrderId(""); setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]); setBuyerName(""); setBuyerAddress(""); }} title="Unlink order">
+                        <Unlink className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
                 ) : (
-                  <Select value={sourceOrderId} onValueChange={handlePullOrder}>
+                  <Select value={sourceOrderId} onValueChange={handlePullOrder} disabled={isEditMode}>
                     <SelectTrigger><SelectValue placeholder="Select order..." /></SelectTrigger>
                     <SelectContent>
                       {orders.map(o => (
@@ -446,18 +521,18 @@ export default function Billing() {
             {/* Buyer Details */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold">Buyer Details</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Name *</Label>
-                  <Input value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Buyer name" />
+                  <Input value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Buyer name" readOnly={!!sourceOrderId} />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">GSTIN</Label>
                   <Input value={buyerGstin} onChange={e => setBuyerGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))} placeholder="22AAAAA0000A1Z5" className="font-mono" maxLength={15} />
                 </div>
-                <div className="space-y-1.5 col-span-2">
+                <div className="space-y-1.5 sm:col-span-2">
                   <Label className="text-xs">Address</Label>
-                  <Input value={buyerAddress} onChange={e => setBuyerAddress(e.target.value)} placeholder="Address" />
+                  <Input value={buyerAddress} onChange={e => setBuyerAddress(e.target.value)} placeholder="Address" readOnly={!!sourceOrderId} />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">State Code</Label>
@@ -470,7 +545,7 @@ export default function Billing() {
             {(docType === "gst_invoice" || docType === "credit_note") && (
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold">GST Configuration</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Supply Type</Label>
                     <Select value={supplyType} onValueChange={v => setSupplyType(v as "intra_state" | "inter_state")}>
@@ -501,32 +576,32 @@ export default function Billing() {
               </div>
               <div className="space-y-2">
                 {lines.map((line, i) => (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-4 space-y-1">
+                  <div key={i} className="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
+                    <div className="col-span-2 sm:col-span-4 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Product</Label>}
                       <Input value={line.productName} onChange={e => updateLine(i, "productName", e.target.value)} placeholder="Product name" className="h-9 text-xs" readOnly={!!sourceOrderId} />
                     </div>
-                    <div className="col-span-2 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">HSN</Label>}
+                    <div className="col-span-1 sm:col-span-2 space-y-1">
+                      {i === 0 && <Label className="text-[10px] text-muted-foreground">HSN <span className="text-muted-foreground/50">(billing)</span></Label>}
                       <Input value={line.hsnCode} onChange={e => updateLine(i, "hsnCode", e.target.value)} placeholder="HSN" className="h-9 text-xs font-mono" />
                     </div>
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 sm:col-span-1 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Qty</Label>}
                       <Input type="number" value={line.quantity} onChange={e => updateLine(i, "quantity", Number(e.target.value))} className="h-9 text-xs" min={1} readOnly={!!sourceOrderId} />
                     </div>
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 sm:col-span-1 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Unit</Label>}
                       <Input value={line.unit} onChange={e => updateLine(i, "unit", e.target.value)} className="h-9 text-xs" readOnly={!!sourceOrderId} />
                     </div>
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-1 sm:col-span-2 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Rate (₹)</Label>}
                       <Input type="number" value={line.unitPrice} onChange={e => updateLine(i, "unitPrice", Number(e.target.value))} className="h-9 text-xs" min={0} readOnly={!!sourceOrderId} />
                     </div>
-                    <div className="col-span-1 space-y-1 text-right">
+                    <div className="hidden sm:block sm:col-span-1 space-y-1 text-right">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}
                       <p className="h-9 flex items-center justify-end text-xs font-mono">₹{round2(line.quantity * line.unitPrice).toLocaleString("en-IN")}</p>
                     </div>
-                    <div className="col-span-1 flex justify-end">
+                    <div className="hidden sm:flex sm:col-span-1 justify-end">
                       {!sourceOrderId && lines.length > 1 && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeLine(i)}>
                           <Trash2 className="h-3 w-3" />
@@ -583,13 +658,54 @@ export default function Billing() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowCreate(false); resetForm(); }}>Cancel</Button>
             <Button onClick={handleCreate} disabled={saving}>
-              {saving ? "Creating…" : isDraftType(docType) ? "Create as Draft" : "Create Document"}
+              {saving
+                ? isEditMode ? "Saving…" : "Creating…"
+                : isEditMode
+                  ? "Save Changes"
+                  : isDraftType(docType) ? "Create as Draft" : "Create Document"
+              }
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete document?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium">{confirmDelete?.invoiceNumber}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => confirmDelete && handleDelete(confirmDelete)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Finalize Confirmation */}
+      <AlertDialog open={!!confirmFinalize} onOpenChange={(open) => { if (!open) setConfirmFinalize(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Finalize document?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Once finalized, <span className="font-medium">{confirmFinalize?.invoiceNumber}</span> will be locked and cannot be edited or deleted. This action is irreversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmFinalize && handleFinalize(confirmFinalize)}>
+              Finalize
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
