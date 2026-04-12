@@ -1,85 +1,54 @@
 
 
-# Full Site-Wide QA, CTO Review & Production Readiness Audit
+# Final Production Readiness Audit — Ledge Platform
 
-## Audit Findings
+## Findings
 
-### Critical (Must Fix Before Launch)
+### Critical (Must Fix)
 
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| C1 | **`claim_lines` fetched without company filter** — `supabase.from("claim_lines").select("*").range(0, 9999)` fetches ALL claim lines across all companies. Same for `invoice_lines`. Data leakage risk. | `DataContext.tsx:368-370` | Security: cross-tenant data leak |
-| C2 | **No `order_schemes` delete on order delete** — `deleteOrder` deletes `stock_deductions` and `order_lines` but not `order_schemes`, leaving orphaned rows | `DataContext.tsx:1076-1092` | Data integrity |
-| C3 | **Dashboard order cards not clickable** — mobile order cards on Dashboard don't navigate to order detail (missing `onClick`/`Link`), unlike the Orders page | `Dashboard.tsx:260-280` | UX: dead-end for users |
-| C4 | **`useOnlineStatus` called in both `OnlineStatusWatcher` and `AppLayout`** — double toast firing on online/offline events | `App.tsx:47` + `AppLayout.tsx:41` | UX: duplicate toasts |
-| C5 | **Missing DB triggers** — The `refresh_entity_aggregates` function exists but no triggers are attached (`db-triggers` section says "no triggers"). Distributor/salesperson/product aggregate columns won't auto-update. | DB config | Data integrity: stale aggregates |
+| # | Issue | Location |
+|---|-------|----------|
+| C1 | **Duplicate `useOnlineStatus` — double toasts on network change.** `OnlineStatusWatcher` in `App.tsx` (line 44) and `AppLayout.tsx` (line 46) both call `useOnlineStatus()`, each independently firing "You're back online" / "You're offline" toasts. Every network state change produces 2 toasts. | `App.tsx:44` + `AppLayout.tsx:46` |
+| C2 | **Dashboard desktop table rows not clickable.** Mobile cards link to `/orders/${id}`, but desktop `<tr>` rows have no `onClick` or `Link` — users can't navigate to order detail from desktop Dashboard. | `Dashboard.tsx:245` |
 
 ### High Priority
 
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| H1 | **Excessive `(d as any)` casts** throughout DataContext — typed DB schema exists but is bypassed, hiding type errors | `DataContext.tsx` throughout | Maintainability, potential runtime bugs |
-| H2 | **Billing page mobile view missing** — Desktop table only (`hidden md:block`), no mobile card layout for invoices | `Billing.tsx:420+` | Mobile UX: blank page on mobile |
-| H3 | **OrderDetail `useEffect` dep on `order?.id`** — if order data refreshes with same ID, edited state won't re-sync. Also creates new `crypto.randomUUID()` line IDs on every re-render trigger | `OrderDetail.tsx:125-145` | UX: potential state desync |
-| H4 | **`--accent` CSS variable defined twice** in `:root` — first as `#4F46E5` (line 28-30), then as HSL `0 0% 96%` (line 51). The second overrides the first. | `index.css:28-51` | Visual: accent color inconsistency |
-| H5 | **Claims page has no empty state** — if no claims exist, users see a blank area with just tabs | `Claims.tsx` | UX: confusing for new users |
-| H6 | **Bottom nav "More" menu missing Billing, Claims, Targets, Schemes** — these pages are only accessible via desktop sidebar | `AppLayout.tsx:31-36` | Mobile: pages unreachable |
-| H7 | **`invoice_lines` has no UPDATE RLS policy** — can't update invoice lines once created | DB RLS | Functional limitation |
+| # | Issue | Location |
+|---|-------|----------|
+| H1 | **Dashboard desktop table missing salesperson column.** Orders page shows salesperson but Dashboard recent orders table omits it — inconsistent info density. | `Dashboard.tsx:235-241` |
+| H2 | **Claims `resolvingId` set but buttons don't show loading state.** The `resolvingId` state is tracked but neither Resolve nor Reject buttons display a spinner or disable during async operation. | `Claims.tsx:43-58` |
+| H3 | **Billing mobile cards missing Convert-to-GST and Finalize actions.** Desktop table shows all action buttons (Download, Edit, Convert, Finalize, Delete) but mobile cards only show Download, Edit, Delete. | `Billing.tsx:531-545` |
 
 ### Medium Priority
 
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| M1 | **Dashboard recent orders don't show salesperson** — mobile cards only show dealer, not who took the order | `Dashboard.tsx:258-280` | Minor info gap |
-| M2 | **No loading state on Claims page resolve/reject** — `resolvingId` is set but the button doesn't show a spinner | `Claims.tsx:43-58` | UX polish |
-| M3 | **Salespersons page missing PDF export** — only has CSV export, unlike Dealers which has both | `Salespersons.tsx` | Feature parity |
-| M4 | **Order list pagination renders below empty state** — when no orders match filters, both the empty state and pagination show | `Orders.tsx:247-263` | Minor visual bug |
-| M5 | **Stock page: no confirmation on bulk stock set** — `setStockItems` directly updates all stock without confirmation | `Stock.tsx` | Data safety |
-| M6 | **Performance page: chart colors hardcoded** — don't respect theme tokens, may have poor contrast in dark mode | `Performance.tsx` | Accessibility |
-| M7 | **Company page doesn't validate GSTIN format** — accepts any string, should validate 15-char alphanumeric pattern | `Company.tsx` | Data quality |
+| # | Issue | Location |
+|---|-------|----------|
+| M1 | **Dashboard empty state "Create Order" button lacks mobile bottom padding.** The CTA sits at pb-8 but with the floating bottom nav at `bottom-4`, content can be obscured on short screens. | `Dashboard.tsx:205` |
+| M2 | **Salespersons page has no PDF export** while Dealers page has both CSV and PDF — feature parity gap. | `Salespersons.tsx` |
+| M3 | **Company page doesn't validate GSTIN format** — accepts any string instead of the 15-char alphanumeric Indian GSTIN pattern. | `Company.tsx` |
 
 ---
 
-## Proposed Fix Plan (Implementation Order)
+## Fix Plan
 
-### Pass 1: Critical Security & Data Fixes
-1. **C1**: Add `.eq("company_id", cId)` filter to `claim_lines` and `invoice_lines` queries in DataContext (requires joining through parent or filtering by claim/invoice IDs already fetched)
-2. **C2**: Add `order_schemes` delete before `order_lines` delete in `deleteOrder`
-3. **C4**: Remove `useOnlineStatus()` from `AppLayout.tsx` (keep only in `OnlineStatusWatcher`)
-4. **C5**: Create DB migration to attach `refresh_entity_aggregates` triggers to `orders` and `order_lines` tables
+### Pass 1: Critical Fixes (2 changes)
 
-### Pass 2: High Priority UX Fixes
-5. **C3**: Wrap Dashboard mobile order cards with navigation to `/orders/{id}`
-6. **H2**: Add mobile card layout for Billing page invoices
-7. **H4**: Remove duplicate `--accent` CSS variable definition
-8. **H5**: Add empty state to Claims page
-9. **H6**: Add Billing, Claims, Targets, Schemes to mobile "More" menu
+| File | Change |
+|------|--------|
+| `src/components/layout/AppLayout.tsx` | Replace `useOnlineStatus()` with a simple `navigator.onLine` state + event listeners that DON'T fire toasts (keep toast-firing in `OnlineStatusWatcher` only). Need to keep the `online` variable for the offline banner UI. |
+| `src/pages/Dashboard.tsx` | Add `onClick={() => navigate(`/orders/${order.id}`)}` and `cursor-pointer row-hover` to desktop table `<tr>` rows. Import `useNavigate`. |
 
-### Pass 3: Medium Priority Polish
-10. **M2**: Add loading spinner to Claims resolve/reject buttons
-11. **M4**: Move pagination inside the conditional that checks for results
-12. **H3**: Fix OrderDetail useEffect to use `JSON.stringify(order?.lines)` or a proper deep comparison
+### Pass 2: High Priority Fixes (3 changes)
 
-### Deferred (non-blocking)
-- H1 (type casts): Large refactor, defer to post-launch
-- H7 (invoice_lines UPDATE RLS): Only needed if inline editing of invoice lines is added
-- M3, M5, M6, M7: Polish items for next sprint
+| File | Change |
+|------|--------|
+| `src/pages/Dashboard.tsx` | Add "Sales Person" column header and `<td>` with `order.salesperson` to desktop table. |
+| `src/pages/Claims.tsx` | Add `disabled={resolvingId === claim.id}` and `Loader2` spinner to Resolve/Reject buttons when `resolvingId` matches. |
+| `src/pages/Billing.tsx` | Add Convert-to-GST and Finalize buttons to mobile card actions section, matching desktop table actions. |
 
----
+### Pass 3: Medium Priority (deferred — non-blocking)
 
-## Files to Edit
+- M1-M3 are polish items for next sprint. No user-facing breakage.
 
-| File | Changes |
-|------|---------|
-| `src/context/DataContext.tsx` | C1 (filter claim/invoice lines), C2 (delete order_schemes on order delete) |
-| `src/components/layout/AppLayout.tsx` | C4 (remove duplicate online status), H6 (add missing mobile nav items) |
-| `src/pages/Dashboard.tsx` | C3 (clickable order cards) |
-| `src/index.css` | H4 (remove duplicate accent var) |
-| `src/pages/Billing.tsx` | H2 (mobile card layout) |
-| `src/pages/Claims.tsx` | H5 (empty state), M2 (loading spinner) |
-| `src/pages/Orders.tsx` | M4 (pagination placement) |
-| `src/pages/OrderDetail.tsx` | H3 (useEffect fix) |
-| DB migration | C5 (triggers for aggregates) |
-
-Total: ~9 files, ~15 surgical changes. No new features, no new dependencies.
+**Total: 5 surgical edits across 4 files. No new dependencies, no schema changes, no feature additions.**
 
