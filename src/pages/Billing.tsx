@@ -490,6 +490,9 @@ export default function Billing() {
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" onClick={() => shareInvoiceOnWhatsApp(inv)} title="Share on WhatsApp">
+                                <WhatsAppIcon className="h-3.5 w-3.5" />
+                              </Button>
                               {isEditable(inv) && (
                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
                                   <Pencil className="h-3.5 w-3.5" />
@@ -545,6 +548,9 @@ export default function Billing() {
                     <div className="flex items-center gap-1 pt-1 border-t border-border/40">
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)}>
                         <Download className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" onClick={() => shareInvoiceOnWhatsApp(inv)}>
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
                       </Button>
                       {isEditable(inv) && (
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)}>
