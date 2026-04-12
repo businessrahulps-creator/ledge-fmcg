@@ -10,7 +10,6 @@ import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
 import { ListChecks, Plus, AlertTriangle } from "lucide-react";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
-import { Link } from "react-router-dom";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
