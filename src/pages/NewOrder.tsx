@@ -570,5 +570,24 @@ export default function NewOrder() {
 
       </div>
     </AppLayout>
+
+    {/* Credit Override Confirmation (Super Admin only) */}
+    <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
+          <AlertDialogDescription>
+            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, exceeding their credit limit of {formatCurrency(creditLimit)}. Do you want to proceed?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { setCreditOverrideOpen(false); executeSave(); }}>
+            Override & Save
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }
