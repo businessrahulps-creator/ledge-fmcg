@@ -346,7 +346,17 @@ export default function Billing() {
     return invoices.filter(inv => inv.sourceOrderId === orderId);
   }, [invoices]);
 
-  const isEditMode = !!editingInvoice;
+  // Sorted/grouped orders for the picker: needs-invoice first, then has-documents, recent first
+  const sortedOrders = useMemo(() => {
+    const withDocs = orders.map(o => ({
+      order: o,
+      docs: invoices.filter(inv => inv.sourceOrderId === o.id),
+    }));
+    const needsInvoice = withDocs.filter(x => x.docs.length === 0).sort((a, b) => new Date(b.order.date).getTime() - new Date(a.order.date).getTime());
+    const hasDocs = withDocs.filter(x => x.docs.length > 0).sort((a, b) => new Date(b.order.date).getTime() - new Date(a.order.date).getTime());
+    return { needsInvoice, hasDocs };
+  }, [orders, invoices]);
+
   const selectedOrder = orders.find(o => o.id === sourceOrderId);
   const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
   const dialogDesc = isEditMode
