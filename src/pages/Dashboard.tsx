@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Link, useNavigate } from "react-router-dom";
 import { useApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
