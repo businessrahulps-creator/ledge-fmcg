@@ -120,6 +120,14 @@ export default function Settings() {
   const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyGstin, setCompanyGstin] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyPan, setCompanyPan] = useState("");
+  const [companyStateCode, setCompanyStateCode] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [bankIfsc, setBankIfsc] = useState("");
+  const [invoicePrefix, setInvoicePrefix] = useState("INV");
   const [logoUrl, setLogoUrl] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
