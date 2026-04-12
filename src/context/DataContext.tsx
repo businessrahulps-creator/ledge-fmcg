@@ -222,6 +222,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [orderSequence, setOrderSequence] = useState(1);
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [targets, setTargets] = useState<Target[]>([]);
+  const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
