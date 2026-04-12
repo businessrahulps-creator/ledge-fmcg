@@ -51,7 +51,7 @@ export default function Company() {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix")
+      .select("name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account_name, bank_account, bank_ifsc, invoice_prefix")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -65,6 +65,7 @@ export default function Company() {
           setCompanyPan((data as any).pan || "");
           setCompanyStateCode((data as any).state_code || "");
           setBankName((data as any).bank_name || "");
+          setBankAccountName((data as any).bank_account_name || "");
           setBankAccount((data as any).bank_account || "");
           setBankIfsc((data as any).bank_ifsc || "");
           setInvoicePrefix((data as any).invoice_prefix || "INV");
@@ -160,6 +161,7 @@ export default function Company() {
           pan: sanitizeInput(companyPan),
           state_code: sanitizeInput(companyStateCode),
           bank_name: sanitizeInput(bankName),
+          bank_account_name: sanitizeInput(bankAccountName),
           bank_account: sanitizeInput(bankAccount),
           bank_ifsc: sanitizeInput(bankIfsc),
           invoice_prefix: sanitizeInput(invoicePrefix),
