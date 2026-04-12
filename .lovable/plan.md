@@ -1,54 +1,63 @@
 
 
-# Final Production Readiness Audit — Ledge Platform
+# Fix All Remaining Issues (Critical → Medium)
 
-## Findings
+## Issues to Fix
 
-### Critical (Must Fix)
-
-| # | Issue | Location |
-|---|-------|----------|
-| C1 | **Duplicate `useOnlineStatus` — double toasts on network change.** `OnlineStatusWatcher` in `App.tsx` (line 44) and `AppLayout.tsx` (line 46) both call `useOnlineStatus()`, each independently firing "You're back online" / "You're offline" toasts. Every network state change produces 2 toasts. | `App.tsx:44` + `AppLayout.tsx:46` |
-| C2 | **Dashboard desktop table rows not clickable.** Mobile cards link to `/orders/${id}`, but desktop `<tr>` rows have no `onClick` or `Link` — users can't navigate to order detail from desktop Dashboard. | `Dashboard.tsx:245` |
-
-### High Priority
-
-| # | Issue | Location |
-|---|-------|----------|
-| H1 | **Dashboard desktop table missing salesperson column.** Orders page shows salesperson but Dashboard recent orders table omits it — inconsistent info density. | `Dashboard.tsx:235-241` |
-| H2 | **Claims `resolvingId` set but buttons don't show loading state.** The `resolvingId` state is tracked but neither Resolve nor Reject buttons display a spinner or disable during async operation. | `Claims.tsx:43-58` |
-| H3 | **Billing mobile cards missing Convert-to-GST and Finalize actions.** Desktop table shows all action buttons (Download, Edit, Convert, Finalize, Delete) but mobile cards only show Download, Edit, Delete. | `Billing.tsx:531-545` |
-
-### Medium Priority
-
-| # | Issue | Location |
-|---|-------|----------|
-| M1 | **Dashboard empty state "Create Order" button lacks mobile bottom padding.** The CTA sits at pb-8 but with the floating bottom nav at `bottom-4`, content can be obscured on short screens. | `Dashboard.tsx:205` |
-| M2 | **Salespersons page has no PDF export** while Dealers page has both CSV and PDF — feature parity gap. | `Salespersons.tsx` |
-| M3 | **Company page doesn't validate GSTIN format** — accepts any string instead of the 15-char alphanumeric Indian GSTIN pattern. | `Company.tsx` |
-
----
+| # | Priority | Issue | File |
+|---|----------|-------|------|
+| 1 | High | Orders page: empty state + pagination render outside the list conditional — lists show even when `filtered.length === 0` | `Orders.tsx:178-263` |
+| 2 | High | Dashboard mobile cards missing salesperson name | `Dashboard.tsx:271-281` |
+| 3 | High | OrderDetail: `crypto.randomUUID()` regenerates line IDs on every useEffect trigger (status changes, etc.) | `OrderDetail.tsx:125-146` |
+| 4 | Medium | Dashboard Recent Orders section `pb-8` insufficient clearance for mobile bottom nav | `Dashboard.tsx:206` |
+| 5 | Medium | Orders mobile cards missing billing status badge (desktop has it) | `Orders.tsx:225-244` |
 
 ## Fix Plan
 
-### Pass 1: Critical Fixes (2 changes)
+### 1. Orders.tsx — Fix empty state / pagination structure + add mobile billing badge
 
-| File | Change |
-|------|--------|
-| `src/components/layout/AppLayout.tsx` | Replace `useOnlineStatus()` with a simple `navigator.onLine` state + event listeners that DON'T fire toasts (keep toast-firing in `OnlineStatusWatcher` only). Need to keep the `online` variable for the offline banner UI. |
-| `src/pages/Dashboard.tsx` | Add `onClick={() => navigate(`/orders/${order.id}`)}` and `cursor-pointer row-hover` to desktop table `<tr>` rows. Import `useNavigate`. |
+**Current**: Desktop table (lines 179-223) and mobile cards (lines 225-245) render unconditionally. Empty state (line 247) appears after both.
 
-### Pass 2: High Priority Fixes (3 changes)
+**Fix**: Wrap the entire glass-card div content in a `filtered.length > 0` conditional. Move empty state outside the glass-card. Add billing status badge to mobile cards.
 
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Add "Sales Person" column header and `<td>` with `order.salesperson` to desktop table. |
-| `src/pages/Claims.tsx` | Add `disabled={resolvingId === claim.id}` and `Loader2` spinner to Resolve/Reject buttons when `resolvingId` matches. |
-| `src/pages/Billing.tsx` | Add Convert-to-GST and Finalize buttons to mobile card actions section, matching desktop table actions. |
+```
+{filtered.length === 0 ? (
+  <EmptyState />
+) : (
+  <div className="glass-card overflow-hidden">
+    {/* desktop table */}
+    {/* mobile cards */}
+    <ListPagination ... />
+  </div>
+)}
+```
 
-### Pass 3: Medium Priority (deferred — non-blocking)
+Add billing badge to mobile cards:
+```
+{billingStatus && (
+  <span className={`... ${billingStatus.color}`}>{billingStatus.label}</span>
+)}
+```
 
-- M1-M3 are polish items for next sprint. No user-facing breakage.
+### 2. Dashboard.tsx — Add salesperson to mobile cards + increase bottom padding
 
-**Total: 5 surgical edits across 4 files. No new dependencies, no schema changes, no feature additions.**
+Add `o.salesperson` line to mobile order cards (between dealer name and order number row). Change `pb-8` to `pb-20`.
+
+### 3. OrderDetail.tsx — Stabilize line IDs
+
+Split the useEffect into two:
+- One for status/dispatch fields (triggers on status changes)
+- One for lines (triggers only on `order?.id` change, using a ref to track previous ID)
+
+This prevents `crypto.randomUUID()` from running when only status fields change.
+
+## Files Changed
+
+| File | Changes |
+|------|---------|
+| `src/pages/Orders.tsx` | Restructure conditional rendering; add billing badge to mobile cards |
+| `src/pages/Dashboard.tsx` | Add salesperson to mobile cards; increase section bottom padding |
+| `src/pages/OrderDetail.tsx` | Split useEffect to stabilize line IDs |
+
+**3 files, 5 surgical edits. No new dependencies, no schema changes.**
 
