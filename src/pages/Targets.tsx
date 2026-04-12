@@ -309,7 +309,7 @@ export default function Targets() {
                 const existingTarget = getTarget("salesperson", sp.id);
                 return (
                   <InlineTargetRow
-                    key={sp.id}
+                    key={`${sp.id}-${period}`}
                     entityId={sp.id}
                     entityName={sp.name}
                     entityType="salesperson"
@@ -336,7 +336,7 @@ export default function Targets() {
                 const existingTarget = getTarget("dealer", d.id);
                 return (
                   <InlineTargetRow
-                    key={d.id}
+                    key={`${d.id}-${period}`}
                     entityId={d.id}
                     entityName={d.name}
                     entityType="dealer"
