@@ -279,7 +279,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 
