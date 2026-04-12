@@ -8,7 +8,7 @@ import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
-import { useOnlineStatus } from "@/hooks/use-online-status";
+
 import { Receipt, RotateCcw, Target, Tags } from "lucide-react";
 import { getQueue } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
@@ -43,7 +43,15 @@ const moreItems = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
-  const online = useOnlineStatus();
+  const [online, setOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
+  }, []);
   const { canInstall, isIOS, isStandalone, dismissed, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
   const showDesktopInstall = canInstall && !isStandalone && !dismissed && !permanentlyDismissed;
   const [pendingCount, setPendingCount] = useState(0);
