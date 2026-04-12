@@ -10,6 +10,7 @@ import {
   type CacheableEntity,
 } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
+import { logActivity, fmtAmount } from "@/utils/activityLog";
 
 export interface AddOrderResult {
   success: boolean;
