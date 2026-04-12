@@ -9,7 +9,7 @@ import { BookOpen } from "lucide-react";
 
 export default function Help() {
   return (
-    <AppLayout title="How to Use Ledge">
+    <AppLayout>
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-muted-foreground">
