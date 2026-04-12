@@ -19,6 +19,7 @@ import {
   Users,
   CalendarIcon,
   Download,
+  Gift,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -519,6 +520,97 @@ export default function Performance() {
                 </p>
               </div>
               <span className="text-lg font-bold text-red-600 dark:text-red-400">{atRisk.length}</span>
+            </div>
+          );
+        })()}
+
+        {/* Scheme Performance */}
+        {(() => {
+          const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
+          const allSchemesData = api.schemes?.list() || [];
+          // Estimate savings from schemes applied to filtered orders
+          let totalSavings = 0;
+          const schemeHits = new Map<string, { name: string; hits: number; savings: number }>();
+          
+          const today = new Date().toISOString().split("T")[0];
+          const validSchemes = allSchemesData.filter(s =>
+            s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
+          );
+
+          for (const order of filteredOrders) {
+            for (const s of validSchemes) {
+              if (s.dealerId && s.dealerId !== order.distributorId) continue;
+              if (s.minOrderValue > 0 && order.total < s.minOrderValue) continue;
+              let savings = 0;
+              switch (s.schemeType) {
+                case "percentage":
+                  savings = (order.total * s.discountPercent) / 100;
+                  break;
+                case "flat_discount":
+                  savings = s.flatAmount;
+                  break;
+                case "buy_x_get_y": {
+                  const totalQty = (order.lines || []).reduce((sum, l) => sum + l.quantity, 0);
+                  if (totalQty >= s.buyQty) {
+                    const sets = Math.floor(totalQty / s.buyQty);
+                    const avgPrice = order.total / Math.max(totalQty, 1);
+                    savings = sets * s.freeQty * avgPrice;
+                  }
+                  break;
+                }
+              }
+              if (savings > 0) {
+                totalSavings += savings;
+                const existing = schemeHits.get(s.id) || { name: s.name, hits: 0, savings: 0 };
+                existing.hits++;
+                existing.savings += savings;
+                schemeHits.set(s.id, existing);
+              }
+            }
+          }
+
+          if (activeSchemes.length === 0 && totalSavings === 0) return null;
+
+          const topSchemes = Array.from(schemeHits.values())
+            .sort((a, b) => b.savings - a.savings)
+            .slice(0, 3);
+
+          return (
+            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-emerald-500">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10">
+                  <Gift className="h-4 w-4 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Scheme Performance</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                {totalSavings > 0 && (
+                  <span className="ml-auto text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(totalSavings)}
+                  </span>
+                )}
+              </div>
+              {totalSavings > 0 && (
+                <p className="text-[11px] text-muted-foreground mb-2">
+                  Estimated savings generated for dealers in this period
+                </p>
+              )}
+              {topSchemes.length > 0 && (
+                <div className="space-y-1.5">
+                  {topSchemes.map(ts => (
+                    <div key={ts.name} className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-muted-foreground">{ts.hits} orders</span>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(ts.savings)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}

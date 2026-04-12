@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, u
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import type { Order, Distributor, Salesperson, Product, OrderLine } from "@/data/mock-data";
+import type { Order, Distributor, Salesperson, Product, OrderLine, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {
   cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue,
@@ -31,6 +31,7 @@ interface DataContextType {
   products: Product[];
   locations: GodownLocation[];
   stockItems: StockItem[];
+  schemes: Scheme[];
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
@@ -63,6 +64,10 @@ interface DataContextType {
   updateStockItem: (si: StockItem) => void;
   deleteStockItem: (id: string) => void;
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
+
+  addScheme: (s: Scheme) => void;
+  updateScheme: (s: Scheme) => void;
+  deleteScheme: (id: string) => void;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -115,6 +120,7 @@ function persistAllToCache(
     products: Product[];
     locations: GodownLocation[];
     stockItems: StockItem[];
+    schemes: Scheme[];
     orderPrefix: string;
     orderSequence: number;
   }
@@ -126,6 +132,7 @@ function persistAllToCache(
     ["products", data.products],
     ["locations", data.locations],
     ["stockItems", data.stockItems],
+    ["schemes", data.schemes],
     ["orderPrefix", data.orderPrefix],
     ["orderSequence", data.orderSequence],
   ];
@@ -140,6 +147,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [rawProducts, setProducts] = useState<Product[]>([]);
   const [locations, setLocations] = useState<GodownLocation[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
   const [orderSequence, setOrderSequence] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -157,13 +165,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setProducts([]);
       setLocations([]);
       setStockItems([]);
+      setSchemes([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
 
   // --- Load from IDB cache (offline fallback) ---
   const loadFromCache = useCallback(async (cId: string) => {
-    const [cOrders, cDist, cSp, cProd, cLoc, cStock, cPrefix, cSeq] = await Promise.all([
+    const [cOrders, cDist, cSp, cProd, cLoc, cStock, cPrefix, cSeq, cSchemes] = await Promise.all([
       getCachedData<Order[]>(cId, "orders"),
       getCachedData<Distributor[]>(cId, "distributors"),
       getCachedData<Salesperson[]>(cId, "salespersons"),
@@ -172,6 +181,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getCachedData<StockItem[]>(cId, "stockItems"),
       getCachedData<string>(cId, "orderPrefix"),
       getCachedData<number>(cId, "orderSequence"),
+      getCachedData<Scheme[]>(cId, "schemes"),
     ]);
     let loaded = false;
     if (cOrders) { setOrders(cOrders); loaded = true; }
@@ -180,6 +190,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (cProd) { setProducts(cProd); loaded = true; }
     if (cLoc) { setLocations(cLoc); loaded = true; }
     if (cStock) { setStockItems(cStock); loaded = true; }
+    if (cSchemes) { setSchemes(cSchemes); loaded = true; }
     if (cPrefix) setOrderPrefixState(cPrefix);
     if (cSeq) setOrderSequence(cSeq);
     if (loaded) setIsOfflineData(true);
@@ -199,13 +210,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("godowns").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -244,6 +256,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
       setStockItems(sis);
 
+      // Map schemes
+      const mappedSchemes: Scheme[] = (schemesRes.data || []).map((s: any) => ({
+        id: s.id, name: s.name, description: s.description || "",
+        schemeType: s.scheme_type as Scheme["schemeType"],
+        discountPercent: Number(s.discount_percent || 0), buyQty: s.buy_qty || 0, freeQty: s.free_qty || 0,
+        flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
+        productId: s.product_id || null, dealerId: s.dealer_id || null,
+        isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
+      }));
+      setSchemes(mappedSchemes);
+
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       if (orderIds.length > 0) {
@@ -259,7 +282,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       persistAllToCache(cId, {
         orders: mappedOrders, distributors: dists, salespersons: sps,
-        products: prods, locations: gds, stockItems: sis,
+        products: prods, locations: gds, stockItems: sis, schemes: mappedSchemes,
         orderPrefix: company?.order_prefix || "ORD",
         orderSequence: company?.next_order_sequence || 1,
       });
@@ -384,6 +407,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => {
           safeRefetchStockItems();
         })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchSchemes();
+        })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') {
             console.warn('Realtime channel error — will retry automatically');
@@ -504,6 +530,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
         setStockItems(mapped);
         cacheData(companyId, "stockItems", mapped);
+      }
+    } catch { /* ignore */ }
+  }, [companyId]);
+
+  const safeRefetchSchemes = useCallback(async () => {
+    if (!companyId) return;
+    try {
+      const { data } = await supabase.from("schemes").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
+      if (data) {
+        const mapped: Scheme[] = data.map((s: any) => ({
+          id: s.id, name: s.name, description: s.description || "",
+          schemeType: s.scheme_type as Scheme["schemeType"],
+          discountPercent: Number(s.discount_percent || 0), buyQty: s.buy_qty || 0, freeQty: s.free_qty || 0,
+          flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
+          productId: s.product_id || null, dealerId: s.dealer_id || null,
+          isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
+        }));
+        setSchemes(mapped);
+        cacheData(companyId, "schemes", mapped);
       }
     } catch { /* ignore */ }
   }, [companyId]);
@@ -836,6 +881,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
   ), [companyId, persistEntityToCache]);
 
+  // Schemes
+  const schemeCrud = useMemo(() => makeOfflineCrud<Scheme>(
+    "schemes", setSchemes, "schemes",
+    s => ({
+      name: sanitizeInput(s.name), description: sanitizeInput(s.description),
+      scheme_type: s.schemeType, discount_percent: s.discountPercent,
+      buy_qty: s.buyQty, free_qty: s.freeQty, flat_amount: s.flatAmount,
+      min_order_value: s.minOrderValue, min_qty: s.minQty,
+      product_id: s.productId || null, dealer_id: s.dealerId || null,
+      is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
+    }),
+    s => ({
+      name: sanitizeInput(s.name), description: sanitizeInput(s.description),
+      scheme_type: s.schemeType, discount_percent: s.discountPercent,
+      buy_qty: s.buyQty, free_qty: s.freeQty, flat_amount: s.flatAmount,
+      min_order_value: s.minOrderValue, min_qty: s.minQty,
+      product_id: s.productId || null, dealer_id: s.dealerId || null,
+      is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
+    }),
+  ), [companyId, persistEntityToCache]);
+
   // Stock Items — special (upsert online, upsert-type offline)
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!companyId) return;
@@ -961,9 +1027,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   return (
     <DataContext.Provider
-      value={{
+       value={{
         orders, distributors: computedDistributors, salespersons: computedSalespersons,
-        products: computedProducts, locations, stockItems, loading, isOfflineData,
+        products: computedProducts, locations, stockItems, schemes, loading, isOfflineData,
         companyInfo,
         orderPrefix, orderSequence, setOrderPrefix,
         addOrder, updateOrder, deleteOrder,
@@ -972,6 +1038,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addProduct: prodCrud.add, updateProduct: prodCrud.update, deleteProduct: prodCrud.remove,
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
+        addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >

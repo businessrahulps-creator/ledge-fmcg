@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Settings,
   UserCheck,
+  Gift,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,6 +37,7 @@ const manageNav = [
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Dealers", url: "/distributors", icon: UserRound },
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },
+  { title: "Schemes", url: "/schemes", icon: Gift },
 ];
 
 const analyzeNav = [

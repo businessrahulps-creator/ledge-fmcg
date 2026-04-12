@@ -8,7 +8,7 @@ function cacheKey(companyId: string, entity: string) {
 
 const ENTITIES = [
   "orders", "distributors", "salespersons", "products",
-  "locations", "stockItems", "orderPrefix", "orderSequence", "notifications",
+  "locations", "stockItems", "orderPrefix", "orderSequence", "notifications", "schemes",
 ] as const;
 
 export type CacheableEntity = (typeof ENTITIES)[number];

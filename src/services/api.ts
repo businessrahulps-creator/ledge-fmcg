@@ -1,5 +1,5 @@
 import { useData } from "@/context/DataContext";
-import type { Order, Distributor, Salesperson, Product } from "@/data/mock-data";
+import type { Order, Distributor, Salesperson, Product, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import type { AddOrderResult } from "@/context/DataContext";
 
@@ -39,6 +39,12 @@ export function useApi() {
       create: (p: Product) => data.addProduct(p),
       update: (p: Product) => data.updateProduct(p),
       remove: (id: string) => data.deleteProduct(id),
+    },
+    schemes: {
+      list: () => data.schemes,
+      create: (s: Scheme) => data.addScheme(s),
+      update: (s: Scheme) => data.updateScheme(s),
+      remove: (id: string) => data.deleteScheme(id),
     },
     stock: {
       items: {

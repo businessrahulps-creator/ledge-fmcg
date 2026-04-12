@@ -449,6 +449,91 @@ export type Database = {
           },
         ]
       }
+      schemes: {
+        Row: {
+          buy_qty: number
+          company_id: string
+          created_at: string
+          dealer_id: string | null
+          description: string
+          discount_percent: number
+          flat_amount: number
+          free_qty: number
+          id: string
+          is_active: boolean
+          min_order_value: number
+          min_qty: number
+          name: string
+          product_id: string | null
+          scheme_type: string
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          buy_qty?: number
+          company_id: string
+          created_at?: string
+          dealer_id?: string | null
+          description?: string
+          discount_percent?: number
+          flat_amount?: number
+          free_qty?: number
+          id?: string
+          is_active?: boolean
+          min_order_value?: number
+          min_qty?: number
+          name: string
+          product_id?: string | null
+          scheme_type?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          buy_qty?: number
+          company_id?: string
+          created_at?: string
+          dealer_id?: string | null
+          description?: string
+          discount_percent?: number
+          flat_amount?: number
+          free_qty?: number
+          id?: string
+          is_active?: boolean
+          min_order_value?: number
+          min_qty?: number
+          name?: string
+          product_id?: string | null
+          scheme_type?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schemes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schemes_dealer_id_fkey"
+            columns: ["dealer_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schemes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_deductions: {
         Row: {
           company_id: string

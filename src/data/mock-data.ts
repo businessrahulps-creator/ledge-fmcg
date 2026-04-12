@@ -9,6 +9,24 @@ export interface Distributor {
   outstandingAmount: number;
 }
 
+export interface Scheme {
+  id: string;
+  name: string;
+  description: string;
+  schemeType: 'percentage' | 'buy_x_get_y' | 'flat_discount';
+  discountPercent: number;
+  buyQty: number;
+  freeQty: number;
+  flatAmount: number;
+  minOrderValue: number;
+  minQty: number;
+  productId: string | null;
+  dealerId: string | null;
+  isActive: boolean;
+  validFrom: string;
+  validUntil: string | null;
+}
+
 export interface Product {
   id: string;
   name: string;

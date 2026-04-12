@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
+import type { Scheme } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import {
   Select,
@@ -74,6 +75,7 @@ export default function NewOrder() {
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
+  const allSchemes = api.schemes.list();
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
   const { userRole } = useAuth();
@@ -165,6 +167,72 @@ export default function NewOrder() {
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
   const isSuperAdmin = userRole === "super_admin";
+
+  // --- Scheme auto-apply ---
+  const appliedSchemes = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const eligible: { scheme: Scheme; savings: number; label: string }[] = [];
+    const activeSchemes = allSchemes.filter(s =>
+      s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
+    );
+    for (const s of activeSchemes) {
+      if (s.dealerId && s.dealerId !== selectedDealer) continue;
+      if (s.minOrderValue > 0 && orderTotal < s.minOrderValue) continue;
+      const validLines = lines.filter(l => l.productId && l.quantity > 0);
+      if (s.productId) {
+        const matchingLine = validLines.find(l => l.productId === s.productId);
+        if (!matchingLine) continue;
+        if (s.minQty > 0 && matchingLine.quantity < s.minQty) continue;
+      } else if (s.minQty > 0) {
+        const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
+        if (totalQty < s.minQty) continue;
+      }
+      let savings = 0;
+      let label = "";
+      switch (s.schemeType) {
+        case "percentage": {
+          if (s.productId) {
+            const line = validLines.find(l => l.productId === s.productId);
+            savings = line ? (line.quantity * line.unitPrice * s.discountPercent) / 100 : 0;
+          } else {
+            savings = (orderTotal * s.discountPercent) / 100;
+          }
+          label = `${s.discountPercent}% off`;
+          break;
+        }
+        case "buy_x_get_y": {
+          if (s.productId) {
+            const line = validLines.find(l => l.productId === s.productId);
+            if (line && line.quantity >= s.buyQty) {
+              const sets = Math.floor(line.quantity / s.buyQty);
+              savings = sets * s.freeQty * line.unitPrice;
+              label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
+            }
+          } else {
+            const sorted = [...validLines].sort((a, b) => b.unitPrice - a.unitPrice);
+            if (sorted.length > 0) {
+              const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
+              if (totalQty >= s.buyQty) {
+                const sets = Math.floor(totalQty / s.buyQty);
+                savings = sets * s.freeQty * sorted[0].unitPrice;
+              }
+            }
+            label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
+          }
+          break;
+        }
+        case "flat_discount": {
+          savings = s.flatAmount;
+          label = `${formatCurrency(s.flatAmount)} off`;
+          break;
+        }
+      }
+      if (savings > 0) eligible.push({ scheme: s, savings, label });
+    }
+    return eligible;
+  }, [allSchemes, selectedDealer, orderTotal, lines]);
+
+  const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
 
   const executeSave = async () => {
     // Validation
@@ -547,6 +615,45 @@ export default function NewOrder() {
                 </div>
               </div>
             </section>
+
+            {/* Schemes Applied */}
+            {appliedSchemes.length > 0 && (
+              <section className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20 md:p-5">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <h2 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                    Schemes Applied
+                  </h2>
+                </div>
+                <div className="space-y-2">
+                  {appliedSchemes.map(({ scheme, savings, label }) => (
+                    <div key={scheme.id} className="flex items-center justify-between text-xs">
+                      <div className="min-w-0">
+                        <p className="font-medium text-emerald-700 dark:text-emerald-300 truncate">{scheme.name}</p>
+                        <p className="text-emerald-600/70 dark:text-emerald-400/70">{label}</p>
+                      </div>
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-300 shrink-0 ml-2">
+                        -{formatCurrency(savings)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2.5 border-t border-emerald-200 dark:border-emerald-800 pt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                      -{formatCurrency(totalSchemeSavings)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Effective Total</span>
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                      {formatCurrency(Math.max(0, orderTotal - totalSchemeSavings))}
+                    </span>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* Save button */}
             <div className="sticky bottom-24 z-10 md:static">
