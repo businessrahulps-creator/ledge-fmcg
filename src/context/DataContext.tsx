@@ -241,6 +241,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setSchemes([]);
       setSecondarySales([]);
       setTargets([]);
+      setClaims([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
