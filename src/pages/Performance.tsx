@@ -10,6 +10,7 @@ import { formatCurrency } from "@/data/mock-data";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getChurnRisk, churnRiskConfig } from "@/utils/dealerScorecard";
+import { getPerformanceHealth, performanceHealthConfig } from "@/utils/salespersonScorecard";
 import {
   TrendingUp,
   TrendingDown,
