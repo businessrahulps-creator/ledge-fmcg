@@ -22,6 +22,7 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
