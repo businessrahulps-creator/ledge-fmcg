@@ -138,6 +138,23 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      <div ref={containerRef} className="relative overflow-y-auto">
+        {/* Pull-to-refresh indicator */}
+        <div
+          className="flex items-center justify-center overflow-hidden transition-[height] duration-200 ease-out"
+          style={{ height: pullDistance > 0 || refreshing ? `${Math.max(pullDistance, refreshing ? 48 : 0)}px` : "0px" }}
+        >
+          <div
+            className={cn(
+              "h-5 w-5 rounded-full border-2 border-primary border-t-transparent",
+              refreshing ? "animate-spin" : ""
+            )}
+            style={{
+              opacity: Math.min(pullDistance / 80, 1),
+              transform: `rotate(${pullDistance * 3}deg)`,
+            }}
+          />
+        </div>
       <div className="space-y-8 md:space-y-10">
         {/* Onboarding checklist */}
         <SetupChecklist />
@@ -378,6 +395,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
             </>
           )}
         </section>
+      </div>
       </div>
     </AppLayout>
   );
