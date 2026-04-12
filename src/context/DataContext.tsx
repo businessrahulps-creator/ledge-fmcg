@@ -24,6 +24,17 @@ export interface CompanyInfo {
   logoUrl: string;
 }
 
+export interface SecondarySale {
+  id: string;
+  distributorId: string;
+  productId: string;
+  productName: string;
+  retailerName: string;
+  quantity: number;
+  date: string;
+  remarks: string;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
@@ -32,6 +43,7 @@ interface DataContextType {
   locations: GodownLocation[];
   stockItems: StockItem[];
   schemes: Scheme[];
+  secondarySales: SecondarySale[];
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
@@ -68,6 +80,9 @@ interface DataContextType {
   addScheme: (s: Scheme) => void;
   updateScheme: (s: Scheme) => void;
   deleteScheme: (id: string) => void;
+
+  addSecondarySale: (s: SecondarySale) => void;
+  deleteSecondarySale: (id: string) => void;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
