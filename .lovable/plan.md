@@ -1,35 +1,26 @@
 
 
-# Fix: "Something went wrong" crashes on Billing page
+# Fix: Dealers Not Showing — Missing `setDistributors` Call
 
 ## Root Cause
 
-The database contains an invoice with `doc_type = 'invoice'` instead of `'gst_invoice'`. In `Billing.tsx` line 625, this code crashes:
+In `src/context/DataContext.tsx`, the initial data fetch maps distributor rows into the `dists` array (lines 374-382) but **never calls `setDistributors(dists)`**. Every other entity (salespersons, products, godowns, etc.) has its setter called immediately after mapping, but distributors was accidentally omitted.
 
-```js
-docTypeLabels[d.docType].slice(0, 3).toUpperCase()
-```
+The data is fetched from the database successfully, mapped correctly, then thrown away.
 
-`docTypeLabels['invoice']` is `undefined`, so `.slice()` throws `TypeError: Cannot read properties of undefined (reading 'slice')`.
-
-Additionally, line 111 misuses `useState(() => {...})` to run side effects — this should be `useEffect`.
-
-## Fixes
+## Fix
 
 | File | Change |
 |------|--------|
-| **DB Migration** | Update the invoice record: `UPDATE invoices SET doc_type = 'gst_invoice' WHERE doc_type = 'invoice'` |
-| `src/pages/Billing.tsx` | 1. Line 625: Add fallback — `(docTypeLabels[d.docType] \|\| d.docType).slice(0, 3)` |
-| | 2. Line 111: Replace `useState(() => {...})` with `useEffect(() => {...}, [])` for the auto-open logic |
-| | 3. Add `docTypeLabels` fallback for unknown doc types in the table rendering (line 439) |
+| `src/context/DataContext.tsx` | Add `setDistributors(dists);` after line 382 (after the dists mapping, before the salespersons mapping) |
 
-## Why it auto-refreshes
+One-line fix. Also need to add the corresponding `cacheData` call to match other entities:
 
-The `PageErrorBoundary` shows "Reload Page" button. After reload, the same bad data is fetched, causing the same crash — an infinite loop if the user keeps clicking Reload.
+```typescript
+// After line 382:
+setDistributors(dists);
+cacheData(cId, "distributors", dists);
+```
 
-## 3 changes, surgical fix
-
-1. Fix the data in the DB (migration)
-2. Make the code defensive against unexpected `doc_type` values
-3. Fix the `useState` misuse
+This mirrors how every other entity is handled in the same function.
 
