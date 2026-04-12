@@ -257,11 +257,11 @@ export default function Settings() {
         .eq("id", editMember.roleId);
       if (roleError) throw roleError;
 
-      toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+      toast.success("Member updated", { description: `${editMember.name} has been updated.` });
       setEditMember(null);
       await loadTeam();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to save member", variant: "destructive" });
+      toast.error("Error", { description: err?.message || "Failed to save member" });
     }
     setSaving(false);
   };
@@ -272,12 +272,12 @@ export default function Settings() {
     try {
       await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
       await supabase.from("profiles").delete().eq("id", deleteMember.id);
-      toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+      toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
       addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
       setDeleteMember(null);
       await loadTeam();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to remove member", variant: "destructive" });
+      toast.error("Error", { description: err?.message || "Failed to remove member" });
     }
     setSaving(false);
   };
