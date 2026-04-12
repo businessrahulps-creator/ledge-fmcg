@@ -357,6 +357,7 @@ export default function Billing() {
     return { needsInvoice, hasDocs };
   }, [orders, invoices]);
 
+  const isEditMode = !!editingInvoice;
   const selectedOrder = orders.find(o => o.id === sourceOrderId);
   const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
   const dialogDesc = isEditMode
