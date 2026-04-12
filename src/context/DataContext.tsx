@@ -311,7 +311,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               synced++;
               break;
             }
-            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, result.error);
+            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, "error" in result ? result.error : "unknown");
             if (attempt < MAX_RETRIES) {
               await new Promise(r => setTimeout(r, 1000 * attempt));
             }
