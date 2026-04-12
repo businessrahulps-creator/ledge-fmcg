@@ -96,6 +96,11 @@ interface DataContextType {
   addSecondarySale: (s: SecondarySale) => void;
   deleteSecondarySale: (id: string) => void;
 
+  targets: Target[];
+  addTarget: (t: Target) => void;
+  updateTarget: (t: Target) => void;
+  deleteTarget: (id: string) => void;
+
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
   refreshAll: () => Promise<void>;
