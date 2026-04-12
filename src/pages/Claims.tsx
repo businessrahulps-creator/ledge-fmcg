@@ -189,8 +189,8 @@ export default function Claims() {
                                   onClick={() => handleResolve(claim.id)}
                                   disabled={resolvingId === claim.id}
                                 >
-                                  <CheckCircle2 className="h-3.5 w-3.5" />
-                                  {resolvingId === claim.id ? "Saving…" : "Mark Resolved"}
+                                   <CheckCircle2 className="h-3.5 w-3.5" />
+                                   {resolvingId === claim.id ? "Saving…" : "Resolve"}
                                 </Button>
                                 <Button
                                   size="sm"

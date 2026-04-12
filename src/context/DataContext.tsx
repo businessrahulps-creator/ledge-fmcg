@@ -365,9 +365,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("claim_lines" as any).select("*").range(0, 9999),
+        supabase.from("claim_lines" as any).select("*").range(0, 9999) as any,
         supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("invoice_lines" as any).select("*").range(0, 9999),
+        supabase.from("invoice_lines" as any).select("*").range(0, 9999) as any,
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -1076,6 +1076,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       const { error: sdErr } = await supabase.from("stock_deductions").delete().eq("order_id", id);
       if (sdErr) throw sdErr;
+      const { error: osErr } = await supabase.from("order_schemes").delete().eq("order_id", id);
+      if (osErr) throw osErr;
       const { error: olErr } = await supabase.from("order_lines").delete().eq("order_id", id);
       if (olErr) throw olErr;
       const { data: deleted, error: oErr } = await supabase.from("orders").delete().eq("id", id).select("id");

@@ -416,92 +416,138 @@ export default function Billing() {
               <p className="text-xs text-muted-foreground/70 mt-1">Create your first billing document from an order</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs">Type</TableHead>
-                    <TableHead className="text-xs">Number</TableHead>
-                    <TableHead className="text-xs">Date</TableHead>
-                    <TableHead className="text-xs">Buyer</TableHead>
-                    <TableHead className="text-xs">Order</TableHead>
-                    <TableHead className="text-xs text-right">Amount</TableHead>
-                    <TableHead className="text-xs">Status</TableHead>
-                    <TableHead className="text-xs text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map(inv => {
-                    const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
-                    return (
-                      <TableRow key={inv.id} className="row-hover">
-                        <TableCell>
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
-                            {docTypeLabels[inv.docType] || inv.docType}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{inv.invoiceDate}</TableCell>
-                        <TableCell className="text-sm">{inv.buyerName}</TableCell>
-                        <TableCell className="text-xs">
-                          {linkedOrder ? (
-                            <span className="inline-flex items-center gap-1 text-primary font-medium">
-                              <Link2 className="h-3 w-3" />
-                              {linkedOrder.orderNumber}
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs">Number</TableHead>
+                      <TableHead className="text-xs">Date</TableHead>
+                      <TableHead className="text-xs">Buyer</TableHead>
+                      <TableHead className="text-xs">Order</TableHead>
+                      <TableHead className="text-xs text-right">Amount</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map(inv => {
+                      const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
+                      return (
+                        <TableRow key={inv.id} className="row-hover">
+                          <TableCell>
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
+                              {docTypeLabels[inv.docType] || inv.docType}
                             </span>
-                          ) : (
-                            <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
-                        <TableCell>
-                          {inv.status === "final" && isDraftType(inv.docType) ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
-                              <Lock className="h-2.5 w-2.5" /> Final
-                            </span>
-                          ) : inv.status === "draft" ? (
-                            <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
-                              Draft
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
-                              <Download className="h-3.5 w-3.5" />
-                            </Button>
-                            {isEditable(inv) && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{inv.invoiceDate}</TableCell>
+                          <TableCell className="text-sm">{inv.buyerName}</TableCell>
+                          <TableCell className="text-xs">
+                            {linkedOrder ? (
+                              <span className="inline-flex items-center gap-1 text-primary font-medium">
+                                <Link2 className="h-3 w-3" />
+                                {linkedOrder.orderNumber}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
                             )}
-                            {(inv.docType === "estimate" || inv.docType === "proforma") && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
-                                <ArrowRightLeft className="h-3.5 w-3.5" />
-                              </Button>
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
+                          <TableCell>
+                            {inv.status === "final" && isDraftType(inv.docType) ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                                <Lock className="h-2.5 w-2.5" /> Final
+                              </span>
+                            ) : inv.status === "draft" ? (
+                              <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                                Draft
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                —
+                              </span>
                             )}
-                            {isDraftType(inv.docType) && inv.status === "draft" && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
-                                <Lock className="h-3.5 w-3.5" />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
+                                <Download className="h-3.5 w-3.5" />
                               </Button>
-                            )}
-                            {isEditable(inv) && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(inv)} title="Delete">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                              {isEditable(inv) && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              {(inv.docType === "estimate" || inv.docType === "proforma") && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
+                                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              {isDraftType(inv.docType) && inv.status === "draft" && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
+                                  <Lock className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              {isEditable(inv) && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(inv)} title="Delete">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="space-y-3 p-3 md:hidden">
+                {filtered.map(inv => (
+                  <div key={inv.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
+                        {docTypeLabels[inv.docType] || inv.docType}
+                      </span>
+                      {inv.status === "final" && isDraftType(inv.docType) ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                          <Lock className="h-2.5 w-2.5" /> Final
+                        </span>
+                      ) : inv.status === "draft" ? (
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                          Draft
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
+                      <span className="text-sm font-bold">₹{inv.grandTotal.toLocaleString("en-IN")}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{inv.buyerName} · {inv.invoiceDate}</p>
+                    <div className="flex items-center gap-1 pt-1 border-t border-border/40">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)}>
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                      {isEditable(inv) && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      {isEditable(inv) && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive ml-auto" onClick={() => setConfirmDelete(inv)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          
           )}
         </motion.div>
       </div>
