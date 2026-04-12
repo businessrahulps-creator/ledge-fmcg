@@ -106,7 +106,8 @@ export default function Dashboard() {
           <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()} 👋</h1>
+          const firstName = profile?.full_name?.split(" ")[0];
+          <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
 
           {/* This Month summary */}
           <motion.div
