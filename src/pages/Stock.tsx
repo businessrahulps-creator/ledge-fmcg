@@ -91,6 +91,7 @@ export default function Stock() {
   const [deleteWarehouseLoc, setDeleteWarehouseLoc] = useState<GodownLocation | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
+  const [confirmDeleteStockItem, setConfirmDeleteStockItem] = useState(false);
   const [editStockItem, setEditStockItem] = useState<StockItem | null>(null);
 
   const [addStockOpen, setAddStockOpen] = useState(false);
