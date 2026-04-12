@@ -633,6 +633,100 @@ export default function Distributors() {
             );
           }}
         />
+
+        {/* Secondary Sale Modal */}
+        <Dialog open={ssOpen} onOpenChange={setSsOpen}>
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-base md:text-lg">Record Secondary Sale</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Track what {selected?.name || "this dealer"} sold to a retailer
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Retailer Name</Label>
+                <Input
+                  value={ssForm.retailerName}
+                  onChange={(e) => setSsForm({ ...ssForm, retailerName: e.target.value })}
+                  placeholder="e.g. Ganesh Kirana Store"
+                  className="h-10 rounded-lg"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Product *</Label>
+                <select
+                  value={ssForm.productId}
+                  onChange={(e) => setSsForm({ ...ssForm, productId: e.target.value })}
+                  className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="">Select product</option>
+                  {allProducts.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs md:text-sm">Quantity *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={ssForm.quantity}
+                    onChange={(e) => setSsForm({ ...ssForm, quantity: parseInt(e.target.value) || 1 })}
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs md:text-sm">Date</Label>
+                  <Input
+                    type="date"
+                    value={ssForm.date}
+                    onChange={(e) => setSsForm({ ...ssForm, date: e.target.value })}
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Remarks (optional)</Label>
+                <Input
+                  value={ssForm.remarks}
+                  onChange={(e) => setSsForm({ ...ssForm, remarks: e.target.value })}
+                  placeholder="Any notes..."
+                  className="h-10 rounded-lg"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setSsOpen(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!ssForm.productId) {
+                  toast.error("Product required", { description: "Please select a product." });
+                  return;
+                }
+                if (ssForm.quantity < 1) {
+                  toast.error("Invalid quantity", { description: "Quantity must be at least 1." });
+                  return;
+                }
+                const product = allProducts.find(p => p.id === ssForm.productId);
+                api.secondarySales.create({
+                  id: "",
+                  distributorId: selectedId || "",
+                  productId: ssForm.productId,
+                  productName: product?.name || "",
+                  retailerName: ssForm.retailerName.trim(),
+                  quantity: ssForm.quantity,
+                  date: ssForm.date,
+                  remarks: ssForm.remarks.trim(),
+                });
+                setSsOpen(false);
+                toast.success("Secondary sale recorded");
+              }}>
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
