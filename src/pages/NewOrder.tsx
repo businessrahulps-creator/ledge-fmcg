@@ -321,6 +321,20 @@ export default function NewOrder() {
               </div>
             </section>
 
+            {/* Credit Limit Warning */}
+            {selectedDealer && exceedsCreditLimit && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Credit limit will be exceeded</p>
+                  <p className="mt-0.5">
+                    {selectedDealerObj?.name}'s projected outstanding: {formatCurrency(projectedOutstanding)} / Limit: {formatCurrency(creditLimit)}
+                    {isSuperAdmin && " — You can override as Super Admin."}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Order Lines */}
             <section className="glass-card p-4 md:p-6">
               <div className="mb-3 flex items-center justify-between md:mb-4">
