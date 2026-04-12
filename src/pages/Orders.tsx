@@ -198,7 +198,64 @@ export default function Orders() {
     }
   };
 
-  const isLoading = usePageLoading(api.loading);
+  const openClaimModal = useCallback(() => {
+    if (!selectedOrder) return;
+    const qtys: Record<number, number> = {};
+    selectedOrder.lines.forEach((_, i) => { qtys[i] = selectedOrder.lines[i].quantity; });
+    setClaimQuantities(qtys);
+    setClaimType("return");
+    setClaimReason("");
+    setClaimModalOpen(true);
+  }, [selectedOrder]);
+
+  const handleSubmitClaim = useCallback(async () => {
+    if (!selectedOrder) return;
+    setClaimSubmitting(true);
+    const claimLines: ClaimLine[] = selectedOrder.lines
+      .map((line, i) => ({
+        productId: line.productId,
+        productName: line.productName,
+        quantity: claimQuantities[i] || 0,
+        unitPrice: line.unitPrice,
+        lineTotal: (claimQuantities[i] || 0) * line.unitPrice,
+      }))
+      .filter(l => l.quantity > 0);
+
+    if (claimLines.length === 0) {
+      toast.error("Select at least one product with quantity > 0");
+      setClaimSubmitting(false);
+      return;
+    }
+
+    const totalClaimValue = claimLines.reduce((s, l) => s + l.lineTotal, 0);
+    const claim: Claim = {
+      id: "",
+      orderId: selectedOrder.id,
+      orderNumber: selectedOrder.orderNumber,
+      distributorId: selectedOrder.distributorId,
+      distributorName: selectedOrder.distributorName,
+      claimType,
+      status: "open",
+      reason: claimReason,
+      resolutionNotes: "",
+      restoreStock: claimType === "return",
+      totalClaimValue,
+      lines: claimLines,
+      createdAt: new Date().toISOString(),
+      resolvedAt: null,
+    };
+
+    const ok = await api.claims.create(claim);
+    setClaimSubmitting(false);
+    if (ok) {
+      toast.success(claimType === "return" ? "Return recorded — stock restored" : "Damage claim recorded", {
+        description: `${formatCurrency(totalClaimValue)} claim for ${selectedOrder.orderNumber}`,
+      });
+      setClaimModalOpen(false);
+      setSelectedOrder(null);
+    }
+  }, [selectedOrder, claimQuantities, claimType, claimReason, api.claims]);
+
   const debouncedSearch = useDebounce(search);
 
   const filtered = useMemo(() => orders.filter((o) => {
