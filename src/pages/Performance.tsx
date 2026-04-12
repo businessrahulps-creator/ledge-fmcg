@@ -524,48 +524,20 @@ export default function Performance() {
           );
         })()}
 
-        {/* Scheme Performance */}
+        {/* Scheme Performance — uses actual stored data */}
         {(() => {
           const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
-          const allSchemesData = api.schemes?.list() || [];
-          // Estimate savings from schemes applied to filtered orders
-          let totalSavings = 0;
+          // Sum actual stored scheme_savings from orders
+          const totalSavings = filteredOrders.reduce((sum, o) => sum + (o.schemeSavings || 0), 0);
+          // Build top schemes from stored appliedSchemes
           const schemeHits = new Map<string, { name: string; hits: number; savings: number }>();
-          
-          const today = new Date().toISOString().split("T")[0];
-          const validSchemes = allSchemesData.filter(s =>
-            s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
-          );
-
           for (const order of filteredOrders) {
-            for (const s of validSchemes) {
-              if (s.dealerId && s.dealerId !== order.distributorId) continue;
-              if (s.minOrderValue > 0 && order.total < s.minOrderValue) continue;
-              let savings = 0;
-              switch (s.schemeType) {
-                case "percentage":
-                  savings = (order.total * s.discountPercent) / 100;
-                  break;
-                case "flat_discount":
-                  savings = s.flatAmount;
-                  break;
-                case "buy_x_get_y": {
-                  const totalQty = (order.lines || []).reduce((sum, l) => sum + l.quantity, 0);
-                  if (totalQty >= s.buyQty) {
-                    const sets = Math.floor(totalQty / s.buyQty);
-                    const avgPrice = order.total / Math.max(totalQty, 1);
-                    savings = sets * s.freeQty * avgPrice;
-                  }
-                  break;
-                }
-              }
-              if (savings > 0) {
-                totalSavings += savings;
-                const existing = schemeHits.get(s.id) || { name: s.name, hits: 0, savings: 0 };
-                existing.hits++;
-                existing.savings += savings;
-                schemeHits.set(s.id, existing);
-              }
+            for (const as of (order.appliedSchemes || [])) {
+              const key = as.schemeId || as.schemeName;
+              const existing = schemeHits.get(key) || { name: as.schemeName, hits: 0, savings: 0 };
+              existing.hits++;
+              existing.savings += as.savings;
+              schemeHits.set(key, existing);
             }
           }
 
@@ -595,7 +567,7 @@ export default function Performance() {
               </div>
               {totalSavings > 0 && (
                 <p className="text-[11px] text-muted-foreground mb-2">
-                  Estimated savings generated for dealers in this period
+                  Total savings from schemes applied to orders in this period
                 </p>
               )}
               {topSchemes.length > 0 && (
@@ -604,7 +576,7 @@ export default function Performance() {
                     <div key={ts.name} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-muted-foreground">{ts.hits} orders</span>
+                        <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
                         <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(ts.savings)}</span>
                       </div>
                     </div>

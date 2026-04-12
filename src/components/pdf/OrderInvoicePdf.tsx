@@ -77,9 +77,23 @@ export function OrderInvoicePdf({
 
         {/* Total */}
         <View style={{ alignItems: "flex-end", marginTop: 8, backgroundColor: "#F9F9F9", padding: 12, border: "0.5pt solid #D4D4D4" }}>
-          <View style={{ flexDirection: "row", gap: 20 }}>
-            <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>Grand Total</Text>
-            <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>{formatCurrencyPdf(order.total)}</Text>
+          <View style={{ flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
+            <View style={{ flexDirection: "row", gap: 20 }}>
+              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>Grand Total</Text>
+              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>{formatCurrencyPdf(order.total)}</Text>
+            </View>
+            {(order.schemeSavings > 0) && (
+              <View style={{ flexDirection: "row", gap: 20 }}>
+                <Text style={{ fontSize: 9, color: "#059669" }}>Scheme Savings</Text>
+                <Text style={{ fontSize: 9, color: "#059669" }}>-{formatCurrencyPdf(order.schemeSavings)}</Text>
+              </View>
+            )}
+            {(order.schemeSavings > 0) && (
+              <View style={{ flexDirection: "row", gap: 20 }}>
+                <Text style={{ fontSize: 10, fontFamily: "Helvetica-Bold", color: "#059669" }}>Effective Total</Text>
+                <Text style={{ fontSize: 10, fontFamily: "Helvetica-Bold", color: "#059669" }}>{formatCurrencyPdf(Math.max(0, order.total - order.schemeSavings))}</Text>
+              </View>
+            )}
           </View>
         </View>
 
