@@ -163,6 +163,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setProducts([]);
       setLocations([]);
       setStockItems([]);
+      setSchemes([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
