@@ -1,52 +1,39 @@
 
 
-# Add Search/Filter to Schemes, Targets, and Claims Pages
+# Add Delete Confirmation to Unprotected Delete Paths
 
-## What Changes
+## Problem
 
-Add a search input below the header on each page, matching the existing pattern used on Orders/Dealers/Stock. Each search filters the visible list in real-time.
+Two delete actions fire immediately without confirmation:
 
-### 1. Claims (`src/pages/Claims.tsx`)
-- Add a `Search` icon input between the header and the Tabs
-- Filter `filtered` claims by: order number, dealer name, claim type, reason text
-- Uses `useState` for search + `useMemo` for filtered results
+1. **Stock — Remove Inventory Item**: The "Remove from Warehouse" button inside the stock item edit dialog calls `deleteStockItemFn()` directly — no confirmation.
+2. **Dealer Detail — Remove Secondary Sale**: The trash icon on each secondary sale entry calls `api.secondarySales.remove(ss.id)` directly — no confirmation.
 
-### 2. Schemes (`src/pages/Schemes.tsx`)
-- Add search input between header and the active/inactive sections
-- Filter schemes by: name, type (flat/percent/bogo), product names, dealer names
-- Both active and inactive sections respect the filter
+All other delete paths (Orders, Dealers, Salespersons, Billing, Schemes, Products, Warehouses) already have proper AlertDialog confirmation.
 
-### 3. Targets (`src/pages/Targets.tsx`)
-- Add search input between the summary stats and the Tabs
-- Filter salespersons/dealers by name, region/location
-- Each tab's list is independently filtered by the same search term
+## Solution
 
-## Implementation Pattern (same for all 3)
+Add an AlertDialog confirmation step to each of these two delete actions, matching the existing pattern used everywhere else.
 
-```tsx
-const [search, setSearch] = useState("");
+### 1. `src/pages/Stock.tsx` — Stock item removal
 
-// In JSX, between header and list:
-<div className="relative">
-  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-  <Input
-    placeholder="Search schemes…"
-    value={search}
-    onChange={e => setSearch(e.target.value)}
-    className="pl-9 h-9"
-  />
-</div>
-```
+- Replace the direct `deleteStockItemFn` call on the "Remove from Warehouse" button with a state toggle (`confirmDeleteStockItem`) that opens an AlertDialog
+- AlertDialog text: "Remove {productName} from {warehouseName}? This action cannot be undone."
+- On confirm, call `deleteStockItemFn()` and close the edit dialog
 
-Filter logic uses `useMemo` with lowercase `.includes()` matching against relevant fields.
+### 2. `src/pages/DealerDetail.tsx` — Secondary sale removal
+
+- Add `deleteSecondarySaleId` state
+- Replace the direct `api.secondarySales.remove(ss.id)` call with `setDeleteSecondarySaleId(ss.id)`
+- Add AlertDialog: "Remove this secondary sale record? This action cannot be undone."
+- On confirm, call `api.secondarySales.remove(deleteSecondarySaleId)` and clear state
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/Claims.tsx` | Add search state + Input + filter claims by order/dealer/type |
-| `src/pages/Schemes.tsx` | Add search state + Input + filter schemes by name/type/products |
-| `src/pages/Targets.tsx` | Add search state + Input + filter entities by name/region |
+| `src/pages/Stock.tsx` | Wrap stock item "Remove from Warehouse" in AlertDialog (~15 lines added) |
+| `src/pages/DealerDetail.tsx` | Wrap secondary sale delete in AlertDialog (~20 lines added) |
 
-**3 files modified. No new files. No new dependencies. No database changes.**
+**2 files modified. No new files. No new dependencies. No database changes.**
 
