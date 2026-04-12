@@ -55,7 +55,7 @@ export function SetupChecklist() {
         >
           <PartyPopper className="h-5 w-5 text-primary shrink-0" />
           <p className="text-sm font-medium text-foreground flex-1">You're all set! Ledge is ready to go.</p>
-          <button onClick={() => setCelebrationDismissed(true)} className="p-1 rounded-lg hover:bg-muted/60 text-muted-foreground/60 hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
+          <button onClick={dismissCelebration} className="p-1 rounded-lg hover:bg-muted/60 text-muted-foreground/60 hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
             <X className="h-4 w-4" />
           </button>
         </motion.div>

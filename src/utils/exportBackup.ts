@@ -142,6 +142,13 @@ export async function exportFullBackup() {
     return;
   }
 
+  if (truncatedTables.length > 0) {
+    toast.warning("Large dataset detected", {
+      description: `Some tables (${truncatedTables.join(", ")}) may be truncated at 1,000 rows. Contact support for a full export.`,
+      duration: 8000,
+    });
+  }
+
   const blob = await zip.generateAsync({ type: "blob" });
   const today = new Date().toISOString().slice(0, 10);
   const url = URL.createObjectURL(blob);
