@@ -1,56 +1,36 @@
 
 
-# Fix Stale Updates & Unexpected Logouts
+# Expand Help Page with Comprehensive Feature Guides
 
-## Two Problems
+## Change
 
-**1. Users see updates late**: The PWA service worker uses `registerType: "autoUpdate"` which silently updates in the background — but only when the browser checks (typically on navigation or page load). Users on long-lived tabs (common on mobile) can go hours/days without seeing new code. There's no reload prompt and no periodic check.
+Replace the current 5 generic accordion sections with ~12 focused, feature-specific guides covering every major area of Ledge. Each section explains what the feature does, how to use it step-by-step, and practical tips.
 
-**2. Users get logged out when inactive**: When a mobile browser suspends a tab (or a user leaves the app idle), the Supabase access token expires (default: 1 hour). `autoRefreshToken` only works while JS is actively running. When the tab resumes, the stale token isn't immediately refreshed, and the auth state listener fires with `null` — triggering a redirect to `/login`. The app needs to re-attempt session recovery when the tab becomes visible again.
+## New Sections
 
-## Solution
+| # | Section | Covers |
+|---|---------|--------|
+| 1 | Getting Started (keep, refine) | First 15 minutes setup |
+| 2 | Daily Workflow (keep) | Morning-to-close routine |
+| 3 | Orders | Creating, editing, statuses (payment + delivery), partial payments, order prefixes, linking to invoices |
+| 4 | Dealers | Adding dealers, GSTIN, credit limits, outstanding tracking, ledger view |
+| 5 | Sales Team | Adding salespersons, assigning regions, linking to orders |
+| 6 | Stock & Warehouses | Products (SKU, HSN, price), warehouses, low-stock thresholds, stock health badges |
+| 7 | Schemes & Discounts | Three scheme types (buy X get Y, percentage, flat), time-bound, product/dealer targeting |
+| 8 | Billing & Invoices | Four document types (GST Invoice, Estimate, Proforma, Credit Note), draft vs finalized, linking orders, PDF/WhatsApp export |
+| 9 | Claims & Returns | Two claim types (Goods Returned, Damaged/Claim Only), resolution workflow (open → resolved/rejected), linking to orders |
+| 10 | Reports & Performance (keep, expand) | Five report types + targets + performance page |
+| 11 | Tips & Best Practices (keep, expand) | Do's and don'ts with new billing/claims tips |
 
-### Fix 1: PWA Update Prompt (service worker)
+## Implementation
 
-Switch from silent `autoUpdate` to `prompt` mode so users see a toast when a new version is available, with a "Reload" button.
+**`src/pages/Help.tsx`** — single file rewrite:
 
-**`vite.config.ts`**: Change `registerType` from `"autoUpdate"` to `"prompt"`
+- Same structure: `AppLayout` > `Accordion type="multiple"`
+- Same styling: `glass-card`, `prose prose-sm`, `text-muted-foreground`
+- Each section uses the existing accordion pattern with `ol`/`ul` lists and `border-l-2` tip callouts
+- Content is static JSX (no data fetching needed)
+- Sections ordered by typical user journey: setup → daily use → feature deep-dives → advanced → tips
 
-**`src/main.tsx`**: Import `useRegisterSW` from `virtual:pwa-register/react` isn't needed since we're not in a React component here. Instead, use the vanilla `registerSW` from `virtual:pwa-register` to:
-- Call `updateSW()` on the `onNeedRefresh` callback after showing a confirmation
-- Check for updates every 60 seconds via `setInterval(() => registration?.update(), 60_000)`
-
-**`src/components/UpdatePrompt.tsx`** (new): A small toast-style banner that appears when a new version is detected. Shows "A new version is available" with a "Reload" button that calls `updateSW(true)`. Rendered in `App.tsx`.
-
-### Fix 2: Session Recovery on Tab Resume
-
-**`src/context/AuthContext.tsx`**: Add a `visibilitychange` listener inside the auth `useEffect`. When the document becomes visible again, call `supabase.auth.getSession()` to re-validate the session. If a valid session exists, update state; if not, the existing logout flow handles it gracefully. This prevents the "sudden logout" where the token expired while the tab was backgrounded.
-
-```typescript
-// Inside the auth useEffect, after setting up onAuthStateChange:
-const handleVisibility = () => {
-  if (document.visibilityState === 'visible') {
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      if (!mountedRef.current) return;
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) fetchProfile(sess.user.id);
-    });
-  }
-};
-document.addEventListener('visibilitychange', handleVisibility);
-// Clean up in the return
-```
-
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `vite.config.ts` | Change `registerType` to `"prompt"` |
-| `src/main.tsx` | Add periodic SW update check (every 60s) |
-| `src/components/UpdatePrompt.tsx` | **New** — toast banner for "New version available → Reload" |
-| `src/App.tsx` | Render `<UpdatePrompt />` |
-| `src/context/AuthContext.tsx` | Add `visibilitychange` listener to re-validate session on tab resume |
-
-**1 new file, 4 files modified. No new dependencies. No database changes.**
+**1 file modified. No new files. No new dependencies. No database changes.**
 
