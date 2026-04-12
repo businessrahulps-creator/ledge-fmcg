@@ -407,6 +407,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => {
           safeRefetchStockItems();
         })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => {
+          safeRefetchSchemes();
+        })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') {
             console.warn('Realtime channel error — will retry automatically');
