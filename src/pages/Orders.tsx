@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import type { Claim, ClaimLine } from "@/context/DataContext";
 import {
   Select,
   SelectContent,
