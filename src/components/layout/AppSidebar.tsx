@@ -31,6 +31,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useOnboarding } from "@/hooks/use-onboarding";
 
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
@@ -62,6 +63,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { companyId } = useAuth();
+  const { companyIncomplete } = useOnboarding();
   const [logoUrl, setLogoUrl] = useState<string>("");
 
   useEffect(() => {
@@ -127,6 +129,9 @@ export function AppSidebar() {
               <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-primary" />
             )}
             <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+            {companyIncomplete && item.url === "/company" && (
+              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+            )}
             <span>{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
