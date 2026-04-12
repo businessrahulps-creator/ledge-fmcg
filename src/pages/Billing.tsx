@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, Unlink, ArrowRightLeft, Pencil } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,12 @@ import { GstInvoicePdf } from "@/components/pdf/GstInvoicePdf";
 import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";
+import { useSearchParams } from "react-router-dom";
 
 type DocType = Invoice["docType"];
 
 const docTypeLabels: Record<DocType, string> = {
   gst_invoice: "GST Invoice",
-  invoice: "Invoice",
   estimate: "Estimate",
   proforma: "Proforma",
   credit_note: "Credit Note",
@@ -40,7 +40,6 @@ const docTypeLabels: Record<DocType, string> = {
 
 const docTypeBadgeColors: Record<DocType, string> = {
   gst_invoice: "bg-primary/10 text-primary",
-  invoice: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300",
   estimate: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
   proforma: "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300",
   credit_note: "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300",
@@ -49,11 +48,8 @@ const docTypeBadgeColors: Record<DocType, string> = {
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const isDraftType = (dt: DocType) => dt === "gst_invoice" || dt === "credit_note";
 
-/** Determines if a document can be edited/deleted */
 const isEditable = (inv: Invoice) => {
-  // Estimates, Proformas, plain Invoices are always editable (informal docs)
-  if (inv.docType === "estimate" || inv.docType === "proforma" || inv.docType === "invoice") return true;
-  // GST Invoice & Credit Note only editable while in draft
+  if (inv.docType === "estimate" || inv.docType === "proforma") return true;
   return inv.status === "draft";
 };
 
@@ -70,16 +66,14 @@ export default function Billing() {
   const invoices = api.invoices.list();
   const orders = api.orders.list();
   const company = api.companyInfo;
+  const [searchParams] = useSearchParams();
 
   const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [saving, setSaving] = useState(false);
 
-  // Edit mode
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
-
-  // Confirmation dialogs
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
   const [confirmFinalize, setConfirmFinalize] = useState<Invoice | null>(null);
 
@@ -93,7 +87,7 @@ export default function Billing() {
   const [supplyType, setSupplyType] = useState<"intra_state" | "inter_state">("intra_state");
   const [gstRate, setGstRate] = useState(18);
   const [notes, setNotes] = useState("");
-  const [lines, setLines] = useState<LineInput[]>([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]);
+  const [lines, setLines] = useState<LineInput[]>([]);
 
   const resetForm = () => {
     setDocType("gst_invoice");
@@ -105,11 +99,20 @@ export default function Billing() {
     setSupplyType("intra_state");
     setGstRate(18);
     setNotes("");
-    setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]);
+    setLines([]);
     setEditingInvoice(null);
   };
 
-  const handlePullOrder = (orderId: string) => {
+  // Auto-open dialog if coming from Orders page with ?order=<id>
+  useState(() => {
+    const orderId = searchParams.get("order");
+    if (orderId) {
+      handleSelectOrder(orderId);
+      setShowCreate(true);
+    }
+  });
+
+  function handleSelectOrder(orderId: string) {
     setSourceOrderId(orderId);
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
@@ -123,7 +126,7 @@ export default function Billing() {
       unit: "Pack",
       unitPrice: l.unitPrice,
     })));
-  };
+  }
 
   const handleEdit = (inv: Invoice) => {
     setEditingInvoice(inv);
@@ -146,7 +149,6 @@ export default function Billing() {
     setShowCreate(true);
   };
 
-  // Calculations
   const calculated = useMemo(() => {
     const subtotal = round2(lines.reduce((sum, l) => sum + round2(l.quantity * l.unitPrice), 0));
     const isGst = docType === "gst_invoice" || docType === "credit_note";
@@ -167,8 +169,12 @@ export default function Billing() {
   }, [lines, docType, supplyType, gstRate]);
 
   const handleCreate = async () => {
+    if (!sourceOrderId && !editingInvoice) {
+      toast.error("Please select an order first");
+      return;
+    }
     if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
-    if (lines.length === 0 || lines.every(l => !l.productName.trim())) { toast.error("Add at least one line item"); return; }
+    if (lines.length === 0 || lines.every(l => !l.productName.trim())) { toast.error("No line items"); return; }
 
     setSaving(true);
     const invoiceLines: InvoiceLine[] = lines.filter(l => l.productName.trim()).map(l => ({
@@ -214,17 +220,15 @@ export default function Billing() {
     };
 
     if (editingInvoice) {
-      // Update existing
       await api.invoices.update(editingInvoice.id, {
         ...commonData,
-        status: editingInvoice.status, // preserve existing status
+        status: editingInvoice.status,
       });
       setSaving(false);
       toast.success("Document updated", { description: `${editingInvoice.invoiceNumber} saved.` });
       setShowCreate(false);
       resetForm();
     } else {
-      // Create new
       const result = await api.invoices.create({
         ...commonData,
         status: isDraftType(docType) ? "draft" : "final",
@@ -319,8 +323,6 @@ export default function Billing() {
     }
   }, []);
 
-  const addLine = () => setLines(prev => [...prev, { productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]);
-  const removeLine = (i: number) => setLines(prev => prev.filter((_, idx) => idx !== i));
   const updateLine = (i: number, field: keyof LineInput, value: string | number) => {
     setLines(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l));
   };
@@ -335,11 +337,17 @@ export default function Billing() {
     return list;
   }, [invoices, filterType, search]);
 
+  // Get linked documents for each order
+  const getOrderDocuments = useCallback((orderId: string) => {
+    return invoices.filter(inv => inv.sourceOrderId === orderId);
+  }, [invoices]);
+
   const isEditMode = !!editingInvoice;
+  const selectedOrder = orders.find(o => o.id === sourceOrderId);
   const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
   const dialogDesc = isEditMode
     ? `Editing ${editingInvoice?.invoiceNumber}. Changes will be saved immediately.`
-    : "Create an invoice, estimate, or credit note. GST documents start as drafts for review.";
+    : "Create a billing document from an order. Select an order first, then choose the document type.";
 
   return (
     <AppLayout>
@@ -348,7 +356,7 @@ export default function Billing() {
           <div>
             <h1 className="text-xl font-bold tracking-tight md:text-2xl">Billing</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
-              Create and manage invoices, estimates, and credit notes
+              Generate invoices, estimates, and credit notes from orders
             </p>
           </div>
           <Button onClick={() => { resetForm(); setShowCreate(true); }} className="gap-1.5">
@@ -376,7 +384,6 @@ export default function Billing() {
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="gst_invoice">GST Invoice</SelectItem>
-              <SelectItem value="invoice">Invoice</SelectItem>
               <SelectItem value="estimate">Estimate</SelectItem>
               <SelectItem value="proforma">Proforma</SelectItem>
               <SelectItem value="credit_note">Credit Note</SelectItem>
@@ -390,7 +397,7 @@ export default function Billing() {
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" strokeWidth={1.5} />
               <p className="text-sm font-medium text-muted-foreground">No documents yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Create your first invoice, estimate, or credit note</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">Create your first billing document from an order</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -401,67 +408,81 @@ export default function Billing() {
                     <TableHead className="text-xs">Number</TableHead>
                     <TableHead className="text-xs">Date</TableHead>
                     <TableHead className="text-xs">Buyer</TableHead>
+                    <TableHead className="text-xs">Order</TableHead>
                     <TableHead className="text-xs text-right">Amount</TableHead>
                     <TableHead className="text-xs">Status</TableHead>
                     <TableHead className="text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map(inv => (
-                    <TableRow key={inv.id} className="row-hover">
-                      <TableCell>
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType]}`}>
-                          {docTypeLabels[inv.docType]}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{inv.invoiceDate}</TableCell>
-                      <TableCell className="text-sm">{inv.buyerName}</TableCell>
-                      <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
-                      <TableCell>
-                        {inv.status === "final" && isDraftType(inv.docType) ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
-                            <Lock className="h-2.5 w-2.5" /> Final
+                  {filtered.map(inv => {
+                    const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
+                    return (
+                      <TableRow key={inv.id} className="row-hover">
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType]}`}>
+                            {docTypeLabels[inv.docType]}
                           </span>
-                        ) : inv.status === "draft" ? (
-                          <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
-                            Draft
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                            —
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
-                            <Download className="h-3.5 w-3.5" />
-                          </Button>
-                          {isEditable(inv) && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{inv.invoiceDate}</TableCell>
+                        <TableCell className="text-sm">{inv.buyerName}</TableCell>
+                        <TableCell className="text-xs">
+                          {linkedOrder ? (
+                            <span className="inline-flex items-center gap-1 text-primary font-medium">
+                              <Link2 className="h-3 w-3" />
+                              {linkedOrder.orderNumber}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
                           )}
-                          {(inv.docType === "estimate" || inv.docType === "proforma") && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
-                              <ArrowRightLeft className="h-3.5 w-3.5" />
-                            </Button>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
+                        <TableCell>
+                          {inv.status === "final" && isDraftType(inv.docType) ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                              <Lock className="h-2.5 w-2.5" /> Final
+                            </span>
+                          ) : inv.status === "draft" ? (
+                            <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                              Draft
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                              —
+                            </span>
                           )}
-                          {isDraftType(inv.docType) && inv.status === "draft" && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
-                              <Lock className="h-3.5 w-3.5" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
+                              <Download className="h-3.5 w-3.5" />
                             </Button>
-                          )}
-                          {isEditable(inv) && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(inv)} title="Delete">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {isEditable(inv) && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(inv)} title="Edit">
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            {(inv.docType === "estimate" || inv.docType === "proforma") && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
+                                <ArrowRightLeft className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            {isDraftType(inv.docType) && inv.status === "draft" && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
+                                <Lock className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            {isEditable(inv) && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(inv)} title="Delete">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -478,195 +499,223 @@ export default function Billing() {
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Document Type */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Step 1: Select Order (required for new documents) */}
+            {!isEditMode && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Document Type</Label>
-                <Select value={docType} onValueChange={v => setDocType(v as DocType)} disabled={isEditMode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(docTypeLabels).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Pull from Order (optional)</Label>
-                {sourceOrderId ? (
-                  <div className="flex items-center gap-2 h-10">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                      <Link2 className="h-3 w-3" />
-                      Linked to {orders.find(o => o.id === sourceOrderId)?.orderNumber}
-                    </span>
-                    {!isEditMode && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSourceOrderId(""); setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]); setBuyerName(""); setBuyerAddress(""); }} title="Unlink order">
-                        <Unlink className="h-3.5 w-3.5" />
+                <Label className="text-xs font-semibold">Step 1: Select Order *</Label>
+                {sourceOrderId && selectedOrder ? (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Link2 className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">{selectedOrder.orderNumber}</span>
+                        <span className="text-xs text-muted-foreground">· {selectedOrder.distributorName}</span>
+                        <span className="text-xs font-mono text-muted-foreground">₹{(selectedOrder.total - (selectedOrder.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setSourceOrderId(""); setLines([]); setBuyerName(""); setBuyerAddress(""); }}>
+                        Change
                       </Button>
-                    )}
+                    </div>
+                    {/* Show existing documents for this order */}
+                    {(() => {
+                      const existingDocs = getOrderDocuments(sourceOrderId);
+                      if (existingDocs.length === 0) return null;
+                      return (
+                        <div className="mt-2 pt-2 border-t border-primary/20">
+                          <p className="text-[10px] text-muted-foreground mb-1">Existing documents for this order:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {existingDocs.map(doc => (
+                              <span key={doc.id} className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.docType]}`}>
+                                {docTypeLabels[doc.docType]} · {doc.invoiceNumber} ({doc.status})
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ) : (
-                  <Select value={sourceOrderId} onValueChange={handlePullOrder} disabled={isEditMode}>
-                    <SelectTrigger><SelectValue placeholder="Select order..." /></SelectTrigger>
+                  <Select value={sourceOrderId} onValueChange={handleSelectOrder}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Select an order to create a document from..." />
+                    </SelectTrigger>
                     <SelectContent>
                       {orders.map(o => (
-                        <SelectItem key={o.id} value={o.id}>{o.orderNumber} — {o.distributorName}</SelectItem>
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.orderNumber} — {o.distributorName} — ₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 )}
               </div>
-            </div>
-
-            {/* Buyer Details */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold">Buyer Details</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Name *</Label>
-                  <Input value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Buyer name" readOnly={!!sourceOrderId} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">GSTIN</Label>
-                  <Input value={buyerGstin} onChange={e => setBuyerGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))} placeholder="22AAAAA0000A1Z5" className="font-mono" maxLength={15} />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs">Address</Label>
-                  <Input value={buyerAddress} onChange={e => setBuyerAddress(e.target.value)} placeholder="Address" readOnly={!!sourceOrderId} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">State Code</Label>
-                  <Input value={buyerStateCode} onChange={e => setBuyerStateCode(e.target.value.replace(/\D/g, "").slice(0, 2))} placeholder="27" className="font-mono max-w-[100px]" maxLength={2} />
-                </div>
-              </div>
-            </div>
-
-            {/* GST Config (only for GST Invoice / Credit Note) */}
-            {(docType === "gst_invoice" || docType === "credit_note") && (
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold">GST Configuration</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Supply Type</Label>
-                    <Select value={supplyType} onValueChange={v => setSupplyType(v as "intra_state" | "inter_state")}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="intra_state">Intra-State (CGST+SGST)</SelectItem>
-                        <SelectItem value="inter_state">Inter-State (IGST)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">GST Rate (%)</Label>
-                    <Input type="number" value={gstRate} onChange={e => setGstRate(Number(e.target.value))} className="max-w-[100px]" min={0} max={28} />
-                  </div>
-                </div>
-              </div>
             )}
 
-            {/* Line Items */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Line Items</h3>
-                {!sourceOrderId && (
-                  <Button variant="outline" size="sm" onClick={addLine} className="h-7 text-xs gap-1">
-                    <Plus className="h-3 w-3" /> Add Item
-                  </Button>
+            {/* Step 2: Document Type (only shown after order is selected or in edit mode) */}
+            {(sourceOrderId || isEditMode) && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">{isEditMode ? "Document Type" : "Step 2: Document Type"}</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {(Object.entries(docTypeLabels) as [DocType, string][]).map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => !isEditMode && setDocType(key)}
+                        disabled={isEditMode}
+                        className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-all ${
+                          docType === key
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:border-foreground/20"
+                        } ${isEditMode ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Buyer Details */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold">Buyer Details</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Name</Label>
+                      <Input value={buyerName} readOnly className="bg-muted/30" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">GSTIN</Label>
+                      <Input value={buyerGstin} onChange={e => setBuyerGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))} placeholder="22AAAAA0000A1Z5" className="font-mono" maxLength={15} />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label className="text-xs">Address</Label>
+                      <Input value={buyerAddress} readOnly className="bg-muted/30" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">State Code</Label>
+                      <Input value={buyerStateCode} onChange={e => setBuyerStateCode(e.target.value.replace(/\D/g, "").slice(0, 2))} placeholder="27" className="font-mono max-w-[100px]" maxLength={2} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* GST Config */}
+                {(docType === "gst_invoice" || docType === "credit_note") && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold">GST Configuration</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Supply Type</Label>
+                        <Select value={supplyType} onValueChange={v => setSupplyType(v as "intra_state" | "inter_state")}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="intra_state">Intra-State (CGST+SGST)</SelectItem>
+                            <SelectItem value="inter_state">Inter-State (IGST)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">GST Rate (%)</Label>
+                        <Input type="number" value={gstRate} onChange={e => setGstRate(Number(e.target.value))} className="max-w-[100px]" min={0} max={28} />
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-              <div className="space-y-2">
-                {lines.map((line, i) => (
-                  <div key={i} className="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
-                    <div className="col-span-2 sm:col-span-4 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">Product</Label>}
-                      <Input value={line.productName} onChange={e => updateLine(i, "productName", e.target.value)} placeholder="Product name" className="h-9 text-xs" readOnly={!!sourceOrderId} />
-                    </div>
-                    <div className="col-span-1 sm:col-span-2 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">HSN <span className="text-muted-foreground/50">(billing)</span></Label>}
-                      <Input value={line.hsnCode} onChange={e => updateLine(i, "hsnCode", e.target.value)} placeholder="HSN" className="h-9 text-xs font-mono" />
-                    </div>
-                    <div className="col-span-1 sm:col-span-1 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">Qty</Label>}
-                      <Input type="number" value={line.quantity} onChange={e => updateLine(i, "quantity", Number(e.target.value))} className="h-9 text-xs" min={1} readOnly={!!sourceOrderId} />
-                    </div>
-                    <div className="col-span-1 sm:col-span-1 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">Unit</Label>}
-                      <Input value={line.unit} onChange={e => updateLine(i, "unit", e.target.value)} className="h-9 text-xs" readOnly={!!sourceOrderId} />
-                    </div>
-                    <div className="col-span-1 sm:col-span-2 space-y-1">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">Rate (₹)</Label>}
-                      <Input type="number" value={line.unitPrice} onChange={e => updateLine(i, "unitPrice", Number(e.target.value))} className="h-9 text-xs" min={0} readOnly={!!sourceOrderId} />
-                    </div>
-                    <div className="hidden sm:block sm:col-span-1 space-y-1 text-right">
-                      {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}
-                      <p className="h-9 flex items-center justify-end text-xs font-mono">₹{round2(line.quantity * line.unitPrice).toLocaleString("en-IN")}</p>
-                    </div>
-                    <div className="hidden sm:flex sm:col-span-1 justify-end">
-                      {!sourceOrderId && lines.length > 1 && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeLine(i)}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Totals */}
-            <div className="rounded-lg border border-border/50 p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-mono">₹{calculated.subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
-              </div>
-              {(docType === "gst_invoice" || docType === "credit_note") && supplyType === "intra_state" && (
-                <>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>CGST @ {gstRate / 2}%</span>
-                    <span className="font-mono">₹{calculated.cgst.toFixed(2)}</span>
+                {/* Line Items (read-only from order, HSN editable) */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">Line Items</h3>
+                    <span className="text-[10px] text-muted-foreground">Auto-populated from order · Only HSN is editable</span>
                   </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>SGST @ {gstRate / 2}%</span>
-                    <span className="font-mono">₹{calculated.sgst.toFixed(2)}</span>
+                  <div className="space-y-2">
+                    {lines.map((line, i) => (
+                      <div key={i} className="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
+                        <div className="col-span-2 sm:col-span-4 space-y-1">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">Product</Label>}
+                          <Input value={line.productName} readOnly className="h-9 text-xs bg-muted/30" />
+                        </div>
+                        <div className="col-span-1 sm:col-span-2 space-y-1">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">HSN</Label>}
+                          <Input value={line.hsnCode} onChange={e => updateLine(i, "hsnCode", e.target.value)} placeholder="HSN" className="h-9 text-xs font-mono" />
+                        </div>
+                        <div className="col-span-1 sm:col-span-1 space-y-1">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">Qty</Label>}
+                          <Input type="number" value={line.quantity} readOnly className="h-9 text-xs bg-muted/30" />
+                        </div>
+                        <div className="col-span-1 sm:col-span-1 space-y-1">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">Unit</Label>}
+                          <Input value={line.unit} readOnly className="h-9 text-xs bg-muted/30" />
+                        </div>
+                        <div className="col-span-1 sm:col-span-2 space-y-1">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">Rate (₹)</Label>}
+                          <Input type="number" value={line.unitPrice} readOnly className="h-9 text-xs bg-muted/30" />
+                        </div>
+                        <div className="hidden sm:block sm:col-span-2 space-y-1 text-right">
+                          {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}
+                          <p className="h-9 flex items-center justify-end text-xs font-mono">₹{round2(line.quantity * line.unitPrice).toLocaleString("en-IN")}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </>
-              )}
-              {(docType === "gst_invoice" || docType === "credit_note") && supplyType === "inter_state" && (
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>IGST @ {gstRate}%</span>
-                  <span className="font-mono">₹{calculated.igst.toFixed(2)}</span>
                 </div>
-              )}
-              {calculated.roundOff !== 0 && (
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Round Off</span>
-                  <span className="font-mono">{calculated.roundOff > 0 ? "+" : ""}₹{calculated.roundOff.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm font-semibold border-t border-border/50 pt-2 mt-2">
-                <span>Grand Total</span>
-                <span className="font-mono">₹{calculated.grandTotal.toLocaleString("en-IN")}</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground italic">{numberToWords(calculated.grandTotal)}</p>
-            </div>
 
-            {/* Notes */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Notes (optional)</Label>
-              <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Payment terms, delivery instructions..." className="min-h-[60px]" />
-            </div>
+                {/* Totals */}
+                <div className="rounded-lg border border-border/50 p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-mono">₹{calculated.subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {(docType === "gst_invoice" || docType === "credit_note") && supplyType === "intra_state" && (
+                    <>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>CGST @ {gstRate / 2}%</span>
+                        <span className="font-mono">₹{calculated.cgst.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>SGST @ {gstRate / 2}%</span>
+                        <span className="font-mono">₹{calculated.sgst.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                  {(docType === "gst_invoice" || docType === "credit_note") && supplyType === "inter_state" && (
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>IGST @ {gstRate}%</span>
+                      <span className="font-mono">₹{calculated.igst.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {calculated.roundOff !== 0 && (
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Round Off</span>
+                      <span className="font-mono">{calculated.roundOff > 0 ? "+" : ""}₹{calculated.roundOff.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm font-semibold border-t border-border/50 pt-2 mt-2">
+                    <span>Grand Total</span>
+                    <span className="font-mono">₹{calculated.grandTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic">{numberToWords(calculated.grandTotal)}</p>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Notes (optional)</Label>
+                  <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Payment terms, delivery instructions..." className="min-h-[60px]" />
+                </div>
+              </>
+            )}
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowCreate(false); resetForm(); }}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={saving}>
-              {saving
-                ? isEditMode ? "Saving…" : "Creating…"
-                : isEditMode
-                  ? "Save Changes"
-                  : isDraftType(docType) ? "Create as Draft" : "Create Document"
-              }
-            </Button>
+            {(sourceOrderId || isEditMode) && (
+              <Button onClick={handleCreate} disabled={saving}>
+                {saving
+                  ? isEditMode ? "Saving…" : "Creating…"
+                  : isEditMode
+                    ? "Save Changes"
+                    : isDraftType(docType) ? "Create as Draft" : "Create Document"
+                }
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
