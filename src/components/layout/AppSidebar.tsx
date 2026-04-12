@@ -11,6 +11,7 @@ import {
   UserCheck,
   Gift,
   Target,
+  RotateCcw,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,7 @@ const manageNav = [
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },
   { title: "Schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
+  { title: "Returns", url: "/claims", icon: RotateCcw },
 ];
 
 const analyzeNav = [

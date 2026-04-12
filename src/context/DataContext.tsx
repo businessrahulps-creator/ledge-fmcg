@@ -46,6 +46,31 @@ export interface Target {
   targetOrders: number;
 }
 
+export interface ClaimLine {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Claim {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  distributorId: string;
+  distributorName: string;
+  claimType: "return" | "damage";
+  status: "open" | "resolved" | "rejected";
+  reason: string;
+  resolutionNotes: string;
+  restoreStock: boolean;
+  totalClaimValue: number;
+  lines: ClaimLine[];
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
@@ -99,6 +124,10 @@ interface DataContextType {
   addTarget: (t: Target) => void;
   updateTarget: (t: Target) => void;
   deleteTarget: (id: string) => void;
+
+  claims: Claim[];
+  addClaim: (claim: Claim) => Promise<boolean>;
+  updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -193,6 +222,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [orderSequence, setOrderSequence] = useState(1);
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [targets, setTargets] = useState<Target[]>([]);
+  const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
@@ -211,6 +241,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setSchemes([]);
       setSecondarySales([]);
       setTargets([]);
+      setClaims([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
@@ -255,7 +286,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -265,6 +296,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("claim_lines" as any).select("*").range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -332,6 +365,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
         targetOrders: t.target_orders || 0,
       }));
       setTargets(mappedTargets);
+
+      // Map claims
+      const allClaimLines = (claimLinesRes as any).data || [];
+      const mappedClaims: Claim[] = ((claimsRes as any).data || []).map((c: any) => ({
+        id: c.id, orderId: c.order_id, orderNumber: c.order_number || "",
+        distributorId: c.distributor_id, distributorName: c.distributor_name || "",
+        claimType: c.claim_type as Claim["claimType"],
+        status: c.status as Claim["status"],
+        reason: c.reason || "", resolutionNotes: c.resolution_notes || "",
+        restoreStock: c.restore_stock || false,
+        totalClaimValue: Number(c.total_claim_value || 0),
+        lines: allClaimLines
+          .filter((cl: any) => cl.claim_id === c.id)
+          .map((cl: any) => ({
+            productId: cl.product_id, productName: cl.product_name || "",
+            quantity: cl.quantity || 0, unitPrice: Number(cl.unit_price || 0),
+            lineTotal: Number(cl.line_total || 0),
+          })),
+        createdAt: c.created_at, resolvedAt: c.resolved_at || null,
+      }));
+      setClaims(mappedClaims);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
@@ -1180,6 +1234,75 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setTargets(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  // Claims CRUD
+  const addClaim = useCallback(async (claim: Claim): Promise<boolean> => {
+    if (!companyId) return false;
+    try {
+      const { data, error } = await supabase.from("claims" as any).insert({
+        company_id: companyId,
+        order_id: claim.orderId,
+        order_number: claim.orderNumber,
+        distributor_id: claim.distributorId,
+        distributor_name: sanitizeInput(claim.distributorName),
+        claim_type: claim.claimType,
+        status: "open",
+        reason: sanitizeInput(claim.reason),
+        restore_stock: claim.restoreStock,
+        total_claim_value: claim.totalClaimValue,
+      }).select().single();
+      if (error) throw error;
+      const claimId = (data as any).id;
+
+      if (claim.lines.length > 0) {
+        const { error: linesErr } = await supabase.from("claim_lines" as any).insert(
+          claim.lines.map(l => ({
+            claim_id: claimId,
+            product_id: l.productId,
+            product_name: sanitizeInput(l.productName),
+            quantity: l.quantity,
+            unit_price: l.unitPrice,
+            line_total: l.lineTotal,
+          }))
+        );
+        if (linesErr) throw linesErr;
+      }
+
+      // Restore stock if requested
+      if (claim.restoreStock) {
+        const order = orders.find(o => o.id === claim.orderId);
+        const godownId = order?.godownId;
+        if (godownId) {
+          for (const line of claim.lines) {
+            const { data: siData } = await supabase.from("stock_items").select("*")
+              .eq("company_id", companyId).eq("product_id", line.productId).eq("godown_id", godownId).single();
+            if (siData) {
+              await supabase.from("stock_items").update({ quantity: siData.quantity + line.quantity } as any).eq("id", siData.id);
+            }
+          }
+          await safeRefetchStockItems();
+        }
+      }
+
+      const newClaim: Claim = { ...claim, id: claimId, status: "open", createdAt: new Date().toISOString(), resolvedAt: null };
+      setClaims(prev => [newClaim, ...prev]);
+      return true;
+    } catch (err: any) {
+      toast.error("Failed to record claim", { description: err?.message || "Unknown error" });
+      return false;
+    }
+  }, [companyId, orders, safeRefetchStockItems]);
+
+  const updateClaim = useCallback(async (id: string, updates: Partial<Claim>) => {
+    const dbUpdates: Record<string, any> = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.resolutionNotes !== undefined) dbUpdates.resolution_notes = sanitizeInput(updates.resolutionNotes);
+    if (updates.status === "resolved") dbUpdates.resolved_at = new Date().toISOString();
+
+    const { error } = await supabase.from("claims" as any).update(dbUpdates).eq("id", id);
+    if (error) { toast.error("Failed to update claim", { description: error.message }); return; }
+    setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1202,6 +1325,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         secondarySales, addSecondarySale, deleteSecondarySale,
         targets, addTarget, updateTarget, deleteTarget,
+        claims, addClaim, updateClaim,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
