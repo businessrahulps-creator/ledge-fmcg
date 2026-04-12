@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus } from "lucide-react";
+import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
@@ -234,6 +234,7 @@ export default function Targets() {
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
   const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
+  const [search, setSearch] = useState("");
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
   const dailyOptions = useMemo(() => getDailyOptions(), []);
@@ -384,6 +385,17 @@ export default function Targets() {
           );
         })()}
 
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, region, location…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
+        </div>
+
         <Tabs defaultValue="salespersons" className="space-y-4">
           <TabsList>
             <TabsTrigger value="salespersons">Sales Team ({salespersons.length})</TabsTrigger>
@@ -391,8 +403,11 @@ export default function Targets() {
           </TabsList>
 
           <TabsContent value="salespersons" className="space-y-3">
-            {salespersons.length > 0 ? (
-              salespersons.map(sp => {
+            {(() => {
+              const q = search.toLowerCase();
+              const filtered = q ? salespersons.filter(sp => sp.name.toLowerCase().includes(q) || (sp.region || "").toLowerCase().includes(q)) : salespersons;
+              return filtered.length > 0 ? (
+              filtered.map(sp => {
                 const actual = spActuals.get(sp.id) || { revenue: 0, orders: 0 };
                 const existingTarget = getTarget("salesperson", sp.id);
                 return (
@@ -414,21 +429,27 @@ export default function Targets() {
             ) : (
               <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
                 <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No team members yet</p>
-                <p className="text-xs text-muted-foreground">Add your sales team to start setting targets</p>
-                <Link to="/salespersons">
-                  <Button size="sm" className="mt-3">
-                    <Plus className="h-4 w-4" />
-                    Add Team Member
-                  </Button>
-                </Link>
+                <p className="mt-3 text-sm font-medium">{q ? "No matching team members" : "No team members yet"}</p>
+                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your sales team to start setting targets"}</p>
+                {!q && (
+                  <Link to="/salespersons">
+                    <Button size="sm" className="mt-3">
+                      <Plus className="h-4 w-4" />
+                      Add Team Member
+                    </Button>
+                  </Link>
+                )}
               </div>
-            )}
+            );
+            })()}
           </TabsContent>
 
           <TabsContent value="dealers" className="space-y-3">
-            {dealers.length > 0 ? (
-              dealers.map(d => {
+            {(() => {
+              const q = search.toLowerCase();
+              const filtered = q ? dealers.filter(d => d.name.toLowerCase().includes(q) || (d.location || "").toLowerCase().includes(q)) : dealers;
+              return filtered.length > 0 ? (
+              filtered.map(d => {
                 const actual = dealerActuals.get(d.id) || { revenue: 0, orders: 0 };
                 const existingTarget = getTarget("dealer", d.id);
                 return (
@@ -450,16 +471,19 @@ export default function Targets() {
             ) : (
               <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
                 <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No dealers yet</p>
-                <p className="text-xs text-muted-foreground">Add your dealer network to start setting targets</p>
-                <Link to="/distributors">
-                  <Button size="sm" className="mt-3">
-                    <Plus className="h-4 w-4" />
-                    Add Dealer
-                  </Button>
-                </Link>
+                <p className="mt-3 text-sm font-medium">{q ? "No matching dealers" : "No dealers yet"}</p>
+                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your dealer network to start setting targets"}</p>
+                {!q && (
+                  <Link to="/distributors">
+                    <Button size="sm" className="mt-3">
+                      <Plus className="h-4 w-4" />
+                      Add Dealer
+                    </Button>
+                  </Link>
+                )}
               </div>
-            )}
+            );
+            })()}
           </TabsContent>
         </Tabs>
       </div>

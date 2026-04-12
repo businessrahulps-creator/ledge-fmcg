@@ -392,11 +392,21 @@ export default function Claims() {
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [tab, setTab] = useState("open");
   const [newClaimOpen, setNewClaimOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
-    if (tab === "all") return claims;
-    return claims.filter(c => c.status === tab);
-  }, [claims, tab]);
+    let list = tab === "all" ? claims : claims.filter(c => c.status === tab);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c =>
+        c.orderNumber.toLowerCase().includes(q) ||
+        c.distributorName.toLowerCase().includes(q) ||
+        c.claimType.toLowerCase().includes(q) ||
+        c.reason.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [claims, tab, search]);
 
   const openCount = claims.filter(c => c.status === "open").length;
 
@@ -440,6 +450,16 @@ export default function Claims() {
           <Button size="sm" onClick={() => setNewClaimOpen(true)}>
             <Plus className="h-4 w-4 mr-1" /> New Claim
           </Button>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by order, dealer, type, reason…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>

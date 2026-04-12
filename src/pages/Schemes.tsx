@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +23,7 @@ import {
   Package,
   Pencil,
   Trash2,
+  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -108,6 +109,7 @@ export default function Schemes() {
   const [editingScheme, setEditingScheme] = useState<Scheme | null>(null);
   const [form, setForm] = useState<Omit<Scheme, "id">>(emptyScheme);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const handleRefresh = useCallback(async () => {
     if (api.refreshAll) await api.refreshAll();
@@ -162,10 +164,22 @@ export default function Schemes() {
     }
   };
 
-  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  const filteredSchemes = useMemo(() => {
+    if (!search.trim()) return schemes;
+    const q = search.toLowerCase();
+    return schemes.filter(s =>
+      s.name.toLowerCase().includes(q) ||
+      s.schemeType.toLowerCase().includes(q) ||
+      s.description.toLowerCase().includes(q) ||
+      (s.productId && products.find(p => p.id === s.productId)?.name.toLowerCase().includes(q)) ||
+      (s.dealerId && dealers.find(d => d.id === s.dealerId)?.name.toLowerCase().includes(q))
+    );
+  }, [schemes, search, products, dealers]);
 
-  const activeSchemes = schemes.filter(s => s.isActive);
-  const inactiveSchemes = schemes.filter(s => !s.isActive);
+  const activeSchemes = filteredSchemes.filter(s => s.isActive);
+  const inactiveSchemes = filteredSchemes.filter(s => !s.isActive);
+
+  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
 
   return (
     <AppLayout>
@@ -197,6 +211,19 @@ export default function Schemes() {
               </Button>
             )}
           </div>
+
+          {/* Search */}
+          {schemes.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search schemes by name, type, product, dealer…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+          )}
 
           {/* Empty state */}
           {schemes.length === 0 && (
