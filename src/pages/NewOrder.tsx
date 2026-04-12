@@ -75,6 +75,7 @@ export default function NewOrder() {
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
+  const allSchemes = api.schemes.list();
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
   const { userRole } = useAuth();
