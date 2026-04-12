@@ -500,6 +500,49 @@ export default function Settings() {
                   </p>
                 </div>
 
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Phone</Label>
+                    <Input value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} className="h-10 rounded-lg" placeholder="+91 98100 12345" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Email</Label>
+                    <Input type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} className="h-10 rounded-lg" placeholder="company@example.com" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">PAN</Label>
+                    <Input value={companyPan} onChange={(e) => setCompanyPan(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))} maxLength={10} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="ABCDE1234F" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">State Code</Label>
+                    <Input value={companyStateCode} onChange={(e) => setCompanyStateCode(e.target.value.replace(/\D/g, "").slice(0, 2))} maxLength={2} className="h-10 rounded-lg max-w-[100px] font-mono" placeholder="27" />
+                    <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-border/50 pt-4 mt-2">
+                  <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Bank Name</Label>
+                      <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">Account Number</Label>
+                        <Input value={bankAccount} onChange={(e) => setBankAccount(e.target.value.replace(/\D/g, ""))} className="h-10 rounded-lg font-mono" placeholder="1234567890" />
+                      </div>
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">IFSC Code</Label>
+                        <Input value={bankIfsc} onChange={(e) => setBankIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11))} maxLength={11} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="SBIN0001234" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Prefix</Label>
                   <Input
