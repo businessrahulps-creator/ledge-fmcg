@@ -234,6 +234,7 @@ export default function Targets() {
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
   const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
+  const [search, setSearch] = useState("");
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
   const dailyOptions = useMemo(() => getDailyOptions(), []);
