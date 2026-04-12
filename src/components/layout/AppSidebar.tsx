@@ -2,7 +2,7 @@ import { useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   House,
-  IndianRupee,
+  ClipboardList,
   UserRound,
   Package,
   ChartNoAxesCombined,
@@ -13,7 +13,7 @@ import {
   Target,
   RotateCcw,
   FileText,
-  Building2,
+  Landmark,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +34,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: IndianRupee },
+  { title: "Orders", url: "/orders", icon: ClipboardList },
 ];
 
 const manageNav = [
@@ -48,7 +48,7 @@ const manageNav = [
 
 const accountingNav = [
   { title: "Billing", url: "/billing", icon: FileText },
-  { title: "Company", url: "/company", icon: Building2 },
+  { title: "Company", url: "/company", icon: Landmark },
 ];
 
 const analyzeNav = [
