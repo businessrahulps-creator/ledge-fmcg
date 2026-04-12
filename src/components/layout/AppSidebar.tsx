@@ -200,6 +200,27 @@ export function AppSidebar() {
 
       <SidebarFooter className="px-2 pb-4">
         <SidebarMenu>
+          {/* Activity Log button */}
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => setActivityOpen(true)}>
+              {collapsed ? (
+                <div className="flex flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors w-full">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors hover:bg-sidebar-accent/50">
+                    <History className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[10px] font-medium leading-tight text-muted-foreground truncate max-w-[56px]">
+                    Activity
+                  </span>
+                </div>
+              ) : (
+                <span className="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-sidebar-accent transition-colors w-full">
+                  <History className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                  <span>Activity</span>
+                </span>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
           {bottomNav.map((item) => {
             const isActive = location.pathname.startsWith(item.url);
             if (collapsed) {
@@ -242,6 +263,8 @@ export function AppSidebar() {
           })}
         </SidebarMenu>
       </SidebarFooter>
+
+      <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
     </Sidebar>
   );
 }
