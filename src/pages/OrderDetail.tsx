@@ -774,7 +774,6 @@ export default function OrderDetail() {
         <div className="glass-card p-4 md:p-6">
           <EntityHistory entityType="order" entityId={order.id} />
         </div>
-      </div>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(""); } }}>
