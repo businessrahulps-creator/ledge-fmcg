@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus } from "lucide-react";
+import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
