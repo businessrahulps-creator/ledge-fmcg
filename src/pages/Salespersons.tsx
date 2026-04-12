@@ -113,6 +113,15 @@ export default function Salespersons() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              onClick={() => setPdfOpen(true)}
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               onClick={() => {
                 exportCsv(
                   csvFilename("sales-team"),
@@ -245,6 +254,38 @@ export default function Salespersons() {
             </AlertDialogContent>
           </AlertDialog>
         )}
+
+        <ExportPdfModal
+          open={pdfOpen}
+          onOpenChange={setPdfOpen}
+          title="Export Sales Team PDF"
+          sections={[
+            { id: "summary", label: "Summary (total members, orders, value)" },
+            { id: "memberList", label: "Member List" },
+          ] satisfies PdfSection[]}
+          onGenerate={async (sel) => {
+            const rows: string[][] = [];
+            if (sel.summary) {
+              rows.push(["Total Members", String(filtered.length)]);
+              rows.push(["Total Orders", String(filtered.reduce((s, m) => s + m.totalOrders, 0))]);
+              rows.push(["Total Value", formatCurrency(filtered.reduce((s, m) => s + m.totalValue, 0))]);
+              rows.push(["", ""]);
+            }
+            if (sel.memberList) {
+              filtered.forEach((m) => {
+                rows.push([m.name, `${m.region} · ${m.phone} · ${m.totalOrders} orders · ${formatCurrency(m.totalValue)}`]);
+              });
+            }
+            const columns = [
+              { header: "Name", width: "35%" },
+              { header: "Details", width: "65%" },
+            ];
+            downloadPdf(
+              pdfFilename("sales-team"),
+              ReportPdf({ title: "Sales Team Report", subtitle: `${filtered.length} members`, columns, rows, companyName: "" })
+            );
+          }}
+        />
       </div>
     </AppLayout>
   );
