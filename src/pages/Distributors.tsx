@@ -323,28 +323,34 @@ export default function Distributors() {
                         variant="outline"
                         size="sm"
                         className="h-8 gap-1.5"
-                        onClick={() => {
-                          const rows = [
-                            ["Location", selected.location],
-                            ["Contact", selected.contact],
-                            ["Total Orders", String(selected.totalOrders)],
-                            ["Total Value", formatCurrencyPdf(selected.totalValue)],
-                          ];
-                          selectedOrders.forEach((o) => {
-                            rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
+                        onClick={async () => {
+                          const sc = buildScorecard(selectedOrders);
+                          const doc = React.createElement(DealerStatementPdf, {
+                            companyName: api.companyInfo.name,
+                            companyAddress: api.companyInfo.address,
+                            gstin: api.companyInfo.gstin,
+                            logoUrl: api.companyInfo.logoUrl,
+                            dealer: {
+                              name: selected.name,
+                              location: selected.location,
+                              contact: selected.contact,
+                              creditLimit: selected.creditLimit,
+                              outstandingAmount: selected.outstandingAmount,
+                            },
+                            scorecard: sc,
+                            orders: selectedOrders.map(o => ({
+                              orderNumber: o.orderNumber,
+                              date: o.date,
+                              total: o.total,
+                              paymentStatus: o.paymentStatus,
+                              schemeSavings: o.schemeSavings || 0,
+                            })),
                           });
-                          const columns = [
-                            { header: "Field", width: "40%" },
-                            { header: "Value", width: "60%" },
-                          ];
-                          downloadPdf(
-                            pdfFilename("dealer", selected.name.replace(/\s+/g, "-")),
-                            ReportPdf({ title: selected.name, subtitle: "Dealer Profile", columns, rows, companyName: api.companyInfo.name })
-                          );
+                          await downloadPdf(pdfFilename("dealer-statement", selected.name.replace(/\s+/g, "-")), doc);
                         }}
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        Export PDF
+                        Statement PDF
                       </Button>
                     </div>
                   </div>
