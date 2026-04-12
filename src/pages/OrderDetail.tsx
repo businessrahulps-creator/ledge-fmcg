@@ -483,7 +483,7 @@ export default function OrderDetail() {
         </div>
 
         {/* Sticky bottom action bar on mobile */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/80 backdrop-blur-xl px-4 py-3 md:static md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0">
+        <div className="fixed bottom-[5.5rem] left-4 right-4 z-40 rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-lg md:static md:bottom-auto md:left-auto md:right-auto md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none">
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-2 mr-auto">
               <Button
