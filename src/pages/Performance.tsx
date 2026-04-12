@@ -683,6 +683,7 @@ export default function Performance() {
           );
         })()}
 
+        {(() => {
           const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
           // Sum actual stored scheme_savings from orders
           const totalSavings = filteredOrders.reduce((sum, o) => sum + (o.schemeSavings || 0), 0);
