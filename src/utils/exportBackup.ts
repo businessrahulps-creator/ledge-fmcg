@@ -21,8 +21,11 @@ const n = (v: unknown) => String(v ?? 0);
 export async function exportFullBackup() {
   const zip = new JSZip();
   let fileCount = 0;
+  const truncatedTables: string[] = [];
 
-  // --- Orders + lines ---
+  const checkTruncation = (name: string, data: unknown[] | null) => {
+    if (data && data.length === 1000) truncatedTables.push(name);
+  };
   const { data: orders } = await supabase
     .from("orders")
     .select("*, order_lines(*)")
