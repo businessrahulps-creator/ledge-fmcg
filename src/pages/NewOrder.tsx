@@ -260,6 +260,7 @@ export default function NewOrder() {
   };
 
   return (
+    <>
     <AppLayout>
       <div className="space-y-6 md:space-y-8">
         <div className="flex items-center gap-3 md:gap-4">
