@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Phone, Mail, MapPin, FileText, TrendingUp, TrendingDown, Activity, Zap, Target } from "lucide-react";
+import { EntityHistory } from "@/components/layout/EntityHistory";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { SalespersonStatementPdf } from "@/components/pdf/SalespersonStatementPdf";
 import { buildSalespersonScorecard, getPerformanceHealth, getPerformanceInsight, performanceHealthConfig } from "@/utils/salespersonScorecard";
