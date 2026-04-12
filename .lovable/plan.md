@@ -1,31 +1,29 @@
 
 
-# Add Keyboard Shortcuts: Enter to Submit, Escape to Close
+# Add "Last Updated" Timestamp on Dashboard
 
-## Problem
+## Change
 
-All CRUD dialogs (Dealers, Sales Team, Stock, Settings, Billing) lack keyboard shortcuts. Users must click buttons to submit or close — no Enter/Escape support.
+Add a subtle "Last updated X ago" timestamp below the greeting header, showing when data was last refreshed. Clicking it triggers a manual refresh.
 
-## Solution
-
-Wrap each dialog's form inputs in a `<form onSubmit>` element so Enter naturally triggers the save function, and rely on Radix Dialog's built-in Escape handling (already works via `onOpenChange`).
+**Current**: Greeting + date only
+**New**: Greeting + date + "Updated 2 min ago · Refresh" line
 
 ## Implementation
 
-**Affected files** (all use the same pattern of `<DialogContent>` → `<div className="space-y-...">` → inputs → `<DialogFooter>` with save button):
+**`src/pages/Dashboard.tsx`** — single file, ~15 lines added:
 
-1. `src/pages/Distributors.tsx`
-2. `src/pages/Salespersons.tsx`
-3. `src/pages/Stock.tsx` (3 dialogs: product, warehouse, stock item)
-4. `src/pages/Settings.tsx` (team member dialog)
+1. Track a `lastUpdated` state initialized to `new Date()`, refreshed whenever `api.refreshAll` completes or `api.loading` transitions from true to false
+2. Use a 1-minute interval to re-render the relative time string ("just now", "1 min ago", "5 min ago", etc.)
+3. Render below the greeting (line ~110), styled as a tiny muted line:
+   ```tsx
+   <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
+     Updated {timeAgo} 
+     <button onClick={api.refreshAll} className="underline hover:text-foreground">
+       Refresh
+     </button>
+   </p>
+   ```
 
-**Pattern per dialog:**
-
-- Wrap the content `<div>` + `<DialogFooter>` inside a `<form onSubmit={(e) => { e.preventDefault(); save(); }}>` element
-- Change the save `<Button>` to `type="submit"`
-- Change the cancel `<Button>` to `type="button"` (prevents accidental submit)
-
-Escape already works — Radix Dialog handles it natively via `onOpenChange`. No extra code needed.
-
-**No new files. No new dependencies. No database changes. ~5 lines changed per dialog.**
+**1 file modified. No new dependencies. No database changes.**
 
