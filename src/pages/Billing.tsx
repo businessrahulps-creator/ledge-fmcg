@@ -537,6 +537,16 @@ export default function Billing() {
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
                       )}
+                      {(inv.docType === "estimate" || inv.docType === "proforma") && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
+                          <ArrowRightLeft className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      {isDraftType(inv.docType) && inv.status === "draft" && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setConfirmFinalize(inv)} title="Finalize">
+                          <Lock className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       {isEditable(inv) && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive ml-auto" onClick={() => setConfirmDelete(inv)}>
                           <Trash2 className="h-3.5 w-3.5" />

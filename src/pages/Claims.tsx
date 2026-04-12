@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -184,23 +184,23 @@ export default function Claims() {
                                 className="min-h-[60px] text-xs"
                               />
                               <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleResolve(claim.id)}
-                                  disabled={resolvingId === claim.id}
-                                >
-                                   <CheckCircle2 className="h-3.5 w-3.5" />
-                                   {resolvingId === claim.id ? "Saving…" : "Resolve"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleReject(claim.id)}
-                                  disabled={resolvingId === claim.id}
-                                >
-                                  <XCircle className="h-3.5 w-3.5" />
-                                  Reject
-                                </Button>
+                                 <Button
+                                   size="sm"
+                                   onClick={() => handleResolve(claim.id)}
+                                   disabled={resolvingId === claim.id}
+                                 >
+                                    {resolvingId === claim.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                                    {resolvingId === claim.id ? "Saving…" : "Resolve"}
+                                 </Button>
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={() => handleReject(claim.id)}
+                                   disabled={resolvingId === claim.id}
+                                 >
+                                   {resolvingId === claim.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
+                                   Reject
+                                 </Button>
                               </div>
                             </div>
                           )}

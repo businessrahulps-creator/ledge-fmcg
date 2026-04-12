@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
@@ -22,6 +22,7 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
@@ -234,6 +235,7 @@ export default function Dashboard() {
                      <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
                        <th className="px-6 py-3 font-semibold">Order</th>
                        <th className="px-6 py-3 font-semibold">Dealer</th>
+                       <th className="px-6 py-3 font-semibold">Sales Person</th>
                        <th className="px-6 py-3 font-semibold">Date</th>
                        <th className="px-6 py-3 font-semibold text-right">Amount</th>
                        <th className="px-6 py-3 font-semibold">Payment</th>
@@ -242,9 +244,10 @@ export default function Dashboard() {
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
-                      <tr key={order.id} className="border-b border-border/50 row-hover">
+                      <tr key={order.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => navigate(`/orders/${order.id}`)}>
                         <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
