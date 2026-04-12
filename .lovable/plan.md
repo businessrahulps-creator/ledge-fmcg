@@ -1,52 +1,36 @@
 
 
-# Add Unsaved Changes Guard to New Order Page
+# Add 7-Day Revenue Sparkline to Dashboard
 
-## Problem
+## Change
 
-The NewOrder form has ~10 state fields and line items. If a user accidentally taps "Back" or navigates away mid-entry, all data is silently lost.
-
-## Solution
-
-Add two guards:
-
-1. **Browser `beforeunload`** — catches tab close, refresh, URL bar navigation
-2. **React Router blocker** — catches in-app navigation (back button, sidebar links)
-
-Both only activate when the form has meaningful data (dealer selected OR any line has a product chosen).
+Add a compact sparkline chart below the "This Month" summary card showing daily revenue for the last 7 days. Pure inline SVG — no charting library.
 
 ## Implementation
 
-**`src/pages/NewOrder.tsx`** — ~25 lines added:
+**`src/pages/Dashboard.tsx`** — ~35 lines added:
 
-1. Add a `isDirty` derived boolean:
+1. **Compute 7-day revenue data** (after `monthlyOrders` block, before the `isLoading` check):
    ```ts
-   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
+   const last7Days = Array.from({ length: 7 }, (_, i) => {
+     const d = new Date(today);
+     d.setDate(today.getDate() - 6 + i);
+     const key = d.toISOString().slice(0, 10);
+     const dayRevenue = orders
+       .filter(o => o.date === key)
+       .reduce((s, o) => s + o.total, 0);
+     return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
+   });
    ```
 
-2. Add `beforeunload` effect:
-   ```ts
-   useEffect(() => {
-     const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
-     window.addEventListener("beforeunload", handler);
-     return () => window.removeEventListener("beforeunload", handler);
-   }, [isDirty]);
-   ```
+2. **Render sparkline** inside the existing "This Month" `motion.div`, after the 4-column KPI grid:
+   - Tiny label row: day abbreviations (Mon, Tue, …)
+   - SVG `polyline` with `fill="none"` and `stroke="currentColor"` in `text-primary/60`
+   - Gradient fill below the line using a `linearGradient` definition
+   - Height: 48px, full width of the card
+   - Dots on each data point, slightly larger on today
 
-3. Use React Router's `useBlocker` for in-app navigation:
-   ```ts
-   import { useBlocker } from "react-router-dom";
-   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-     isDirty && currentLocation.pathname !== nextLocation.pathname
-   );
-   ```
-
-4. Add an `AlertDialog` (already imported) that shows when `blocker.state === "blocked"`:
-   - Title: "Discard unsaved order?"
-   - Description: "You have unsaved changes. Leaving will lose your progress."
-   - Cancel → `blocker.reset()`, Discard → `blocker.proceed()`
-
-5. Clear dirty state on successful save (already navigates away via `navigate`).
+3. **Edge cases**: If all 7 values are 0, show a flat line at the bottom with a "No revenue this week" subtitle.
 
 **1 file modified. No new files. No new dependencies. No database changes.**
 
