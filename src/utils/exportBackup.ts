@@ -69,9 +69,10 @@ export async function exportFullBackup() {
   }
 
   // --- Dealers ---
-  const { data: dealers } = await supabase.from("distributors").select("*").order("name");
-  checkTruncation("dealers", dealers);
-  if (dealers?.length) {
+  const dealers = await fetchAll((from, to) =>
+    supabase.from("distributors").select("*").order("name").range(from, to)
+  );
+  if (dealers.length) {
     const h = ["Name", "Location", "Contact", "Email", "GSTIN", "PAN", "Outstanding (₹)", "Credit Limit (₹)", "Total Orders", "Total Value (₹)"];
     const r = dealers.map((d) => [s(d.name), s(d.location), s(d.contact), s(d.email), s(d.gstin), s(d.pan), n(d.outstanding_amount), n(d.credit_limit), n(d.total_orders), n(d.total_value)]);
     zip.file("dealers.csv", toCsvString(h, r));
@@ -79,9 +80,10 @@ export async function exportFullBackup() {
   }
 
   // --- Products ---
-  const { data: products } = await supabase.from("products").select("*").order("name");
-  checkTruncation("products", products);
-  if (products?.length) {
+  const products = await fetchAll((from, to) =>
+    supabase.from("products").select("*").order("name").range(from, to)
+  );
+  if (products.length) {
     const h = ["Name", "SKU", "Unit", "Base Price (₹)", "HSN Code", "Total Sold"];
     const r = products.map((p) => [s(p.name), s(p.sku), s(p.unit), n(p.base_price), s(p.hsn_code), n(p.total_sold)]);
     zip.file("products.csv", toCsvString(h, r));
@@ -89,9 +91,10 @@ export async function exportFullBackup() {
   }
 
   // --- Sales Team ---
-  const { data: sales } = await supabase.from("salespersons").select("*").order("name");
-  checkTruncation("sales team", sales);
-  if (sales?.length) {
+  const sales = await fetchAll((from, to) =>
+    supabase.from("salespersons").select("*").order("name").range(from, to)
+  );
+  if (sales.length) {
     const h = ["Name", "Phone", "Email", "Region", "Total Orders", "Total Value (₹)"];
     const r = sales.map((sp) => [s(sp.name), s(sp.phone), s(sp.email), s(sp.region), n(sp.total_orders), n(sp.total_value)]);
     zip.file("sales_team.csv", toCsvString(h, r));
@@ -99,9 +102,10 @@ export async function exportFullBackup() {
   }
 
   // --- Stock ---
-  const { data: stockItems } = await supabase.from("stock_items").select("*, products(name, sku), godowns(name)");
-  checkTruncation("stock", stockItems);
-  if (stockItems?.length) {
+  const stockItems = await fetchAll((from, to) =>
+    supabase.from("stock_items").select("*, products(name, sku), godowns(name)").range(from, to)
+  );
+  if (stockItems.length) {
     const h = ["Product", "SKU", "Warehouse", "Quantity", "Threshold", "Last Deducted"];
     const r = stockItems.map((si: any) => [
       s(si.products?.name), s(si.products?.sku), s(si.godowns?.name),
@@ -112,9 +116,10 @@ export async function exportFullBackup() {
   }
 
   // --- Warehouses ---
-  const { data: godowns } = await supabase.from("godowns").select("*").order("name");
-  checkTruncation("warehouses", godowns);
-  if (godowns?.length) {
+  const godowns = await fetchAll((from, to) =>
+    supabase.from("godowns").select("*").order("name").range(from, to)
+  );
+  if (godowns.length) {
     const h = ["Name", "Address", "Active"];
     const r = godowns.map((g) => [s(g.name), s(g.address), g.is_active ? "Yes" : "No"]);
     zip.file("warehouses.csv", toCsvString(h, r));
@@ -122,9 +127,10 @@ export async function exportFullBackup() {
   }
 
   // --- Schemes ---
-  const { data: schemes } = await supabase.from("schemes").select("*").order("name");
-  checkTruncation("schemes", schemes);
-  if (schemes?.length) {
+  const schemes = await fetchAll((from, to) =>
+    supabase.from("schemes").select("*").order("name").range(from, to)
+  );
+  if (schemes.length) {
     const h = ["Name", "Type", "Active", "Valid From", "Valid Until", "Discount %", "Flat Amount (₹)", "Buy Qty", "Free Qty", "Min Qty", "Min Order Value (₹)"];
     const r = schemes.map((sc) => [s(sc.name), s(sc.scheme_type), sc.is_active ? "Yes" : "No", s(sc.valid_from), s(sc.valid_until), n(sc.discount_percent), n(sc.flat_amount), n(sc.buy_qty), n(sc.free_qty), n(sc.min_qty), n(sc.min_order_value)]);
     zip.file("schemes.csv", toCsvString(h, r));
@@ -132,9 +138,10 @@ export async function exportFullBackup() {
   }
 
   // --- Invoices ---
-  const { data: invoices } = await supabase.from("invoices").select("*, invoice_lines(*)").order("invoice_date", { ascending: false });
-  checkTruncation("invoices", invoices);
-  if (invoices?.length) {
+  const invoices = await fetchAll((from, to) =>
+    supabase.from("invoices").select("*, invoice_lines(*)").order("invoice_date", { ascending: false }).range(from, to)
+  );
+  if (invoices.length) {
     const h = ["Invoice #", "Date", "Buyer", "Subtotal (₹)", "Tax (₹)", "Grand Total (₹)", "Status"];
     const r = invoices.map((inv) => [s(inv.invoice_number), s(inv.invoice_date), s(inv.buyer_name), n(inv.subtotal), n(inv.total_tax), n(inv.grand_total), s(inv.status)]);
     zip.file("invoices.csv", toCsvString(h, r));
@@ -142,9 +149,10 @@ export async function exportFullBackup() {
   }
 
   // --- Claims ---
-  const { data: claims } = await supabase.from("claims").select("*, claim_lines(*)").order("created_at", { ascending: false });
-  checkTruncation("claims", claims);
-  if (claims?.length) {
+  const claims = await fetchAll((from, to) =>
+    supabase.from("claims").select("*, claim_lines(*)").order("created_at", { ascending: false }).range(from, to)
+  );
+  if (claims.length) {
     const h = ["Order #", "Dealer", "Type", "Status", "Claim Value (₹)", "Reason", "Created"];
     const r = claims.map((c) => [s(c.order_number), s(c.distributor_name), s(c.claim_type), s(c.status), n(c.total_claim_value), s(c.reason), s(c.created_at).slice(0, 10)]);
     zip.file("claims.csv", toCsvString(h, r));
@@ -152,9 +160,10 @@ export async function exportFullBackup() {
   }
 
   // --- Targets ---
-  const { data: targets } = await supabase.from("targets").select("*").order("period_start", { ascending: false });
-  checkTruncation("targets", targets);
-  if (targets?.length) {
+  const targets = await fetchAll((from, to) =>
+    supabase.from("targets").select("*").order("period_start", { ascending: false }).range(from, to)
+  );
+  if (targets.length) {
     const h = ["Entity", "Type", "Period", "Period Start", "Target Orders", "Target Revenue (₹)"];
     const r = targets.map((t) => [s(t.entity_name), s(t.entity_type), s(t.period_type), s(t.period_start), n(t.target_orders), n(t.target_revenue)]);
     zip.file("targets.csv", toCsvString(h, r));
