@@ -332,12 +332,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const { data: company } = await supabase
-        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url").eq("id", cId).single();
+        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
       if (token !== fetchTokenRef.current) return;
       if (company) {
         setOrderPrefixState(company.order_prefix);
         setOrderSequence(company.next_order_sequence);
-        setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
+        setCompanyInfo({
+          name: company.name || "", address: company.address || "", gstin: company.gstin || "",
+          logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
+          pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
+          bankName: (company as any).bank_name || "", bankAccount: (company as any).bank_account || "",
+          bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
+        });
       }
 
       const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes] = await Promise.all([
