@@ -230,6 +230,8 @@ export default function OrderDetail() {
       setClaimModalOpen(false);
     }
   }, [order, claimQuantities, claimType, claimReason, api.claims]);
+
+  if (!order) {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">
@@ -242,117 +244,6 @@ export default function OrderDetail() {
     );
   }
 
-  const orderDocs = invoices.filter(inv => inv.sourceOrderId === order.id);
-
-  const executeSaveOrder = async () => {
-    if ((editDelivery === "dispatched" || editDelivery === "delivered") && !editGodown) {
-      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
-      return;
-    }
-    setIsSaving(true);
-    await updateOrder(order.id, {
-      paymentMode: editPaymentMode as Order["paymentMode"],
-      paymentStatus: editPayment as Order["paymentStatus"],
-      deliveryStatus: editDelivery as Order["deliveryStatus"],
-      dispatchDate: editDispatchDate || null,
-      vehicle: editVehicle,
-      driverName: editDriver,
-      godownId: editGodown || undefined,
-    });
-    setIsSaving(false);
-    toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
-  };
-
-  const saveOrder = () => {
-    const dealer = distributors.find(d => d.id === order.distributorId);
-    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
-    const wasUnpaid = order.paymentStatus === "pending" || order.paymentStatus === "partial";
-    const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
-    if (willBeUnpaid) {
-      const currentContribution = wasUnpaid ? order.total : 0;
-      const newContribution = order.total;
-      const projected = dealer.outstandingAmount - currentContribution + newContribution;
-      if (projected > dealer.creditLimit) {
-        if (userRole === "super_admin") {
-          setCreditOverrideOpen(true);
-          return;
-        }
-        toast.error("Credit limit exceeded", {
-          description: `${dealer.name}'s outstanding would exceed their credit limit. Contact a Super Admin.`,
-        });
-        return;
-      }
-    }
-    executeSaveOrder();
-  };
-
-  const handleDeleteOrder = async () => {
-    if (!deleteTarget) return;
-    setDeleteLoading(true);
-    const ok = await api.orders.delete(deleteTarget.id);
-    setDeleteLoading(false);
-    if (ok) {
-      toast.success("Order deleted", { description: `${deleteTarget.orderNumber} has been deleted.` });
-      navigate("/orders");
-    }
-  };
-
-  const openClaimModal = useCallback(() => {
-    const qtys: Record<number, number> = {};
-    order.lines.forEach((_, i) => { qtys[i] = order.lines[i].quantity; });
-    setClaimQuantities(qtys);
-    setClaimType("return");
-    setClaimReason("");
-    setClaimModalOpen(true);
-  }, [order]);
-
-  const handleSubmitClaim = useCallback(async () => {
-    setClaimSubmitting(true);
-    const claimLines: ClaimLine[] = order.lines
-      .map((line, i) => ({
-        productId: line.productId,
-        productName: line.productName,
-        quantity: claimQuantities[i] || 0,
-        unitPrice: line.unitPrice,
-        lineTotal: (claimQuantities[i] || 0) * line.unitPrice,
-      }))
-      .filter(l => l.quantity > 0);
-
-    if (claimLines.length === 0) {
-      toast.error("Select at least one product with quantity > 0");
-      setClaimSubmitting(false);
-      return;
-    }
-
-    const totalClaimValue = claimLines.reduce((s, l) => s + l.lineTotal, 0);
-    const claim: Claim = {
-      id: "",
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      distributorId: order.distributorId,
-      distributorName: order.distributorName,
-      claimType,
-      status: "open",
-      reason: claimReason,
-      resolutionNotes: "",
-      restoreStock: claimType === "return",
-      totalClaimValue,
-      lines: claimLines,
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-    };
-
-    const ok = await api.claims.create(claim);
-    setClaimSubmitting(false);
-    if (ok) {
-      toast.success(claimType === "return" ? "Return recorded — stock restored" : "Damage claim recorded", {
-        description: `${formatCurrency(totalClaimValue)} claim for ${order.orderNumber}`,
-      });
-      setClaimModalOpen(false);
-    }
-  }, [order, claimQuantities, claimType, claimReason, api.claims]);
-
-  return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6 pb-24 md:pb-6">
         {/* Header */}
