@@ -1,44 +1,43 @@
 
 
-# Final Adversarial QA — Audit & Production Readiness Plan
+# Add Unit Tests for All Business Logic Utilities
 
-## Audit Summary
+## What
+Write 7 test files covering every pure business logic function, then delete the placeholder test. This gives a safety net for all money, date, score, and export calculations before real customers start using the app tomorrow.
 
-The platform is in excellent shape after two prior passes. This fresh adversarial review found **3 remaining calculation inconsistencies** — all in the same file. No critical or security issues.
+## Files to Create
 
-## Critical
-**None.**
+| # | File | Functions Tested |
+|---|------|-----------------|
+| 1 | `src/utils/numberToWords.test.ts` | `numberToWords()` — zero, ones, teens, tens, hundreds, thousands, lakhs, crores, paise, negatives |
+| 2 | `src/utils/formatDate.test.ts` | `formatIndianDate()` — null/undefined → "—", invalid → "—", YYYY-MM-DD string, ISO string, Date object, DD/MM/YYYY output format |
+| 3 | `src/utils/dealerScorecard.test.ts` | `getChurnRisk()`, `buildScorecard()` — empty → high, recent+paid → low, old → high, value/payment aggregation |
+| 4 | `src/utils/salespersonScorecard.test.ts` | `getPerformanceHealth()`, `getPerformanceInsight()`, `buildSalespersonScorecard()` — scheme-adjusted revenue, frequency, insight strings |
+| 5 | `src/utils/exportCsv.test.ts` | `csvFilename()` — dated filename format |
+| 6 | `src/utils/exportPdf.test.ts` | `formatCurrencyPdf()`, `pdfFilename()` — "Rs." prefix, Indian comma grouping, dated filenames |
+| 7 | `src/utils/sanitize.test.ts` | `sanitizeInput()` — HTML stripping, script tags, control chars, whitespace collapse |
 
-## High Priority
+## File to Delete
+- `src/test/example.test.ts` — placeholder with no real assertions
 
-### H1. Dashboard sparkline revenue uses raw total (not scheme-adjusted)
-**File:** `src/pages/Dashboard.tsx` line 103
-The sparkline computes `dayRevenue` using `o.total` without subtracting `schemeSavings`. The "This Month" card above it correctly uses `o.total - (o.schemeSavings || 0)`. This means the sparkline visual overstates revenue.
-**Fix:** Change line 103 to `.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0)`
+## Technical Approach
+- All tests use `vi.useFakeTimers()` where dates matter (scorecards, filenames) for determinism
+- Scorecard tests create minimal `Order` stub objects with only the fields each function reads
+- No React rendering, no Supabase mocking — pure function tests only
+- `escapeCell` is not exported from `exportCsv.ts`, so we only test `csvFilename()`
 
-### H2. Dashboard day-of-week KPI revenue uses raw total
-**File:** `src/pages/Dashboard.tsx` line 129
-The daily KPI "Revenue" card uses `filteredOrders.reduce((s, o) => s + o.total, 0)` — again missing the scheme savings subtraction.
-**Fix:** Change to `filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0)`
+## Key Test Cases
 
-## Medium / Low
-No additional issues found. Previous audits already addressed:
-- Dark mode status classes ✓
-- Backup pagination ✓
-- FK constraints ✓
-- Scheme-adjusted Orders export ✓
-- Sonner toast standardization ✓
-- DialogDescription on Schemes ✓
-- Mobile save button spacing ✓
-- Filtered child table queries ✓
-- bank_account_name in company select ✓
+**numberToWords**: `0 → "Zero Rupees Only"`, `1234.56 → "One Thousand Two Hundred and Thirty Four Rupees and Fifty Six Paise Only"`, `123456 → includes "One Lakh"`, `10000000 → includes "One Crore"`, negative amounts prefixed with "Minus"
 
-## Implementation Plan
+**formatIndianDate**: `null → "—"`, `"2025-01-15" → "15/01/2025"`, `"garbage" → "—"`, Date object → DD/MM/YYYY
 
-| Step | Issue | Line | Fix |
-|------|-------|------|-----|
-| 1 | H1: Sparkline revenue | 103 | Subtract `(o.schemeSavings \|\| 0)` |
-| 2 | H2: Day KPI revenue | 129 | Subtract `(o.schemeSavings \|\| 0)` |
+**dealerScorecard**: Empty orders → high risk. Order 10 days ago + paid → low risk. Order 45 days ago + 50% paid → medium. Order 90 days ago → high.
 
-Both fixes are in `src/pages/Dashboard.tsx`. Two surgical one-line changes. No new files, no new dependencies, no database changes.
+**salespersonScorecard**: Scheme-adjusted revenue = `total - schemeSavings`. High health + high efficiency → "Consistent performer" insight. Low health + 90 days inactive → "Needs attention" insight.
+
+**sanitize**: `"<script>alert(1)</script>Hello" → "Hello"`, `"a\x00b" → "a b"`, `"  too   many   spaces  " → "too many spaces"`
+
+## No Database or UI Changes
+Zero impact on any existing code. Only adds test files and removes the placeholder.
 
