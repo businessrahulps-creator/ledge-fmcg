@@ -112,37 +112,64 @@ export type Database = {
       companies: {
         Row: {
           address: string
+          bank_account: string
+          bank_ifsc: string
+          bank_name: string
           created_at: string
+          email: string
           gstin: string
           id: string
+          invoice_prefix: string
           logo_url: string
           name: string
+          next_invoice_sequence: number
           next_order_sequence: number
           order_prefix: string
+          pan: string
+          phone: string
+          state_code: string
           trial_ends_at: string | null
           updated_at: string
         }
         Insert: {
           address?: string
+          bank_account?: string
+          bank_ifsc?: string
+          bank_name?: string
           created_at?: string
+          email?: string
           gstin?: string
           id?: string
+          invoice_prefix?: string
           logo_url?: string
           name: string
+          next_invoice_sequence?: number
           next_order_sequence?: number
           order_prefix?: string
+          pan?: string
+          phone?: string
+          state_code?: string
           trial_ends_at?: string | null
           updated_at?: string
         }
         Update: {
           address?: string
+          bank_account?: string
+          bank_ifsc?: string
+          bank_name?: string
           created_at?: string
+          email?: string
           gstin?: string
           id?: string
+          invoice_prefix?: string
           logo_url?: string
           name?: string
+          next_invoice_sequence?: number
           next_order_sequence?: number
           order_prefix?: string
+          pan?: string
+          phone?: string
+          state_code?: string
           trial_ends_at?: string | null
           updated_at?: string
         }
@@ -235,6 +262,164 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      invoice_lines: {
+        Row: {
+          created_at: string
+          hsn_code: string
+          id: string
+          invoice_id: string
+          product_name: string
+          quantity: number
+          taxable_value: number
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          hsn_code?: string
+          id?: string
+          invoice_id: string
+          product_name?: string
+          quantity?: number
+          taxable_value?: number
+          unit?: string
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          hsn_code?: string
+          id?: string
+          invoice_id?: string
+          product_name?: string
+          quantity?: number
+          taxable_value?: number
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_in_words: string
+          buyer_address: string
+          buyer_gstin: string
+          buyer_name: string
+          buyer_state_code: string
+          cgst_amount: number
+          company_id: string
+          created_at: string
+          doc_type: string
+          grand_total: number
+          gst_rate: number
+          id: string
+          igst_amount: number
+          invoice_date: string
+          invoice_number: string
+          notes: string
+          round_off: number
+          seller_address: string
+          seller_bank_account: string
+          seller_bank_ifsc: string
+          seller_bank_name: string
+          seller_email: string
+          seller_gstin: string
+          seller_logo_url: string
+          seller_name: string
+          seller_pan: string
+          seller_phone: string
+          seller_state_code: string
+          sgst_amount: number
+          source_order_id: string | null
+          status: string
+          subtotal: number
+          supply_type: string
+          total_tax: number
+          updated_at: string
+        }
+        Insert: {
+          amount_in_words?: string
+          buyer_address?: string
+          buyer_gstin?: string
+          buyer_name?: string
+          buyer_state_code?: string
+          cgst_amount?: number
+          company_id: string
+          created_at?: string
+          doc_type?: string
+          grand_total?: number
+          gst_rate?: number
+          id?: string
+          igst_amount?: number
+          invoice_date?: string
+          invoice_number: string
+          notes?: string
+          round_off?: number
+          seller_address?: string
+          seller_bank_account?: string
+          seller_bank_ifsc?: string
+          seller_bank_name?: string
+          seller_email?: string
+          seller_gstin?: string
+          seller_logo_url?: string
+          seller_name?: string
+          seller_pan?: string
+          seller_phone?: string
+          seller_state_code?: string
+          sgst_amount?: number
+          source_order_id?: string | null
+          status?: string
+          subtotal?: number
+          supply_type?: string
+          total_tax?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_in_words?: string
+          buyer_address?: string
+          buyer_gstin?: string
+          buyer_name?: string
+          buyer_state_code?: string
+          cgst_amount?: number
+          company_id?: string
+          created_at?: string
+          doc_type?: string
+          grand_total?: number
+          gst_rate?: number
+          id?: string
+          igst_amount?: number
+          invoice_date?: string
+          invoice_number?: string
+          notes?: string
+          round_off?: number
+          seller_address?: string
+          seller_bank_account?: string
+          seller_bank_ifsc?: string
+          seller_bank_name?: string
+          seller_email?: string
+          seller_gstin?: string
+          seller_logo_url?: string
+          seller_name?: string
+          seller_pan?: string
+          seller_phone?: string
+          seller_state_code?: string
+          sgst_amount?: number
+          source_order_id?: string | null
+          status?: string
+          subtotal?: number
+          supply_type?: string
+          total_tax?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -465,6 +650,7 @@ export type Database = {
           base_price: number
           company_id: string
           created_at: string
+          hsn_code: string
           id: string
           name: string
           sku: string
@@ -476,6 +662,7 @@ export type Database = {
           base_price?: number
           company_id: string
           created_at?: string
+          hsn_code?: string
           id?: string
           name: string
           sku: string
@@ -487,6 +674,7 @@ export type Database = {
           base_price?: number
           company_id?: string
           created_at?: string
+          hsn_code?: string
           id?: string
           name?: string
           sku?: string
@@ -905,6 +1093,13 @@ export type Database = {
     }
     Functions: {
       get_company_id: { Args: never; Returns: string }
+      get_next_invoice_number: {
+        Args: { target_company_id: string }
+        Returns: {
+          prefix: string
+          seq: number
+        }[]
+      }
       get_next_order_number: {
         Args: { target_company_id: string }
         Returns: {
