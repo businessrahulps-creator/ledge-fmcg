@@ -268,6 +268,11 @@ export default function SalespersonDetail() {
             </div>
           )}
         </div>
+
+        {/* Activity History */}
+        <div className="glass-card p-4 md:p-6">
+          <EntityHistory entityType="salesperson" entityId={id!} />
+        </div>
       </div>
     </AppLayout>
   );
