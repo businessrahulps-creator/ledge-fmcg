@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Stock from "./pages/Stock";
 import Schemes from "./pages/Schemes";
+import Targets from "./pages/Targets";
 import Performance from "./pages/Performance";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -81,6 +82,7 @@ const App = () => (
                   <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Stock /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Schemes /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Targets /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Performance /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
