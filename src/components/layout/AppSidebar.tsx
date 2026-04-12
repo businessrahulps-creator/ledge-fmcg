@@ -175,14 +175,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Accounting section */}
-        <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Accounting</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {accountingNav.map(renderNavItem)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+
+
 
         <SidebarGroup>
           {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Analyze</SidebarGroupLabel>}
