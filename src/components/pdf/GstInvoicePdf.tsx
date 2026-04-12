@@ -1,38 +1,9 @@
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
+import { pdfStyles as s } from "./PdfStyles";
+import { PdfHeader } from "./PdfHeader";
+import { PdfFooter } from "./PdfFooter";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
 import { numberToWords } from "@/utils/numberToWords";
-
-const styles = StyleSheet.create({
-  page: { padding: 30, fontSize: 9, fontFamily: "Helvetica", color: "#1a1a1a" },
-  header: { textAlign: "center", marginBottom: 12 },
-  title: { fontSize: 14, fontFamily: "Helvetica-Bold", marginBottom: 2 },
-  subtitle: { fontSize: 8, color: "#666", marginBottom: 8 },
-  docType: { fontSize: 11, fontFamily: "Helvetica-Bold", textAlign: "center", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  col: { width: "48%" },
-  label: { fontSize: 7, color: "#888", textTransform: "uppercase", marginBottom: 1 },
-  value: { fontSize: 9, marginBottom: 3 },
-  bold: { fontFamily: "Helvetica-Bold" },
-  divider: { borderBottomWidth: 0.5, borderBottomColor: "#ccc", marginVertical: 8 },
-  thickDivider: { borderBottomWidth: 1, borderBottomColor: "#333", marginVertical: 8 },
-  tableHeader: { flexDirection: "row", backgroundColor: "#f5f5f5", borderBottomWidth: 0.5, borderBottomColor: "#ccc", paddingVertical: 4, paddingHorizontal: 4 },
-  tableRow: { flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: "#eee", paddingVertical: 3, paddingHorizontal: 4 },
-  colSno: { width: "6%" },
-  colName: { width: "28%" },
-  colHsn: { width: "12%" },
-  colQty: { width: "8%", textAlign: "right" },
-  colUnit: { width: "8%" },
-  colRate: { width: "12%", textAlign: "right" },
-  colTax: { width: "14%", textAlign: "right" },
-  colAmt: { width: "12%", textAlign: "right" },
-  taxSection: { marginTop: 8, alignItems: "flex-end" },
-  taxRow: { flexDirection: "row", justifyContent: "flex-end", width: 220, marginBottom: 2 },
-  taxLabel: { width: 140, textAlign: "right", paddingRight: 8, fontSize: 8 },
-  taxValue: { width: 80, textAlign: "right", fontSize: 9 },
-  grandTotal: { flexDirection: "row", justifyContent: "flex-end", width: 220, marginTop: 4, paddingTop: 4, borderTopWidth: 1, borderTopColor: "#333" },
-  wordsSection: { marginTop: 10, padding: 6, backgroundColor: "#fafafa", borderRadius: 2 },
-  bankSection: { marginTop: 12 },
-  footer: { position: "absolute", bottom: 30, left: 30, right: 30, fontSize: 7, color: "#999", textAlign: "center" },
-});
 
 const docTypeLabels: Record<string, string> = {
   gst_invoice: "Tax Invoice",
@@ -88,150 +59,171 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{data.sellerName || "Company Name"}</Text>
-          {data.sellerAddress ? <Text style={styles.subtitle}>{data.sellerAddress}</Text> : null}
-          {data.sellerGstin ? <Text style={styles.subtitle}>GSTIN: {data.sellerGstin}</Text> : null}
-        </View>
-
-        <Text style={styles.docType}>{docTypeLabels[data.docType] || "Invoice"}</Text>
-
-        {/* Invoice meta */}
-        <View style={styles.row}>
-          <View style={styles.col}>
-            <Text style={styles.label}>Document No.</Text>
-            <Text style={[styles.value, styles.bold]}>{data.invoiceNumber}</Text>
-          </View>
-          <View style={[styles.col, { alignItems: "flex-end" }]}>
-            <Text style={styles.label}>Date</Text>
-            <Text style={styles.value}>{data.invoiceDate}</Text>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
+      <Page size="A4" style={s.page}>
+        <PdfHeader
+          title={docTypeLabels[data.docType] || "Invoice"}
+          subtitle={data.invoiceNumber}
+          companyName={data.sellerName || "Company Name"}
+          companyAddress={data.sellerAddress}
+          gstin={data.sellerGstin}
+        />
 
         {/* Seller / Buyer */}
-        <View style={styles.row}>
-          <View style={styles.col}>
-            <Text style={[styles.label, { marginBottom: 3 }]}>Bill From</Text>
-            <Text style={[styles.value, styles.bold]}>{data.sellerName}</Text>
-            {data.sellerAddress ? <Text style={styles.value}>{data.sellerAddress}</Text> : null}
-            {data.sellerGstin ? <Text style={styles.value}>GSTIN: {data.sellerGstin}</Text> : null}
-            {data.sellerPan ? <Text style={styles.value}>PAN: {data.sellerPan}</Text> : null}
-            {data.sellerStateCode ? <Text style={styles.value}>State Code: {data.sellerStateCode}</Text> : null}
-            {data.sellerPhone ? <Text style={styles.value}>Phone: {data.sellerPhone}</Text> : null}
-            {data.sellerEmail ? <Text style={styles.value}>Email: {data.sellerEmail}</Text> : null}
+        <View style={s.infoRow}>
+          <View style={s.billToBox}>
+            <Text style={s.infoLabel}>Bill From</Text>
+            <Text style={s.infoValueBold}>{data.sellerName}</Text>
+            {data.sellerAddress ? <Text style={s.infoValue}>{data.sellerAddress}</Text> : null}
+            {data.sellerGstin ? <Text style={s.infoValue}>GSTIN: {data.sellerGstin}</Text> : null}
+            {data.sellerPan ? <Text style={s.infoValue}>PAN: {data.sellerPan}</Text> : null}
+            {data.sellerStateCode ? <Text style={s.infoValue}>State Code: {data.sellerStateCode}</Text> : null}
+            {data.sellerPhone ? <Text style={s.infoValue}>Phone: {data.sellerPhone}</Text> : null}
+            {data.sellerEmail ? <Text style={s.infoValue}>Email: {data.sellerEmail}</Text> : null}
           </View>
-          <View style={styles.col}>
-            <Text style={[styles.label, { marginBottom: 3 }]}>Bill To</Text>
-            <Text style={[styles.value, styles.bold]}>{data.buyerName}</Text>
-            {data.buyerAddress ? <Text style={styles.value}>{data.buyerAddress}</Text> : null}
-            {data.buyerGstin ? <Text style={styles.value}>GSTIN: {data.buyerGstin}</Text> : null}
-            {data.buyerStateCode ? <Text style={styles.value}>State Code: {data.buyerStateCode}</Text> : null}
+          <View style={s.orderMetaBox}>
+            <Text style={s.infoLabel}>Bill To</Text>
+            <Text style={s.infoValueBold}>{data.buyerName}</Text>
+            {data.buyerAddress ? <Text style={s.infoValue}>{data.buyerAddress}</Text> : null}
+            {data.buyerGstin ? <Text style={s.infoValue}>GSTIN: {data.buyerGstin}</Text> : null}
+            {data.buyerStateCode ? <Text style={s.infoValue}>State Code: {data.buyerStateCode}</Text> : null}
+            <View style={{ marginTop: 6 }}>
+              <Text style={s.infoLabel}>Invoice Details</Text>
+              <View style={s.metaRow}>
+                <Text style={s.metaLabel}>Date</Text>
+                <Text style={s.metaValue}>{data.invoiceDate}</Text>
+              </View>
+              <View style={s.metaRow}>
+                <Text style={s.metaLabel}>Supply Type</Text>
+                <Text style={s.metaValue}>{isIntraState ? "Intra-State" : "Inter-State"}</Text>
+              </View>
+              {isGst && (
+                <View style={s.metaRow}>
+                  <Text style={s.metaLabel}>GST Rate</Text>
+                  <Text style={s.metaValue}>{data.gstRate}%</Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
-
-        <View style={styles.thickDivider} />
 
         {/* Line Items Table */}
-        <View style={styles.tableHeader}>
-          <Text style={[styles.colSno, styles.bold]}>#</Text>
-          <Text style={[styles.colName, styles.bold]}>Item</Text>
-          {isGst && <Text style={[styles.colHsn, styles.bold]}>HSN</Text>}
-          <Text style={[styles.colQty, styles.bold]}>Qty</Text>
-          <Text style={[styles.colUnit, styles.bold]}>Unit</Text>
-          <Text style={[styles.colRate, styles.bold]}>Rate</Text>
-          <Text style={[styles.colAmt, styles.bold]}>Amount</Text>
+        <Text style={s.sectionTitle}>Line Items</Text>
+        <View style={s.table}>
+          <View style={s.tableHeader}>
+            <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
+            <Text style={[s.tableHeaderCell, { width: isGst ? "30%" : "40%" }]}>Item</Text>
+            {isGst && <Text style={[s.tableHeaderCell, { width: "10%" }]}>HSN</Text>}
+            <Text style={[s.tableHeaderCell, { width: "8%", textAlign: "right" }]}>Qty</Text>
+            <Text style={[s.tableHeaderCell, { width: "8%" }]}>Unit</Text>
+            <Text style={[s.tableHeaderCell, { width: "14%", textAlign: "right" }]}>Rate</Text>
+            <Text style={[s.tableHeaderCell, { width: isGst ? "12%" : "15%", textAlign: "right" }]}>Taxable</Text>
+            <Text style={[s.tableHeaderCell, { width: "13%", textAlign: "right" }]}>Amount</Text>
+          </View>
+          {data.lines.map((line, i) => (
+            <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
+              <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
+              <Text style={[s.tableCellBold, { width: isGst ? "30%" : "40%" }]}>{line.productName}</Text>
+              {isGst && <Text style={[s.tableCell, { width: "10%" }]}>{line.hsnCode || "-"}</Text>}
+              <Text style={[s.tableCellRight, { width: "8%" }]}>{line.quantity}</Text>
+              <Text style={[s.tableCell, { width: "8%" }]}>{line.unit}</Text>
+              <Text style={[s.tableCellRight, { width: "14%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatCurrencyPdf(line.taxableValue)}</Text>
+              <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatCurrencyPdf(line.taxableValue)}</Text>
+            </View>
+          ))}
         </View>
-        {data.lines.map((line, i) => (
-          <View key={i} style={styles.tableRow}>
-            <Text style={styles.colSno}>{i + 1}</Text>
-            <Text style={styles.colName}>{line.productName}</Text>
-            {isGst && <Text style={styles.colHsn}>{line.hsnCode || "-"}</Text>}
-            <Text style={styles.colQty}>{line.quantity}</Text>
-            <Text style={styles.colUnit}>{line.unit}</Text>
-            <Text style={styles.colRate}>{line.unitPrice.toFixed(2)}</Text>
-            <Text style={styles.colAmt}>{line.taxableValue.toFixed(2)}</Text>
-          </View>
-        ))}
 
-        {/* Tax Summary */}
-        <View style={styles.taxSection}>
-          <View style={styles.taxRow}>
-            <Text style={styles.taxLabel}>Subtotal</Text>
-            <Text style={[styles.taxValue, styles.bold]}>{data.subtotal.toFixed(2)}</Text>
-          </View>
+        {/* Totals box — right-aligned */}
+        <View style={s.totalsContainer}>
+          <View style={s.totalsBox}>
+            <View style={s.totalsRow}>
+              <Text style={s.totalsLabel}>Subtotal</Text>
+              <Text style={s.totalsValue}>{formatCurrencyPdf(data.subtotal)}</Text>
+            </View>
 
-          {isGst && isIntraState && (
-            <>
-              <View style={styles.taxRow}>
-                <Text style={styles.taxLabel}>CGST @ {halfRate}%</Text>
-                <Text style={styles.taxValue}>{data.cgstAmount.toFixed(2)}</Text>
+            {isGst && isIntraState && (
+              <>
+                <View style={s.totalsRow}>
+                  <Text style={s.totalsLabel}>CGST @ {halfRate}%</Text>
+                  <Text style={s.totalsValue}>{formatCurrencyPdf(data.cgstAmount)}</Text>
+                </View>
+                <View style={s.totalsRow}>
+                  <Text style={s.totalsLabel}>SGST @ {halfRate}%</Text>
+                  <Text style={s.totalsValue}>{formatCurrencyPdf(data.sgstAmount)}</Text>
+                </View>
+              </>
+            )}
+
+            {isGst && !isIntraState && (
+              <View style={s.totalsRow}>
+                <Text style={s.totalsLabel}>IGST @ {data.gstRate}%</Text>
+                <Text style={s.totalsValue}>{formatCurrencyPdf(data.igstAmount)}</Text>
               </View>
-              <View style={styles.taxRow}>
-                <Text style={styles.taxLabel}>SGST @ {halfRate}%</Text>
-                <Text style={styles.taxValue}>{data.sgstAmount.toFixed(2)}</Text>
+            )}
+
+            {isGst && (
+              <View style={s.totalsRow}>
+                <Text style={s.totalsLabel}>Total Tax</Text>
+                <Text style={s.totalsValue}>{formatCurrencyPdf(data.totalTax)}</Text>
               </View>
-            </>
-          )}
+            )}
 
-          {isGst && !isIntraState && (
-            <View style={styles.taxRow}>
-              <Text style={styles.taxLabel}>IGST @ {data.gstRate}%</Text>
-              <Text style={styles.taxValue}>{data.igstAmount.toFixed(2)}</Text>
+            {data.roundOff !== 0 && (
+              <View style={s.totalsRow}>
+                <Text style={s.totalsLabel}>Round Off</Text>
+                <Text style={s.totalsValue}>{data.roundOff > 0 ? "+" : ""}{data.roundOff.toFixed(2)}</Text>
+              </View>
+            )}
+
+            <View style={s.totalsRowBorder}>
+              <Text style={s.totalsFinalLabel}>Grand Total</Text>
+              <Text style={s.totalsFinalValue}>{formatCurrencyPdf(data.grandTotal)}</Text>
             </View>
-          )}
-
-          {isGst && (
-            <View style={styles.taxRow}>
-              <Text style={styles.taxLabel}>Total Tax</Text>
-              <Text style={styles.taxValue}>{data.totalTax.toFixed(2)}</Text>
-            </View>
-          )}
-
-          {data.roundOff !== 0 && (
-            <View style={styles.taxRow}>
-              <Text style={styles.taxLabel}>Round Off</Text>
-              <Text style={styles.taxValue}>{data.roundOff > 0 ? "+" : ""}{data.roundOff.toFixed(2)}</Text>
-            </View>
-          )}
-
-          <View style={styles.grandTotal}>
-            <Text style={[styles.taxLabel, styles.bold, { fontSize: 10 }]}>Grand Total</Text>
-            <Text style={[styles.taxValue, styles.bold, { fontSize: 11 }]}>₹{data.grandTotal.toFixed(2)}</Text>
           </View>
         </View>
 
         {/* Amount in Words */}
-        <View style={styles.wordsSection}>
-          <Text style={styles.label}>Amount in Words</Text>
-          <Text style={[styles.value, styles.bold]}>{data.amountInWords}</Text>
+        <View style={{ marginTop: 12, padding: 8, backgroundColor: "#FAFAFA" }}>
+          <Text style={s.infoLabel}>Amount in Words</Text>
+          <Text style={s.infoValueBold}>{data.amountInWords}</Text>
         </View>
 
         {/* Bank Details */}
         {(data.sellerBankName || data.sellerBankAccount) && (
-          <View style={styles.bankSection}>
-            <Text style={[styles.label, { marginBottom: 3 }]}>Bank Details</Text>
-            {data.sellerBankName && <Text style={styles.value}>Bank: {data.sellerBankName}</Text>}
-            {data.sellerBankAccount && <Text style={styles.value}>A/C No: {data.sellerBankAccount}</Text>}
-            {data.sellerBankIfsc && <Text style={styles.value}>IFSC: {data.sellerBankIfsc}</Text>}
+          <View style={{ marginTop: 12 }}>
+            <Text style={s.sectionTitle}>Bank Details</Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              {data.sellerBankName && (
+                <View style={s.summaryCard}>
+                  <Text style={s.summaryLabel}>Bank</Text>
+                  <Text style={{ fontSize: 9 }}>{data.sellerBankName}</Text>
+                </View>
+              )}
+              {data.sellerBankAccount && (
+                <View style={s.summaryCard}>
+                  <Text style={s.summaryLabel}>Account No.</Text>
+                  <Text style={{ fontSize: 9 }}>{data.sellerBankAccount}</Text>
+                </View>
+              )}
+              {data.sellerBankIfsc && (
+                <View style={s.summaryCard}>
+                  <Text style={s.summaryLabel}>IFSC</Text>
+                  <Text style={{ fontSize: 9 }}>{data.sellerBankIfsc}</Text>
+                </View>
+              )}
+            </View>
           </View>
         )}
 
         {/* Notes */}
         {data.notes && (
           <View style={{ marginTop: 10 }}>
-            <Text style={styles.label}>Notes</Text>
-            <Text style={styles.value}>{data.notes}</Text>
+            <Text style={s.infoLabel}>Notes</Text>
+            <Text style={s.infoValue}>{data.notes}</Text>
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>This is a computer-generated document. No signature is required.</Text>
-        </View>
+        <PdfFooter />
       </Page>
     </Document>
   );

@@ -4,6 +4,7 @@ import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
 import { formatCurrencyPdf } from "@/utils/exportPdf";
 import { formatIndianDate } from "@/utils/formatDate";
+import { numberToWords } from "@/utils/numberToWords";
 import type { Order } from "@/data/mock-data";
 
 interface OrderInvoicePdfProps {
@@ -120,6 +121,14 @@ export function OrderInvoicePdf({
               <Text style={s.totalsFinalValue}>{formatCurrencyPdf(hasSavings ? effectiveTotal : order.total)}</Text>
             </View>
           </View>
+        </View>
+
+        {/* Amount in Words */}
+        <View style={{ marginTop: 12, padding: 8, backgroundColor: "#FAFAFA" }}>
+          <Text style={s.infoLabel}>Amount in Words</Text>
+          <Text style={s.infoValueBold}>
+            {numberToWords(hasSavings ? effectiveTotal : order.total)}
+          </Text>
         </View>
 
         {/* Dispatch info if available */}
