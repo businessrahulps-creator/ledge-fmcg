@@ -133,6 +133,7 @@ export default function Billing() {
       unit: "Pack",
       unitPrice: l.unitPrice,
     })));
+    setStep(2);
   }
 
   const handleEdit = (inv: Invoice) => {
