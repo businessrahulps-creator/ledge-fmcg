@@ -63,6 +63,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { companyId } = useAuth();
+  const { companyIncomplete } = useOnboarding();
   const [logoUrl, setLogoUrl] = useState<string>("");
 
   useEffect(() => {
