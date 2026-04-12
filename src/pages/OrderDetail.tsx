@@ -615,7 +615,7 @@ export default function OrderDetail() {
                       <td className="px-4 py-3 text-right font-mono">₹{doc.grandTotal.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          doc.status === "final" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
+                          doc.status === "final" ? "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                         }`}>{doc.status}</span>
                       </td>
                     </tr>

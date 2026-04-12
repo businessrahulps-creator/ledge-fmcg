@@ -52,13 +52,13 @@ export default function Orders() {
     const docs = invoices.filter(inv => inv.sourceOrderId === orderId);
     if (docs.length === 0) return null;
     const gstFinal = docs.find(d => d.docType === "gst_invoice" && d.status === "final");
-    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" };
+    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" };
     const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
-    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300" };
+    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" };
     const proforma = docs.find(d => d.docType === "proforma");
-    if (proforma) return { label: "Proforma", color: "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300" };
+    if (proforma) return { label: "Proforma", color: "bg-purple-50/80 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300" };
     const estimate = docs.find(d => d.docType === "estimate");
-    if (estimate) return { label: "Estimate", color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300" };
+    if (estimate) return { label: "Estimate", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" };
     return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
   }, [invoices]);
 
