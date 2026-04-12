@@ -172,7 +172,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // --- Load from IDB cache (offline fallback) ---
   const loadFromCache = useCallback(async (cId: string) => {
-    const [cOrders, cDist, cSp, cProd, cLoc, cStock, cPrefix, cSeq] = await Promise.all([
+    const [cOrders, cDist, cSp, cProd, cLoc, cStock, cPrefix, cSeq, cSchemes] = await Promise.all([
       getCachedData<Order[]>(cId, "orders"),
       getCachedData<Distributor[]>(cId, "distributors"),
       getCachedData<Salesperson[]>(cId, "salespersons"),
@@ -181,6 +181,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getCachedData<StockItem[]>(cId, "stockItems"),
       getCachedData<string>(cId, "orderPrefix"),
       getCachedData<number>(cId, "orderSequence"),
+      getCachedData<Scheme[]>(cId, "schemes"),
     ]);
     let loaded = false;
     if (cOrders) { setOrders(cOrders); loaded = true; }
@@ -189,6 +190,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (cProd) { setProducts(cProd); loaded = true; }
     if (cLoc) { setLocations(cLoc); loaded = true; }
     if (cStock) { setStockItems(cStock); loaded = true; }
+    if (cSchemes) { setSchemes(cSchemes); loaded = true; }
     if (cPrefix) setOrderPrefixState(cPrefix);
     if (cSeq) setOrderSequence(cSeq);
     if (loaded) setIsOfflineData(true);
