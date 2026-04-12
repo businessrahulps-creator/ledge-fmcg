@@ -88,6 +88,7 @@ export default function Orders() {
   const distributors = api.dealers.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
+  const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
   const [search, setSearch] = useState(dealerParam);
   const [paymentFilter, setPaymentFilter] = useState("all");
