@@ -113,6 +113,7 @@ export type Database = {
         Row: {
           address: string
           bank_account: string
+          bank_account_name: string
           bank_ifsc: string
           bank_name: string
           created_at: string
@@ -134,6 +135,7 @@ export type Database = {
         Insert: {
           address?: string
           bank_account?: string
+          bank_account_name?: string
           bank_ifsc?: string
           bank_name?: string
           created_at?: string
@@ -155,6 +157,7 @@ export type Database = {
         Update: {
           address?: string
           bank_account?: string
+          bank_account_name?: string
           bank_ifsc?: string
           bank_name?: string
           created_at?: string
@@ -177,40 +180,67 @@ export type Database = {
       }
       distributors: {
         Row: {
+          address: string
+          bank_account: string
+          bank_account_name: string
+          bank_ifsc: string
+          bank_name: string
           company_id: string
           contact: string
           created_at: string
           credit_limit: number
+          email: string
+          gstin: string
           id: string
           location: string
           name: string
           outstanding_amount: number
+          pan: string
+          state_code: string
           total_orders: number
           total_value: number
           updated_at: string
         }
         Insert: {
+          address?: string
+          bank_account?: string
+          bank_account_name?: string
+          bank_ifsc?: string
+          bank_name?: string
           company_id: string
           contact?: string
           created_at?: string
           credit_limit?: number
+          email?: string
+          gstin?: string
           id?: string
           location?: string
           name: string
           outstanding_amount?: number
+          pan?: string
+          state_code?: string
           total_orders?: number
           total_value?: number
           updated_at?: string
         }
         Update: {
+          address?: string
+          bank_account?: string
+          bank_account_name?: string
+          bank_ifsc?: string
+          bank_name?: string
           company_id?: string
           contact?: string
           created_at?: string
           credit_limit?: number
+          email?: string
+          gstin?: string
           id?: string
           location?: string
           name?: string
           outstanding_amount?: number
+          pan?: string
+          state_code?: string
           total_orders?: number
           total_value?: number
           updated_at?: string
