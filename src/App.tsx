@@ -31,6 +31,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
 import ResetPassword from "./pages/ResetPassword";
+import Claims from "./pages/Claims";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => (
                   <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Schemes /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Targets /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Claims /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Performance /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
