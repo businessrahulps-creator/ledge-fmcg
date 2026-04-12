@@ -35,6 +35,17 @@ export interface SecondarySale {
   remarks: string;
 }
 
+export interface Target {
+  id: string;
+  entityType: "salesperson" | "dealer";
+  entityId: string;
+  entityName: string;
+  periodType: "monthly" | "quarterly";
+  periodStart: string;
+  targetRevenue: number;
+  targetOrders: number;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
