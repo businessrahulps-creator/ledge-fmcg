@@ -220,9 +220,9 @@ export default function Distributors() {
           ))}
         </div>
 
-        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-
-        {filtered.length === 0 && (
+        {filtered.length > 0 ? (
+          <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Search className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
             <p className="mt-3 text-sm font-medium">No dealers found</p>

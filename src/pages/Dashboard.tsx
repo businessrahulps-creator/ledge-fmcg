@@ -203,7 +203,7 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
         </div>
 
         {/* Recent Orders */}
-        <section className="pb-20">
+        <section className="pb-24 md:pb-8">
            <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
             <Link to="/orders" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>

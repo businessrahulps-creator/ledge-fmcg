@@ -43,9 +43,9 @@ const docTypeLabels: Record<DocType, string> = {
 
 const docTypeBadgeColors: Record<DocType, string> = {
   gst_invoice: "bg-primary/10 text-primary",
-  estimate: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300",
-  proforma: "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300",
-  credit_note: "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300",
+  estimate: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
+  proforma: "bg-purple-50/80 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
+  credit_note: "bg-red-50/80 text-red-700 dark:bg-red-500/20 dark:text-red-300",
 };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
