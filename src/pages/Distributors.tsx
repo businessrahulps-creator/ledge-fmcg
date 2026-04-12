@@ -57,6 +57,11 @@ export default function Distributors() {
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [ssOpen, setSsOpen] = useState(false);
+  const [ssExpanded, setSsExpanded] = useState(false);
+  const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+  const allProducts = api.products.list();
+  const allSecondarySales = api.secondarySales.list();
 
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
