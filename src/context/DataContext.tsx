@@ -271,7 +271,7 @@ function persistAllToCache(
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const { companyId, authReady } = useAuth();
+  const { companyId, authReady, user, profile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [rawDistributors, setDistributors] = useState<Distributor[]>([]);
   const [rawSalespersons, setSalespersons] = useState<Salesperson[]>([]);
