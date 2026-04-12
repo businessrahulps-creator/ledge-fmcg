@@ -1140,6 +1140,46 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSecondarySales(prev => prev.filter(s => s.id !== id));
   }, []);
 
+  // Targets CRUD
+  const addTarget = useCallback(async (target: Target) => {
+    if (!companyId) return;
+    const { data, error } = await supabase.from("targets").insert({
+      company_id: companyId,
+      entity_type: target.entityType,
+      entity_id: target.entityId,
+      entity_name: sanitizeInput(target.entityName),
+      period_type: target.periodType,
+      period_start: target.periodStart,
+      target_revenue: target.targetRevenue,
+      target_orders: target.targetOrders,
+    } as any).select().single();
+    if (error) { toast.error("Failed to save target", { description: error.message }); return; }
+    if (data) {
+      const mapped: Target = {
+        id: (data as any).id, entityType: target.entityType, entityId: target.entityId,
+        entityName: target.entityName, periodType: target.periodType, periodStart: target.periodStart,
+        targetRevenue: target.targetRevenue, targetOrders: target.targetOrders,
+      };
+      setTargets(prev => [mapped, ...prev]);
+    }
+  }, [companyId]);
+
+  const updateTarget = useCallback(async (target: Target) => {
+    const { error } = await supabase.from("targets").update({
+      target_revenue: target.targetRevenue,
+      target_orders: target.targetOrders,
+      entity_name: sanitizeInput(target.entityName),
+    } as any).eq("id", target.id);
+    if (error) { toast.error("Failed to update target", { description: error.message }); return; }
+    setTargets(prev => prev.map(t => t.id === target.id ? target : t));
+  }, []);
+
+  const deleteTarget = useCallback(async (id: string) => {
+    const { error } = await supabase.from("targets").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete target", { description: error.message }); return; }
+    setTargets(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1161,6 +1201,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         secondarySales, addSecondarySale, deleteSecondarySale,
+        targets, addTarget, updateTarget, deleteTarget,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
