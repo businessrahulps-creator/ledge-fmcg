@@ -1,42 +1,32 @@
 
 
-# Rethink Billing "New Document" Order Picker
+# Fix: "1 open" badge clipping on mobile Claims header
 
-## The Problem
+## Problem
 
-The current order picker in Billing uses a `Popover` + `Command` combobox. Issues:
-1. **Not scrollable on mobile** — the popover clips or overflows
-2. **Doesn't scale** — with 5,000 orders, the entire list renders inside a small dropdown
-3. **Inconsistent** — Claims uses a much better two-step Dialog pattern that users already like
+On a 390px viewport, the header row crams three elements side-by-side: the long title "Returns & Claims", the "1 open" badge, and the "+ New Claim" button. The badge gets visually broken/clipped.
 
-## Solution
+## Fix
 
-Replace the inline Popover-based order picker with a **two-step Dialog pattern matching Claims**:
+Move the badge below the title on mobile, placing it next to the subtitle text, so the header row only has the title vs the button competing for width. The badge naturally fits under the title.
 
-- **Step 1**: Full-screen-friendly dialog with search input + scrollable order list (cards, not combobox items). Orders grouped as "Needs Invoice" first, then "Has Documents". Each card shows order number, dealer, date, amount, and existing document badges.
-- **Step 2**: The rest of the form (doc type, buyer details, lines, GST config) — exactly as it exists today.
+**Specifically** (lines 427-442 of `src/pages/Claims.tsx`):
 
-This gives us:
-- Proper `max-h-[45vh] overflow-y-auto` scrollable list (same as Claims)
-- Search filtering that works at any scale
-- Touch-friendly card-based selection on mobile
-- A "Back" button to change order selection (same as Claims step navigation)
+- Keep the `h1` title alone in its row (remove the badge from the `flex items-center gap-3` wrapper around the title)
+- Place the badge inline after the subtitle `<p>` tag, or on a new line between title and subtitle using `flex-wrap`
 
-## Files Changed
+Simplest approach: make the title+badge wrapper `flex-wrap` so the badge wraps to a new line on narrow screens:
 
-| File | Change |
-|------|--------|
-| `src/pages/Billing.tsx` | Replace Popover/Command order picker with two-step Dialog flow (~80 lines changed) |
+```tsx
+<div className="flex flex-wrap items-center gap-2">
+  <h1 className="text-xl font-bold tracking-tight md:text-2xl">Returns & Claims</h1>
+  {openCount > 0 && (
+    <Badge ...>{openCount} open</Badge>
+  )}
+</div>
+```
 
-**1 file modified. No new files. No new dependencies. No database changes.**
+This single CSS change (`gap-3` → `gap-2`, add `flex-wrap`) fixes the layout without touching any logic.
 
-## Key Implementation Details
-
-- Remove `Popover`, `PopoverContent`, `PopoverTrigger`, `Command*`, `ChevronsUpDown`, `Check` imports (no longer needed)
-- Remove `orderPickerOpen` state
-- Add `step` state (1 = pick order, 2 = fill form) — mirrors Claims pattern
-- Step 1: search input + `max-h-[45vh] overflow-y-auto` scrollable list of order cards grouped by "Needs Invoice" / "Has Documents"
-- Step 2: existing form content (doc type, buyer, lines, GST) + "Back" button in footer
-- When `showCreate` opens without a pre-selected order (e.g. from URL param), start at step 1; with pre-selected order, start at step 2
-- Mobile: dialog already has `max-w-[calc(100vw-2rem)]` which is correct
+**1 line changed in 1 file. No new files. No database changes.**
 
