@@ -21,6 +21,9 @@ export function OrderInvoicePdf({
   gstin,
   logoUrl,
 }: OrderInvoicePdfProps) {
+  const hasSavings = order.schemeSavings > 0;
+  const effectiveTotal = Math.max(0, order.total - order.schemeSavings);
+
   return (
     <Document>
       <Page size="A4" style={s.page}>
@@ -32,25 +35,34 @@ export function OrderInvoicePdf({
           logoUrl={logoUrl}
         />
 
-        {/* Order details */}
-        <View style={{ flexDirection: "row", marginBottom: 16, gap: 12 }}>
-          <View style={s.summaryCard}>
-            <Text style={s.summaryLabel}>Order Date</Text>
-            <Text style={s.summaryValue}>{formatIndianDate(order.date)}</Text>
+        {/* Two-column info block: Bill To + Order Details */}
+        <View style={s.infoRow}>
+          <View style={s.billToBox}>
+            <Text style={s.infoLabel}>Bill To</Text>
+            <Text style={s.infoValueBold}>{order.distributorName}</Text>
           </View>
-          <View style={s.summaryCard}>
-            <Text style={s.summaryLabel}>Dealer</Text>
-            <Text style={s.summaryValue}>{order.distributorName}</Text>
-          </View>
-          <View style={s.summaryCard}>
-            <Text style={s.summaryLabel}>Sales Person</Text>
-            <Text style={s.summaryValue}>{order.salesperson}</Text>
-          </View>
-          <View style={s.summaryCard}>
-            <Text style={s.summaryLabel}>Payment</Text>
-            <Text style={s.summaryValue}>
-              {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} · {order.paymentMode.replace("_", " ")}
-            </Text>
+          <View style={s.orderMetaBox}>
+            <Text style={s.infoLabel}>Order Details</Text>
+            <View style={s.metaRow}>
+              <Text style={s.metaLabel}>Date</Text>
+              <Text style={s.metaValue}>{formatIndianDate(order.date)}</Text>
+            </View>
+            <View style={s.metaRow}>
+              <Text style={s.metaLabel}>Salesperson</Text>
+              <Text style={s.metaValue}>{order.salesperson}</Text>
+            </View>
+            <View style={s.metaRow}>
+              <Text style={s.metaLabel}>Payment</Text>
+              <Text style={s.metaValue}>
+                {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} · {order.paymentMode.replace("_", " ")}
+              </Text>
+            </View>
+            <View style={s.metaRow}>
+              <Text style={s.metaLabel}>Delivery</Text>
+              <Text style={s.metaValue}>
+                {order.deliveryStatus.charAt(0).toUpperCase() + order.deliveryStatus.slice(1)}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -75,25 +87,38 @@ export function OrderInvoicePdf({
           ))}
         </View>
 
-        {/* Total */}
-        <View style={{ alignItems: "flex-end", marginTop: 8, backgroundColor: "#F9F9F9", padding: 12, border: "0.5pt solid #D4D4D4" }}>
-          <View style={{ flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-            <View style={{ flexDirection: "row", gap: 20 }}>
-              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>Grand Total</Text>
-              <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold" }}>{formatCurrencyPdf(order.total)}</Text>
+        {/* Totals box — right-aligned */}
+        <View style={s.totalsContainer}>
+          <View style={s.totalsBox}>
+            {/* Subtotal */}
+            <View style={s.totalsRow}>
+              <Text style={s.totalsLabel}>Subtotal</Text>
+              <Text style={s.totalsValue}>{formatCurrencyPdf(order.total)}</Text>
             </View>
-            {(order.schemeSavings > 0) && (
-              <View style={{ flexDirection: "row", gap: 20 }}>
-                <Text style={{ fontSize: 9, color: "#059669" }}>Scheme Savings</Text>
-                <Text style={{ fontSize: 9, color: "#059669" }}>-{formatCurrencyPdf(order.schemeSavings)}</Text>
-              </View>
+
+            {/* Schemes Applied */}
+            {hasSavings && order.appliedSchemes && order.appliedSchemes.length > 0 && (
+              <>
+                <View style={s.schemeDivider} />
+                <Text style={s.schemeHeader}>Schemes Applied</Text>
+                {order.appliedSchemes.map((scheme, i) => (
+                  <View key={i} style={s.schemeRow}>
+                    <Text style={s.schemeName}>{scheme.schemeName}</Text>
+                    <Text style={s.schemeSavings}>-{formatCurrencyPdf(scheme.savings)}</Text>
+                  </View>
+                ))}
+                <View style={s.totalsRow}>
+                  <Text style={[s.totalsLabel, { color: "#059669" }]}>Total Savings</Text>
+                  <Text style={[s.totalsValue, { color: "#059669" }]}>-{formatCurrencyPdf(order.schemeSavings)}</Text>
+                </View>
+              </>
             )}
-            {(order.schemeSavings > 0) && (
-              <View style={{ flexDirection: "row", gap: 20 }}>
-                <Text style={{ fontSize: 10, fontFamily: "Helvetica-Bold", color: "#059669" }}>Effective Total</Text>
-                <Text style={{ fontSize: 10, fontFamily: "Helvetica-Bold", color: "#059669" }}>{formatCurrencyPdf(Math.max(0, order.total - order.schemeSavings))}</Text>
-              </View>
-            )}
+
+            {/* Grand / Effective Total */}
+            <View style={s.totalsRowBorder}>
+              <Text style={s.totalsFinalLabel}>{hasSavings ? "Effective Total" : "Grand Total"}</Text>
+              <Text style={s.totalsFinalValue}>{formatCurrencyPdf(hasSavings ? effectiveTotal : order.total)}</Text>
+            </View>
           </View>
         </View>
 
