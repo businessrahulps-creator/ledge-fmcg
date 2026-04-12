@@ -134,7 +134,7 @@ export default function Help() {
                   <li><strong>Warehouses tab</strong> — Under <em>Stock → Warehouses</em>, create your warehouse/godown locations. Add an address and mark them active or inactive.</li>
                   <li><strong>Assigning stock</strong> — Once you have products and warehouses, assign quantities of each product to specific warehouses. This gives you a per-location inventory view.</li>
                   <li><strong>Low-stock thresholds</strong> — Set a threshold quantity for each product in a warehouse. When stock falls below the threshold, it's flagged visually so you know to reorder.</li>
-                  <li><strong>Stock health badges</strong> — Stock items show colour-coded badges: <span className="text-green-500 font-medium">Healthy</span> (above threshold), <span className="text-yellow-500 font-medium">Low</span> (near threshold), and <span className="text-red-500 font-medium">Critical</span> (at or below zero). Use these to make quick restock decisions.</li>
+                  <li><strong>Stock health badges</strong> — Stock items show colour-coded badges: <strong>Healthy</strong> (above threshold), <strong>Low</strong> (near threshold), and <strong>Critical</strong> (at or below zero). Use these to make quick restock decisions.</li>
                 </ul>
                 <Tip>Start by adding your top 10–20 products with correct HSN codes and prices. You can always add more later.</Tip>
               </AccordionContent>
