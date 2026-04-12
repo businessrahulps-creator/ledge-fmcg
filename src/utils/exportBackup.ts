@@ -132,6 +132,7 @@ export async function exportFullBackup() {
 
   // --- Claims ---
   const { data: claims } = await supabase.from("claims").select("*, claim_lines(*)").order("created_at", { ascending: false });
+  checkTruncation("claims", claims);
   if (claims?.length) {
     const h = ["Order #", "Dealer", "Type", "Status", "Claim Value (₹)", "Reason", "Created"];
     const r = claims.map((c) => [s(c.order_number), s(c.distributor_name), s(c.claim_type), s(c.status), n(c.total_claim_value), s(c.reason), s(c.created_at).slice(0, 10)]);
@@ -141,6 +142,7 @@ export async function exportFullBackup() {
 
   // --- Targets ---
   const { data: targets } = await supabase.from("targets").select("*").order("period_start", { ascending: false });
+  checkTruncation("targets", targets);
   if (targets?.length) {
     const h = ["Entity", "Type", "Period", "Period Start", "Target Orders", "Target Revenue (₹)"];
     const r = targets.map((t) => [s(t.entity_name), s(t.entity_type), s(t.period_type), s(t.period_start), n(t.target_orders), n(t.target_revenue)]);
