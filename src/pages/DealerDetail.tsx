@@ -450,6 +450,21 @@ export default function DealerDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteSecondarySaleId} onOpenChange={() => setDeleteSecondarySaleId(null)}>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Secondary Sale</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove this secondary sale record? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="destructive" onClick={() => { if (deleteSecondarySaleId) { api.secondarySales.remove(deleteSecondarySaleId); setDeleteSecondarySaleId(null); toast.success("Secondary sale removed"); } }}>Remove</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
