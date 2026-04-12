@@ -34,6 +34,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Claims from "./pages/Claims";
 import Billing from "./pages/Billing";
 import Company from "./pages/Company";
+import OrderDetail from "./pages/OrderDetail";
+import DealerDetail from "./pages/DealerDetail";
+import SalespersonDetail from "./pages/SalespersonDetail";
 
 const queryClient = new QueryClient();
 
@@ -81,8 +84,11 @@ const App = () => (
                   <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Dashboard /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Orders /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><NewOrder /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><OrderDetail /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DealerDetail /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><Distributors /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Stock /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><SalespersonDetail /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Schemes /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Targets /></PageErrorBoundary></ProtectedRoute>} />
