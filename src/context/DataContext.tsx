@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import type { Order, Distributor, Salesperson, Product, OrderLine } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {
-  cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue, clearQueue,
+  cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue,
+  replaySingleMutation, updateMutationInQueue,
   type CacheableEntity,
 } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
@@ -146,7 +147,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
-  const deductStockRef = useRef<((orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>) | null>(null);
 
   // Clear data when no company
   useEffect(() => {
@@ -199,7 +199,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      // Override Supabase default 1,000-row limit with .range(0, 9999) on all list queries
       const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -247,7 +246,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       if (orderIds.length > 0) {
-        // Override default 1,000-row limit for order lines
         const { data: linesData } = await supabase
           .from("order_lines").select("*").in("order_id", orderIds).range(0, 9999);
         allLines = linesData || [];
@@ -258,7 +256,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setOrders(mappedOrders);
       setIsOfflineData(false);
 
-      // Persist to IDB cache
       persistAllToCache(cId, {
         orders: mappedOrders, distributors: dists, salespersons: sps,
         products: prods, locations: gds, stockItems: sis,
@@ -267,7 +264,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       console.error("Data fetch error:", err);
-      // If offline, load from cache
       if (!navigator.onLine) {
         await loadFromCache(cId);
       }
@@ -284,129 +280,82 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // --- Sync queue on reconnect ---
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId || !authReady) return;
 
     const syncQueue = async () => {
       if (isSyncingRef.current || !navigator.onLine) return;
       isSyncingRef.current = true;
       try {
-        const queue = await getQueue();
-        if (queue.length === 0) {
-          isSyncingRef.current = false;
+        // Verify auth session is valid before replaying
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn("No active session — skipping queue sync");
           return;
         }
 
-        let synced = 0;
+        const queue = await getQueue();
+        if (queue.length === 0) return;
+
         const MAX_RETRIES = 3;
+        let synced = 0;
 
         for (const mutation of queue) {
+          // Skip mutations that have already exceeded max retries
+          if ((mutation.attempts || 0) >= MAX_RETRIES) continue;
+
           let succeeded = false;
           for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            try {
-              if (mutation.type === "insert_order_atomic") {
-                // Replay order creation via the same RPC used online
-                const p = mutation.payload;
-                const { data: rpcData, error: rpcError } = await supabase.rpc("insert_order_atomic", {
-                  p_company_id: p.companyId,
-                  p_date: p.date,
-                  p_distributor_id: p.distributorId,
-                  p_distributor_name: sanitizeInput(p.distributorName),
-                  p_salesperson_id: p.salespersonId,
-                  p_salesperson_name: sanitizeInput(p.salesperson),
-                  p_total: p.total,
-                  p_payment_mode: p.paymentMode,
-                  p_payment_status: p.paymentStatus,
-                  p_dispatch_date: p.dispatchDate || null,
-                  p_vehicle: sanitizeInput(p.vehicle || ""),
-                  p_driver_name: sanitizeInput(p.driverName || ""),
-                  p_delivery_status: p.deliveryStatus,
-                  p_dispatch_remarks: sanitizeInput(p.dispatchRemarks || ""),
-                  p_godown_id: p.godownId || null,
-                });
-                if (rpcError) throw rpcError;
-
-                const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
-                if (!inserted) throw new Error("Atomic insert returned no data");
-
-                // Insert order lines
-                if (p.lines && p.lines.length > 0) {
-                  const { error: linesError } = await supabase.from("order_lines").insert(
-                    p.lines.map((l: any) => ({
-                      order_id: inserted.id,
-                      product_id: l.productId,
-                      product_name: sanitizeInput(l.productName),
-                      quantity: l.quantity,
-                      unit_price: l.unitPrice,
-                      line_total: l.lineTotal,
-                    }))
-                  );
-                  if (linesError) throw linesError;
-                }
-
-                // Stock deduction if dispatched/delivered
-                if (p.godownId && (p.deliveryStatus === "dispatched" || p.deliveryStatus === "delivered")) {
-                  if (deductStockRef.current) await deductStockRef.current(inserted.id, p.lines, p.godownId, p.companyId);
-                }
-              } else if (mutation.type === "insert") {
-                const { error } = await supabase.from(mutation.table as any).insert(mutation.payload);
-                if (error) throw error;
-              } else if (mutation.type === "update") {
-                const { id: rowId, ...rest } = mutation.payload;
-                const { error } = await supabase.from(mutation.table as any).update(rest).eq("id", rowId);
-                if (error) throw error;
-              } else if (mutation.type === "delete") {
-                const { error } = await supabase.from(mutation.table as any).delete().eq("id", mutation.payload.id);
-                if (error) throw error;
-              }
+            const result = await replaySingleMutation(mutation);
+            if (result.ok) {
               succeeded = true;
-              break; // success, stop retrying
-            } catch (err) {
-              console.error(`Sync mutation failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation, err);
-              if (attempt < MAX_RETRIES) {
-                await new Promise(r => setTimeout(r, 1000 * attempt)); // backoff
-              }
+              synced++;
+              break;
+            }
+            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, "error" in result ? result.error : "unknown");
+            if (attempt < MAX_RETRIES) {
+              await new Promise(r => setTimeout(r, 1000 * attempt));
             }
           }
-          if (succeeded) {
-            await removeFromQueue(mutation.id);
-            synced++;
+
+          if (!succeeded) {
+            // Mark as max-retried so we don't loop endlessly
+            await updateMutationInQueue(mutation.id, { attempts: MAX_RETRIES });
           }
         }
 
         if (synced > 0) {
-          toast.success("Back online — all changes synced", {
+          toast.success("Back online — changes synced", {
             description: `${synced} change${synced > 1 ? "s" : ""} synced successfully`,
             duration: 3000,
           });
         }
 
         const remaining = await getQueue();
-        if (remaining.length > 0) {
-          toast.warning(`${remaining.length} change(s) failed to sync`, {
-            description: "Will retry on next reconnection",
+        const stuck = remaining.filter(m => (m.attempts || 0) >= MAX_RETRIES);
+        if (stuck.length > 0) {
+          toast.warning(`${stuck.length} change(s) failed to sync`, {
+            description: "Check Settings for manual retry",
           });
         }
 
-        // Refresh all data from server
-        const token = ++fetchTokenRef.current;
-        await fetchAll(companyId, token);
-        await safeRefetchOrders();
-        await safeRefetchStockItems();
+        // Full refresh from server after sync
+        if (synced > 0) {
+          const token = ++fetchTokenRef.current;
+          await fetchAll(companyId, token);
+        }
       } finally {
         isSyncingRef.current = false;
       }
     };
 
     const handleOnline = () => { syncQueue(); };
-
     window.addEventListener("online", handleOnline);
-    // Also sync immediately if we're online and there's a queue
+    // Also sync immediately on mount if online
     syncQueue();
     return () => { window.removeEventListener("online", handleOnline); };
-  }, [companyId, fetchAll]);
+  }, [companyId, authReady, fetchAll]);
 
-  // Realtime subscriptions — only after auth ready + companyId
-  // Pause when offline, resume when online
+  // Realtime subscriptions
   useEffect(() => {
     if (!companyId || !authReady) return;
 
@@ -463,11 +412,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [companyId, authReady]);
 
-  // Safe refetch helpers wrapped in try/catch
+  // Safe refetch helpers
   const safeRefetchOrders = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
       const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
       if (!ordersData) return;
       const orderIds = ordersData.map(o => o.id);
@@ -479,13 +427,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const mapped = mapOrders(ordersData, allLines);
       setOrders(mapped);
       if (companyId) cacheData(companyId, "orders", mapped);
-    } catch { /* ignore — never affect auth */ }
+    } catch { /* ignore */ }
   }, [companyId]);
 
   const safeRefetchDistributors = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
       const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0) }));
@@ -498,7 +445,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchSalespersons = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
       const { data } = await supabase.from("salespersons").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(s => ({ id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0) }));
@@ -511,7 +457,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchProducts = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
       const { data } = await supabase.from("products").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: (p as any).total_sold ?? 0 }));
@@ -524,7 +469,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchGodowns = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Override default 1,000-row limit
       const { data } = await supabase.from("godowns").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
         const mapped = data.map(g => ({ id: g.id, name: g.name, address: g.address, isActive: g.is_active }));
@@ -537,7 +481,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const safeRefetchStockItems = useCallback(async () => {
     if (!companyId) return;
     try {
-      // Fetch stock_items, products, and godowns in parallel to avoid stale closure state
       const [siRes, prodRes, gdRes] = await Promise.all([
         supabase.from("stock_items").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("products").select("*").eq("company_id", companyId).order("name").range(0, 9999),
@@ -571,7 +514,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const today = new Date().toISOString().split("T")[0];
     let hasNegative = false;
 
-    // Fetch fresh stock items to avoid stale closure
     const { data: freshStockData } = await supabase
       .from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId);
     const freshStock = freshStockData || [];
@@ -596,7 +538,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
           quantity: newQty,
           last_deducted_date: today,
         }).eq("id", existing.id);
-        // Update fresh stock in-loop for subsequent lines
         existing.quantity = newQty;
       } else {
         hasNegative = true;
@@ -611,7 +552,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Refresh local state from DB
     await safeRefetchStockItems();
 
     if (hasNegative) {
@@ -620,24 +560,37 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [safeRefetchStockItems]);
-  deductStockRef.current = deductStockForOrder;
+
+  // --- Helper: persist single entity to IDB cache after offline mutation ---
+  const persistEntityToCache = useCallback((entity: CacheableEntity, data: any) => {
+    if (companyId) cacheData(companyId, entity, data);
+  }, [companyId]);
 
   // --- Offline-aware CRUD operations ---
 
   const addOrder = useCallback(async (order: Order): Promise<AddOrderResult> => {
     if (!companyId) return { success: false, error: "No company" };
 
-    // Offline: optimistic local + queue
+    // Offline: optimistic local + queue + persist to IDB
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
       const year = new Date().getFullYear();
       const offlineNumber = `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
       const newOrder: Order = { ...order, id: tempId, orderNumber: offlineNumber };
-      setOrders(prev => [newOrder, ...prev]);
-      setOrderSequence(prev => prev + 1);
+      setOrders(prev => {
+        const updated = [newOrder, ...prev];
+        persistEntityToCache("orders", updated);
+        return updated;
+      });
+      setOrderSequence(prev => {
+        const next = prev + 1;
+        persistEntityToCache("orderSequence", next);
+        return next;
+      });
       await enqueueMutation({
         type: "insert_order_atomic",
         table: "orders",
+        clientTempId: tempId,
         payload: {
           companyId,
           date: order.date,
@@ -662,7 +615,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Atomic RPC: increments sequence + inserts order in one transaction
       const { data: rpcData, error: rpcError } = await supabase.rpc("insert_order_atomic", {
         p_company_id: companyId,
         p_date: order.date,
@@ -716,7 +668,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to create order", { description: msg });
       return { success: false, error: msg };
     }
-  }, [companyId, deductStockForOrder, orderPrefix, orderSequence]);
+  }, [companyId, deductStockForOrder, orderPrefix, orderSequence, persistEntityToCache]);
 
   const ordersRef = useRef(orders);
   ordersRef.current = orders;
@@ -736,9 +688,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = sanitizeInput(updates.dispatchRemarks);
     if (updates.godownId !== undefined) dbUpdates.godown_id = updates.godownId || null;
 
-    // Offline: optimistic + queue
+    // Offline: optimistic + queue + persist
     if (!navigator.onLine) {
-      setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+      setOrders(prev => {
+        const updated = prev.map(o => o.id === id ? { ...o, ...updates } : o);
+        persistEntityToCache("orders", updated);
+        return updated;
+      });
       if (Object.keys(dbUpdates).length > 0) {
         await enqueueMutation({ type: "update", table: "orders", payload: { id, ...dbUpdates } });
       }
@@ -761,10 +717,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-  }, [companyId, deductStockForOrder]);
+  }, [companyId, deductStockForOrder, persistEntityToCache]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
-    // Offline: not supported — too complex (stock restore, cascading deletes)
     if (!navigator.onLine) {
       toast.error("Cannot delete orders while offline", {
         description: "Please reconnect to delete orders.",
@@ -783,7 +738,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         throw new Error("Order could not be deleted — you may not have permission.");
       }
       setOrders(prev => prev.filter(o => o.id !== id));
-      // Refresh stock state since stock_deductions trigger restores stock
       await safeRefetchStockItems();
       return true;
     } catch (err: any) {
@@ -796,6 +750,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   function makeOfflineCrud<T extends { id: string }>(
     table: string,
     setter: React.Dispatch<React.SetStateAction<T[]>>,
+    cacheEntity: CacheableEntity,
     toDbInsert: (item: T) => Record<string, any>,
     toDbUpdate: (item: T) => Record<string, any>,
   ) {
@@ -803,8 +758,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!companyId) return;
       if (!navigator.onLine) {
         const tempId = crypto.randomUUID();
-        setter(prev => [...prev, { ...item, id: tempId }]);
-        await enqueueMutation({ type: "insert", table, payload: { ...toDbInsert(item), company_id: companyId } });
+        setter(prev => {
+          const updated = [...prev, { ...item, id: tempId }];
+          persistEntityToCache(cacheEntity, updated);
+          return updated;
+        });
+        await enqueueMutation({ type: "insert", table, clientTempId: tempId, payload: { ...toDbInsert(item), company_id: companyId } });
         toast("Saved offline — will sync when back online", { duration: 3000 });
         return;
       }
@@ -815,7 +774,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const update = async (item: T) => {
       if (!navigator.onLine) {
-        setter(prev => prev.map(x => x.id === item.id ? item : x));
+        setter(prev => {
+          const updated = prev.map(x => x.id === item.id ? item : x);
+          persistEntityToCache(cacheEntity, updated);
+          return updated;
+        });
         await enqueueMutation({ type: "update", table, payload: { id: item.id, ...toDbUpdate(item) } });
         toast("Saved offline — will sync when back online", { duration: 3000 });
         return;
@@ -827,7 +790,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const remove = async (id: string) => {
       if (!navigator.onLine) {
-        setter(prev => prev.filter(x => x.id !== id));
+        setter(prev => {
+          const updated = prev.filter(x => x.id !== id);
+          persistEntityToCache(cacheEntity, updated);
+          return updated;
+        });
         await enqueueMutation({ type: "delete", table, payload: { id } });
         toast("Saved offline — will sync when back online", { duration: 3000 });
         return;
@@ -842,41 +809,47 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Distributors
   const distCrud = useMemo(() => makeOfflineCrud<Distributor>(
-    "distributors", setDistributors,
+    "distributors", setDistributors, "distributors",
     d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
     d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
-  ), [companyId]);
+  ), [companyId, persistEntityToCache]);
 
   // Salespersons
   const spCrud = useMemo(() => makeOfflineCrud<Salesperson>(
-    "salespersons", setSalespersons,
+    "salespersons", setSalespersons, "salespersons",
     s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
     s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
-  ), [companyId]);
+  ), [companyId, persistEntityToCache]);
 
   // Products
   const prodCrud = useMemo(() => makeOfflineCrud<Product>(
-    "products", setProducts,
+    "products", setProducts, "products",
     p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
     p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
-  ), [companyId]);
+  ), [companyId, persistEntityToCache]);
 
   // Locations (Godowns)
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
-    "godowns", setLocations,
+    "godowns", setLocations, "locations",
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
-  ), [companyId]);
+  ), [companyId, persistEntityToCache]);
 
-  // Stock Items — special (upsert)
+  // Stock Items — special (upsert online, upsert-type offline)
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!companyId) return;
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
-      setStockItems(prev => [...prev, { ...si, id: tempId }]);
+      setStockItems(prev => {
+        const updated = [...prev, { ...si, id: tempId }];
+        persistEntityToCache("stockItems", updated);
+        return updated;
+      });
       await enqueueMutation({
-        type: "insert", table: "stock_items",
+        type: "upsert", table: "stock_items",
+        clientTempId: tempId,
         payload: {
+          _onConflict: "company_id,product_id,godown_id",
           company_id: companyId, product_id: si.productId, godown_id: si.godownId,
           quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
         },
@@ -896,11 +869,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return [...prev, { ...si, id: data.id }];
       });
     }
-  }, [companyId]);
+  }, [companyId, persistEntityToCache]);
 
   const updateStockItem = useCallback(async (si: StockItem) => {
     if (!navigator.onLine) {
-      setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
+      setStockItems(prev => {
+        const updated = prev.map(x => x.id === si.id ? si : x);
+        persistEntityToCache("stockItems", updated);
+        return updated;
+      });
       await enqueueMutation({
         type: "update", table: "stock_items",
         payload: { id: si.id, quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate },
@@ -914,11 +891,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }).eq("id", si.id);
     if (error) { toast.error("Failed to update stock item", { description: error.message }); return; }
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
-  }, []);
+  }, [persistEntityToCache]);
 
   const deleteStockItemFn = useCallback(async (id: string) => {
     if (!navigator.onLine) {
-      setStockItems(prev => prev.filter(x => x.id !== id));
+      setStockItems(prev => {
+        const updated = prev.filter(x => x.id !== id);
+        persistEntityToCache("stockItems", updated);
+        return updated;
+      });
       await enqueueMutation({ type: "delete", table: "stock_items", payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
@@ -926,19 +907,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.from("stock_items").delete().eq("id", id);
     if (error) { toast.error("Failed to delete stock item", { description: error.message }); return; }
     setStockItems(prev => prev.filter(x => x.id !== id));
-  }, []);
+  }, [persistEntityToCache]);
 
   // Prefix update
   const setOrderPrefix = useCallback(async (prefix: string) => {
     if (!companyId) return;
     setOrderPrefixState(prefix);
     if (!navigator.onLine) {
+      persistEntityToCache("orderPrefix", prefix);
       await enqueueMutation({ type: "update", table: "companies", payload: { id: companyId, order_prefix: prefix } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
     await supabase.from("companies").update({ order_prefix: prefix }).eq("id", companyId);
-  }, [companyId]);
+  }, [companyId, persistEntityToCache]);
 
   // Computed values
   const computedDistributors = useMemo(() =>
