@@ -244,6 +244,7 @@ export default function OrderDetail() {
     );
   }
 
+  return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6 pb-24 md:pb-6">
         {/* Header */}
