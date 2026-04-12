@@ -455,6 +455,37 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }));
       setClaims(mappedClaims);
 
+      // Map invoices
+      const allInvoiceLines = (invoiceLinesRes as any).data || [];
+      const mappedInvoices: Invoice[] = ((invoicesRes as any).data || []).map((inv: any) => ({
+        id: inv.id, docType: inv.doc_type, invoiceNumber: inv.invoice_number,
+        invoiceDate: inv.invoice_date, sourceOrderId: inv.source_order_id || undefined,
+        buyerName: inv.buyer_name || "", buyerAddress: inv.buyer_address || "",
+        buyerGstin: inv.buyer_gstin || "", buyerStateCode: inv.buyer_state_code || "",
+        sellerName: inv.seller_name || "", sellerAddress: inv.seller_address || "",
+        sellerGstin: inv.seller_gstin || "", sellerPan: inv.seller_pan || "",
+        sellerStateCode: inv.seller_state_code || "", sellerPhone: inv.seller_phone || "",
+        sellerEmail: inv.seller_email || "", sellerBankName: inv.seller_bank_name || "",
+        sellerBankAccount: inv.seller_bank_account || "", sellerBankIfsc: inv.seller_bank_ifsc || "",
+        sellerLogoUrl: inv.seller_logo_url || "",
+        supplyType: inv.supply_type as Invoice["supplyType"],
+        gstRate: Number(inv.gst_rate || 0), subtotal: Number(inv.subtotal || 0),
+        cgstAmount: Number(inv.cgst_amount || 0), sgstAmount: Number(inv.sgst_amount || 0),
+        igstAmount: Number(inv.igst_amount || 0), totalTax: Number(inv.total_tax || 0),
+        grandTotal: Number(inv.grand_total || 0), roundOff: Number(inv.round_off || 0),
+        amountInWords: inv.amount_in_words || "", notes: inv.notes || "",
+        status: inv.status as Invoice["status"],
+        lines: allInvoiceLines
+          .filter((l: any) => l.invoice_id === inv.id)
+          .map((l: any) => ({
+            productName: l.product_name || "", hsnCode: l.hsn_code || "",
+            quantity: l.quantity || 0, unit: l.unit || "Pack",
+            unitPrice: Number(l.unit_price || 0), taxableValue: Number(l.taxable_value || 0),
+          })),
+        createdAt: inv.created_at,
+      }));
+      setInvoices(mappedInvoices);
+
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       let allOrderSchemes: any[] = [];
