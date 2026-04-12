@@ -666,6 +666,23 @@ export default function Orders() {
             );
           }}
         />
+        {/* Credit Override Dialog */}
+        <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
+              <AlertDialogDescription>
+                Changing payment status will push this dealer's outstanding above their credit limit. Do you want to proceed as Super Admin?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>
+                Override & Save
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
