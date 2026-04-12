@@ -1,32 +1,26 @@
 
 
-# Add Missing UPDATE Policies (Defensive Hardening)
+# Lazy-Load Performance Page to Code-Split Recharts
 
-## Why this is low-risk
-No application code ever calls `.update()` on `claim_lines`, `secondary_sales`, or `stock_deductions`. These are insert-and-delete-only tables. The missing policies cannot cause any current bug or security issue.
+## Problem
+All pages are eagerly imported in `App.tsx`. The Performance page pulls in Recharts (~45KB gzipped), which gets bundled into the initial load for every user — even those who never visit it.
 
-## What we'd do
-One database migration adding three UPDATE policies, all scoped to `company_id = get_company_id()`:
+## Solution
+Use `React.lazy()` + `Suspense` to code-split the Performance page. Vite/Rollup will automatically put Recharts into a separate chunk that only loads when the user navigates to `/performance`.
 
-```sql
-CREATE POLICY "Company members can update claim lines"
-ON public.claim_lines FOR UPDATE TO authenticated
-USING (EXISTS (SELECT 1 FROM claims c WHERE c.id = claim_lines.claim_id AND c.company_id = get_company_id()))
-WITH CHECK (EXISTS (SELECT 1 FROM claims c WHERE c.id = claim_lines.claim_id AND c.company_id = get_company_id()));
+## Changes
 
-CREATE POLICY "Company members can update secondary sales"
-ON public.secondary_sales FOR UPDATE TO authenticated
-USING (company_id = get_company_id())
-WITH CHECK (company_id = get_company_id());
+### `src/App.tsx`
+- Replace `import Performance from "./pages/Performance"` with `const Performance = React.lazy(() => import("./pages/Performance"))`
+- Wrap the Performance route element in `<Suspense fallback={<PageSkeleton />}>` (reusing the existing skeleton component)
+- Apply the same lazy pattern to other heavy/infrequent pages: `Reports`, `Billing`, `Settings`, `Help`, and all legal pages (`PrivacyPolicy`, `TermsOfService`, `RefundPolicy`, `AboutUs`, `Contact`)
 
-CREATE POLICY "Company members can update stock deductions"
-ON public.stock_deductions FOR UPDATE TO authenticated
-USING (company_id = get_company_id())
-WITH CHECK (company_id = get_company_id());
-```
+### `vite.config.ts`
+- Remove the manual `react-pdf` chunk from `manualChunks` — lazy loading handles code-splitting naturally and the manual chunk can cause duplicate-module issues
 
 ## Impact
-- Zero code changes
-- Zero risk of breaking anything
-- Future-proofs the tables if UPDATE functionality is added later
+- Initial bundle shrinks by ~45KB+ gzipped
+- Performance page loads its chunk on first visit (typically <1s on 4G)
+- Users see a skeleton briefly while the chunk loads
+- Zero functional changes
 
