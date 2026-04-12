@@ -128,6 +128,24 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Credit at Risk */}
+        {dealersAtRisk.length > 0 && (
+          <Link to="/distributors" className="block">
+            <div className="glass-card p-4 flex items-center gap-3 border-l-4 border-l-red-500 card-hover">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} at or over credit limit
+                </p>
+              </div>
+              <span className="text-lg font-bold text-red-600 dark:text-red-400">{dealersAtRisk.length}</span>
+            </div>
+          </Link>
+        )}
+
         {/* Dealers + Products side-by-side on desktop */}
         <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
           {/* Top Dealers */}
