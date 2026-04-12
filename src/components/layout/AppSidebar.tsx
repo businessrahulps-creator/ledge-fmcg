@@ -13,6 +13,7 @@ import {
   Target,
   RotateCcw,
   FileText,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,6 +48,7 @@ const manageNav = [
 
 const accountingNav = [
   { title: "Billing", url: "/billing", icon: FileText },
+  { title: "Company", url: "/company", icon: Building2 },
 ];
 
 const analyzeNav = [
