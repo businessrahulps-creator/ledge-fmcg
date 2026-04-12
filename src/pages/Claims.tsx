@@ -425,7 +425,7 @@ export default function Claims() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-bold tracking-tight md:text-2xl">Returns & Claims</h1>
               {openCount > 0 && (
                 <Badge variant="secondary" className="bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
