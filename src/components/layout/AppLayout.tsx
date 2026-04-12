@@ -9,6 +9,7 @@ import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { Receipt, RotateCcw, Target, Tags } from "lucide-react";
 import { getQueue } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,10 @@ const moreItems = [
   { title: "Dealers", url: "/distributors", icon: Store },
   { title: "Team", url: "/salespersons", icon: UsersRound },
   { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Billing", url: "/billing", icon: Receipt },
+  { title: "Claims", url: "/claims", icon: RotateCcw },
+  { title: "Targets", url: "/targets", icon: Target },
+  { title: "Schemes", url: "/schemes", icon: Tags },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

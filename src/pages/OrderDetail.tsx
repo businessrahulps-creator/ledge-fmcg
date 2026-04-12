@@ -142,7 +142,8 @@ export default function OrderDetail() {
         unitPrice: l.unitPrice,
       })));
     }
-  }, [order?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.id, order?.paymentStatus, order?.deliveryStatus, order?.distributorId, order?.salespersonId, order?.lines?.length]);
 
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
 

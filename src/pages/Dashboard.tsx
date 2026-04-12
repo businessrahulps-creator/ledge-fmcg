@@ -258,25 +258,26 @@ export default function Dashboard() {
               {/* Mobile cards */}
               <div className="space-y-3 md:hidden">
                 {recentOrders.map((o, i) => (
-                  <motion.div
-                    key={o.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
-                    className="glass-card card-hover p-4"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold">{o.distributorName}</span>
-                      <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
-                      <div className="flex gap-1.5">
-                        <StatusBadge status={o.paymentStatus} />
-                        <StatusBadge status={o.deliveryStatus} />
+                  <Link key={o.id} to={`/orders/${o.id}`}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
+                      className="glass-card card-hover p-4"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold">{o.distributorName}</span>
+                        <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                       </div>
-                    </div>
-                  </motion.div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
+                        <div className="flex gap-1.5">
+                          <StatusBadge status={o.paymentStatus} />
+                          <StatusBadge status={o.deliveryStatus} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
                 ))}
               </div>
             </>

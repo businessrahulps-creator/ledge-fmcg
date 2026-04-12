@@ -244,9 +244,7 @@ export default function Orders() {
             ))}
           </div>
 
-          <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-
-          {filtered.length === 0 && (
+          {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
               <p className="mt-3 text-sm font-medium">No orders found</p>
@@ -260,6 +258,8 @@ export default function Orders() {
                 </Button>
               </Link>
             </div>
+          ) : (
+            <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           )}
         </div>
 
