@@ -237,7 +237,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -245,6 +245,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -293,6 +294,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
       }));
       setSchemes(mappedSchemes);
+
+      // Map secondary sales
+      const mappedSS: SecondarySale[] = (ssRes.data || []).map((s: any) => ({
+        id: s.id, distributorId: s.distributor_id, productId: s.product_id,
+        productName: s.product_name || "", retailerName: s.retailer_name || "",
+        quantity: s.quantity || 0, date: s.date, remarks: s.remarks || "",
+      }));
+      setSecondarySales(mappedSS);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
