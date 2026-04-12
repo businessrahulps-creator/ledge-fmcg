@@ -223,43 +223,6 @@ export default function Settings() {
 
   useEffect(() => { loadTeam(); }, [loadTeam]);
 
-  const handleSaveClick = () => {
-    if (orderPrefix !== savedPrefix) {
-      setShowPrefixConfirm(true);
-      return;
-    }
-    saveCompany();
-  };
-
-  const saveCompany = async () => {
-    if (orderPrefix !== savedPrefix) {
-      api.orders.setPrefix(sanitizeInput(orderPrefix));
-    }
-    if (companyId) {
-      const { error } = await supabase
-        .from("companies")
-        .update({
-          name: sanitizeInput(companyName),
-          address: sanitizeInput(companyAddress),
-          gstin: sanitizeInput(companyGstin),
-          phone: sanitizeInput(companyPhone),
-          email: sanitizeInput(companyEmail),
-          pan: sanitizeInput(companyPan),
-          state_code: sanitizeInput(companyStateCode),
-          bank_name: sanitizeInput(bankName),
-          bank_account: sanitizeInput(bankAccount),
-          bank_ifsc: sanitizeInput(bankIfsc),
-          invoice_prefix: sanitizeInput(invoicePrefix),
-        } as any)
-        .eq("id", companyId);
-      if (error) {
-        toast({ title: "Error saving", description: error.message, variant: "destructive" });
-        return;
-      }
-    }
-    toast({ title: "Settings saved", description: "Company profile has been updated." });
-  };
-
   const openNewMember = () => {
     // Invite-by-email not yet implemented; show placeholder
   };
@@ -328,10 +291,9 @@ export default function Settings() {
           </p>
         </div>
 
-        <Tabs defaultValue="company" className="space-y-4 md:space-y-6">
+        <Tabs defaultValue="team" className="space-y-4 md:space-y-6">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
-              <TabsTrigger value="company" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Company</TabsTrigger>
               <TabsTrigger value="team" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Team</TabsTrigger>
               <TabsTrigger value="subscription" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Subscription</TabsTrigger>
               <TabsTrigger value="sync" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm flex items-center gap-1.5">
