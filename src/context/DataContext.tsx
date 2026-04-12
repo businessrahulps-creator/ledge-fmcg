@@ -120,6 +120,7 @@ function persistAllToCache(
     products: Product[];
     locations: GodownLocation[];
     stockItems: StockItem[];
+    schemes: Scheme[];
     orderPrefix: string;
     orderSequence: number;
   }
@@ -131,6 +132,7 @@ function persistAllToCache(
     ["products", data.products],
     ["locations", data.locations],
     ["stockItems", data.stockItems],
+    ["schemes", data.schemes],
     ["orderPrefix", data.orderPrefix],
     ["orderSequence", data.orderSequence],
   ];
