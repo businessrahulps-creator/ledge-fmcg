@@ -217,7 +217,7 @@ export default function Distributors() {
                   );
                 })()}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 

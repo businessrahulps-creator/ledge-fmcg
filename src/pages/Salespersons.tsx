@@ -134,13 +134,11 @@ export default function Salespersons() {
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {paginatedSales.map((s, i) => (
-            <motion.div
+            <div
               key={s.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i, 8) * 0.05, duration: 0.3 }}
               onClick={() => navigate(`/salespersons/${s.id}`)}
               className="cursor-pointer glass-card card-hover p-4 md:p-6"
+            >
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2.5 md:gap-3">
