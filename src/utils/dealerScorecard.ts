@@ -56,7 +56,7 @@ export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
   let daysSinceLastOrder: number | null = null;
   if (dealerOrders.length > 0) {
     const sorted = [...dealerOrders].sort((a, b) => b.date.localeCompare(a.date));
-    daysSinceLastOrder = Math.floor((now.getTime() - new Date(sorted[0].date + "T00:00:00").getTime()) / 86400000);
+    daysSinceLastOrder = Math.max(0, Math.floor((now.getTime() - new Date(sorted[0].date + "T00:00:00").getTime()) / 86400000));
   }
 
   return {

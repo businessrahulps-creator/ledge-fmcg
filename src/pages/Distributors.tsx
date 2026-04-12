@@ -412,7 +412,7 @@ export default function Distributors() {
                           <div className="flex-1">
                             <span className={`text-xs font-semibold ${risk.color}`}>{risk.label}</span>
                             <p className="text-[10px] text-muted-foreground">
-                              {sc.daysSinceLastOrder !== null ? `Last order ${sc.daysSinceLastOrder} day${sc.daysSinceLastOrder !== 1 ? "s" : ""} ago` : "No orders yet"}
+                              {sc.daysSinceLastOrder !== null ? (sc.daysSinceLastOrder === 0 ? "Ordered today" : `Last order ${sc.daysSinceLastOrder} day${sc.daysSinceLastOrder !== 1 ? "s" : ""} ago`) : "No orders yet"}
                             </p>
                           </div>
                           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${risk.color} ${risk.bg}`}>
