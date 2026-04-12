@@ -56,6 +56,18 @@ export default function Dashboard() {
   }, [api.loading]);
   const timeAgo = useTimeAgo(lastUpdated);
 
+  const handleRefresh = useCallback(async () => {
+    if (api.refreshAll) {
+      await api.refreshAll();
+    } else {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }, [api]);
+
+  const { containerRef, pullDistance, refreshing } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   // Track dashboard visits for PWA install prompt milestone
   useEffect(() => { trackDashboardVisit(); }, []);
   const orders = api.orders.list();
