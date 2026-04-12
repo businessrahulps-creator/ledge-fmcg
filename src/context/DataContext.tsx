@@ -1130,6 +1130,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
+        secondarySales, addSecondarySale, deleteSecondarySale,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
