@@ -1,39 +1,58 @@
 
 
-# Audit: Feature #5 — Issues Found & Fixes
+# Feature #5: Sales Team Performance Scorecard + Statement PDF
 
-## Issues Identified
+## Overview
+Mirror the existing Dealer Performance Scorecard for salespersons — same visual layout, same utility pattern, plus a "Top Sales Team" widget on Performance page.
 
-### 1. Churn Risk Logic Bug (Critical)
-In `getChurnRisk` (line 26), the condition uses `||` (OR):
-```
-if (daysSinceLastOrder <= 60 || paidPct >= 30) return "medium";
-```
-This means a dealer who hasn't ordered in **6 months** but paid 35% of old orders still gets "medium" risk. The `paidPct >= 30` overrides the recency check entirely. A dealer inactive for 200 days should be "high" risk.
+## Files to Create
 
-**Fix:** Change to `&&` — medium only if BOTH conditions are met (recent enough AND decent payment):
-```
-if (daysSinceLastOrder <= 60 && paidPct >= 30) return "medium";
-```
+### 1. `src/utils/salespersonScorecard.ts`
+Symmetric to `dealerScorecard.ts`. Contains:
+- `SalespersonScorecard` interface: `orders30d`, `orders60d`, `orders90d`, `ordersPrev30d`, `totalRevenue`, `totalRevenue30d`, `avgOrderValue`, `orderFrequency` (orders/week over 90d), `paymentCollectionEfficiency` (% paid), `daysSinceLastOrder`
+- `PerformanceHealth` type: `"high" | "medium" | "low"`
+- `getPerformanceHealth(orders)`: Returns health level based on order recency + payment collection (mirrors churn risk logic)
+- `getPerformanceInsight(health, scorecard)`: Returns plain-English one-liner (e.g., "Strong closer but slow payment collection", "Consistent performer", "Needs attention — low activity")
+- `buildSalespersonScorecard(orders)`: Computes all metrics
+- `performanceHealthConfig`: Color/label map (High=green, Medium=amber, Low=red) — symmetric to `churnRiskConfig`
 
-### 2. PDF Uses `px` Instead of `pt` (DealerStatementPdf)
-The `DealerStatementPdf` uses inline styles like `border: "1px solid #e2e8f0"`. All existing PDF styles in `PdfStyles.ts` use `pt` (e.g. `"0.5pt solid #D4D4D4"`). `@react-pdf/renderer` expects points. While it may still render, using `px` is inconsistent and could cause subtle sizing issues.
+### 2. `src/components/pdf/SalespersonStatementPdf.tsx`
+Symmetric to `DealerStatementPdf.tsx`. Professional branded PDF with:
+- Company header (PdfHeader)
+- Salesperson details (name, phone, email, region)
+- Performance scorecard table (all metrics + health assessment)
+- Order history table (order #, date, dealer name, amount, payment status)
+- Summary totals box
+- PdfFooter
 
-**Fix:** Replace all `1px` with `1pt` and `0.5px` with `0.5pt` in `DealerStatementPdf.tsx`.
+## Files to Modify
 
-### 3. Dealer Detail Order History Shows Gross Total, Not Effective
-In `Distributors.tsx` lines 485 and 496, the order history table shows `o.total` (gross). The Orders page was already updated to show effective total (`o.total - o.schemeSavings`). This is inconsistent — a business owner sees different amounts for the same order.
+### 3. `src/pages/Salespersons.tsx` — Profile Dialog Enhancement
+Replace the basic profile dialog (lines 280-386) with the enhanced version:
 
-**Fix:** Show effective total: `formatCurrency(o.total - (o.schemeSavings || 0))`.
+**Header**: Add "Statement PDF" button (same style as dealer page) next to name.
 
-### 4. Top Dealers Widget Uses Gross Revenue
-In `Performance.tsx` line 533, revenue is computed as `o.total` without subtracting scheme savings.
+**Info cards**: Keep existing Phone/Email/Region/Total Value grid.
 
-**Fix:** Use `o.total - (o.schemeSavings || 0)` for revenue calculation.
+**Performance Scorecard section** (new, after info cards): Exact same visual structure as Dealer Scorecard:
+- Performance Health badge (replaces Churn Risk) with icon, label, insight line
+- 2x2 metrics grid: Orders (30d) with trend arrow, Orders (90d), Avg Order Value, Revenue (30d)
+- Payment Collection Efficiency progress bar
+- Order Frequency stat
 
-## Files Changed
-- `src/utils/dealerScorecard.ts` — Fix churn risk `||` → `&&`
-- `src/components/pdf/DealerStatementPdf.tsx` — Fix `px` → `pt` in border styles
-- `src/pages/Distributors.tsx` — Show effective total in dealer order history
-- `src/pages/Performance.tsx` — Use effective total in Top Dealers revenue
+**Order History table**: Keep existing, update amounts to effective totals.
+
+### 4. `src/pages/Performance.tsx` — Top Sales Team Widget
+Add after the "Top Dealers Performance" widget (~line 577):
+- "Top Sales Team" card with blue-purple accent
+- Top 3 salespersons by revenue with order count + performance health badge
+- Each row clickable → navigates to `/salespersons`
+- Same visual style as Top Dealers widget
+
+## Key Design Decisions
+- Performance Health uses same logic pattern as Churn Risk (recency + payment %)
+- "High" health = Low churn risk equivalent (green), "Low" health = needs attention (red)
+- Insight line uses simple conditional logic based on metrics
+- All amounts use effective totals (minus scheme savings)
+- Statement PDF mirrors Dealer Statement PDF structure exactly
 
