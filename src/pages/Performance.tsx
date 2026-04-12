@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
