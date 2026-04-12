@@ -35,6 +35,7 @@ import { supabase } from "@/integrations/supabase/client";
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
+  { title: "Billing", url: "/billing", icon: FileText },
 ];
 
 const manageNav = [
@@ -47,7 +48,6 @@ const manageNav = [
 ];
 
 const accountingNav = [
-  { title: "Billing", url: "/billing", icon: FileText },
   { title: "Company", url: "/company", icon: Landmark },
 ];
 

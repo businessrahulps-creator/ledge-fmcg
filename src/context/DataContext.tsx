@@ -43,7 +43,7 @@ export interface InvoiceLine {
 
 export interface Invoice {
   id: string;
-  docType: "gst_invoice" | "invoice" | "estimate" | "proforma" | "credit_note";
+  docType: "gst_invoice" | "estimate" | "proforma" | "credit_note";
   invoiceNumber: string;
   invoiceDate: string;
   sourceOrderId?: string;
