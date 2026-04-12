@@ -403,8 +403,11 @@ export default function Targets() {
           </TabsList>
 
           <TabsContent value="salespersons" className="space-y-3">
-            {salespersons.length > 0 ? (
-              salespersons.map(sp => {
+            {(() => {
+              const q = search.toLowerCase();
+              const filtered = q ? salespersons.filter(sp => sp.name.toLowerCase().includes(q) || (sp.region || "").toLowerCase().includes(q)) : salespersons;
+              return filtered.length > 0 ? (
+              filtered.map(sp => {
                 const actual = spActuals.get(sp.id) || { revenue: 0, orders: 0 };
                 const existingTarget = getTarget("salesperson", sp.id);
                 return (
@@ -426,16 +429,19 @@ export default function Targets() {
             ) : (
               <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
                 <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No team members yet</p>
-                <p className="text-xs text-muted-foreground">Add your sales team to start setting targets</p>
-                <Link to="/salespersons">
-                  <Button size="sm" className="mt-3">
-                    <Plus className="h-4 w-4" />
-                    Add Team Member
-                  </Button>
-                </Link>
+                <p className="mt-3 text-sm font-medium">{q ? "No matching team members" : "No team members yet"}</p>
+                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your sales team to start setting targets"}</p>
+                {!q && (
+                  <Link to="/salespersons">
+                    <Button size="sm" className="mt-3">
+                      <Plus className="h-4 w-4" />
+                      Add Team Member
+                    </Button>
+                  </Link>
+                )}
               </div>
-            )}
+            );
+            })()}
           </TabsContent>
 
           <TabsContent value="dealers" className="space-y-3">
