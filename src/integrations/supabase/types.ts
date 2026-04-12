@@ -222,6 +222,51 @@ export type Database = {
           },
         ]
       }
+      order_schemes: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          savings: number
+          scheme_id: string | null
+          scheme_label: string
+          scheme_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          savings?: number
+          scheme_id?: string | null
+          scheme_label?: string
+          scheme_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          savings?: number
+          scheme_id?: string | null
+          scheme_label?: string
+          scheme_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_schemes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_schemes_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           company_id: string
@@ -240,6 +285,7 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           salesperson_id: string
           salesperson_name: string
+          scheme_savings: number
           total: number
           updated_at: string
           vehicle: string
@@ -261,6 +307,7 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           salesperson_id: string
           salesperson_name: string
+          scheme_savings?: number
           total?: number
           updated_at?: string
           vehicle?: string
@@ -282,6 +329,7 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           salesperson_id?: string
           salesperson_name?: string
+          scheme_savings?: number
           total?: number
           updated_at?: string
           vehicle?: string
