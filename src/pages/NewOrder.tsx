@@ -158,7 +158,15 @@ export default function NewOrder() {
   const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
-  const handleSave = async () => {
+  // Credit guard computation
+  const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
+  const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? orderTotal : 0);
+  const creditLimit = selectedDealerObj?.creditLimit || 0;
+  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
+  const isSuperAdmin = userRole === "super_admin";
+
+  const executeSave = async () => {
     // Validation
     if (!selectedDealer) {
       toast.error("Dealer required", { description: "Please select a dealer for this order." });
