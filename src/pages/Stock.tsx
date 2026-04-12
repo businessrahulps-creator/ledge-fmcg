@@ -531,7 +531,7 @@ export default function Stock() {
                       <h3 className="text-sm font-semibold md:text-base">
                         Inventory — {locations.find((l) => l.id === selectedWarehouse)?.name}
                       </h3>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <div className="relative flex-1 sm:flex-initial">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
@@ -566,7 +566,7 @@ export default function Stock() {
                             }}
                           >
                             <Download className="h-4 w-4" />
-                            <span >Export CSV</span>
+                            <span className="hidden sm:inline">Export CSV</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -574,7 +574,7 @@ export default function Stock() {
                             onClick={() => setInventoryPdfOpen(true)}
                           >
                             <FileText className="h-4 w-4" />
-                            <span >Export PDF</span>
+                            <span className="hidden sm:inline">Export PDF</span>
                           </Button>
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">

@@ -81,7 +81,7 @@ export default function DealerDetail() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 ml-13 sm:ml-0">
+          <div className="flex items-center gap-2.5 ml-13 sm:ml-0">
             <Button
               size="sm"
               className="h-9 gap-1.5 bg-[#25D366] hover:bg-[#1ebe57] text-white"
