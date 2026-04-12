@@ -992,6 +992,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const newOrder: Order = { ...order, id: inserted.id, orderNumber };
       setOrders(prev => [newOrder, ...prev]);
 
+      log("order", inserted.id, "created", `Created order ${orderNumber} for ${order.distributorName} — ${fmtAmount(order.total)}`);
+
       return { success: true, orderNumber };
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
