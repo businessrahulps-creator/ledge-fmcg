@@ -582,6 +582,45 @@ export type Database = {
           },
         ]
       }
+      secondary_sales: {
+        Row: {
+          company_id: string
+          created_at: string
+          date: string
+          distributor_id: string
+          id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          remarks: string
+          retailer_name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date?: string
+          distributor_id: string
+          id?: string
+          product_id: string
+          product_name?: string
+          quantity?: number
+          remarks?: string
+          retailer_name?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date?: string
+          distributor_id?: string
+          id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          remarks?: string
+          retailer_name?: string
+        }
+        Relationships: []
+      }
       stock_deductions: {
         Row: {
           company_id: string

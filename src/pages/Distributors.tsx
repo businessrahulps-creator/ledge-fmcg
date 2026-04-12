@@ -6,9 +6,10 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText, TrendingUp, TrendingDown, Minus, AlertTriangle, Shield, ShieldAlert } from "lucide-react";
+import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText, TrendingUp, TrendingDown, Minus, AlertTriangle, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Package } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
+import type { SecondarySale } from "@/context/DataContext";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
@@ -56,6 +57,11 @@ export default function Distributors() {
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [ssOpen, setSsOpen] = useState(false);
+  const [ssExpanded, setSsExpanded] = useState(false);
+  const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+  const allProducts = api.products.list();
+  const allSecondarySales = api.secondarySales.list();
 
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
@@ -464,6 +470,89 @@ export default function Distributors() {
                     );
                   })()}
 
+                  {/* Secondary Sales Section */}
+                  {(() => {
+                    const dealerSS = allSecondarySales.filter(s => s.distributorId === selectedId);
+                    const totalQty = dealerSS.reduce((s, r) => s + r.quantity, 0);
+                    const recentSS = dealerSS.slice(0, 10);
+                    return (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
+                            <Store className="h-3.5 w-3.5 text-primary" />
+                            Secondary Sales
+                          </h3>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1.5"
+                            onClick={() => {
+                              setSsForm({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+                              setSsOpen(true);
+                            }}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Record Sale
+                          </Button>
+                        </div>
+
+                        {dealerSS.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                                <span className="text-[10px] text-muted-foreground">Total Records</span>
+                                <p className="text-sm font-semibold mt-0.5">{dealerSS.length}</p>
+                              </div>
+                              <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                                <span className="text-[10px] text-muted-foreground">Total Qty Sold</span>
+                                <p className="text-sm font-semibold mt-0.5">{totalQty} units</p>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => setSsExpanded(!ssExpanded)}
+                              className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                            >
+                              {ssExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                              {ssExpanded ? "Hide" : "Show"} recent records ({recentSS.length})
+                            </button>
+
+                            {ssExpanded && (
+                              <div className="rounded-lg border border-border overflow-hidden">
+                                <div className="divide-y divide-border/50">
+                                  {recentSS.map(ss => (
+                                    <div key={ss.id} className="flex items-center justify-between px-3 py-2">
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs font-medium truncate">{ss.retailerName || "—"}</span>
+                                          <span className="text-[10px] text-muted-foreground">{formatIndianDate(ss.date)}</span>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                          {ss.productName} × {ss.quantity}
+                                          {ss.remarks ? ` · ${ss.remarks}` : ""}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive shrink-0"
+                                        onClick={() => api.secondarySales.remove(ss.id)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No secondary sales recorded yet. Track what this dealer sells to retailers.</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <div>
                     <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {selectedOrders.length > 0 ? (
@@ -544,6 +633,100 @@ export default function Distributors() {
             );
           }}
         />
+
+        {/* Secondary Sale Modal */}
+        <Dialog open={ssOpen} onOpenChange={setSsOpen}>
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-base md:text-lg">Record Secondary Sale</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Track what {selected?.name || "this dealer"} sold to a retailer
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Retailer Name</Label>
+                <Input
+                  value={ssForm.retailerName}
+                  onChange={(e) => setSsForm({ ...ssForm, retailerName: e.target.value })}
+                  placeholder="e.g. Ganesh Kirana Store"
+                  className="h-10 rounded-lg"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Product *</Label>
+                <select
+                  value={ssForm.productId}
+                  onChange={(e) => setSsForm({ ...ssForm, productId: e.target.value })}
+                  className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="">Select product</option>
+                  {allProducts.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs md:text-sm">Quantity *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={ssForm.quantity}
+                    onChange={(e) => setSsForm({ ...ssForm, quantity: parseInt(e.target.value) || 1 })}
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs md:text-sm">Date</Label>
+                  <Input
+                    type="date"
+                    value={ssForm.date}
+                    onChange={(e) => setSsForm({ ...ssForm, date: e.target.value })}
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs md:text-sm">Remarks (optional)</Label>
+                <Input
+                  value={ssForm.remarks}
+                  onChange={(e) => setSsForm({ ...ssForm, remarks: e.target.value })}
+                  placeholder="Any notes..."
+                  className="h-10 rounded-lg"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setSsOpen(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!ssForm.productId) {
+                  toast.error("Product required", { description: "Please select a product." });
+                  return;
+                }
+                if (ssForm.quantity < 1) {
+                  toast.error("Invalid quantity", { description: "Quantity must be at least 1." });
+                  return;
+                }
+                const product = allProducts.find(p => p.id === ssForm.productId);
+                api.secondarySales.create({
+                  id: "",
+                  distributorId: selectedId || "",
+                  productId: ssForm.productId,
+                  productName: product?.name || "",
+                  retailerName: ssForm.retailerName.trim(),
+                  quantity: ssForm.quantity,
+                  date: ssForm.date,
+                  remarks: ssForm.remarks.trim(),
+                });
+                setSsOpen(false);
+                toast.success("Secondary sale recorded");
+              }}>
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

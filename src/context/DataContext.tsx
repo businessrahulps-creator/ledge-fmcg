@@ -24,6 +24,17 @@ export interface CompanyInfo {
   logoUrl: string;
 }
 
+export interface SecondarySale {
+  id: string;
+  distributorId: string;
+  productId: string;
+  productName: string;
+  retailerName: string;
+  quantity: number;
+  date: string;
+  remarks: string;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
@@ -32,6 +43,7 @@ interface DataContextType {
   locations: GodownLocation[];
   stockItems: StockItem[];
   schemes: Scheme[];
+  secondarySales: SecondarySale[];
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
@@ -68,6 +80,9 @@ interface DataContextType {
   addScheme: (s: Scheme) => void;
   updateScheme: (s: Scheme) => void;
   deleteScheme: (id: string) => void;
+
+  addSecondarySale: (s: SecondarySale) => void;
+  deleteSecondarySale: (id: string) => void;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -160,6 +175,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
   const [orderSequence, setOrderSequence] = useState(1);
+  const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
@@ -176,6 +192,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setLocations([]);
       setStockItems([]);
       setSchemes([]);
+      setSecondarySales([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
@@ -220,7 +237,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -228,6 +245,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -276,6 +294,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
       }));
       setSchemes(mappedSchemes);
+
+      // Map secondary sales
+      const mappedSS: SecondarySale[] = (ssRes.data || []).map((s: any) => ({
+        id: s.id, distributorId: s.distributor_id, productId: s.product_id,
+        productName: s.product_name || "", retailerName: s.retailer_name || "",
+        quantity: s.quantity || 0, date: s.date, remarks: s.remarks || "",
+      }));
+      setSecondarySales(mappedSS);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
@@ -1054,6 +1080,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
+  // Secondary Sales CRUD
+  const addSecondarySale = useCallback(async (sale: SecondarySale) => {
+    if (!companyId) return;
+    const { data, error } = await supabase.from("secondary_sales").insert({
+      company_id: companyId,
+      distributor_id: sale.distributorId,
+      product_id: sale.productId,
+      product_name: sanitizeInput(sale.productName),
+      retailer_name: sanitizeInput(sale.retailerName),
+      quantity: sale.quantity,
+      date: sale.date,
+      remarks: sanitizeInput(sale.remarks),
+    } as any).select().single();
+    if (error) { toast.error("Failed to record secondary sale", { description: error.message }); return; }
+    if (data) {
+      const mapped: SecondarySale = {
+        id: (data as any).id, distributorId: sale.distributorId, productId: sale.productId,
+        productName: sale.productName, retailerName: sale.retailerName,
+        quantity: sale.quantity, date: sale.date, remarks: sale.remarks,
+      };
+      setSecondarySales(prev => [mapped, ...prev]);
+    }
+  }, [companyId]);
+
+  const deleteSecondarySale = useCallback(async (id: string) => {
+    const { error } = await supabase.from("secondary_sales").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return; }
+    setSecondarySales(prev => prev.filter(s => s.id !== id));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1074,6 +1130,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
+        secondarySales, addSecondarySale, deleteSecondarySale,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >

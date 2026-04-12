@@ -23,6 +23,7 @@ import {
   Download,
   Gift,
   UserCheck,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -626,6 +627,58 @@ export default function Performance() {
                   );
                 })}
               </div>
+            </div>
+          );
+        })()}
+
+        {/* Secondary Sales Summary */}
+        {(() => {
+          const allSS = api.secondarySales.list();
+          const periodSS = allSS.filter(s => {
+            const d = new Date(s.date + "T00:00:00");
+            if (period === "custom") {
+              if (customFrom && d < customFrom) return false;
+              if (customTo) { const end = new Date(customTo); end.setHours(23,59,59,999); if (d > end) return false; }
+              return !!(customFrom || customTo);
+            }
+            return d >= cutoff;
+          });
+
+          if (periodSS.length === 0) return null;
+
+          const totalQty = periodSS.reduce((s, r) => s + r.quantity, 0);
+          // Top retailers by qty
+          const retMap = new Map<string, number>();
+          periodSS.forEach(s => {
+            const name = s.retailerName || "Unknown";
+            retMap.set(name, (retMap.get(name) || 0) + s.quantity);
+          });
+          const topRetailers = Array.from(retMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+          return (
+            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-orange-500">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10">
+                  <Store className="h-4 w-4 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold">Secondary Sales</p>
+                  <p className="text-[11px] text-muted-foreground">{periodSS.length} records · {totalQty} units</p>
+                </div>
+              </div>
+              {topRetailers.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-muted-foreground font-medium">Top Retailers</p>
+                  {topRetailers.map(([name, qty]) => (
+                    <div key={name} className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground truncate mr-2">{name}</span>
+                      <span className="font-medium shrink-0">{qty} units</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}
