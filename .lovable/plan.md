@@ -1,97 +1,42 @@
 
 
-# Platform-Wide Modal Overload Fix — Mobile-First Detail Pages
+# Fix: Order Detail Action Bar Hidden on Mobile
 
-## Audit Results
+## Problem Found
+The Order Detail page's sticky action bar (Delete, Invoice, WhatsApp, Save Changes) is **completely hidden behind the floating bottom navigation** on mobile.
 
-| Modal | Lines | Complexity | Verdict |
-|-------|-------|-----------|---------|
-| **Order Detail** (Orders.tsx) | ~300 | Info cards + items table + schemes + billing docs + payment/delivery editing + dispatch fields + 6 action buttons + claim sub-modal | **→ Full page** `/orders/:id` |
-| **Dealer Profile** (Distributors.tsx) | ~490 | Info + scorecard + churn risk + targets + secondary sales + order history + WhatsApp/PDF actions | **→ Full page** `/distributors/:id` |
-| **Salesperson Profile** (Salespersons.tsx) | ~250 | Info + performance scorecard + order history + PDF export | **→ Full page** `/salespersons/:id` |
-| Dealer Add/Edit | ~120 | Form with 4 sections | **Keep modal** — single-purpose CRUD |
-| Salesperson Add/Edit | ~30 | 4 fields | **Keep modal** |
-| Stock Product/Warehouse CRUD | ~80 | Simple forms | **Keep modal** |
-| Delete confirmations | ~30 | Single confirmation | **Keep modal** |
-| Credit override | ~15 | Single confirmation | **Keep modal** |
-| Claim/Return | ~100 | Focused action | **Keep modal** |
-| Export PDF options | ~30 | Checkboxes + generate | **Keep modal** |
+- Action bar: `fixed bottom-0 z-40`
+- Bottom nav: `fixed bottom-4 z-50` (floating pill, ~60px tall)
 
-### Decision Rule
-- **Modal**: Single-purpose, ≤5 fields, quick action (CRUD form, confirm, quick select)
-- **Full page**: Information-rich, read+edit, multiple sections, actions toolbar
+The action bar renders below the bottom nav and is invisible/inaccessible.
 
-## Implementation Plan
-
-### Phase 1: Order Detail Page (priority — most overloaded)
-
-**New file**: `src/pages/OrderDetail.tsx`
-
-- Route: `/orders/:id`
-- Back button → `/orders`
-- Clean sections with clear visual hierarchy:
-  1. **Header**: Order number, date, status badges, action buttons (WhatsApp, Invoice PDF, Generate Invoice, Delete)
-  2. **Summary cards**: Dealer, Salesperson, Total/Effective Total (2×2 grid)
-  3. **Items table**: Product lines with scheme savings
-  4. **Billing Documents**: Linked invoices table + "Generate Invoice" CTA
-  5. **Status & Dispatch** (editable section): Payment mode/status toggles, delivery status, warehouse, dispatch date, vehicle, driver — with Save button
-- Mobile layout: Stacked single-column, full-width cards, touch-friendly controls, safe-area padding
-- Reuse all existing logic from the dialog (save, credit guard, claim modal stays as modal since it's a focused action)
-
-**Changes to `src/pages/Orders.tsx`**:
-- Replace `openOrder()` → `navigate(\`/orders/${order.id}\`)`
-- Remove entire Order Detail Dialog (~300 lines), claim modal, credit override dialog, delete dialog — all move to OrderDetail page
-- Keep list page clean: just search, filters, table
-
-**Route in `src/App.tsx`**:
-- Add `<Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><OrderDetail /></PageErrorBoundary></ProtectedRoute>} />`
-
-### Phase 2: Dealer Detail Page
-
-**New file**: `src/pages/DealerDetail.tsx`
-
-- Route: `/distributors/:id`
-- Back button → `/distributors`
-- Tabbed layout: **Overview** | **Orders** | **Secondary Sales**
-- Overview: Info cards, scorecard, targets, credit health
-- Orders: Full order history table
-- Keep Add/Edit dealer as modal (simple CRUD form)
-
-**Changes to `src/pages/Distributors.tsx`**:
-- Card click → `navigate(\`/distributors/${d.id}\`)`
-- Remove Profile Dialog (~490 lines)
-
-### Phase 3: Salesperson Detail Page
-
-**New file**: `src/pages/SalespersonDetail.tsx`
-
-- Route: `/salespersons/:id`
-- Back button → `/salespersons`
-- Sections: Info, Performance Scorecard, Order History
-- Keep Add/Edit as modal
-
-**Changes to `src/pages/Salespersons.tsx`**:
-- Card click → `navigate(\`/salespersons/${s.id}\`)`
-- Remove Profile Dialog (~250 lines)
-
-## Files Changed
+## Fix
 
 | File | Change |
 |------|--------|
-| `src/pages/OrderDetail.tsx` | **New** — Full order detail page with sections |
-| `src/pages/Orders.tsx` | Remove dialog + claim modal (~400 lines removed), navigate to detail page |
-| `src/pages/DealerDetail.tsx` | **New** — Full dealer profile page with tabs |
-| `src/pages/Distributors.tsx` | Remove profile dialog (~490 lines removed), navigate to detail page |
-| `src/pages/SalespersonDetail.tsx` | **New** — Full salesperson profile page |
-| `src/pages/Salespersons.tsx` | Remove profile dialog (~250 lines removed), navigate to detail page |
-| `src/App.tsx` | Add 3 new routes: `/orders/:id`, `/distributors/:id`, `/salespersons/:id` |
+| `src/pages/OrderDetail.tsx` | Change the action bar from `fixed bottom-0` to `fixed bottom-24 md:bottom-0` (or use `bottom-[calc(4.5rem+env(safe-area-inset-bottom))]`) so it floats above the bottom nav on mobile. Also match the rounded/glass styling of the nav for consistency. On `md:` and above, keep it `static` as currently designed. |
 
-## Design Approach
+The existing `pb-24 md:pb-6` padding on the content wrapper already accounts for this bar, so no other changes needed.
 
-- Maintain existing glassmorphic `glass-card` aesthetic
-- Mobile: Single-column stacked layout, min 44px touch targets, `pb-safe` bottom padding
-- Desktop: Multi-column grids where appropriate
-- Back navigation: `ArrowLeft` button + breadcrumb-style subtitle
-- Sticky action bar at bottom on mobile for primary actions (Save, WhatsApp, etc.)
-- No horizontal overflow — all tables scroll within their container
+### Single-line change
+Line 486 — update the action bar container classes:
+```
+// Before
+fixed bottom-0 left-0 right-0 z-40 ...
+
+// After  
+fixed bottom-[5.5rem] left-4 right-4 z-40 rounded-xl ...
+```
+
+This positions it just above the floating bottom nav (which sits at `bottom-4` with ~3.5rem height + padding).
+
+No other pages are affected — DealerDetail and SalespersonDetail do not have fixed action bars.
+
+## Everything Else Works
+- Order detail page: all sections render correctly on both desktop and mobile
+- Salesperson detail page: profile, scorecard, order history all functional
+- Dealer detail page: code is sound (no dealers in DB to test live, but "not found" state works)
+- Navigation from list to detail pages works correctly for all three entities
+- Back buttons work
+- No console errors related to the detail pages
 
