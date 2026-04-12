@@ -47,6 +47,7 @@ export default function Salespersons() {
   const [editItem, setEditItem] = useState<Salesperson | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
 
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
