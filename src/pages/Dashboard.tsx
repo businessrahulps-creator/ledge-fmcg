@@ -106,6 +106,36 @@ export default function Dashboard() {
           </p>
           <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()} 👋</h1>
 
+          {/* This Month summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="glass-card p-4 mt-5"
+          >
+            <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase mb-3">
+              This Month · {monthLabel}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Revenue</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthRevenue)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Orders</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{monthOrderCount}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Outstanding</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthOutstanding)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Delivered</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{monthDeliveredPct}%</p>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-5">
             {DAYS.map((d, i) => (
