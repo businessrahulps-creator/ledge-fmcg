@@ -69,6 +69,7 @@ export function AppSidebar() {
   const { companyId } = useAuth();
   const { companyIncomplete } = useOnboarding();
   const [logoUrl, setLogoUrl] = useState<string>("");
+  const [activityOpen, setActivityOpen] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
