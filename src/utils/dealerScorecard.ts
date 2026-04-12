@@ -23,7 +23,7 @@ export function getChurnRisk(dealerOrders: Order[]): ChurnRisk {
   const paidPct = (dealerOrders.filter(o => o.paymentStatus === "paid").length / dealerOrders.length) * 100;
 
   if (daysSinceLastOrder <= 30 && paidPct >= 60) return "low";
-  if (daysSinceLastOrder <= 60 || paidPct >= 30) return "medium";
+  if (daysSinceLastOrder <= 60 && paidPct >= 30) return "medium";
   return "high";
 }
 

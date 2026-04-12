@@ -530,7 +530,7 @@ export default function Performance() {
           const dealerData = dealers.map(d => {
             const dOrders = orders.filter(o => o.distributorId === d.id);
             const periodOrders = filteredOrders.filter(o => o.distributorId === d.id);
-            const revenue = periodOrders.reduce((s, o) => s + o.total, 0);
+            const revenue = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
             const risk = getChurnRisk(dOrders);
             return { id: d.id, name: d.name, revenue, orderCount: periodOrders.length, risk };
           })

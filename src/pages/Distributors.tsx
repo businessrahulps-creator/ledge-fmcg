@@ -482,7 +482,7 @@ export default function Distributors() {
                               <tr key={o.id} className="border-b border-border/50">
                                 <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
                                 <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(o.date)}</td>
-                                <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total)}</td>
+                                <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
                                 <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
                               </tr>
                             ))}
@@ -493,7 +493,7 @@ export default function Distributors() {
                             <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
                               <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
-                                <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
+                                <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
                               </div>
                               <div className="mt-0.5 flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{formatIndianDate(o.date)}</span>
