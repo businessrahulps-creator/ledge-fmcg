@@ -6,6 +6,8 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
 import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
@@ -278,35 +280,47 @@ export default function Distributors() {
               <>
                 <DialogHeader>
                   <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                     <DialogTitle className="text-base md:text-lg">{selected.name}</DialogTitle>
                     <DialogDescription className="sr-only">Dealer profile details</DialogDescription>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1.5"
-                      onClick={() => {
-                        const rows = [
-                          ["Location", selected.location],
-                          ["Contact", selected.contact],
-                          ["Total Orders", String(selected.totalOrders)],
-                          ["Total Value", formatCurrencyPdf(selected.totalValue)],
-                        ];
-                        selectedOrders.forEach((o) => {
-                          rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
-                        });
-                        const columns = [
-                          { header: "Field", width: "40%" },
-                          { header: "Value", width: "60%" },
-                        ];
-                        downloadPdf(
-                          pdfFilename("dealer", selected.name.replace(/\s+/g, "-")),
-                          ReportPdf({ title: selected.name, subtitle: "Dealer Profile", columns, rows, companyName: api.companyInfo.name })
-                        );
-                      }}
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      Export PDF
-                    </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        className="h-8 gap-1.5 bg-[#25D366] hover:bg-[#1ebe57] text-white"
+                        onClick={() => shareDealerOnWhatsApp(selected)}
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
+                        WhatsApp
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5"
+                        onClick={() => {
+                          const rows = [
+                            ["Location", selected.location],
+                            ["Contact", selected.contact],
+                            ["Total Orders", String(selected.totalOrders)],
+                            ["Total Value", formatCurrencyPdf(selected.totalValue)],
+                          ];
+                          selectedOrders.forEach((o) => {
+                            rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
+                          });
+                          const columns = [
+                            { header: "Field", width: "40%" },
+                            { header: "Value", width: "60%" },
+                          ];
+                          downloadPdf(
+                            pdfFilename("dealer", selected.name.replace(/\s+/g, "-")),
+                            ReportPdf({ title: selected.name, subtitle: "Dealer Profile", columns, rows, companyName: api.companyInfo.name })
+                          );
+                        }}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        Export PDF
+                      </Button>
+                    </div>
                   </div>
                 </DialogHeader>
                 <div className="space-y-4 md:space-y-6">
