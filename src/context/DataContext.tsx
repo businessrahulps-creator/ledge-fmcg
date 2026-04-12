@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, u
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import type { Order, Distributor, Salesperson, Product, OrderLine, Scheme } from "@/data/mock-data";
+import type { Order, OrderScheme, Distributor, Salesperson, Product, OrderLine, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {
   cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue,
@@ -83,7 +83,7 @@ export function useData() {
 }
 
 // Helper to map DB rows to app types
-function mapOrders(ordersData: any[], allLines: any[]): Order[] {
+function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: any[] = []): Order[] {
   return ordersData.map(o => {
     const oLines: OrderLine[] = allLines
       .filter(l => l.order_id === o.id)
@@ -93,6 +93,14 @@ function mapOrders(ordersData: any[], allLines: any[]): Order[] {
         quantity: l.quantity,
         unitPrice: Number(l.unit_price),
         lineTotal: Number(l.line_total),
+      }));
+    const oSchemes: OrderScheme[] = allOrderSchemes
+      .filter(s => s.order_id === o.id)
+      .map(s => ({
+        schemeId: s.scheme_id || null,
+        schemeName: s.scheme_name,
+        schemeLabel: s.scheme_label || "",
+        savings: Number(s.savings || 0),
       }));
     return {
       id: o.id, orderNumber: o.order_number, date: o.date,
@@ -106,6 +114,8 @@ function mapOrders(ordersData: any[], allLines: any[]): Order[] {
       deliveryStatus: o.delivery_status as Order["deliveryStatus"],
       dispatchRemarks: o.dispatch_remarks,
       godownId: o.godown_id || undefined,
+      schemeSavings: Number(o.scheme_savings || 0),
+      appliedSchemes: oSchemes,
     };
   });
 }
@@ -269,14 +279,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
+      let allOrderSchemes: any[] = [];
       if (orderIds.length > 0) {
-        const { data: linesData } = await supabase
-          .from("order_lines").select("*").in("order_id", orderIds).range(0, 9999);
-        allLines = linesData || [];
+        const [linesRes, osRes] = await Promise.all([
+          supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999),
+          supabase.from("order_schemes").select("*").in("order_id", orderIds).range(0, 9999),
+        ]);
+        allLines = linesRes.data || [];
+        allOrderSchemes = osRes.data || [];
       }
       if (token !== fetchTokenRef.current) return;
 
-      const mappedOrders = mapOrders(ordersRes.data || [], allLines);
+      const mappedOrders = mapOrders(ordersRes.data || [], allLines, allOrderSchemes);
       setOrders(mappedOrders);
       setIsOfflineData(false);
 
@@ -447,11 +461,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!ordersData) return;
       const orderIds = ordersData.map(o => o.id);
       let allLines: any[] = [];
+      let allOrderSchemes: any[] = [];
       if (orderIds.length > 0) {
-        const { data: linesData } = await supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999);
-        allLines = linesData || [];
+        const [linesRes, osRes] = await Promise.all([
+          supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999),
+          supabase.from("order_schemes").select("*").in("order_id", orderIds).range(0, 9999),
+        ]);
+        allLines = linesRes.data || [];
+        allOrderSchemes = osRes.data || [];
       }
-      const mapped = mapOrders(ordersData, allLines);
+      const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
       setOrders(mapped);
       if (companyId) cacheData(companyId, "orders", mapped);
     } catch { /* ignore */ }
@@ -699,6 +718,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
           }))
         );
         if (linesError) throw linesError;
+      }
+
+      // Persist scheme savings
+      if (order.schemeSavings > 0) {
+        await supabase.from("orders").update({ scheme_savings: order.schemeSavings } as any).eq("id", inserted.id);
+      }
+      if (order.appliedSchemes && order.appliedSchemes.length > 0) {
+        await supabase.from("order_schemes").insert(
+          order.appliedSchemes.map(s => ({
+            order_id: inserted.id,
+            scheme_id: s.schemeId || null,
+            scheme_name: s.schemeName,
+            scheme_label: s.schemeLabel,
+            savings: s.savings,
+          }))
+        );
       }
 
       if (order.godownId && (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered")) {

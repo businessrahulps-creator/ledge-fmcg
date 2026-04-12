@@ -290,6 +290,13 @@ export default function NewOrder() {
       deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
       dispatchRemarks: remarks,
       godownId: selectedGodown || undefined,
+      schemeSavings: totalSchemeSavings,
+      appliedSchemes: appliedSchemes.map(a => ({
+        schemeId: a.scheme.id,
+        schemeName: a.scheme.name,
+        schemeLabel: a.label,
+        savings: a.savings,
+      })),
     };
 
     const result = await addOrder(order);

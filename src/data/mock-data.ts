@@ -54,6 +54,13 @@ export interface OrderLine {
   lineTotal: number;
 }
 
+export interface OrderScheme {
+  schemeId: string | null;
+  schemeName: string;
+  schemeLabel: string;
+  savings: number;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -72,6 +79,8 @@ export interface Order {
   deliveryStatus: "pending" | "dispatched" | "delivered";
   dispatchRemarks: string;
   godownId?: string;
+  schemeSavings: number;
+  appliedSchemes: OrderScheme[];
 }
 
 export function formatCurrency(amount: number): string {
