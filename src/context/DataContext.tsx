@@ -22,6 +22,60 @@ export interface CompanyInfo {
   address: string;
   gstin: string;
   logoUrl: string;
+  phone: string;
+  email: string;
+  pan: string;
+  stateCode: string;
+  bankName: string;
+  bankAccount: string;
+  bankIfsc: string;
+  invoicePrefix: string;
+}
+
+export interface InvoiceLine {
+  productName: string;
+  hsnCode: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  taxableValue: number;
+}
+
+export interface Invoice {
+  id: string;
+  docType: "gst_invoice" | "invoice" | "estimate" | "proforma" | "credit_note";
+  invoiceNumber: string;
+  invoiceDate: string;
+  sourceOrderId?: string;
+  buyerName: string;
+  buyerAddress: string;
+  buyerGstin: string;
+  buyerStateCode: string;
+  sellerName: string;
+  sellerAddress: string;
+  sellerGstin: string;
+  sellerPan: string;
+  sellerStateCode: string;
+  sellerPhone: string;
+  sellerEmail: string;
+  sellerBankName: string;
+  sellerBankAccount: string;
+  sellerBankIfsc: string;
+  sellerLogoUrl: string;
+  supplyType: "intra_state" | "inter_state";
+  gstRate: number;
+  subtotal: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
+  totalTax: number;
+  grandTotal: number;
+  roundOff: number;
+  amountInWords: string;
+  notes: string;
+  status: "draft" | "final";
+  lines: InvoiceLine[];
+  createdAt: string;
 }
 
 export interface SecondarySale {
