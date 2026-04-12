@@ -370,6 +370,11 @@ export default function Billing() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
                             <Download className="h-3.5 w-3.5" />
                           </Button>
+                          {(inv.docType === "estimate" || inv.docType === "proforma") && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleConvertToGst(inv)} title="Convert to GST Invoice">
+                              <ArrowRightLeft className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
                           {inv.status === "draft" && (
                             <>
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleFinalize(inv)} title="Finalize">
