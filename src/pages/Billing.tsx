@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ChevronsUpDown, Check } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -72,6 +75,7 @@ export default function Billing() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [saving, setSaving] = useState(false);
+  const [orderPickerOpen, setOrderPickerOpen] = useState(false);
 
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
@@ -342,6 +346,17 @@ export default function Billing() {
     return invoices.filter(inv => inv.sourceOrderId === orderId);
   }, [invoices]);
 
+  // Sorted/grouped orders for the picker: needs-invoice first, then has-documents, recent first
+  const sortedOrders = useMemo(() => {
+    const withDocs = orders.map(o => ({
+      order: o,
+      docs: invoices.filter(inv => inv.sourceOrderId === o.id),
+    }));
+    const needsInvoice = withDocs.filter(x => x.docs.length === 0).sort((a, b) => new Date(b.order.date).getTime() - new Date(a.order.date).getTime());
+    const hasDocs = withDocs.filter(x => x.docs.length > 0).sort((a, b) => new Date(b.order.date).getTime() - new Date(a.order.date).getTime());
+    return { needsInvoice, hasDocs };
+  }, [orders, invoices]);
+
   const isEditMode = !!editingInvoice;
   const selectedOrder = orders.find(o => o.id === sourceOrderId);
   const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
@@ -535,18 +550,93 @@ export default function Billing() {
                     })()}
                   </div>
                 ) : (
-                  <Select value={sourceOrderId} onValueChange={handleSelectOrder}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Select an order to create a document from..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {orders.map(o => (
-                        <SelectItem key={o.id} value={o.id}>
-                          {o.orderNumber} — {o.distributorName} — ₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={orderPickerOpen} onOpenChange={setOrderPickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={orderPickerOpen}
+                        className="h-10 w-full justify-between font-normal"
+                      >
+                        {sourceOrderId
+                          ? (() => {
+                              const o = orders.find(x => x.id === sourceOrderId);
+                              return o ? `${o.orderNumber} — ${o.distributorName} — ₹${(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}` : "Select an order...";
+                            })()
+                          : "Search by order number, dealer name..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search orders..." />
+                        <CommandList>
+                          <CommandEmpty>No orders found.</CommandEmpty>
+                          {sortedOrders.needsInvoice.length > 0 && (
+                            <CommandGroup heading="Needs Invoice">
+                              {sortedOrders.needsInvoice.map(({ order: o }) => (
+                                <CommandItem
+                                  key={o.id}
+                                  value={`${o.orderNumber} ${o.distributorName}`}
+                                  onSelect={() => {
+                                    handleSelectOrder(o.id);
+                                    setOrderPickerOpen(false);
+                                  }}
+                                  className="flex items-center justify-between gap-2"
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Check className={cn("h-4 w-4 shrink-0", sourceOrderId === o.id ? "opacity-100" : "opacity-0")} />
+                                    <div className="min-w-0">
+                                      <span className="font-medium">{o.orderNumber}</span>
+                                      <span className="text-muted-foreground"> · {o.distributorName}</span>
+                                      <div className="text-[10px] text-muted-foreground">
+                                        {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {o.salesperson}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className="shrink-0 text-xs font-medium tabular-nums">₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                          {sortedOrders.hasDocs.length > 0 && (
+                            <CommandGroup heading="Has Documents">
+                              {sortedOrders.hasDocs.map(({ order: o, docs }) => (
+                                <CommandItem
+                                  key={o.id}
+                                  value={`${o.orderNumber} ${o.distributorName}`}
+                                  onSelect={() => {
+                                    handleSelectOrder(o.id);
+                                    setOrderPickerOpen(false);
+                                  }}
+                                  className="flex items-center justify-between gap-2"
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Check className={cn("h-4 w-4 shrink-0", sourceOrderId === o.id ? "opacity-100" : "opacity-0")} />
+                                    <div className="min-w-0">
+                                      <span className="font-medium">{o.orderNumber}</span>
+                                      <span className="text-muted-foreground"> · {o.distributorName}</span>
+                                      <div className="flex items-center gap-1 mt-0.5">
+                                        <span className="text-[10px] text-muted-foreground">
+                                          {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                                        </span>
+                                        {docs.map(d => (
+                                          <span key={d.id} className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-medium ${docTypeBadgeColors[d.docType]}`}>
+                                            {docTypeLabels[d.docType].slice(0, 3).toUpperCase()}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className="shrink-0 text-xs font-medium tabular-nums">₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </div>
             )}
