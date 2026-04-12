@@ -500,6 +500,29 @@ export default function Performance() {
           ))}
         </div>
 
+        {/* Credit at Risk */}
+        {(() => {
+          const atRisk = dealers.filter(d => (d.creditLimit || 0) > 0 && (d.outstandingAmount || 0) >= (d.creditLimit || 0));
+          if (atRisk.length === 0) return null;
+          return (
+            <div
+              className="glass-card rounded-xl p-4 flex items-center gap-3 border-l-[3px] border-l-red-500 cursor-pointer card-hover"
+              onClick={() => navigate("/distributors")}
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit
+                </p>
+              </div>
+              <span className="text-lg font-bold text-red-600 dark:text-red-400">{atRisk.length}</span>
+            </div>
+          );
+        })()}
+
         {/* Charts Row 1: Revenue Trend + Payment Split */}
         <div className="grid gap-4 md:grid-cols-5">
           <div className="glass-card rounded-xl p-4 md:col-span-3">
