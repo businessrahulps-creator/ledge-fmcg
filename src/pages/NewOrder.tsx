@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
-import confetti from "canvas-confetti";
+
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
@@ -303,19 +303,11 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
-      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
-      setTimeout(() => {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors });
-      }, 300);
-      setTimeout(() => {
-        confetti({ particleCount: 50, spread: 90, origin: { y: 0.5 }, colors });
-      }, 700);
-
       trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
       toast.success(`Order #${result.orderNumber} created successfully!`);
 
-      setTimeout(() => navigate("/orders"), 2000);
+      setTimeout(() => navigate("/orders"), 800);
     }
     // If !result.success, toast was already shown by DataContext
   };

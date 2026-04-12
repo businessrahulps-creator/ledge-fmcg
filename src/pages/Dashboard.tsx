@@ -120,7 +120,7 @@ export default function Dashboard() {
               key={kpi.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, type: "spring", stiffness: 280 + i * 15, damping: 22 + i * 2 }}
+              transition={{ delay: i * 0.06, type: "tween", duration: 0.25, ease: "easeOut" }}
               className={`glass-card p-5 md:p-7 min-w-0 ${kpiAccents[i]}`}
             >
               <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
@@ -193,7 +193,7 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
+className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                     />
                   </div>
                 </div>
@@ -265,7 +265,7 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                     <motion.div
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
+                      transition={{ delay: Math.min(i, 3) * 0.05, type: "tween", duration: 0.2, ease: "easeOut" }}
                       className="glass-card card-hover p-4"
                     >
                       <div className="flex items-center justify-between mb-1">
