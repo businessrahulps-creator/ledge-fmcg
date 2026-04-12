@@ -1037,21 +1037,38 @@ export default function Performance() {
         {(() => {
           const allTargets = api.targets.list();
           const now = new Date();
+          const today = now.toISOString().split("T")[0];
+          const dayOfWeek = now.getDay();
+          const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
+          const weekEnd = new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0];
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
           const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
-          const monthTargets = allTargets.filter(t => t.periodType === "monthly" && t.periodStart === monthStart && (t.targetRevenue > 0 || t.targetOrders > 0));
-          if (monthTargets.length === 0) return null;
 
-          const monthOrders = orders.filter(o => o.date >= monthStart && o.date <= monthEnd);
+          // Collect active targets across all period types
+          const activeTargets = allTargets.filter(t =>
+            (t.targetRevenue > 0 || t.targetOrders > 0) && (
+              (t.periodType === "daily" && t.periodStart === today) ||
+              (t.periodType === "weekly" && t.periodStart === weekStart) ||
+              (t.periodType === "monthly" && t.periodStart === monthStart)
+            )
+          );
+          if (activeTargets.length === 0) return null;
 
-          const withProgress = monthTargets.map(t => {
-            const entityOrders = monthOrders.filter(o =>
-              t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId
+          const withProgress = activeTargets.map(t => {
+            const pStart = t.periodStart;
+            const pEnd = t.periodType === "daily" ? pStart
+              : t.periodType === "weekly" ? weekEnd
+              : monthEnd;
+            const entityOrders = orders.filter(o =>
+              o.date >= pStart && o.date <= pEnd &&
+              (t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId)
             );
             const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
             const actualOrd = entityOrders.length;
             const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
-            return { ...t, pct, actualRev, actualOrd };
+            const periodLabel = t.periodType === "daily" ? "Today" : t.periodType === "weekly" ? "This Week" : "This Month";
+            return { ...t, pct, actualRev, actualOrd, periodLabel };
           }).sort((a, b) => b.pct - a.pct);
 
           const topPerformers = withProgress.filter(t => t.pct >= 70).slice(0, 3);
@@ -1062,7 +1079,6 @@ export default function Performance() {
               <h3 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" />
                 Targets Overview
-                <span className="text-[10px] font-normal text-muted-foreground">({new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" })})</span>
               </h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 {topPerformers.length > 0 && (
@@ -1073,7 +1089,7 @@ export default function Performance() {
                         <div key={t.id} className="flex items-center justify-between rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2">
                           <div>
                             <p className="text-xs font-semibold">{t.entityName}</p>
-                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                           </div>
                           <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t.pct}%</span>
                         </div>
@@ -1089,7 +1105,7 @@ export default function Performance() {
                         <div key={t.id} className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2">
                           <div>
                             <p className="text-xs font-semibold">{t.entityName}</p>
-                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                           </div>
                           <span className="text-sm font-bold text-red-600 dark:text-red-400">{t.pct}%</span>
                         </div>

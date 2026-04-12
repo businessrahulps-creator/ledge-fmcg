@@ -424,13 +424,27 @@ export default function Salespersons() {
                     {(() => {
                       const allTargets = api.targets.list();
                       const now = new Date();
+                      const today = now.toISOString().split("T")[0];
+                      const dayOfWeek = now.getDay();
+                      const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                      const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
                       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-                      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
-                      const target = allTargets.find(t => t.entityType === "salesperson" && t.entityId === profileId && t.periodType === "monthly" && t.periodStart === monthStart);
+
+                      const dailyTarget = allTargets.find(t => t.entityType === "salesperson" && t.entityId === profileId && t.periodType === "daily" && t.periodStart === today);
+                      const weeklyTarget = allTargets.find(t => t.entityType === "salesperson" && t.entityId === profileId && t.periodType === "weekly" && t.periodStart === weekStart);
+                      const monthlyTarget = allTargets.find(t => t.entityType === "salesperson" && t.entityId === profileId && t.periodType === "monthly" && t.periodStart === monthStart);
+
+                      const target = dailyTarget || weeklyTarget || monthlyTarget;
                       if (!target || (target.targetRevenue <= 0 && target.targetOrders <= 0)) return null;
-                      const monthOrders = profileOrders.filter(o => o.date >= monthStart && o.date <= monthEnd);
-                      const actualRev = monthOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-                      const actualOrd = monthOrders.length;
+
+                      const periodLabel = target.periodType === "daily" ? "Today" : target.periodType === "weekly" ? "This Week" : new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+                      const periodEnd = target.periodType === "daily" ? today
+                        : target.periodType === "weekly" ? new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0]
+                        : new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+
+                      const filteredOrders = profileOrders.filter(o => o.date >= target.periodStart && o.date <= periodEnd);
+                      const actualRev = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                      const actualOrd = filteredOrders.length;
                       const revPct = target.targetRevenue > 0 ? Math.round((actualRev / target.targetRevenue) * 100) : 0;
                       const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
                       const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
@@ -442,7 +456,7 @@ export default function Salespersons() {
                           <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
                             <Target className="h-3.5 w-3.5 text-primary" />
                             Targets & Achievements
-                            <span className="text-[10px] font-normal text-muted-foreground">({new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" })})</span>
+                            <span className="text-[10px] font-normal text-muted-foreground">({periodLabel})</span>
                           </h3>
                           <div className="rounded-lg border border-border bg-muted/30 p-3">
                             <div className="flex items-center justify-between mb-2">
