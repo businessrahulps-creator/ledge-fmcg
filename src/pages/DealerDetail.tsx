@@ -1,4 +1,13 @@
 import { useState, useMemo } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Phone, Mail, FileText, TrendingUp, TrendingDown, Minus, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Plus, Trash2, Target } from "lucide-react";
@@ -43,6 +52,7 @@ export default function DealerDetail() {
 
   const [ssOpen, setSsOpen] = useState(false);
   const [ssExpanded, setSsExpanded] = useState(false);
+  const [deleteSecondarySaleId, setDeleteSecondarySaleId] = useState<string | null>(null);
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
 
   if (!dealer) {
@@ -357,7 +367,7 @@ export default function DealerDetail() {
                         {ss.remarks ? ` · ${ss.remarks}` : ""}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => api.secondarySales.remove(ss.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => setDeleteSecondarySaleId(ss.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -440,6 +450,21 @@ export default function DealerDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteSecondarySaleId} onOpenChange={() => setDeleteSecondarySaleId(null)}>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Secondary Sale</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove this secondary sale record? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="destructive" onClick={() => { if (deleteSecondarySaleId) { api.secondarySales.remove(deleteSecondarySaleId); setDeleteSecondarySaleId(null); toast.success("Secondary sale removed"); } }}>Remove</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
