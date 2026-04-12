@@ -791,6 +791,106 @@ export default function Orders() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Claim / Return Modal */}
+        <Dialog open={claimModalOpen} onOpenChange={setClaimModalOpen}>
+          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-base">Record Return / Claim</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                {selectedOrder?.orderNumber} · {selectedOrder?.distributorName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Claim type toggle */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">What happened?</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setClaimType("return")}
+                    className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
+                      claimType === "return"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-foreground/20"
+                    }`}
+                  >
+                    <RotateCcw className="h-4 w-4 shrink-0" />
+                    <div className="text-left">
+                      <div className="font-semibold">Goods Returned</div>
+                      <div className="text-[10px] opacity-70">Stock will be restored</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setClaimType("damage")}
+                    className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
+                      claimType === "damage"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-foreground/20"
+                    }`}
+                  >
+                    <PackageX className="h-4 w-4 shrink-0" />
+                    <div className="text-left">
+                      <div className="font-semibold">Damaged / Claim Only</div>
+                      <div className="text-[10px] opacity-70">No stock change</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Product quantities */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Select products & quantities to claim</Label>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
+                        <th className="px-3 py-2 text-left font-medium">Product</th>
+                        <th className="px-3 py-2 text-right font-medium">Ordered</th>
+                        <th className="px-3 py-2 text-right font-medium">Claim Qty</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder?.lines.map((line, i) => (
+                        <tr key={i} className="border-b border-border/50">
+                          <td className="px-3 py-2 font-medium">{line.productName}</td>
+                          <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
+                          <td className="px-3 py-2 text-right">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={line.quantity}
+                              value={claimQuantities[i] ?? 0}
+                              onChange={e => setClaimQuantities(prev => ({ ...prev, [i]: Math.min(line.quantity, Math.max(0, parseInt(e.target.value) || 0)) }))}
+                              className="h-8 w-16 text-right text-xs ml-auto"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Reason */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Reason</Label>
+                <Input
+                  value={claimReason}
+                  onChange={e => setClaimReason(e.target.value)}
+                  placeholder="e.g. Damaged packaging, wrong items, expired goods…"
+                  className="h-10"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={() => setClaimModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmitClaim} disabled={claimSubmitting}>
+                {claimSubmitting ? "Submitting…" : claimType === "return" ? "Record Return & Restore Stock" : "Record Damage Claim"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
