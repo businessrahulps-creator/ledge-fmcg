@@ -1080,6 +1080,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
+  // Secondary Sales CRUD
+  const addSecondarySale = useCallback(async (sale: SecondarySale) => {
+    if (!companyId) return;
+    const { data, error } = await supabase.from("secondary_sales").insert({
+      company_id: companyId,
+      distributor_id: sale.distributorId,
+      product_id: sale.productId,
+      product_name: sanitizeInput(sale.productName),
+      retailer_name: sanitizeInput(sale.retailerName),
+      quantity: sale.quantity,
+      date: sale.date,
+      remarks: sanitizeInput(sale.remarks),
+    } as any).select().single();
+    if (error) { toast.error("Failed to record secondary sale", { description: error.message }); return; }
+    if (data) {
+      const mapped: SecondarySale = {
+        id: (data as any).id, distributorId: sale.distributorId, productId: sale.productId,
+        productName: sale.productName, retailerName: sale.retailerName,
+        quantity: sale.quantity, date: sale.date, remarks: sale.remarks,
+      };
+      setSecondarySales(prev => [mapped, ...prev]);
+    }
+  }, [companyId]);
+
+  const deleteSecondarySale = useCallback(async (id: string) => {
+    const { error } = await supabase.from("secondary_sales").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return; }
+    setSecondarySales(prev => prev.filter(s => s.id !== id));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
