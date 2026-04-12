@@ -534,6 +534,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [companyId]);
 
+  const safeRefetchSchemes = useCallback(async () => {
+    if (!companyId) return;
+    try {
+      const { data } = await supabase.from("schemes").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).range(0, 9999);
+      if (data) {
+        const mapped: Scheme[] = data.map((s: any) => ({
+          id: s.id, name: s.name, description: s.description || "",
+          schemeType: s.scheme_type as Scheme["schemeType"],
+          discountPercent: Number(s.discount_percent || 0), buyQty: s.buy_qty || 0, freeQty: s.free_qty || 0,
+          flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
+          productId: s.product_id || null, dealerId: s.dealer_id || null,
+          isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
+        }));
+        setSchemes(mapped);
+        cacheData(companyId, "schemes", mapped);
+      }
+    } catch { /* ignore */ }
+  }, [companyId]);
+
   // --- Stock deduction helper ---
   const deductStockForOrder = useCallback(async (
     orderId: string, lines: OrderLine[], godownId: string, cId: string
