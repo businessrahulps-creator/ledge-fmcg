@@ -246,7 +246,7 @@ export default function Dashboard() {
                       <tr key={order.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => navigate(`/orders/${order.id}`)}>
                         <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
-                        <td className="px-6 py-4 text-muted-foreground">{order.salespersonName}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
