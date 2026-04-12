@@ -1,29 +1,21 @@
 import { useState, useMemo, useCallback } from "react";
-import { Gift, RotateCcw, PackageX } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useAuth } from "@/context/AuthContext";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, Trash2, Download, FileText } from "lucide-react";
-import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
+import { Plus, Search, Filter, Download, FileText } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
-import { OrderInvoicePdf } from "@/components/pdf/OrderInvoicePdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { formatCurrency, type Order } from "@/data/mock-data";
+import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
-import type { Claim, ClaimLine } from "@/context/DataContext";
 import {
   Select,
   SelectContent,
@@ -31,69 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 import { formatIndianDate } from "@/utils/formatDate";
-
-const statusColors: Record<string, string> = {
-  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
-  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
-  pending: "border-red-500 bg-red-500/10 text-red-600",
-  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
-  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
-};
-
-const paymentModes = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cheque", label: "Cheque" },
-  { value: "upi", label: "UPI" },
-];
-
-const paymentStatuses = [
-  { value: "paid", label: "Paid" },
-  { value: "partial", label: "Partial" },
-  { value: "pending", label: "Pending" },
-];
-
-const deliveryStatuses = [
-  { value: "pending", label: "Pending" },
-  { value: "dispatched", label: "Dispatched" },
-  { value: "delivered", label: "Delivered" },
-];
 
 export default function Orders() {
   const api = useApi();
   const { companyInfo } = api;
-  const { userRole } = useAuth();
   const navigate = useNavigate();
   const orders = api.orders.list();
   const invoices = api.invoices.list();
-  const distributors = api.dealers.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
-  const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
   const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
   const [search, setSearch] = useState(dealerParam);
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryFilter, setDeliveryFilter] = useState("all");
-
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
   const ordersPdfSections: PdfSection[] = [
@@ -105,7 +48,6 @@ export default function Orders() {
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
-  // Get billing status for an order
   const getOrderBillingStatus = useCallback((orderId: string) => {
     const docs = invoices.filter(inv => inv.sourceOrderId === orderId);
     if (docs.length === 0) return null;
@@ -237,68 +179,68 @@ export default function Orders() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                 <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
                   <th className="px-6 py-3 font-semibold">Order #</th>
                   <th className="px-6 py-3 font-semibold">Date</th>
                   <th className="px-6 py-3 font-semibold">Dealer</th>
                   <th className="px-6 py-3 font-semibold">Sales Person</th>
                   <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                     <th className="px-6 py-3 font-semibold">Payment</th>
-                     <th className="px-6 py-3 font-semibold">Delivery</th>
-                     <th className="px-6 py-3 font-semibold">Billing</th>
+                  <th className="px-6 py-3 font-semibold">Payment</th>
+                  <th className="px-6 py-3 font-semibold">Delivery</th>
+                  <th className="px-6 py-3 font-semibold">Billing</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedOrders.map((order) => {
+                  const billingStatus = getOrderBillingStatus(order.id);
+                  return (
+                    <tr
+                      key={order.id}
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                      className="group border-b border-border/50 row-hover cursor-pointer"
+                    >
+                      <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
+                      <td className="px-6 py-4">{order.distributorName}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
+                      <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                      <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                      <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                      <td className="px-6 py-4">
+                        {billingStatus ? (
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                            {billingStatus.label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground/50">—</span>
+                        )}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedOrders.map((order) => {
-                      const billingStatus = getOrderBillingStatus(order.id);
-                      return (
-                        <tr
-                          key={order.id}
-                          onClick={() => openOrder(order)}
-                          className="group border-b border-border/50 row-hover cursor-pointer"
-                        >
-                          <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
-                          <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                          <td className="px-6 py-4">{order.distributorName}</td>
-                          <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
-                          <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                          <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                          <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                          <td className="px-6 py-4">
-                            {billingStatus ? (
-                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                                {billingStatus.label}
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-muted-foreground/50">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           <div className="divide-y divide-border/50 md:hidden">
             {paginatedOrders.map((order) => (
-                <div
-                  key={order.id}
-                  onClick={() => openOrder(order)}
-                  className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
-                  </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {order.distributorName} · {formatIndianDate(order.date)}
-                  </p>
-                  <div className="mt-2 flex gap-1.5">
-                    <StatusBadge status={order.paymentStatus} />
-                    <StatusBadge status={order.deliveryStatus} />
-                  </div>
+              <div
+                key={order.id}
+                onClick={() => navigate(`/orders/${order.id}`)}
+                className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
+                  <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
                 </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {order.distributorName} · {formatIndianDate(order.date)}
+                </p>
+                <div className="mt-2 flex gap-1.5">
+                  <StatusBadge status={order.paymentStatus} />
+                  <StatusBadge status={order.deliveryStatus} />
+                </div>
+              </div>
             ))}
           </div>
 
@@ -321,344 +263,6 @@ export default function Orders() {
           )}
         </div>
 
-        {/* Order Detail Dialog */}
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-2xl">
-            {selectedOrder && (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="text-base md:text-lg">{selectedOrder.orderNumber}</DialogTitle>
-                  <DialogDescription className="sr-only">View and edit order details</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 md:space-y-5">
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                     <div className="rounded-lg border border-border bg-muted/30 p-3">
-                       <span className="text-xs text-muted-foreground">Date</span>
-                      <p className="mt-0.5 text-xs font-medium md:text-sm">{formatIndianDate(selectedOrder.date)}</p>
-                    </div>
-                     <div className="rounded-lg border border-border bg-muted/30 p-3">
-                       <span className="text-xs text-muted-foreground">Dealer</span>
-                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.distributorName}</p>
-                    </div>
-                     <div className="rounded-lg border border-border bg-muted/30 p-3">
-                       <span className="text-xs text-muted-foreground">Sales Person</span>
-                      <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.salesperson}</p>
-                    </div>
-                     <div className="rounded-lg border border-border bg-muted/30 p-3">
-                       <span className="text-xs text-muted-foreground">{(selectedOrder.schemeSavings || 0) > 0 ? 'Effective Total' : 'Total'}</span>
-                      {(selectedOrder.schemeSavings || 0) > 0 && (
-                        <p className="mt-0.5 text-[10px] text-muted-foreground line-through">{formatCurrency(selectedOrder.total)}</p>
-                      )}
-                      <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total - (selectedOrder.schemeSavings || 0))}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="mb-2 text-xs font-semibold md:text-sm">Items</h3>
-                    <div className="rounded-lg border border-border overflow-hidden">
-                      <table className="w-full text-xs md:text-sm">
-                        <thead>
-                          <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                            <th className="px-3 py-2 font-medium md:px-4">Product</th>
-                            <th className="px-3 py-2 font-medium text-right md:px-4">Qty</th>
-                            <th className="px-3 py-2 font-medium text-right md:px-4">Price</th>
-                            <th className="px-3 py-2 font-medium text-right md:px-4">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedOrder.lines.map((line, i) => (
-                            <tr key={i} className="border-b border-border/50">
-                              <td className="px-3 py-2.5 font-medium md:px-4">{line.productName}</td>
-                              <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{line.quantity}</td>
-                              <td className="px-3 py-2.5 text-right text-muted-foreground md:px-4">{formatCurrency(line.unitPrice)}</td>
-                              <td className="px-3 py-2.5 text-right font-medium md:px-4">{formatCurrency(line.lineTotal)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Schemes Applied (read-only from stored data) */}
-                  {selectedOrder.appliedSchemes && selectedOrder.appliedSchemes.length > 0 && (
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Gift className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Schemes Applied</span>
-                      </div>
-                      <div className="space-y-1">
-                        {selectedOrder.appliedSchemes.map((s, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs">
-                            <div>
-                              <span className="font-medium text-emerald-700 dark:text-emerald-300">{s.schemeName}</span>
-                              {s.schemeLabel && <span className="text-emerald-600/70 dark:text-emerald-400/70 ml-1">({s.schemeLabel})</span>}
-                            </div>
-                            <span className="font-semibold text-emerald-700 dark:text-emerald-300">-{formatCurrency(s.savings)}</span>
-                          </div>
-                        ))}
-                      </div>
-                      {selectedOrder.schemeSavings > 0 && (
-                        <div className="mt-1.5 pt-1.5 border-t border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs">
-                          <span className="font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
-                          <span className="font-bold text-emerald-700 dark:text-emerald-300">-{formatCurrency(selectedOrder.schemeSavings)}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Linked Billing Documents */}
-                  {(() => {
-                    const docs = invoices.filter(inv => inv.sourceOrderId === selectedOrder.id);
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-xs font-semibold md:text-sm">Documents</h3>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs gap-1"
-                            onClick={() => {
-                              setSelectedOrder(null);
-                              navigate(`/billing?order=${selectedOrder.id}`);
-                            }}
-                          >
-                            <FileText className="h-3 w-3" />
-                            Generate Invoice
-                          </Button>
-                        </div>
-                        {docs.length > 0 ? (
-                          <div className="rounded-lg border border-border overflow-hidden">
-                            <table className="w-full text-xs">
-                              <thead>
-                                <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
-                                  <th className="px-3 py-2 text-left font-medium">Type</th>
-                                  <th className="px-3 py-2 text-left font-medium">Number</th>
-                                  <th className="px-3 py-2 text-right font-medium">Amount</th>
-                                  <th className="px-3 py-2 text-left font-medium">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {docs.map(doc => (
-                                  <tr key={doc.id} className="border-b border-border/50">
-                                    <td className="px-3 py-2">
-                                      <span className="capitalize">{doc.docType.replace("_", " ")}</span>
-                                    </td>
-                                    <td className="px-3 py-2 font-mono font-medium">{doc.invoiceNumber}</td>
-                                    <td className="px-3 py-2 text-right font-mono">₹{doc.grandTotal.toLocaleString("en-IN")}</td>
-                                    <td className="px-3 py-2">
-                                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                                        doc.status === "final" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
-                                      }`}>{doc.status}</span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground/60 py-2">No billing documents yet for this order.</p>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  <Separator />
-
-                  <div className="space-y-3 md:space-y-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs md:text-sm">Payment Mode</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {paymentModes.map((m) => (
-                          <button
-                            key={m.value}
-                            onClick={() => setEditPaymentMode(m.value)}
-                            className={`rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                              editPaymentMode === m.value
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-border text-muted-foreground hover:border-foreground/20"
-                            }`}
-                          >
-                            {m.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="text-xs md:text-sm">Payment Status</Label>
-                      <div className="flex gap-2">
-                        {paymentStatuses.map((s) => (
-                          <button
-                            key={s.value}
-                            onClick={() => setEditPayment(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                              editPayment === s.value
-                                ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                                : "border-border text-muted-foreground hover:border-foreground/20"
-                            }`}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="text-xs md:text-sm">Delivery Status</Label>
-                      <div className="flex gap-2">
-                        {deliveryStatuses.map((s) => (
-                          <button
-                            key={s.value}
-                            onClick={() => setEditDelivery(s.value)}
-                            className={`flex-1 rounded-lg border px-2 py-2.5 md:px-3 md:py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                              editDelivery === s.value
-                                ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                                : "border-border text-muted-foreground hover:border-foreground/20"
-                            }`}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label className="text-xs md:text-sm">Source Warehouse {(editDelivery === "dispatched" || editDelivery === "delivered") ? "*" : ""}</Label>
-                      <Select value={editGodown} onValueChange={setEditGodown}>
-                        <SelectTrigger className="h-10 rounded-lg">
-                          <SelectValue placeholder="Select warehouse" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {godowns.map((g) => (
-                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
-                      <div className="space-y-1.5">
-                        <Label className="text-xs md:text-sm">Dispatch Date</Label>
-                        <Input
-                          type="date"
-                          value={editDispatchDate}
-                          onChange={(e) => setEditDispatchDate(e.target.value)}
-                          className="h-10 rounded-lg md:h-12"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs md:text-sm">Vehicle</Label>
-                        <Input
-                          value={editVehicle}
-                          onChange={(e) => setEditVehicle(e.target.value)}
-                          placeholder="e.g. MH-01-AB-1234"
-                          className="h-10 rounded-lg md:h-12"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs md:text-sm">Driver</Label>
-                        <Input
-                          value={editDriver}
-                          onChange={(e) => setEditDriver(e.target.value)}
-                          placeholder="Driver name"
-                          className="h-10 rounded-lg md:h-12"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-                  <div className="flex gap-2 sm:mr-auto">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={selectedOrder.deliveryStatus === "delivered"}
-                      onClick={() => { setDeleteTarget(selectedOrder); setDeleteConfirmText(""); }}
-                      aria-label="Delete order"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span>{selectedOrder.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label="Download invoice PDF"
-                      onClick={() => {
-                        downloadPdf(
-                          pdfFilename("invoice", selectedOrder.orderNumber),
-                          <OrderInvoicePdf order={selectedOrder} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} logoUrl={companyInfo.logoUrl} />
-                        );
-                      }}
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      <span>Invoice</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-[#25D366] hover:bg-[#1ebe57] text-white"
-                      aria-label="Share via WhatsApp"
-                      onClick={() => shareOrderOnWhatsApp(selectedOrder, companyInfo)}
-                    >
-                      <WhatsAppIcon className="h-3.5 w-3.5" />
-                      <span>WhatsApp</span>
-                    </Button>
-                    {(selectedOrder.deliveryStatus === "dispatched" || selectedOrder.deliveryStatus === "delivered") && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={openClaimModal}
-                        aria-label="Record return or claim"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        <span>Return / Claim</span>
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
-                    <Button onClick={saveOrder} disabled={isSaving}>
-                      {isSaving ? "Saving…" : "Save Changes"}
-                    </Button>
-                  </div>
-                </DialogFooter>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(""); } }}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Order</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete <span className="font-semibold text-foreground">{deleteTarget?.orderNumber}</span> and restore any deducted stock. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-2 py-2">
-              <Label className="text-xs text-muted-foreground">
-                Type <span className="font-mono font-semibold text-foreground">{deleteTarget?.orderNumber}</span> to confirm
-              </Label>
-              <Input
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder={deleteTarget?.orderNumber || ""}
-                className="h-11 rounded-lg font-mono"
-                autoFocus
-              />
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => { setDeleteTarget(null); setDeleteConfirmText(""); }}>Cancel</AlertDialogCancel>
-              <Button
-                variant="destructive"
-                disabled={deleteConfirmText !== deleteTarget?.orderNumber || deleteLoading}
-                onClick={handleDeleteOrder}
-              >
-                {deleteLoading ? "Deleting…" : "Delete Order"}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
         <ExportPdfModal
           open={pdfModalOpen}
           onOpenChange={setPdfModalOpen}
@@ -704,123 +308,6 @@ export default function Orders() {
             );
           }}
         />
-        {/* Credit Override Dialog */}
-        <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
-              <AlertDialogDescription>
-                Changing payment status will push this dealer's outstanding above their credit limit. Do you want to proceed as Super Admin?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>
-                Override & Save
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Claim / Return Modal */}
-        <Dialog open={claimModalOpen} onOpenChange={setClaimModalOpen}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-base">Record Return / Claim</DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                {selectedOrder?.orderNumber} · {selectedOrder?.distributorName}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              {/* Claim type toggle */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium">What happened?</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setClaimType("return")}
-                    className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
-                      claimType === "return"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-foreground/20"
-                    }`}
-                  >
-                    <RotateCcw className="h-4 w-4 shrink-0" />
-                    <div className="text-left">
-                      <div className="font-semibold">Goods Returned</div>
-                      <div className="text-[10px] opacity-70">Stock will be restored</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setClaimType("damage")}
-                    className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
-                      claimType === "damage"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-foreground/20"
-                    }`}
-                  >
-                    <PackageX className="h-4 w-4 shrink-0" />
-                    <div className="text-left">
-                      <div className="font-semibold">Damaged / Claim Only</div>
-                      <div className="text-[10px] opacity-70">No stock change</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Product quantities */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium">Select products & quantities to claim</Label>
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
-                        <th className="px-3 py-2 text-left font-medium">Product</th>
-                        <th className="px-3 py-2 text-right font-medium">Ordered</th>
-                        <th className="px-3 py-2 text-right font-medium">Claim Qty</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder?.lines.map((line, i) => (
-                        <tr key={i} className="border-b border-border/50">
-                          <td className="px-3 py-2 font-medium">{line.productName}</td>
-                          <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
-                          <td className="px-3 py-2 text-right">
-                            <Input
-                              type="number"
-                              min={0}
-                              max={line.quantity}
-                              value={claimQuantities[i] ?? 0}
-                              onChange={e => setClaimQuantities(prev => ({ ...prev, [i]: Math.min(line.quantity, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                              className="h-8 w-16 text-right text-xs ml-auto"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Reason */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium">Reason</Label>
-                <Input
-                  value={claimReason}
-                  onChange={e => setClaimReason(e.target.value)}
-                  placeholder="e.g. Damaged packaging, wrong items, expired goods…"
-                  className="h-10"
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="flex-col gap-2 sm:flex-row">
-              <Button variant="outline" onClick={() => setClaimModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmitClaim} disabled={claimSubmitting}>
-                {claimSubmitting ? "Submitting…" : claimType === "return" ? "Record Return & Restore Stock" : "Record Damage Claim"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </AppLayout>
   );
