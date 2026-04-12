@@ -1,83 +1,39 @@
 
 
-# Feature #5: Dealer Performance Scorecard + Churn Risk
+# Audit: Feature #5 — Issues Found & Fixes
 
-## Overview
-Add a Performance Scorecard section inside the existing dealer detail dialog (Distributors page), a churn risk indicator, a "Generate Dealer Statement PDF" button, and a "Top Dealers Performance" widget on the Performance page linking to individual scorecards.
+## Issues Identified
 
-## Changes
+### 1. Churn Risk Logic Bug (Critical)
+In `getChurnRisk` (line 26), the condition uses `||` (OR):
+```
+if (daysSinceLastOrder <= 60 || paidPct >= 30) return "medium";
+```
+This means a dealer who hasn't ordered in **6 months** but paid 35% of old orders still gets "medium" risk. The `paidPct >= 30` overrides the recency check entirely. A dealer inactive for 200 days should be "high" risk.
 
-### 1. `src/pages/Distributors.tsx` — Scorecard in Dealer Detail Dialog
-
-After the existing 4 stat cards and credit health section (line ~382), insert a new **"Performance Scorecard"** section:
-
-**Metrics computed from `selectedOrders`:**
-- **Orders (30/60/90 days):** Count orders within each window, show trend arrow (↑/↓) comparing 30d vs previous 30d
-- **Total Value:** Sum of order totals for this dealer in period
-- **Average Order Value:** Total / count
-- **Payment Timeliness:** % of orders with `paymentStatus === "paid"` (on-time %)
-- **Churn Risk:** Computed from days since last order + payment behavior:
-  - **Low** (green): Ordered within 30 days, >60% on-time payment
-  - **Medium** (amber): Ordered within 60 days OR 30-60% on-time
-  - **High** (red): No orders in 60+ days OR <30% on-time
-
-**Visual treatment:**
-- Progress bars for payment timeliness
-- Color-coded churn risk badge (green/amber/red with icon)
-- Trend arrows (↑↓→) on order count comparisons
-
-**"Generate Dealer Statement PDF" button** — replaces the existing basic Export PDF button in the dealer detail header. Generates a professional branded PDF containing:
-- Company header (from `api.companyInfo`)
-- Dealer info section
-- Scorecard metrics table
-- Churn risk assessment
-- Order history summary table
-
-Uses existing `downloadPdf` + a new `DealerStatementPdf` component.
-
-### 2. `src/components/pdf/DealerStatementPdf.tsx` — New file
-
-A `@react-pdf/renderer` Document component rendering:
-- PdfHeader with company branding
-- Dealer details section (name, location, contact, credit)
-- Performance scorecard table (orders 30/60/90d, AOV, payment timeliness, churn risk)
-- Order history table (order number, date, amount, payment status)
-- PdfFooter
-
-### 3. `src/pages/Performance.tsx` — Top Dealers Performance Widget
-
-Add a new widget after the existing "Credit at Risk" section (~line 525) and before "Scheme Performance":
-
-**"Top Dealers Performance"** card showing top 5 dealers with:
-- Name, revenue in period, order count, churn risk badge
-- Each row is clickable → navigates to `/distributors` (and could set a query param, but for simplicity just navigates)
-- Uses the same churn risk calculation logic
-
-### 4. Shared Churn Risk Utility
-
-Create a small helper function (inline or in a utils file) to compute churn risk given a dealer's orders array. This avoids duplicating logic between Distributors and Performance pages.
-
-**Logic:**
-```typescript
-function getChurnRisk(dealerOrders: Order[]): "low" | "medium" | "high" {
-  if (dealerOrders.length === 0) return "high";
-  const now = new Date();
-  const sorted = [...dealerOrders].sort((a, b) => b.date.localeCompare(a.date));
-  const daysSinceLastOrder = (now.getTime() - new Date(sorted[0].date).getTime()) / 86400000;
-  const paidPct = dealerOrders.filter(o => o.paymentStatus === "paid").length / dealerOrders.length * 100;
-  
-  if (daysSinceLastOrder <= 30 && paidPct >= 60) return "low";
-  if (daysSinceLastOrder <= 60 || paidPct >= 30) return "medium";
-  return "high";
-}
+**Fix:** Change to `&&` — medium only if BOTH conditions are met (recent enough AND decent payment):
+```
+if (daysSinceLastOrder <= 60 && paidPct >= 30) return "medium";
 ```
 
-## Files Touched
-- `src/utils/dealerScorecard.ts` — New: churn risk calculator + scorecard data builder
-- `src/components/pdf/DealerStatementPdf.tsx` — New: branded statement PDF
-- `src/pages/Distributors.tsx` — Add scorecard section + statement PDF button in dealer detail dialog
-- `src/pages/Performance.tsx` — Add Top Dealers Performance widget
+### 2. PDF Uses `px` Instead of `pt` (DealerStatementPdf)
+The `DealerStatementPdf` uses inline styles like `border: "1px solid #e2e8f0"`. All existing PDF styles in `PdfStyles.ts` use `pt` (e.g. `"0.5pt solid #D4D4D4"`). `@react-pdf/renderer` expects points. While it may still render, using `px` is inconsistent and could cause subtle sizing issues.
 
-## No database changes needed
-All data is computed from existing `orders` table. No new tables or columns required.
+**Fix:** Replace all `1px` with `1pt` and `0.5px` with `0.5pt` in `DealerStatementPdf.tsx`.
+
+### 3. Dealer Detail Order History Shows Gross Total, Not Effective
+In `Distributors.tsx` lines 485 and 496, the order history table shows `o.total` (gross). The Orders page was already updated to show effective total (`o.total - o.schemeSavings`). This is inconsistent — a business owner sees different amounts for the same order.
+
+**Fix:** Show effective total: `formatCurrency(o.total - (o.schemeSavings || 0))`.
+
+### 4. Top Dealers Widget Uses Gross Revenue
+In `Performance.tsx` line 533, revenue is computed as `o.total` without subtracting scheme savings.
+
+**Fix:** Use `o.total - (o.schemeSavings || 0)` for revenue calculation.
+
+## Files Changed
+- `src/utils/dealerScorecard.ts` — Fix churn risk `||` → `&&`
+- `src/components/pdf/DealerStatementPdf.tsx` — Fix `px` → `pt` in border styles
+- `src/pages/Distributors.tsx` — Show effective total in dealer order history
+- `src/pages/Performance.tsx` — Use effective total in Top Dealers revenue
 
