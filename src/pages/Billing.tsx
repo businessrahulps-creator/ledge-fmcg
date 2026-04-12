@@ -113,6 +113,7 @@ export default function Billing() {
     const orderId = searchParams.get("order");
     if (orderId) {
       handleSelectOrder(orderId);
+      setStep(2);
       setShowCreate(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
