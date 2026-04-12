@@ -282,6 +282,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [targets, setTargets] = useState<Target[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
