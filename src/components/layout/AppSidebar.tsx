@@ -14,6 +14,7 @@ import {
   RotateCcw,
   FileText,
   Landmark,
+  BookOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,7 @@ const analyzeNav = [
 ];
 
 const bottomNav = [
+  { title: "Help", url: "/help", icon: BookOpen },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

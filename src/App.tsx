@@ -33,6 +33,7 @@ import Contact from "./pages/Contact";
 import ResetPassword from "./pages/ResetPassword";
 import Claims from "./pages/Claims";
 import Billing from "./pages/Billing";
+import Help from "./pages/Help";
 import Company from "./pages/Company";
 import OrderDetail from "./pages/OrderDetail";
 import DealerDetail from "./pages/DealerDetail";
@@ -98,6 +99,7 @@ const App = () => (
                   <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Performance /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Help /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
