@@ -40,7 +40,7 @@ export interface Target {
   entityType: "salesperson" | "dealer";
   entityId: string;
   entityName: string;
-  periodType: "monthly" | "quarterly";
+  periodType: "daily" | "weekly" | "monthly";
   periodStart: string;
   targetRevenue: number;
   targetOrders: number;

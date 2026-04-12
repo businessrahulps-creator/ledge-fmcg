@@ -8,9 +8,11 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, TrendingUp, TrendingDown, CheckCircle2, AlertTriangle, Minus } from "lucide-react";
+import { Target, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
+
+type PeriodType = "daily" | "weekly" | "monthly";
 
 function getMonthOptions() {
   const opts: { value: string; label: string }[] = [];
@@ -24,14 +26,62 @@ function getMonthOptions() {
   return opts;
 }
 
-function getCurrentMonthStart() {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0];
+function getDailyOptions() {
+  const opts: { value: string; label: string }[] = [];
+  const now = new Date();
+  for (let i = -7; i <= 7; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const value = d.toISOString().split("T")[0];
+    const isToday = i === 0;
+    const label = isToday
+      ? `Today (${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
+      : d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+    opts.push({ value, label });
+  }
+  return opts;
 }
 
-function getMonthEnd(periodStart: string) {
+function getMonday(d: Date) {
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.getFullYear(), d.getMonth(), diff);
+}
+
+function getWeeklyOptions() {
+  const opts: { value: string; label: string }[] = [];
+  const now = new Date();
+  const thisMonday = getMonday(now);
+  for (let i = -2; i <= 2; i++) {
+    const monday = new Date(thisMonday);
+    monday.setDate(monday.getDate() + i * 7);
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    const value = monday.toISOString().split("T")[0];
+    const isCurrent = i === 0;
+    const label = isCurrent
+      ? `This Week (${monday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
+      : `${monday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`;
+    opts.push({ value, label });
+  }
+  return opts;
+}
+
+function getPeriodEnd(periodType: PeriodType, periodStart: string) {
   const d = new Date(periodStart);
+  if (periodType === "daily") return periodStart;
+  if (periodType === "weekly") {
+    const end = new Date(d);
+    end.setDate(end.getDate() + 6);
+    return end.toISOString().split("T")[0];
+  }
   return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split("T")[0];
+}
+
+function getDefaultPeriodStart(periodType: PeriodType) {
+  const now = new Date();
+  if (periodType === "daily") return now.toISOString().split("T")[0];
+  if (periodType === "weekly") return getMonday(now).toISOString().split("T")[0];
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 }
 
 type StatusKey = "exceeded" | "on_track" | "behind" | "needs_attention" | "no_target";
@@ -72,10 +122,11 @@ interface InlineTargetRowProps {
   actualOrders: number;
   existingTarget?: TargetType;
   periodStart: string;
+  periodType: PeriodType;
   onSave: (target: TargetType) => void;
 }
 
-function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, onSave }: InlineTargetRowProps) {
+function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave }: InlineTargetRowProps) {
   const [revInput, setRevInput] = useState(existingTarget?.targetRevenue?.toString() || "");
   const [ordInput, setOrdInput] = useState(existingTarget?.targetOrders?.toString() || "");
   const [dirty, setDirty] = useState(false);
@@ -96,14 +147,14 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       entityType,
       entityId,
       entityName,
-      periodType: "monthly",
+      periodType,
       periodStart,
       targetRevenue: targetRev,
       targetOrders: targetOrd,
     });
     setDirty(false);
-    toast.success("Target saved", { description: `${entityName}'s target updated` });
-  }, [dirty, existingTarget, entityType, entityId, entityName, periodStart, targetRev, targetOrd, onSave]);
+    toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
+  }, [dirty, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
 
   return (
     <div className="glass-card p-4 space-y-3">
@@ -171,26 +222,39 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
   );
 }
 
+const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+};
+
 export default function Targets() {
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
-  const [period, setPeriod] = useState(getCurrentMonthStart());
+  const [periodType, setPeriodType] = useState<PeriodType>("monthly");
+  const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
+
   const monthOptions = useMemo(() => getMonthOptions(), []);
+  const dailyOptions = useMemo(() => getDailyOptions(), []);
+  const weeklyOptions = useMemo(() => getWeeklyOptions(), []);
+
+  const handlePeriodTypeChange = useCallback((pt: PeriodType) => {
+    setPeriodType(pt);
+    setPeriod(getDefaultPeriodStart(pt));
+  }, []);
 
   const orders = api.orders.list();
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
   const targets = api.targets.list();
 
-  const periodEnd = getMonthEnd(period);
+  const periodEnd = getPeriodEnd(periodType, period);
 
-  // Filter orders in selected period
   const periodOrders = useMemo(() =>
     orders.filter(o => o.date >= period && o.date <= periodEnd),
     [orders, period, periodEnd]
   );
 
-  // Compute actuals per salesperson
   const spActuals = useMemo(() => {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
@@ -202,7 +266,6 @@ export default function Targets() {
     return map;
   }, [periodOrders]);
 
-  // Compute actuals per dealer
   const dealerActuals = useMemo(() => {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
@@ -214,13 +277,12 @@ export default function Targets() {
     return map;
   }, [periodOrders]);
 
-  // Get existing target for entity + period
   const getTarget = useCallback((entityType: string, entityId: string) => {
     return targets.find(t =>
       t.entityType === entityType && t.entityId === entityId &&
-      t.periodType === "monthly" && t.periodStart === period
+      t.periodType === periodType && t.periodStart === period
     );
-  }, [targets, period]);
+  }, [targets, period, periodType]);
 
   const handleSave = useCallback(async (target: TargetType) => {
     if (target.id) {
@@ -234,7 +296,13 @@ export default function Targets() {
     return <AppLayout><DashboardSkeleton /></AppLayout>;
   }
 
-  const periodLabel = new Date(period).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const dateOptions = periodType === "daily" ? dailyOptions : periodType === "weekly" ? weeklyOptions : monthOptions;
+
+  const periodLabel = periodType === "daily"
+    ? new Date(period).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })
+    : periodType === "weekly"
+    ? `Week of ${new Date(period).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+    : new Date(period).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
   return (
     <AppLayout>
@@ -249,20 +317,39 @@ export default function Targets() {
               Set goals and track progress for your team and dealers
             </p>
           </div>
-          <select
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-56"
-          >
-            {monthOptions.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            {/* Period Type Toggle */}
+            <div className="flex rounded-lg border border-input bg-background overflow-hidden">
+              {(["daily", "weekly", "monthly"] as PeriodType[]).map(pt => (
+                <button
+                  key={pt}
+                  onClick={() => handlePeriodTypeChange(pt)}
+                  className={`px-3 py-2 text-xs font-medium transition-colors ${
+                    periodType === pt
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {PERIOD_TYPE_LABELS[pt]}
+                </button>
+              ))}
+            </div>
+            {/* Period Selector */}
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-56"
+            >
+              {dateOptions.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Summary Stats */}
         {(() => {
-          const periodTargets = targets.filter(t => t.periodType === "monthly" && t.periodStart === period);
+          const periodTargets = targets.filter(t => t.periodType === periodType && t.periodStart === period);
           const spTargets = periodTargets.filter(t => t.entityType === "salesperson");
           const dlTargets = periodTargets.filter(t => t.entityType === "dealer");
           const totalTargetRev = periodTargets.reduce((s, t) => s + t.targetRevenue, 0);
@@ -273,7 +360,7 @@ export default function Targets() {
           return (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="glass-card p-3 md:p-4">
-                <span className="text-[10px] text-muted-foreground md:text-xs">Total Target</span>
+                <span className="text-[10px] text-muted-foreground md:text-xs">{PERIOD_TYPE_LABELS[periodType]} Target</span>
                 <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(totalTargetRev)}</p>
               </div>
               <div className="glass-card p-3 md:p-4">
@@ -309,7 +396,7 @@ export default function Targets() {
                 const existingTarget = getTarget("salesperson", sp.id);
                 return (
                   <InlineTargetRow
-                    key={`${sp.id}-${period}`}
+                    key={`${sp.id}-${periodType}-${period}`}
                     entityId={sp.id}
                     entityName={sp.name}
                     entityType="salesperson"
@@ -318,6 +405,7 @@ export default function Targets() {
                     actualOrders={actual.orders}
                     existingTarget={existingTarget}
                     periodStart={period}
+                    periodType={periodType}
                     onSave={handleSave}
                   />
                 );
@@ -336,7 +424,7 @@ export default function Targets() {
                 const existingTarget = getTarget("dealer", d.id);
                 return (
                   <InlineTargetRow
-                    key={`${d.id}-${period}`}
+                    key={`${d.id}-${periodType}-${period}`}
                     entityId={d.id}
                     entityName={d.name}
                     entityType="dealer"
@@ -345,6 +433,7 @@ export default function Targets() {
                     actualOrders={actual.orders}
                     existingTarget={existingTarget}
                     periodStart={period}
+                    periodType={periodType}
                     onSave={handleSave}
                   />
                 );
