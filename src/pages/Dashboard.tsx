@@ -93,6 +93,19 @@ export default function Dashboard() {
     : 0;
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
+  // 7-day revenue sparkline data
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const dayRevenue = orders
+      .filter(o => o.date === key)
+      .reduce((s, o) => s + o.total, 0);
+    return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
+  });
+  const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
+  const allZero = last7Days.every(d => d.value === 0);
+
   if (isLoading) {
     return <AppLayout><DashboardSkeleton /></AppLayout>;
   }
@@ -199,6 +212,56 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground font-medium">Delivered</p>
                 <p className="text-sm font-bold tracking-tight tabular-nums">{monthDeliveredPct}%</p>
               </div>
+            </div>
+
+            {/* 7-day revenue sparkline */}
+            <div className="mt-4">
+              <p className="text-[10px] text-muted-foreground/50 font-medium mb-2">Last 7 days</p>
+              {allZero ? (
+                <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
+              ) : (
+                <div>
+                  <svg viewBox="0 0 180 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <polyline
+                      fill="url(#sparkFill)"
+                      stroke="none"
+                      points={
+                        last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ") +
+                        ` 180,44 0,44`
+                      }
+                    />
+                    <polyline
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ")}
+                    />
+                    {last7Days.map((d, i) => (
+                      <circle
+                        key={i}
+                        cx={i * 30}
+                        cy={44 - (d.value / sparkMax) * 40}
+                        r={i === 6 ? 3 : 2}
+                        fill="currentColor"
+                        opacity={i === 6 ? 1 : 0.6}
+                      />
+                    ))}
+                  </svg>
+                  <div className="flex justify-between mt-1">
+                    {last7Days.map((d, i) => (
+                      <span key={i} className={cn("text-[9px] tabular-nums", i === 6 ? "text-foreground font-medium" : "text-muted-foreground/50")}>{d.label}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
