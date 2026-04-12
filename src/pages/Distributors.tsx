@@ -164,11 +164,8 @@ export default function Distributors() {
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {paginatedDealers.map((d, i) => (
-            <motion.div
+            <div
               key={d.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i, 8) * 0.05, duration: 0.3 }}
               onClick={() => navigate(`/distributors/${d.id}`)}
               className="cursor-pointer glass-card card-hover p-4 md:p-6"
             >
