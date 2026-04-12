@@ -1,4 +1,13 @@
 import { useState, useMemo } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Phone, Mail, FileText, TrendingUp, TrendingDown, Minus, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Plus, Trash2, Target } from "lucide-react";
