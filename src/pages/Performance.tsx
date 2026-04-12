@@ -525,6 +525,57 @@ export default function Performance() {
           );
         })()}
 
+        {/* Top Dealers Performance */}
+        {(() => {
+          const dealerData = dealers.map(d => {
+            const dOrders = orders.filter(o => o.distributorId === d.id);
+            const periodOrders = filteredOrders.filter(o => o.distributorId === d.id);
+            const revenue = periodOrders.reduce((s, o) => s + o.total, 0);
+            const risk = getChurnRisk(dOrders);
+            return { id: d.id, name: d.name, revenue, orderCount: periodOrders.length, risk };
+          })
+            .filter(d => d.orderCount > 0 || d.risk === "high")
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 5);
+
+          if (dealerData.length === 0) return null;
+
+          return (
+            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-blue-500">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10">
+                  <Users className="h-4 w-4 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold">Top Dealers Performance</p>
+                  <p className="text-[11px] text-muted-foreground">With churn risk assessment</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {dealerData.map(d => {
+                  const rc = churnRiskConfig[d.risk];
+                  return (
+                    <div
+                      key={d.id}
+                      className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                      onClick={() => navigate("/distributors")}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{d.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rc.color} ${rc.bg} shrink-0`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${rc.dot}`} />
+                        {rc.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Scheme Performance — uses actual stored data */}
         {(() => {
           const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
