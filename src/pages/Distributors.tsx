@@ -470,6 +470,89 @@ export default function Distributors() {
                     );
                   })()}
 
+                  {/* Secondary Sales Section */}
+                  {(() => {
+                    const dealerSS = allSecondarySales.filter(s => s.distributorId === selectedId);
+                    const totalQty = dealerSS.reduce((s, r) => s + r.quantity, 0);
+                    const recentSS = dealerSS.slice(0, 10);
+                    return (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
+                            <Store className="h-3.5 w-3.5 text-primary" />
+                            Secondary Sales
+                          </h3>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1.5"
+                            onClick={() => {
+                              setSsForm({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+                              setSsOpen(true);
+                            }}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Record Sale
+                          </Button>
+                        </div>
+
+                        {dealerSS.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                                <span className="text-[10px] text-muted-foreground">Total Records</span>
+                                <p className="text-sm font-semibold mt-0.5">{dealerSS.length}</p>
+                              </div>
+                              <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                                <span className="text-[10px] text-muted-foreground">Total Qty Sold</span>
+                                <p className="text-sm font-semibold mt-0.5">{totalQty} units</p>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => setSsExpanded(!ssExpanded)}
+                              className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                            >
+                              {ssExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                              {ssExpanded ? "Hide" : "Show"} recent records ({recentSS.length})
+                            </button>
+
+                            {ssExpanded && (
+                              <div className="rounded-lg border border-border overflow-hidden">
+                                <div className="divide-y divide-border/50">
+                                  {recentSS.map(ss => (
+                                    <div key={ss.id} className="flex items-center justify-between px-3 py-2">
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs font-medium truncate">{ss.retailerName || "—"}</span>
+                                          <span className="text-[10px] text-muted-foreground">{formatIndianDate(ss.date)}</span>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                          {ss.productName} × {ss.quantity}
+                                          {ss.remarks ? ` · ${ss.remarks}` : ""}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive shrink-0"
+                                        onClick={() => api.secondarySales.remove(ss.id)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No secondary sales recorded yet. Track what this dealer sells to retailers.</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <div>
                     <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {selectedOrders.length > 0 ? (
