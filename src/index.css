@@ -28,10 +28,10 @@
     --accent-indigo: #4F46E5;
     --accent-wash: #EEF2FF;
 
-    --background: 220 16% 94%;
+    --background: 220 14% 97%;
     --foreground: 222 20% 14%;
 
-    --card: 0 0% 99.5%;
+    --card: 0 0% 100%;
     --card-foreground: 222 20% 14%;
 
     --popover: 0 0% 100%;
@@ -44,7 +44,7 @@
     --secondary-foreground: 0 0% 18%;
 
     --muted: 220 14% 93%;
-    --muted-foreground: 220 10% 44%;
+    --muted-foreground: 220 10% 40%;
 
     --accent: 220 14% 95%;
     --accent-foreground: 0 0% 11%;
@@ -58,19 +58,19 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --border: 220 9% 89%;
-    --input: 220 9% 89%;
+    --border: 220 9% 87%;
+    --input: 220 9% 87%;
     --ring: 222 47% 42%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 20% 98%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 20%;
     --sidebar-primary: 0 0% 7%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 95%;
     --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 220 9% 90%;
+    --sidebar-border: 220 9% 87%;
     --sidebar-ring: 0 0% 7%;
 
     --surface: 0 0% 100%;
@@ -150,7 +150,7 @@
 
 @layer utilities {
   .glass-card {
-    @apply rounded-2xl bg-card border border-border/50 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03),0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.6)] transition-all duration-200
+    @apply rounded-2xl bg-card border border-border/50 shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.04),0_4px_14px_rgba(0,0,0,0.04)] transition-all duration-200
            dark:border-border/50 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_1px_3px_rgba(0,0,0,0.2)];
   }
 
@@ -160,7 +160,7 @@
 
   .card-hover {
     @apply transition-all duration-200 ease-out 
-           hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-border/80
+           hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border
            active:scale-[0.98] active:shadow-sm;
   }
 
