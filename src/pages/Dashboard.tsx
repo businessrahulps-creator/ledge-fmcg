@@ -100,7 +100,7 @@ export default function Dashboard() {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const dayRevenue = orders
       .filter(o => o.date === key)
-      .reduce((s, o) => s + o.total, 0);
+      .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
     return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
   });
   const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
@@ -126,7 +126,7 @@ export default function Dashboard() {
       orderDate.getDate() === target.getDate();
   });
 
-  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
+  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
   const totalOrders = filteredOrders.length;
   const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
