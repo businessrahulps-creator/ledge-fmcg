@@ -993,6 +993,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (updates.driverName !== undefined) dbUpdates.driver_name = sanitizeInput(updates.driverName);
     if (updates.dispatchRemarks !== undefined) dbUpdates.dispatch_remarks = sanitizeInput(updates.dispatchRemarks);
     if (updates.godownId !== undefined) dbUpdates.godown_id = updates.godownId || null;
+    if (updates.distributorId !== undefined) dbUpdates.distributor_id = updates.distributorId;
+    if (updates.distributorName !== undefined) dbUpdates.distributor_name = updates.distributorName;
+    if (updates.salespersonId !== undefined) dbUpdates.salesperson_id = updates.salespersonId;
+    if (updates.salesperson !== undefined) dbUpdates.salesperson_name = updates.salesperson;
+    if (updates.total !== undefined) dbUpdates.total = updates.total;
+    if (updates.schemeSavings !== undefined) dbUpdates.scheme_savings = updates.schemeSavings;
+
+    const linesChanged = updates.lines !== undefined;
 
     // Offline: optimistic + queue + persist
     if (!navigator.onLine) {
@@ -1013,13 +1021,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (error) { toast.error("Failed to update order", { description: error.message }); return; }
     }
 
+    // Update line items: delete old, insert new
+    if (linesChanged && updates.lines) {
+      const { error: delErr } = await supabase.from("order_lines").delete().eq("order_id", id);
+      if (delErr) { toast.error("Failed to update line items", { description: delErr.message }); return; }
+      if (updates.lines.length > 0) {
+        const lineRows = updates.lines.map(l => ({
+          order_id: id,
+          product_id: l.productId,
+          product_name: l.productName,
+          quantity: l.quantity,
+          unit_price: l.unitPrice,
+          line_total: l.lineTotal,
+        }));
+        const { error: insErr } = await supabase.from("order_lines").insert(lineRows);
+        if (insErr) { toast.error("Failed to insert line items", { description: insErr.message }); return; }
+      }
+
+      // Update order_schemes: delete old and re-insert if appliedSchemes provided
+      await supabase.from("order_schemes").delete().eq("order_id", id);
+      if (updates.appliedSchemes && updates.appliedSchemes.length > 0) {
+        const schemeRows = updates.appliedSchemes.map(s => ({
+          order_id: id,
+          scheme_id: s.schemeId || null,
+          scheme_name: s.schemeName,
+          scheme_label: s.schemeLabel || "",
+          savings: s.savings,
+        }));
+        await supabase.from("order_schemes").insert(schemeRows);
+      }
+    }
+
     const godownId = updates.godownId || currentOrder?.godownId;
     if (
       previousDelivery === "pending" &&
       (newDelivery === "dispatched" || newDelivery === "delivered") &&
       godownId && currentOrder && companyId
     ) {
-      await deductStockForOrder(id, currentOrder.lines, godownId, companyId);
+      const linesToUse = updates.lines || currentOrder.lines;
+      await deductStockForOrder(id, linesToUse, godownId, companyId);
     }
 
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
