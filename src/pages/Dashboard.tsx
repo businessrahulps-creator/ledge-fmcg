@@ -75,6 +75,7 @@ export default function Dashboard() {
   // Credit at Risk
   const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
 
+  const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
 
   const topProducts = [...products].sort((a, b) => b.totalSold - a.totalSold).slice(0, 4);
