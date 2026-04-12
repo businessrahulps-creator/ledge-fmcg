@@ -54,7 +54,7 @@ export async function shareOrderOnWhatsApp(
       logoUrl: companyInfo.logoUrl,
     });
 
-    const blob = await pdf(doc).toBlob();
+    const blob = await (pdf(doc as any).toBlob());
     const file = new File(
       [blob],
       `Invoice_${order.orderNumber}.pdf`,
