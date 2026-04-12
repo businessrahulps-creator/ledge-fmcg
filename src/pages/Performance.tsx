@@ -24,6 +24,7 @@ import {
   Gift,
   UserCheck,
   Store,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -1031,6 +1032,75 @@ export default function Performance() {
             )}
           </div>
         </div>
+
+        {/* Targets Overview Widget */}
+        {(() => {
+          const allTargets = api.targets.list();
+          const now = new Date();
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+          const monthTargets = allTargets.filter(t => t.periodType === "monthly" && t.periodStart === monthStart && (t.targetRevenue > 0 || t.targetOrders > 0));
+          if (monthTargets.length === 0) return null;
+
+          const monthOrders = orders.filter(o => o.date >= monthStart && o.date <= monthEnd);
+
+          const withProgress = monthTargets.map(t => {
+            const entityOrders = monthOrders.filter(o =>
+              t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId
+            );
+            const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+            const actualOrd = entityOrders.length;
+            const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
+            return { ...t, pct, actualRev, actualOrd };
+          }).sort((a, b) => b.pct - a.pct);
+
+          const topPerformers = withProgress.filter(t => t.pct >= 70).slice(0, 3);
+          const behindTarget = withProgress.filter(t => t.pct < 40).slice(0, 3);
+
+          return (
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                Targets Overview
+                <span className="text-[10px] font-normal text-muted-foreground">({new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" })})</span>
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {topPerformers.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">⭐ Top Performers</p>
+                    <div className="space-y-2">
+                      {topPerformers.map(t => (
+                        <div key={t.id} className="flex items-center justify-between rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2">
+                          <div>
+                            <p className="text-xs font-semibold">{t.entityName}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"}</p>
+                          </div>
+                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {behindTarget.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">⚠️ Needs Attention</p>
+                    <div className="space-y-2">
+                      {behindTarget.map(t => (
+                        <div key={t.id} className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2">
+                          <div>
+                            <p className="text-xs font-semibold">{t.entityName}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"}</p>
+                          </div>
+                          <span className="text-sm font-bold text-red-600 dark:text-red-400">{t.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Actionable Insights */}
         {insights.length > 0 && (
