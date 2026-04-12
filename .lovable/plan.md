@@ -1,39 +1,45 @@
 
 
-# Add Delete Confirmation to Unprotected Delete Paths
+# Dashboard: Add "This Month" Summary Row
 
 ## Problem
 
-Two delete actions fire immediately without confirmation:
-
-1. **Stock — Remove Inventory Item**: The "Remove from Warehouse" button inside the stock item edit dialog calls `deleteStockItemFn()` directly — no confirmation.
-2. **Dealer Detail — Remove Secondary Sale**: The trash icon on each secondary sale entry calls `api.secondarySales.remove(ss.id)` directly — no confirmation.
-
-All other delete paths (Orders, Dealers, Salespersons, Billing, Schemes, Products, Warehouses) already have proper AlertDialog confirmation.
+The dashboard currently filters all KPIs and data to a single day (via the day-of-week picker). Business owners want a persistent monthly overview — total revenue, order count, pending payments — visible at a glance without switching views.
 
 ## Solution
 
-Add an AlertDialog confirmation step to each of these two delete actions, matching the existing pattern used everywhere else.
+Add a **"This Month" summary strip** above the day-of-week picker. It shows four key monthly aggregates in a compact horizontal row, always visible regardless of which day is selected. This gives the "big picture" while the day picker continues to handle daily drill-down.
 
-### 1. `src/pages/Stock.tsx` — Stock item removal
+### Design
 
-- Replace the direct `deleteStockItemFn` call on the "Remove from Warehouse" button with a state toggle (`confirmDeleteStockItem`) that opens an AlertDialog
-- AlertDialog text: "Remove {productName} from {warehouseName}? This action cannot be undone."
-- On confirm, call `deleteStockItemFn()` and close the edit dialog
+A single horizontal row of 4 stats, styled as a subtle secondary strip (lighter than the main KPI cards to create visual hierarchy):
 
-### 2. `src/pages/DealerDetail.tsx` — Secondary sale removal
+```text
+┌──────────────────────────────────────────────────────┐
+│  This Month                                          │
+│  ₹18,42,000 Revenue  ·  312 Orders  ·  ₹2,14,000   │
+│                                         Outstanding  │
+│  ·  89% Delivered                                    │
+└──────────────────────────────────────────────────────┘
 
-- Add `deleteSecondarySaleId` state
-- Replace the direct `api.secondarySales.remove(ss.id)` call with `setDeleteSecondarySaleId(ss.id)`
-- Add AlertDialog: "Remove this secondary sale record? This action cannot be undone."
-- On confirm, call `api.secondarySales.remove(deleteSecondarySaleId)` and clear state
+  [S] [M] [T] [W] [T] [F] [S]   ← existing day picker
 
-## Files Changed
+  ┌─────────┐ ┌─────────┐ ...   ← existing daily KPIs
+```
 
-| File | Change |
-|------|--------|
-| `src/pages/Stock.tsx` | Wrap stock item "Remove from Warehouse" in AlertDialog (~15 lines added) |
-| `src/pages/DealerDetail.tsx` | Wrap secondary sale delete in AlertDialog (~20 lines added) |
+- **glass-card** with a single row of 4 inline stats (not 4 separate cards — keeps it compact)
+- Stats: **Revenue** (sum of all orders this calendar month), **Orders** (count), **Outstanding** (sum of unpaid/partial totals), **Delivered %** (delivered / total orders)
+- Label: "This Month · Apr 2026" in muted text at top
+- Mobile: 2×2 grid within the card
 
-**2 files modified. No new files. No new dependencies. No database changes.**
+### Implementation
+
+**`src/pages/Dashboard.tsx`** — single file change:
+
+1. Compute `monthlyOrders` by filtering `orders` where `o.date` falls within the current calendar month (1st of month to today)
+2. Derive 4 stats: `monthRevenue`, `monthOrderCount`, `monthOutstanding`, `monthDeliveredPct`
+3. Insert a new `<motion.div>` section between the header and the day-of-week row
+4. Style: `glass-card p-4` with `grid grid-cols-2 md:grid-cols-4 gap-3` for the stat items
+
+**No new files. No new dependencies. No database changes.**
 
