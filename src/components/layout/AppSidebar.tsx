@@ -46,7 +46,7 @@ const manageNav = [
 ];
 
 const accountingNav = [
-  { title: "Billing", url: "/billing", icon: Receipt },
+  { title: "Billing", url: "/billing", icon: FileText },
 ];
 
 const analyzeNav = [
