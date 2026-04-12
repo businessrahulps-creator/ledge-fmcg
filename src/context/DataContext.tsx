@@ -125,6 +125,10 @@ interface DataContextType {
   updateTarget: (t: Target) => void;
   deleteTarget: (id: string) => void;
 
+  claims: Claim[];
+  addClaim: (claim: Claim) => Promise<boolean>;
+  updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
+
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
   refreshAll: () => Promise<void>;
