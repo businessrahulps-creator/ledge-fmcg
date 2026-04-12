@@ -16,11 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Download, Share, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -29,16 +29,33 @@ const primaryMobileNav = [
   { title: "Performance", url: "/performance", icon: TrendingUp },
 ];
 
-const moreItems = [
-  { title: "Dealers", url: "/distributors", icon: Store },
-  { title: "Team", url: "/salespersons", icon: UsersRound },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Billing", url: "/billing", icon: Receipt },
-  { title: "Claims", url: "/claims", icon: RotateCcw },
-  { title: "Targets", url: "/targets", icon: Target },
-  { title: "Schemes", url: "/schemes", icon: Tags },
-  { title: "Settings", url: "/settings", icon: Settings },
+const moreGroups = [
+  {
+    label: "Manage",
+    items: [
+      { title: "Dealers", url: "/distributors", icon: Store },
+      { title: "Team", url: "/salespersons", icon: UsersRound },
+      { title: "Schemes", url: "/schemes", icon: Tags },
+      { title: "Targets", url: "/targets", icon: Target },
+    ],
+  },
+  {
+    label: "Analyze",
+    items: [
+      { title: "Reports", url: "/reports", icon: BarChart3 },
+      { title: "Billing", url: "/billing", icon: Receipt },
+      { title: "Claims", url: "/claims", icon: RotateCcw },
+    ],
+  },
+  {
+    label: "Settings",
+    items: [
+      { title: "Settings", url: "/settings", icon: Settings },
+    ],
+  },
 ];
+
+const allMoreItems = moreGroups.flatMap((g) => g.items);
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
@@ -78,7 +95,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }, [online, refreshPendingCount]);
 
-  const isMoreActive = moreItems.some((item) => location.pathname.startsWith(item.url));
+  const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -218,41 +236,67 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 );
               })}
 
-              {/* More menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-90"
-                    aria-label="More navigation options"
-                  >
-                    {isMoreActive && (
-                      <motion.div
-                        layoutId="nav-pill"
-                        className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                        transition={{ type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                        style={{ willChange: "transform" }}
-                      />
-                    )}
-                    <MoreHorizontal
-                      className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isMoreActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
-                      strokeWidth={isMoreActive ? 1.8 : 1.5}
-                    />
-                    <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isMoreActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
-                      More
-                    </span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" side="top" className="mb-2 min-w-[160px]">
-                  {moreItems.map((item) => (
-                    <DropdownMenuItem key={item.title} asChild>
-                      <Link to={item.url} className="flex items-center gap-2.5">
-                        <item.icon className="h-4 w-4" strokeWidth={1.5} />
-                        {item.title}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* More menu — Sheet drawer */}
+              <button
+                onClick={() => setMoreOpen(true)}
+                className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-90"
+                aria-label="More navigation options"
+              >
+                {isMoreActive && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
+                    transition={{ type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                    style={{ willChange: "transform" }}
+                  />
+                )}
+                <MoreHorizontal
+                  className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isMoreActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
+                  strokeWidth={isMoreActive ? 1.8 : 1.5}
+                />
+                <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isMoreActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
+                  More
+                </span>
+              </button>
+
+              <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+                <SheetContent side="bottom" className="rounded-t-[20px] pb-10 px-5 max-h-[70vh]">
+                  <SheetHeader className="pb-2">
+                    <SheetTitle className="text-base">More</SheetTitle>
+                  </SheetHeader>
+                  <div className="space-y-5">
+                    {moreGroups.map((group) => (
+                      <div key={group.label}>
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2 px-1">
+                          {group.label}
+                        </p>
+                        <div className="grid grid-cols-4 gap-1">
+                          {group.items.map((item) => {
+                            const active = location.pathname.startsWith(item.url);
+                            return (
+                              <Link
+                                key={item.title}
+                                to={item.url}
+                                onClick={() => setMoreOpen(false)}
+                                className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-colors active:scale-95 ${
+                                  active
+                                    ? "bg-primary/10 text-primary"
+                                    : "text-muted-foreground hover:bg-muted/50"
+                                }`}
+                              >
+                                <item.icon className="h-5 w-5" strokeWidth={active ? 2 : 1.5} />
+                                <span className={`text-[11px] ${active ? "font-bold" : "font-medium"}`}>
+                                  {item.title}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </nav>
         </div>
