@@ -22,6 +22,60 @@ export interface CompanyInfo {
   address: string;
   gstin: string;
   logoUrl: string;
+  phone: string;
+  email: string;
+  pan: string;
+  stateCode: string;
+  bankName: string;
+  bankAccount: string;
+  bankIfsc: string;
+  invoicePrefix: string;
+}
+
+export interface InvoiceLine {
+  productName: string;
+  hsnCode: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  taxableValue: number;
+}
+
+export interface Invoice {
+  id: string;
+  docType: "gst_invoice" | "invoice" | "estimate" | "proforma" | "credit_note";
+  invoiceNumber: string;
+  invoiceDate: string;
+  sourceOrderId?: string;
+  buyerName: string;
+  buyerAddress: string;
+  buyerGstin: string;
+  buyerStateCode: string;
+  sellerName: string;
+  sellerAddress: string;
+  sellerGstin: string;
+  sellerPan: string;
+  sellerStateCode: string;
+  sellerPhone: string;
+  sellerEmail: string;
+  sellerBankName: string;
+  sellerBankAccount: string;
+  sellerBankIfsc: string;
+  sellerLogoUrl: string;
+  supplyType: "intra_state" | "inter_state";
+  gstRate: number;
+  subtotal: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
+  totalTax: number;
+  grandTotal: number;
+  roundOff: number;
+  amountInWords: string;
+  notes: string;
+  status: "draft" | "final";
+  lines: InvoiceLine[];
+  createdAt: string;
 }
 
 export interface SecondarySale {
@@ -129,6 +183,11 @@ interface DataContextType {
   addClaim: (claim: Claim) => Promise<boolean>;
   updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
 
+  invoices: Invoice[];
+  addInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => Promise<Invoice | null>;
+  updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
+  deleteInvoice: (id: string) => Promise<void>;
+
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
   refreshAll: () => Promise<void>;
@@ -223,9 +282,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [targets, setTargets] = useState<Target[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 
@@ -278,15 +338,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const { data: company } = await supabase
-        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url").eq("id", cId).single();
+        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
       if (token !== fetchTokenRef.current) return;
       if (company) {
         setOrderPrefixState(company.order_prefix);
         setOrderSequence(company.next_order_sequence);
-        setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
+        setCompanyInfo({
+          name: company.name || "", address: company.address || "", gstin: company.gstin || "",
+          logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
+          pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
+          bankName: (company as any).bank_name || "", bankAccount: (company as any).bank_account || "",
+          bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
+        });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes, invoicesRes, invoiceLinesRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -298,6 +364,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("claim_lines" as any).select("*").range(0, 9999),
+        supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("invoice_lines" as any).select("*").range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -386,6 +454,37 @@ export function DataProvider({ children }: { children: ReactNode }) {
         createdAt: c.created_at, resolvedAt: c.resolved_at || null,
       }));
       setClaims(mappedClaims);
+
+      // Map invoices
+      const allInvoiceLines = (invoiceLinesRes as any).data || [];
+      const mappedInvoices: Invoice[] = ((invoicesRes as any).data || []).map((inv: any) => ({
+        id: inv.id, docType: inv.doc_type, invoiceNumber: inv.invoice_number,
+        invoiceDate: inv.invoice_date, sourceOrderId: inv.source_order_id || undefined,
+        buyerName: inv.buyer_name || "", buyerAddress: inv.buyer_address || "",
+        buyerGstin: inv.buyer_gstin || "", buyerStateCode: inv.buyer_state_code || "",
+        sellerName: inv.seller_name || "", sellerAddress: inv.seller_address || "",
+        sellerGstin: inv.seller_gstin || "", sellerPan: inv.seller_pan || "",
+        sellerStateCode: inv.seller_state_code || "", sellerPhone: inv.seller_phone || "",
+        sellerEmail: inv.seller_email || "", sellerBankName: inv.seller_bank_name || "",
+        sellerBankAccount: inv.seller_bank_account || "", sellerBankIfsc: inv.seller_bank_ifsc || "",
+        sellerLogoUrl: inv.seller_logo_url || "",
+        supplyType: inv.supply_type as Invoice["supplyType"],
+        gstRate: Number(inv.gst_rate || 0), subtotal: Number(inv.subtotal || 0),
+        cgstAmount: Number(inv.cgst_amount || 0), sgstAmount: Number(inv.sgst_amount || 0),
+        igstAmount: Number(inv.igst_amount || 0), totalTax: Number(inv.total_tax || 0),
+        grandTotal: Number(inv.grand_total || 0), roundOff: Number(inv.round_off || 0),
+        amountInWords: inv.amount_in_words || "", notes: inv.notes || "",
+        status: inv.status as Invoice["status"],
+        lines: allInvoiceLines
+          .filter((l: any) => l.invoice_id === inv.id)
+          .map((l: any) => ({
+            productName: l.product_name || "", hsnCode: l.hsn_code || "",
+            quantity: l.quantity || 0, unit: l.unit || "Pack",
+            unitPrice: Number(l.unit_price || 0), taxableValue: Number(l.taxable_value || 0),
+          })),
+        createdAt: inv.created_at,
+      }));
+      setInvoices(mappedInvoices);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
@@ -1303,6 +1402,105 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
   }, []);
 
+  // Invoice CRUD
+  const addInvoice = useCallback(async (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">): Promise<Invoice | null> => {
+    if (!companyId) return null;
+    try {
+      // Get atomic invoice number
+      const { data: seqData, error: seqErr } = await supabase.rpc("get_next_invoice_number", { target_company_id: companyId });
+      if (seqErr) throw seqErr;
+      const seq = Array.isArray(seqData) ? seqData[0] : seqData;
+      const invoiceNumber = `${seq.prefix}-${new Date().getFullYear()}-${String(seq.seq).padStart(4, "0")}`;
+
+      const { data, error } = await supabase.from("invoices" as any).insert({
+        company_id: companyId,
+        doc_type: invoice.docType,
+        invoice_number: invoiceNumber,
+        invoice_date: invoice.invoiceDate,
+        source_order_id: invoice.sourceOrderId || null,
+        buyer_name: sanitizeInput(invoice.buyerName),
+        buyer_address: sanitizeInput(invoice.buyerAddress),
+        buyer_gstin: sanitizeInput(invoice.buyerGstin),
+        buyer_state_code: sanitizeInput(invoice.buyerStateCode),
+        seller_name: sanitizeInput(invoice.sellerName),
+        seller_address: sanitizeInput(invoice.sellerAddress),
+        seller_gstin: sanitizeInput(invoice.sellerGstin),
+        seller_pan: sanitizeInput(invoice.sellerPan),
+        seller_state_code: sanitizeInput(invoice.sellerStateCode),
+        seller_phone: sanitizeInput(invoice.sellerPhone),
+        seller_email: sanitizeInput(invoice.sellerEmail),
+        seller_bank_name: sanitizeInput(invoice.sellerBankName),
+        seller_bank_account: sanitizeInput(invoice.sellerBankAccount),
+        seller_bank_ifsc: sanitizeInput(invoice.sellerBankIfsc),
+        seller_logo_url: invoice.sellerLogoUrl || "",
+        supply_type: invoice.supplyType,
+        gst_rate: invoice.gstRate,
+        subtotal: invoice.subtotal,
+        cgst_amount: invoice.cgstAmount,
+        sgst_amount: invoice.sgstAmount,
+        igst_amount: invoice.igstAmount,
+        total_tax: invoice.totalTax,
+        grand_total: invoice.grandTotal,
+        round_off: invoice.roundOff,
+        amount_in_words: invoice.amountInWords,
+        notes: sanitizeInput(invoice.notes),
+        status: invoice.status,
+      }).select().single();
+      if (error) throw error;
+
+      const invId = (data as any).id;
+
+      // Insert lines
+      if (invoice.lines.length > 0) {
+        const { error: lErr } = await supabase.from("invoice_lines" as any).insert(
+          invoice.lines.map(l => ({
+            invoice_id: invId,
+            product_name: sanitizeInput(l.productName),
+            hsn_code: sanitizeInput(l.hsnCode),
+            quantity: l.quantity,
+            unit: l.unit,
+            unit_price: l.unitPrice,
+            taxable_value: l.taxableValue,
+          }))
+        );
+        if (lErr) throw lErr;
+      }
+
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: invId,
+        invoiceNumber,
+        createdAt: new Date().toISOString(),
+      };
+      setInvoices(prev => [newInvoice, ...prev]);
+      return newInvoice;
+    } catch (err: any) {
+      toast.error("Failed to create document", { description: err?.message || "Unknown error" });
+      return null;
+    }
+  }, [companyId]);
+
+  const updateInvoice = useCallback(async (id: string, updates: Partial<Invoice>) => {
+    const dbUpdates: Record<string, any> = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
+
+    const { error } = await supabase.from("invoices" as any).update(dbUpdates).eq("id", id);
+    if (error) { toast.error("Failed to update document", { description: error.message }); return; }
+    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
+  }, []);
+
+  const deleteInvoice = useCallback(async (id: string) => {
+    const inv = invoices.find(i => i.id === id);
+    if (inv?.status === "final") {
+      toast.error("Cannot delete finalized document");
+      return;
+    }
+    const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
+    if (error) { toast.error("Failed to delete document", { description: error.message }); return; }
+    setInvoices(prev => prev.filter(i => i.id !== id));
+  }, [invoices]);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1326,6 +1524,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         secondarySales, addSecondarySale, deleteSecondarySale,
         targets, addTarget, updateTarget, deleteTarget,
         claims, addClaim, updateClaim,
+        invoices, addInvoice, updateInvoice, deleteInvoice,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >

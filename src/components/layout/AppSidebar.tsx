@@ -12,6 +12,7 @@ import {
   Gift,
   Target,
   RotateCcw,
+  Receipt,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,10 @@ const manageNav = [
   { title: "Schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
   { title: "Returns", url: "/claims", icon: RotateCcw },
+];
+
+const accountingNav = [
+  { title: "Billing", url: "/billing", icon: Receipt },
 ];
 
 const analyzeNav = [
@@ -170,7 +175,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Analyze section */}
+        {/* Accounting section */}
+        <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Accounting</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {accountingNav.map(renderNavItem)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Analyze</SidebarGroupLabel>}
           <SidebarGroupContent>

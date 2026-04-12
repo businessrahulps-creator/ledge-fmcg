@@ -1,7 +1,7 @@
 import { useData } from "@/context/DataContext";
 import type { Order, Distributor, Salesperson, Product, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
-import type { AddOrderResult, SecondarySale, Target, Claim } from "@/context/DataContext";
+import type { AddOrderResult, SecondarySale, Target, Claim, Invoice } from "@/context/DataContext";
 
 export function useApi() {
   const data = useData();
@@ -76,6 +76,12 @@ export function useApi() {
       list: () => data.claims,
       create: (c: Claim) => data.addClaim(c),
       update: (id: string, updates: Partial<Claim>) => data.updateClaim(id, updates),
+    },
+    invoices: {
+      list: () => data.invoices,
+      create: (inv: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => data.addInvoice(inv),
+      update: (id: string, updates: Partial<Invoice>) => data.updateInvoice(id, updates),
+      remove: (id: string) => data.deleteInvoice(id),
     },
   };
 }

@@ -120,6 +120,14 @@ export default function Settings() {
   const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyGstin, setCompanyGstin] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyPan, setCompanyPan] = useState("");
+  const [companyStateCode, setCompanyStateCode] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [bankIfsc, setBankIfsc] = useState("");
+  const [invoicePrefix, setInvoicePrefix] = useState("INV");
   const [logoUrl, setLogoUrl] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,7 +162,7 @@ export default function Settings() {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url, trial_ends_at")
+      .select("name, address, gstin, logo_url, trial_ends_at, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -163,6 +171,14 @@ export default function Settings() {
           setCompanyAddress(data.address || "");
           setCompanyGstin(data.gstin || "");
           setLogoUrl(data.logo_url || "");
+          setCompanyPhone((data as any).phone || "");
+          setCompanyEmail((data as any).email || "");
+          setCompanyPan((data as any).pan || "");
+          setCompanyStateCode((data as any).state_code || "");
+          setBankName((data as any).bank_name || "");
+          setBankAccount((data as any).bank_account || "");
+          setBankIfsc((data as any).bank_ifsc || "");
+          setInvoicePrefix((data as any).invoice_prefix || "INV");
           if (data.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
         }
       });
@@ -319,7 +335,19 @@ export default function Settings() {
     if (companyId) {
       const { error } = await supabase
         .from("companies")
-        .update({ name: sanitizeInput(companyName), address: sanitizeInput(companyAddress), gstin: sanitizeInput(companyGstin) })
+        .update({
+          name: sanitizeInput(companyName),
+          address: sanitizeInput(companyAddress),
+          gstin: sanitizeInput(companyGstin),
+          phone: sanitizeInput(companyPhone),
+          email: sanitizeInput(companyEmail),
+          pan: sanitizeInput(companyPan),
+          state_code: sanitizeInput(companyStateCode),
+          bank_name: sanitizeInput(bankName),
+          bank_account: sanitizeInput(bankAccount),
+          bank_ifsc: sanitizeInput(bankIfsc),
+          invoice_prefix: sanitizeInput(invoicePrefix),
+        } as any)
         .eq("id", companyId);
       if (error) {
         toast({ title: "Error saving", description: error.message, variant: "destructive" });
@@ -472,6 +500,49 @@ export default function Settings() {
                   </p>
                 </div>
 
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Phone</Label>
+                    <Input value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} className="h-10 rounded-lg" placeholder="+91 98100 12345" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Email</Label>
+                    <Input type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} className="h-10 rounded-lg" placeholder="company@example.com" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">PAN</Label>
+                    <Input value={companyPan} onChange={(e) => setCompanyPan(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))} maxLength={10} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="ABCDE1234F" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">State Code</Label>
+                    <Input value={companyStateCode} onChange={(e) => setCompanyStateCode(e.target.value.replace(/\D/g, "").slice(0, 2))} maxLength={2} className="h-10 rounded-lg max-w-[100px] font-mono" placeholder="27" />
+                    <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-border/50 pt-4 mt-2">
+                  <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Bank Name</Label>
+                      <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">Account Number</Label>
+                        <Input value={bankAccount} onChange={(e) => setBankAccount(e.target.value.replace(/\D/g, ""))} className="h-10 rounded-lg font-mono" placeholder="1234567890" />
+                      </div>
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">IFSC Code</Label>
+                        <Input value={bankIfsc} onChange={(e) => setBankIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11))} maxLength={11} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="SBIN0001234" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Prefix</Label>
                   <Input
@@ -483,6 +554,20 @@ export default function Settings() {
                   />
                   <p className="text-[10px] text-muted-foreground md:text-xs">
                     This will be used in all future order numbers (e.g. {orderPrefix || "ORD"}-2026-0042)
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Invoice Prefix</Label>
+                  <Input
+                    value={invoicePrefix}
+                    onChange={(e) => setInvoicePrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                    maxLength={10}
+                    className="h-10 rounded-lg max-w-[200px] font-mono"
+                    placeholder="INV"
+                  />
+                  <p className="text-[10px] text-muted-foreground md:text-xs">
+                    Used for invoice numbers (e.g. {invoicePrefix || "INV"}-2026-0001)
                   </p>
                 </div>
 
