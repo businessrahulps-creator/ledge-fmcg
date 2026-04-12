@@ -183,6 +183,11 @@ interface DataContextType {
   addClaim: (claim: Claim) => Promise<boolean>;
   updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
 
+  invoices: Invoice[];
+  addInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => Promise<Invoice | null>;
+  updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
+  deleteInvoice: (id: string) => Promise<void>;
+
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
   refreshAll: () => Promise<void>;
