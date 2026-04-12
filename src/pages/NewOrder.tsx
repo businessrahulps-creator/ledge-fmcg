@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
