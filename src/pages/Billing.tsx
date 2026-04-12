@@ -590,7 +590,7 @@ export default function Billing() {
                                       <span className="font-medium">{o.orderNumber}</span>
                                       <span className="text-muted-foreground"> · {o.distributorName}</span>
                                       <div className="text-[10px] text-muted-foreground">
-                                        {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {o.salespersonName}
+                                        {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {o.salesperson}
                                       </div>
                                     </div>
                                   </div>
