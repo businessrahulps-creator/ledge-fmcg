@@ -245,6 +245,20 @@ export default function NewOrder() {
     // If !result.success, toast was already shown by DataContext
   };
 
+  const handleSave = () => {
+    if (exceedsCreditLimit) {
+      if (isSuperAdmin) {
+        setCreditOverrideOpen(true);
+        return;
+      }
+      toast.error("Credit limit exceeded", {
+        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Contact a Super Admin to override.`,
+      });
+      return;
+    }
+    executeSave();
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6 md:space-y-8">
