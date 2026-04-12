@@ -59,6 +59,7 @@ export async function exportFullBackup() {
 
   // --- Dealers ---
   const { data: dealers } = await supabase.from("distributors").select("*").order("name");
+  checkTruncation("dealers", dealers);
   if (dealers?.length) {
     const h = ["Name", "Location", "Contact", "Email", "GSTIN", "PAN", "Outstanding (₹)", "Credit Limit (₹)", "Total Orders", "Total Value (₹)"];
     const r = dealers.map((d) => [s(d.name), s(d.location), s(d.contact), s(d.email), s(d.gstin), s(d.pan), n(d.outstanding_amount), n(d.credit_limit), n(d.total_orders), n(d.total_value)]);
@@ -68,6 +69,7 @@ export async function exportFullBackup() {
 
   // --- Products ---
   const { data: products } = await supabase.from("products").select("*").order("name");
+  checkTruncation("products", products);
   if (products?.length) {
     const h = ["Name", "SKU", "Unit", "Base Price (₹)", "HSN Code", "Total Sold"];
     const r = products.map((p) => [s(p.name), s(p.sku), s(p.unit), n(p.base_price), s(p.hsn_code), n(p.total_sold)]);
@@ -77,6 +79,7 @@ export async function exportFullBackup() {
 
   // --- Sales Team ---
   const { data: sales } = await supabase.from("salespersons").select("*").order("name");
+  checkTruncation("sales team", sales);
   if (sales?.length) {
     const h = ["Name", "Phone", "Email", "Region", "Total Orders", "Total Value (₹)"];
     const r = sales.map((sp) => [s(sp.name), s(sp.phone), s(sp.email), s(sp.region), n(sp.total_orders), n(sp.total_value)]);
@@ -86,6 +89,7 @@ export async function exportFullBackup() {
 
   // --- Stock ---
   const { data: stockItems } = await supabase.from("stock_items").select("*, products(name, sku), godowns(name)");
+  checkTruncation("stock", stockItems);
   if (stockItems?.length) {
     const h = ["Product", "SKU", "Warehouse", "Quantity", "Threshold", "Last Deducted"];
     const r = stockItems.map((si: any) => [
@@ -98,6 +102,7 @@ export async function exportFullBackup() {
 
   // --- Warehouses ---
   const { data: godowns } = await supabase.from("godowns").select("*").order("name");
+  checkTruncation("warehouses", godowns);
   if (godowns?.length) {
     const h = ["Name", "Address", "Active"];
     const r = godowns.map((g) => [s(g.name), s(g.address), g.is_active ? "Yes" : "No"]);
@@ -107,6 +112,7 @@ export async function exportFullBackup() {
 
   // --- Schemes ---
   const { data: schemes } = await supabase.from("schemes").select("*").order("name");
+  checkTruncation("schemes", schemes);
   if (schemes?.length) {
     const h = ["Name", "Type", "Active", "Valid From", "Valid Until", "Discount %", "Flat Amount (₹)", "Buy Qty", "Free Qty", "Min Qty", "Min Order Value (₹)"];
     const r = schemes.map((sc) => [s(sc.name), s(sc.scheme_type), sc.is_active ? "Yes" : "No", s(sc.valid_from), s(sc.valid_until), n(sc.discount_percent), n(sc.flat_amount), n(sc.buy_qty), n(sc.free_qty), n(sc.min_qty), n(sc.min_order_value)]);
@@ -116,6 +122,7 @@ export async function exportFullBackup() {
 
   // --- Invoices ---
   const { data: invoices } = await supabase.from("invoices").select("*, invoice_lines(*)").order("invoice_date", { ascending: false });
+  checkTruncation("invoices", invoices);
   if (invoices?.length) {
     const h = ["Invoice #", "Date", "Buyer", "Subtotal (₹)", "Tax (₹)", "Grand Total (₹)", "Status"];
     const r = invoices.map((inv) => [s(inv.invoice_number), s(inv.invoice_date), s(inv.buyer_name), n(inv.subtotal), n(inv.total_tax), n(inv.grand_total), s(inv.status)]);
