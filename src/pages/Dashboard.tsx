@@ -43,6 +43,17 @@ export default function Dashboard() {
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
+  // Track last updated timestamp
+  const [lastUpdated, setLastUpdated] = useState(() => new Date());
+  const prevLoading = useRef(api.loading);
+  useEffect(() => {
+    if (prevLoading.current && !api.loading) {
+      setLastUpdated(new Date());
+    }
+    prevLoading.current = api.loading;
+  }, [api.loading]);
+  const timeAgo = useTimeAgo(lastUpdated);
+
   // Track dashboard visits for PWA install prompt milestone
   useEffect(() => { trackDashboardVisit(); }, []);
   const orders = api.orders.list();
