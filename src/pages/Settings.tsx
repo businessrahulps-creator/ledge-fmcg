@@ -579,6 +579,7 @@ export default function Settings() {
               <DialogTitle className="text-base md:text-lg">{isNewMember ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewMember ? "Add a new team member" : "Edit team member details"}</DialogDescription>
             </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); saveMember(); }}>
             {editMember && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -619,10 +620,11 @@ export default function Settings() {
                 </div>
               </div>
             )}
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
-              <Button onClick={saveMember} disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
+            <DialogFooter className="gap-2 sm:gap-0 mt-4">
+              <Button type="button" variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
+              <Button type="submit" disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
         {/* Install App Card — mobile only, shown when not installed */}

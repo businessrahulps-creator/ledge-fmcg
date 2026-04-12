@@ -252,6 +252,7 @@ export default function Distributors() {
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
               <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
             </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); save(); }}>
             {editItem && (
               <div className="space-y-4 md:space-y-5">
                 <div className="space-y-3 md:space-y-4">
@@ -333,9 +334,10 @@ export default function Distributors() {
               </div>
             )}
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button onClick={save}>{isNew ? "Add Dealer" : "Save Changes"}</Button>
+              <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
+              <Button type="submit">{isNew ? "Add Dealer" : "Save Changes"}</Button>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
