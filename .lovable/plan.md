@@ -1,73 +1,38 @@
 
 
-# Feature #8: Targets & Achievements
+# Add Daily & Weekly Target Periods
 
-## Overview
-A new dedicated page and database table for setting monthly/quarterly revenue or order targets for salespersons and dealers, with progress tracking integrated into detail views and the Performance page.
+## Problem
+Currently the Targets page only supports monthly periods. Indian FMCG sales teams commonly work on daily and weekly targets too — a salesperson might have a daily target of ₹10,000 or a weekly target of 50 orders.
 
-## Database
+## What Changes
 
-### New table: `targets`
-```sql
-CREATE TABLE public.targets (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id uuid NOT NULL,
-  entity_type text NOT NULL DEFAULT 'salesperson',  -- 'salesperson' | 'dealer'
-  entity_id uuid NOT NULL,
-  entity_name text NOT NULL DEFAULT '',
-  period_type text NOT NULL DEFAULT 'monthly',       -- 'monthly' | 'quarterly'
-  period_start date NOT NULL,
-  target_revenue numeric NOT NULL DEFAULT 0,
-  target_orders integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (company_id, entity_type, entity_id, period_type, period_start)
-);
+### 1. `src/pages/Targets.tsx` — Add period type selector + dynamic date options
 
-ALTER TABLE public.targets ENABLE ROW LEVEL SECURITY;
--- Company-scoped SELECT, INSERT, UPDATE, DELETE policies
-```
+- Add a **Period Type** toggle/selector: "Daily", "Weekly", "Monthly" (default Monthly)
+- When **Daily** is selected: show a date picker (today ± 7 days), period_start = selected date, period_end = same date
+- When **Weekly** is selected: show week options (current week, last week, next week), period_start = Monday of that week, period_end = Sunday
+- When **Monthly** is selected: keep existing month dropdown behavior
+- The `periodType` value ("daily" | "weekly" | "monthly") is stored in each target record
+- Update `getTarget()` to also match on `periodType`
+- Update `handleSave()` to pass the selected `periodType`
 
-## Files to Create
+### 2. `src/context/DataContext.tsx` — No schema change needed
+The `targets` table already has `period_type` column with default `'monthly'`. The `Target` interface already has `periodType: string`. Just need to ensure `periodType` is passed through correctly in create/update.
 
-### 1. `src/pages/Targets.tsx` — Dedicated page
-- Two tabs: "Sales Team" and "Dealers"
-- Period selector (month/quarter picker, defaulting to current month)
-- For each tab: list all entities with inline target setting (revenue + orders) and visual progress bars
-- Progress computed from actual orders in that period
-- Status badges: "Exceeded" (green, >100%), "On Track" (blue, ≥70%), "Behind Target" (amber, ≥40%), "Needs Attention" (red, <40%)
-- Empty state when no targets set yet
+### 3. Detail views (`Distributors.tsx`, `Salespersons.tsx`) — Show active targets
+- Check for daily target (today), weekly target (this week), and monthly target (this month)
+- Display whichever exists, or show the most granular one
 
-### 2. DataContext additions
-- Add `targets` state array, `addTarget`, `updateTarget`, `deleteTarget` functions
-- Fetch on load alongside other entities
+### 4. `Performance.tsx` — Targets widget
+- Filter targets by the dashboard's selected period type naturally (the widget already filters by period)
 
-### 3. `src/services/api.ts` — Expose targets CRUD
+## No database migration needed
+The `period_type` column already exists and accepts any text value. "daily" and "weekly" will work without schema changes. The unique constraint `(company_id, entity_type, entity_id, period_type, period_start)` already differentiates daily/weekly/monthly targets for the same entity.
 
-## Files to Modify
-
-### 4. `src/components/layout/AppSidebar.tsx`
-- Add `{ title: "Targets", url: "/targets", icon: Target }` to `manageNav` after Schemes
-
-### 5. `src/App.tsx`
-- Add route: `/targets` → `<Targets />`
-
-### 6. `src/pages/Distributors.tsx` — Dealer detail view
-- Add "Targets & Achievements" section showing current period target vs actual with progress bar and status
-
-### 7. `src/pages/Salespersons.tsx` — Salesperson detail view
-- Same "Targets & Achievements" section
-
-### 8. `src/pages/Performance.tsx`
-- Add "Targets Overview" widget showing top performers and those behind target
-
-## UX Proposal (Better Flow)
-Rather than a separate modal for each target, the Targets page uses **inline editing** — each row has editable revenue/orders fields that auto-save on blur. This eliminates modal fatigue and lets the admin set all targets in one sweep. The period selector at the top (month dropdown) applies globally, making it trivial to set targets for the whole team in under a minute.
-
-Progress bars use a gradient fill (green when >100%, blue for on-track, amber/red for behind) so status is instantly visible at a glance without reading numbers.
-
-## Files Touched Summary
-- **New migration**: `targets` table
-- **New file**: `src/pages/Targets.tsx`
-- **Modified**: `src/context/DataContext.tsx`, `src/services/api.ts`, `src/App.tsx`, `src/components/layout/AppSidebar.tsx`, `src/pages/Distributors.tsx`, `src/pages/Salespersons.tsx`, `src/pages/Performance.tsx`
+## Files Modified
+- `src/pages/Targets.tsx` — Period type selector, dynamic date generation, updated filtering
+- `src/pages/Distributors.tsx` — Show daily/weekly/monthly targets in detail view  
+- `src/pages/Salespersons.tsx` — Same
+- `src/pages/Performance.tsx` — Minor filter update
 
