@@ -122,7 +122,7 @@ export default function Settings() {
       const { exportFullBackup } = await import("@/utils/exportBackup");
       await exportFullBackup();
     } catch (e) {
-      sonnerToast.error("Backup failed", { description: "Please try again." });
+      toast.error("Backup failed", { description: "Please try again." });
     } finally {
       setBackupLoading(false);
     }
@@ -434,7 +434,7 @@ export default function Settings() {
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Unlimited</p>
                   </div>
                 </div>
-                <Button className="w-full" size="lg" onClick={() => sonnerToast.info("Billing integration coming soon — contact support")}>
+                <Button className="w-full" size="lg" onClick={() => toast.info("Billing integration coming soon — contact support")}>
                   Upgrade Plan
                 </Button>
               </div>
@@ -524,7 +524,7 @@ export default function Settings() {
                                   title="Retry"
                                   onClick={async () => {
                                     if (!navigator.onLine) {
-                                      sonnerToast.error("You're offline — reconnect to retry");
+                                      toast.error("You're offline — reconnect to retry");
                                       return;
                                     }
                                     const result = await replaySingleMutation(m);
@@ -532,13 +532,13 @@ export default function Settings() {
                                       const updated = { ...retryStatus, [m.id]: "success" as const };
                                       setRetryStatus(updated);
                                       await saveRetryStatus(updated);
-                                      sonnerToast.success("Mutation synced successfully");
+                                      toast.success("Mutation synced successfully");
                                     } else {
                                       const updated = { ...retryStatus, [m.id]: "failed" as const };
                                       setRetryStatus(updated);
                                       await saveRetryStatus(updated);
                                       const errMsg = "error" in result ? result.error : "Unknown error";
-                                      sonnerToast.error("Sync failed", { description: errMsg });
+                                      toast.error("Sync failed", { description: errMsg });
                                     }
                                     const queue = await getQueue();
                                     setQueuedMutations(queue);
@@ -699,7 +699,7 @@ export default function Settings() {
                   await clearQueue();
                   setQueuedMutations([]);
                   setShowClearQueueConfirm(false);
-                  sonnerToast.success("Queue cleared", { description: "All pending changes have been discarded." });
+                  toast.success("Queue cleared", { description: "All pending changes have been discarded." });
                 }}
               >
                 Clear All
