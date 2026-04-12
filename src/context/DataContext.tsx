@@ -1137,6 +1137,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     cacheEntity: CacheableEntity,
     toDbInsert: (item: T) => Record<string, any>,
     toDbUpdate: (item: T) => Record<string, any>,
+    entityLogType?: string,
+    getLabel?: (item: T) => string,
   ) {
     const add = async (item: T) => {
       if (!companyId) return;
@@ -1153,7 +1155,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       const { data, error } = await supabase.from(table as any).insert({ ...toDbInsert(item), company_id: companyId }).select().single();
       if (error) { toast.error(`Failed to add ${table}`, { description: error.message }); return; }
-      if (data) setter(prev => [...prev, { ...item, id: (data as any).id }]);
+      if (data) {
+        const newId = (data as any).id;
+        setter(prev => [...prev, { ...item, id: newId }]);
+        if (entityLogType) log(entityLogType, newId, "created", `Added ${getLabel?.(item) || table}`);
+      }
     };
 
     const update = async (item: T) => {
@@ -1170,6 +1176,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.from(table as any).update(toDbUpdate(item)).eq("id", item.id);
       if (error) { toast.error(`Failed to update ${table}`, { description: error.message }); return; }
       setter(prev => prev.map(x => x.id === item.id ? item : x));
+      if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
     };
 
     const remove = async (id: string) => {
@@ -1186,6 +1193,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.from(table as any).delete().eq("id", id);
       if (error) { toast.error(`Failed to delete ${table}`, { description: error.message }); return; }
       setter(prev => prev.filter(x => x.id !== id));
+      if (entityLogType) log(entityLogType, id, "deleted", `Deleted ${entityLogType}`);
     };
 
     return { add, update, remove };
