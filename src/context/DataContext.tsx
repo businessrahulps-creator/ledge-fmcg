@@ -380,6 +380,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
         creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0),
       }));
+      setDistributors(dists);
+      cacheData(cId, "distributors", dists);
 
       const sps: Salesperson[] = (spRes.data || []).map(s => ({
         id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0),
