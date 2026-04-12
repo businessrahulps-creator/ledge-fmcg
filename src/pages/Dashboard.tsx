@@ -35,6 +35,22 @@ export default function Dashboard() {
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
 
+  // This Month aggregates
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthlyOrders = orders.filter((o) => {
+    const d = new Date(o.date + "T00:00:00");
+    return d >= monthStart && d <= today;
+  });
+  const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total, 0);
+  const monthOrderCount = monthlyOrders.length;
+  const monthOutstanding = monthlyOrders
+    .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
+    .reduce((s, o) => s + o.total, 0);
+  const monthDeliveredPct = monthOrderCount > 0
+    ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
+    : 0;
+  const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+
   if (isLoading) {
     return <AppLayout><DashboardSkeleton /></AppLayout>;
   }
@@ -89,6 +105,36 @@ export default function Dashboard() {
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
           <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()} 👋</h1>
+
+          {/* This Month summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="glass-card p-4 mt-5"
+          >
+            <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase mb-3">
+              This Month · {monthLabel}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Revenue</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthRevenue)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Orders</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{monthOrderCount}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Outstanding</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthOutstanding)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Delivered</p>
+                <p className="text-sm font-bold tracking-tight tabular-nums">{monthDeliveredPct}%</p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Day-of-week row */}
           <div className="flex gap-2.5 mt-5">
