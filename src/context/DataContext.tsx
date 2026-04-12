@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, u
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import type { Order, Distributor, Salesperson, Product, OrderLine } from "@/data/mock-data";
+import type { Order, Distributor, Salesperson, Product, OrderLine, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {
   cacheData, getCachedData, enqueueMutation, getQueue, removeFromQueue,
@@ -31,6 +31,7 @@ interface DataContextType {
   products: Product[];
   locations: GodownLocation[];
   stockItems: StockItem[];
+  schemes: Scheme[];
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
@@ -63,6 +64,10 @@ interface DataContextType {
   updateStockItem: (si: StockItem) => void;
   deleteStockItem: (id: string) => void;
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
+
+  addScheme: (s: Scheme) => void;
+  updateScheme: (s: Scheme) => void;
+  deleteScheme: (id: string) => void;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -140,6 +145,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [rawProducts, setProducts] = useState<Product[]>([]);
   const [locations, setLocations] = useState<GodownLocation[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
   const [orderSequence, setOrderSequence] = useState(1);
   const [loading, setLoading] = useState(true);
