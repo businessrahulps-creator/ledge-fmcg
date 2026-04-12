@@ -80,7 +80,7 @@ export default function Distributors() {
   const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;
 
   const openNew = () => {
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
     setIsNew(true);
   };
 
