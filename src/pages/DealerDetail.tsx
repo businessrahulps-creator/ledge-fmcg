@@ -139,6 +139,7 @@ export default function DealerDetail() {
           <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders ({dealerOrders.length})</TabsTrigger>
+            <TabsTrigger value="ledger">Ledger</TabsTrigger>
             <TabsTrigger value="secondary">Secondary Sales</TabsTrigger>
           </TabsList>
 
@@ -325,6 +326,113 @@ export default function DealerDetail() {
                 <p className="text-sm text-muted-foreground">No orders yet</p>
               </div>
             )}
+          </TabsContent>
+
+          {/* Ledger Tab */}
+          <TabsContent value="ledger" className="space-y-4">
+            {(() => {
+              type LedgerEntry = { date: string; particulars: string; debit: number; credit: number; balance: number; orderId?: string };
+              const entries: Omit<LedgerEntry, "balance">[] = [];
+              dealerOrders.forEach(o => {
+                const net = o.total - (o.schemeSavings || 0);
+                entries.push({ date: o.date, particulars: o.orderNumber, debit: net, credit: 0, orderId: o.id });
+                if (o.paymentStatus === "paid") {
+                  entries.push({ date: o.date, particulars: `Payment — ${o.orderNumber}`, debit: 0, credit: net });
+                } else if (o.paymentStatus === "partial") {
+                  entries.push({ date: o.date, particulars: `Part Payment — ${o.orderNumber}`, debit: 0, credit: Math.round(net * 0.5) });
+                }
+              });
+              entries.sort((a, b) => a.date.localeCompare(b.date));
+              let running = 0;
+              const ledger: LedgerEntry[] = entries.map(e => {
+                running += e.debit - e.credit;
+                return { ...e, balance: running };
+              });
+              const totalDebit = ledger.reduce((s, e) => s + e.debit, 0);
+              const totalCredit = ledger.reduce((s, e) => s + e.credit, 0);
+              const closing = totalDebit - totalCredit;
+
+              if (ledger.length === 0) {
+                return (
+                  <div className="py-12 text-center">
+                    <FileText className="h-8 w-8 text-muted-foreground/50 mx-auto" />
+                    <p className="mt-2 text-sm text-muted-foreground">No ledger entries yet</p>
+                  </div>
+                );
+              }
+
+              return (
+                <>
+                  {/* Desktop table */}
+                  <div className="glass-card overflow-hidden hidden md:block">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                          <th className="px-4 py-2.5 font-medium">Date</th>
+                          <th className="px-4 py-2.5 font-medium">Particulars</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Debit (₹)</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Credit (₹)</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Balance (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ledger.map((e, i) => (
+                          <tr
+                            key={i}
+                            className={`border-b border-border/50 ${e.orderId ? "row-hover cursor-pointer" : ""}`}
+                            onClick={e.orderId ? () => navigate(`/orders/${e.orderId}`) : undefined}
+                          >
+                            <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(e.date)}</td>
+                            <td className="px-4 py-3 font-medium">{e.particulars}</td>
+                            <td className="px-4 py-3 text-right font-medium">{e.debit > 0 ? formatCurrency(e.debit) : "—"}</td>
+                            <td className="px-4 py-3 text-right font-medium text-emerald-600 dark:text-emerald-400">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
+                            <td className="px-4 py-3 text-right font-semibold">{formatCurrency(e.balance)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="border-t border-border bg-muted/30">
+                          <td className="px-4 py-2.5" colSpan={2}><span className="text-xs font-semibold">Totals</span></td>
+                          <td className="px-4 py-2.5 text-right text-xs font-semibold">{formatCurrency(totalDebit)}</td>
+                          <td className="px-4 py-2.5 text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalCredit)}</td>
+                          <td className="px-4 py-2.5 text-right text-xs font-bold">{formatCurrency(closing)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  {/* Mobile cards */}
+                  <div className="md:hidden space-y-2">
+                    <div className="glass-card p-3 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Outstanding</span>
+                      <span className="text-sm font-bold">{formatCurrency(closing)}</span>
+                    </div>
+                    <div className="glass-card overflow-hidden divide-y divide-border/50">
+                      {ledger.map((e, i) => (
+                        <div
+                          key={i}
+                          className={`px-4 py-3 ${e.orderId ? "card-hover cursor-pointer" : ""}`}
+                          onClick={e.orderId ? () => navigate(`/orders/${e.orderId}`) : undefined}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium">{e.particulars}</span>
+                            {e.debit > 0 ? (
+                              <span className="text-xs font-medium">+{formatCurrency(e.debit)}</span>
+                            ) : (
+                              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">−{formatCurrency(e.credit)}</span>
+                            )}
+                          </div>
+                          <div className="mt-0.5 flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground">{formatIndianDate(e.date)}</span>
+                            <span className="text-[10px] text-muted-foreground">Bal: {formatCurrency(e.balance)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </TabsContent>
 
           {/* Secondary Sales Tab */}
