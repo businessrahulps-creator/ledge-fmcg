@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,6 +12,20 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { ListChecks, Plus, AlertTriangle } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
+
+function useTimeAgo(date: Date) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  return `${hrs}h ago`;
+}
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
