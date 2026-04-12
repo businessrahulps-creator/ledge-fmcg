@@ -399,26 +399,39 @@ export default function Orders() {
                   <th className="px-6 py-3 font-semibold">Dealer</th>
                   <th className="px-6 py-3 font-semibold">Sales Person</th>
                   <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                  <th className="px-6 py-3 font-semibold">Payment</th>
-                  <th className="px-6 py-3 font-semibold">Delivery</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    onClick={() => openOrder(order)}
-                    className="group border-b border-border/50 row-hover cursor-pointer"
-                  >
-                    <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                    <td className="px-6 py-4">{order.distributorName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                    <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                    <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                  </tr>
-                ))}
+                     <th className="px-6 py-3 font-semibold">Payment</th>
+                     <th className="px-6 py-3 font-semibold">Delivery</th>
+                     <th className="px-6 py-3 font-semibold">Billing</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.map((order) => {
+                      const billingStatus = getOrderBillingStatus(order.id);
+                      return (
+                        <tr
+                          key={order.id}
+                          onClick={() => openOrder(order)}
+                          className="group border-b border-border/50 row-hover cursor-pointer"
+                        >
+                          <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
+                          <td className="px-6 py-4">{order.distributorName}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
+                          <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                          <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                          <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                          <td className="px-6 py-4">
+                            {billingStatus ? (
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                                {billingStatus.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/50">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
           </div>
