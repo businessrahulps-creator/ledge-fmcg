@@ -145,28 +145,13 @@ export default function Settings() {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url, trial_ends_at, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix")
+      .select("trial_ends_at")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
-        if (data) {
-          setCompanyName(data.name || "");
-          setCompanyAddress(data.address || "");
-          setCompanyGstin(data.gstin || "");
-          setLogoUrl(data.logo_url || "");
-          setCompanyPhone((data as any).phone || "");
-          setCompanyEmail((data as any).email || "");
-          setCompanyPan((data as any).pan || "");
-          setCompanyStateCode((data as any).state_code || "");
-          setBankName((data as any).bank_name || "");
-          setBankAccount((data as any).bank_account || "");
-          setBankIfsc((data as any).bank_ifsc || "");
-          setInvoicePrefix((data as any).invoice_prefix || "INV");
-          if (data.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
-        }
+        if (data?.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
       });
 
-    // Realtime subscription for trial updates
     const channel = supabase
       .channel(`settings-trial-${companyId}`)
       .on(
@@ -181,71 +166,6 @@ export default function Settings() {
 
     return () => { supabase.removeChannel(channel); };
   }, [companyId]);
-
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !companyId) return;
-    if (file.size > 2 * 1024 * 1024) {
-      sonnerToast.error("File too large", { description: "Logo must be under 2MB." });
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      sonnerToast.error("Invalid file type", { description: "Please upload an image file." });
-      return;
-    }
-    setLogoUploading(true);
-    try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `logos/${companyId}/logo.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("company-logos")
-        .upload(path, file, { upsert: true });
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("company-logos")
-        .getPublicUrl(path);
-
-      const { error: updateError } = await supabase
-        .from("companies")
-        .update({ logo_url: publicUrl })
-        .eq("id", companyId);
-      if (updateError) throw updateError;
-
-      setLogoUrl(publicUrl);
-      sonnerToast.success("Logo uploaded", { description: "Company logo has been updated." });
-    } catch (err: any) {
-      sonnerToast.error("Upload failed", { description: err?.message || "Could not upload logo." });
-    }
-    setLogoUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleRemoveLogo = async () => {
-    if (!companyId) return;
-    setLogoUploading(true);
-    try {
-      // List and delete all files in the company's logo folder
-      const { data: files } = await supabase.storage
-        .from("company-logos")
-        .list(`logos/${companyId}`);
-      if (files && files.length > 0) {
-        await supabase.storage
-          .from("company-logos")
-          .remove(files.map((f) => `logos/${companyId}/${f.name}`));
-      }
-      const { error } = await supabase
-        .from("companies")
-        .update({ logo_url: "" })
-        .eq("id", companyId);
-      if (error) throw error;
-      setLogoUrl("");
-      sonnerToast.success("Logo removed", { description: "Company logo has been removed." });
-    } catch (err: any) {
-      sonnerToast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
-    }
-    setLogoUploading(false);
-  };
 
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [teamLoading, setTeamLoading] = useState(true);
