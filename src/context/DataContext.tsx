@@ -256,6 +256,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
       setStockItems(sis);
 
+      // Map schemes
+      const mappedSchemes: Scheme[] = (schemesRes.data || []).map((s: any) => ({
+        id: s.id, name: s.name, description: s.description || "",
+        schemeType: s.scheme_type as Scheme["schemeType"],
+        discountPercent: Number(s.discount_percent || 0), buyQty: s.buy_qty || 0, freeQty: s.free_qty || 0,
+        flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
+        productId: s.product_id || null, dealerId: s.dealer_id || null,
+        isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
+      }));
+      setSchemes(mappedSchemes);
+
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       if (orderIds.length > 0) {
@@ -271,7 +282,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       persistAllToCache(cId, {
         orders: mappedOrders, distributors: dists, salespersons: sps,
-        products: prods, locations: gds, stockItems: sis,
+        products: prods, locations: gds, stockItems: sis, schemes: mappedSchemes,
         orderPrefix: company?.order_prefix || "ORD",
         orderSequence: company?.next_order_sequence || 1,
       });
