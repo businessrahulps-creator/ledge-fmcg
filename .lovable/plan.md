@@ -1,42 +1,35 @@
 
 
-# Fix: Order Detail Action Bar Hidden on Mobile
+# Fix: "Something went wrong" crashes on Billing page
 
-## Problem Found
-The Order Detail page's sticky action bar (Delete, Invoice, WhatsApp, Save Changes) is **completely hidden behind the floating bottom navigation** on mobile.
+## Root Cause
 
-- Action bar: `fixed bottom-0 z-40`
-- Bottom nav: `fixed bottom-4 z-50` (floating pill, ~60px tall)
+The database contains an invoice with `doc_type = 'invoice'` instead of `'gst_invoice'`. In `Billing.tsx` line 625, this code crashes:
 
-The action bar renders below the bottom nav and is invisible/inaccessible.
+```js
+docTypeLabels[d.docType].slice(0, 3).toUpperCase()
+```
 
-## Fix
+`docTypeLabels['invoice']` is `undefined`, so `.slice()` throws `TypeError: Cannot read properties of undefined (reading 'slice')`.
+
+Additionally, line 111 misuses `useState(() => {...})` to run side effects — this should be `useEffect`.
+
+## Fixes
 
 | File | Change |
 |------|--------|
-| `src/pages/OrderDetail.tsx` | Change the action bar from `fixed bottom-0` to `fixed bottom-24 md:bottom-0` (or use `bottom-[calc(4.5rem+env(safe-area-inset-bottom))]`) so it floats above the bottom nav on mobile. Also match the rounded/glass styling of the nav for consistency. On `md:` and above, keep it `static` as currently designed. |
+| **DB Migration** | Update the invoice record: `UPDATE invoices SET doc_type = 'gst_invoice' WHERE doc_type = 'invoice'` |
+| `src/pages/Billing.tsx` | 1. Line 625: Add fallback — `(docTypeLabels[d.docType] \|\| d.docType).slice(0, 3)` |
+| | 2. Line 111: Replace `useState(() => {...})` with `useEffect(() => {...}, [])` for the auto-open logic |
+| | 3. Add `docTypeLabels` fallback for unknown doc types in the table rendering (line 439) |
 
-The existing `pb-24 md:pb-6` padding on the content wrapper already accounts for this bar, so no other changes needed.
+## Why it auto-refreshes
 
-### Single-line change
-Line 486 — update the action bar container classes:
-```
-// Before
-fixed bottom-0 left-0 right-0 z-40 ...
+The `PageErrorBoundary` shows "Reload Page" button. After reload, the same bad data is fetched, causing the same crash — an infinite loop if the user keeps clicking Reload.
 
-// After  
-fixed bottom-[5.5rem] left-4 right-4 z-40 rounded-xl ...
-```
+## 3 changes, surgical fix
 
-This positions it just above the floating bottom nav (which sits at `bottom-4` with ~3.5rem height + padding).
-
-No other pages are affected — DealerDetail and SalespersonDetail do not have fixed action bars.
-
-## Everything Else Works
-- Order detail page: all sections render correctly on both desktop and mobile
-- Salesperson detail page: profile, scorecard, order history all functional
-- Dealer detail page: code is sound (no dealers in DB to test live, but "not found" state works)
-- Navigation from list to detail pages works correctly for all three entities
-- Back buttons work
-- No console errors related to the detail pages
+1. Fix the data in the DB (migration)
+2. Make the code defensive against unexpected `doc_type` values
+3. Fix the `useState` misuse
 
