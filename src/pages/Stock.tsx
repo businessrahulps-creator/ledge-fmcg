@@ -835,6 +835,7 @@ export default function Stock() {
                 <Button type="submit" className="w-full">Save Changes</Button>
               </div>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
