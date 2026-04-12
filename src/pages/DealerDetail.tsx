@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Phone, Mail, FileText, TrendingUp, TrendingDown, Minus, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Plus, Trash2, Target } from "lucide-react";
+import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
@@ -491,6 +492,11 @@ export default function DealerDetail() {
           </TabsContent>
         </Tabs>
       </div>
+
+        {/* Activity History */}
+        <div className="glass-card p-4 md:p-6">
+          <EntityHistory entityType="dealer" entityId={id!} />
+        </div>
 
       {/* Secondary Sale Modal */}
       <Dialog open={ssOpen} onOpenChange={setSsOpen}>

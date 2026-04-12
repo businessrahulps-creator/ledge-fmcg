@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X } from "lucide-react";
+import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
@@ -768,6 +769,11 @@ export default function OrderDetail() {
           </div>
         </div>
       </div>
+
+        {/* Activity History */}
+        <div className="glass-card p-4 md:p-6">
+          <EntityHistory entityType="order" entityId={order.id} />
+        </div>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(""); } }}>

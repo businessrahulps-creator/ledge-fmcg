@@ -10,6 +10,7 @@ import {
   type CacheableEntity,
 } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
+import { logActivity, fmtAmount } from "@/utils/activityLog";
 
 export interface AddOrderResult {
   success: boolean;
@@ -270,7 +271,7 @@ function persistAllToCache(
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const { companyId, authReady } = useAuth();
+  const { companyId, authReady, user, profile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [rawDistributors, setDistributors] = useState<Distributor[]>([]);
   const [rawSalespersons, setSalespersons] = useState<Salesperson[]>([]);
@@ -289,6 +290,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
+
+  // Activity log shorthand
+  const log = useCallback((entityType: string, entityId: string, action: string, summary: string, metadata?: Record<string, any>) => {
+    if (!companyId || !user) return;
+    logActivity({
+      companyId, userId: user.id, userName: profile?.full_name || user.email || "",
+      entityType, entityId, action, summary, metadata,
+    });
+  }, [companyId, user, profile]);
 
   // Clear data when no company
   useEffect(() => {
@@ -982,6 +992,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const newOrder: Order = { ...order, id: inserted.id, orderNumber };
       setOrders(prev => [newOrder, ...prev]);
 
+      log("order", inserted.id, "created", `Created order ${orderNumber} for ${order.distributorName} — ${fmtAmount(order.total)}`);
+
       return { success: true, orderNumber };
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
@@ -1077,7 +1089,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-  }, [companyId, deductStockForOrder, persistEntityToCache]);
+
+    // Log activity for order updates
+    const summaryParts: string[] = [];
+    if (updates.paymentStatus) summaryParts.push(`payment ${currentOrder?.paymentStatus || "?"} → ${updates.paymentStatus}`);
+    if (updates.deliveryStatus) summaryParts.push(`delivery ${currentOrder?.deliveryStatus || "?"} → ${updates.deliveryStatus}`);
+    if (summaryParts.length === 0 && linesChanged) summaryParts.push("updated line items");
+    if (summaryParts.length === 0) summaryParts.push("updated details");
+    log("order", id, "updated", `${currentOrder?.orderNumber || "Order"}: ${summaryParts.join(", ")}`, updates);
+  }, [companyId, deductStockForOrder, persistEntityToCache, log]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
@@ -1099,8 +1119,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!deleted || deleted.length === 0) {
         throw new Error("Order could not be deleted — you may not have permission.");
       }
+      const deletedOrder = ordersRef.current.find(o => o.id === id);
       setOrders(prev => prev.filter(o => o.id !== id));
       await safeRefetchStockItems();
+      log("order", id, "deleted", `Deleted order ${deletedOrder?.orderNumber || id}`);
       return true;
     } catch (err: any) {
       toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
@@ -1115,6 +1137,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     cacheEntity: CacheableEntity,
     toDbInsert: (item: T) => Record<string, any>,
     toDbUpdate: (item: T) => Record<string, any>,
+    entityLogType?: string,
+    getLabel?: (item: T) => string,
   ) {
     const add = async (item: T) => {
       if (!companyId) return;
@@ -1131,7 +1155,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       const { data, error } = await supabase.from(table as any).insert({ ...toDbInsert(item), company_id: companyId }).select().single();
       if (error) { toast.error(`Failed to add ${table}`, { description: error.message }); return; }
-      if (data) setter(prev => [...prev, { ...item, id: (data as any).id }]);
+      if (data) {
+        const newId = (data as any).id;
+        setter(prev => [...prev, { ...item, id: newId }]);
+        if (entityLogType) log(entityLogType, newId, "created", `Added ${getLabel?.(item) || table}`);
+      }
     };
 
     const update = async (item: T) => {
@@ -1148,6 +1176,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.from(table as any).update(toDbUpdate(item)).eq("id", item.id);
       if (error) { toast.error(`Failed to update ${table}`, { description: error.message }); return; }
       setter(prev => prev.map(x => x.id === item.id ? item : x));
+      if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
     };
 
     const remove = async (id: string) => {
@@ -1164,6 +1193,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.from(table as any).delete().eq("id", id);
       if (error) { toast.error(`Failed to delete ${table}`, { description: error.message }); return; }
       setter(prev => prev.filter(x => x.id !== id));
+      if (entityLogType) log(entityLogType, id, "deleted", `Deleted ${entityLogType}`);
     };
 
     return { add, update, remove };
@@ -1174,28 +1204,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
     "distributors", setDistributors, "distributors",
     d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0, email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""), gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""), bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""), bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || "") }),
     d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0, email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""), gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""), bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""), bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || "") }),
-  ), [companyId, persistEntityToCache]);
+    "dealer", d => d.name,
+  ), [companyId, persistEntityToCache, log]);
 
   // Salespersons
   const spCrud = useMemo(() => makeOfflineCrud<Salesperson>(
     "salespersons", setSalespersons, "salespersons",
     s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
     s => ({ name: sanitizeInput(s.name), phone: sanitizeInput(s.phone), email: sanitizeInput(s.email), region: sanitizeInput(s.region) }),
-  ), [companyId, persistEntityToCache]);
+    "salesperson", s => s.name,
+  ), [companyId, persistEntityToCache, log]);
 
   // Products
   const prodCrud = useMemo(() => makeOfflineCrud<Product>(
     "products", setProducts, "products",
     p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
     p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
-  ), [companyId, persistEntityToCache]);
+    "product", p => `${p.name} — ${fmtAmount(p.basePrice)}`,
+  ), [companyId, persistEntityToCache, log]);
 
   // Locations (Godowns)
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
     "godowns", setLocations, "locations",
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
-  ), [companyId, persistEntityToCache]);
+    "stock_item", l => l.name,
+  ), [companyId, persistEntityToCache, log]);
 
   // Schemes
   const schemeCrud = useMemo(() => makeOfflineCrud<Scheme>(
@@ -1216,7 +1250,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       product_id: s.productId || null, dealer_id: s.dealerId || null,
       is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
     }),
-  ), [companyId, persistEntityToCache]);
+    "scheme", s => s.name,
+  ), [companyId, persistEntityToCache, log]);
 
   // Stock Items — special (upsert online, upsert-type offline)
   const addStockItem = useCallback(async (si: StockItem) => {
