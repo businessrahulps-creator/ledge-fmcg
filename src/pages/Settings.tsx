@@ -557,6 +557,20 @@ export default function Settings() {
                   </p>
                 </div>
 
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Invoice Prefix</Label>
+                  <Input
+                    value={invoicePrefix}
+                    onChange={(e) => setInvoicePrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                    maxLength={10}
+                    className="h-10 rounded-lg max-w-[200px] font-mono"
+                    placeholder="INV"
+                  />
+                  <p className="text-[10px] text-muted-foreground md:text-xs">
+                    Used for invoice numbers (e.g. {invoicePrefix || "INV"}-2026-0001)
+                  </p>
+                </div>
+
                 <Button onClick={handleSaveClick}>Save Changes</Button>
               </div>
             </motion.div>
