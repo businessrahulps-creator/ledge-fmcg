@@ -23,6 +23,7 @@ import {
   Download,
   Gift,
   UserCheck,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
