@@ -881,6 +881,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
   ), [companyId, persistEntityToCache]);
 
+  // Schemes
+  const schemeCrud = useMemo(() => makeOfflineCrud<Scheme>(
+    "schemes", setSchemes, "schemes",
+    s => ({
+      name: sanitizeInput(s.name), description: sanitizeInput(s.description),
+      scheme_type: s.schemeType, discount_percent: s.discountPercent,
+      buy_qty: s.buyQty, free_qty: s.freeQty, flat_amount: s.flatAmount,
+      min_order_value: s.minOrderValue, min_qty: s.minQty,
+      product_id: s.productId || null, dealer_id: s.dealerId || null,
+      is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
+    }),
+    s => ({
+      name: sanitizeInput(s.name), description: sanitizeInput(s.description),
+      scheme_type: s.schemeType, discount_percent: s.discountPercent,
+      buy_qty: s.buyQty, free_qty: s.freeQty, flat_amount: s.flatAmount,
+      min_order_value: s.minOrderValue, min_qty: s.minQty,
+      product_id: s.productId || null, dealer_id: s.dealerId || null,
+      is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
+    }),
+  ), [companyId, persistEntityToCache]);
+
   // Stock Items — special (upsert online, upsert-type offline)
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!companyId) return;
@@ -1006,9 +1027,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   return (
     <DataContext.Provider
-      value={{
+       value={{
         orders, distributors: computedDistributors, salespersons: computedSalespersons,
-        products: computedProducts, locations, stockItems, loading, isOfflineData,
+        products: computedProducts, locations, stockItems, schemes, loading, isOfflineData,
         companyInfo,
         orderPrefix, orderSequence, setOrderPrefix,
         addOrder, updateOrder, deleteOrder,
@@ -1017,6 +1038,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addProduct: prodCrud.add, updateProduct: prodCrud.update, deleteProduct: prodCrud.remove,
         addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
+        addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
