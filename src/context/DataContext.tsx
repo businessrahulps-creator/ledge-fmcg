@@ -366,6 +366,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }));
       setTargets(mappedTargets);
 
+      // Map claims
+      const allClaimLines = (claimLinesRes as any).data || [];
+      const mappedClaims: Claim[] = ((claimsRes as any).data || []).map((c: any) => ({
+        id: c.id, orderId: c.order_id, orderNumber: c.order_number || "",
+        distributorId: c.distributor_id, distributorName: c.distributor_name || "",
+        claimType: c.claim_type as Claim["claimType"],
+        status: c.status as Claim["status"],
+        reason: c.reason || "", resolutionNotes: c.resolution_notes || "",
+        restoreStock: c.restore_stock || false,
+        totalClaimValue: Number(c.total_claim_value || 0),
+        lines: allClaimLines
+          .filter((cl: any) => cl.claim_id === c.id)
+          .map((cl: any) => ({
+            productId: cl.product_id, productName: cl.product_name || "",
+            quantity: cl.quantity || 0, unitPrice: Number(cl.unit_price || 0),
+            lineTotal: Number(cl.line_total || 0),
+          })),
+        createdAt: c.created_at, resolvedAt: c.resolved_at || null,
+      }));
+      setClaims(mappedClaims);
+
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       let allOrderSchemes: any[] = [];
