@@ -1,33 +1,42 @@
 
 
-# Add "New Claim" Flow to Claims Page
+# Rethink Billing "New Document" Order Picker
 
 ## The Problem
 
-Currently, claims can only be created from deep inside an Order Detail page (the "Return / Claim" button appears only on dispatched/delivered orders). Users landing on the Claims page have no way to create one — confusing for anyone who doesn't know the hidden path.
+The current order picker in Billing uses a `Popover` + `Command` combobox. Issues:
+1. **Not scrollable on mobile** — the popover clips or overflows
+2. **Doesn't scale** — with 5,000 orders, the entire list renders inside a small dropdown
+3. **Inconsistent** — Claims uses a much better two-step Dialog pattern that users already like
 
 ## Solution
 
-Add a **"+ New Claim"** button to the Claims page header that opens a two-step modal:
+Replace the inline Popover-based order picker with a **two-step Dialog pattern matching Claims**:
 
-1. **Step 1 — Pick an order**: Show a searchable list of dispatched/delivered orders (the only orders eligible for claims). Each row shows order number, dealer name, date, and amount.
-2. **Step 2 — Fill in claim details**: Once an order is selected, show the same claim form already built in `OrderDetail.tsx` — claim type (Return vs Damage), reason, per-product quantities.
+- **Step 1**: Full-screen-friendly dialog with search input + scrollable order list (cards, not combobox items). Orders grouped as "Needs Invoice" first, then "Has Documents". Each card shows order number, dealer, date, amount, and existing document badges.
+- **Step 2**: The rest of the form (doc type, buyer details, lines, GST config) — exactly as it exists today.
 
-This reuses the exact same `api.claims.create()` logic and `Claim`/`ClaimLine` types. No new API surface needed.
-
-## Design
-
-- Button in the page header row, matching the pattern on Orders/Dealers/Stock pages
-- Modal uses `Dialog` from shadcn/ui, glassmorphic styling
-- Step 1: filterable order list (simple text input + scrollable list)
-- Step 2: identical to the existing claim form in OrderDetail
-- Mobile-friendly: `max-w-[calc(100vw-2rem)]` with scroll
+This gives us:
+- Proper `max-h-[45vh] overflow-y-auto` scrollable list (same as Claims)
+- Search filtering that works at any scale
+- Touch-friendly card-based selection on mobile
+- A "Back" button to change order selection (same as Claims step navigation)
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/Claims.tsx` | Add "+ New Claim" button + two-step dialog (~120 lines of new JSX/logic) |
+| `src/pages/Billing.tsx` | Replace Popover/Command order picker with two-step Dialog flow (~80 lines changed) |
 
-**1 file modified. No new files. No database changes. No new dependencies.**
+**1 file modified. No new files. No new dependencies. No database changes.**
+
+## Key Implementation Details
+
+- Remove `Popover`, `PopoverContent`, `PopoverTrigger`, `Command*`, `ChevronsUpDown`, `Check` imports (no longer needed)
+- Remove `orderPickerOpen` state
+- Add `step` state (1 = pick order, 2 = fill form) — mirrors Claims pattern
+- Step 1: search input + `max-h-[45vh] overflow-y-auto` scrollable list of order cards grouped by "Needs Invoice" / "Has Documents"
+- Step 2: existing form content (doc type, buyer, lines, GST) + "Back" button in footer
+- When `showCreate` opens without a pre-selected order (e.g. from URL param), start at step 1; with pre-selected order, start at step 2
+- Mobile: dialog already has `max-w-[calc(100vw-2rem)]` which is correct
 
