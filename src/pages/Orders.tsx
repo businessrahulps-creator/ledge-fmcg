@@ -256,6 +256,7 @@ export default function Orders() {
     }
   }, [selectedOrder, claimQuantities, claimType, claimReason, api.claims]);
 
+  const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
   const filtered = useMemo(() => orders.filter((o) => {
