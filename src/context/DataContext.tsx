@@ -46,6 +46,31 @@ export interface Target {
   targetOrders: number;
 }
 
+export interface ClaimLine {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Claim {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  distributorId: string;
+  distributorName: string;
+  claimType: "return" | "damage";
+  status: "open" | "resolved" | "rejected";
+  reason: string;
+  resolutionNotes: string;
+  restoreStock: boolean;
+  totalClaimValue: number;
+  lines: ClaimLine[];
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
