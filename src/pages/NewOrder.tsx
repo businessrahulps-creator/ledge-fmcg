@@ -670,7 +670,7 @@ export default function NewOrder() {
             )}
 
             {/* Save button */}
-            <div className="sticky bottom-24 z-10 md:static">
+            <div className="sticky bottom-28 z-10 md:static">
               <Button
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"

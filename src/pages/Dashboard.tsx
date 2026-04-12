@@ -221,7 +221,7 @@ export default function Dashboard() {
                 <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
               ) : (
                 <div>
-                  <svg viewBox="0 0 180 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
+                  <svg viewBox="0 0 184 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
@@ -420,7 +420,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                         <td className="px-6 py-4">{order.distributorName}</td>
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
+                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                       </tr>
@@ -441,7 +441,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold">{o.distributorName}</span>
-                        <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
+                        <span className="text-sm font-bold">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mb-2">{o.salesperson}</p>
                       <div className="flex items-center justify-between">

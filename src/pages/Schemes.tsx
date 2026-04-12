@@ -28,6 +28,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -295,6 +296,7 @@ export default function Schemes() {
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingScheme ? "Edit Scheme" : "New Scheme"}</DialogTitle>
+            <DialogDescription className="sr-only">{editingScheme ? "Edit scheme details" : "Create a new scheme"}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
