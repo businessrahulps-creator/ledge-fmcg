@@ -331,7 +331,7 @@ export default function Orders() {
                     <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                     <td className="px-6 py-4">{order.distributorName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total)}</td>
+                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                     <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
                     <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                   </tr>
@@ -349,7 +349,7 @@ export default function Orders() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
-                    <span className="text-sm font-medium">{formatCurrency(order.total)}</span>
+                    <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {order.distributorName} · {formatIndianDate(order.date)}
@@ -405,8 +405,11 @@ export default function Orders() {
                       <p className="mt-0.5 text-xs font-medium md:text-sm">{selectedOrder.salesperson}</p>
                     </div>
                      <div className="rounded-lg border border-border bg-muted/30 p-3">
-                       <span className="text-xs text-muted-foreground">Total</span>
-                      <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total)}</p>
+                       <span className="text-xs text-muted-foreground">{(selectedOrder.schemeSavings || 0) > 0 ? 'Effective Total' : 'Total'}</span>
+                      {(selectedOrder.schemeSavings || 0) > 0 && (
+                        <p className="mt-0.5 text-[10px] text-muted-foreground line-through">{formatCurrency(selectedOrder.total)}</p>
+                      )}
+                      <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selectedOrder.total - (selectedOrder.schemeSavings || 0))}</p>
                     </div>
                   </div>
 
