@@ -108,7 +108,7 @@ function InstallAppCard() {
 }
 
 export default function Settings() {
-  const { toast } = useToast();
+  
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
