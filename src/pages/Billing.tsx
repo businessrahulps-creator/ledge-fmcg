@@ -194,6 +194,27 @@ export default function Billing() {
     toast.success("Document deleted");
   };
 
+  const handleConvertToGst = (inv: Invoice) => {
+    resetForm();
+    setDocType("gst_invoice");
+    setBuyerName(inv.buyerName);
+    setBuyerAddress(inv.buyerAddress);
+    setBuyerGstin(inv.buyerGstin);
+    setBuyerStateCode(inv.buyerStateCode);
+    setSupplyType(inv.supplyType as "intra_state" | "inter_state");
+    setGstRate(inv.gstRate);
+    setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+    if (inv.sourceOrderId) setSourceOrderId(inv.sourceOrderId);
+    setLines(inv.lines.map(l => ({
+      productName: l.productName,
+      hsnCode: l.hsnCode || "",
+      quantity: l.quantity,
+      unit: l.unit,
+      unitPrice: l.unitPrice,
+    })));
+    setShowCreate(true);
+  };
+
   const handleDownloadPdf = useCallback(async (inv: Invoice) => {
     const pdfData: InvoicePdfData = {
       docType: inv.docType,
