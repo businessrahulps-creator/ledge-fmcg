@@ -1,120 +1,70 @@
 
 
-# Feature #3: Smart Scheme Auto-Apply Engine
+# Fix: Scheme Integration Gaps — Complete Business-Ready Implementation
 
-## Overview
-Add a complete Schemes system: a new `schemes` database table, a Schemes management page accessible from the sidebar, automatic scheme detection in the New Order form, and a Scheme Performance widget on the Performance page.
+## Problems Found
 
-## Database Changes
+1. **Schemes are NOT stored on orders.** The auto-apply engine in NewOrder only shows a live preview, but when the order is saved, no scheme data is persisted. Once saved, scheme info is lost forever.
+2. **Order detail dialog shows zero scheme info.** When you click an order in the Orders page, there's no indication of which schemes were applied or savings earned.
+3. **Performance page re-computes savings by guessing.** It runs all current active schemes against historical orders — this is wrong because schemes may have changed, expired, or been deleted since the order was created.
+4. **The Schemes page itself works** (CRUD is functional), but the downstream integration is broken.
+5. **PDF invoice doesn't include scheme savings.**
 
-### Migration: Create `schemes` table
+## Solution: Store Scheme Savings on Orders
+
+### Database Changes
+
+**Migration: Create `order_schemes` table**
 ```sql
-CREATE TABLE public.schemes (
+CREATE TABLE public.order_schemes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id uuid NOT NULL,
-  name text NOT NULL,
-  description text NOT NULL DEFAULT '',
-  scheme_type text NOT NULL DEFAULT 'percentage',  -- 'percentage' | 'buy_x_get_y' | 'flat_discount'
-  discount_percent numeric NOT NULL DEFAULT 0,      -- for percentage type
-  buy_qty integer NOT NULL DEFAULT 0,               -- for buy_x_get_y
-  free_qty integer NOT NULL DEFAULT 0,              -- for buy_x_get_y
-  flat_amount numeric NOT NULL DEFAULT 0,           -- for flat_discount
-  min_order_value numeric NOT NULL DEFAULT 0,       -- minimum order total to qualify
-  min_qty integer NOT NULL DEFAULT 0,               -- minimum product qty to qualify
-  product_id uuid,                                  -- NULL = all products
-  dealer_id uuid,                                   -- NULL = all dealers
-  is_active boolean NOT NULL DEFAULT true,
-  valid_from date NOT NULL DEFAULT CURRENT_DATE,
-  valid_until date,                                 -- NULL = no expiry
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  order_id uuid NOT NULL,
+  scheme_id uuid,
+  scheme_name text NOT NULL,
+  scheme_label text NOT NULL DEFAULT '',
+  savings numeric NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
-
-ALTER TABLE public.schemes ENABLE ROW LEVEL SECURITY;
-
--- RLS: company-scoped CRUD
-CREATE POLICY "Company members can view schemes" ON public.schemes FOR SELECT TO authenticated USING (company_id = get_company_id());
-CREATE POLICY "Super admins can insert schemes" ON public.schemes FOR INSERT TO authenticated WITH CHECK (company_id = get_company_id() AND has_role(auth.uid(), 'super_admin'));
-CREATE POLICY "Super admins can update schemes" ON public.schemes FOR UPDATE TO authenticated USING (company_id = get_company_id() AND has_role(auth.uid(), 'super_admin')) WITH CHECK (company_id = get_company_id() AND has_role(auth.uid(), 'super_admin'));
-CREATE POLICY "Super admins can delete schemes" ON public.schemes FOR DELETE TO authenticated USING (company_id = get_company_id() AND has_role(auth.uid(), 'super_admin'));
-
--- Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE public.schemes;
+-- + RLS policies (company-scoped via order join)
+-- + Realtime
 ```
 
-## Code Changes
-
-### 1. New: `src/pages/Schemes.tsx`
-- Card-based view of all schemes with clear labels ("Buy 10 Get 2 Free", "10% Off orders above ₹5,000")
-- Add/Edit dialog with simple form: name, type selector (3 types), conditions, validity dates, optional product/dealer filter
-- Activate/deactivate toggle per scheme card
-- Only Super Admin can add/edit/delete; others can view
-
-### 2. Modify: `src/components/layout/AppSidebar.tsx`
-- Add `{ title: "Schemes", url: "/schemes", icon: Gift }` to `manageNav` array (after Sales Team)
-
-### 3. Modify: `src/App.tsx`
-- Add route: `/schemes` → `<ProtectedRoute><Schemes /></ProtectedRoute>`
-
-### 4. Modify: `src/context/DataContext.tsx`
-- Add `schemes` state array, fetch from `schemes` table in `fetchAll`
-- Add CRUD operations using the existing `makeOfflineCrud` pattern
-- Add `schemes` to IDB cache and realtime subscription
-- Expose via context: `schemes`, `addScheme`, `updateScheme`, `deleteScheme`
-
-### 5. Modify: `src/lib/offline-store.ts`
-- Add `"schemes"` to the `ENTITIES` array for IDB caching
-
-### 6. Modify: `src/services/api.ts`
-- Add `schemes` section to the API object
-
-### 7. Modify: `src/pages/NewOrder.tsx`
-- Add scheme auto-detection logic: after order lines are filled, compute eligible schemes based on order total, product quantities, dealer, and date
-- Show a "Schemes Applied" box in the sidebar summary area (between Summary and Save button) with green styling showing each applied scheme and calculated savings
-- Adjust displayed total to show "before/after scheme" savings
-
-### 8. Modify: `src/pages/Performance.tsx`
-- Add a "Scheme Performance" widget below Credit at Risk showing:
-  - Total schemes active
-  - Total savings generated (computed from orders in period)
-  - This is a simple informational card, not a complex chart
-
-### 9. Data model for scheme type interface
-```typescript
-interface Scheme {
-  id: string;
-  name: string;
-  description: string;
-  schemeType: 'percentage' | 'buy_x_get_y' | 'flat_discount';
-  discountPercent: number;
-  buyQty: number;
-  freeQty: number;
-  flatAmount: number;
-  minOrderValue: number;
-  minQty: number;
-  productId: string | null;
-  dealerId: string | null;
-  isActive: boolean;
-  validFrom: string;
-  validUntil: string | null;
-}
+**Migration: Add `scheme_savings` column to `orders`**
+```sql
+ALTER TABLE public.orders ADD COLUMN scheme_savings numeric NOT NULL DEFAULT 0;
 ```
 
-## Key Design Decisions
-- Scheme savings are computed client-side at order time (not stored on the order). This keeps the orders table untouched.
-- For the Performance widget, savings are re-computed from orders + schemes data in the filtered period.
-- Scheme application is advisory (shown as preview), not blocking — users see savings but the order total remains the original amount. The savings info is displayed for awareness.
-- Only Super Admin can manage schemes (RLS enforced). All roles can view.
+This gives us a permanent record of what was applied and how much was saved.
 
-## Files touched
-- 1 migration (schemes table + RLS + realtime)
-- `src/pages/Schemes.tsx` (new)
-- `src/components/layout/AppSidebar.tsx` (add nav item)
-- `src/App.tsx` (add route)
-- `src/context/DataContext.tsx` (schemes CRUD + fetch + cache)
-- `src/lib/offline-store.ts` (add entity)
-- `src/services/api.ts` (add schemes API)
-- `src/pages/NewOrder.tsx` (auto-apply preview)
-- `src/pages/Performance.tsx` (scheme widget)
-- `src/data/mock-data.ts` (Scheme interface)
+### Code Changes
+
+**1. `src/data/mock-data.ts`** — Add `schemeSavings: number` and `appliedSchemes: OrderScheme[]` to the `Order` interface.
+
+**2. `src/context/DataContext.tsx`** — Fetch `order_schemes` alongside orders. When saving a new order, also insert into `order_schemes` for each applied scheme.
+
+**3. `src/pages/NewOrder.tsx`** — On save, persist scheme data: insert `order_schemes` rows and set `scheme_savings` on the order. (Auto-apply logic already works correctly.)
+
+**4. `src/pages/Orders.tsx`** — In the order detail dialog, after the items table, show a "Schemes Applied" section (green box with Gift icon) if the order has any applied schemes — showing scheme name, label, and savings. This is read-only from stored data.
+
+**5. `src/pages/Performance.tsx`** — Replace the guesswork computation with actual stored `scheme_savings` from orders. Sum `scheme_savings` across filtered orders for accurate totals. Use `order_schemes` for top-performing scheme breakdown.
+
+**6. `src/components/pdf/OrderInvoicePdf.tsx`** — Add a "Scheme Savings" line below the items total if applicable, showing the discount applied.
+
+**7. `src/services/api.ts`** — No structural changes needed; schemes and orders already exposed.
+
+**8. `src/lib/offline-store.ts`** — Add `"order_schemes"` entity for IDB caching.
+
+### Console Warning Fix
+- The `Dialog` and `AlertDialog` ref warnings in `Schemes.tsx` — fix by ensuring functional components used as children are wrapped with `forwardRef` where needed, or restructure JSX.
+
+## Files Touched
+- 1 migration (create `order_schemes` + add `scheme_savings` to orders)
+- `src/data/mock-data.ts` (Order interface)
+- `src/context/DataContext.tsx` (fetch + persist scheme data with orders)
+- `src/pages/NewOrder.tsx` (save scheme data on order creation)
+- `src/pages/Orders.tsx` (show schemes in order detail dialog)
+- `src/pages/Performance.tsx` (use stored data instead of guessing)
+- `src/components/pdf/OrderInvoicePdf.tsx` (scheme savings line)
+- `src/lib/offline-store.ts` (cache order_schemes)
+- `src/pages/Schemes.tsx` (fix console warnings)
 
