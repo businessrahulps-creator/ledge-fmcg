@@ -167,7 +167,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-primary/50 dark:bg-primary/50"
+className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                     />
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function Dashboard() {
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
                       transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
-                      className="h-full rounded-full bg-primary/50 dark:bg-primary/50"
+                      className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                     />
                   </div>
                 </div>
