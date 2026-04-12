@@ -133,6 +133,13 @@ export default function Dashboard() {
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
           <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+          <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
+            Updated {timeAgo}
+            <span className="text-muted-foreground/30">·</span>
+            <button onClick={() => api.refreshAll()} className="underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors">
+              Refresh
+            </button>
+          </p>
 
           {/* This Month summary */}
           <motion.div
