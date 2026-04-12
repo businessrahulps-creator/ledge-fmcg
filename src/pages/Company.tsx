@@ -266,10 +266,14 @@ export default function Company() {
             <div className="border-t border-border/50 pt-4 mt-2">
               <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
               <div className="space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Bank Name</Label>
-                  <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
-                </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Bank Name</Label>
+                    <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Account Holder Name</Label>
+                    <Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className="h-10 rounded-lg" placeholder="Your Company Pvt Ltd" />
+                  </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Account Number</Label>
