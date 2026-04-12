@@ -281,7 +281,7 @@ export default function Salespersons() {
 
         {/* Profile Dialog — only mount when profileId is set */}
         {profileId && profilePerson && (
-          <Dialog open onOpenChange={() => setProfileId(null)}>
+           <Dialog open onOpenChange={() => setProfileId(null)}>
             <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-xl sm:max-w-2xl">
               <DialogHeader>
                 <div className="flex items-center justify-between">
@@ -292,94 +292,181 @@ export default function Salespersons() {
                     size="sm"
                     className="h-8 gap-1.5"
                     onClick={() => {
-                      const rows = [
-                        ["Phone", profilePerson.phone],
-                        ["Email", profilePerson.email || "—"],
-                        ["Region", profilePerson.region],
-                        ["Total Orders", String(profilePerson.totalOrders)],
-                        ["Total Value", formatCurrencyPdf(profilePerson.totalValue)],
-                      ];
-                      profileOrders.forEach((o) => {
-                        rows.push([o.orderNumber, `${o.distributorName} — ${formatCurrencyPdf(o.total)}`]);
-                      });
-                      const columns = [
-                        { header: "Field", width: "40%" },
-                        { header: "Value", width: "60%" },
-                      ];
+                      const sc = buildSalespersonScorecard(profileOrders);
+                      const health = getPerformanceHealth(profileOrders);
                       downloadPdf(
-                        pdfFilename("salesperson", profilePerson.name.replace(/\s+/g, "-")),
-                        ReportPdf({ title: profilePerson.name, subtitle: "Team Member Profile", columns, rows, companyName: "" })
+                        pdfFilename("salesperson-statement", profilePerson.name.replace(/\s+/g, "-")),
+                        SalespersonStatementPdf({
+                          companyName: "",
+                          salesperson: {
+                            name: profilePerson.name,
+                            phone: profilePerson.phone,
+                            email: profilePerson.email,
+                            region: profilePerson.region,
+                          },
+                          scorecard: sc,
+                          orders: profileOrders.map(o => ({
+                            orderNumber: o.orderNumber,
+                            date: o.date,
+                            distributorName: o.distributorName,
+                            total: o.total,
+                            paymentStatus: o.paymentStatus,
+                            schemeSavings: o.schemeSavings || 0,
+                          })),
+                          health,
+                        })
                       );
                     }}
                   >
                     <FileText className="h-3.5 w-3.5" />
-                    Export PDF
+                    Statement PDF
                   </Button>
                 </div>
               </DialogHeader>
-              <div className="space-y-4 md:space-y-6">
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
-                     <span className="text-xs text-muted-foreground">Phone</span>
-                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
-                   </div>
-                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
-                     <span className="text-xs text-muted-foreground">Email</span>
-                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
-                   </div>
-                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
-                     <span className="text-xs text-muted-foreground">Region</span>
-                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
-                   </div>
-                   <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
-                     <span className="text-xs text-muted-foreground">Total Value</span>
-                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
-                   </div>
-                </div>
-                <div>
-                  <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
-                  {profileOrders.length > 0 ? (
-                    <div className="rounded-lg border border-border overflow-hidden">
-                      <table className="hidden w-full text-sm md:table">
-                        <thead>
-                          <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                            <th className="px-4 py-2.5 font-medium">Order</th>
-                            <th className="px-4 py-2.5 font-medium">Dealer</th>
-                            <th className="px-4 py-2.5 font-medium text-right">Amount</th>
-                            <th className="px-4 py-2.5 font-medium">Payment</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {profileOrders.map((o) => (
-                            <tr key={o.id} className="border-b border-border/50">
-                              <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
-                              <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total)}</td>
-                              <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <div className="md:hidden">
-                        {profileOrders.map((o) => (
-                          <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
-                              <span className="text-xs font-medium">{formatCurrency(o.total)}</span>
-                            </div>
-                            <div className="mt-0.5 flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">{o.distributorName}</span>
-                              <StatusBadge status={o.paymentStatus} />
-                            </div>
+              {(() => {
+                const sc = buildSalespersonScorecard(profileOrders);
+                const health = getPerformanceHealth(profileOrders);
+                const hc = performanceHealthConfig[health];
+                const insight = getPerformanceInsight(health, sc);
+                const trend30 = sc.ordersPrev30d > 0 ? ((sc.orders30d - sc.ordersPrev30d) / sc.ordersPrev30d) * 100 : sc.orders30d > 0 ? 100 : 0;
+
+                return (
+                  <div className="space-y-4 md:space-y-6">
+                    {/* Info cards */}
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                       <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                         <span className="text-xs text-muted-foreground">Phone</span>
+                         <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.phone}</p>
+                       </div>
+                       <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                         <span className="text-xs text-muted-foreground">Email</span>
+                         <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm truncate">{profilePerson.email}</p>
+                       </div>
+                       <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                         <span className="text-xs text-muted-foreground">Region</span>
+                         <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{profilePerson.region}</p>
+                       </div>
+                       <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                         <span className="text-xs text-muted-foreground">Total Value</span>
+                         <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(profilePerson.totalValue)}</p>
+                       </div>
+                    </div>
+
+                    {/* Performance Scorecard */}
+                    <div>
+                      <h3 className="mb-3 text-xs font-semibold md:text-sm flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                        Performance Scorecard
+                      </h3>
+
+                      {/* Health Badge */}
+                      <div className={`rounded-lg border border-border p-3 md:p-4 mb-3 ${hc.bg}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`h-2 w-2 rounded-full ${hc.dot}`} />
+                          <span className={`text-xs font-semibold ${hc.color}`}>{hc.label}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{insight}</p>
+                      </div>
+
+                      {/* Metrics Grid */}
+                      <div className="grid grid-cols-2 gap-3 md:gap-4">
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <span className="text-xs text-muted-foreground">Orders (30d)</span>
+                          <div className="mt-0.5 flex items-center gap-1.5">
+                            <p className="text-sm font-semibold md:text-base">{sc.orders30d}</p>
+                            {trend30 !== 0 && (
+                              <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${trend30 > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                                {trend30 > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                                {Math.abs(Math.round(trend30))}%
+                              </span>
+                            )}
                           </div>
-                        ))}
+                        </div>
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <span className="text-xs text-muted-foreground">Orders (90d)</span>
+                          <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.orders90d}</p>
+                        </div>
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <span className="text-xs text-muted-foreground">Avg Order Value</span>
+                          <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.avgOrderValue)}</p>
+                        </div>
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <span className="text-xs text-muted-foreground">Revenue (30d)</span>
+                          <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.totalRevenue30d)}</p>
+                        </div>
+                      </div>
+
+                      {/* Payment Collection + Order Frequency */}
+                      <div className="mt-3 grid grid-cols-2 gap-3 md:gap-4">
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <span className="text-xs text-muted-foreground">Payment Collection</span>
+                          <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.paymentCollectionEfficiency.toFixed(0)}%</p>
+                          <Progress value={sc.paymentCollectionEfficiency} className="mt-2 h-1.5" />
+                        </div>
+                        <div className="rounded-lg border border-border bg-muted/30 p-3 md:p-4">
+                          <div className="flex items-center gap-1">
+                            <Zap className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">Order Frequency</span>
+                          </div>
+                          <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.orderFrequency} / week</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {sc.daysSinceLastOrder !== null
+                              ? sc.daysSinceLastOrder === 0
+                                ? "Ordered today"
+                                : `${sc.daysSinceLastOrder} days since last order`
+                              : "No orders yet"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground md:text-sm">No orders yet</p>
-                  )}
-                </div>
-              </div>
+
+                    {/* Order History */}
+                    <div>
+                      <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
+                      {profileOrders.length > 0 ? (
+                        <div className="rounded-lg border border-border overflow-hidden">
+                          <table className="hidden w-full text-sm md:table">
+                            <thead>
+                              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                                <th className="px-4 py-2.5 font-medium">Order</th>
+                                <th className="px-4 py-2.5 font-medium">Dealer</th>
+                                <th className="px-4 py-2.5 font-medium text-right">Amount</th>
+                                <th className="px-4 py-2.5 font-medium">Payment</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {profileOrders.map((o) => (
+                                <tr key={o.id} className="border-b border-border/50">
+                                  <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
+                                  <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
+                                  <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
+                                  <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <div className="md:hidden">
+                            {profileOrders.map((o) => (
+                              <div key={o.id} className="border-b border-border/50 px-3 py-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
+                                  <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
+                                </div>
+                                <div className="mt-0.5 flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">{o.distributorName}</span>
+                                  <StatusBadge status={o.paymentStatus} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground md:text-sm">No orders yet</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </DialogContent>
           </Dialog>
         )}
