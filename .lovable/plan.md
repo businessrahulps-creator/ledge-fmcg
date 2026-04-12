@@ -1,50 +1,38 @@
 
 
-# Scalable Order Selector for Billing
+# Remove the Lonely "Accounting" Section
 
 ## Problem
-The order picker in "New Document" is a plain dropdown listing ALL orders. At 500+ orders/day, this is unusable — no search, no filtering, no visual cues about which orders already have invoices.
+After moving Billing to Overview, "Accounting" only contains "Company" — a single-item section header looks odd and wastes vertical space.
 
-## Solution: Searchable Order Picker with Smart Defaults
+## Solution
+**Dissolve "Accounting"** and move Company into the **Manage** section. Company settings (name, GST, bank details, logo) are operational configuration — it fits naturally alongside Dealers, Stock, and other entity management items.
 
-Replace the `<Select>` dropdown with a **searchable command palette** (using the existing `cmdk`-based Command component already in the project) that includes:
+```text
+Sidebar
+├── Overview
+│   ├── Dashboard
+│   ├── Orders
+│   └── Billing
+├── Manage
+│   ├── Stock
+│   ├── Dealers
+│   ├── Sales Team
+│   ├── Schemes
+│   ├── Targets
+│   ├── Returns
+│   └── Company          ← moved here (last item, setup-oriented)
+├── Analyze
+│   ├── Reports
+│   └── Performance
+└── Settings
+```
 
-1. **Real-time search** — type order number, dealer name, or amount to instantly filter
-2. **Smart sorting** — show orders WITHOUT billing documents first (the ones most likely needing invoices), then orders that already have documents
-3. **Visual indicators** — each row shows: order number, dealer name, date, amount, and a small badge if documents already exist (e.g., "Estimate", "GST Invoice")
-4. **Recent-first** — sorted by date descending so today's orders appear at top
-
-### UI Behavior
-- Click "Select an order" → opens a popover with a search input + scrollable list
-- User types to filter (searches across order number, dealer name)
-- Each order row shows: `ORD-2026-0045 · Sharma Traders · ₹40,500 · 31 Mar` and optionally a small "✓ GST Invoice" badge
-- Orders with no documents get a subtle highlight or appear in an "Needs Invoice" group
-- Selecting an order works exactly as today (populates buyer + line items)
-
-## File Changes
+## Changes
 
 | File | Change |
 |------|--------|
-| `src/pages/Billing.tsx` | Replace the `<Select>` order picker (lines 538-549) with a `Popover` + `Command` component. Add search state, grouped/sorted order list, and billing status indicators per order. |
+| `src/components/layout/AppSidebar.tsx` | Remove `accountingNav` array and its `<SidebarGroup>`. Add Company entry to the end of `manageNav`. Remove the Accounting section from the JSX. |
 
-No new files, no database changes. Uses existing `cmdk` Command component and Popover from the UI library.
-
-## Technical Detail
-
-```text
-┌─────────────────────────────────────────────┐
-│ 🔍 Search orders...                        │
-├─────────────────────────────────────────────┤
-│ ── Needs Invoice ──────────────────────────│
-│ ORD-2026-0045 · Sharma Traders    ₹40,500  │
-│ 31 Mar · Rajesh Kumar                      │
-│                                             │
-│ ORD-2026-0044 · Gupta & Sons     ₹64,000  │
-│ 30 Mar · Priya Verma                       │
-│                                             │
-│ ── Has Documents ──────────────────────────│
-│ ORD-2026-0043 · Patel Dist.  ₹28K  [EST]  │
-│ 29 Mar · Amit Shah                         │
-└─────────────────────────────────────────────┘
-```
+One file, ~15 lines removed, 1 line added. No other files affected.
 
