@@ -27,6 +27,7 @@ export interface CompanyInfo {
   pan: string;
   stateCode: string;
   bankName: string;
+  bankAccountName: string;
   bankAccount: string;
   bankIfsc: string;
   invoicePrefix: string;
@@ -285,7 +286,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 
@@ -347,7 +348,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
           name: company.name || "", address: company.address || "", gstin: company.gstin || "",
           logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
           pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
-          bankName: (company as any).bank_name || "", bankAccount: (company as any).bank_account || "",
+          bankName: (company as any).bank_name || "", bankAccountName: (company as any).bank_account_name || "",
+          bankAccount: (company as any).bank_account || "",
           bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
         });
       }
@@ -370,10 +372,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (token !== fetchTokenRef.current) return;
 
       const dists: Distributor[] = (distRes.data || []).map(d => ({
-        id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
+        id: d.id, name: d.name, location: d.location, contact: d.contact,
+        email: (d as any).email || "", address: (d as any).address || "",
+        gstin: (d as any).gstin || "", pan: (d as any).pan || "", stateCode: (d as any).state_code || "",
+        bankName: (d as any).bank_name || "", bankAccountName: (d as any).bank_account_name || "",
+        bankAccount: (d as any).bank_account || "", bankIfsc: (d as any).bank_ifsc || "",
+        totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
         creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0),
       }));
-      setDistributors(dists);
 
       const sps: Salesperson[] = (spRes.data || []).map(s => ({
         id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: (s as any).total_orders ?? 0, totalValue: Number((s as any).total_value ?? 0),
@@ -690,7 +696,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
-        const mapped = data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0), creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0) }));
+        const mapped: Distributor[] = data.map(d => ({
+          id: d.id, name: d.name, location: d.location, contact: d.contact,
+          email: (d as any).email || "", address: (d as any).address || "",
+          gstin: (d as any).gstin || "", pan: (d as any).pan || "", stateCode: (d as any).state_code || "",
+          bankName: (d as any).bank_name || "", bankAccountName: (d as any).bank_account_name || "",
+          bankAccount: (d as any).bank_account || "", bankIfsc: (d as any).bank_ifsc || "",
+          totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
+          creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0),
+        }));
         setDistributors(mapped);
         cacheData(companyId, "distributors", mapped);
       }
@@ -1100,8 +1114,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const distCrud = useMemo(() => makeOfflineCrud<Distributor>(
     "distributors", setDistributors, "distributors",
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0, email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""), gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""), bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""), bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || "") }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0, email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""), gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""), bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""), bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || "") }),
   ), [companyId, persistEntityToCache]);
 
   // Salespersons

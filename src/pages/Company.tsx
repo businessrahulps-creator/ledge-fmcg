@@ -38,6 +38,7 @@ export default function Company() {
   const [companyPan, setCompanyPan] = useState("");
   const [companyStateCode, setCompanyStateCode] = useState("");
   const [bankName, setBankName] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
   const [bankAccount, setBankAccount] = useState("");
   const [bankIfsc, setBankIfsc] = useState("");
   const [invoicePrefix, setInvoicePrefix] = useState("INV");
@@ -50,7 +51,7 @@ export default function Company() {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix")
+      .select("name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account_name, bank_account, bank_ifsc, invoice_prefix")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -64,6 +65,7 @@ export default function Company() {
           setCompanyPan((data as any).pan || "");
           setCompanyStateCode((data as any).state_code || "");
           setBankName((data as any).bank_name || "");
+          setBankAccountName((data as any).bank_account_name || "");
           setBankAccount((data as any).bank_account || "");
           setBankIfsc((data as any).bank_ifsc || "");
           setInvoicePrefix((data as any).invoice_prefix || "INV");
@@ -159,6 +161,7 @@ export default function Company() {
           pan: sanitizeInput(companyPan),
           state_code: sanitizeInput(companyStateCode),
           bank_name: sanitizeInput(bankName),
+          bank_account_name: sanitizeInput(bankAccountName),
           bank_account: sanitizeInput(bankAccount),
           bank_ifsc: sanitizeInput(bankIfsc),
           invoice_prefix: sanitizeInput(invoicePrefix),
@@ -263,10 +266,14 @@ export default function Company() {
             <div className="border-t border-border/50 pt-4 mt-2">
               <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
               <div className="space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Bank Name</Label>
-                  <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
-                </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Bank Name</Label>
+                    <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Account Holder Name</Label>
+                    <Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className="h-10 rounded-lg" placeholder="Your Company Pvt Ltd" />
+                  </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Account Number</Label>
