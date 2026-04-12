@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      claim_lines: {
+        Row: {
+          claim_id: string
+          created_at: string
+          id: string
+          line_total: number
+          product_id: string
+          product_name: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          id?: string
+          line_total?: number
+          product_id: string
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          id?: string
+          line_total?: number
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_lines_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claims: {
+        Row: {
+          claim_type: string
+          company_id: string
+          created_at: string
+          distributor_id: string
+          distributor_name: string
+          id: string
+          order_id: string
+          order_number: string
+          reason: string
+          resolution_notes: string
+          resolved_at: string | null
+          restore_stock: boolean
+          status: string
+          total_claim_value: number
+          updated_at: string
+        }
+        Insert: {
+          claim_type?: string
+          company_id: string
+          created_at?: string
+          distributor_id: string
+          distributor_name?: string
+          id?: string
+          order_id: string
+          order_number?: string
+          reason?: string
+          resolution_notes?: string
+          resolved_at?: string | null
+          restore_stock?: boolean
+          status?: string
+          total_claim_value?: number
+          updated_at?: string
+        }
+        Update: {
+          claim_type?: string
+          company_id?: string
+          created_at?: string
+          distributor_id?: string
+          distributor_name?: string
+          id?: string
+          order_id?: string
+          order_number?: string
+          reason?: string
+          resolution_notes?: string
+          resolved_at?: string | null
+          restore_stock?: boolean
+          status?: string
+          total_claim_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string
