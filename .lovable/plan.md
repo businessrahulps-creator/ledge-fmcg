@@ -1,58 +1,70 @@
 
 
-# Feature #5: Sales Team Performance Scorecard + Statement PDF
+# Feature #7: Quick Secondary Sale Capture
 
-## Overview
-Mirror the existing Dealer Performance Scorecard for salespersons — same visual layout, same utility pattern, plus a "Top Sales Team" widget on Performance page.
+## Analysis & Decision: ACCEPTED
 
-## Files to Create
+Secondary sale tracking provides genuine value for FMCG distributors who want to understand dealer sell-through rates. The key insight: "Is my dealer actually selling what I supply, or just hoarding?" This directly impacts reorder decisions and credit decisions. Implementation must be dead-simple and fully optional — zero friction for users who don't want it.
 
-### 1. `src/utils/salespersonScorecard.ts`
-Symmetric to `dealerScorecard.ts`. Contains:
-- `SalespersonScorecard` interface: `orders30d`, `orders60d`, `orders90d`, `ordersPrev30d`, `totalRevenue`, `totalRevenue30d`, `avgOrderValue`, `orderFrequency` (orders/week over 90d), `paymentCollectionEfficiency` (% paid), `daysSinceLastOrder`
-- `PerformanceHealth` type: `"high" | "medium" | "low"`
-- `getPerformanceHealth(orders)`: Returns health level based on order recency + payment collection (mirrors churn risk logic)
-- `getPerformanceInsight(health, scorecard)`: Returns plain-English one-liner (e.g., "Strong closer but slow payment collection", "Consistent performer", "Needs attention — low activity")
-- `buildSalespersonScorecard(orders)`: Computes all metrics
-- `performanceHealthConfig`: Color/label map (High=green, Medium=amber, Low=red) — symmetric to `churnRiskConfig`
+## Database
 
-### 2. `src/components/pdf/SalespersonStatementPdf.tsx`
-Symmetric to `DealerStatementPdf.tsx`. Professional branded PDF with:
-- Company header (PdfHeader)
-- Salesperson details (name, phone, email, region)
-- Performance scorecard table (all metrics + health assessment)
-- Order history table (order #, date, dealer name, amount, payment status)
-- Summary totals box
-- PdfFooter
+### New table: `secondary_sales`
+```sql
+CREATE TABLE secondary_sales (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id uuid NOT NULL,
+  distributor_id uuid NOT NULL,
+  product_id uuid NOT NULL,
+  product_name text NOT NULL,
+  retailer_name text NOT NULL DEFAULT '',
+  quantity integer NOT NULL DEFAULT 0,
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  remarks text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 
-## Files to Modify
+ALTER TABLE secondary_sales ENABLE ROW LEVEL SECURITY;
 
-### 3. `src/pages/Salespersons.tsx` — Profile Dialog Enhancement
-Replace the basic profile dialog (lines 280-386) with the enhanced version:
+-- RLS: company-scoped CRUD
+CREATE POLICY "Company members can view secondary sales" ON secondary_sales FOR SELECT TO authenticated USING (company_id = get_company_id());
+CREATE POLICY "Company members can insert secondary sales" ON secondary_sales FOR INSERT TO authenticated WITH CHECK (company_id = get_company_id());
+CREATE POLICY "Company members can delete secondary sales" ON secondary_sales FOR DELETE TO authenticated USING (company_id = get_company_id());
+```
 
-**Header**: Add "Statement PDF" button (same style as dealer page) next to name.
+## Files to Create/Modify
 
-**Info cards**: Keep existing Phone/Email/Region/Total Value grid.
+### 1. `src/context/DataContext.tsx` — Add secondary sales state + CRUD
+- Add `secondarySales` array to context state
+- Add `addSecondarySale`, `deleteSecondarySale` functions
+- Fetch from `secondary_sales` table on load
+- Expose via context
 
-**Performance Scorecard section** (new, after info cards): Exact same visual structure as Dealer Scorecard:
-- Performance Health badge (replaces Churn Risk) with icon, label, insight line
-- 2x2 metrics grid: Orders (30d) with trend arrow, Orders (90d), Avg Order Value, Revenue (30d)
-- Payment Collection Efficiency progress bar
-- Order Frequency stat
+### 2. `src/services/api.ts` — Expose secondary sales via API hook
+- Add `secondarySales` section: `list()`, `create()`, `remove()`
 
-**Order History table**: Keep existing, update amounts to effective totals.
+### 3. `src/pages/Distributors.tsx` — Dealer detail enhancements
+- Add "Record Secondary Sale" button (prominent, after scorecard)
+- Simple modal: Retailer Name (text), Product (dropdown), Quantity (number), Date (default today), Remarks (optional)
+- Below the button, show a compact "Secondary Sales Summary" section:
+  - Total secondary sales count + total quantity for this dealer
+  - Collapsible list of recent secondary sales (last 10)
+  - Each row: date, retailer, product, qty
 
-### 4. `src/pages/Performance.tsx` — Top Sales Team Widget
-Add after the "Top Dealers Performance" widget (~line 577):
-- "Top Sales Team" card with blue-purple accent
-- Top 3 salespersons by revenue with order count + performance health badge
-- Each row clickable → navigates to `/salespersons`
-- Same visual style as Top Dealers widget
+### 4. `src/pages/Performance.tsx` — Secondary Sales widget
+- Small card showing: total secondary sale records in period, top 3 retailers by quantity
+- Simple, non-intrusive placement after existing widgets
 
-## Key Design Decisions
-- Performance Health uses same logic pattern as Churn Risk (recency + payment %)
-- "High" health = Low churn risk equivalent (green), "Low" health = needs attention (red)
-- Insight line uses simple conditional logic based on metrics
-- All amounts use effective totals (minus scheme savings)
-- Statement PDF mirrors Dealer Statement PDF structure exactly
+## Design Principles
+- The "Record Secondary Sale" button is visible but not dominant — secondary to the Statement PDF button
+- Modal is extremely minimal: 4-5 fields, large touch targets, instant save
+- Summary is collapsible so it doesn't overwhelm the dealer detail view
+- All amounts are quantities only (no pricing) — secondary sales track units moved, not revenue
+- Fully optional: if no secondary sales exist, the section shows a subtle empty state
+
+## Files Touched
+- **New migration**: `secondary_sales` table
+- `src/context/DataContext.tsx` — Add secondary sales state + CRUD
+- `src/services/api.ts` — Expose via hook
+- `src/pages/Distributors.tsx` — Record button, modal, summary section
+- `src/pages/Performance.tsx` — Small widget
 
