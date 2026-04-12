@@ -77,7 +77,7 @@ export function ActivityLog({ open, onOpenChange }: Props) {
       }
 
       const { data } = await query;
-      const rows = (data || []) as ActivityEntry[];
+      const rows = ((data as any) || []) as ActivityEntry[];
       setHasMore(rows.length === PAGE_SIZE);
       if (append) {
         setEntries(prev => [...prev, ...rows]);

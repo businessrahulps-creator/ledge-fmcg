@@ -33,7 +33,7 @@ export function EntityHistory({ entityType, entityId }: Props) {
       .eq("entity_id", entityId)
       .order("created_at", { ascending: false })
       .limit(30)
-      .then(({ data }) => setEntries((data || []) as ActivityEntry[]));
+      .then(({ data }) => setEntries(((data as any) || []) as ActivityEntry[]));
   }, [open, companyId, entityType, entityId]);
 
   return (
