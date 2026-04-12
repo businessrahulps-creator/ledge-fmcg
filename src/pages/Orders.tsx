@@ -122,7 +122,7 @@ export default function Orders() {
     setEditGodown(order.godownId || "");
   };
 
-  const saveOrder = async () => {
+  const executeSaveOrder = async () => {
     if (!selectedOrder) return;
 
     // Require godown if changing to dispatched/delivered
@@ -144,6 +144,36 @@ export default function Orders() {
     setIsSaving(false);
     toast.success("Order updated", { description: `${selectedOrder.orderNumber} has been updated.` });
     setSelectedOrder(null);
+  };
+
+  // Credit guard for order edit
+  const saveOrder = () => {
+    if (!selectedOrder) return;
+    const dealer = distributors.find(d => d.id === selectedOrder.distributorId);
+    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+
+    // Check if payment status is changing TO unpaid (or staying unpaid)
+    const wasUnpaid = selectedOrder.paymentStatus === "pending" || selectedOrder.paymentStatus === "partial";
+    const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
+
+    if (willBeUnpaid) {
+      // Compute projected outstanding: current outstanding - (this order's contribution if previously unpaid) + (this order if still unpaid)
+      const currentContribution = wasUnpaid ? selectedOrder.total : 0;
+      const newContribution = selectedOrder.total;
+      const projected = dealer.outstandingAmount - currentContribution + newContribution;
+
+      if (projected > dealer.creditLimit) {
+        if (userRole === "super_admin") {
+          setCreditOverrideOpen(true);
+          return;
+        }
+        toast.error("Credit limit exceeded", {
+          description: `${dealer.name}'s outstanding would exceed their credit limit. Contact a Super Admin.`,
+        });
+        return;
+      }
+    }
+    executeSaveOrder();
   };
 
   const handleDeleteOrder = async () => {
