@@ -5,6 +5,8 @@ export interface Distributor {
   contact: string;
   totalOrders: number;
   totalValue: number;
+  creditLimit: number;
+  outstandingAmount: number;
 }
 
 export interface Product {

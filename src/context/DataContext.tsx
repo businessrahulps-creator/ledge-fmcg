@@ -211,6 +211,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       const dists: Distributor[] = (distRes.data || []).map(d => ({
         id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0),
+        creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0),
       }));
       setDistributors(dists);
 
@@ -435,7 +436,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await supabase.from("distributors").select("*").eq("company_id", companyId).order("name").range(0, 9999);
       if (data) {
-        const mapped = data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0) }));
+        const mapped = data.map(d => ({ id: d.id, name: d.name, location: d.location, contact: d.contact, totalOrders: (d as any).total_orders ?? 0, totalValue: Number((d as any).total_value ?? 0), creditLimit: Number((d as any).credit_limit ?? 0), outstandingAmount: Number((d as any).outstanding_amount ?? 0) }));
         setDistributors(mapped);
         cacheData(companyId, "distributors", mapped);
       }
@@ -810,8 +811,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const distCrud = useMemo(() => makeOfflineCrud<Distributor>(
     "distributors", setDistributors, "distributors",
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
   ), [companyId, persistEntityToCache]);
 
   // Salespersons

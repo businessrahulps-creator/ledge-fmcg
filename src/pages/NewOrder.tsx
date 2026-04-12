@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Loader2 } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +21,16 @@ import {
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface OrderLineState {
   id: string;
@@ -65,6 +76,8 @@ export default function NewOrder() {
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
+  const { userRole } = useAuth();
+  const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
   const firstProductRef = useRef<HTMLButtonElement>(null);
 
@@ -145,7 +158,15 @@ export default function NewOrder() {
   const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
-  const handleSave = async () => {
+  // Credit guard computation
+  const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
+  const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? orderTotal : 0);
+  const creditLimit = selectedDealerObj?.creditLimit || 0;
+  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
+  const isSuperAdmin = userRole === "super_admin";
+
+  const executeSave = async () => {
     // Validation
     if (!selectedDealer) {
       toast.error("Dealer required", { description: "Please select a dealer for this order." });
@@ -224,7 +245,22 @@ export default function NewOrder() {
     // If !result.success, toast was already shown by DataContext
   };
 
+  const handleSave = () => {
+    if (exceedsCreditLimit) {
+      if (isSuperAdmin) {
+        setCreditOverrideOpen(true);
+        return;
+      }
+      toast.error("Credit limit exceeded", {
+        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Contact a Super Admin to override.`,
+      });
+      return;
+    }
+    executeSave();
+  };
+
   return (
+    <>
     <AppLayout>
       <div className="space-y-6 md:space-y-8">
         <div className="flex items-center gap-3 md:gap-4">
@@ -285,6 +321,20 @@ export default function NewOrder() {
                 </div>
               </div>
             </section>
+
+            {/* Credit Limit Warning */}
+            {selectedDealer && exceedsCreditLimit && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Credit limit will be exceeded</p>
+                  <p className="mt-0.5">
+                    {selectedDealerObj?.name}'s projected outstanding: {formatCurrency(projectedOutstanding)} / Limit: {formatCurrency(creditLimit)}
+                    {isSuperAdmin && " — You can override as Super Admin."}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Order Lines */}
             <section className="glass-card p-4 md:p-6">
@@ -521,5 +571,24 @@ export default function NewOrder() {
 
       </div>
     </AppLayout>
+
+    {/* Credit Override Confirmation (Super Admin only) */}
+    <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
+          <AlertDialogDescription>
+            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, exceeding their credit limit of {formatCurrency(creditLimit)}. Do you want to proceed?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { setCreditOverrideOpen(false); executeSave(); }}>
+            Override & Save
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }
