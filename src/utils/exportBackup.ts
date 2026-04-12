@@ -18,10 +18,26 @@ function toCsvString(headers: string[], rows: string[][]): string {
 const s = (v: unknown) => String(v ?? "");
 const n = (v: unknown) => String(v ?? 0);
 
+const PAGE_SIZE = 1000;
+
+async function fetchAll<T>(
+  queryFn: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const all: T[] = [];
+  let offset = 0;
+  while (true) {
+    const { data, error } = await queryFn(offset, offset + PAGE_SIZE - 1);
+    if (error || !data) break;
+    all.push(...data);
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return all;
+}
+
 export async function exportFullBackup() {
   const zip = new JSZip();
   let fileCount = 0;
-  const truncatedTables: string[] = [];
 
   const checkTruncation = (name: string, data: unknown[] | null) => {
     if (data && data.length === 1000) truncatedTables.push(name);
