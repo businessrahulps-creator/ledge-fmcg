@@ -10,14 +10,6 @@ import { formatCurrency } from "@/data/mock-data";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getChurnRisk, churnRiskConfig } from "@/utils/dealerScorecard";
-import { useNavigate } from "react-router-dom";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { useApi } from "@/services/api";
-import { usePageLoading } from "@/hooks/use-loading";
-import { DashboardSkeleton } from "@/components/ui/page-skeleton";
-import { formatCurrency } from "@/data/mock-data";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
