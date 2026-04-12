@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -38,6 +40,18 @@ export default function Orders() {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    if (api.refreshAll) {
+      await api.refreshAll();
+    } else {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }, [api]);
+
+  const { containerRef, pullDistance, refreshing } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
 
   const ordersPdfSections: PdfSection[] = [
     { id: "company", label: "Company header" },
@@ -81,6 +95,23 @@ export default function Orders() {
 
   return (
     <AppLayout>
+      <div ref={containerRef} className="relative overflow-y-auto">
+        {/* Pull-to-refresh indicator */}
+        <div
+          className="flex items-center justify-center overflow-hidden transition-[height] duration-200 ease-out"
+          style={{ height: pullDistance > 0 || refreshing ? `${Math.max(pullDistance, refreshing ? 48 : 0)}px` : "0px" }}
+        >
+          <div
+            className={cn(
+              "h-5 w-5 rounded-full border-2 border-primary border-t-transparent",
+              refreshing ? "animate-spin" : ""
+            )}
+            style={{
+              opacity: Math.min(pullDistance / 80, 1),
+              transform: `rotate(${pullDistance * 3}deg)`,
+            }}
+          />
+        </div>
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -324,6 +355,7 @@ export default function Orders() {
             );
           }}
         />
+      </div>
       </div>
     </AppLayout>
   );
