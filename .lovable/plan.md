@@ -1,70 +1,73 @@
 
 
-# Feature #7: Quick Secondary Sale Capture
+# Feature #8: Targets & Achievements
 
-## Analysis & Decision: ACCEPTED
-
-Secondary sale tracking provides genuine value for FMCG distributors who want to understand dealer sell-through rates. The key insight: "Is my dealer actually selling what I supply, or just hoarding?" This directly impacts reorder decisions and credit decisions. Implementation must be dead-simple and fully optional — zero friction for users who don't want it.
+## Overview
+A new dedicated page and database table for setting monthly/quarterly revenue or order targets for salespersons and dealers, with progress tracking integrated into detail views and the Performance page.
 
 ## Database
 
-### New table: `secondary_sales`
+### New table: `targets`
 ```sql
-CREATE TABLE secondary_sales (
+CREATE TABLE public.targets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL,
-  distributor_id uuid NOT NULL,
-  product_id uuid NOT NULL,
-  product_name text NOT NULL,
-  retailer_name text NOT NULL DEFAULT '',
-  quantity integer NOT NULL DEFAULT 0,
-  date date NOT NULL DEFAULT CURRENT_DATE,
-  remarks text NOT NULL DEFAULT '',
-  created_at timestamptz NOT NULL DEFAULT now()
+  entity_type text NOT NULL DEFAULT 'salesperson',  -- 'salesperson' | 'dealer'
+  entity_id uuid NOT NULL,
+  entity_name text NOT NULL DEFAULT '',
+  period_type text NOT NULL DEFAULT 'monthly',       -- 'monthly' | 'quarterly'
+  period_start date NOT NULL,
+  target_revenue numeric NOT NULL DEFAULT 0,
+  target_orders integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (company_id, entity_type, entity_id, period_type, period_start)
 );
 
-ALTER TABLE secondary_sales ENABLE ROW LEVEL SECURITY;
-
--- RLS: company-scoped CRUD
-CREATE POLICY "Company members can view secondary sales" ON secondary_sales FOR SELECT TO authenticated USING (company_id = get_company_id());
-CREATE POLICY "Company members can insert secondary sales" ON secondary_sales FOR INSERT TO authenticated WITH CHECK (company_id = get_company_id());
-CREATE POLICY "Company members can delete secondary sales" ON secondary_sales FOR DELETE TO authenticated USING (company_id = get_company_id());
+ALTER TABLE public.targets ENABLE ROW LEVEL SECURITY;
+-- Company-scoped SELECT, INSERT, UPDATE, DELETE policies
 ```
 
-## Files to Create/Modify
+## Files to Create
 
-### 1. `src/context/DataContext.tsx` — Add secondary sales state + CRUD
-- Add `secondarySales` array to context state
-- Add `addSecondarySale`, `deleteSecondarySale` functions
-- Fetch from `secondary_sales` table on load
-- Expose via context
+### 1. `src/pages/Targets.tsx` — Dedicated page
+- Two tabs: "Sales Team" and "Dealers"
+- Period selector (month/quarter picker, defaulting to current month)
+- For each tab: list all entities with inline target setting (revenue + orders) and visual progress bars
+- Progress computed from actual orders in that period
+- Status badges: "Exceeded" (green, >100%), "On Track" (blue, ≥70%), "Behind Target" (amber, ≥40%), "Needs Attention" (red, <40%)
+- Empty state when no targets set yet
 
-### 2. `src/services/api.ts` — Expose secondary sales via API hook
-- Add `secondarySales` section: `list()`, `create()`, `remove()`
+### 2. DataContext additions
+- Add `targets` state array, `addTarget`, `updateTarget`, `deleteTarget` functions
+- Fetch on load alongside other entities
 
-### 3. `src/pages/Distributors.tsx` — Dealer detail enhancements
-- Add "Record Secondary Sale" button (prominent, after scorecard)
-- Simple modal: Retailer Name (text), Product (dropdown), Quantity (number), Date (default today), Remarks (optional)
-- Below the button, show a compact "Secondary Sales Summary" section:
-  - Total secondary sales count + total quantity for this dealer
-  - Collapsible list of recent secondary sales (last 10)
-  - Each row: date, retailer, product, qty
+### 3. `src/services/api.ts` — Expose targets CRUD
 
-### 4. `src/pages/Performance.tsx` — Secondary Sales widget
-- Small card showing: total secondary sale records in period, top 3 retailers by quantity
-- Simple, non-intrusive placement after existing widgets
+## Files to Modify
 
-## Design Principles
-- The "Record Secondary Sale" button is visible but not dominant — secondary to the Statement PDF button
-- Modal is extremely minimal: 4-5 fields, large touch targets, instant save
-- Summary is collapsible so it doesn't overwhelm the dealer detail view
-- All amounts are quantities only (no pricing) — secondary sales track units moved, not revenue
-- Fully optional: if no secondary sales exist, the section shows a subtle empty state
+### 4. `src/components/layout/AppSidebar.tsx`
+- Add `{ title: "Targets", url: "/targets", icon: Target }` to `manageNav` after Schemes
 
-## Files Touched
-- **New migration**: `secondary_sales` table
-- `src/context/DataContext.tsx` — Add secondary sales state + CRUD
-- `src/services/api.ts` — Expose via hook
-- `src/pages/Distributors.tsx` — Record button, modal, summary section
-- `src/pages/Performance.tsx` — Small widget
+### 5. `src/App.tsx`
+- Add route: `/targets` → `<Targets />`
+
+### 6. `src/pages/Distributors.tsx` — Dealer detail view
+- Add "Targets & Achievements" section showing current period target vs actual with progress bar and status
+
+### 7. `src/pages/Salespersons.tsx` — Salesperson detail view
+- Same "Targets & Achievements" section
+
+### 8. `src/pages/Performance.tsx`
+- Add "Targets Overview" widget showing top performers and those behind target
+
+## UX Proposal (Better Flow)
+Rather than a separate modal for each target, the Targets page uses **inline editing** — each row has editable revenue/orders fields that auto-save on blur. This eliminates modal fatigue and lets the admin set all targets in one sweep. The period selector at the top (month dropdown) applies globally, making it trivial to set targets for the whole team in under a minute.
+
+Progress bars use a gradient fill (green when >100%, blue for on-track, amber/red for behind) so status is instantly visible at a glance without reading numbers.
+
+## Files Touched Summary
+- **New migration**: `targets` table
+- **New file**: `src/pages/Targets.tsx`
+- **Modified**: `src/context/DataContext.tsx`, `src/services/api.ts`, `src/App.tsx`, `src/components/layout/AppSidebar.tsx`, `src/pages/Distributors.tsx`, `src/pages/Salespersons.tsx`, `src/pages/Performance.tsx`
 
