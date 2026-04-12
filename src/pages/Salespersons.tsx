@@ -139,7 +139,6 @@ export default function Salespersons() {
               onClick={() => navigate(`/salespersons/${s.id}`)}
               className="cursor-pointer glass-card card-hover p-4 md:p-6"
             >
-            >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2.5 md:gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 md:h-10 md:w-10">
@@ -169,7 +168,7 @@ export default function Salespersons() {
                 <span>{s.totalOrders} orders</span>
                 <span className="font-semibold">{formatCurrency(s.totalValue)}</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
