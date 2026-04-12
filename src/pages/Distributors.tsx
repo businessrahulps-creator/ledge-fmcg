@@ -389,9 +389,81 @@ export default function Distributors() {
                          </div>
                        );
                      })()}
-                  </div>
+                   </div>
 
-                  <div>
+                  {/* Performance Scorecard */}
+                  {(() => {
+                    const sc = buildScorecard(selectedOrders);
+                    const risk = churnRiskConfig[sc.churnRisk];
+                    const trend = sc.orders30d > sc.ordersPrev30d ? "up" : sc.orders30d < sc.ordersPrev30d ? "down" : "flat";
+                    return (
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
+                          <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                          Performance Scorecard
+                        </h3>
+                        {/* Churn Risk Badge */}
+                        <div className={`flex items-center gap-2 rounded-lg px-3 py-2 ${risk.bg}`}>
+                          {sc.churnRisk === "high" ? (
+                            <ShieldAlert className={`h-4 w-4 ${risk.color}`} />
+                          ) : (
+                            <Shield className={`h-4 w-4 ${risk.color}`} />
+                          )}
+                          <div className="flex-1">
+                            <span className={`text-xs font-semibold ${risk.color}`}>{risk.label}</span>
+                            <p className="text-[10px] text-muted-foreground">
+                              {sc.daysSinceLastOrder !== null ? `Last order ${sc.daysSinceLastOrder} day${sc.daysSinceLastOrder !== 1 ? "s" : ""} ago` : "No orders yet"}
+                            </p>
+                          </div>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${risk.color} ${risk.bg}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${risk.dot}`} />
+                            {sc.churnRisk.toUpperCase()}
+                          </span>
+                        </div>
+
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                            <span className="text-[10px] text-muted-foreground">Orders (30d)</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-sm font-semibold">{sc.orders30d}</span>
+                              {trend === "up" && <TrendingUp className="h-3 w-3 text-emerald-500" />}
+                              {trend === "down" && <TrendingDown className="h-3 w-3 text-red-500" />}
+                              {trend === "flat" && <Minus className="h-3 w-3 text-muted-foreground" />}
+                              <span className="text-[10px] text-muted-foreground">vs {sc.ordersPrev30d} prev</span>
+                            </div>
+                          </div>
+                          <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                            <span className="text-[10px] text-muted-foreground">Orders (90d)</span>
+                            <p className="text-sm font-semibold mt-0.5">{sc.orders90d}</p>
+                          </div>
+                          <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                            <span className="text-[10px] text-muted-foreground">Avg Order Value</span>
+                            <p className="text-sm font-semibold mt-0.5">{formatCurrency(sc.avgOrderValue)}</p>
+                          </div>
+                          <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                            <span className="text-[10px] text-muted-foreground">Value (30d)</span>
+                            <p className="text-sm font-semibold mt-0.5">{formatCurrency(sc.totalValue30d)}</p>
+                          </div>
+                        </div>
+
+                        {/* Payment Timeliness */}
+                        <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] text-muted-foreground">Payment Timeliness (On-time %)</span>
+                            <span className={`text-xs font-semibold ${sc.paymentTimeliness >= 60 ? "text-emerald-600 dark:text-emerald-400" : sc.paymentTimeliness >= 30 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                              {sc.paymentTimeliness.toFixed(0)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={sc.paymentTimeliness}
+                            className="h-2"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                     <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {selectedOrders.length > 0 ? (
                       <div className="rounded-lg border border-border overflow-hidden">
