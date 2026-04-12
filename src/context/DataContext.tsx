@@ -175,7 +175,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
   const [orderSequence, setOrderSequence] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
   const fetchTokenRef = useRef(0);
