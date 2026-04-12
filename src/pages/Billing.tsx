@@ -104,6 +104,8 @@ export default function Billing() {
     setNotes("");
     setLines([]);
     setEditingInvoice(null);
+    setStep(1);
+    setOrderSearch("");
   };
 
   // Auto-open dialog if coming from Orders page with ?order=<id>
