@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
-import { toast as sonnerToast } from "sonner";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -37,7 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+
 import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
