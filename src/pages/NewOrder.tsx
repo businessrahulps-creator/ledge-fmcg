@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Loader2 } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +21,16 @@ import {
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface OrderLineState {
   id: string;
@@ -65,6 +76,8 @@ export default function NewOrder() {
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const addOrder = api.orders.create;
   const { addNotification } = useNotifications();
+  const { userRole } = useAuth();
+  const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
   const firstProductRef = useRef<HTMLButtonElement>(null);
 
