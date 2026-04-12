@@ -1,77 +1,49 @@
 
 
-# Executive QA & Maximum-Impact Enhancement Plan
+# Visual Refinement Plan — From Faded/Washed-Out to Premium Crisp
 
-## Fresh Audit Findings
+## Root Cause Analysis
 
-### Critical Issues
+Comparing the current Ledge screenshot against the Dub reference reveals one core problem: **the background is too dark/gray** (`220 16% 94%` ≈ `#EDEFF3`), which makes the entire UI feel washed-out and muddy. The Dub reference uses a near-white background (`~#FAFAFA`) with pure white cards, creating crisp separation through clean borders rather than background contrast. The current `inset_0_1px_0_rgba(255,255,255,0.6)` highlight on glass cards adds to the washed-out feel.
 
-| # | Issue | Impact |
-|---|-------|--------|
-| 1 | **Distributors page: empty state + pagination render outside conditional** — When `filtered.length === 0`, the grid is empty but `ListPagination` still renders (line 223), and the empty state renders *after* pagination (line 225). Same pattern issue as the Orders page fix from a previous pass, but on Distributors. | Broken UX — pagination controls visible with 0 results |
-| 2 | **Salespersons page: same pagination/empty-state ordering bug** — Need to verify identical pattern exists here | Broken UX |
+## Token Changes (src/index.css only)
 
-### High Priority
+| Token | Current | New | Why |
+|-------|---------|-----|-----|
+| `--background` | `220 16% 94%` | `220 14% 97%` | Lighter bg like Dub (#F5F6F8 → #F7F8FA) — crisp, not gray |
+| `--card` | `0 0% 99.5%` | `0 0% 100%` | Pure white cards — clean separation against bg |
+| `--muted-foreground` | `220 10% 44%` | `220 10% 40%` | Slightly darker secondary text for readability |
+| `--border` | `220 9% 89%` | `220 9% 87%` | Slightly more visible borders like Dub |
+| `--input` | `220 9% 89%` | `220 9% 87%` | Match border |
+| `--sidebar-background` | `220 20% 98%` | `0 0% 100%` | Pure white sidebar like Dub |
+| `--sidebar-border` | `220 9% 90%` | `220 9% 87%` | Match border |
 
-| # | Issue | Impact |
-|---|-------|--------|
-| 3 | **Dashboard "Recent Orders" section has excessive bottom padding** — `pb-20` on the section (line 206) creates a large gap before the mobile bottom nav. On desktop, this gap is unnecessary. | Wasted space, unprofessional feel |
-| 4 | **Dealer cards show empty location/contact when fields are blank** — MapPin and Phone icons render with empty text when `d.location` or `d.contact` is `""` | Visual bug — icons with no text |
-| 5 | **Claims page badge colors use saturated `bg-*-100` instead of softened `bg-*-50/80`** — Inconsistent with the status-badge.tsx overhaul done in the visual pass | Inconsistent with enterprise design system |
+## Glass Card Shadow Refinement (src/index.css)
 
-### Medium Priority
+Remove the inset white highlight (adds to washed-out feel). Use a clean, crisp shadow system like Dub:
 
-| # | Issue | Impact |
-|---|-------|--------|
-| 6 | **Billing page badge colors also use old saturated `bg-*-100` pattern** — `docTypeBadgeColors` and `statusConfig` in Claims use old palette | Visual inconsistency |
-| 7 | **Stock HealthBadge uses `bg-*-50` but Claims/Billing use `bg-*-100`** — Mixed badge color conventions across pages | Inconsistency |
-| 8 | **Dashboard mobile cards missing `pb-24 md:pb-6` pattern** — The `pb-20` class on the Recent Orders section should be `pb-24 md:pb-8` to properly clear the floating bottom nav on mobile while not wasting space on desktop | Minor spacing |
+```
+shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.04),0_4px_14px_rgba(0,0,0,0.04)]
+```
 
----
+No `inset` highlight. The border `rgba(0,0,0,0.05)` ring is slightly stronger for definition.
 
-## Implementation Plan
+## Card Hover Shadow
 
-### Pass 1: Fix Distributors page empty state / pagination ordering
+Slightly stronger hover for tactile feedback:
+```
+hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border
+```
 
-**File:** `src/pages/Distributors.tsx`
+## Dashboard Progress Bars (src/pages/Dashboard.tsx)
 
-Move `ListPagination` and empty state inside a conditional block — show the card grid + pagination only when `filtered.length > 0`, show the empty state only when `filtered.length === 0`. This matches the pattern already used in Orders.tsx.
-
-### Pass 2: Fix Salespersons page same pattern (if present)
-
-**File:** `src/pages/Salespersons.tsx`
-
-Verify and apply the same fix.
-
-### Pass 3: Fix dealer cards rendering empty location/contact
-
-**File:** `src/pages/Distributors.tsx`
-
-Conditionally render the MapPin row only when `d.location` is non-empty, and Phone row only when `d.contact` is non-empty.
-
-### Pass 4: Standardize badge colors across Claims and Billing
-
-**Files:** `src/pages/Claims.tsx`, `src/pages/Billing.tsx`
-
-Replace `bg-*-100` with `bg-*-50/80` and soften text colors (e.g., `text-*-800` → `text-*-700`) to match the enterprise palette established in status-badge.tsx.
-
-### Pass 5: Fix Dashboard section padding
-
-**File:** `src/pages/Dashboard.tsx`
-
-Change `pb-20` to `pb-24 md:pb-8` on the Recent Orders section for proper mobile bottom-nav clearance without desktop waste.
-
----
+Progress bars `bg-primary/40` are fine with the new crisp palette — no change needed.
 
 ## Files Changed
 
 | File | Changes |
-|------|---------|
-| `src/pages/Distributors.tsx` | Fix empty state/pagination ordering; conditional location/contact rendering |
-| `src/pages/Salespersons.tsx` | Fix empty state/pagination ordering (if applicable) |
-| `src/pages/Claims.tsx` | Soften badge colors to match design system |
-| `src/pages/Billing.tsx` | Soften badge colors to match design system |
-| `src/pages/Dashboard.tsx` | Fix section bottom padding |
+|------|------|
+| `src/index.css` | ~8 token updates + glass-card shadow cleanup |
 
-**5 files, ~8 surgical edits. No new dependencies. No feature additions. No behavior changes.**
+**1 file. Pure token tuning. No layout, behaviour, or component changes.**
 
