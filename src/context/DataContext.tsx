@@ -27,6 +27,7 @@ export interface CompanyInfo {
   pan: string;
   stateCode: string;
   bankName: string;
+  bankAccountName: string;
   bankAccount: string;
   bankIfsc: string;
   invoicePrefix: string;
@@ -285,7 +286,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV" });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
 

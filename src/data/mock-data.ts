@@ -3,6 +3,15 @@ export interface Distributor {
   name: string;
   location: string;
   contact: string;
+  email: string;
+  address: string;
+  gstin: string;
+  pan: string;
+  stateCode: string;
+  bankName: string;
+  bankAccountName: string;
+  bankAccount: string;
+  bankIfsc: string;
   totalOrders: number;
   totalValue: number;
   creditLimit: number;
