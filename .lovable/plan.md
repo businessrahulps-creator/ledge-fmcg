@@ -1,25 +1,35 @@
 
 
-# Dashboard: Replace Emoji with User's Name in Greeting
+# Add WhatsApp Share for GST Invoices on Billing Page
 
-## Change
+## Problem
 
-Replace `👋` emoji in the greeting with the logged-in user's first name from `profile.full_name`.
+The Orders page has WhatsApp sharing (PDF attachment + text summary), but the Billing page — where GST invoices, estimates, proformas, and credit notes live — has no WhatsApp share option. Indian FMCG billing is heavily WhatsApp-driven.
 
-- **Current**: "Good morning 👋"
-- **New**: "Good morning, Rahul" (or just "Good morning" if no profile loaded yet)
+## Solution
 
-## Implementation
+Add a WhatsApp share button next to the existing Download button on every invoice row (desktop table and mobile cards), reusing the same Web Share API + fallback pattern from `shareOrderOnWhatsApp`.
 
-**`src/pages/Dashboard.tsx`** — single line change:
+### New utility: `shareInvoiceOnWhatsApp` in `src/utils/shareWhatsApp.ts`
 
-1. Extract first name: `const firstName = profile?.full_name?.split(" ")[0]`
-2. Replace greeting line:
-   ```tsx
-   <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">
-     {getGreeting()}{firstName ? `, ${firstName}` : ""}
-   </h1>
-   ```
+- Accepts an `Invoice` and `CompanyInfo`
+- Builds a text summary (invoice number, buyer, date, line items, tax breakdown, grand total)
+- Generates a PDF blob via `GstInvoicePdf`
+- Uses `navigator.share` with file attachment on supported devices; falls back to `wa.me` text link + PDF download
 
-**1 file, 1 line changed. No new dependencies. No database changes.**
+### UI changes in `src/pages/Billing.tsx`
+
+- Import `WhatsAppIcon` and `shareInvoiceOnWhatsApp`
+- Add a green WhatsApp button next to the Download button in both:
+  - Desktop table actions (line ~488)
+  - Mobile card actions (line ~543)
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/utils/shareWhatsApp.ts` | Add `shareInvoiceOnWhatsApp()` function (~50 lines) |
+| `src/pages/Billing.tsx` | Import + add WhatsApp share button in desktop & mobile views |
+
+**2 files modified. No new files. No new dependencies. No database changes.**
 
