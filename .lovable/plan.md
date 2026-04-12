@@ -1,35 +1,49 @@
 
 
-# Add WhatsApp Share for GST Invoices on Billing Page
+# Add Dealer Ledger / Outstanding View to DealerDetail
 
 ## Problem
 
-The Orders page has WhatsApp sharing (PDF attachment + text summary), but the Billing page — where GST invoices, estimates, proformas, and credit notes live — has no WhatsApp share option. Indian FMCG billing is heavily WhatsApp-driven.
+DealerDetail shows orders and totals but no running balance or payment ledger. Business owners need to see a chronological view of how outstanding built up — each order adding to the balance, each payment reducing it.
 
 ## Solution
 
-Add a WhatsApp share button next to the existing Download button on every invoice row (desktop table and mobile cards), reusing the same Web Share API + fallback pattern from `shareOrderOnWhatsApp`.
+Add a **"Ledger"** tab to DealerDetail (alongside Overview, Orders, Secondary Sales). It shows a chronological table of all transactions — orders (debit) and payments (credit) — with a running balance column.
 
-### New utility: `shareInvoiceOnWhatsApp` in `src/utils/shareWhatsApp.ts`
+### Design
 
-- Accepts an `Invoice` and `CompanyInfo`
-- Builds a text summary (invoice number, buyer, date, line items, tax breakdown, grand total)
-- Generates a PDF blob via `GstInvoicePdf`
-- Uses `navigator.share` with file attachment on supported devices; falls back to `wa.me` text link + PDF download
+```text
+Tabs: [Overview] [Orders (12)] [Ledger] [Secondary Sales]
 
-### UI changes in `src/pages/Billing.tsx`
+┌─────────┬──────────────┬──────────┬──────────┬───────────┐
+│ Date    │ Particulars  │ Debit(₹) │ Credit(₹)│ Balance(₹)│
+├─────────┼──────────────┼──────────┼──────────┼───────────┤
+│ 01 Apr  │ ORD-0045     │ 24,000   │    —     │ 24,000    │
+│ 03 Apr  │ Payment Recd │    —     │ 10,000   │ 14,000    │
+│ 07 Apr  │ ORD-0052     │ 18,500   │    —     │ 32,500    │
+└─────────┴──────────────┴──────────┴──────────┴───────────┘
+                                      Outstanding: ₹32,500
+```
 
-- Import `WhatsAppIcon` and `shareInvoiceOnWhatsApp`
-- Add a green WhatsApp button next to the Download button in both:
-  - Desktop table actions (line ~488)
-  - Mobile card actions (line ~543)
+### Logic
 
-## Files Changed
+- **Debit entries**: Each order creates a debit of `order.total - order.schemeSavings`
+- **Credit entries**: Orders with `paymentStatus === "paid"` generate a matching credit entry on the same date (since we don't have a separate payments table, paid orders = payment received)
+- **Partial payments**: Orders with `paymentStatus === "partial"` — credit = 50% of order value (heuristic, since no partial amount field exists)
+- Sort all entries chronologically, compute running balance
+- Show summary row at bottom with total debits, total credits, and closing balance
 
-| File | Change |
-|------|--------|
-| `src/utils/shareWhatsApp.ts` | Add `shareInvoiceOnWhatsApp()` function (~50 lines) |
-| `src/pages/Billing.tsx` | Import + add WhatsApp share button in desktop & mobile views |
+### Implementation
 
-**2 files modified. No new files. No new dependencies. No database changes.**
+**`src/pages/DealerDetail.tsx`** — single file change:
+
+1. Add a new `TabsTrigger` for "Ledger"
+2. In `TabsContent value="ledger"`:
+   - Build ledger entries from `dealerOrders` using `useMemo`
+   - Each order → debit entry; paid/partial orders → credit entry
+   - Sort by date, compute running balance
+   - Render as a glass-card table (desktop) and card list (mobile)
+   - Summary footer with closing outstanding
+
+**1 file modified. No new files. No new dependencies. No database changes.**
 
