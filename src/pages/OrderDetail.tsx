@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
