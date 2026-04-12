@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useBlocker } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
 
@@ -100,6 +100,21 @@ export default function NewOrder() {
   const [vehicle, setVehicle] = useState("");
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Unsaved changes guard
+  const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    isDirty && currentLocation.pathname !== nextLocation.pathname
+  );
 
   // Auto-select godown if only one exists
   useEffect(() => {
