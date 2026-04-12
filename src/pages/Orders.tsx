@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useAuth } from "@/context/AuthContext";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -78,7 +79,9 @@ const deliveryStatuses = [
 export default function Orders() {
   const api = useApi();
   const { companyInfo } = api;
+  const { userRole } = useAuth();
   const orders = api.orders.list();
+  const distributors = api.dealers.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -100,6 +103,7 @@ export default function Orders() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
   const ordersPdfSections: PdfSection[] = [
     { id: "company", label: "Company header" },
