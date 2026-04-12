@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json
+          summary: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json
+          summary: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json
+          summary?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       claim_lines: {
         Row: {
           claim_id: string
