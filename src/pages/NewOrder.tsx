@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
+import type { Scheme } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import {
   Select,
