@@ -4,12 +4,12 @@ import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast as sonnerToast } from "sonner";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useToast } from "@/hooks/use-toast";
+
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Company() {
-  const { toast } = useToast();
+  
   const api = useApi();
   const { companyId } = useAuth();
 
@@ -168,11 +168,11 @@ export default function Company() {
         } as any)
         .eq("id", companyId);
       if (error) {
-        toast({ title: "Error saving", description: error.message, variant: "destructive" });
+        toast.error("Error saving", { description: error.message });
         return;
       }
     }
-    toast({ title: "Settings saved", description: "Company profile has been updated." });
+    toast.success("Settings saved", { description: "Company profile has been updated." });
   };
 
   return (

@@ -83,11 +83,11 @@ export default function Dashboard() {
     const d = new Date(o.date + "T00:00:00");
     return d >= monthStart && d <= today;
   });
-  const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total, 0);
+  const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
   const monthOrderCount = monthlyOrders.length;
   const monthOutstanding = monthlyOrders
     .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
-    .reduce((s, o) => s + o.total, 0);
+    .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
   const monthDeliveredPct = monthOrderCount > 0
     ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
     : 0;
