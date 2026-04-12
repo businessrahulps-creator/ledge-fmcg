@@ -672,6 +672,17 @@ export default function Orders() {
                       <WhatsAppIcon className="h-3.5 w-3.5" />
                       <span>WhatsApp</span>
                     </Button>
+                    {(selectedOrder.deliveryStatus === "dispatched" || selectedOrder.deliveryStatus === "delivered") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={openClaimModal}
+                        aria-label="Record return or claim"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Return / Claim</span>
+                      </Button>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cancel</Button>
