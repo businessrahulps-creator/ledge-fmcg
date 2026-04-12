@@ -1,50 +1,63 @@
 
 
-# Fix: Enable Full Order Editing (Dealer, Salesperson, Line Items)
+# Redesign: Performance Page — Tabbed Layout
 
 ## Problem
+The page has 11+ widgets stacked vertically in a single scroll: KPIs, credit alerts, dealer performance, sales team, secondary sales, schemes, revenue chart, payment split, dealer bar chart, product velocity, sales ranking, targets, and insights. It's overwhelming — too much to parse at once, especially on mobile.
 
-The Order Detail page currently only allows editing **payment/delivery status and dispatch fields**. The dealer, salesperson, and line items are displayed as read-only summary cards with no way to modify them. The `updateOrder` function in `DataContext.tsx` also only maps status-related fields to DB updates — it ignores `distributorId`, `salespersonId`, and line changes.
+## Approach: Tab-based sections with persistent KPIs
 
-## Solution
+Keep the 4 KPI cards and time period selector always visible at the top. Group everything else into **4 tabs**:
 
-Add inline editing for dealer, salesperson, and line items on the Order Detail page, and extend `updateOrder` in DataContext to persist those changes.
+```text
+┌─────────────────────────────────────────────┐
+│  Performance          [7D] [30D] [90D] ...  │
+│  Real-time business intelligence            │
+├─────────────────────────────────────────────┤
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌───────┐│
+│  │Revenue │ │Orders  │ │Avg Ord │ │Collect││
+│  │₹4.2L   │ │  12    │ │₹35K    │ │  67%  ││
+│  └────────┘ └────────┘ └────────┘ └───────┘│
+├─────────────────────────────────────────────┤
+│  [Overview] [People] [Products] [Alerts]    │
+│                                             │
+│  (tab content here)                         │
+└─────────────────────────────────────────────┘
+```
 
-## Changes
+### Tab 1: Overview (default)
+- Revenue Trend chart (with target line)
+- Payment Split donut
+- Scheme Performance card
 
-### 1. `src/context/DataContext.tsx` — Extend `updateOrder`
+### Tab 2: People
+- Top Dealers Performance (with churn risk badges)
+- Top Dealers by Revenue bar chart
+- Top Sales Team (with health badges)
+- Sales Team Ranking bar chart
 
-- Add mappings for `distributor_id`, `distributor_name`, `salesperson_id`, `salesperson_name`, `total` to `dbUpdates`
-- When line items are updated: delete existing `order_lines` for the order and re-insert the new set
-- Recalculate and update `order_schemes` if lines change
-- Update `scheme_savings` on the order row
+### Tab 3: Products
+- Product Velocity bar chart
+- Secondary Sales Summary
 
-### 2. `src/pages/OrderDetail.tsx` — Add editing UI
+### Tab 4: Alerts
+- Credit at Risk banner
+- Targets Overview (top performers / needs attention)
+- Actionable Insights (stock alerts, churn warnings)
 
-- **Dealer**: Replace the read-only card with a `Select` dropdown (populated from `api.dealers.list()`) that updates `editDistributor` state
-- **Salesperson**: Replace the read-only card with a `Select` dropdown (populated from `api.salespersons.list()`) that updates `editSalesperson` state
-- **Line Items**: Add editable quantity inputs, product selector for adding new lines, and remove buttons per line — similar to the NewOrder page but inline
-- **Save Changes**: Extend `executeSaveOrder` to include dealer, salesperson, and line item updates in the update call
-- Add new state variables: `editDistributorId`, `editSalesperson`, `editLines`
+## Technical Changes
 
-### 3. `src/services/api.ts` — Extend `orders.update`
-
-- Pass through the new fields (dealer, salesperson, lines) to `data.updateOrder`
+| File | Change |
+|------|--------|
+| `src/pages/Performance.tsx` | Add `activeTab` state. Wrap existing widget JSX into 4 tab content sections. Add a pill-style tab bar below KPIs (same style as the time period selector). No new components — just reorganizing existing JSX within the same file. |
 
 ## What stays the same
+- All data, computations, and `useMemo` hooks remain unchanged
+- Export PDF functionality untouched
+- Pull-to-refresh preserved
+- All chart configurations identical
+- No new dependencies
 
-- Order number remains immutable
-- Order date remains immutable
-- The claim, delete, WhatsApp, invoice flows are untouched
-- Offline queueing pattern is preserved
-
-## Technical detail
-
-For line item updates, the approach is:
-1. Delete all existing `order_lines` WHERE `order_id = id`
-2. Insert the new set of lines
-3. Update the `orders.total` with recalculated sum
-4. Recalculate scheme eligibility and update `order_schemes` + `orders.scheme_savings`
-
-This is wrapped in the same online/offline pattern used by the existing update logic.
+## Result
+Each tab shows 2-3 focused widgets instead of 11+ in one scroll. Mobile users see meaningful content immediately without scrolling through walls of cards.
 
