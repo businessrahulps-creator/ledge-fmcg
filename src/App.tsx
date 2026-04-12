@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +12,7 @@ import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -19,26 +21,28 @@ import Orders from "./pages/Orders";
 import NewOrder from "./pages/NewOrder";
 import Distributors from "./pages/Distributors";
 import Salespersons from "./pages/Salespersons";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
 import Stock from "./pages/Stock";
 import Schemes from "./pages/Schemes";
 import Targets from "./pages/Targets";
-import Performance from "./pages/Performance";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import RefundPolicy from "./pages/RefundPolicy";
-import AboutUs from "./pages/AboutUs";
-import Contact from "./pages/Contact";
+import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
-import Claims from "./pages/Claims";
-import Billing from "./pages/Billing";
-import Help from "./pages/Help";
-import Company from "./pages/Company";
 import OrderDetail from "./pages/OrderDetail";
 import DealerDetail from "./pages/DealerDetail";
 import SalespersonDetail from "./pages/SalespersonDetail";
+
+// Lazy-loaded pages (heavy or infrequent)
+const Reports = lazy(() => import("./pages/Reports"));
+const Performance = lazy(() => import("./pages/Performance"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Billing = lazy(() => import("./pages/Billing"));
+const Help = lazy(() => import("./pages/Help"));
+const Company = lazy(() => import("./pages/Company"));
+const Claims = lazy(() => import("./pages/Claims"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const queryClient = new QueryClient();
 
