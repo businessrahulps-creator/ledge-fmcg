@@ -35,6 +35,22 @@ export default function Dashboard() {
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDay());
 
+  // This Month aggregates
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthlyOrders = orders.filter((o) => {
+    const d = new Date(o.date + "T00:00:00");
+    return d >= monthStart && d <= today;
+  });
+  const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total, 0);
+  const monthOrderCount = monthlyOrders.length;
+  const monthOutstanding = monthlyOrders
+    .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
+    .reduce((s, o) => s + o.total, 0);
+  const monthDeliveredPct = monthOrderCount > 0
+    ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
+    : 0;
+  const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+
   if (isLoading) {
     return <AppLayout><DashboardSkeleton /></AppLayout>;
   }
