@@ -362,12 +362,20 @@ export default function Billing() {
     return { needsInvoice, hasDocs };
   }, [orders, invoices]);
 
+  // Filtered orders for step-1 picker
+  const filteredPickerOrders = useMemo(() => {
+    const q = orderSearch.toLowerCase().trim();
+    const filterFn = (items: typeof sortedOrders.needsInvoice) =>
+      q ? items.filter(x => x.order.orderNumber.toLowerCase().includes(q) || x.order.distributorName.toLowerCase().includes(q)) : items;
+    return { needsInvoice: filterFn(sortedOrders.needsInvoice), hasDocs: filterFn(sortedOrders.hasDocs) };
+  }, [sortedOrders, orderSearch]);
+
   const isEditMode = !!editingInvoice;
   const selectedOrder = orders.find(o => o.id === sourceOrderId);
-  const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : "New Document";
+  const dialogTitle = isEditMode ? `Edit ${docTypeLabels[docType]}` : step === 1 ? "Select Order" : "New Document";
   const dialogDesc = isEditMode
     ? `Editing ${editingInvoice?.invoiceNumber}. Changes will be saved immediately.`
-    : "Create a billing document from an order. Select an order first, then choose the document type.";
+    : step === 1 ? "Pick an order to create a billing document from." : "Fill in document details.";
 
   return (
     <AppLayout>
