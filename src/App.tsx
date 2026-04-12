@@ -32,6 +32,7 @@ import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
 import ResetPassword from "./pages/ResetPassword";
 import Claims from "./pages/Claims";
+import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
 

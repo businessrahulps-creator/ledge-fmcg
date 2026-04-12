@@ -12,6 +12,7 @@ import {
   Gift,
   Target,
   RotateCcw,
+  Receipt,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,10 @@ const manageNav = [
   { title: "Schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
   { title: "Returns", url: "/claims", icon: RotateCcw },
+];
+
+const accountingNav = [
+  { title: "Billing", url: "/billing", icon: Receipt },
 ];
 
 const analyzeNav = [
