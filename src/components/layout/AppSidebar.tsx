@@ -45,9 +45,6 @@ const manageNav = [
   { title: "Schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
   { title: "Returns", url: "/claims", icon: RotateCcw },
-];
-
-const accountingNav = [
   { title: "Company", url: "/company", icon: Landmark },
 ];
 
