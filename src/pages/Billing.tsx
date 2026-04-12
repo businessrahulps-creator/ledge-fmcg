@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, Unlink } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -43,6 +43,7 @@ const docTypeBadgeColors: Record<DocType, string> = {
 };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+const isDraftType = (dt: DocType) => dt === "gst_invoice" || dt === "credit_note";
 
 interface LineInput {
   productName: string;
@@ -168,13 +169,14 @@ export default function Billing() {
       roundOff: calculated.roundOff,
       amountInWords: numberToWords(calculated.grandTotal),
       notes,
-      status: "draft",
+      status: isDraftType(docType) ? "draft" : "final",
       lines: invoiceLines,
     });
 
     setSaving(false);
     if (result) {
-      toast.success("Document created", { description: `${docTypeLabels[docType]} ${result.invoiceNumber} created as draft.` });
+      const statusLabel = isDraftType(docType) ? "created as draft" : "created";
+      toast.success("Document created", { description: `${docTypeLabels[docType]} ${result.invoiceNumber} ${statusLabel}.` });
       setShowCreate(false);
       resetForm();
     }
@@ -373,6 +375,7 @@ export default function Billing() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>New Document</DialogTitle>
+            <DialogDescription>Create an invoice, estimate, or credit note. GST documents start as drafts for review.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5">
@@ -391,14 +394,26 @@ export default function Billing() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Pull from Order (optional)</Label>
-                <Select value={sourceOrderId} onValueChange={handlePullOrder}>
-                  <SelectTrigger><SelectValue placeholder="Select order..." /></SelectTrigger>
-                  <SelectContent>
-                    {orders.map(o => (
-                      <SelectItem key={o.id} value={o.id}>{o.orderNumber} — {o.distributorName}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {sourceOrderId ? (
+                  <div className="flex items-center gap-2 h-10">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                      <Link2 className="h-3 w-3" />
+                      Linked to {orders.find(o => o.id === sourceOrderId)?.orderNumber}
+                    </span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSourceOrderId(""); setLines([{ productName: "", hsnCode: "", quantity: 1, unit: "Pack", unitPrice: 0 }]); setBuyerName(""); setBuyerAddress(""); }} title="Unlink order">
+                      <Unlink className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Select value={sourceOrderId} onValueChange={handlePullOrder}>
+                    <SelectTrigger><SelectValue placeholder="Select order..." /></SelectTrigger>
+                    <SelectContent>
+                      {orders.map(o => (
+                        <SelectItem key={o.id} value={o.id}>{o.orderNumber} — {o.distributorName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
 
@@ -452,16 +467,18 @@ export default function Billing() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">Line Items</h3>
-                <Button variant="outline" size="sm" onClick={addLine} className="h-7 text-xs gap-1">
-                  <Plus className="h-3 w-3" /> Add Item
-                </Button>
+                {!sourceOrderId && (
+                  <Button variant="outline" size="sm" onClick={addLine} className="h-7 text-xs gap-1">
+                    <Plus className="h-3 w-3" /> Add Item
+                  </Button>
+                )}
               </div>
               <div className="space-y-2">
                 {lines.map((line, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-end">
                     <div className="col-span-4 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Product</Label>}
-                      <Input value={line.productName} onChange={e => updateLine(i, "productName", e.target.value)} placeholder="Product name" className="h-9 text-xs" />
+                      <Input value={line.productName} onChange={e => updateLine(i, "productName", e.target.value)} placeholder="Product name" className="h-9 text-xs" readOnly={!!sourceOrderId} />
                     </div>
                     <div className="col-span-2 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">HSN</Label>}
@@ -469,22 +486,22 @@ export default function Billing() {
                     </div>
                     <div className="col-span-1 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Qty</Label>}
-                      <Input type="number" value={line.quantity} onChange={e => updateLine(i, "quantity", Number(e.target.value))} className="h-9 text-xs" min={1} />
+                      <Input type="number" value={line.quantity} onChange={e => updateLine(i, "quantity", Number(e.target.value))} className="h-9 text-xs" min={1} readOnly={!!sourceOrderId} />
                     </div>
                     <div className="col-span-1 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Unit</Label>}
-                      <Input value={line.unit} onChange={e => updateLine(i, "unit", e.target.value)} className="h-9 text-xs" />
+                      <Input value={line.unit} onChange={e => updateLine(i, "unit", e.target.value)} className="h-9 text-xs" readOnly={!!sourceOrderId} />
                     </div>
                     <div className="col-span-2 space-y-1">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Rate (₹)</Label>}
-                      <Input type="number" value={line.unitPrice} onChange={e => updateLine(i, "unitPrice", Number(e.target.value))} className="h-9 text-xs" min={0} />
+                      <Input type="number" value={line.unitPrice} onChange={e => updateLine(i, "unitPrice", Number(e.target.value))} className="h-9 text-xs" min={0} readOnly={!!sourceOrderId} />
                     </div>
                     <div className="col-span-1 space-y-1 text-right">
                       {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}
                       <p className="h-9 flex items-center justify-end text-xs font-mono">₹{round2(line.quantity * line.unitPrice).toLocaleString("en-IN")}</p>
                     </div>
                     <div className="col-span-1 flex justify-end">
-                      {lines.length > 1 && (
+                      {!sourceOrderId && lines.length > 1 && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeLine(i)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -542,7 +559,7 @@ export default function Billing() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={saving}>
-              {saving ? "Creating…" : "Create as Draft"}
+              {saving ? "Creating…" : isDraftType(docType) ? "Create as Draft" : "Create Document"}
             </Button>
           </DialogFooter>
         </DialogContent>
