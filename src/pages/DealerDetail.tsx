@@ -52,6 +52,7 @@ export default function DealerDetail() {
 
   const [ssOpen, setSsOpen] = useState(false);
   const [ssExpanded, setSsExpanded] = useState(false);
+  const [deleteSecondarySaleId, setDeleteSecondarySaleId] = useState<string | null>(null);
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
 
   if (!dealer) {
