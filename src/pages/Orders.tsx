@@ -175,93 +175,101 @@ export default function Orders() {
         </div>
 
         {/* Table */}
-        <div className="glass-card overflow-hidden">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
-                  <th className="px-6 py-3 font-semibold">Order #</th>
-                  <th className="px-6 py-3 font-semibold">Date</th>
-                  <th className="px-6 py-3 font-semibold">Dealer</th>
-                  <th className="px-6 py-3 font-semibold">Sales Person</th>
-                  <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                  <th className="px-6 py-3 font-semibold">Payment</th>
-                  <th className="px-6 py-3 font-semibold">Delivery</th>
-                  <th className="px-6 py-3 font-semibold">Billing</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedOrders.map((order) => {
-                  const billingStatus = getOrderBillingStatus(order.id);
-                  return (
-                    <tr
-                      key={order.id}
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                      className="group border-b border-border/50 row-hover cursor-pointer"
-                    >
-                      <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
-                      <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                      <td className="px-6 py-4">{order.distributorName}</td>
-                      <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
-                      <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                      <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                      <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                      <td className="px-6 py-4">
-                        {billingStatus ? (
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                            {billingStatus.label}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground/50">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        {filtered.length === 0 ? (
+          <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+            <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+            <p className="mt-3 text-sm font-medium">No orders found</p>
+            <p className="text-xs text-muted-foreground">
+              Try adjusting your search or filters
+            </p>
+            <Link to="/orders/new">
+              <Button size="sm" className="mt-3">
+                <Plus className="h-4 w-4" />
+                Create your first order
+              </Button>
+            </Link>
           </div>
-
-          <div className="divide-y divide-border/50 md:hidden">
-            {paginatedOrders.map((order) => (
-              <div
-                key={order.id}
-                onClick={() => navigate(`/orders/${order.id}`)}
-                className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
-                  <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {order.distributorName} · {formatIndianDate(order.date)}
-                </p>
-                <div className="mt-2 flex gap-1.5">
-                  <StatusBadge status={order.paymentStatus} />
-                  <StatusBadge status={order.deliveryStatus} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-              <p className="mt-3 text-sm font-medium">No orders found</p>
-              <p className="text-xs text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
-              <Link to="/orders/new">
-                <Button size="sm" className="mt-3">
-                  <Plus className="h-4 w-4" />
-                  Create your first order
-                </Button>
-              </Link>
+        ) : (
+          <div className="glass-card overflow-hidden">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                    <th className="px-6 py-3 font-semibold">Order #</th>
+                    <th className="px-6 py-3 font-semibold">Date</th>
+                    <th className="px-6 py-3 font-semibold">Dealer</th>
+                    <th className="px-6 py-3 font-semibold">Sales Person</th>
+                    <th className="px-6 py-3 font-semibold text-right">Amount</th>
+                    <th className="px-6 py-3 font-semibold">Payment</th>
+                    <th className="px-6 py-3 font-semibold">Delivery</th>
+                    <th className="px-6 py-3 font-semibold">Billing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedOrders.map((order) => {
+                    const billingStatus = getOrderBillingStatus(order.id);
+                    return (
+                      <tr
+                        key={order.id}
+                        onClick={() => navigate(`/orders/${order.id}`)}
+                        className="group border-b border-border/50 row-hover cursor-pointer"
+                      >
+                        <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
+                        <td className="px-6 py-4">{order.distributorName}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
+                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                        <td className="px-6 py-4">
+                          {billingStatus ? (
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                              {billingStatus.label}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/50">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          ) : (
+
+            <div className="divide-y divide-border/50 md:hidden">
+              {paginatedOrders.map((order) => {
+                const billingStatus = getOrderBillingStatus(order.id);
+                return (
+                  <div
+                    key={order.id}
+                    onClick={() => navigate(`/orders/${order.id}`)}
+                    className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
+                      <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {order.distributorName} · {formatIndianDate(order.date)}
+                    </p>
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <StatusBadge status={order.paymentStatus} />
+                      <StatusBadge status={order.deliveryStatus} />
+                      {billingStatus && (
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                          {billingStatus.label}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          )}
-        </div>
+          </div>
+        )}
 
         <ExportPdfModal
           open={pdfModalOpen}

@@ -203,7 +203,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Orders */}
-        <section className="pb-8">
+        <section className="pb-20">
            <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
             <Link to="/orders" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
@@ -268,10 +268,11 @@ export default function Dashboard() {
                       transition={{ delay: Math.min(i, 8) * 0.06, type: "spring", stiffness: 300, damping: 24 }}
                       className="glass-card card-hover p-4"
                     >
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold">{o.distributorName}</span>
                         <span className="text-sm font-bold">{formatCurrency(o.total)}</span>
                       </div>
+                      <p className="text-[11px] text-muted-foreground mb-2">{o.salesperson}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                         <div className="flex gap-1.5">

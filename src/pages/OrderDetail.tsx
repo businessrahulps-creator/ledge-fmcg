@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
@@ -121,7 +121,9 @@ export default function OrderDetail() {
 
   const order = orders.find(o => o.id === id);
 
-  // Sync edit state when order loads/changes
+  const prevOrderId = useRef<string | undefined>();
+
+  // Sync status/dispatch fields when they change
   useEffect(() => {
     if (order) {
       setEditPaymentMode(order.paymentMode);
@@ -133,6 +135,14 @@ export default function OrderDetail() {
       setEditGodown(order.godownId || "");
       setEditDealerId(order.distributorId);
       setEditSalespersonId(order.salespersonId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.id, order?.paymentStatus, order?.deliveryStatus, order?.distributorId, order?.salespersonId]);
+
+  // Sync line items only when order ID changes (avoids regenerating UUIDs on status updates)
+  useEffect(() => {
+    if (order && order.id !== prevOrderId.current) {
+      prevOrderId.current = order.id;
       setEditLines(order.lines.map(l => ({
         id: crypto.randomUUID(),
         productId: l.productId,
@@ -143,7 +153,7 @@ export default function OrderDetail() {
       })));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.id, order?.paymentStatus, order?.deliveryStatus, order?.distributorId, order?.salespersonId, order?.lines?.length]);
+  }, [order?.id]);
 
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
 
