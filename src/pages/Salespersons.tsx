@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin, Download, FileText, TrendingUp, TrendingDown, Activity, Zap } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, UserCheck, Phone, Mail, MapPin, Download, FileText, TrendingUp, TrendingDown, Activity, Zap, Target } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
@@ -419,6 +419,55 @@ export default function Salespersons() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Targets & Achievements */}
+                    {(() => {
+                      const allTargets = api.targets.list();
+                      const now = new Date();
+                      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+                      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+                      const target = allTargets.find(t => t.entityType === "salesperson" && t.entityId === profileId && t.periodType === "monthly" && t.periodStart === monthStart);
+                      if (!target || (target.targetRevenue <= 0 && target.targetOrders <= 0)) return null;
+                      const monthOrders = profileOrders.filter(o => o.date >= monthStart && o.date <= monthEnd);
+                      const actualRev = monthOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                      const actualOrd = monthOrders.length;
+                      const revPct = target.targetRevenue > 0 ? Math.round((actualRev / target.targetRevenue) * 100) : 0;
+                      const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
+                      const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
+                      const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
+                      const statusColor = mainPct > 100 ? "text-emerald-600 dark:text-emerald-400" : mainPct >= 70 ? "text-blue-600 dark:text-blue-400" : mainPct >= 40 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400";
+                      const barColor = mainPct > 100 ? "[&>div]:bg-emerald-500" : mainPct >= 70 ? "[&>div]:bg-blue-500" : mainPct >= 40 ? "[&>div]:bg-amber-500" : "[&>div]:bg-red-500";
+                      return (
+                        <div className="space-y-2">
+                          <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
+                            <Target className="h-3.5 w-3.5 text-primary" />
+                            Targets & Achievements
+                            <span className="text-[10px] font-normal text-muted-foreground">({new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" })})</span>
+                          </h3>
+                          <div className="rounded-lg border border-border bg-muted/30 p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className={`text-xs font-semibold ${statusColor}`}>{statusLabel}</span>
+                              <span className={`text-lg font-bold ${statusColor}`}>{mainPct}%</span>
+                            </div>
+                            <Progress value={Math.min(mainPct, 100)} className={`h-2 mb-3 ${barColor}`} />
+                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                              {target.targetRevenue > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Revenue</span>
+                                  <p className="font-semibold">{formatCurrency(actualRev)} / {formatCurrency(target.targetRevenue)}</p>
+                                </div>
+                              )}
+                              {target.targetOrders > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Orders</span>
+                                  <p className="font-semibold">{actualOrd} / {target.targetOrders}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Order History */}
                     <div>

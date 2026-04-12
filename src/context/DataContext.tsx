@@ -35,6 +35,17 @@ export interface SecondarySale {
   remarks: string;
 }
 
+export interface Target {
+  id: string;
+  entityType: "salesperson" | "dealer";
+  entityId: string;
+  entityName: string;
+  periodType: "monthly" | "quarterly";
+  periodStart: string;
+  targetRevenue: number;
+  targetOrders: number;
+}
+
 interface DataContextType {
   orders: Order[];
   distributors: Distributor[];
@@ -83,6 +94,11 @@ interface DataContextType {
 
   addSecondarySale: (s: SecondarySale) => void;
   deleteSecondarySale: (id: string) => void;
+
+  targets: Target[];
+  addTarget: (t: Target) => void;
+  updateTarget: (t: Target) => void;
+  deleteTarget: (id: string) => void;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -176,6 +192,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
   const [orderSequence, setOrderSequence] = useState(1);
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
+  const [targets, setTargets] = useState<Target[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: "", address: "", gstin: "", logoUrl: "" });
@@ -193,6 +210,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setStockItems([]);
       setSchemes([]);
       setSecondarySales([]);
+      setTargets([]);
       setLoading(false);
     }
   }, [authReady, companyId]);
@@ -237,7 +255,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -246,6 +264,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -302,6 +321,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         quantity: s.quantity || 0, date: s.date, remarks: s.remarks || "",
       }));
       setSecondarySales(mappedSS);
+
+      // Map targets
+      const mappedTargets: Target[] = ((targetsRes as any).data || []).map((t: any) => ({
+        id: t.id, entityType: t.entity_type as Target["entityType"],
+        entityId: t.entity_id, entityName: t.entity_name || "",
+        periodType: t.period_type as Target["periodType"],
+        periodStart: t.period_start,
+        targetRevenue: Number(t.target_revenue || 0),
+        targetOrders: t.target_orders || 0,
+      }));
+      setTargets(mappedTargets);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
@@ -1110,6 +1140,46 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSecondarySales(prev => prev.filter(s => s.id !== id));
   }, []);
 
+  // Targets CRUD
+  const addTarget = useCallback(async (target: Target) => {
+    if (!companyId) return;
+    const { data, error } = await supabase.from("targets").insert({
+      company_id: companyId,
+      entity_type: target.entityType,
+      entity_id: target.entityId,
+      entity_name: sanitizeInput(target.entityName),
+      period_type: target.periodType,
+      period_start: target.periodStart,
+      target_revenue: target.targetRevenue,
+      target_orders: target.targetOrders,
+    } as any).select().single();
+    if (error) { toast.error("Failed to save target", { description: error.message }); return; }
+    if (data) {
+      const mapped: Target = {
+        id: (data as any).id, entityType: target.entityType, entityId: target.entityId,
+        entityName: target.entityName, periodType: target.periodType, periodStart: target.periodStart,
+        targetRevenue: target.targetRevenue, targetOrders: target.targetOrders,
+      };
+      setTargets(prev => [mapped, ...prev]);
+    }
+  }, [companyId]);
+
+  const updateTarget = useCallback(async (target: Target) => {
+    const { error } = await supabase.from("targets").update({
+      target_revenue: target.targetRevenue,
+      target_orders: target.targetOrders,
+      entity_name: sanitizeInput(target.entityName),
+    } as any).eq("id", target.id);
+    if (error) { toast.error("Failed to update target", { description: error.message }); return; }
+    setTargets(prev => prev.map(t => t.id === target.id ? target : t));
+  }, []);
+
+  const deleteTarget = useCallback(async (id: string) => {
+    const { error } = await supabase.from("targets").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete target", { description: error.message }); return; }
+    setTargets(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1131,6 +1201,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addStockItem, updateStockItem, deleteStockItem: deleteStockItemFn, setStockItems,
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         secondarySales, addSecondarySale, deleteSecondarySale,
+        targets, addTarget, updateTarget, deleteTarget,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >

@@ -741,6 +741,48 @@ export type Database = {
           },
         ]
       }
+      targets: {
+        Row: {
+          company_id: string
+          created_at: string
+          entity_id: string
+          entity_name: string
+          entity_type: string
+          id: string
+          period_start: string
+          period_type: string
+          target_orders: number
+          target_revenue: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          entity_id: string
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          period_start: string
+          period_type?: string
+          target_orders?: number
+          target_revenue?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          period_start?: string
+          period_type?: string
+          target_orders?: number
+          target_revenue?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
