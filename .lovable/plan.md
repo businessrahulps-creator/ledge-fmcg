@@ -1,42 +1,33 @@
 
 
-# Enhancement #1: Polished Empty States on All List Pages
+# Add "New Claim" Flow to Claims Page
 
-## Current State
+## The Problem
 
-Most pages already have basic empty states, but they're inconsistent in quality:
+Currently, claims can only be created from deep inside an Order Detail page (the "Return / Claim" button appears only on dispatched/delivered orders). Users landing on the Claims page have no way to create one — confusing for anyone who doesn't know the hidden path.
 
-| Page | Icon | Headline | Description | CTA | Needs Work |
-|------|------|----------|-------------|-----|------------|
-| Orders | Filter ⚠️ | ✓ | Generic | ✓ | Better icon when truly empty vs filtered |
-| Dealers | Search ⚠️ | ✓ | Generic | ✓ | Better icon + copy |
-| Salespersons | UserCheck ✓ | ✓ | ✓ | ✓ | Good as-is |
-| Stock → Products | Package ✓ | ✓ | ✓ | ✓ | Good as-is |
-| Stock → Warehouses | Warehouse ✓ | ✓ | ✓ | **Missing** | Add CTA button |
-| Schemes | Gift ✓ | ✓ | ✓ | ✓ | Good as-is |
-| Targets (team) | **None** | **None** | Plain text | **None** | Full rework needed |
-| Targets (dealers) | **None** | **None** | Plain text | **None** | Full rework needed |
-| Claims | RotateCcw ✓ | ✓ | ✓ | **None** | Acceptable (claims come from orders) |
-| Billing | FileText ✓ | ✓ | ✓ | **None** | Acceptable (invoices come from orders) |
+## Solution
 
-## Changes
+Add a **"+ New Claim"** button to the Claims page header that opens a two-step modal:
 
-Only 4 files need updates — pages where empty states are missing or subpar:
+1. **Step 1 — Pick an order**: Show a searchable list of dispatched/delivered orders (the only orders eligible for claims). Each row shows order number, dealer name, date, and amount.
+2. **Step 2 — Fill in claim details**: Once an order is selected, show the same claim form already built in `OrderDetail.tsx` — claim type (Return vs Damage), reason, per-product quantities.
 
-### 1. `src/pages/Targets.tsx` — Full empty state rework
-- **Sales team tab**: Add `UserCheck` icon, "No team members yet" headline, helpful description, CTA linking to `/salespersons`
-- **Dealers tab**: Add `MapPin` icon, "No dealers yet" headline, CTA linking to `/dealers`
+This reuses the exact same `api.claims.create()` logic and `Claim`/`ClaimLine` types. No new API surface needed.
 
-### 2. `src/pages/Stock.tsx` — Add warehouse CTA
-- Add "Add Warehouse" CTA button to the warehouse empty state (respecting `isAccountant` role check)
+## Design
 
-### 3. `src/pages/Orders.tsx` — Differentiate empty vs no-results
-- When `items.length === 0`: Show `ShoppingCart` icon with "No orders yet" + "Create your first order" CTA
-- When filtered to zero: Keep current Filter icon with "No orders match your filters"
+- Button in the page header row, matching the pattern on Orders/Dealers/Stock pages
+- Modal uses `Dialog` from shadcn/ui, glassmorphic styling
+- Step 1: filterable order list (simple text input + scrollable list)
+- Step 2: identical to the existing claim form in OrderDetail
+- Mobile-friendly: `max-w-[calc(100vw-2rem)]` with scroll
 
-### 4. `src/pages/Distributors.tsx` — Better empty icon
-- When `items.length === 0`: Use `MapPin` icon with "No dealers yet" + add CTA
-- When filtered to zero: Keep Search icon with "No dealers match your search"
+## Files Changed
 
-**4 files modified. No new files. No new dependencies. No database changes.**
+| File | Change |
+|------|--------|
+| `src/pages/Claims.tsx` | Add "+ New Claim" button + two-step dialog (~120 lines of new JSX/logic) |
+
+**1 file modified. No new files. No database changes. No new dependencies.**
 
