@@ -70,7 +70,7 @@ export default function Distributors() {
   const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;
 
   const openNew = () => {
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", totalOrders: 0, totalValue: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
     setIsNew(true);
   };
 
@@ -200,12 +200,29 @@ export default function Distributors() {
                   </Button>
                 </div>
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 md:mt-4 md:pt-4">
-                <div className="flex items-center gap-1.5 text-xs md:text-sm">
-                  <ShoppingCart className="h-3 w-3 text-muted-foreground md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                  <span>{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
+              <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3 md:mt-4 md:pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs md:text-sm">
+                    <ShoppingCart className="h-3 w-3 text-muted-foreground md:h-3.5 md:w-3.5" strokeWidth={1.5} />
+                    <span>{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
+                  </div>
+                  <span className="text-xs font-semibold md:text-sm">{formatCurrency(d.totalValue)}</span>
                 </div>
-                <span className="text-xs font-semibold md:text-sm">{formatCurrency(d.totalValue)}</span>
+                {/* Credit Health Badge */}
+                {(() => {
+                  const limit = d.creditLimit || 0;
+                  const outstanding = d.outstandingAmount || 0;
+                  if (limit === 0 && outstanding === 0) return null;
+                  const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
+                  const color = limit === 0 ? "text-muted-foreground" : pct >= 100 ? "text-red-600 dark:text-red-400" : pct >= 70 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400";
+                  const bgColor = limit === 0 ? "bg-muted/50" : pct >= 100 ? "bg-red-500/10" : pct >= 70 ? "bg-amber-500/10" : "bg-emerald-500/10";
+                  return (
+                    <div className={`flex items-center justify-between rounded-md px-2 py-1 text-[11px] font-medium ${bgColor} ${color}`}>
+                      <span>Outstanding</span>
+                      <span>{formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </motion.div>
           ))}
@@ -243,10 +260,15 @@ export default function Distributors() {
                     <Label className="text-xs md:text-sm">Location</Label>
                     <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-10 rounded-lg" />
                   </div>
-                  <div className="space-y-1.5 md:space-y-2">
+                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Contact *</Label>
                     <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                   </div>
+                </div>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
+                  <Input type="number" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                  <p className="text-[10px] text-muted-foreground">Set to 0 for unlimited credit</p>
                 </div>
               </div>
             )}
@@ -341,6 +363,22 @@ export default function Distributors() {
                        <span className="text-xs text-muted-foreground">Total Value</span>
                        <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">{formatCurrency(selected.totalValue)}</p>
                      </div>
+                     {/* Outstanding / Credit Limit stat */}
+                     {(() => {
+                       const limit = selected.creditLimit || 0;
+                       const outstanding = selected.outstandingAmount || 0;
+                       const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
+                       const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-red-500" : pct >= 70 ? "border-amber-500" : "border-emerald-500";
+                       const textColor = limit === 0 ? "" : pct >= 100 ? "text-red-600 dark:text-red-400" : pct >= 70 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400";
+                       return (
+                         <div className={`col-span-2 rounded-lg border ${borderColor} bg-muted/30 p-3 md:p-4`}>
+                           <span className="text-xs text-muted-foreground">Outstanding / Credit Limit</span>
+                           <p className={`mt-0.5 text-xs font-semibold md:mt-1 md:text-sm ${textColor}`}>
+                             {formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}
+                           </p>
+                         </div>
+                       );
+                     })()}
                   </div>
 
                   <div>

@@ -811,8 +811,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Distributors
   const distCrud = useMemo(() => makeOfflineCrud<Distributor>(
     "distributors", setDistributors, "distributors",
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
-    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact) }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
+    d => ({ name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact), credit_limit: d.creditLimit || 0 }),
   ), [companyId, persistEntityToCache]);
 
   // Salespersons
