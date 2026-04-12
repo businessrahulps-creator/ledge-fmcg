@@ -38,6 +38,7 @@ export default function Company() {
   const [companyPan, setCompanyPan] = useState("");
   const [companyStateCode, setCompanyStateCode] = useState("");
   const [bankName, setBankName] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
   const [bankAccount, setBankAccount] = useState("");
   const [bankIfsc, setBankIfsc] = useState("");
   const [invoicePrefix, setInvoicePrefix] = useState("INV");

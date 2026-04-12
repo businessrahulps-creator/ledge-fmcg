@@ -254,31 +254,118 @@ export default function Distributors() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
               <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
             </DialogHeader>
             {editItem && (
-              <div className="space-y-3 md:space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dealer Name *</Label>
-                  <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-10 rounded-lg" />
-                </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="space-y-4 md:space-y-5">
+                {/* Basic Info */}
+                <div className="space-y-3 md:space-y-4">
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Location</Label>
-                    <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-10 rounded-lg" />
+                    <Label className="text-xs md:text-sm">Dealer Name *</Label>
+                    <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-10 rounded-lg" />
                   </div>
-                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Contact *</Label>
-                    <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Location</Label>
+                      <Input value={editItem.location} onChange={(e) => setEditItem({ ...editItem, location: e.target.value })} placeholder="e.g. Kochi, Kerala" className="h-10 rounded-lg" />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Contact *</Label>
+                      <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Email</Label>
+                      <Input type="email" value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="dealer@example.com" className="h-10 rounded-lg" />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
+                      <Input type="number" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
-                  <Input type="number" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
-                  <p className="text-[10px] text-muted-foreground">Set to 0 for unlimited credit</p>
+
+                {/* Address */}
+                <div className="border-t border-border/50 pt-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Address</Label>
+                    <textarea
+                      value={editItem.address}
+                      onChange={(e) => setEditItem({ ...editItem, address: e.target.value })}
+                      placeholder="Full business address"
+                      className="flex min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Tax Details */}
+                <div className="border-t border-border/50 pt-4">
+                  <h3 className="text-sm font-semibold mb-3">Tax Details</h3>
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">GSTIN</Label>
+                      <Input
+                        value={editItem.gstin}
+                        onChange={(e) => setEditItem({ ...editItem, gstin: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15) })}
+                        maxLength={15}
+                        className="h-10 rounded-lg max-w-[300px] font-mono"
+                        placeholder="22AAAAA0000A1Z5"
+                      />
+                      <p className="text-[10px] text-muted-foreground md:text-xs">15-digit GST Identification Number</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">PAN</Label>
+                        <Input
+                          value={editItem.pan}
+                          onChange={(e) => setEditItem({ ...editItem, pan: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) })}
+                          maxLength={10}
+                          className="h-10 rounded-lg font-mono"
+                          placeholder="ABCDE1234F"
+                        />
+                      </div>
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">State Code</Label>
+                        <Input
+                          value={editItem.stateCode}
+                          onChange={(e) => setEditItem({ ...editItem, stateCode: e.target.value.replace(/\D/g, "").slice(0, 2) })}
+                          maxLength={2}
+                          className="h-10 rounded-lg max-w-[100px] font-mono"
+                          placeholder="27"
+                        />
+                        <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Details */}
+                <div className="border-t border-border/50 pt-4">
+                  <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Bank Name</Label>
+                      <Input value={editItem.bankName} onChange={(e) => setEditItem({ ...editItem, bankName: e.target.value })} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Account Holder Name</Label>
+                      <Input value={editItem.bankAccountName} onChange={(e) => setEditItem({ ...editItem, bankAccountName: e.target.value })} className="h-10 rounded-lg" placeholder="Sharma Traders Pvt Ltd" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">Account Number</Label>
+                        <Input value={editItem.bankAccount} onChange={(e) => setEditItem({ ...editItem, bankAccount: e.target.value.replace(/\D/g, "") })} className="h-10 rounded-lg font-mono" placeholder="1234567890" />
+                      </div>
+                      <div className="space-y-1.5 md:space-y-2">
+                        <Label className="text-xs md:text-sm">IFSC Code</Label>
+                        <Input value={editItem.bankIfsc} onChange={(e) => setEditItem({ ...editItem, bankIfsc: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11) })} maxLength={11} className="h-10 rounded-lg font-mono" placeholder="SBIN0001234" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
