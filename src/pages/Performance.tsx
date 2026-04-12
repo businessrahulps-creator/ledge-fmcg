@@ -507,641 +507,470 @@ export default function Performance() {
           ))}
         </div>
 
-        {/* Credit at Risk */}
-        {(() => {
-          const atRisk = dealers.filter(d => (d.creditLimit || 0) > 0 && (d.outstandingAmount || 0) >= (d.creditLimit || 0));
-          if (atRisk.length === 0) return null;
-          return (
-            <div
-              className="glass-card rounded-xl p-4 flex items-center gap-3 border-l-[3px] border-l-red-500 cursor-pointer card-hover"
-              onClick={() => navigate("/distributors")}
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit
-                </p>
-              </div>
-              <span className="text-lg font-bold text-red-600 dark:text-red-400">{atRisk.length}</span>
-            </div>
-          );
-        })()}
+        {/* Tabbed sections */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full justify-start gap-1 rounded-full bg-muted/50 p-1 overflow-x-auto scrollbar-hide">
+            <TabsTrigger value="overview" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
+            <TabsTrigger value="people" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">People</TabsTrigger>
+            <TabsTrigger value="products" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Products</TabsTrigger>
+            <TabsTrigger value="alerts" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Alerts</TabsTrigger>
+          </TabsList>
 
-        {/* Top Dealers Performance */}
-        {(() => {
-          const dealerData = dealers.map(d => {
-            const dOrders = orders.filter(o => o.distributorId === d.id);
-            const periodOrders = filteredOrders.filter(o => o.distributorId === d.id);
-            const revenue = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-            const risk = getChurnRisk(dOrders);
-            return { id: d.id, name: d.name, revenue, orderCount: periodOrders.length, risk };
-          })
-            .filter(d => d.orderCount > 0 || d.risk === "high")
-            .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, 5);
-
-          if (dealerData.length === 0) return null;
-
-          return (
-            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-blue-500">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10">
-                  <Users className="h-4 w-4 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">Top Dealers Performance</p>
-                  <p className="text-[11px] text-muted-foreground">With churn risk assessment</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {dealerData.map(d => {
-                  const rc = churnRiskConfig[d.risk];
-                  return (
-                    <div
-                      key={d.id}
-                      className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
-                      onClick={() => navigate("/distributors")}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{d.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
-                      </div>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rc.color} ${rc.bg} shrink-0`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${rc.dot}`} />
-                        {rc.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Top Sales Team */}
-        {(() => {
-          const salespersons = api.salespersons.list();
-          const spData = salespersons.map(sp => {
-            const spOrders = filteredOrders.filter(o => o.salespersonId === sp.id);
-            const allSpOrders = orders.filter(o => o.salespersonId === sp.id);
-            const revenue = spOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-            const health = getPerformanceHealth(allSpOrders);
-            return { id: sp.id, name: sp.name, revenue, orderCount: spOrders.length, health };
-          })
-            .filter(d => d.orderCount > 0 || d.health === "low")
-            .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, 3);
-
-          if (spData.length === 0) return null;
-
-          return (
-            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-violet-500">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
-                  <UserCheck className="h-4 w-4 text-violet-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">Top Sales Team</p>
-                  <p className="text-[11px] text-muted-foreground">With performance health assessment</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {spData.map(d => {
-                  const hc = performanceHealthConfig[d.health];
-                  return (
-                    <div
-                      key={d.id}
-                      className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
-                      onClick={() => navigate("/salespersons")}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{d.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
-                      </div>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${hc.color} ${hc.bg} shrink-0`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${hc.dot}`} />
-                        {hc.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Secondary Sales Summary */}
-        {(() => {
-          const allSS = api.secondarySales.list();
-          const periodSS = allSS.filter(s => {
-            const d = new Date(s.date + "T00:00:00");
-            if (period === "custom") {
-              if (customFrom && d < customFrom) return false;
-              if (customTo) { const end = new Date(customTo); end.setHours(23,59,59,999); if (d > end) return false; }
-              return !!(customFrom || customTo);
-            }
-            return d >= cutoff;
-          });
-
-          if (periodSS.length === 0) return null;
-
-          const totalQty = periodSS.reduce((s, r) => s + r.quantity, 0);
-          // Top retailers by qty
-          const retMap = new Map<string, number>();
-          periodSS.forEach(s => {
-            const name = s.retailerName || "Unknown";
-            retMap.set(name, (retMap.get(name) || 0) + s.quantity);
-          });
-          const topRetailers = Array.from(retMap.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3);
-
-          return (
-            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-orange-500">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10">
-                  <Store className="h-4 w-4 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold">Secondary Sales</p>
-                  <p className="text-[11px] text-muted-foreground">{periodSS.length} records · {totalQty} units</p>
-                </div>
-              </div>
-              {topRetailers.length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-[10px] text-muted-foreground font-medium">Top Retailers</p>
-                  {topRetailers.map(([name, qty]) => (
-                    <div key={name} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground truncate mr-2">{name}</span>
-                      <span className="font-medium shrink-0">{qty} units</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {(() => {
-          const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
-          // Sum actual stored scheme_savings from orders
-          const totalSavings = filteredOrders.reduce((sum, o) => sum + (o.schemeSavings || 0), 0);
-          // Build top schemes from stored appliedSchemes
-          const schemeHits = new Map<string, { name: string; hits: number; savings: number }>();
-          for (const order of filteredOrders) {
-            for (const as of (order.appliedSchemes || [])) {
-              const key = as.schemeId || as.schemeName;
-              const existing = schemeHits.get(key) || { name: as.schemeName, hits: 0, savings: 0 };
-              existing.hits++;
-              existing.savings += as.savings;
-              schemeHits.set(key, existing);
-            }
-          }
-
-          if (activeSchemes.length === 0 && totalSavings === 0) return null;
-
-          const topSchemes = Array.from(schemeHits.values())
-            .sort((a, b) => b.savings - a.savings)
-            .slice(0, 3);
-
-          return (
-            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-emerald-500">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10">
-                  <Gift className="h-4 w-4 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Scheme Performance</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-                {totalSavings > 0 && (
-                  <span className="ml-auto text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(totalSavings)}
-                  </span>
-                )}
-              </div>
-              {totalSavings > 0 && (
-                <p className="text-[11px] text-muted-foreground mb-2">
-                  Total savings from schemes applied to orders in this period
-                </p>
-              )}
-              {topSchemes.length > 0 && (
-                <div className="space-y-1.5">
-                  {topSchemes.map(ts => (
-                    <div key={ts.name} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
-                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(ts.savings)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Charts Row 1: Revenue Trend + Payment Split */}
-        <div className="grid gap-4 md:grid-cols-5">
-          <div className="glass-card rounded-xl p-4 md:col-span-3">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">
-                Revenue Trend
-              </h3>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span>Target</span>
-                <div className="flex items-center rounded-md border border-border bg-background px-2 py-1">
-                  <span className="mr-0.5 text-muted-foreground">₹</span>
-                  <input
-                    type="number"
-                    value={dailyTarget}
-                    onChange={(e) => setDailyTarget(Number(e.target.value) || 0)}
-                    className="w-16 bg-transparent text-xs text-foreground outline-none"
-                    min={0}
-                    step={5000}
-                  />
-                </div>
-              </div>
-            </div>
-            {revenueTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={revenueTrend}>
-                  <defs>
-                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tickFormatter={(v) => formatCompact(v)}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={55}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#revGrad)"
-                  />
-                  {dailyTarget > 0 && (
-                    <ReferenceLine
-                      y={dailyTarget}
-                      stroke="hsl(var(--destructive))"
-                      strokeDasharray="6 4"
-                      strokeWidth={1.5}
-                      label={{
-                        value: `Target: ${formatCompact(dailyTarget)}`,
-                        position: "right",
-                        fontSize: 11,
-                        fill: "hsl(var(--muted-foreground))",
-                      }}
-                    />
-                  )}
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-                No orders in this period
-              </div>
-            )}
-          </div>
-
-          <div className="glass-card rounded-xl p-4 md:col-span-2">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">
-              Payment Split
-            </h3>
-            {paymentSplit.length > 0 ? (
-              <div className="flex flex-col items-center">
-                <ResponsiveContainer width="100%" height={180}>
-                  <PieChart>
-                    <Pie
-                      data={paymentSplit}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {paymentSplit.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: number, name: string) => [
-                        `${value} orders`,
-                        name,
-                      ]}
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-wrap justify-center gap-3 mt-1">
-                  {paymentSplit.map((entry) => (
-                    <div key={entry.name} className="flex items-center gap-1.5 text-xs">
-                      <div
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: entry.color }}
+          {/* ── Overview Tab ── */}
+          <TabsContent value="overview" className="space-y-4 mt-4">
+            {/* Revenue Trend + Payment Split */}
+            <div className="grid gap-4 md:grid-cols-5">
+              <div className="glass-card rounded-xl p-4 md:col-span-3">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground">Revenue Trend</h3>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span>Target</span>
+                    <div className="flex items-center rounded-md border border-border bg-background px-2 py-1">
+                      <span className="mr-0.5 text-muted-foreground">₹</span>
+                      <input
+                        type="number"
+                        value={dailyTarget}
+                        onChange={(e) => setDailyTarget(Number(e.target.value) || 0)}
+                        className="w-16 bg-transparent text-xs text-foreground outline-none"
+                        min={0}
+                        step={5000}
                       />
-                      <span className="text-muted-foreground">
-                        {entry.name} ({entry.value})
-                      </span>
+                    </div>
+                  </div>
+                </div>
+                {revenueTrend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <AreaChart data={revenueTrend}>
+                      <defs>
+                        <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                      <YAxis tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={55} />
+                      <Tooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                      <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)" />
+                      {dailyTarget > 0 && (
+                        <ReferenceLine y={dailyTarget} stroke="hsl(var(--destructive))" strokeDasharray="6 4" strokeWidth={1.5} label={{ value: `Target: ${formatCompact(dailyTarget)}`, position: "right", fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                      )}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">No orders in this period</div>
+                )}
+              </div>
+
+              <div className="glass-card rounded-xl p-4 md:col-span-2">
+                <h3 className="mb-3 text-sm font-semibold text-foreground">Payment Split</h3>
+                {paymentSplit.length > 0 ? (
+                  <div className="flex flex-col items-center">
+                    <ResponsiveContainer width="100%" height={180}>
+                      <PieChart>
+                        <Pie data={paymentSplit} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                          {paymentSplit.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
+                        </Pie>
+                        <Tooltip formatter={(value: number, name: string) => [`${value} orders`, name]} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-wrap justify-center gap-3 mt-1">
+                      {paymentSplit.map((entry) => (
+                        <div key={entry.name} className="flex items-center gap-1.5 text-xs">
+                          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                          <span className="text-muted-foreground">{entry.name} ({entry.value})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">No data</div>
+                )}
+              </div>
+            </div>
+
+            {/* Scheme Performance */}
+            {(() => {
+              const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
+              const totalSavings = filteredOrders.reduce((sum, o) => sum + (o.schemeSavings || 0), 0);
+              const schemeHits = new Map<string, { name: string; hits: number; savings: number }>();
+              for (const order of filteredOrders) {
+                for (const as of (order.appliedSchemes || [])) {
+                  const key = as.schemeId || as.schemeName;
+                  const existing = schemeHits.get(key) || { name: as.schemeName, hits: 0, savings: 0 };
+                  existing.hits++;
+                  existing.savings += as.savings;
+                  schemeHits.set(key, existing);
+                }
+              }
+              if (activeSchemes.length === 0 && totalSavings === 0) return null;
+              const topSchemes = Array.from(schemeHits.values()).sort((a, b) => b.savings - a.savings).slice(0, 3);
+              return (
+                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-emerald-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10">
+                      <Gift className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Scheme Performance</p>
+                      <p className="text-[11px] text-muted-foreground">{activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}</p>
+                    </div>
+                    {totalSavings > 0 && (
+                      <span className="ml-auto text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalSavings)}</span>
+                    )}
+                  </div>
+                  {totalSavings > 0 && (
+                    <p className="text-[11px] text-muted-foreground mb-2">Total savings from schemes applied to orders in this period</p>
+                  )}
+                  {topSchemes.length > 0 && (
+                    <div className="space-y-1.5">
+                      {topSchemes.map(ts => (
+                        <div key={ts.name} className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
+                            <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(ts.savings)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ── People Tab ── */}
+          <TabsContent value="people" className="space-y-4 mt-4">
+            {/* Top Dealers Performance */}
+            {(() => {
+              const dealerData = dealers.map(d => {
+                const dOrders = orders.filter(o => o.distributorId === d.id);
+                const periodOrders = filteredOrders.filter(o => o.distributorId === d.id);
+                const revenue = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const risk = getChurnRisk(dOrders);
+                return { id: d.id, name: d.name, revenue, orderCount: periodOrders.length, risk };
+              })
+                .filter(d => d.orderCount > 0 || d.risk === "high")
+                .sort((a, b) => b.revenue - a.revenue)
+                .slice(0, 5);
+              if (dealerData.length === 0) return null;
+              return (
+                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-blue-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10">
+                      <Users className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold">Top Dealers Performance</p>
+                      <p className="text-[11px] text-muted-foreground">With churn risk assessment</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {dealerData.map(d => {
+                      const rc = churnRiskConfig[d.risk];
+                      return (
+                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/distributors")}>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{d.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                          </div>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rc.color} ${rc.bg} shrink-0`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${rc.dot}`} />
+                            {rc.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Top Dealers by Revenue bar chart */}
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Top Dealers by Revenue</h3>
+              {topDealers.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={topDealers} layout="vertical" margin={{ left: 0, right: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                    <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} cursor="pointer" onClick={(data: any) => { if (data?.name) navigate(`/orders?dealer=${encodeURIComponent(data.name)}`); }} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">No dealer data</div>
+              )}
+            </div>
+
+            {/* Top Sales Team */}
+            {(() => {
+              const salespersons = api.salespersons.list();
+              const spData = salespersons.map(sp => {
+                const spOrders = filteredOrders.filter(o => o.salespersonId === sp.id);
+                const allSpOrders = orders.filter(o => o.salespersonId === sp.id);
+                const revenue = spOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const health = getPerformanceHealth(allSpOrders);
+                return { id: sp.id, name: sp.name, revenue, orderCount: spOrders.length, health };
+              })
+                .filter(d => d.orderCount > 0 || d.health === "low")
+                .sort((a, b) => b.revenue - a.revenue)
+                .slice(0, 3);
+              if (spData.length === 0) return null;
+              return (
+                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-violet-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
+                      <UserCheck className="h-4 w-4 text-violet-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold">Top Sales Team</p>
+                      <p className="text-[11px] text-muted-foreground">With performance health assessment</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {spData.map(d => {
+                      const hc = performanceHealthConfig[d.health];
+                      return (
+                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/salespersons")}>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{d.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                          </div>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${hc.color} ${hc.bg} shrink-0`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${hc.dot}`} />
+                            {hc.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Sales Team Ranking */}
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Sales Team Ranking</h3>
+              {salesRanking.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={salesRanking} layout="vertical" margin={{ left: 0, right: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                    <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">No salesperson data</div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ── Products Tab ── */}
+          <TabsContent value="products" className="space-y-4 mt-4">
+            {/* Product Velocity */}
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Product Velocity (Units Sold)</h3>
+              {productVelocity.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={productVelocity}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval={0} angle={-20} textAnchor="end" height={50} />
+                    <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(value: number) => [`${value} units`, "Sold"]} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                    <Bar dataKey="qty" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={32} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">No product data</div>
+              )}
+            </div>
+
+            {/* Secondary Sales Summary */}
+            {(() => {
+              const allSS = api.secondarySales.list();
+              const periodSS = allSS.filter(s => {
+                const d = new Date(s.date + "T00:00:00");
+                if (period === "custom") {
+                  if (customFrom && d < customFrom) return false;
+                  if (customTo) { const end = new Date(customTo); end.setHours(23,59,59,999); if (d > end) return false; }
+                  return !!(customFrom || customTo);
+                }
+                return d >= cutoff;
+              });
+              if (periodSS.length === 0) return null;
+              const totalQty = periodSS.reduce((s, r) => s + r.quantity, 0);
+              const retMap = new Map<string, number>();
+              periodSS.forEach(s => { const name = s.retailerName || "Unknown"; retMap.set(name, (retMap.get(name) || 0) + s.quantity); });
+              const topRetailers = Array.from(retMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
+              return (
+                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-orange-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10">
+                      <Store className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold">Secondary Sales</p>
+                      <p className="text-[11px] text-muted-foreground">{periodSS.length} records · {totalQty} units</p>
+                    </div>
+                  </div>
+                  {topRetailers.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-muted-foreground font-medium">Top Retailers</p>
+                      {topRetailers.map(([name, qty]) => (
+                        <div key={name} className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground truncate mr-2">{name}</span>
+                          <span className="font-medium shrink-0">{qty} units</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ── Alerts Tab ── */}
+          <TabsContent value="alerts" className="space-y-4 mt-4">
+            {/* Credit at Risk */}
+            {(() => {
+              const atRisk = dealers.filter(d => (d.creditLimit || 0) > 0 && (d.outstandingAmount || 0) >= (d.creditLimit || 0));
+              if (atRisk.length === 0) return null;
+              return (
+                <div className="glass-card rounded-xl p-4 flex items-center gap-3 border-l-[3px] border-l-red-500 cursor-pointer card-hover" onClick={() => navigate("/distributors")}>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
+                  </div>
+                  <span className="text-lg font-bold text-red-600 dark:text-red-400">{atRisk.length}</span>
+                </div>
+              );
+            })()}
+
+            {/* Targets Overview */}
+            {(() => {
+              const allTargets = api.targets.list();
+              const now = new Date();
+              const today = now.toISOString().split("T")[0];
+              const dayOfWeek = now.getDay();
+              const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+              const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
+              const weekEnd = new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0];
+              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+              const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+              const activeTargets = allTargets.filter(t =>
+                (t.targetRevenue > 0 || t.targetOrders > 0) && (
+                  (t.periodType === "daily" && t.periodStart === today) ||
+                  (t.periodType === "weekly" && t.periodStart === weekStart) ||
+                  (t.periodType === "monthly" && t.periodStart === monthStart)
+                )
+              );
+              if (activeTargets.length === 0) return null;
+              const withProgress = activeTargets.map(t => {
+                const pStart = t.periodStart;
+                const pEnd = t.periodType === "daily" ? pStart : t.periodType === "weekly" ? weekEnd : monthEnd;
+                const entityOrders = orders.filter(o => o.date >= pStart && o.date <= pEnd && (t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId));
+                const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const actualOrd = entityOrders.length;
+                const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
+                const periodLabel = t.periodType === "daily" ? "Today" : t.periodType === "weekly" ? "This Week" : "This Month";
+                return { ...t, pct, actualRev, actualOrd, periodLabel };
+              }).sort((a, b) => b.pct - a.pct);
+              const topPerformers = withProgress.filter(t => t.pct >= 70).slice(0, 3);
+              const behindTarget = withProgress.filter(t => t.pct < 40).slice(0, 3);
+              return (
+                <div className="glass-card rounded-xl p-4">
+                  <h3 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    Targets Overview
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {topPerformers.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">⭐ Top Performers</p>
+                        <div className="space-y-2">
+                          {topPerformers.map(t => (
+                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2">
+                              <div>
+                                <p className="text-xs font-semibold">{t.entityName}</p>
+                                <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
+                              </div>
+                              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t.pct}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {behindTarget.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">⚠️ Needs Attention</p>
+                        <div className="space-y-2">
+                          {behindTarget.map(t => (
+                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2">
+                              <div>
+                                <p className="text-xs font-semibold">{t.entityName}</p>
+                                <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
+                              </div>
+                              <span className="text-sm font-bold text-red-600 dark:text-red-400">{t.pct}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Actionable Insights */}
+            {insights.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  Actionable Insights
+                </h3>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {insights.map((insight, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg border px-3 py-2.5 text-xs leading-relaxed ${
+                        insight.type === "danger"
+                          ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+                          : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
+                      }`}
+                    >
+                      {insight.message}
                     </div>
                   ))}
                 </div>
               </div>
-            ) : (
-              <div className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">
-                No data
-              </div>
             )}
-          </div>
-        </div>
 
-        {/* Top Dealers */}
-        <div className="glass-card rounded-xl p-4">
-          <h3 className="mb-3 text-sm font-semibold text-foreground">
-            Top Dealers by Revenue
-          </h3>
-          {topDealers.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={topDealers} layout="vertical" margin={{ left: 0, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} horizontal={false} />
-                <XAxis
-                  type="number"
-                  tickFormatter={(v) => formatCompact(v)}
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={100}
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  formatter={(value: number) => [formatCurrency(value), "Revenue"]}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                />
-                <Bar
-                  dataKey="revenue"
-                  fill="hsl(var(--primary))"
-                  radius={[0, 4, 4, 0]}
-                  barSize={24}
-                  cursor="pointer"
-                  onClick={(data: any) => {
-                    if (data?.name) {
-                      navigate(`/orders?dealer=${encodeURIComponent(data.name)}`);
-                    }
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
-              No dealer data
-            </div>
-          )}
-        </div>
-
-        {/* Product Velocity + Sales Team */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="glass-card rounded-xl p-4">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">
-              Product Velocity (Units Sold)
-            </h3>
-            {productVelocity.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={productVelocity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval={0}
-                    angle={-20}
-                    textAnchor="end"
-                    height={50}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`${value} units`, "Sold"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar dataKey="qty" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={32} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
-                No product data
-              </div>
-            )}
-          </div>
-
-          <div className="glass-card rounded-xl p-4">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">
-              Sales Team Ranking
-            </h3>
-            {salesRanking.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={salesRanking} layout="vertical" margin={{ left: 0, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} horizontal={false} />
-                  <XAxis
-                    type="number"
-                    tickFormatter={(v) => formatCompact(v)}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={80}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                   <Bar
-                    dataKey="revenue"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                    barSize={24}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
-                No salesperson data
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Targets Overview Widget */}
-        {(() => {
-          const allTargets = api.targets.list();
-          const now = new Date();
-          const today = now.toISOString().split("T")[0];
-          const dayOfWeek = now.getDay();
-          const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-          const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
-          const weekEnd = new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0];
-          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
-
-          // Collect active targets across all period types
-          const activeTargets = allTargets.filter(t =>
-            (t.targetRevenue > 0 || t.targetOrders > 0) && (
-              (t.periodType === "daily" && t.periodStart === today) ||
-              (t.periodType === "weekly" && t.periodStart === weekStart) ||
-              (t.periodType === "monthly" && t.periodStart === monthStart)
-            )
-          );
-          if (activeTargets.length === 0) return null;
-
-          const withProgress = activeTargets.map(t => {
-            const pStart = t.periodStart;
-            const pEnd = t.periodType === "daily" ? pStart
-              : t.periodType === "weekly" ? weekEnd
-              : monthEnd;
-            const entityOrders = orders.filter(o =>
-              o.date >= pStart && o.date <= pEnd &&
-              (t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId)
-            );
-            const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-            const actualOrd = entityOrders.length;
-            const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
-            const periodLabel = t.periodType === "daily" ? "Today" : t.periodType === "weekly" ? "This Week" : "This Month";
-            return { ...t, pct, actualRev, actualOrd, periodLabel };
-          }).sort((a, b) => b.pct - a.pct);
-
-          const topPerformers = withProgress.filter(t => t.pct >= 70).slice(0, 3);
-          const behindTarget = withProgress.filter(t => t.pct < 40).slice(0, 3);
-
-          return (
-            <div className="glass-card rounded-xl p-4">
-              <h3 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" />
-                Targets Overview
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {topPerformers.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">⭐ Top Performers</p>
-                    <div className="space-y-2">
-                      {topPerformers.map(t => (
-                        <div key={t.id} className="flex items-center justify-between rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2">
-                          <div>
-                            <p className="text-xs font-semibold">{t.entityName}</p>
-                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
-                          </div>
-                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t.pct}%</span>
-                        </div>
-                      ))}
+            {/* Empty state for alerts tab */}
+            {(() => {
+              const atRisk = dealers.filter(d => (d.creditLimit || 0) > 0 && (d.outstandingAmount || 0) >= (d.creditLimit || 0));
+              if (atRisk.length === 0 && insights.length === 0) {
+                return (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mb-3">
+                      <Target className="h-5 w-5 text-emerald-500" />
                     </div>
+                    <p className="text-sm font-medium text-foreground">All clear!</p>
+                    <p className="text-xs text-muted-foreground mt-1">No alerts or risks detected for this period.</p>
                   </div>
-                )}
-                {behindTarget.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">⚠️ Needs Attention</p>
-                    <div className="space-y-2">
-                      {behindTarget.map(t => (
-                        <div key={t.id} className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2">
-                          <div>
-                            <p className="text-xs font-semibold">{t.entityName}</p>
-                            <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
-                          </div>
-                          <span className="text-sm font-bold text-red-600 dark:text-red-400">{t.pct}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Actionable Insights */}
-        {insights.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              Actionable Insights
-            </h3>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {insights.map((insight, i) => (
-                <div
-                  key={i}
-                  className={`rounded-lg border px-3 py-2.5 text-xs leading-relaxed ${
-                    insight.type === "danger"
-                      ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
-                      : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
-                  }`}
-                >
-                  {insight.message}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                );
+              }
+              return null;
+            })()}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <ExportPdfModal
