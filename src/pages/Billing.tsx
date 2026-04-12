@@ -154,6 +154,7 @@ export default function Billing() {
       unit: l.unit,
       unitPrice: l.unitPrice,
     })));
+    setStep(2);
     setShowCreate(true);
   };
 
