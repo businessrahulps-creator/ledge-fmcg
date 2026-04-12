@@ -1,36 +1,52 @@
 
 
-# Expand Help Page with Comprehensive Feature Guides
+# Add Unsaved Changes Guard to New Order Page
 
-## Change
+## Problem
 
-Replace the current 5 generic accordion sections with ~12 focused, feature-specific guides covering every major area of Ledge. Each section explains what the feature does, how to use it step-by-step, and practical tips.
+The NewOrder form has ~10 state fields and line items. If a user accidentally taps "Back" or navigates away mid-entry, all data is silently lost.
 
-## New Sections
+## Solution
 
-| # | Section | Covers |
-|---|---------|--------|
-| 1 | Getting Started (keep, refine) | First 15 minutes setup |
-| 2 | Daily Workflow (keep) | Morning-to-close routine |
-| 3 | Orders | Creating, editing, statuses (payment + delivery), partial payments, order prefixes, linking to invoices |
-| 4 | Dealers | Adding dealers, GSTIN, credit limits, outstanding tracking, ledger view |
-| 5 | Sales Team | Adding salespersons, assigning regions, linking to orders |
-| 6 | Stock & Warehouses | Products (SKU, HSN, price), warehouses, low-stock thresholds, stock health badges |
-| 7 | Schemes & Discounts | Three scheme types (buy X get Y, percentage, flat), time-bound, product/dealer targeting |
-| 8 | Billing & Invoices | Four document types (GST Invoice, Estimate, Proforma, Credit Note), draft vs finalized, linking orders, PDF/WhatsApp export |
-| 9 | Claims & Returns | Two claim types (Goods Returned, Damaged/Claim Only), resolution workflow (open → resolved/rejected), linking to orders |
-| 10 | Reports & Performance (keep, expand) | Five report types + targets + performance page |
-| 11 | Tips & Best Practices (keep, expand) | Do's and don'ts with new billing/claims tips |
+Add two guards:
+
+1. **Browser `beforeunload`** — catches tab close, refresh, URL bar navigation
+2. **React Router blocker** — catches in-app navigation (back button, sidebar links)
+
+Both only activate when the form has meaningful data (dealer selected OR any line has a product chosen).
 
 ## Implementation
 
-**`src/pages/Help.tsx`** — single file rewrite:
+**`src/pages/NewOrder.tsx`** — ~25 lines added:
 
-- Same structure: `AppLayout` > `Accordion type="multiple"`
-- Same styling: `glass-card`, `prose prose-sm`, `text-muted-foreground`
-- Each section uses the existing accordion pattern with `ol`/`ul` lists and `border-l-2` tip callouts
-- Content is static JSX (no data fetching needed)
-- Sections ordered by typical user journey: setup → daily use → feature deep-dives → advanced → tips
+1. Add a `isDirty` derived boolean:
+   ```ts
+   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
+   ```
+
+2. Add `beforeunload` effect:
+   ```ts
+   useEffect(() => {
+     const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
+     window.addEventListener("beforeunload", handler);
+     return () => window.removeEventListener("beforeunload", handler);
+   }, [isDirty]);
+   ```
+
+3. Use React Router's `useBlocker` for in-app navigation:
+   ```ts
+   import { useBlocker } from "react-router-dom";
+   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+     isDirty && currentLocation.pathname !== nextLocation.pathname
+   );
+   ```
+
+4. Add an `AlertDialog` (already imported) that shows when `blocker.state === "blocked"`:
+   - Title: "Discard unsaved order?"
+   - Description: "You have unsaved changes. Leaving will lose your progress."
+   - Cancel → `blocker.reset()`, Discard → `blocker.proceed()`
+
+5. Clear dirty state on successful save (already navigates away via `navigate`).
 
 **1 file modified. No new files. No new dependencies. No database changes.**
 
