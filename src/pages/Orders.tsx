@@ -135,7 +135,7 @@ export default function Orders() {
                     formatIndianDate(o.date),
                     o.distributorName,
                     o.salesperson,
-                    formatCurrency(o.total),
+                    formatCurrency(o.total - (o.schemeSavings || 0)),
                     o.paymentMode.replace("_", " "),
                     o.paymentStatus,
                     o.deliveryStatus,
@@ -316,7 +316,7 @@ export default function Orders() {
           sections={ordersPdfSections}
           onGenerate={(sel) => {
             const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
-            const totalAmount = filtered.reduce((s, o) => s + o.total, 0);
+            const totalAmount = filtered.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
             downloadPdf(
               pdfFilename("orders"),
               <ReportPdf
@@ -347,7 +347,7 @@ export default function Orders() {
                   formatIndianDate(o.date),
                   o.distributorName,
                   o.salesperson,
-                  formatCurrencyPdf(o.total),
+                  formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
                   o.paymentStatus,
                   o.deliveryStatus,
                 ])}

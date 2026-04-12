@@ -4,12 +4,12 @@ import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast as sonnerToast } from "sonner";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useToast } from "@/hooks/use-toast";
+
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Company() {
-  const { toast } = useToast();
+  
   const api = useApi();
   const { companyId } = useAuth();
 
@@ -77,11 +77,11 @@ export default function Company() {
     const file = e.target.files?.[0];
     if (!file || !companyId) return;
     if (file.size > 2 * 1024 * 1024) {
-      sonnerToast.error("File too large", { description: "Logo must be under 2MB." });
+      toast.error("File too large", { description: "Logo must be under 2MB." });
       return;
     }
     if (!file.type.startsWith("image/")) {
-      sonnerToast.error("Invalid file type", { description: "Please upload an image file." });
+      toast.error("Invalid file type", { description: "Please upload an image file." });
       return;
     }
     setLogoUploading(true);
@@ -104,9 +104,9 @@ export default function Company() {
       if (updateError) throw updateError;
 
       setLogoUrl(publicUrl);
-      sonnerToast.success("Logo uploaded", { description: "Company logo has been updated." });
+      toast.success("Logo uploaded", { description: "Company logo has been updated." });
     } catch (err: any) {
-      sonnerToast.error("Upload failed", { description: err?.message || "Could not upload logo." });
+      toast.error("Upload failed", { description: err?.message || "Could not upload logo." });
     }
     setLogoUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -130,9 +130,9 @@ export default function Company() {
         .eq("id", companyId);
       if (error) throw error;
       setLogoUrl("");
-      sonnerToast.success("Logo removed", { description: "Company logo has been removed." });
+      toast.success("Logo removed", { description: "Company logo has been removed." });
     } catch (err: any) {
-      sonnerToast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
+      toast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
     }
     setLogoUploading(false);
   };
@@ -168,11 +168,11 @@ export default function Company() {
         } as any)
         .eq("id", companyId);
       if (error) {
-        toast({ title: "Error saving", description: error.message, variant: "destructive" });
+        toast.error("Error saving", { description: error.message });
         return;
       }
     }
-    toast({ title: "Settings saved", description: "Company profile has been updated." });
+    toast.success("Settings saved", { description: "Company profile has been updated." });
   };
 
   return (

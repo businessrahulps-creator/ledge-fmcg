@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
-import { toast as sonnerToast } from "sonner";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -37,7 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+
 import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,7 +108,7 @@ function InstallAppCard() {
 }
 
 export default function Settings() {
-  const { toast } = useToast();
+  
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const api = useApi();
@@ -122,7 +122,7 @@ export default function Settings() {
       const { exportFullBackup } = await import("@/utils/exportBackup");
       await exportFullBackup();
     } catch (e) {
-      sonnerToast.error("Backup failed", { description: "Please try again." });
+      toast.error("Backup failed", { description: "Please try again." });
     } finally {
       setBackupLoading(false);
     }
@@ -257,11 +257,11 @@ export default function Settings() {
         .eq("id", editMember.roleId);
       if (roleError) throw roleError;
 
-      toast({ title: "Member updated", description: `${editMember.name} has been updated.` });
+      toast.success("Member updated", { description: `${editMember.name} has been updated.` });
       setEditMember(null);
       await loadTeam();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to save member", variant: "destructive" });
+      toast.error("Error", { description: err?.message || "Failed to save member" });
     }
     setSaving(false);
   };
@@ -272,12 +272,12 @@ export default function Settings() {
     try {
       await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
       await supabase.from("profiles").delete().eq("id", deleteMember.id);
-      toast({ title: "Member removed", description: `${deleteMember.name} has been removed.` });
+      toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
       addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
       setDeleteMember(null);
       await loadTeam();
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Failed to remove member", variant: "destructive" });
+      toast.error("Error", { description: err?.message || "Failed to remove member" });
     }
     setSaving(false);
   };
@@ -434,7 +434,7 @@ export default function Settings() {
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Unlimited</p>
                   </div>
                 </div>
-                <Button className="w-full" size="lg" onClick={() => sonnerToast.info("Billing integration coming soon — contact support")}>
+                <Button className="w-full" size="lg" onClick={() => toast.info("Billing integration coming soon — contact support")}>
                   Upgrade Plan
                 </Button>
               </div>
@@ -524,7 +524,7 @@ export default function Settings() {
                                   title="Retry"
                                   onClick={async () => {
                                     if (!navigator.onLine) {
-                                      sonnerToast.error("You're offline — reconnect to retry");
+                                      toast.error("You're offline — reconnect to retry");
                                       return;
                                     }
                                     const result = await replaySingleMutation(m);
@@ -532,13 +532,13 @@ export default function Settings() {
                                       const updated = { ...retryStatus, [m.id]: "success" as const };
                                       setRetryStatus(updated);
                                       await saveRetryStatus(updated);
-                                      sonnerToast.success("Mutation synced successfully");
+                                      toast.success("Mutation synced successfully");
                                     } else {
                                       const updated = { ...retryStatus, [m.id]: "failed" as const };
                                       setRetryStatus(updated);
                                       await saveRetryStatus(updated);
                                       const errMsg = "error" in result ? result.error : "Unknown error";
-                                      sonnerToast.error("Sync failed", { description: errMsg });
+                                      toast.error("Sync failed", { description: errMsg });
                                     }
                                     const queue = await getQueue();
                                     setQueuedMutations(queue);
@@ -699,7 +699,7 @@ export default function Settings() {
                   await clearQueue();
                   setQueuedMutations([]);
                   setShowClearQueueConfirm(false);
-                  sonnerToast.success("Queue cleared", { description: "All pending changes have been discarded." });
+                  toast.success("Queue cleared", { description: "All pending changes have been discarded." });
                 }}
               >
                 Clear All

@@ -339,7 +339,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const { data: company } = await supabase
-        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
+        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
       if (token !== fetchTokenRef.current) return;
       if (company) {
         setOrderPrefixState(company.order_prefix);
@@ -354,7 +354,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes, invoicesRes, invoiceLinesRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -365,9 +365,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("claim_lines" as any).select("*").range(0, 9999) as any,
         supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("invoice_lines" as any).select("*").range(0, 9999) as any,
+      ]);
+
+      // Fetch child lines filtered by parent IDs (avoids unscoped cross-tenant queries)
+      const claimIds = ((claimsRes as any).data || []).map((c: any) => c.id);
+      const invoiceIds = ((invoicesRes as any).data || []).map((i: any) => i.id);
+
+      // Batch helper for .in() queries (Postgres param limit ~32K)
+      const batchIn = async (table: string, column: string, ids: string[]) => {
+        if (ids.length === 0) return [];
+        const CHUNK = 500;
+        const results: any[] = [];
+        for (let i = 0; i < ids.length; i += CHUNK) {
+          const chunk = ids.slice(i, i + CHUNK);
+          const { data } = await supabase.from(table as any).select("*").in(column, chunk) as any;
+          if (data) results.push(...data);
+        }
+        return results;
+      };
+
+      const [claimLinesData, invoiceLinesData] = await Promise.all([
+        batchIn("claim_lines", "claim_id", claimIds),
+        batchIn("invoice_lines", "invoice_id", invoiceIds),
       ]);
       if (token !== fetchTokenRef.current) return;
 
@@ -443,7 +463,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setTargets(mappedTargets);
 
       // Map claims
-      const allClaimLines = (claimLinesRes as any).data || [];
+      const allClaimLines = claimLinesData;
       const mappedClaims: Claim[] = ((claimsRes as any).data || []).map((c: any) => ({
         id: c.id, orderId: c.order_id, orderNumber: c.order_number || "",
         distributorId: c.distributor_id, distributorName: c.distributor_name || "",
@@ -464,7 +484,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setClaims(mappedClaims);
 
       // Map invoices
-      const allInvoiceLines = (invoiceLinesRes as any).data || [];
+      const allInvoiceLines = invoiceLinesData;
       const mappedInvoices: Invoice[] = ((invoicesRes as any).data || []).map((inv: any) => ({
         id: inv.id, docType: inv.doc_type, invoiceNumber: inv.invoice_number,
         invoiceDate: inv.invoice_date, sourceOrderId: inv.source_order_id || undefined,
@@ -495,16 +515,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setInvoices(mappedInvoices);
 
       const orderIds = (ordersRes.data || []).map(o => o.id);
-      let allLines: any[] = [];
-      let allOrderSchemes: any[] = [];
-      if (orderIds.length > 0) {
-        const [linesRes, osRes] = await Promise.all([
-          supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999),
-          supabase.from("order_schemes").select("*").in("order_id", orderIds).range(0, 9999),
-        ]);
-        allLines = linesRes.data || [];
-        allOrderSchemes = osRes.data || [];
-      }
+      const [allLines, allOrderSchemes] = await Promise.all([
+        batchIn("order_lines", "order_id", orderIds),
+        batchIn("order_schemes", "order_id", orderIds),
+      ]);
       if (token !== fetchTokenRef.current) return;
 
       const mappedOrders = mapOrders(ordersRes.data || [], allLines, allOrderSchemes);
