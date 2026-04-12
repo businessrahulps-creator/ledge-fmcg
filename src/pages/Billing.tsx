@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ChevronsUpDown, Check } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
@@ -108,13 +108,14 @@ export default function Billing() {
   };
 
   // Auto-open dialog if coming from Orders page with ?order=<id>
-  useState(() => {
+  useEffect(() => {
     const orderId = searchParams.get("order");
     if (orderId) {
       handleSelectOrder(orderId);
       setShowCreate(true);
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleSelectOrder(orderId: string) {
     setSourceOrderId(orderId);
@@ -435,8 +436,8 @@ export default function Billing() {
                     return (
                       <TableRow key={inv.id} className="row-hover">
                         <TableCell>
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType]}`}>
-                            {docTypeLabels[inv.docType]}
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
+                            {docTypeLabels[inv.docType] || inv.docType}
                           </span>
                         </TableCell>
                         <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
@@ -621,8 +622,8 @@ export default function Billing() {
                                           {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                                         </span>
                                         {docs.map(d => (
-                                          <span key={d.id} className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-medium ${docTypeBadgeColors[d.docType]}`}>
-                                            {docTypeLabels[d.docType].slice(0, 3).toUpperCase()}
+                                          <span key={d.id} className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-medium ${docTypeBadgeColors[d.docType] || 'bg-muted text-muted-foreground'}`}>
+                                            {(docTypeLabels[d.docType] || d.docType || 'INV').slice(0, 3).toUpperCase()}
                                           </span>
                                         ))}
                                       </div>
