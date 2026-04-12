@@ -564,7 +564,7 @@ export default function Billing() {
 
       {/* Create / Edit Document Dialog */}
       <Dialog open={showCreate} onOpenChange={(open) => { if (!open) { setShowCreate(false); resetForm(); } else { setShowCreate(true); } }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>{dialogDesc}</DialogDescription>
@@ -627,7 +627,7 @@ export default function Billing() {
                     <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search orders..." />
-                        <CommandList>
+                        <CommandList className="max-h-[40vh] overflow-y-auto">
                           <CommandEmpty>No orders found.</CommandEmpty>
                           {sortedOrders.needsInvoice.length > 0 && (
                             <CommandGroup heading="Needs Invoice">

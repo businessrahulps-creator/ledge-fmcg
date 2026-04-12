@@ -389,7 +389,7 @@ export default function Schemes() {
             </div>
 
             {/* Product & Dealer filters */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Specific Product (optional)</Label>
                 <Select
@@ -427,7 +427,7 @@ export default function Schemes() {
             </div>
 
             {/* Validity */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Valid From</Label>
                 <Input
