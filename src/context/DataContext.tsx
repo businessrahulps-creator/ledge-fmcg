@@ -55,6 +55,7 @@ interface DataContextType {
   stockItems: StockItem[];
   schemes: Scheme[];
   secondarySales: SecondarySale[];
+  targets: Target[];
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
