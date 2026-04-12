@@ -106,7 +106,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthReady(true);
     });
 
-    return () => subscription.unsubscribe();
+    // 3. Re-validate session when tab becomes visible (prevents unexpected logouts)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.getSession().then(({ data: { session: sess } }) => {
+          if (!mountedRef.current) return;
+          setSession(sess);
+          setUser(sess?.user ?? null);
+          if (sess?.user) fetchProfile(sess.user.id);
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
