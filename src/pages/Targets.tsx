@@ -445,8 +445,11 @@ export default function Targets() {
           </TabsContent>
 
           <TabsContent value="dealers" className="space-y-3">
-            {dealers.length > 0 ? (
-              dealers.map(d => {
+            {(() => {
+              const q = search.toLowerCase();
+              const filtered = q ? dealers.filter(d => d.name.toLowerCase().includes(q) || (d.location || "").toLowerCase().includes(q)) : dealers;
+              return filtered.length > 0 ? (
+              filtered.map(d => {
                 const actual = dealerActuals.get(d.id) || { revenue: 0, orders: 0 };
                 const existingTarget = getTarget("dealer", d.id);
                 return (
@@ -468,16 +471,19 @@ export default function Targets() {
             ) : (
               <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
                 <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No dealers yet</p>
-                <p className="text-xs text-muted-foreground">Add your dealer network to start setting targets</p>
-                <Link to="/distributors">
-                  <Button size="sm" className="mt-3">
-                    <Plus className="h-4 w-4" />
-                    Add Dealer
-                  </Button>
-                </Link>
+                <p className="mt-3 text-sm font-medium">{q ? "No matching dealers" : "No dealers yet"}</p>
+                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your dealer network to start setting targets"}</p>
+                {!q && (
+                  <Link to="/distributors">
+                    <Button size="sm" className="mt-3">
+                      <Plus className="h-4 w-4" />
+                      Add Dealer
+                    </Button>
+                  </Link>
+                )}
               </div>
-            )}
+            );
+            })()}
           </TabsContent>
         </Tabs>
       </div>
