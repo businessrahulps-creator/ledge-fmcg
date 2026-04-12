@@ -2,14 +2,14 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, BarChart3, MoreHorizontal, Store, UsersRound, Settings, WifiOff, RefreshCw, TrendingUp } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 
-import { Receipt, RotateCcw, Target, Tags } from "lucide-react";
+import { RotateCcw, Target } from "lucide-react";
 import { getQueue } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
@@ -33,17 +33,18 @@ const moreGroups = [
   {
     label: "Manage",
     items: [
-      { title: "Dealers", url: "/distributors", icon: Store },
-      { title: "Team", url: "/salespersons", icon: UsersRound },
-      { title: "Schemes", url: "/schemes", icon: Tags },
+      { title: "Dealers", url: "/distributors", icon: UserRound },
+      { title: "Team", url: "/salespersons", icon: UserCheck },
+      { title: "Company", url: "/company", icon: Landmark },
+      { title: "Schemes", url: "/schemes", icon: Gift },
       { title: "Targets", url: "/targets", icon: Target },
     ],
   },
   {
     label: "Analyze",
     items: [
-      { title: "Reports", url: "/reports", icon: BarChart3 },
-      { title: "Billing", url: "/billing", icon: Receipt },
+      { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+      { title: "Billing", url: "/billing", icon: FileText },
       { title: "Claims", url: "/claims", icon: RotateCcw },
     ],
   },
