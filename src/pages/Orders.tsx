@@ -106,6 +106,13 @@ export default function Orders() {
   const [isSaving, setIsSaving] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
+  // Claim modal state
+  const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const [claimType, setClaimType] = useState<"return" | "damage">("return");
+  const [claimReason, setClaimReason] = useState("");
+  const [claimQuantities, setClaimQuantities] = useState<Record<number, number>>({});
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+
   const ordersPdfSections: PdfSection[] = [
     { id: "company", label: "Company header" },
     { id: "summary", label: "Summary statistics" },
