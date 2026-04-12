@@ -114,6 +114,19 @@ export default function Settings() {
   const api = useApi();
   const { signOut, companyId, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+
+  const handleBackup = async () => {
+    setBackupLoading(true);
+    try {
+      const { exportFullBackup } = await import("@/utils/exportBackup");
+      await exportFullBackup();
+    } catch (e) {
+      sonnerToast.error("Backup failed", { description: "Please try again." });
+    } finally {
+      setBackupLoading(false);
+    }
+  };
 
   const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
   const [queuedMutations, setQueuedMutations] = useState<QueuedMutation[]>([]);
@@ -614,6 +627,28 @@ export default function Settings() {
         </Dialog>
         {/* Install App Card — mobile only, shown when not installed */}
         <InstallAppCard />
+
+        {/* Data Backup */}
+        <div className="glass-card p-4 md:p-6 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Database className="h-5 w-5 text-primary shrink-0" />
+              <div>
+                <h3 className="text-sm font-semibold md:text-base">Data Backup</h3>
+                <p className="text-xs text-muted-foreground md:text-sm mt-0.5">Download all your company data as a ZIP file</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={backupLoading}
+              onClick={handleBackup}
+            >
+              {backupLoading ? <RotateCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              <span className="hidden sm:inline ml-1">{backupLoading ? "Exporting…" : "Download"}</span>
+            </Button>
+          </div>
+        </div>
 
         {/* Logout Section */}
         <div className="glass-card p-4 md:p-6 max-w-2xl">
