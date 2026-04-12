@@ -9,6 +9,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
 import { ListChecks, Plus, AlertTriangle } from "lucide-react";
+import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -87,6 +88,8 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="space-y-8 md:space-y-10">
+        {/* Onboarding checklist */}
+        <SetupChecklist />
         {/* Header */}
         <div>
           <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
