@@ -16,11 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Download, Share, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -29,16 +29,33 @@ const primaryMobileNav = [
   { title: "Performance", url: "/performance", icon: TrendingUp },
 ];
 
-const moreItems = [
-  { title: "Dealers", url: "/distributors", icon: Store },
-  { title: "Team", url: "/salespersons", icon: UsersRound },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Billing", url: "/billing", icon: Receipt },
-  { title: "Claims", url: "/claims", icon: RotateCcw },
-  { title: "Targets", url: "/targets", icon: Target },
-  { title: "Schemes", url: "/schemes", icon: Tags },
-  { title: "Settings", url: "/settings", icon: Settings },
+const moreGroups = [
+  {
+    label: "Manage",
+    items: [
+      { title: "Dealers", url: "/distributors", icon: Store },
+      { title: "Team", url: "/salespersons", icon: UsersRound },
+      { title: "Schemes", url: "/schemes", icon: Tags },
+      { title: "Targets", url: "/targets", icon: Target },
+    ],
+  },
+  {
+    label: "Analyze",
+    items: [
+      { title: "Reports", url: "/reports", icon: BarChart3 },
+      { title: "Billing", url: "/billing", icon: Receipt },
+      { title: "Claims", url: "/claims", icon: RotateCcw },
+    ],
+  },
+  {
+    label: "Settings",
+    items: [
+      { title: "Settings", url: "/settings", icon: Settings },
+    ],
+  },
 ];
+
+const allMoreItems = moreGroups.flatMap((g) => g.items);
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
