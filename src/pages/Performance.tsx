@@ -10,6 +10,7 @@ import { formatCurrency } from "@/data/mock-data";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getChurnRisk, churnRiskConfig } from "@/utils/dealerScorecard";
+import { getPerformanceHealth, performanceHealthConfig } from "@/utils/salespersonScorecard";
 import {
   TrendingUp,
   TrendingDown,
@@ -21,6 +22,7 @@ import {
   CalendarIcon,
   Download,
   Gift,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -576,7 +578,58 @@ export default function Performance() {
           );
         })()}
 
-        {/* Scheme Performance — uses actual stored data */}
+        {/* Top Sales Team */}
+        {(() => {
+          const salespersons = api.salespersons.list();
+          const spData = salespersons.map(sp => {
+            const spOrders = filteredOrders.filter(o => o.salespersonId === sp.id);
+            const allSpOrders = orders.filter(o => o.salespersonId === sp.id);
+            const revenue = spOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+            const health = getPerformanceHealth(allSpOrders);
+            return { id: sp.id, name: sp.name, revenue, orderCount: spOrders.length, health };
+          })
+            .filter(d => d.orderCount > 0 || d.health === "low")
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 3);
+
+          if (spData.length === 0) return null;
+
+          return (
+            <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-violet-500">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
+                  <UserCheck className="h-4 w-4 text-violet-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold">Top Sales Team</p>
+                  <p className="text-[11px] text-muted-foreground">With performance health assessment</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {spData.map(d => {
+                  const hc = performanceHealthConfig[d.health];
+                  return (
+                    <div
+                      key={d.id}
+                      className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                      onClick={() => navigate("/salespersons")}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{d.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${hc.color} ${hc.bg} shrink-0`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${hc.dot}`} />
+                        {hc.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {(() => {
           const activeSchemes = api.schemes?.list().filter(s => s.isActive) || [];
           // Sum actual stored scheme_savings from orders
