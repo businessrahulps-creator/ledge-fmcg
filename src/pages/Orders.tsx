@@ -6,7 +6,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, Filter, Trash2, Download, FileText } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
@@ -82,11 +82,13 @@ export default function Orders() {
   const api = useApi();
   const { companyInfo } = api;
   const { userRole } = useAuth();
+  const navigate = useNavigate();
   const orders = api.orders.list();
+  const invoices = api.invoices.list();
   const distributors = api.dealers.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (id: string, updates: Partial<import("@/data/mock-data").Order>) => api.orders.update(id, updates);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
   const [search, setSearch] = useState(dealerParam);
   const [paymentFilter, setPaymentFilter] = useState("all");
@@ -259,6 +261,21 @@ export default function Orders() {
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
+  // Get billing status for an order
+  const getOrderBillingStatus = useCallback((orderId: string) => {
+    const docs = invoices.filter(inv => inv.sourceOrderId === orderId);
+    if (docs.length === 0) return null;
+    const gstFinal = docs.find(d => d.docType === "gst_invoice" && d.status === "final");
+    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" };
+    const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
+    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300" };
+    const proforma = docs.find(d => d.docType === "proforma");
+    if (proforma) return { label: "Proforma", color: "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300" };
+    const estimate = docs.find(d => d.docType === "estimate");
+    if (estimate) return { label: "Estimate", color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300" };
+    return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
+  }, [invoices]);
+
   const filtered = useMemo(() => orders.filter((o) => {
     const q = debouncedSearch.toLowerCase();
     const matchesSearch =
@@ -382,26 +399,39 @@ export default function Orders() {
                   <th className="px-6 py-3 font-semibold">Dealer</th>
                   <th className="px-6 py-3 font-semibold">Sales Person</th>
                   <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                  <th className="px-6 py-3 font-semibold">Payment</th>
-                  <th className="px-6 py-3 font-semibold">Delivery</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    onClick={() => openOrder(order)}
-                    className="group border-b border-border/50 row-hover cursor-pointer"
-                  >
-                    <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                    <td className="px-6 py-4">{order.distributorName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
-                    <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                    <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                    <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                  </tr>
-                ))}
+                     <th className="px-6 py-3 font-semibold">Payment</th>
+                     <th className="px-6 py-3 font-semibold">Delivery</th>
+                     <th className="px-6 py-3 font-semibold">Billing</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.map((order) => {
+                      const billingStatus = getOrderBillingStatus(order.id);
+                      return (
+                        <tr
+                          key={order.id}
+                          onClick={() => openOrder(order)}
+                          className="group border-b border-border/50 row-hover cursor-pointer"
+                        >
+                          <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
+                          <td className="px-6 py-4">{order.distributorName}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
+                          <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                          <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                          <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                          <td className="px-6 py-4">
+                            {billingStatus ? (
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                                {billingStatus.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/50">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
           </div>
@@ -531,6 +561,62 @@ export default function Orders() {
                       )}
                     </div>
                   )}
+
+                  {/* Linked Billing Documents */}
+                  {(() => {
+                    const docs = invoices.filter(inv => inv.sourceOrderId === selectedOrder.id);
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-semibold md:text-sm">Documents</h3>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => {
+                              setSelectedOrder(null);
+                              navigate(`/billing?order=${selectedOrder.id}`);
+                            }}
+                          >
+                            <FileText className="h-3 w-3" />
+                            Generate Invoice
+                          </Button>
+                        </div>
+                        {docs.length > 0 ? (
+                          <div className="rounded-lg border border-border overflow-hidden">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
+                                  <th className="px-3 py-2 text-left font-medium">Type</th>
+                                  <th className="px-3 py-2 text-left font-medium">Number</th>
+                                  <th className="px-3 py-2 text-right font-medium">Amount</th>
+                                  <th className="px-3 py-2 text-left font-medium">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {docs.map(doc => (
+                                  <tr key={doc.id} className="border-b border-border/50">
+                                    <td className="px-3 py-2">
+                                      <span className="capitalize">{doc.docType.replace("_", " ")}</span>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono font-medium">{doc.invoiceNumber}</td>
+                                    <td className="px-3 py-2 text-right font-mono">₹{doc.grandTotal.toLocaleString("en-IN")}</td>
+                                    <td className="px-3 py-2">
+                                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                                        doc.status === "final" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
+                                      }`}>{doc.status}</span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 py-2">No billing documents yet for this order.</p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <Separator />
 
