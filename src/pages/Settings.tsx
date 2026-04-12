@@ -162,7 +162,7 @@ export default function Settings() {
     if (!companyId) return;
     supabase
       .from("companies")
-      .select("name, address, gstin, logo_url, trial_ends_at")
+      .select("name, address, gstin, logo_url, trial_ends_at, phone, email, pan, state_code, bank_name, bank_account, bank_ifsc, invoice_prefix")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
@@ -171,6 +171,14 @@ export default function Settings() {
           setCompanyAddress(data.address || "");
           setCompanyGstin(data.gstin || "");
           setLogoUrl(data.logo_url || "");
+          setCompanyPhone((data as any).phone || "");
+          setCompanyEmail((data as any).email || "");
+          setCompanyPan((data as any).pan || "");
+          setCompanyStateCode((data as any).state_code || "");
+          setBankName((data as any).bank_name || "");
+          setBankAccount((data as any).bank_account || "");
+          setBankIfsc((data as any).bank_ifsc || "");
+          setInvoicePrefix((data as any).invoice_prefix || "INV");
           if (data.trial_ends_at) setTrialEndsAt(new Date(data.trial_ends_at));
         }
       });
@@ -327,7 +335,19 @@ export default function Settings() {
     if (companyId) {
       const { error } = await supabase
         .from("companies")
-        .update({ name: sanitizeInput(companyName), address: sanitizeInput(companyAddress), gstin: sanitizeInput(companyGstin) })
+        .update({
+          name: sanitizeInput(companyName),
+          address: sanitizeInput(companyAddress),
+          gstin: sanitizeInput(companyGstin),
+          phone: sanitizeInput(companyPhone),
+          email: sanitizeInput(companyEmail),
+          pan: sanitizeInput(companyPan),
+          state_code: sanitizeInput(companyStateCode),
+          bank_name: sanitizeInput(bankName),
+          bank_account: sanitizeInput(bankAccount),
+          bank_ifsc: sanitizeInput(bankIfsc),
+          invoice_prefix: sanitizeInput(invoicePrefix),
+        } as any)
         .eq("id", companyId);
       if (error) {
         toast({ title: "Error saving", description: error.message, variant: "destructive" });
