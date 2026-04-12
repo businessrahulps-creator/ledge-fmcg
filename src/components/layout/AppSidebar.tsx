@@ -156,7 +156,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         {/* Overview section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Overview</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80 px-3 mb-1">Home</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {overviewNav.map(renderNavItem)}
