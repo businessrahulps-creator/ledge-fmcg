@@ -669,6 +669,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">{isNewProduct ? "Add Product" : "Edit Product"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewProduct ? "Add a new product" : "Edit product details"}</DialogDescription>
             </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); saveProduct(); }}>
             {editProduct && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -691,10 +692,11 @@ export default function Stock() {
                 </div>
               </div>
             )}
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditProduct(null)}>Cancel</Button>
-              <Button onClick={saveProduct}>{isNewProduct ? "Add Product" : "Save Changes"}</Button>
+            <DialogFooter className="gap-2 sm:gap-0 mt-4">
+              <Button type="button" variant="outline" onClick={() => setEditProduct(null)}>Cancel</Button>
+              <Button type="submit">{isNewProduct ? "Add Product" : "Save Changes"}</Button>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -721,6 +723,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">{isNewWarehouse ? "Add Warehouse" : "Edit Warehouse"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewWarehouse ? "Add a new warehouse" : "Edit warehouse details"}</DialogDescription>
             </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); saveWarehouse(); }}>
             {editWarehouse && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -733,10 +736,11 @@ export default function Stock() {
                 </div>
               </div>
             )}
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditWarehouse(null)}>Cancel</Button>
-              <Button onClick={saveWarehouse}>{isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
+            <DialogFooter className="gap-2 sm:gap-0 mt-4">
+              <Button type="button" variant="outline" onClick={() => setEditWarehouse(null)}>Cancel</Button>
+              <Button type="submit">{isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -776,6 +780,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
               <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
             </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); saveStockItemFn(); }}>
             {editStockItem && (
               <div className="space-y-3 md:space-y-4">
                 <div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
@@ -807,9 +812,9 @@ export default function Stock() {
                 </div>
               </div>
             )}
-            <DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0">
+            <DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0 mt-4">
               <AlertDialog open={confirmDeleteStockItem} onOpenChange={setConfirmDeleteStockItem}>
-                <Button variant="destructive" onClick={() => setConfirmDeleteStockItem(true)} className="w-full">
+                <Button type="button" variant="destructive" onClick={() => setConfirmDeleteStockItem(true)} className="w-full">
                   Remove from Warehouse
                 </Button>
                 <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
@@ -826,10 +831,11 @@ export default function Stock() {
                 </AlertDialogContent>
               </AlertDialog>
               <div className="grid w-full grid-cols-2 gap-2">
-                <Button variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
-                <Button onClick={saveStockItemFn} className="w-full">Save Changes</Button>
+                <Button type="button" variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
+                <Button type="submit" className="w-full">Save Changes</Button>
               </div>
             </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 

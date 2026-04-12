@@ -194,6 +194,7 @@ export default function Salespersons() {
                 <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
                 <DialogDescription className="sr-only">{isNew ? "Add a new team member" : "Edit team member details"}</DialogDescription>
               </DialogHeader>
+              <form onSubmit={(e) => { e.preventDefault(); save(); }}>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name *</Label>
@@ -214,10 +215,11 @@ export default function Salespersons() {
                   <Input value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="name@company.com" className="h-10 rounded-lg" />
                 </div>
               </div>
-              <DialogFooter className="gap-2 sm:gap-0">
-                <Button variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-                <Button onClick={save}>{isNew ? "Add Member" : "Save Changes"}</Button>
+              <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
+                <Button type="submit">{isNew ? "Add Member" : "Save Changes"}</Button>
               </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         )}
