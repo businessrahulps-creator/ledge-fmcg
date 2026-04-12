@@ -60,10 +60,10 @@ export default function Dashboard() {
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
   const kpiAccents = [
-    "border-l-4 border-l-emerald-500",
-    "border-l-4 border-l-blue-500",
-    "border-l-4 border-l-amber-500",
-    "border-l-4 border-l-indigo-500",
+    "",
+    "",
+    "",
+    "",
   ];
 
   const kpis = [
@@ -132,7 +132,7 @@ export default function Dashboard() {
         {/* Credit at Risk */}
         {dealersAtRisk.length > 0 && (
           <Link to="/distributors" className="block">
-            <div className="glass-card p-4 flex items-center gap-3 border-l-4 border-l-red-500 card-hover">
+            <div className="glass-card p-4 flex items-center gap-3 card-hover">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
               </div>
