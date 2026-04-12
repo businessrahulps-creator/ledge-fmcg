@@ -67,7 +67,7 @@ export default function Claims() {
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold tracking-tight md:text-2xl">Returns & Claims</h1>
             {openCount > 0 && (
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+              <Badge variant="secondary" className="bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
                 {openCount} open
               </Badge>
             )}
