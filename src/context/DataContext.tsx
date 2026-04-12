@@ -1119,8 +1119,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!deleted || deleted.length === 0) {
         throw new Error("Order could not be deleted — you may not have permission.");
       }
+      const deletedOrder = ordersRef.current.find(o => o.id === id);
       setOrders(prev => prev.filter(o => o.id !== id));
       await safeRefetchStockItems();
+      log("order", id, "deleted", `Deleted order ${deletedOrder?.orderNumber || id}`);
       return true;
     } catch (err: any) {
       toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
