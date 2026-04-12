@@ -1369,6 +1369,105 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
   }, []);
 
+  // Invoice CRUD
+  const addInvoice = useCallback(async (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">): Promise<Invoice | null> => {
+    if (!companyId) return null;
+    try {
+      // Get atomic invoice number
+      const { data: seqData, error: seqErr } = await supabase.rpc("get_next_invoice_number", { target_company_id: companyId });
+      if (seqErr) throw seqErr;
+      const seq = Array.isArray(seqData) ? seqData[0] : seqData;
+      const invoiceNumber = `${seq.prefix}-${new Date().getFullYear()}-${String(seq.seq).padStart(4, "0")}`;
+
+      const { data, error } = await supabase.from("invoices" as any).insert({
+        company_id: companyId,
+        doc_type: invoice.docType,
+        invoice_number: invoiceNumber,
+        invoice_date: invoice.invoiceDate,
+        source_order_id: invoice.sourceOrderId || null,
+        buyer_name: sanitizeInput(invoice.buyerName),
+        buyer_address: sanitizeInput(invoice.buyerAddress),
+        buyer_gstin: sanitizeInput(invoice.buyerGstin),
+        buyer_state_code: sanitizeInput(invoice.buyerStateCode),
+        seller_name: sanitizeInput(invoice.sellerName),
+        seller_address: sanitizeInput(invoice.sellerAddress),
+        seller_gstin: sanitizeInput(invoice.sellerGstin),
+        seller_pan: sanitizeInput(invoice.sellerPan),
+        seller_state_code: sanitizeInput(invoice.sellerStateCode),
+        seller_phone: sanitizeInput(invoice.sellerPhone),
+        seller_email: sanitizeInput(invoice.sellerEmail),
+        seller_bank_name: sanitizeInput(invoice.sellerBankName),
+        seller_bank_account: sanitizeInput(invoice.sellerBankAccount),
+        seller_bank_ifsc: sanitizeInput(invoice.sellerBankIfsc),
+        seller_logo_url: invoice.sellerLogoUrl || "",
+        supply_type: invoice.supplyType,
+        gst_rate: invoice.gstRate,
+        subtotal: invoice.subtotal,
+        cgst_amount: invoice.cgstAmount,
+        sgst_amount: invoice.sgstAmount,
+        igst_amount: invoice.igstAmount,
+        total_tax: invoice.totalTax,
+        grand_total: invoice.grandTotal,
+        round_off: invoice.roundOff,
+        amount_in_words: invoice.amountInWords,
+        notes: sanitizeInput(invoice.notes),
+        status: invoice.status,
+      }).select().single();
+      if (error) throw error;
+
+      const invId = (data as any).id;
+
+      // Insert lines
+      if (invoice.lines.length > 0) {
+        const { error: lErr } = await supabase.from("invoice_lines" as any).insert(
+          invoice.lines.map(l => ({
+            invoice_id: invId,
+            product_name: sanitizeInput(l.productName),
+            hsn_code: sanitizeInput(l.hsnCode),
+            quantity: l.quantity,
+            unit: l.unit,
+            unit_price: l.unitPrice,
+            taxable_value: l.taxableValue,
+          }))
+        );
+        if (lErr) throw lErr;
+      }
+
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: invId,
+        invoiceNumber,
+        createdAt: new Date().toISOString(),
+      };
+      setInvoices(prev => [newInvoice, ...prev]);
+      return newInvoice;
+    } catch (err: any) {
+      toast.error("Failed to create document", { description: err?.message || "Unknown error" });
+      return null;
+    }
+  }, [companyId]);
+
+  const updateInvoice = useCallback(async (id: string, updates: Partial<Invoice>) => {
+    const dbUpdates: Record<string, any> = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
+
+    const { error } = await supabase.from("invoices" as any).update(dbUpdates).eq("id", id);
+    if (error) { toast.error("Failed to update document", { description: error.message }); return; }
+    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
+  }, []);
+
+  const deleteInvoice = useCallback(async (id: string) => {
+    const inv = invoices.find(i => i.id === id);
+    if (inv?.status === "final") {
+      toast.error("Cannot delete finalized document");
+      return;
+    }
+    const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
+    if (error) { toast.error("Failed to delete document", { description: error.message }); return; }
+    setInvoices(prev => prev.filter(i => i.id !== id));
+  }, [invoices]);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1392,6 +1491,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         secondarySales, addSecondarySale, deleteSecondarySale,
         targets, addTarget, updateTarget, deleteTarget,
         claims, addClaim, updateClaim,
+        invoices, addInvoice, updateInvoice, deleteInvoice,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
