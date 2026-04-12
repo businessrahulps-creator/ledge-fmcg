@@ -14,14 +14,14 @@ import { toast } from "sonner";
 import type { Claim } from "@/context/DataContext";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
-  return: { label: "Goods Returned", icon: RotateCcw, color: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300" },
-  damage: { label: "Damaged / Claim Only", icon: PackageX, color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300" },
+  return: { label: "Goods Returned", icon: RotateCcw, color: "bg-blue-50/80 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300" },
+  damage: { label: "Damaged / Claim Only", icon: PackageX, color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" },
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
-  open: { label: "Open", color: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300", icon: PackageX },
-  resolved: { label: "Resolved", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300", icon: CheckCircle2 },
-  rejected: { label: "Rejected", color: "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300", icon: XCircle },
+  open: { label: "Open", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300", icon: PackageX },
+  resolved: { label: "Resolved", color: "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300", icon: CheckCircle2 },
+  rejected: { label: "Rejected", color: "bg-red-50/80 text-red-700 dark:bg-red-500/20 dark:text-red-300", icon: XCircle },
 };
 
 export default function Claims() {
@@ -67,7 +67,7 @@ export default function Claims() {
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold tracking-tight md:text-2xl">Returns & Claims</h1>
             {openCount > 0 && (
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+              <Badge variant="secondary" className="bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
                 {openCount} open
               </Badge>
             )}

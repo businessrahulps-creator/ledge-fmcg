@@ -175,14 +175,18 @@ export default function Distributors() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-sm font-semibold md:text-base">{d.name}</h3>
-                  <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground md:mt-2 md:text-sm">
-                    <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                    {d.location}
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground md:text-sm">
-                    <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                    {d.contact}
-                  </div>
+                  {d.location && (
+                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground md:mt-2 md:text-sm">
+                      <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
+                      {d.location}
+                    </div>
+                  )}
+                  {d.contact && (
+                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground md:text-sm">
+                      <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
+                      {d.contact}
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" className="h-10 w-10 active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
@@ -220,9 +224,9 @@ export default function Distributors() {
           ))}
         </div>
 
-        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-
-        {filtered.length === 0 && (
+        {filtered.length > 0 ? (
+          <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Search className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
             <p className="mt-3 text-sm font-medium">No dealers found</p>
