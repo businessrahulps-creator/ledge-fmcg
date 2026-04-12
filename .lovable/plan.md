@@ -1,112 +1,71 @@
 
 
-# Feature #9: Claim & Return Easy Flow
+# Accounting → Billing Implementation Plan
 
-## Recommendation: Hybrid Approach
+## Analysis of Previous Plan
 
-**Why hybrid wins over the alternatives:**
+The previously proposed plan is well-aligned with all user constraints. Key confirmations:
+- **Order PDF untouched**: `OrderInvoicePdf.tsx`, `ExportPdfModal.tsx`, and Orders page PDF flow will not be modified.
+- **No order creation from Billing**: Only pull from existing orders or create standalone documents.
+- **Multi-document types**: GST Invoice, Invoice, Estimate, Proforma, Credit Note — differentiated by `doc_type` field.
+- **Company Settings**: Missing fields (phone, email, PAN, state_code, bank details) will be added to `companies` table and Settings UI.
+- **Immutability**: Invoices snapshot all data at creation. Final documents are locked.
+- **Precision**: All monetary columns use `numeric`; JS uses `Math.round(value * 100) / 100`.
 
-- **Order detail button only**: Fast for the common case (damage spotted at delivery), but no central view for tracking open claims, generating reports, or following up with manufacturers. The business owner loses visibility.
-- **Dedicated page only**: Great for management/reporting, but forces the user to navigate away from the order, manually look up the order number, and re-enter dealer/product info they already have. Too much friction for the field team.
-- **Hybrid (recommended)**: A "Record Return / Claim" button inside the Order detail dialog pre-fills all context (order, dealer, products, quantities). A dedicated "Returns & Claims" page in the sidebar shows all claims with status tracking, filtering, and resolution workflow. Best of both worlds.
+No gaps found. Proceeding with implementation as planned.
 
-## Business Value
+## Implementation Steps
 
-- **For the business owner**: Central claims register creates an audit trail for manufacturer disputes. "Total claims this month" becomes a reportable metric. Stock restoration is tracked automatically.
-- **For godown staff**: Clear "Goods Returned → stock restored" vs "Damaged / Claim Only → no stock change" choice eliminates confusion about inventory impact.
-- **For salespersons**: One-tap from the order they just delivered. No re-entering product details.
+### 1. Database Migration
+- Add columns to `companies`: `phone`, `email`, `pan`, `state_code`, `bank_name`, `bank_account`, `bank_ifsc`, `invoice_prefix`, `next_invoice_sequence`
+- Add `hsn_code` to `products`
+- Create `invoices` table (with doc_type, buyer/seller snapshots, GST fields, status)
+- Create `invoice_lines` table
+- Create atomic `get_next_invoice_number()` function
+- Add `updated_at` trigger on invoices
+- Company-scoped RLS on both tables
 
-## Database
+### 2. Settings Page — Add Company Fields
+Add Phone, Email, PAN, State Code, Bank Name, Account Number, IFSC, Invoice Prefix fields to the Company tab. Save alongside existing fields.
 
-### New table: `claims`
-```sql
-CREATE TABLE public.claims (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id uuid NOT NULL,
-  order_id uuid NOT NULL,
-  order_number text NOT NULL DEFAULT '',
-  distributor_id uuid NOT NULL,
-  distributor_name text NOT NULL DEFAULT '',
-  claim_type text NOT NULL DEFAULT 'return',        -- 'return' | 'damage'
-  status text NOT NULL DEFAULT 'open',               -- 'open' | 'resolved' | 'rejected'
-  reason text NOT NULL DEFAULT '',
-  resolution_notes text NOT NULL DEFAULT '',
-  restore_stock boolean NOT NULL DEFAULT false,
-  total_claim_value numeric NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  resolved_at timestamptz
-);
+### 3. DataContext — Extend CompanyInfo + Add Invoices
+- Extend `CompanyInfo` with new fields
+- Add `Invoice` and `InvoiceLine` interfaces
+- Add `invoices` state, `addInvoice`, `updateInvoice` functions
+- Fetch invoices and invoice_lines on load
 
--- claim_lines: which products and how many
-CREATE TABLE public.claim_lines (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  claim_id uuid NOT NULL,
-  product_id uuid NOT NULL,
-  product_name text NOT NULL DEFAULT '',
-  quantity integer NOT NULL DEFAULT 0,
-  unit_price numeric NOT NULL DEFAULT 0,
-  line_total numeric NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-```
-- RLS: company-scoped SELECT/INSERT/UPDATE/DELETE on `claims`; claim_lines via join to claims table
-- `updated_at` trigger on claims
+### 4. Sidebar — "Accounting" Section
+New section between "Manage" and "Analyze" with `Receipt` icon → "Billing" link.
 
-## Implementation Plan
+### 5. New Page: `src/pages/Billing.tsx`
+- Invoice list with doc type badge, number, date, buyer, amount, status
+- "New Document" dialog: type selector, optional order pull, buyer details, GST config, line items, auto-calculated totals
+- Download PDF per document
+- Only drafts can be edited/deleted; final documents locked
 
-### 1. New page: `src/pages/Claims.tsx`
-- Header: "Returns & Claims" with count badge
-- Tabs: "Open" | "Resolved" | "All"
-- Each claim card shows: order number, dealer, type (Return / Damage), date, value, status badge
-- Click to expand: see claim lines, reason, resolution notes
-- "Resolve" button: mark as resolved with optional notes
-- "New Claim" button (standalone, without order context — picks order from dropdown)
-- Empty state with helpful guidance
+### 6. New PDF: `src/components/pdf/GstInvoicePdf.tsx`
+Separate from OrderInvoicePdf. Full GST-compliant layout with seller/buyer blocks, HSN codes, tax breakdown, bank details, amount in words.
 
-### 2. Order detail dialog addition (`src/pages/Orders.tsx`)
-- After the existing footer buttons (Delete, Invoice, WhatsApp), add a "Return / Claim" button (only visible when delivery status is "dispatched" or "delivered")
-- Opens a modal pre-filled with order info and product lines
-- User selects which products and quantities to claim
-- Chooses claim type: "Goods Returned (stock will be restored)" or "Damaged / Claim Only (no stock change)"
-- Enters a brief reason
-- Submits → creates claim record, optionally restores stock
+### 7. Utility: `src/utils/numberToWords.ts`
+Indian currency number-to-words converter.
 
-### 3. DataContext additions
-- Add `Claim` and `ClaimLine` interfaces
-- Add `claims` state, `addClaim`, `updateClaim` functions
-- Fetch claims on load
+### 8. Route + API
+- `/billing` protected route in App.tsx
+- Expose invoices CRUD via `useApi()`
 
-### 4. Navigation
-- Add "Returns" to sidebar under Manage group with `RotateCcw` icon
-
-### 5. Stock restoration logic
-- When `restore_stock = true` and claim is created, increment `stock_items.quantity` for each claimed product in the order's godown
-- This happens in `addClaim` via a Supabase update call
-
-## Files
+## Files Modified/Created
 
 | Action | File |
 |--------|------|
-| New migration | `claims` + `claim_lines` tables with RLS |
-| New | `src/pages/Claims.tsx` |
-| Modify | `src/context/DataContext.tsx` — claims state + CRUD |
-| Modify | `src/services/api.ts` — expose claims |
-| Modify | `src/pages/Orders.tsx` — "Return / Claim" button in order detail |
-| Modify | `src/components/layout/AppSidebar.tsx` — add nav item |
-| Modify | `src/App.tsx` — add route |
+| Migration | companies columns + hsn_code + invoices + invoice_lines + function + RLS |
+| Modify | `src/pages/Settings.tsx` — new company fields |
+| Modify | `src/components/layout/AppSidebar.tsx` — Accounting section |
+| Modify | `src/App.tsx` — /billing route |
+| Modify | `src/context/DataContext.tsx` — CompanyInfo + invoices state |
+| Modify | `src/services/api.ts` — invoices API |
+| New | `src/pages/Billing.tsx` |
+| New | `src/components/pdf/GstInvoicePdf.tsx` |
+| New | `src/utils/numberToWords.ts` |
 
-## UX Flow Summary
-
-```text
-Order Detail Dialog
-  └─ [Return / Claim] button (shown for dispatched/delivered orders)
-       └─ Modal: pre-filled products, qty selectors, type toggle, reason field
-            └─ Submit → claim created, toast confirmation
-                 └─ If "Goods Returned" → stock auto-restored
-
-Returns & Claims Page (sidebar)
-  └─ All claims listed with filters (Open/Resolved/All)
-       └─ Click claim → expand details, resolve, add notes
-```
+**Untouched**: OrderInvoicePdf.tsx, ExportPdfModal.tsx, Orders.tsx PDF flow, all existing features.
 
