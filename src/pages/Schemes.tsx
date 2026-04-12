@@ -164,8 +164,6 @@ export default function Schemes() {
     }
   };
 
-  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
-
   const filteredSchemes = useMemo(() => {
     if (!search.trim()) return schemes;
     const q = search.toLowerCase();
@@ -180,6 +178,8 @@ export default function Schemes() {
 
   const activeSchemes = filteredSchemes.filter(s => s.isActive);
   const inactiveSchemes = filteredSchemes.filter(s => !s.isActive);
+
+  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
 
   return (
     <AppLayout>
