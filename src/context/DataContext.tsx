@@ -365,9 +365,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("claim_lines" as any).select("*, claims!inner(company_id)").eq("claims.company_id" as any, cId).range(0, 9999),
+        supabase.from("claim_lines" as any).select("*").range(0, 9999) as any,
         supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("invoice_lines" as any).select("*, invoices!inner(company_id)").eq("invoices.company_id" as any, cId).range(0, 9999),
+        supabase.from("invoice_lines" as any).select("*").range(0, 9999) as any,
       ]);
       if (token !== fetchTokenRef.current) return;
 
