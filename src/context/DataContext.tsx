@@ -1234,6 +1234,75 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setTargets(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  // Claims CRUD
+  const addClaim = useCallback(async (claim: Claim): Promise<boolean> => {
+    if (!companyId) return false;
+    try {
+      const { data, error } = await supabase.from("claims" as any).insert({
+        company_id: companyId,
+        order_id: claim.orderId,
+        order_number: claim.orderNumber,
+        distributor_id: claim.distributorId,
+        distributor_name: sanitizeInput(claim.distributorName),
+        claim_type: claim.claimType,
+        status: "open",
+        reason: sanitizeInput(claim.reason),
+        restore_stock: claim.restoreStock,
+        total_claim_value: claim.totalClaimValue,
+      }).select().single();
+      if (error) throw error;
+      const claimId = (data as any).id;
+
+      if (claim.lines.length > 0) {
+        const { error: linesErr } = await supabase.from("claim_lines" as any).insert(
+          claim.lines.map(l => ({
+            claim_id: claimId,
+            product_id: l.productId,
+            product_name: sanitizeInput(l.productName),
+            quantity: l.quantity,
+            unit_price: l.unitPrice,
+            line_total: l.lineTotal,
+          }))
+        );
+        if (linesErr) throw linesErr;
+      }
+
+      // Restore stock if requested
+      if (claim.restoreStock) {
+        const order = orders.find(o => o.id === claim.orderId);
+        const godownId = order?.godownId;
+        if (godownId) {
+          for (const line of claim.lines) {
+            const { data: siData } = await supabase.from("stock_items").select("*")
+              .eq("company_id", companyId).eq("product_id", line.productId).eq("godown_id", godownId).single();
+            if (siData) {
+              await supabase.from("stock_items").update({ quantity: siData.quantity + line.quantity } as any).eq("id", siData.id);
+            }
+          }
+          await safeRefetchStockItems();
+        }
+      }
+
+      const newClaim: Claim = { ...claim, id: claimId, status: "open", createdAt: new Date().toISOString(), resolvedAt: null };
+      setClaims(prev => [newClaim, ...prev]);
+      return true;
+    } catch (err: any) {
+      toast.error("Failed to record claim", { description: err?.message || "Unknown error" });
+      return false;
+    }
+  }, [companyId, orders, safeRefetchStockItems]);
+
+  const updateClaim = useCallback(async (id: string, updates: Partial<Claim>) => {
+    const dbUpdates: Record<string, any> = {};
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.resolutionNotes !== undefined) dbUpdates.resolution_notes = sanitizeInput(updates.resolutionNotes);
+    if (updates.status === "resolved") dbUpdates.resolved_at = new Date().toISOString();
+
+    const { error } = await supabase.from("claims" as any).update(dbUpdates).eq("id", id);
+    if (error) { toast.error("Failed to update claim", { description: error.message }); return; }
+    setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
+  }, []);
+
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
@@ -1256,6 +1325,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addScheme: schemeCrud.add, updateScheme: schemeCrud.update, deleteScheme: schemeCrud.remove,
         secondarySales, addSecondarySale, deleteSecondarySale,
         targets, addTarget, updateTarget, deleteTarget,
+        claims, addClaim, updateClaim,
         nextOrderNumber, previewOrderNumber, refreshAll,
       }}
     >
