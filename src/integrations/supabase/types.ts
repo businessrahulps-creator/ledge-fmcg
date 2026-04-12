@@ -58,9 +58,11 @@ export type Database = {
           company_id: string
           contact: string
           created_at: string
+          credit_limit: number
           id: string
           location: string
           name: string
+          outstanding_amount: number
           total_orders: number
           total_value: number
           updated_at: string
@@ -69,9 +71,11 @@ export type Database = {
           company_id: string
           contact?: string
           created_at?: string
+          credit_limit?: number
           id?: string
           location?: string
           name: string
+          outstanding_amount?: number
           total_orders?: number
           total_value?: number
           updated_at?: string
@@ -80,9 +84,11 @@ export type Database = {
           company_id?: string
           contact?: string
           created_at?: string
+          credit_limit?: number
           id?: string
           location?: string
           name?: string
+          outstanding_amount?: number
           total_orders?: number
           total_value?: number
           updated_at?: string
