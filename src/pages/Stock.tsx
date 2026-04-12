@@ -514,6 +514,12 @@ export default function Stock() {
                   <Warehouse className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                   <p className="mt-3 text-sm font-medium">No warehouses yet</p>
                   <p className="text-xs text-muted-foreground">Add your first warehouse to start tracking inventory</p>
+                  {!isAccountant && (
+                    <Button size="sm" className="mt-3" onClick={openNewWarehouse}>
+                      <Plus className="h-4 w-4" />
+                      Add Warehouse
+                    </Button>
+                  )}
                 </div>
               )}
 

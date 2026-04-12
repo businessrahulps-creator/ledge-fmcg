@@ -224,14 +224,24 @@ export default function Distributors() {
         {filtered.length > 0 ? (
           <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Search className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-            <p className="mt-3 text-sm font-medium">No dealers found</p>
-            <p className="text-xs text-muted-foreground">Add your first dealer to get started</p>
-            <Button size="sm" className="mt-3" onClick={openNew}>
-              <Plus className="h-4 w-4" />
-              Add Dealer
-            </Button>
+          <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+            {items.length === 0 ? (
+              <>
+                <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No dealers yet</p>
+                <p className="text-xs text-muted-foreground">Add your first dealer to start managing your network</p>
+                <Button size="sm" className="mt-3" onClick={openNew}>
+                  <Plus className="h-4 w-4" />
+                  Add Dealer
+                </Button>
+              </>
+            ) : (
+              <>
+                <Search className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No dealers match your search</p>
+                <p className="text-xs text-muted-foreground">Try a different search term</p>
+              </>
+            )}
           </div>
         )}
 

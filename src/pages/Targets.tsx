@@ -8,7 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 
@@ -411,8 +412,16 @@ export default function Targets() {
                 );
               })
             ) : (
-              <div className="flex flex-col items-center py-12 text-center">
-                <p className="text-sm text-muted-foreground">No sales team members yet. Add team members first.</p>
+              <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+                <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No team members yet</p>
+                <p className="text-xs text-muted-foreground">Add your sales team to start setting targets</p>
+                <Link to="/salespersons">
+                  <Button size="sm" className="mt-3">
+                    <Plus className="h-4 w-4" />
+                    Add Team Member
+                  </Button>
+                </Link>
               </div>
             )}
           </TabsContent>
@@ -439,8 +448,16 @@ export default function Targets() {
                 );
               })
             ) : (
-              <div className="flex flex-col items-center py-12 text-center">
-                <p className="text-sm text-muted-foreground">No dealers yet. Add dealers first.</p>
+              <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+                <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No dealers yet</p>
+                <p className="text-xs text-muted-foreground">Add your dealer network to start setting targets</p>
+                <Link to="/distributors">
+                  <Button size="sm" className="mt-3">
+                    <Plus className="h-4 w-4" />
+                    Add Dealer
+                  </Button>
+                </Link>
               </div>
             )}
           </TabsContent>

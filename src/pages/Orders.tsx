@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, Download, FileText } from "lucide-react";
+import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
@@ -177,17 +177,25 @@ export default function Orders() {
         {/* Table */}
         {filtered.length === 0 ? (
           <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
-            <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-            <p className="mt-3 text-sm font-medium">No orders found</p>
-            <p className="text-xs text-muted-foreground">
-              Try adjusting your search or filters
-            </p>
-            <Link to="/orders/new">
-              <Button size="sm" className="mt-3">
-                <Plus className="h-4 w-4" />
-                Create your first order
-              </Button>
-            </Link>
+            {orders.length === 0 ? (
+              <>
+                <ShoppingCart className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No orders yet</p>
+                <p className="text-xs text-muted-foreground">Create your first sales order to get started</p>
+                <Link to="/orders/new">
+                  <Button size="sm" className="mt-3">
+                    <Plus className="h-4 w-4" />
+                    New Order
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+                <p className="mt-3 text-sm font-medium">No orders match your filters</p>
+                <p className="text-xs text-muted-foreground">Try adjusting your search or filters</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="glass-card overflow-hidden">
