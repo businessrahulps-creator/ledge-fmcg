@@ -82,15 +82,13 @@ export default function OrderDetail() {
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (oid: string, updates: Partial<Order>) => api.orders.update(oid, updates);
 
-  const order = orders.find(o => o.id === id);
-
-  const [editPaymentMode, setEditPaymentMode] = useState(order?.paymentMode || "");
-  const [editPayment, setEditPayment] = useState(order?.paymentStatus || "");
-  const [editDelivery, setEditDelivery] = useState(order?.deliveryStatus || "");
-  const [editDispatchDate, setEditDispatchDate] = useState(order?.dispatchDate || "");
-  const [editVehicle, setEditVehicle] = useState(order?.vehicle || "");
-  const [editDriver, setEditDriver] = useState(order?.driverName || "");
-  const [editGodown, setEditGodown] = useState(order?.godownId || "");
+  const [editPaymentMode, setEditPaymentMode] = useState("");
+  const [editPayment, setEditPayment] = useState("");
+  const [editDelivery, setEditDelivery] = useState("");
+  const [editDispatchDate, setEditDispatchDate] = useState("");
+  const [editVehicle, setEditVehicle] = useState("");
+  const [editDriver, setEditDriver] = useState("");
+  const [editGodown, setEditGodown] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
@@ -103,6 +101,22 @@ export default function OrderDetail() {
   const [claimReason, setClaimReason] = useState("");
   const [claimQuantities, setClaimQuantities] = useState<Record<number, number>>({});
   const [claimSubmitting, setClaimSubmitting] = useState(false);
+
+  const order = orders.find(o => o.id === id);
+
+  // Sync edit state when order loads/changes
+  const orderKey = order?.id || "";
+  useState(() => {
+    if (order) {
+      setEditPaymentMode(order.paymentMode);
+      setEditPayment(order.paymentStatus);
+      setEditDelivery(order.deliveryStatus);
+      setEditDispatchDate(order.dispatchDate || "");
+      setEditVehicle(order.vehicle || "");
+      setEditDriver(order.driverName || "");
+      setEditGodown(order.godownId || "");
+    }
+  });
 
   if (!order) {
     return (
