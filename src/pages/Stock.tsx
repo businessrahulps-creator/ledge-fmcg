@@ -807,9 +807,23 @@ export default function Stock() {
               </div>
             )}
             <DialogFooter className="w-full flex-col gap-2 sm:flex-col sm:space-x-0">
-              <Button variant="destructive" onClick={deleteStockItemFn} className="w-full">
-                Remove from Warehouse
-              </Button>
+              <AlertDialog open={confirmDeleteStockItem} onOpenChange={setConfirmDeleteStockItem}>
+                <Button variant="destructive" onClick={() => setConfirmDeleteStockItem(true)} className="w-full">
+                  Remove from Warehouse
+                </Button>
+                <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove Inventory Item</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Remove <span className="font-semibold text-foreground">{editStockItem?.productName}</span> from this warehouse? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <Button variant="destructive" onClick={() => { setConfirmDeleteStockItem(false); deleteStockItemFn(); }}>Remove</Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <div className="grid w-full grid-cols-2 gap-2">
                 <Button variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
                 <Button onClick={saveStockItemFn} className="w-full">Save Changes</Button>

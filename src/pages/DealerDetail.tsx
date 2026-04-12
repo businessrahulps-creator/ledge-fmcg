@@ -357,7 +357,7 @@ export default function DealerDetail() {
                         {ss.remarks ? ` · ${ss.remarks}` : ""}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => api.secondarySales.remove(ss.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => setDeleteSecondarySaleId(ss.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
