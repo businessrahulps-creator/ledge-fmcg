@@ -114,6 +114,19 @@ export default function Settings() {
   const api = useApi();
   const { signOut, companyId, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+
+  const handleBackup = async () => {
+    setBackupLoading(true);
+    try {
+      const { exportFullBackup } = await import("@/utils/exportBackup");
+      await exportFullBackup();
+    } catch (e) {
+      sonnerToast.error("Backup failed", { description: "Please try again." });
+    } finally {
+      setBackupLoading(false);
+    }
+  };
 
   const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
   const [queuedMutations, setQueuedMutations] = useState<QueuedMutation[]>([]);
