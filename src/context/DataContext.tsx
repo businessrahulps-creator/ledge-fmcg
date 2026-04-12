@@ -1089,7 +1089,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
 
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-  }, [companyId, deductStockForOrder, persistEntityToCache]);
+
+    // Log activity for order updates
+    const summaryParts: string[] = [];
+    if (updates.paymentStatus) summaryParts.push(`payment ${currentOrder?.paymentStatus || "?"} → ${updates.paymentStatus}`);
+    if (updates.deliveryStatus) summaryParts.push(`delivery ${currentOrder?.deliveryStatus || "?"} → ${updates.deliveryStatus}`);
+    if (summaryParts.length === 0 && linesChanged) summaryParts.push("updated line items");
+    if (summaryParts.length === 0) summaryParts.push("updated details");
+    log("order", id, "updated", `${currentOrder?.orderNumber || "Order"}: ${summaryParts.join(", ")}`, updates);
+  }, [companyId, deductStockForOrder, persistEntityToCache, log]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
