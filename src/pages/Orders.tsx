@@ -562,6 +562,62 @@ export default function Orders() {
                     </div>
                   )}
 
+                  {/* Linked Billing Documents */}
+                  {(() => {
+                    const docs = invoices.filter(inv => inv.sourceOrderId === selectedOrder.id);
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-semibold md:text-sm">Documents</h3>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => {
+                              setSelectedOrder(null);
+                              navigate(`/billing?order=${selectedOrder.id}`);
+                            }}
+                          >
+                            <FileText className="h-3 w-3" />
+                            Generate Invoice
+                          </Button>
+                        </div>
+                        {docs.length > 0 ? (
+                          <div className="rounded-lg border border-border overflow-hidden">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
+                                  <th className="px-3 py-2 text-left font-medium">Type</th>
+                                  <th className="px-3 py-2 text-left font-medium">Number</th>
+                                  <th className="px-3 py-2 text-right font-medium">Amount</th>
+                                  <th className="px-3 py-2 text-left font-medium">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {docs.map(doc => (
+                                  <tr key={doc.id} className="border-b border-border/50">
+                                    <td className="px-3 py-2">
+                                      <span className="capitalize">{doc.docType.replace("_", " ")}</span>
+                                    </td>
+                                    <td className="px-3 py-2 font-mono font-medium">{doc.invoiceNumber}</td>
+                                    <td className="px-3 py-2 text-right font-mono">₹{doc.grandTotal.toLocaleString("en-IN")}</td>
+                                    <td className="px-3 py-2">
+                                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                                        doc.status === "final" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300"
+                                      }`}>{doc.status}</span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 py-2">No billing documents yet for this order.</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <Separator />
 
                   <div className="space-y-3 md:space-y-4">
