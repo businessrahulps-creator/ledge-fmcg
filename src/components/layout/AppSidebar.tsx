@@ -129,6 +129,9 @@ export function AppSidebar() {
               <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-primary" />
             )}
             <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+            {companyIncomplete && item.url === "/company" && (
+              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+            )}
             <span>{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
