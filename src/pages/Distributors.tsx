@@ -464,6 +464,7 @@ export default function Distributors() {
                     );
                   })()}
 
+                  <div>
                     <h3 className="mb-2 text-xs font-semibold md:mb-3 md:text-sm">Order History</h3>
                     {selectedOrders.length > 0 ? (
                       <div className="rounded-lg border border-border overflow-hidden">
