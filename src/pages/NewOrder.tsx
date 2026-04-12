@@ -710,6 +710,22 @@ export default function NewOrder() {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    {/* Unsaved changes navigation guard */}
+    <AlertDialog open={blocker.state === "blocked"}>
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Discard unsaved order?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. Leaving will lose your progress.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </>
   );
 }
