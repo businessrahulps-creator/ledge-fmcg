@@ -1,58 +1,67 @@
 
 
-# Data Backup/Export — Settings Page
+# High-Impact Onboarding System
 
-## What It Does
+## Design Philosophy
 
-A new "Data Backup" card in Settings that lets users download their entire company data as a single ZIP file containing multiple CSV files — one per entity (Orders, Dealers, Products, Sales Team, Stock, Schemes, Claims, Invoices). One-click, no configuration needed.
+For non-tech-savvy Indian FMCG business owners, the onboarding must feel like a helpful assistant — not a software wizard. No multi-step modals, no overwhelming checklists. Instead: **a persistent, friendly setup checklist on the Dashboard** that disappears once complete, plus a **one-time welcome screen** after first signup.
 
-## How It Works
+## Architecture
 
-1. User clicks **"Download Backup"** button in a new glass-card on the Settings page (placed above the Log Out card)
-2. The app queries all company tables from the database
-3. Each table is converted to a CSV using the existing `exportCsv` utility pattern (UTF-8 BOM for Excel compatibility)
-4. All CSVs are bundled into a ZIP file named `ledge_backup_2026-04-12.zip` using the lightweight `jszip` library (~45KB)
-5. ZIP auto-downloads to the user's device
+### 1. Onboarding Checklist Hook (`src/hooks/use-onboarding.ts`)
 
-## What's Included in the Backup
+A single hook that computes setup completion by querying real data:
 
-| File in ZIP | Source Table |
-|-------------|-------------|
-| `orders.csv` | orders + order_lines joined |
-| `dealers.csv` | distributors |
-| `products.csv` | products |
-| `sales_team.csv` | salespersons |
-| `stock.csv` | stock_items joined with products + godowns |
-| `warehouses.csv` | godowns |
-| `schemes.csv` | schemes |
-| `invoices.csv` | invoices + invoice_lines |
-| `claims.csv` | claims + claim_lines |
-| `targets.csv` | targets |
+| Step | Check | Links to |
+|------|-------|----------|
+| Company details | `companies.gstin` is not empty | `/company` |
+| Upload logo | `companies.logo_url` is not empty | `/company` |
+| Add first dealer | `distributors` count > 0 | `/distributors` |
+| Add first product | `products` count > 0 | `/stock` |
+| Add first salesperson | `salespersons` count > 0 | `/salespersons` |
+| Create first order | `orders` count > 0 | `/orders/new` |
 
-## Technical Details
+Returns: `{ steps, completedCount, totalSteps, isComplete, percentage }`. Uses existing data from `useApi()` — no new DB queries. Dismissed state stored in `localStorage` so users can hide it permanently.
 
-### New dependency
-- `jszip` — well-maintained, zero-dependency ZIP library
+### 2. Dashboard Setup Card (`src/components/onboarding/SetupChecklist.tsx`)
 
-### Files changed
+A glassmorphic card shown at the **top of the Dashboard** (above KPIs) when setup is incomplete:
+
+- Circular progress ring showing completion (e.g., "3 of 6")
+- Each step is a tappable row: icon + label + status (checkmark or "→" arrow)
+- Tapping an incomplete step navigates directly to the relevant page
+- "Dismiss" link at the bottom to hide permanently
+- Animates out when all steps are done (with a brief celebration message)
+
+### 3. Post-Signup Welcome (inline on Dashboard)
+
+Instead of a blocking modal, for **brand-new accounts** (0 orders, 0 dealers, 0 products), the Setup Checklist card gets a welcome header:
+
+> "Welcome to Ledge! Let's get your workspace ready in 5 minutes."
+
+This disappears once any step is completed.
+
+### 4. Settings Badge (existing users)
+
+In the sidebar nav, show a small indigo dot badge next to "Company" if GSTIN or logo is missing. This is a 3-line change in `AppSidebar.tsx`.
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/Settings.tsx` | Add "Data Backup" card with download button + loading state (~40 lines) |
-| `src/utils/exportBackup.ts` | New file — async function that queries all tables, builds CSVs, zips them, triggers download (~120 lines) |
+| `src/hooks/use-onboarding.ts` | **New** — hook computing setup steps from live data (~60 lines) |
+| `src/components/onboarding/SetupChecklist.tsx` | **New** — glassmorphic checklist card (~120 lines) |
+| `src/pages/Dashboard.tsx` | Insert `<SetupChecklist />` above KPI grid (~3 lines) |
+| `src/components/layout/AppSidebar.tsx` | Add dot badge on "Company" nav item when incomplete (~5 lines) |
 
-### UI Design
-- Glass card matching existing Settings cards
-- `Database` icon (already imported in Settings) + "Data Backup" heading
-- Subtitle: "Download all your company data as a ZIP file"
-- Single "Download Backup" button with loading spinner during export
-- Success toast with file count on completion
+**4 files total (2 new, 2 modified). No database changes. No new dependencies. No new routes.**
 
-### Security
-- All queries go through existing RLS policies — users can only export their own company's data
-- No new database changes needed
+## UX Details
 
----
-
-**1 new utility file, 1 modified page, 1 new npm dependency. No database changes. No new features beyond the export.**
+- Mobile-first: card is full-width, steps are large touch targets (48px rows)
+- Progress ring uses the indigo primary color
+- Completed steps show a muted checkmark, incomplete steps show an arrow with subtle indigo accent
+- The card uses the existing `glass-card` class for visual consistency
+- `localStorage` key: `ledge_onboarding_dismissed` — respects per-user dismissal
+- Seed data from signup means dealers/products/orders may already exist, so the checklist correctly reflects pre-seeded state
 
