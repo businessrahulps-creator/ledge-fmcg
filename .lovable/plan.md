@@ -1,37 +1,61 @@
 
 
-# Billing Audit: Bug Fixes & UX Improvements
+# Billing Audit: Comprehensive Bug & UX Fix
 
-## Bugs Found
+## Issues Found
 
-### Bug 1: Order items are editable after pulling
-When a user pulls from an existing order, all line items become editable text fields — the user can add new items, delete items, or change quantities/prices. This violates the requirement that billing should NOT modify orders.
+### Bug 1: No Edit Functionality
+There is no edit button or edit flow anywhere. Once a document is created, users cannot modify it at all — not even a draft GST Invoice or an Estimate. The dialog is create-only.
 
-**Fix**: When `sourceOrderId` is set (order is pulled), lock all line item fields as read-only. Hide the "Add Item" and delete buttons. Show a subtle "Linked to order" indicator.
+**Fix**: Add an "Edit" button in the actions column for editable documents. Clicking it opens the same dialog pre-filled with the document's data. On save, call `api.invoices.update()` instead of `create()`.
 
-### Bug 2: Draft/Final status applies to all document types
-Currently every document type (Estimate, Proforma, Invoice, etc.) creates as "Draft" and requires a manual "Finalize" step. This is confusing because:
-- **GST Invoice / Credit Note**: These are legal tax documents → draft/finalize makes sense (review before locking)
-- **Estimate / Proforma / Regular Invoice**: These are simpler documents → no need for draft stage, create directly as "final"
+### Bug 2: Estimates & Proformas Created as "Final" — Immediately Locked
+The previous fix made Estimates/Proformas create as `status: "final"`, which means they can't be edited or deleted. But Estimates and Proformas are informal documents that should **always** be editable and deletable. Only finalized GST Invoices and Credit Notes should be immutable.
 
 **Fix**: 
-- GST Invoice & Credit Note → create as "draft", show finalize button
-- Invoice, Estimate, Proforma → create directly as "final" (no draft step)
-- Update the create button label dynamically: "Create as Draft" for GST types, "Create Document" for others
+- Estimates & Proformas → create as `"final"` (no draft stage needed) BUT allow edit and delete regardless of status since they are not legal documents.
+- GST Invoice & Credit Note → create as `"draft"`, editable until finalized. Once finalized, locked.
+- Change the edit/delete guard from `inv.status === "draft"` to a helper: `isEditable(inv)` that checks both doc type and status.
 
-### Bug 3: Missing DialogDescription (console warning)
-The dialog is missing an `aria-describedby` / `DialogDescription`, causing an accessibility warning.
+### Bug 3: No Confirmation on Destructive Actions
+Delete and Finalize happen instantly with no confirmation. Finalizing is irreversible.
 
-**Fix**: Add a `DialogDescription` to the create dialog.
+**Fix**: Add confirmation dialogs (AlertDialog) for both Delete and Finalize actions.
 
-## Changes
+### Bug 4: HSN Code Editable on Pulled Orders
+Line 511 — HSN input has no `readOnly` when `sourceOrderId` is set. While HSN isn't part of the order, it's inconsistent UX. HSN should remain editable (it's billing-specific metadata not in orders), but this should be visually clarified.
 
-**File: `src/pages/Billing.tsx`** — All fixes in this single file:
+**Fix**: Keep HSN editable (it's not order data), but add a subtle visual indicator that it's a billing-only field.
 
-1. When `sourceOrderId` is set, make line item inputs `readOnly`/`disabled`, hide "Add Item" and delete buttons
-2. Change `handleCreate` to set `status: "draft"` only for `gst_invoice` / `credit_note`, and `"final"` for all others
-3. Update create button label based on doc type
-4. Add `DialogDescription` for accessibility
-5. Show a "Linked to Order" badge when order is pulled, with option to unlink
+### Bug 5: Mobile Layout Broken
+The 12-column grid for line items is unusable on mobile screens.
 
-No other files modified. No database changes needed.
+**Fix**: Stack line item fields vertically on mobile using responsive grid classes.
+
+### Bug 6: No Visual Distinction for Editable vs Locked Documents
+Users can't tell at a glance which documents they can still modify.
+
+**Fix**: Already partially addressed by status badges, but the edit button visibility will make this clearer.
+
+## Implementation
+
+**Single file**: `src/pages/Billing.tsx`
+
+1. Add `isEditable(inv)` helper:
+   - `estimate` / `proforma` / `invoice` → always editable
+   - `gst_invoice` / `credit_note` → editable only when `status === "draft"`
+
+2. Add edit state (`editingInvoice: Invoice | null`) and a `handleEdit(inv)` function that pre-fills the form from the existing document.
+
+3. Modify `handleCreate` to detect edit mode → call `api.invoices.update()` with changed fields instead of `create()`.
+
+4. Show Edit button (Pencil icon) in actions column when `isEditable(inv)`.
+
+5. Add `AlertDialog` confirmations for Delete and Finalize.
+
+6. Make line items grid responsive: `grid-cols-1 sm:grid-cols-12`.
+
+7. Update button label: "Save Changes" in edit mode, "Create as Draft" / "Create Document" in create mode.
+
+No database changes needed.
+
