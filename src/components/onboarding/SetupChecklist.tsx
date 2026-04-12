@@ -26,9 +26,18 @@ export function SetupChecklist() {
   const navigate = useNavigate();
   const { steps, completedCount, totalSteps, percentage, isBrandNew, visible, dismiss, isComplete } = useOnboarding();
 
-  if (!visible && !isComplete) return null;
+  const [celebrationDismissed, setCelebrationDismissed] = useState(false);
 
-  // Brief celebration when just completed
+  // Auto-hide celebration after 5 seconds
+  useEffect(() => {
+    if (isComplete && !celebrationDismissed) {
+      const t = setTimeout(() => setCelebrationDismissed(true), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [isComplete, celebrationDismissed]);
+
+  if ((!visible && !isComplete) || celebrationDismissed) return null;
+
   if (isComplete) {
     return (
       <AnimatePresence>
@@ -38,7 +47,10 @@ export function SetupChecklist() {
           className="glass-card rounded-2xl p-5 flex items-center gap-3 border border-primary/20"
         >
           <PartyPopper className="h-5 w-5 text-primary shrink-0" />
-          <p className="text-sm font-medium text-foreground">You're all set! Ledge is ready to go.</p>
+          <p className="text-sm font-medium text-foreground flex-1">You're all set! Ledge is ready to go.</p>
+          <button onClick={() => setCelebrationDismissed(true)} className="p-1 rounded-lg hover:bg-muted/60 text-muted-foreground/60 hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
+            <X className="h-4 w-4" />
+          </button>
         </motion.div>
       </AnimatePresence>
     );
