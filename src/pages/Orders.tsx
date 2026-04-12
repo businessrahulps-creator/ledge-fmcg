@@ -41,6 +41,18 @@ export default function Orders() {
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
 
+  const handleRefresh = useCallback(async () => {
+    if (api.refreshAll) {
+      await api.refreshAll();
+    } else {
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }, [api]);
+
+  const { containerRef, pullDistance, refreshing } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   const ordersPdfSections: PdfSection[] = [
     { id: "company", label: "Company header" },
     { id: "summary", label: "Summary statistics" },
