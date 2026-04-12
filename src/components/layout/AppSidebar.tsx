@@ -2,7 +2,7 @@ import { useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   House,
-  IndianRupee,
+  ClipboardList,
   UserRound,
   Package,
   ChartNoAxesCombined,
@@ -13,7 +13,7 @@ import {
   Target,
   RotateCcw,
   FileText,
-  Building2,
+  Landmark,
 } from "lucide-react";
 import {
   Sidebar,
