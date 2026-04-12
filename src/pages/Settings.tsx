@@ -308,6 +308,7 @@ export default function Settings() {
             </TabsList>
           </div>
 
+          <TabsContent value="team">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground md:text-sm">
