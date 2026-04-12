@@ -31,6 +31,7 @@ export async function exportFullBackup() {
     .select("*, order_lines(*)")
     .order("date", { ascending: false });
 
+  checkTruncation("orders", orders);
   if (orders?.length) {
     const headers = [
       "Order #", "Date", "Dealer", "Salesperson", "Total (₹)",
