@@ -1,44 +1,58 @@
 
 
-# Fix Mobile UI Issues — Spacing, Cropping, and Billing Order Picker
+# Data Backup/Export — Settings Page
 
-## Issues Identified from Screenshots
+## What It Does
 
-| # | Issue | File | Root Cause |
-|---|-------|------|------------|
-| 1 | **Schemes: "Specific Product/Dealer (optional)" labels break on mobile** | `Schemes.tsx` L392 | Two `grid-cols-2` columns are too narrow at 320-375px for long labels + select dropdowns |
-| 2 | **Stock: Warehouse inventory toolbar buttons overflow/disappear on mobile** | `Stock.tsx` L534 | `flex gap-2` with 4 buttons (search, CSV, PDF, Add Stock) — no wrapping, buttons fall off-screen |
-| 3 | **OrderDetail: Action bar icons too close together** | `OrderDetail.tsx` L727 | `gap-2` on icons inside `flex` is fine, but the buttons have no min spacing on mobile — the delete/invoice/WhatsApp/claim icons are cramped |
-| 4 | **DealerDetail: Export icons too close** | `DealerDetail.tsx` L84 | `gap-2` between WhatsApp and Statement buttons is tight at mobile |
-| 5 | **Billing: Order picker Command list not scrollable / search broken** | `Billing.tsx` L627-694 | `CommandList` has `max-h-[300px]` which works, but the `PopoverContent` inside a `Dialog` with `max-h-[90vh] overflow-y-auto` creates nested scroll containers. The popover may be clipped by the dialog's overflow. Also the dialog itself is `max-w-3xl` without mobile-responsive width. |
-| 6 | **Billing dialog not mobile-responsive** | `Billing.tsx` L567 | `max-w-3xl` without `max-w-[calc(100vw-2rem)]` — may crop on mobile |
+A new "Data Backup" card in Settings that lets users download their entire company data as a single ZIP file containing multiple CSV files — one per entity (Orders, Dealers, Products, Sales Team, Stock, Schemes, Claims, Invoices). One-click, no configuration needed.
 
-## Implementation Plan
+## How It Works
 
-### Pass 1: Schemes — Stack product/dealer selects on mobile (`Schemes.tsx`)
+1. User clicks **"Download Backup"** button in a new glass-card on the Settings page (placed above the Log Out card)
+2. The app queries all company tables from the database
+3. Each table is converted to a CSV using the existing `exportCsv` utility pattern (UTF-8 BOM for Excel compatibility)
+4. All CSVs are bundled into a ZIP file named `ledge_backup_2026-04-12.zip` using the lightweight `jszip` library (~45KB)
+5. ZIP auto-downloads to the user's device
 
-- Line 392: Change `grid-cols-2` to `grid-cols-1 sm:grid-cols-2` so the two selects stack vertically on mobile
+## What's Included in the Backup
 
-### Pass 2: Stock — Wrap inventory toolbar on mobile (`Stock.tsx`)
+| File in ZIP | Source Table |
+|-------------|-------------|
+| `orders.csv` | orders + order_lines joined |
+| `dealers.csv` | distributors |
+| `products.csv` | products |
+| `sales_team.csv` | salespersons |
+| `stock.csv` | stock_items joined with products + godowns |
+| `warehouses.csv` | godowns |
+| `schemes.csv` | schemes |
+| `invoices.csv` | invoices + invoice_lines |
+| `claims.csv` | claims + claim_lines |
+| `targets.csv` | targets |
 
-- Line 534: Change `flex gap-2` to `flex flex-wrap gap-2` so buttons wrap to next row
-- On mobile, hide "Export CSV" and "Export PDF" text labels (already icon-only buttons with text, make text `hidden sm:inline`)
+## Technical Details
 
-### Pass 3: OrderDetail — Add proper icon spacing (`OrderDetail.tsx`)
+### New dependency
+- `jszip` — well-maintained, zero-dependency ZIP library
 
-- Line 727: Increase icon button spacing from `gap-2` to `gap-2.5` in the action bar for better touch targets
+### Files changed
 
-### Pass 4: Billing dialog — Fix mobile width + order picker scrollability (`Billing.tsx`)
+| File | Change |
+|------|--------|
+| `src/pages/Settings.tsx` | Add "Data Backup" card with download button + loading state (~40 lines) |
+| `src/utils/exportBackup.ts` | New file — async function that queries all tables, builds CSVs, zips them, triggers download (~120 lines) |
 
-- Line 567: Add `max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-3xl` to DialogContent for mobile
-- Line 627: Add `sideOffset={4}` and ensure PopoverContent has proper max-height
-- Line 630: Add explicit `className="max-h-[40vh]"` to CommandList to ensure scrollability within the dialog
+### UI Design
+- Glass card matching existing Settings cards
+- `Database` icon (already imported in Settings) + "Data Backup" heading
+- Subtitle: "Download all your company data as a ZIP file"
+- Single "Download Backup" button with loading spinner during export
+- Success toast with file count on completion
 
-### Pass 5: Schemes validity dates — Stack on mobile (`Schemes.tsx`)
-
-- Line 430: Change `grid-cols-2` to `grid-cols-1 sm:grid-cols-2` for validity date fields too (they share the same tight-column problem as product/dealer)
+### Security
+- All queries go through existing RLS policies — users can only export their own company's data
+- No new database changes needed
 
 ---
 
-**4 files changed. ~10 line edits. Pure layout/spacing fixes. No behaviour or feature changes.**
+**1 new utility file, 1 modified page, 1 new npm dependency. No database changes. No new features beyond the export.**
 
