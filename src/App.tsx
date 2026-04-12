@@ -12,7 +12,7 @@ import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
-import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -80,11 +80,11 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/about-us" element={<AboutUs />} />
-                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy-policy" element={<Suspense fallback={<ListPageSkeleton />}><PrivacyPolicy /></Suspense>} />
+                  <Route path="/terms-of-service" element={<Suspense fallback={<ListPageSkeleton />}><TermsOfService /></Suspense>} />
+                  <Route path="/refund-policy" element={<Suspense fallback={<ListPageSkeleton />}><RefundPolicy /></Suspense>} />
+                  <Route path="/about-us" element={<Suspense fallback={<ListPageSkeleton />}><AboutUs /></Suspense>} />
+                  <Route path="/contact" element={<Suspense fallback={<ListPageSkeleton />}><Contact /></Suspense>} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
@@ -99,13 +99,13 @@ const App = () => (
                   <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Schemes /></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Targets /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Claims /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><Billing /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><Company /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Reports /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Performance /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Settings /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Help /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Claims /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Billing /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Company /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Reports /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Settings /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Help /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
