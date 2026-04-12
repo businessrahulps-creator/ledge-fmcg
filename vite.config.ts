@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => ({
         start_url: "/dashboard",
         display: "standalone",
         background_color: "#fafafa",
-        theme_color: "#121212",
+        theme_color: "#3b82f6",
         orientation: "portrait-primary",
         categories: ["business", "productivity"],
         icons: [
