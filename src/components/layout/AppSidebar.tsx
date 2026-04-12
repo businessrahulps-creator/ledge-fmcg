@@ -12,7 +12,7 @@ import {
   Gift,
   Target,
   RotateCcw,
-  Receipt,
+  FileText,
 } from "lucide-react";
 import {
   Sidebar,
