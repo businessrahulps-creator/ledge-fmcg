@@ -93,6 +93,19 @@ export default function Dashboard() {
     : 0;
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
+  // 7-day revenue sparkline data
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const dayRevenue = orders
+      .filter(o => o.date === key)
+      .reduce((s, o) => s + o.total, 0);
+    return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
+  });
+  const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
+  const allZero = last7Days.every(d => d.value === 0);
+
   if (isLoading) {
     return <AppLayout><DashboardSkeleton /></AppLayout>;
   }
