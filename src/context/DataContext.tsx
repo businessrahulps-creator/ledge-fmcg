@@ -322,6 +322,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }));
       setSecondarySales(mappedSS);
 
+      // Map targets
+      const mappedTargets: Target[] = ((targetsRes as any).data || []).map((t: any) => ({
+        id: t.id, entityType: t.entity_type as Target["entityType"],
+        entityId: t.entity_id, entityName: t.entity_name || "",
+        periodType: t.period_type as Target["periodType"],
+        periodStart: t.period_start,
+        targetRevenue: Number(t.target_revenue || 0),
+        targetOrders: t.target_orders || 0,
+      }));
+      setTargets(mappedTargets);
+
       const orderIds = (ordersRes.data || []).map(o => o.id);
       let allLines: any[] = [];
       let allOrderSchemes: any[] = [];
