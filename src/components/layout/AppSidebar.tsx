@@ -15,6 +15,7 @@ import {
   FileText,
   Landmark,
   BookOpen,
+  History,
 } from "lucide-react";
 import {
   Sidebar,
