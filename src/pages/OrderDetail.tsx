@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { formatCurrency, type Order } from "@/data/mock-data";
+import { formatCurrency, type Order, type OrderLine, type Scheme } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import type { Claim, ClaimLine } from "@/context/DataContext";
@@ -69,6 +69,15 @@ const deliveryStatuses = [
   { value: "delivered", label: "Delivered" },
 ];
 
+interface EditLineState {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  quantityStr: string;
+  unitPrice: number;
+}
+
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -79,6 +88,9 @@ export default function OrderDetail() {
   const orders = api.orders.list();
   const invoices = api.invoices.list();
   const distributors = api.dealers.list();
+  const salespersons = api.salespersons.list();
+  const products = api.products.list();
+  const allSchemes = api.schemes.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const updateOrder = (oid: string, updates: Partial<Order>) => api.orders.update(oid, updates);
 
@@ -90,6 +102,11 @@ export default function OrderDetail() {
   const [editDriver, setEditDriver] = useState("");
   const [editGodown, setEditGodown] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Editable dealer, salesperson, lines
+  const [editDealerId, setEditDealerId] = useState("");
+  const [editSalespersonId, setEditSalespersonId] = useState("");
+  const [editLines, setEditLines] = useState<EditLineState[]>([]);
 
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -114,10 +131,125 @@ export default function OrderDetail() {
       setEditVehicle(order.vehicle || "");
       setEditDriver(order.driverName || "");
       setEditGodown(order.godownId || "");
+      setEditDealerId(order.distributorId);
+      setEditSalespersonId(order.salespersonId);
+      setEditLines(order.lines.map(l => ({
+        id: crypto.randomUUID(),
+        productId: l.productId,
+        productName: l.productName,
+        quantity: l.quantity,
+        quantityStr: String(l.quantity),
+        unitPrice: l.unitPrice,
+      })));
     }
   }, [order?.id]);
 
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
+
+  // Line editing helpers
+  const addLine = () => {
+    setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, quantityStr: "1", unitPrice: 0 }]);
+  };
+
+  const removeLine = (lineId: string) => {
+    if (editLines.length <= 1) return;
+    setEditLines(prev => prev.filter(l => l.id !== lineId));
+  };
+
+  const updateLine = (lineId: string, field: keyof EditLineState, value: string | number) => {
+    setEditLines(prev => prev.map(l => {
+      if (l.id !== lineId) return l;
+      if (field === "quantity") {
+        const raw = String(value).replace(/[^0-9]/g, "");
+        const num = raw === "" ? 0 : parseInt(raw, 10);
+        return { ...l, quantity: num, quantityStr: raw };
+      }
+      const updated = { ...l, [field]: value };
+      if (field === "productId") {
+        const product = products.find(p => p.id === value);
+        if (product) {
+          updated.unitPrice = product.basePrice;
+          updated.productName = product.name;
+        }
+      }
+      return updated;
+    }));
+  };
+
+  const handleQuantityBlur = (lineId: string) => {
+    setEditLines(prev => prev.map(l => {
+      if (l.id !== lineId) return l;
+      return { ...l, quantityStr: String(l.quantity || 0) };
+    }));
+  };
+
+  const editTotal = editLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
+
+  // Scheme auto-apply for edited lines
+  const appliedSchemes = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const eligible: { scheme: Scheme; savings: number; label: string }[] = [];
+    const activeSchemes = allSchemes.filter(s =>
+      s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
+    );
+    const validLines = editLines.filter(l => l.productId && l.quantity > 0);
+    for (const s of activeSchemes) {
+      if (s.dealerId && s.dealerId !== editDealerId) continue;
+      if (s.minOrderValue > 0 && editTotal < s.minOrderValue) continue;
+      if (s.productId) {
+        const matchingLine = validLines.find(l => l.productId === s.productId);
+        if (!matchingLine) continue;
+        if (s.minQty > 0 && matchingLine.quantity < s.minQty) continue;
+      } else if (s.minQty > 0) {
+        const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
+        if (totalQty < s.minQty) continue;
+      }
+      let savings = 0;
+      let label = "";
+      switch (s.schemeType) {
+        case "percentage": {
+          if (s.productId) {
+            const line = validLines.find(l => l.productId === s.productId);
+            savings = line ? (line.quantity * line.unitPrice * s.discountPercent) / 100 : 0;
+          } else {
+            savings = (editTotal * s.discountPercent) / 100;
+          }
+          label = `${s.discountPercent}% off`;
+          break;
+        }
+        case "buy_x_get_y": {
+          if (s.productId) {
+            const line = validLines.find(l => l.productId === s.productId);
+            if (line && line.quantity >= s.buyQty) {
+              const sets = Math.floor(line.quantity / s.buyQty);
+              savings = sets * s.freeQty * line.unitPrice;
+              label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
+            }
+          } else {
+            const sorted = [...validLines].sort((a, b) => b.unitPrice - a.unitPrice);
+            if (sorted.length > 0) {
+              const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
+              if (totalQty >= s.buyQty) {
+                const sets = Math.floor(totalQty / s.buyQty);
+                savings = sets * s.freeQty * sorted[0].unitPrice;
+              }
+            }
+            label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
+          }
+          break;
+        }
+        case "flat_discount": {
+          savings = s.flatAmount;
+          label = `${formatCurrency(s.flatAmount)} off`;
+          break;
+        }
+      }
+      if (savings > 0) eligible.push({ scheme: s, savings, label });
+    }
+    return eligible;
+  }, [allSchemes, editDealerId, editTotal, editLines]);
+
+  const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
 
   const executeSaveOrder = async () => {
     if (!order) return;
@@ -125,7 +257,37 @@ export default function OrderDetail() {
       toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
       return;
     }
+
+    const validLines = editLines.filter(l => l.productId && l.quantity > 0);
+    if (validLines.length === 0) {
+      toast.error("Products required", { description: "Add at least one product with quantity > 0." });
+      return;
+    }
+
+    const dealer = distributors.find(d => d.id === editDealerId);
+    const sp = salespersons.find(s => s.id === editSalespersonId);
+
+    if (!editDealerId || !dealer) {
+      toast.error("Dealer required", { description: "Please select a dealer." });
+      return;
+    }
+    if (!editSalespersonId || !sp) {
+      toast.error("Sales person required", { description: "Please select a sales person." });
+      return;
+    }
+
     setIsSaving(true);
+
+    const newLines: OrderLine[] = validLines.map(l => ({
+      productId: l.productId,
+      productName: l.productName || products.find(p => p.id === l.productId)?.name || "",
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      lineTotal: l.quantity * l.unitPrice,
+    }));
+
+    const newTotal = newLines.reduce((sum, l) => sum + l.lineTotal, 0);
+
     await updateOrder(order.id, {
       paymentMode: editPaymentMode as Order["paymentMode"],
       paymentStatus: editPayment as Order["paymentStatus"],
@@ -134,6 +296,19 @@ export default function OrderDetail() {
       vehicle: editVehicle,
       driverName: editDriver,
       godownId: editGodown || undefined,
+      distributorId: editDealerId,
+      distributorName: dealer.name,
+      salespersonId: editSalespersonId,
+      salesperson: sp.name,
+      lines: newLines,
+      total: newTotal,
+      schemeSavings: totalSchemeSavings,
+      appliedSchemes: appliedSchemes.map(a => ({
+        schemeId: a.scheme.id,
+        schemeName: a.scheme.name,
+        schemeLabel: a.label,
+        savings: a.savings,
+      })),
     });
     setIsSaving(false);
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
@@ -141,14 +316,14 @@ export default function OrderDetail() {
 
   const saveOrder = () => {
     if (!order) return;
-    const dealer = distributors.find(d => d.id === order.distributorId);
+    const dealer = distributors.find(d => d.id === editDealerId);
     if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
     const wasUnpaid = order.paymentStatus === "pending" || order.paymentStatus === "partial";
     const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
     if (willBeUnpaid) {
       const currentContribution = wasUnpaid ? order.total : 0;
-      const newContribution = order.total;
-      const projected = dealer.outstandingAmount - currentContribution + newContribution;
+      const newTotal = editLines.filter(l => l.productId && l.quantity > 0).reduce((s, l) => s + l.quantity * l.unitPrice, 0);
+      const projected = dealer.outstandingAmount - currentContribution + newTotal;
       if (projected > dealer.creditLimit) {
         if (userRole === "super_admin") {
           setCreditOverrideOpen(true);
@@ -264,80 +439,133 @@ export default function OrderDetail() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">Dealer</span>
-            <p className="mt-0.5 text-sm font-medium md:text-base">{order.distributorName}</p>
+        {/* Editable Dealer & Salesperson */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
+          <div className="glass-card p-3 md:p-4 space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Dealer</Label>
+            <Select value={editDealerId} onValueChange={setEditDealerId}>
+              <SelectTrigger className="h-10 rounded-lg">
+                <SelectValue placeholder="Select dealer" />
+              </SelectTrigger>
+              <SelectContent>
+                {distributors.map(d => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">Sales Person</span>
-            <p className="mt-0.5 text-sm font-medium md:text-base">{order.salesperson}</p>
-          </div>
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">{(order.schemeSavings || 0) > 0 ? "Effective Total" : "Total"}</span>
-            {(order.schemeSavings || 0) > 0 && (
-              <p className="mt-0.5 text-[10px] text-muted-foreground line-through">{formatCurrency(order.total)}</p>
-            )}
-            <p className="text-sm font-semibold md:text-base">{formatCurrency(order.total - (order.schemeSavings || 0))}</p>
-          </div>
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">Payment Mode</span>
-            <p className="mt-0.5 text-sm font-medium md:text-base capitalize">{order.paymentMode.replace("_", " ")}</p>
+          <div className="glass-card p-3 md:p-4 space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Sales Person</Label>
+            <Select value={editSalespersonId} onValueChange={setEditSalespersonId}>
+              <SelectTrigger className="h-10 rounded-lg">
+                <SelectValue placeholder="Select sales person" />
+              </SelectTrigger>
+              <SelectContent>
+                {salespersons.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Items */}
-        <div className="glass-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold md:text-base">Items</h2>
+        {/* Total & Payment Mode summary */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          <div className="glass-card p-3 md:p-4">
+            <span className="text-xs text-muted-foreground">{totalSchemeSavings > 0 ? "Effective Total" : "Total"}</span>
+            {totalSchemeSavings > 0 && (
+              <p className="mt-0.5 text-[10px] text-muted-foreground line-through">{formatCurrency(editTotal)}</p>
+            )}
+            <p className="text-sm font-semibold md:text-base">{formatCurrency(editTotal - totalSchemeSavings)}</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs md:text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Product</th>
-                  <th className="px-4 py-2.5 font-medium text-right">Qty</th>
-                  <th className="px-4 py-2.5 font-medium text-right">Price</th>
-                  <th className="px-4 py-2.5 font-medium text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.lines.map((line, i) => (
-                  <tr key={i} className="border-b border-border/50">
-                    <td className="px-4 py-3 font-medium">{line.productName}</td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">{line.quantity}</td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrency(line.unitPrice)}</td>
-                    <td className="px-4 py-3 text-right font-medium">{formatCurrency(line.lineTotal)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="glass-card p-3 md:p-4">
+            <span className="text-xs text-muted-foreground">Payment Mode</span>
+            <p className="mt-0.5 text-sm font-medium md:text-base capitalize">{editPaymentMode.replace("_", " ")}</p>
+          </div>
+        </div>
+
+        {/* Editable Items */}
+        <div className="glass-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold md:text-base">Items</h2>
+            <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={addLine}>
+              <Plus className="h-3 w-3" /> Add Item
+            </Button>
+          </div>
+          <div className="p-3 space-y-3">
+            {editLines.map((line, i) => (
+              <div key={line.id} className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <Select value={line.productId} onValueChange={(v) => updateLine(line.id, "productId", v)}>
+                    <SelectTrigger className="h-9 rounded-lg text-xs">
+                      <SelectValue placeholder="Select product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} — {formatCurrency(p.basePrice)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-20">
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={line.quantityStr}
+                    onChange={e => updateLine(line.id, "quantity", e.target.value)}
+                    onBlur={() => handleQuantityBlur(line.id)}
+                    placeholder="Qty"
+                    className="h-9 text-xs text-right"
+                  />
+                </div>
+                <div className="w-24 text-right">
+                  <Input
+                    type="number"
+                    value={line.unitPrice}
+                    onChange={e => updateLine(line.id, "unitPrice", Number(e.target.value))}
+                    placeholder="Price"
+                    className="h-9 text-xs text-right"
+                  />
+                </div>
+                <div className="w-20 flex items-center justify-end gap-1">
+                  <span className="text-xs font-medium">{formatCurrency(line.quantity * line.unitPrice)}</span>
+                  {editLines.length > 1 && (
+                    <button onClick={() => removeLine(line.id)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="px-4 py-3 border-t border-border flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">Subtotal</span>
+            <span className="text-sm font-semibold">{formatCurrency(editTotal)}</span>
           </div>
         </div>
 
         {/* Schemes Applied */}
-        {order.appliedSchemes && order.appliedSchemes.length > 0 && (
+        {appliedSchemes.length > 0 && (
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
             <div className="flex items-center gap-2 mb-2">
               <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Schemes Applied</span>
             </div>
             <div className="space-y-1.5">
-              {order.appliedSchemes.map((s, i) => (
+              {appliedSchemes.map((a, i) => (
                 <div key={i} className="flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-medium text-emerald-700 dark:text-emerald-300">{s.schemeName}</span>
-                    {s.schemeLabel && <span className="text-emerald-600/70 dark:text-emerald-400/70 ml-1">({s.schemeLabel})</span>}
+                    <span className="font-medium text-emerald-700 dark:text-emerald-300">{a.scheme.name}</span>
+                    {a.label && <span className="text-emerald-600/70 dark:text-emerald-400/70 ml-1">({a.label})</span>}
                   </div>
-                  <span className="font-semibold text-emerald-700 dark:text-emerald-300">-{formatCurrency(s.savings)}</span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-300">-{formatCurrency(a.savings)}</span>
                 </div>
               ))}
             </div>
-            {order.schemeSavings > 0 && (
+            {totalSchemeSavings > 0 && (
               <div className="mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs">
                 <span className="font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
-                <span className="font-bold text-emerald-700 dark:text-emerald-300">-{formatCurrency(order.schemeSavings)}</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-300">-{formatCurrency(totalSchemeSavings)}</span>
               </div>
             )}
           </div>
