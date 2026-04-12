@@ -60,13 +60,6 @@ export default function Dashboard() {
   const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
   const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
 
-  const kpiAccents = [
-    "",
-    "",
-    "",
-    "",
-  ];
-
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue) },
     { label: "Orders", value: totalOrders.toString() },
@@ -124,7 +117,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06, type: "tween", duration: 0.25, ease: "easeOut" }}
-              className={`glass-card p-5 md:p-7 min-w-0 ${kpiAccents[i]}`}
+              className="glass-card p-5 md:p-7 min-w-0"
             >
               <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
               <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
@@ -206,7 +199,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
         </div>
 
         {/* Recent Orders */}
-        <section className="pb-24 md:pb-8">
+        <section>
            <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
             <Link to="/orders" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>

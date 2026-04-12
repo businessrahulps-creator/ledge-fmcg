@@ -26,15 +26,22 @@ export function SetupChecklist() {
   const navigate = useNavigate();
   const { steps, completedCount, totalSteps, percentage, isBrandNew, visible, dismiss, isComplete } = useOnboarding();
 
-  const [celebrationDismissed, setCelebrationDismissed] = useState(false);
+  const [celebrationDismissed, setCelebrationDismissed] = useState(() => {
+    try { return localStorage.getItem("ledge_onboarding_celebration_dismissed") === "true"; } catch { return false; }
+  });
+
+  const dismissCelebration = useCallback(() => {
+    setCelebrationDismissed(true);
+    try { localStorage.setItem("ledge_onboarding_celebration_dismissed", "true"); } catch {}
+  }, []);
 
   // Auto-hide celebration after 5 seconds
   useEffect(() => {
     if (isComplete && !celebrationDismissed) {
-      const t = setTimeout(() => setCelebrationDismissed(true), 5000);
+      const t = setTimeout(dismissCelebration, 5000);
       return () => clearTimeout(t);
     }
-  }, [isComplete, celebrationDismissed]);
+  }, [isComplete, celebrationDismissed, dismissCelebration]);
 
   if ((!visible && !isComplete) || celebrationDismissed) return null;
 

@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
@@ -45,12 +45,13 @@ const moreGroups = [
     items: [
       { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
       { title: "Billing", url: "/billing", icon: FileText },
-      { title: "Claims", url: "/claims", icon: RotateCcw },
+      { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
   {
     label: "Settings",
     items: [
+      { title: "Help", url: "/help", icon: BookOpen },
       { title: "Settings", url: "/settings", icon: Settings },
     ],
   },
