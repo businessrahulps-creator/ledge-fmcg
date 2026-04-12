@@ -6,7 +6,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText, TrendingUp, TrendingDown, Minus, AlertTriangle, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Package } from "lucide-react";
+import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download, FileText, TrendingUp, TrendingDown, Minus, AlertTriangle, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Package, Target } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
 import type { SecondarySale } from "@/context/DataContext";
