@@ -286,7 +286,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCompanyInfo({ name: company.name || "", address: company.address || "", gstin: company.gstin || "", logoUrl: company.logo_url || "" });
       }
 
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, claimLinesRes] = await Promise.all([
         supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
         supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
@@ -296,6 +296,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
         supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        supabase.from("claim_lines" as any).select("*").range(0, 9999),
       ]);
       if (token !== fetchTokenRef.current) return;
 
