@@ -1,83 +1,58 @@
 
 
-# Comprehensive QA Audit & Improvement Plan
+# Enterprise Visual Overhaul — From Startup Blue to Billion-Dollar B2B
 
-## Part 1: Mobile Navigation Redesign
+## Core Problem
 
-**Current state**: 5-item bottom bar (Home, Orders, Stock, Performance, More). The "More" menu is a DropdownMenu that pops up with 8 items. This is functional but has issues:
-- The DropdownMenu disappears immediately on tap outside — easy to dismiss accidentally
-- 8 items in a plain dropdown is a lot to scan
-- No visual grouping or hierarchy in the More menu
-- The More menu doesn't indicate which page you're currently on
+The current `--primary: 217 78% 51%` (#2563EB) is Stripe/Vercel-grade consumer blue. Enterprise B2B products like Dynamics 365, Power BI, SAP, and Salesforce use deeply muted, desaturated accent tones. The background tokens were improved but cards still feel flat. The overall depth system needs one more calibration pass.
 
-**Proposed approach**: Replace the DropdownMenu with a full-screen Sheet (bottom drawer) for the "More" menu. This is the modern pattern used by ChatGPT, WhatsApp, and most production mobile apps. Benefits:
-- Larger touch targets in a grid/list layout
-- Visual grouping (Manage, Analyze, Settings)
-- Active page indicator visible
-- Harder to dismiss accidentally
-- More breathing room and better scannability
+## Token Changes (index.css only — single file, surgical)
 
-### Changes:
-- `AppLayout.tsx`: Replace `DropdownMenu` with `Sheet` (side="bottom") for the More menu
-- Group items into sections with subtle headers
-- Show active indicator on the current page item
-- Use a 2-column grid for better space utilization
+### Primary Accent: Consumer Blue → Corporate Indigo
+| Token | Current | New | Hex Approx |
+|-------|---------|-----|------------|
+| `--primary` (light) | `217 78% 51%` | `222 47% 42%` | `#3B5998` → muted navy-indigo |
+| `--ring` (light) | `217 78% 51%` | `222 47% 42%` | Match primary |
+| `--primary` (dark) | `217 91% 60%` | `222 60% 58%` | Slightly brighter for dark contrast |
+| `--ring` (dark) | `217 91% 60%` | `222 60% 58%` | Match |
+| `--accent` (dark) | `217 91% 60%` | `222 60% 58%` | Match |
+| `--sidebar-primary` (dark) | `217 91% 60%` | `222 60% 58%` | Match |
+| `--sidebar-ring` (dark) | `217 91% 60%` | `222 60% 58%` | Match |
 
----
+### Background & Surface Depth
+| Token | Current | New | Why |
+|-------|---------|-----|-----|
+| `--background` | `220 14% 96%` | `220 16% 94%` | Slightly darker bg creates more card contrast |
+| `--card` | `0 0% 100%` | `0 0% 99.5%` | Barely warm white — not sterile |
+| `--foreground` | `0 0% 11%` | `222 20% 14%` | Warmer, richer black with slight navy tint |
+| `--card-foreground` | `0 0% 11%` | `222 20% 14%` | Match |
+| `--muted-foreground` | `0 0% 44%` | `220 10% 44%` | Tinted gray text |
 
-## Part 2: PDF Standardization
+### Glass Card Elevation
+Current shadow is good but the border opacity is still too thin. Bump `border-border/60` to `border-border/50` and add a 1px inset highlight for depth:
+```
+.glass-card {
+  shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03),0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.6)]
+}
+```
 
-**Current state**: 6 PDF components with inconsistent approaches:
-1. `OrderInvoicePdf` — Uses shared `PdfStyles`, `PdfHeader`, `PdfFooter`. Professional.
-2. `GstInvoicePdf` — Has its OWN `StyleSheet.create()`, own header/footer. Uses `₹` symbol (Helvetica can't render it — will show as `?`). No shared branding.
-3. `DealerStatementPdf` — Uses shared components. Inline styles throughout. Professional but inconsistent with others.
-4. `SalespersonStatementPdf` — Uses shared components. Same inline style issue. Good quality.
-5. `PerformanceReportPdf` — Uses shared components. Clean.
-6. `ReportPdf` — Uses shared components. Clean generic template.
+### Progress Bars (Dashboard)
+Current `bg-primary/50` is too vivid with the new muted primary. Change to `bg-primary/40` for a quieter feel.
 
-**Critical bug**: `GstInvoicePdf` line 203 uses `₹` symbol which Helvetica cannot render. Should use `Rs.` like all other PDFs.
+## Files Changed
 
-**Standardization plan**:
-- Migrate `GstInvoicePdf` to use shared `PdfHeader`, `PdfFooter`, and `pdfStyles`
-- Replace `₹` with `Rs.` in `GstInvoicePdf` using `formatCurrencyPdf()`
-- Add "Amount in Words" section to `OrderInvoicePdf` (currently missing, but GstInvoice has it)
-- Standardize all inline styles in `DealerStatementPdf` and `SalespersonStatementPdf` to use shared `pdfStyles` where possible
-- Add consistent "Computer-generated document" footer text across all PDFs
-- Add `wrap={false}` to table rows in `GstInvoicePdf` to prevent row splitting across pages
+| File | What |
+|------|------|
+| `src/index.css` | ~14 token value changes + glass-card shadow refinement |
+| `src/pages/Dashboard.tsx` | Progress bar opacity `bg-primary/50` → `bg-primary/40` |
 
----
+**2 files. No behaviour changes. No new dependencies. No dark mode regressions (dark tokens explicitly updated). Pure palette and depth elevation.**
 
-## Part 3: Other Issues Found
+## What This Achieves
 
-### High Priority
-| # | Issue | File |
-|---|-------|------|
-| H1 | `GstInvoicePdf` uses `₹` which Helvetica can't render — shows as `?` or blank | `GstInvoicePdf.tsx:203` |
-| H2 | `GstInvoicePdf` has no `PdfHeader`/`PdfFooter` — completely different branding from all other PDFs | `GstInvoicePdf.tsx` |
-| H3 | `GstInvoicePdf` doesn't use `wrap={false}` on table rows — rows can split across pages | `GstInvoicePdf.tsx:149` |
-
-### Medium Priority
-| # | Issue | File |
-|---|-------|------|
-| M1 | `OrderInvoicePdf` missing "Amount in Words" section — GstInvoice has it, Order doesn't | `OrderInvoicePdf.tsx` |
-| M2 | `GstInvoicePdf` uses raw `.toFixed(2)` instead of `formatCurrencyPdf()` for amounts — inconsistent formatting | `GstInvoicePdf.tsx` |
-| M3 | More menu items lack visual feedback for the currently active page | `AppLayout.tsx` |
-
----
-
-## Implementation Plan
-
-### Pass 1: Mobile Navigation (AppLayout.tsx)
-Replace the DropdownMenu "More" with a Sheet bottom drawer containing grouped navigation items in a clean list with section headers, active indicators, and proper touch targets.
-
-### Pass 2: PDF Standardization (GstInvoicePdf.tsx)
-- Migrate to shared `PdfHeader`, `PdfFooter`, `pdfStyles`
-- Replace `₹` with `formatCurrencyPdf()`
-- Add `wrap={false}` to table rows
-- Standardize formatting
-
-### Pass 3: PDF Enhancements (OrderInvoicePdf.tsx)
-- Add "Amount in Words" section using `numberToWords` utility
-
-**Total: 3 files changed. No new dependencies. No feature additions.**
+- Primary accent shifts from consumer Stripe-blue to a sophisticated navy-indigo that reads "enterprise"
+- Background gets slightly more depth so cards float properly
+- Foreground text gets a warmer, richer tone instead of flat black
+- Glass cards gain an inset highlight creating real material depth
+- Overall feel moves from "indie SaaS" to "Dynamics 365 / Power BI" territory
 
