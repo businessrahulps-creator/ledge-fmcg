@@ -322,7 +322,7 @@ export default function Settings() {
           </div>
 
           <TabsContent value="team">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground md:text-sm">
                   {teamLoading ? "Loading…" : `${team.length} team members`}
@@ -384,7 +384,7 @@ export default function Settings() {
 
           {/* Subscription Tab */}
           <TabsContent value="subscription">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="max-w-2xl space-y-4 md:space-y-6">
               <div className={`rounded-xl border p-4 md:p-6 ${trialExpired ? "border-destructive/30 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
                 <div className="flex items-center gap-3">
                   {trialExpired ? (

@@ -187,9 +187,9 @@ export default function Dashboard() {
 
           {/* This Month summary */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ type: "spring", damping: 26, stiffness: 200 }}
             className="glass-card p-4 mt-5"
           >
             <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase mb-3">
@@ -289,9 +289,9 @@ export default function Dashboard() {
           {kpis.map((kpi, i) => (
             <motion.div
               key={kpi.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06, type: "tween", duration: 0.25, ease: "easeOut" }}
+              transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
               className="glass-card p-5 md:p-7 min-w-0"
             >
               <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
@@ -337,7 +337,7 @@ export default function Dashboard() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
+                      transition={{ type: "spring", damping: 30, stiffness: 150, delay: 0.2 + index * 0.06 }}
 className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                     />
                   </div>
@@ -363,7 +363,7 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(p.totalSold / maxProdVal) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
+                      transition={{ type: "spring", damping: 30, stiffness: 150, delay: 0.2 + index * 0.06 }}
 className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                     />
                   </div>
@@ -434,9 +434,9 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                 {recentOrders.map((o, i) => (
                   <Link key={o.id} to={`/orders/${o.id}`}>
                     <motion.div
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i, 3) * 0.05, type: "tween", duration: 0.2, ease: "easeOut" }}
+                      transition={{ delay: Math.min(i, 3) * 0.04, type: "spring", damping: 26, stiffness: 200 }}
                       className="glass-card card-hover p-4"
                     >
                       <div className="flex items-center justify-between mb-1">

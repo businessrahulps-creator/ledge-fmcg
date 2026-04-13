@@ -202,7 +202,7 @@ export default function Company() {
           </p>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl space-y-4 md:space-y-6">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="max-w-2xl space-y-4 md:space-y-6">
           <div className="glass-card p-4 space-y-4 md:p-6 md:space-y-6">
             <input
               ref={fileInputRef}

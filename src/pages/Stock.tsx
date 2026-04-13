@@ -462,9 +462,9 @@ export default function Stock() {
                   return (
                     <motion.div
                       key={loc.id}
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.3 }}
+                      transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
                       onClick={() => setSelectedWarehouse(isSelected ? null : loc.id)}
                       className={`cursor-pointer glass-card card-hover p-4 md:p-5 transition-all ${isSelected ? "ring-2 ring-primary" : ""}`}
                     >
@@ -528,10 +528,11 @@ export default function Stock() {
                 {selectedWarehouse && (
                   <motion.div
                     ref={inventoryRef}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0, scaleY: 0.95 }}
+                    animate={{ opacity: 1, scaleY: 1 }}
+                    exit={{ opacity: 0, scaleY: 0.95 }}
+                    transition={{ type: "spring", damping: 26, stiffness: 200 }}
+                    style={{ transformOrigin: "top" }}
                     className="space-y-3 overflow-hidden"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
