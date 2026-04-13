@@ -1,136 +1,96 @@
 
 
-# Add Automated Testing for Core Flows
+# Harden Data Strategy & Offline Queue Replay
 
-## Problem
-Only 7 utility test files exist (formatting, sanitization, scorecards). Zero integration tests for the domain hooks that drive all business logic, and zero E2E tests for critical user journeys.
+## Problems Identified
 
-## Strategy
+After reviewing all domain hooks, `offline-store.ts`, `DataContext.tsx`, and `data-utils.ts`, here are the concrete issues:
 
-Two layers of testing, prioritized by impact:
+### 1. Inconsistent offline support across domains
+- **Orders, Dealers, Salespersons, Products, Schemes, Stock, Godowns**: Full offline CRUD (queue + optimistic state)
+- **Billing (Invoices, Claims)**: Zero offline support — `addInvoice`, `deleteInvoice`, `addClaim`, `updateClaim`, `updateInvoice` all call Supabase directly with no `navigator.onLine` check. They silently fail offline.
+- **Targets, Secondary Sales**: Zero offline support — same issue.
 
-### Layer 1: Domain Hook Unit Tests (Vitest)
-Test each domain hook in isolation by mocking `supabase` and verifying state transitions. These are fast, deterministic, and cover the core business logic without needing a running backend.
+### 2. Replay logic is fragile
+- **No idempotency**: If replay of an `insert` succeeds on the server but the `removeFromQueue` call fails (e.g. IDB write error), the mutation stays in the queue and gets replayed again, creating a duplicate row.
+- **No conflict detection for updates**: An update replayed after a refetch may overwrite newer server-side data. No `updated_at` check.
+- **Race condition in `reconcileTempId`**: Only checks `payload.id` — misses references to temp IDs in other payload fields (e.g. `distributor_id`, `order_id` in related mutations).
+- **Stock deduction in replay is non-transactional**: The `insert_order_atomic` replay manually inserts stock deductions line-by-line. If it fails partway, you get partial deductions with no rollback.
+- **Silent swallow in `syncQueue`**: Failed mutations after MAX_RETRIES are silently marked done. The user gets a generic "failed to sync" toast but no way to inspect or retry individual mutations.
 
-### Layer 2: E2E Tests (Playwright)
-Test critical user journeys through the real UI against the live preview. These validate the full stack — auth, database, UI interactions.
+### 3. State divergence after sync
+- After replay, `fetchAll` is called to refresh — but the optimistic state may have accumulated changes that the refetch overwrites. This is mostly fine, but during the sync window, UI flickers and computed values (computed distributors/salespersons/products) briefly show stale data.
 
----
-
-## Layer 1: Domain Hook Unit Tests
-
-Each test file creates a test harness using `renderHook` with mocked Supabase client. We mock `supabase.from()`, `supabase.rpc()`, and `navigator.onLine`.
-
-### Files to create:
-
-| File | What it tests |
-|------|---------------|
-| `src/context/domains/__tests__/useOrdersDomain.test.ts` | `addOrder` (online + offline), `updateOrder` (status transitions, stock deduction trigger), `deleteOrder`, `previewOrderNumber` |
-| `src/context/domains/__tests__/useDealersDomain.test.ts` | CRUD operations, offline queue enqueue |
-| `src/context/domains/__tests__/useCatalogDomain.test.ts` | Product + scheme CRUD |
-| `src/context/domains/__tests__/useStockDomain.test.ts` | Stock item CRUD, `deductStockForOrder` logic, godown management |
-| `src/context/domains/__tests__/useBillingDomain.test.ts` | Invoice creation (sequence number), claim creation (stock restore), status updates |
-| `src/context/domains/__tests__/useTargetsDomain.test.ts` | Target + secondary sale CRUD |
-| `src/utils/activityLog.test.ts` | `logActivity`, `fmtAmount` |
-| `src/context/__tests__/data-utils.test.ts` | `mapOrders`, `mapDistributor`, `batchIn`, `persistAllToCache` |
-
-### Key test scenarios for Orders (highest priority):
-
-1. **addOrder online** — mocks `supabase.rpc("insert_order_atomic")` returning `{id, order_number, seq}`, verifies order is added to state with correct number
-2. **addOrder offline** — sets `navigator.onLine = false`, verifies mutation is enqueued via `enqueueMutation`, temp ID assigned, sequence incremented locally
-3. **updateOrder with stock deduction** — transition from `pending` → `dispatched` with a godownId triggers `deductStockForOrder`
-4. **updateOrder without stock deduction** — transition from `dispatched` → `delivered` does NOT re-deduct
-5. **deleteOrder** — cascading delete of stock_deductions, order_schemes, order_lines, then order
-6. **deleteOrder offline** — returns false with error toast
-
-### Key test scenarios for Billing:
-
-1. **addInvoice** — mocks `get_next_invoice_number` RPC, verifies invoice number format, lines inserted
-2. **deleteInvoice** — final status blocks deletion
-3. **addClaim with stock restore** — verifies stock quantity incremented
-
-### Test harness pattern:
-
-```typescript
-// Shared mock factory
-function createMockSupabase() {
-  const mockFrom = vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    // chain terminators
-  });
-  return { from: mockFrom, rpc: vi.fn() };
-}
-```
-
-Each domain hook is a plain function returning state + callbacks — we call it inside `renderHook` with mock deps.
+### 4. Delete operations blocked offline (orders) but allowed offline (dealers, stock)
+- `deleteOrder` explicitly blocks offline deletion and returns false
+- `makeOfflineCrud.remove` queues offline deletions for dealers/products/etc.
+- This inconsistency means offline-deleted dealers can still appear in order forms, but offline-deleted orders cannot happen. Reasonable for orders, but the user gets no warning for dealers.
 
 ---
 
-## Layer 2: E2E Tests (Playwright)
+## Fix Plan
 
-### Files to create:
+### Fix 1: Add offline guards to Billing & Targets domains
+**Files**: `useBillingDomain.ts`, `useTargetsDomain.ts`
 
-| File | Journey |
-|------|---------|
-| `e2e/auth.spec.ts` | Signup → dashboard redirect, Login → dashboard, Login with wrong credentials → error toast, Logout → redirect to login |
-| `e2e/order-lifecycle.spec.ts` | Create order → verify in list → update payment status → update delivery status → verify stock deduction → delete order |
-| `e2e/billing.spec.ts` | Create GST invoice from order → verify in list → finalize → verify cannot delete |
+Add `navigator.onLine` checks + `enqueueMutation` for:
+- `addInvoice` — queue as `insert` type with table `invoices` + separate `invoice_lines` insert
+- `deleteInvoice` — block offline (same as deleteOrder — finalized docs shouldn't be queued)
+- `addClaim` — queue as `insert` with stock restore deferred to replay
+- `updateClaim` / `updateInvoice` — queue as `update`
+- `addTarget`, `addSecondarySale` — already use `makeOfflineCrud` pattern? No — targets domain does direct Supabase calls. Add offline CRUD.
 
-### Auth test approach:
-- Use a dedicated test account (create via signup flow in test setup)
-- Store session for reuse across order/billing tests
+### Fix 2: Make replay idempotent
+**File**: `offline-store.ts`
 
-### E2E test pattern:
-```typescript
-import { test, expect } from "../playwright-fixture";
+- For `insert` type: Add an `idempotency_key` field (the mutation `id`) to the payload. Before inserting, check if a row with that idempotency key already exists. For orders, the `insert_order_atomic` RPC already handles uniqueness via `order_number`, but for dealers/products, duplicates are possible.
+- For `insert_order_atomic`: Wrap the post-RPC steps (lines + stock deductions) so that if the order already exists (from a prior partial replay), skip the RPC and just insert missing lines.
+- For `update` type: Add `updated_at` comparison — only apply if the row hasn't been modified since the mutation was queued.
 
-test("create order and verify in list", async ({ page }) => {
-  await page.goto("/login");
-  await page.fill('[id="email"]', testEmail);
-  await page.fill('[id="password"]', testPassword);
-  await page.click('button[type="submit"]');
-  await page.waitForURL("**/dashboard");
-  
-  await page.goto("/orders/new");
-  // Fill form fields, submit, verify redirect + toast
-});
-```
+### Fix 3: Broader temp ID reconciliation
+**File**: `offline-store.ts`
+
+Update `reconcileTempId` to scan all payload fields (not just `payload.id`) for the temp UUID string, replacing any occurrence. This handles cases like an offline-created dealer whose ID appears in a subsequently queued order's `distributorId`.
+
+### Fix 4: Make stock deduction in replay safer
+**File**: `offline-store.ts`
+
+Move the stock deduction logic for `insert_order_atomic` replay into a single RPC call or at minimum wrap it in a try-catch that records partial progress, so a retry doesn't double-deduct.
+
+### Fix 5: Add retry UI for stuck mutations
+**File**: `src/pages/Settings.tsx` (existing)
+
+Add a "Pending Changes" section that shows:
+- Count of queued mutations
+- Each mutation: type, table, timestamp, attempts, lastError
+- "Retry" button per mutation and "Retry All" button
+- "Discard" button for permanently failed mutations
+
+### Fix 6: Unify the offline delete policy
+**Files**: `data-utils.ts` (makeOfflineCrud)
+
+Add an option `allowOfflineDelete` (default: true for simple entities, false for orders/invoices). When false, show the same blocking toast as `deleteOrder`.
 
 ---
+
+## Files Changed
+
+| File | Change | ~Lines |
+|------|--------|--------|
+| `src/lib/offline-store.ts` | Idempotency keys, broader reconciliation, safer stock replay | ~80 added |
+| `src/context/domains/useBillingDomain.ts` | Offline guards for all 5 operations | ~60 added |
+| `src/context/domains/useTargetsDomain.ts` | Offline guards for targets + secondary sales | ~30 added |
+| `src/context/data-utils.ts` | `allowOfflineDelete` option in makeOfflineCrud | ~10 changed |
+| `src/pages/Settings.tsx` | "Pending Changes" UI section | ~80 added |
+| `src/context/DataContext.tsx` | Pass queue inspection to Settings via context | ~5 added |
+
+Total: 6 files, ~265 lines of changes. Zero breaking changes to existing API.
 
 ## Execution Order
-
-1. Create shared test utilities (`src/test/mock-supabase.ts`)
-2. `data-utils.test.ts` — pure functions, no mocking needed for mappers
-3. `useOrdersDomain.test.ts` — highest business value
-4. `useBillingDomain.test.ts` — second highest
-5. Remaining domain hooks
-6. E2E auth test
-7. E2E order lifecycle test
-8. E2E billing test
-
-## Files Created
-
-| File | Lines |
-|------|-------|
-| `src/test/mock-supabase.ts` | ~60 |
-| `src/context/__tests__/data-utils.test.ts` | ~120 |
-| `src/context/domains/__tests__/useOrdersDomain.test.ts` | ~200 |
-| `src/context/domains/__tests__/useBillingDomain.test.ts` | ~150 |
-| `src/context/domains/__tests__/useDealersDomain.test.ts` | ~80 |
-| `src/context/domains/__tests__/useCatalogDomain.test.ts` | ~80 |
-| `src/context/domains/__tests__/useStockDomain.test.ts` | ~120 |
-| `src/context/domains/__tests__/useTargetsDomain.test.ts` | ~60 |
-| `src/utils/activityLog.test.ts` | ~40 |
-| `e2e/auth.spec.ts` | ~80 |
-| `e2e/order-lifecycle.spec.ts` | ~120 |
-| `e2e/billing.spec.ts` | ~80 |
-
-Total: 12 new files, ~1,190 lines of test code. Zero changes to production code.
+1. `offline-store.ts` — idempotency + reconciliation hardening
+2. `useBillingDomain.ts` — offline support
+3. `useTargetsDomain.ts` — offline support
+4. `data-utils.ts` — delete policy flag
+5. `Settings.tsx` — retry UI
+6. `DataContext.tsx` — wire up queue state
 
