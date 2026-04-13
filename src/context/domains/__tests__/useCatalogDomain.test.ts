@@ -15,7 +15,7 @@ vi.mock("@/lib/offline-store", () => ({
 import { useCatalogDomain } from "../useCatalogDomain";
 
 function makeProduct(overrides = {}) {
-  return { id: "p1", name: "Widget", sku: "W01", unit: "Pack", basePrice: 250, totalSold: 0, ...overrides };
+  return { id: "p1", name: "Widget", sku: "W01", unit: "Pack", basePrice: 250, hsnCode: "", totalSold: 0, ...overrides };
 }
 
 function makeScheme(overrides = {}) {

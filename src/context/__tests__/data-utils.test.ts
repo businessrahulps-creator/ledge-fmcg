@@ -87,7 +87,7 @@ describe("mapGodown", () => {
 
 describe("mapStockItem", () => {
   it("resolves product and godown names", () => {
-    const prods = [{ id: "p1", name: "Widget", sku: "W01", unit: "Pack", basePrice: 100, totalSold: 0 }];
+    const prods = [{ id: "p1", name: "Widget", sku: "W01", unit: "Pack", basePrice: 100, hsnCode: "", totalSold: 0 }];
     const gds = [{ id: "g1", name: "Main", address: "", isActive: true }];
     const si = mapStockItem({ id: "si1", product_id: "p1", godown_id: "g1", quantity: 50, threshold: 10, last_deducted_date: null }, prods, gds);
     expect(si.productName).toBe("Widget");
