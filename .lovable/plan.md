@@ -1,70 +1,40 @@
 
 
-# Make Mobile Experience Feel Solid and App-Like (Android-First)
+# Fix: Pages Not Scrollable on Mobile and Web
 
-## Problem
-The app still has several "webby" tells on mobile — text selection on buttons/nav, tap highlight flashes, instant page swaps, and no touch feedback on cards. 95% of users are on Android, so we prioritize Android Chrome behaviors while keeping iOS parity.
+## Root Cause
+The CSS rule `overflow-x: hidden` applied to `html, body, #root` is causing scroll issues. On mobile browsers (especially Android Chrome), applying `overflow-x: hidden` to `html` or `body` can implicitly change the overflow model and create conflicting scroll containers. Combined with `overscroll-behavior-y: contain` on all three elements, the browser gets confused about which element should scroll.
 
-## Important: Text Selection Stays on Content
-Text selection will **only** be disabled on UI chrome (navigation, buttons, headers, badges). All content areas — inputs, textareas, paragraphs, table cells with data — remain fully selectable. This is a targeted approach, not a blanket disable.
+## Fix
 
-## Changes
+### `src/index.css` — Remove problematic overflow rules from html/body
 
-### 1. `src/index.css` — Anti-web CSS rules
-
-**Tap highlight removal (Android + iOS):**
+Change the current rule:
 ```css
-* { -webkit-tap-highlight-color: transparent; }
-```
-This removes the blue/gray rectangle flash that Android Chrome shows on every tap — the single biggest "website" tell.
-
-**Selective text selection disable — only on UI chrome:**
-```css
-nav, button, [role="button"], .sidebar, header, label, badge {
-  -webkit-user-select: none;
-  user-select: none;
-}
-```
-Inputs, textareas, paragraphs, and table content are untouched — users can still select, copy, and paste text in all content areas.
-
-**Touch callout suppression (iOS long-press previews):**
-```css
-a, button { -webkit-touch-callout: none; }
-```
-
-**Overscroll containment on main scroll area:**
-```css
-main { overscroll-behavior-y: contain; }
-```
-
-### 2. `src/index.css` — Touch feedback utility class
-Add a `.touch-bounce` utility:
-```css
-.touch-bounce {
-  transition: transform 0.1s ease;
-}
-.touch-bounce:active {
-  transform: scale(0.97);
+html, body, #root {
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 ```
 
-### 3. `src/components/ui/card.tsx` — Tap feedback on cards
-Add `active:scale-[0.98] transition-transform` to the Card component so all cards give physical press feedback on touch.
+To only apply `overflow-x: hidden` on `#root` (not `html` or `body`), and move `overscroll-behavior-y: contain` to just `body`:
 
-### 4. `src/components/layout/AppLayout.tsx` — Page crossfade transitions
-Wrap `{children}` in a `motion.div` keyed to `location.pathname` with a fast fade transition (opacity 0→1, 150ms). This replaces instant page swaps with smooth native-feeling crossfades.
+```css
+body {
+  overscroll-behavior-y: contain;
+}
 
-### 5. `src/components/layout/AppLayout.tsx` — Scroll-aware header shadow
-Add a scroll listener to the main content area. When scrolled > 0, apply a subtle bottom shadow to the sticky header — matching how native Android/iOS toolbars behave.
+#root {
+  overflow-x: hidden;
+}
+```
 
-## Android-Specific Considerations
-- Tap highlight removal is the highest-impact fix for Android Chrome
-- `overscroll-behavior-y: contain` already prevents Chrome's native pull-to-refresh (added earlier)
-- `user-select: none` on nav/buttons prevents accidental text selection during fast tapping — very common on Android
-- Page transitions use `will-change: opacity` for GPU acceleration on lower-end Android devices
+This preserves the horizontal overflow prevention and pull-to-refresh suppression while restoring normal vertical scrolling on all browsers.
+
+### `src/components/layout/AppLayout.tsx` — Ensure main is scrollable
+
+The `<main>` element already has `overflow-y-auto` which is correct. No changes needed here — the CSS fix alone should resolve this.
 
 ## Files Changed
-- `src/index.css` — tap highlight, selective user-select, touch-callout, overscroll, touch-bounce utility
-- `src/components/ui/card.tsx` — active scale feedback
-- `src/components/layout/AppLayout.tsx` — page crossfade + scroll-aware header shadow
+- `src/index.css` — restructure overflow/overscroll rules to not block vertical scrolling
 
