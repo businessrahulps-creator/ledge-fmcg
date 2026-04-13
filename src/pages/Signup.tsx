@@ -125,7 +125,7 @@ export default function Signup() {
               </div>
             </div>
 
-            <Button className="w-full mt-2" size="default" type="submit" disabled={loading}>
+            <Button className="w-full mt-2" size="lg" type="submit" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Start free trial
             </Button>

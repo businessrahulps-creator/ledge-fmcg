@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { formatIndianDate } from "@/utils/formatDate";
-import { ListChecks, Plus, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Plus, AlertTriangle } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 
@@ -221,7 +221,7 @@ export default function Dashboard() {
                 <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
               ) : (
                 <div>
-                  <svg viewBox="0 0 184 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
+                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
@@ -387,7 +387,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
           {recentOrders.length === 0 ? (
             <div className="glass-card p-10 text-center flex flex-col items-center gap-3">
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                <ListChecks className="h-5 w-5 text-muted-foreground/60" strokeWidth={1.5} />
+                <ShoppingCart className="h-5 w-5 text-muted-foreground/60" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm font-medium">No orders on {DAY_LABELS[selectedDay]}</p>
@@ -463,6 +463,16 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
           )}
         </section>
       </div>
+      </div>
+
+      {/* Mobile FAB — quick order creation */}
+      <Link
+        to="/orders/new"
+        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform md:hidden"
+        aria-label="New Order"
+      >
+        <Plus className="h-6 w-6" />
+      </Link>
       </div>
     </AppLayout>
   );
