@@ -622,7 +622,7 @@ export default function NewOrder() {
                 </div>
                 <div className="border-t border-border pt-2 md:pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium md:text-sm">Order Total</span>
+                    <span className="text-xs font-medium md:text-sm">{appliedSchemes.length > 0 ? "Gross Total" : "Order Total"}</span>
                     <span className="text-base font-bold md:text-lg">{formatCurrency(orderTotal)}</span>
                   </div>
                 </div>

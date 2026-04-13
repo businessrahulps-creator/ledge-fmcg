@@ -42,6 +42,13 @@ export default function Signup() {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Signup failed");
 
+      // If email confirmation is required, session will be null
+      if (!authData.session) {
+        toast.success("Check your email", { description: "We sent a verification link — confirm it, then sign in." });
+        navigate("/login");
+        return;
+      }
+
       // 2. Single RPC handles company + profile + role + seed data
       const { error: setupError } = await supabase.rpc("setup_new_company", {
         p_company_name: companyName,
