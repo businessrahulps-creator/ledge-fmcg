@@ -9,8 +9,9 @@ interface UsePullToRefreshOptions {
 
 export function usePullToRefresh({
   onRefresh,
-  threshold = 80,
-  maxPull = 120,
+  threshold = 120,
+  maxPull = 150,
+  deadZone = 10,
 }: UsePullToRefreshOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pullDistance, setPullDistance] = useState(0);
