@@ -4,39 +4,39 @@ import { AnimateIn } from "../AnimateIn";
 const features = [
   {
     icon: BarChart3,
-    title: "Your business, at a glance",
+    title: "Your entire business on one dashboard.",
     description:
-      "Open your dashboard to instantly track daily revenue, total orders, and dispatch statuses without calling anyone.",
+      "Today's revenue, orders placed, pending dispatch, delivery rate — the moment you log in. Pull-to-refresh on mobile. Weekly revenue chart to spot patterns. No morning call to the office. No waiting for someone to send you a file.",
   },
   {
     icon: ClipboardCheck,
-    title: "Orders that track themselves",
+    title: "Orders that move through their full lifecycle — tracked.",
     description:
-      "Watch every order move cleanly from pending to dispatched to delivered in real time.",
+      "Pending → Dispatched → Delivered. Each step logged with who did what and when. Vehicle number, driver name, dispatch date, remarks — all captured. Stock deducts from the assigned godown the moment dispatch is marked. Nothing falls out of the system.",
   },
   {
     icon: Users,
-    title: "Complete dealer intelligence",
+    title: "Complete intelligence on every dealer you work with.",
     description:
-      "Access lifetime value, outstanding payments, and past order history for any retail dealer immediately.",
+      "Lifetime value. Outstanding amount. Full order history. Payment history. Credit limit. GSTIN. Bank details. Everything on one profile page. Your salesperson walks into a dealer meeting knowing exactly where things stand — what they owe, what they usually buy, when they last ordered.",
   },
   {
     icon: Package,
-    title: "Multi-warehouse visibility",
+    title: "Every godown. Every SKU. Color-coded by health.",
     description:
-      "Monitor inventory health across all your locations with alerts to prevent unexpected stock-outs.",
+      "Green, Amber, Red — per product, per warehouse, against thresholds you set. When something is about to run out, you know before the dealer calls. Stock movements are logged against every dispatch. Your accountant sees value summaries. Your ops team sees quantities. Right access for the right role.",
   },
   {
     icon: IndianRupee,
-    title: "Native payment tracking",
+    title: "Payments tracked the way Indian distribution actually works.",
     description:
-      "Track cash, UPI, and cheque collections exactly how Indian distribution businesses operate.",
+      "Cash. UPI. Cheque. Bank transfer. Each payment mode captured against each order. Outstanding balances update as collections come in. Your accountant reconciles from the same system your salesperson used to take the order — not from a separate sheet built the next morning.",
   },
   {
     icon: CloudOff,
-    title: "Zero-friction installation",
+    title: "Schemes, targets, claims — the whole ops layer, not just orders.",
     description:
-      "Give your field team a fast, lightweight web app that installs directly to their home screen in seconds.",
+      "Run percentage discounts, flat deals, or buy-X-get-Y-free schemes on any product or dealer combination, with validity dates and minimum order values. Set daily, weekly, or monthly targets for each salesperson. Log damage or return claims against orders and resolve them with a workflow — stock restores automatically when you approve.",
   },
 ];
 
@@ -46,7 +46,7 @@ export function Features() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            Built for the way your business actually runs.
+            Built for the way Indian distribution businesses actually run. Not for how someone in a boardroom imagined they do.
           </h2>
         </AnimateIn>
 

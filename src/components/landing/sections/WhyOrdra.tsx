@@ -2,24 +2,24 @@ import { AnimateIn } from "../AnimateIn";
 
 const blocks = [
   {
-    title: "Designed for actual field adoption.",
+    title: "It installs from a link. No app store. No IT department. No training day.",
     content:
-      "Heavy software fails when your team refuses to use it. We built an interface so fast and clean that your field force will actually prefer it over their paper order books.",
+      "Ledge is a Progressive Web App. You send your team a URL. They tap \"Add to Home Screen.\" It's on their phone in 90 seconds. Works on any basic Android device. No version updates to manage. No permissions to configure. Start to first live order in under two minutes — we've timed it.",
   },
   {
-    title: "Deployed in under thirty seconds.",
+    title: "It works when the network doesn't.",
     content:
-      "Skip the IT department and lengthy setups. Send your team a link, and they can start capturing orders on any smartphone immediately.",
+      "Your salesperson is in a basement godown or a market with spotty signal. Ledge keeps working. Orders placed offline go into a queue and sync the moment connectivity returns. Dealer data and product catalogues are cached locally. The field doesn't stop because the internet did.",
   },
   {
-    title: "Built for operational realities.",
+    title: "Four roles. One system. Everyone sees exactly what they should.",
     content:
-      "We treat UPI payments, multiple warehouses, and basic network connections as absolute defaults, not as corporate afterthoughts.",
+      "The business owner sees everything. The sales manager tracks team performance, targets, and dispatch. The accountant handles payments, invoicing, and GST compliance — without touching inventory quantities. The field salesperson sees their dealers, their orders, their numbers. Role-based access, not role-based chaos.",
   },
   {
-    title: "Immediate operational visibility.",
+    title: "GST-compliant billing that builds itself from your orders.",
     content:
-      "Stop waiting for the evening Excel file. Make critical decisions based on a live feed of your entire distribution network from anywhere.",
+      "Select an order. Choose GST Invoice, Estimate, Proforma, or Credit Note. CGST/SGST for intra-state, IGST for inter-state — auto-calculated from the state codes on the buyer and seller profiles. Amount in words in the Indian numbering system. Sequential invoice numbers with your prefix. PDF generated in one click. Suresh doesn't need to open Tally for this anymore.",
   },
 ];
 
@@ -29,7 +29,7 @@ export function WhyOrdra() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            This isn't another ERP your team will abandon.
+            This isn't another ERP your field team will quit in three weeks.
           </h2>
         </AnimateIn>
 

@@ -12,10 +12,10 @@ const fadeUp = (delay: number) => ({
 /* ── Inline Dashboard Mockup ── */
 function DashboardMockup() {
   const kpis = [
-    { label: "Today's Revenue", value: "₹1,84,200", color: "text-emerald-600" },
-    { label: "Orders Placed", value: "47", color: "text-midnight" },
-    { label: "Pending Dispatch", value: "12", color: "text-amber-600" },
-    { label: "Delivered", value: "35", color: "text-emerald-600" },
+    { label: "Today's Revenue", value: "₹12,47,000", color: "text-emerald-600" },
+    { label: "Orders Placed", value: "23", color: "text-midnight" },
+    { label: "Pending Dispatch", value: "16", color: "text-amber-600" },
+    { label: "Delivered", value: "53%", color: "text-emerald-600" },
   ];
 
   const orders = [
@@ -132,16 +132,14 @@ export function Hero() {
             className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
             {...fadeUp(0)}
           >
-            Stop chasing your field team for today's numbers.
+            Every order your team placed today. Do you actually know about it?
           </motion.h1>
 
           <motion.p
             className="font-body text-[17px] md:text-[20px] text-graphite leading-[1.6] max-w-xl mt-6"
             {...fadeUp(0.2)}
           >
-            Your team captures orders on their phones. You track every dealer,
-            dispatch, and payment live from your desk. Escape the chaos of
-            scattered WhatsApp chats and fragile spreadsheets.
+            Ledge is a complete distribution management platform — order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
           </motion.p>
 
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
@@ -149,13 +147,13 @@ export function Hero() {
               to="/signup"
               className="font-body font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2.5 rounded-full hover:scale-[1.02] transition-all duration-150"
             >
-              Start Free Trial
+              Get Started Free
             </Link>
             <a
-              href="#features"
+              href="#how-it-works"
               className="font-body font-medium text-sm text-indigo-700 border border-indigo-200 hover:border-indigo-400 px-6 py-2.5 rounded-full transition-all duration-150"
             >
-              Watch a 2-Minute Demo
+              See How It Works
             </a>
           </motion.div>
 
@@ -163,7 +161,7 @@ export function Hero() {
             className="font-body text-sm text-lp-zinc mt-6"
             {...fadeUp(0.4)}
           >
-            Powering over 10 crore monthly orders for 50+ growing FMCG businesses.
+            Used by FMCG distribution businesses across India to replace spreadsheets, WhatsApp threads, and ERPs their teams hated.
           </motion.p>
 
         </div>

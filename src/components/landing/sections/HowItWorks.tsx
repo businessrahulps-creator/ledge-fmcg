@@ -132,26 +132,26 @@ function StockMockup() {
 
 const steps = [
   {
-    badge: "Step 1",
-    title: "Your team captures orders instantly.",
+    badge: "01",
+    title: "Your field team places an order from their phone. In under a minute.",
     description:
-      "Your field team selects the dealer, taps the products, and confirms pricing in under a minute. It runs smoothly on any basic Android phone without a heavy app download.",
+      "They open Ledge — no app store, no download, just a link they installed to their home screen. They select the dealer, add the products, apply any active scheme, set the payment mode. Done. The order gets a sequential number the moment it's submitted. Nothing falls through.",
     mockup: OrderMockup,
     reversed: false,
   },
   {
-    badge: "Step 2",
-    title: "You see the data live.",
+    badge: "02",
+    title: "You see it on your dashboard immediately.",
     description:
-      "The order hits your dashboard immediately, updating your daily sales and pending dispatches. You track what your team sold today as easily as checking your bank balance.",
+      "The order is live. Revenue updates. Pending dispatch count moves. You're not waiting for an evening summary — you're watching your business happen, the way you'd watch a bank balance. Every order, every salesperson, every dealer. Right there.",
     mockup: DashboardMiniMockup,
     reversed: true,
   },
   {
-    badge: "Step 3",
-    title: "You act on actual metrics.",
+    badge: "03",
+    title: "Your ops team dispatches, stocks adjust, invoices generate — automatically.",
     description:
-      "Spot low warehouse stock, identify inactive territories, and track pending collections instantly. You can finally stop relying on estimates and manage with exact data.",
+      "When dispatch is marked, inventory deducts from the right godown. The invoice builds itself from the order — CGST, SGST, or IGST calculated based on state codes. Your accountant generates a GST-compliant PDF without touching a calculator. No double entry. No reconciliation ritual.",
     mockup: StockMockup,
     reversed: false,
   },
@@ -163,7 +163,7 @@ export function HowItWorks() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            Three steps. Sixty seconds. Total clarity.
+            Three things happen when your team uses Ledge. All of them in under sixty seconds.
           </h2>
         </AnimateIn>
 

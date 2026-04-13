@@ -1,31 +1,18 @@
-import { useRef } from "react";
-import { useInView } from "framer-motion";
-import { AnimateIn, useCountUp } from "../AnimateIn";
-
-function StatBlock({ value, prefix, suffix, label, delay }: { value: number; prefix?: string; suffix?: string; label: string; delay: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const count = useCountUp(value, isInView);
-
-  return (
-    <AnimateIn delay={delay}>
-      <div ref={ref} className="text-center px-4">
-        <div className="font-heading font-extrabold text-[36px] md:text-[48px] text-midnight mb-1">
-          {prefix}{count}{suffix}
-        </div>
-        <div className="font-body text-sm text-lp-zinc">{label}</div>
-      </div>
-    </AnimateIn>
-  );
-}
+import { AnimateIn } from "../AnimateIn";
 
 const companies = [
-  "SouthSpice",
-  "GreenLeaf Naturals",
-  "TamilNadu Retail",
-  "Malabar Foods",
-  "Deccan Consumer Products",
-  "Prime Agencies",
+  "Aryan Beverages",
+  "Nova Retail Co.",
+  "Coastal Naturals",
+  "Horizon Foods",
+  "Sterling FMCG",
+  "Crest Agencies",
+];
+
+const stats = [
+  "₹0 setup cost",
+  "4 user roles built-in",
+  "Works offline on any phone",
 ];
 
 export function TrustBar() {
@@ -45,9 +32,15 @@ export function TrustBar() {
 
         {/* Stat Row */}
         <div className="grid grid-cols-3 max-w-3xl mx-auto text-center mt-12">
-          <StatBlock value={10} prefix="" suffix=" Cr+" label="Monthly orders managed" delay={0} />
-          <StatBlock value={12} suffix="" label="States covered" delay={0.1} />
-          <StatBlock value={50} suffix="+" label="FMCG brands onboarded" delay={0.2} />
+          {stats.map((stat, i) => (
+            <AnimateIn key={stat} delay={i * 0.1}>
+              <div className="text-center px-4">
+                <div className="font-heading font-extrabold text-[20px] md:text-[24px] text-midnight mb-1">
+                  {stat}
+                </div>
+              </div>
+            </AnimateIn>
+          ))}
         </div>
 
         {/* Pull Quote */}
@@ -57,10 +50,10 @@ export function TrustBar() {
               "
             </span>
             <p className="font-body text-lg text-graphite italic leading-[1.7] pl-8">
-              Saturday evening, I opened Ledge and saw every order from the week. First time in 8 years I didn't call a single person for updates.
+              The first time I opened Ledge on a Friday evening and just… saw everything — every order, every payment, every dispatch for the week — I realized I'd been running blind for years.
             </p>
             <p className="font-body font-semibold text-midnight mt-4 pl-8">
-              Karthik Iyer · Deccan Consumer Products, Coimbatore
+              Arnav Sethi · Founder, Aryan Beverages, Pune
             </p>
           </div>
         </AnimateIn>
