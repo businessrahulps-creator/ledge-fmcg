@@ -296,6 +296,8 @@ export default function Billing() {
     setSupplyType(inv.supplyType as "intra_state" | "inter_state");
     setGstRate(inv.gstRate);
     setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+    setVehicle(inv.vehicle || "");
+    setDriverName(inv.driverName || "");
     if (inv.sourceOrderId) setSourceOrderId(inv.sourceOrderId);
     setLines(inv.lines.map(l => ({
       productName: l.productName,
