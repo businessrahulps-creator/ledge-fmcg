@@ -4,6 +4,7 @@ interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void;
   threshold?: number;
   maxPull?: number;
+  deadZone?: number;
 }
 
 export function usePullToRefresh({
