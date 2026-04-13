@@ -143,36 +143,36 @@ export interface DataContextType {
 
   addDistributor: (d: Distributor) => void;
   updateDistributor: (d: Distributor) => void;
-  deleteDistributor: (id: string) => void;
+  deleteDistributor: (id: string) => Promise<boolean>;
 
   addSalesperson: (s: Salesperson) => void;
   updateSalesperson: (s: Salesperson) => void;
-  deleteSalesperson: (id: string) => void;
+  deleteSalesperson: (id: string) => Promise<boolean>;
 
   addProduct: (p: Product) => void;
   updateProduct: (p: Product) => void;
-  deleteProduct: (id: string) => void;
+  deleteProduct: (id: string) => Promise<boolean>;
 
   addLocation: (l: GodownLocation) => void;
   updateLocation: (l: GodownLocation) => void;
-  deleteLocation: (id: string) => void;
+  deleteLocation: (id: string) => Promise<boolean>;
 
   addStockItem: (si: StockItem) => void;
   updateStockItem: (si: StockItem) => void;
-  deleteStockItem: (id: string) => void;
+  deleteStockItem: (id: string) => Promise<boolean>;
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
 
   addScheme: (s: Scheme) => void;
   updateScheme: (s: Scheme) => void;
-  deleteScheme: (id: string) => void;
+  deleteScheme: (id: string) => Promise<boolean>;
 
   addSecondarySale: (s: SecondarySale) => void;
-  deleteSecondarySale: (id: string) => void;
+  deleteSecondarySale: (id: string) => Promise<boolean>;
 
   targets: Target[];
   addTarget: (t: Target) => void;
   updateTarget: (t: Target) => void;
-  deleteTarget: (id: string) => void;
+  deleteTarget: (id: string) => Promise<boolean>;
 
   claims: Claim[];
   addClaim: (claim: Claim) => Promise<boolean>;
