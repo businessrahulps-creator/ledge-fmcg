@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
+import { SplashScreen } from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -55,11 +56,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, authReady } = useAuth();
   // Don't redirect until auth is fully restored
   if (loading || !authReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <SplashScreen />;
   }
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
