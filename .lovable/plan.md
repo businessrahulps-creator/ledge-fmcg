@@ -1,66 +1,37 @@
 
 
-# Add Foreign Key Constraints Across All Tables
+# Fix: Premature Success Toasts on Delete (FK Constraint Errors)
 
-## Current State
-All tables use UUID columns to reference other tables but have zero foreign key constraints. Data is currently clean (0 orphaned records across all 13 relationships checked).
+## Root Cause
+The `makeOfflineCrud.remove()` function is async — it returns a Promise. But all 5 pages that call it do so **without `await`** and immediately show a success toast. When the DB rejects the delete (FK RESTRICT), the user sees both a success toast AND an error toast.
 
-## Migration — Single SQL migration adding all FK constraints
+## Affected Pages
+1. **Distributors.tsx** — `deleteDistributor(deleteId)` + instant success toast
+2. **Salespersons.tsx** — `deleteSalesperson(deleteId)` + instant success toast
+3. **Stock.tsx** — `deleteProductCtx(deleteProductId)` + instant success toast
+4. **Stock.tsx** — `deleteLocation(deleteWarehouseLoc.id)` + instant success toast
+5. **Schemes.tsx** — `api.schemes.remove(deleteId)` + instant success toast
 
-### Relationships to constrain:
+## Fix Strategy
 
-| Child Table | Column | Parent Table | ON DELETE |
-|---|---|---|---|
-| `profiles` | `company_id` | `companies(id)` | SET NULL (user keeps profile if company deleted) |
-| `profiles` | `user_id` | `auth.users(id)` | CASCADE |
-| `user_roles` | `user_id` | `auth.users(id)` | CASCADE |
-| `orders` | `company_id` | `companies(id)` | CASCADE |
-| `orders` | `distributor_id` | `distributors(id)` | RESTRICT (can't delete dealer with orders) |
-| `orders` | `salesperson_id` | `salespersons(id)` | RESTRICT (can't delete salesperson with orders) |
-| `orders` | `godown_id` | `godowns(id)` | SET NULL |
-| `order_lines` | `order_id` | `orders(id)` | CASCADE |
-| `order_lines` | `product_id` | `products(id)` | RESTRICT |
-| `order_schemes` | `order_id` | `orders(id)` | CASCADE |
-| `order_schemes` | `scheme_id` | `schemes(id)` | SET NULL |
-| `invoice_lines` | `invoice_id` | `invoices(id)` | CASCADE |
-| `invoices` | `company_id` | `companies(id)` | CASCADE |
-| `invoices` | `source_order_id` | `orders(id)` | SET NULL |
-| `claims` | `company_id` | `companies(id)` | CASCADE |
-| `claims` | `order_id` | `orders(id)` | RESTRICT |
-| `claims` | `distributor_id` | `distributors(id)` | RESTRICT |
-| `claim_lines` | `claim_id` | `claims(id)` | CASCADE |
-| `claim_lines` | `product_id` | `products(id)` | RESTRICT |
-| `stock_items` | `company_id` | `companies(id)` | CASCADE |
-| `stock_items` | `product_id` | `products(id)` | CASCADE |
-| `stock_items` | `godown_id` | `godowns(id)` | CASCADE |
-| `stock_deductions` | `company_id` | `companies(id)` | CASCADE |
-| `stock_deductions` | `order_id` | `orders(id)` | CASCADE |
-| `stock_deductions` | `product_id` | `products(id)` | RESTRICT |
-| `stock_deductions` | `godown_id` | `godowns(id)` | RESTRICT |
-| `schemes` | `company_id` | `companies(id)` | CASCADE |
-| `schemes` | `product_id` | `products(id)` | SET NULL |
-| `schemes` | `dealer_id` | `distributors(id)` | SET NULL |
-| `targets` | `company_id` | `companies(id)` | CASCADE |
-| `distributors` | `company_id` | `companies(id)` | CASCADE |
-| `salespersons` | `company_id` | `companies(id)` | CASCADE |
-| `products` | `company_id` | `companies(id)` | CASCADE |
-| `godowns` | `company_id` | `companies(id)` | CASCADE |
-| `notifications` | `company_id` | `companies(id)` | CASCADE |
-| `notifications` | `user_id` | `auth.users(id)` | CASCADE |
-| `activity_log` | `company_id` | `companies(id)` | CASCADE |
-| `activity_log` | `user_id` | `auth.users(id)` | CASCADE |
-| `secondary_sales` | `company_id` | `companies(id)` | CASCADE |
-| `secondary_sales` | `distributor_id` | `distributors(id)` | RESTRICT |
-| `secondary_sales` | `product_id` | `products(id)` | RESTRICT |
+### Step 1: Make `makeOfflineCrud.remove()` return success/failure
 
-### ON DELETE strategy
-- **CASCADE**: Child records are meaningless without parent (order_lines without order, all company-scoped data if company deleted)
-- **RESTRICT**: Prevent deleting a dealer/salesperson/product that has orders referencing it — forces user to handle dependencies first
-- **SET NULL**: Optional references (godown on order, source_order on invoice, scheme on order_scheme)
+Change `remove` in `src/context/data-utils.ts` to return `Promise<boolean>` — `true` if deleted, `false` if error. Move the success toast INTO the crud function (alongside the existing error toast), so callers don't need to manage toasts at all.
 
-### What changes in code
-Nothing. The app already handles these relationships correctly via application logic. FKs add database-level enforcement as a safety net.
+### Step 2: Update all 5 delete handlers
 
-### Risk
-Minimal — data is clean, no orphans exist. The migration is additive (adding constraints, not changing columns). Fully reversible by dropping the constraints.
+Make each `confirmDelete` function `async`, `await` the remove call, and remove the manual success toast (since it's now handled inside `remove`). Also improve the FK error message to be user-friendly (e.g., "Cannot delete — this dealer has existing orders").
+
+### Step 3: Improve FK error messages
+
+In `makeOfflineCrud.remove()`, detect the FK violation error string and replace the raw Postgres message with a human-readable one like "This dealer has orders linked to it. Remove those orders first."
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/context/data-utils.ts` | `remove()` returns `boolean`, shows success toast internally, maps FK errors to friendly messages |
+| `src/pages/Distributors.tsx` | `await` the delete, remove manual success toast |
+| `src/pages/Salespersons.tsx` | Same pattern |
+| `src/pages/Stock.tsx` | Same for product + warehouse delete |
+| `src/pages/Schemes.tsx` | Same pattern |
 
