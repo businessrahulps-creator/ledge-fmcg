@@ -27,6 +27,7 @@ export default function Company() {
   
   const api = useApi();
   const { companyId } = useAuth();
+  const { updateCompanyInfo } = api;
 
   const [companyName, setCompanyName] = useState("");
   const savedPrefix = api.orders.prefix();
