@@ -113,8 +113,21 @@ export function useTargetsDomain(deps: DomainDeps) {
     setSecondarySales(prev => prev.filter(s => s.id !== id));
   }, []);
 
+  const safeRefetchTargets = useCallback(async () => {
+    if (!deps.companyId || !navigator.onLine) return;
+    const { data } = await supabase.from("targets").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false });
+    if (data) setTargets((data as any[]).map((t: any) => ({ id: t.id, entityType: t.entity_type, entityId: t.entity_id, entityName: t.entity_name, periodType: t.period_type, periodStart: t.period_start, targetRevenue: t.target_revenue, targetOrders: t.target_orders })));
+  }, [deps.companyId]);
+
+  const safeRefetchSecondarySales = useCallback(async () => {
+    if (!deps.companyId || !navigator.onLine) return;
+    const { data } = await supabase.from("secondary_sales").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false });
+    if (data) setSecondarySales((data as any[]).map((s: any) => ({ id: s.id, distributorId: s.distributor_id, productId: s.product_id, productName: s.product_name, retailerName: s.retailer_name, quantity: s.quantity, date: s.date, remarks: s.remarks })));
+  }, [deps.companyId]);
+
   return {
     targets, setTargets, secondarySales, setSecondarySales,
     addTarget, updateTarget, deleteTarget, addSecondarySale, deleteSecondarySale,
+    safeRefetchTargets, safeRefetchSecondarySales,
   };
 }

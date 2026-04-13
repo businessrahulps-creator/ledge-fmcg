@@ -172,8 +172,21 @@ export function useBillingDomain(deps: BillingDeps) {
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
   }, []);
 
+  const safeRefetchInvoices = useCallback(async () => {
+    if (!deps.companyId || !navigator.onLine) return;
+    const { data } = await supabase.from("invoices").select("*, invoice_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
+    if (data) setInvoices((data as any[]).map((inv: any) => ({ id: inv.id, invoiceNumber: inv.invoice_number, invoiceDate: inv.invoice_date, docType: inv.doc_type, sourceOrderId: inv.source_order_id, buyerName: inv.buyer_name, buyerAddress: inv.buyer_address, buyerGstin: inv.buyer_gstin, buyerStateCode: inv.buyer_state_code, sellerName: inv.seller_name, sellerAddress: inv.seller_address, sellerGstin: inv.seller_gstin, sellerPan: inv.seller_pan, sellerStateCode: inv.seller_state_code, sellerPhone: inv.seller_phone, sellerEmail: inv.seller_email, sellerBankName: inv.seller_bank_name, sellerBankAccount: inv.seller_bank_account, sellerBankIfsc: inv.seller_bank_ifsc, sellerBankAccountName: inv.seller_bank_account_name, sellerLogoUrl: inv.seller_logo_url, supplyType: inv.supply_type, gstRate: inv.gst_rate, subtotal: inv.subtotal, cgstAmount: inv.cgst_amount, sgstAmount: inv.sgst_amount, igstAmount: inv.igst_amount, totalTax: inv.total_tax, grandTotal: inv.grand_total, roundOff: inv.round_off, amountInWords: inv.amount_in_words, notes: inv.notes, status: inv.status, createdAt: inv.created_at, lines: (inv.invoice_lines || []).map((l: any) => ({ id: l.id, productName: l.product_name, hsnCode: l.hsn_code, quantity: l.quantity, unit: l.unit, unitPrice: l.unit_price, taxableValue: l.taxable_value })) })));
+  }, [deps.companyId]);
+
+  const safeRefetchClaims = useCallback(async () => {
+    if (!deps.companyId || !navigator.onLine) return;
+    const { data } = await supabase.from("claims" as any).select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
+    if (data) setClaims((data as any[]).map((c: any) => ({ id: c.id, orderId: c.order_id, orderNumber: c.order_number, distributorId: c.distributor_id, distributorName: c.distributor_name, claimType: c.claim_type, reason: c.reason, status: c.status, totalClaimValue: c.total_claim_value, restoreStock: c.restore_stock, resolutionNotes: c.resolution_notes, resolvedAt: c.resolved_at, createdAt: c.created_at, lines: (c.claim_lines || []).map((l: any) => ({ id: l.id, productId: l.product_id, productName: l.product_name, quantity: l.quantity, unitPrice: l.unit_price, lineTotal: l.line_total })) })));
+  }, [deps.companyId]);
+
   return {
     invoices, setInvoices, claims, setClaims,
     addInvoice, updateInvoice, deleteInvoice, addClaim, updateClaim,
+    safeRefetchInvoices, safeRefetchClaims,
   };
 }
