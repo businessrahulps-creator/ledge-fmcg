@@ -198,6 +198,10 @@ export default function Billing() {
     }
     if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
     if (lines.length === 0 || lines.every(l => !l.productName.trim())) { toast.error("No line items"); return; }
+    if (docType === "gst_invoice" && (!vehicle.trim() || !driverName.trim())) {
+      toast.error("Vehicle and driver details are mandatory for GST invoices");
+      return;
+    }
 
     setSaving(true);
     const invoiceLines: InvoiceLine[] = lines.filter(l => l.productName.trim()).map(l => ({
@@ -240,6 +244,8 @@ export default function Billing() {
       roundOff: calculated.roundOff,
       amountInWords: numberToWords(calculated.grandTotal),
       notes,
+      vehicle,
+      driverName,
       lines: invoiceLines,
     };
 
@@ -333,6 +339,8 @@ export default function Billing() {
       roundOff: inv.roundOff,
       amountInWords: inv.amountInWords,
       notes: inv.notes,
+      vehicle: inv.vehicle || "",
+      driverName: inv.driverName || "",
     };
 
     try {
