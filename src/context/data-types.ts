@@ -181,7 +181,7 @@ export interface DataContextType {
   invoices: Invoice[];
   addInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => Promise<Invoice | null>;
   updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
-  deleteInvoice: (id: string) => Promise<void>;
+  deleteInvoice: (id: string) => Promise<boolean>;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;

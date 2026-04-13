@@ -89,19 +89,20 @@ export function useBillingDomain(deps: BillingDeps) {
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
   }, []);
 
-  const deleteInvoice = useCallback(async (id: string) => {
+  const deleteInvoice = useCallback(async (id: string): Promise<boolean> => {
     const inv = invoices.find(i => i.id === id);
-    if (inv?.status === "final") { toast.error("Cannot delete finalized document"); return; }
+    if (inv?.status === "final") { toast.error("Cannot delete finalized document"); return false; }
 
     // Block offline — deleting financial documents should only happen with server confirmation
     if (!navigator.onLine) {
       toast.error("Cannot delete documents offline", { description: "Please reconnect to delete." });
-      return;
+      return false;
     }
 
     const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
-    if (error) { toast.error("Failed to delete document", { description: error.message }); return; }
+    if (error) { toast.error("Failed to delete document", { description: error.message }); return false; }
     setInvoices(prev => prev.filter(i => i.id !== id));
+    return true;
   }, [invoices]);
 
   const addClaim = useCallback(async (claim: Claim): Promise<boolean> => {
