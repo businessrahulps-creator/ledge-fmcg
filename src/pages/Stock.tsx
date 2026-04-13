@@ -149,11 +149,11 @@ export default function Stock() {
     setEditProduct(null);
   };
 
-  const confirmDeleteProduct = () => {
+  const confirmDeleteProduct = async () => {
     if (!deleteProductId) return;
     const p = products.find((i) => i.id === deleteProductId);
-    deleteProductCtx(deleteProductId);
-    toast.success("Product deleted", { description: `${p?.name} has been removed.` });
+    const ok = await deleteProductCtx(deleteProductId);
+    if (ok) toast.success("Product deleted", { description: `${p?.name} has been removed.` });
     setDeleteProductId(null);
   };
 
@@ -187,12 +187,14 @@ export default function Stock() {
     setEditWarehouse(null);
   };
 
-  const confirmDeleteWarehouse = () => {
+  const confirmDeleteWarehouse = async () => {
     if (!deleteWarehouseLoc) return;
-    deleteLocation(deleteWarehouseLoc.id);
-    setStockItems((prev) => prev.filter((si) => si.godownId !== deleteWarehouseLoc.id));
-    if (selectedWarehouse === deleteWarehouseLoc.id) setSelectedWarehouse(null);
-    toast.success("Warehouse deleted", { description: `${deleteWarehouseLoc.name} and all its inventory have been removed.` });
+    const ok = await deleteLocation(deleteWarehouseLoc.id);
+    if (ok) {
+      setStockItems((prev) => prev.filter((si) => si.godownId !== deleteWarehouseLoc.id));
+      if (selectedWarehouse === deleteWarehouseLoc.id) setSelectedWarehouse(null);
+      toast.success("Warehouse deleted", { description: `${deleteWarehouseLoc.name} and all its inventory have been removed.` });
+    }
     setDeleteWarehouseLoc(null);
     setDeleteConfirmText("");
   };

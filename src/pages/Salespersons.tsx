@@ -85,11 +85,11 @@ export default function Salespersons() {
     setEditItem(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
     const s = items.find((i) => i.id === deleteId);
-    deleteSalesperson(deleteId);
-    toast.success("Team member removed", { description: `${s?.name} has been removed.` });
+    const ok = await deleteSalesperson(deleteId);
+    if (ok) toast.success("Team member removed", { description: `${s?.name} has been removed.` });
     setDeleteId(null);
   };
 

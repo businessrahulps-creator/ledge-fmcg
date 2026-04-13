@@ -243,11 +243,11 @@ export function makeOfflineCrud<T extends { id: string }>(
     if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
       if (!allowOfflineDelete) {
         toast.error(`Cannot delete ${entityLogType || table} offline`, { description: "Please reconnect to delete." });
-        return;
+        return false;
       }
       setter(prev => {
         const updated = prev.filter(x => x.id !== id);
@@ -256,12 +256,17 @@ export function makeOfflineCrud<T extends { id: string }>(
       });
       await enqueueMutation({ type: "delete", table, payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     const { error } = await supabase.from(table as any).delete().eq("id", id);
-    if (error) { toast.error(`Failed to delete ${table}`, { description: error.message }); return; }
+    if (error) {
+      const friendly = mapFkError(error.message, entityLogType || table);
+      toast.error(friendly.title, { description: friendly.description });
+      return false;
+    }
     setter(prev => prev.filter(x => x.id !== id));
     if (entityLogType) log(entityLogType, id, "deleted", `Deleted ${entityLogType}`);
+    return true;
   };
 
   return { add, update, remove };
