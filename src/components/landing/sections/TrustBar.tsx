@@ -17,13 +17,13 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="bg-indigo-50/30 py-20">
+    <section className="bg-[#F8F7F5] py-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
         <div className="overflow-hidden">
           <div className="flex gap-12 animate-marquee w-max items-center">
             {[...companies, ...companies].map((name, i) => (
-              <span key={i} className="text-lg font-semibold text-[#C4C4C4] whitespace-nowrap shrink-0">
+              <span key={i} className="text-lg font-semibold text-[#D4D1CC] whitespace-nowrap shrink-0">
                 {name}
               </span>
             ))}
@@ -35,7 +35,7 @@ export function TrustBar() {
           {stats.map((stat, i) => (
             <AnimateIn key={stat} delay={i * 0.1}>
               <div className="text-center px-4">
-                <div className="font-heading font-extrabold text-[20px] md:text-[24px] text-midnight mb-1">
+                <div className="font-heading font-extrabold text-[20px] md:text-[24px] text-[#1A1A1A] mb-1">
                   {stat}
                 </div>
               </div>
@@ -45,14 +45,14 @@ export function TrustBar() {
 
         {/* Pull Quote */}
         <AnimateIn delay={0.15} className="mt-12">
-          <div className="bg-violet-50/50 rounded-2xl p-8 max-w-2xl mx-auto relative">
-            <span className="absolute top-4 left-6 text-6xl font-serif text-indigo-400 opacity-30 leading-none select-none">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl mx-auto relative border border-[#E8E5E0]" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+            <span className="absolute top-4 left-6 text-6xl font-serif text-[#D4D1CC] opacity-40 leading-none select-none">
               "
             </span>
-            <p className="font-body text-lg text-graphite italic leading-[1.7] pl-8">
+            <p className="font-body text-lg text-[#52525B] italic leading-[1.75] pl-8">
               The first time I opened Ledge on a Friday evening and just… saw everything - every order, every payment, every dispatch for the week - I realized I'd been running blind for years.
             </p>
-            <p className="font-body font-semibold text-midnight mt-4 pl-8">
+            <p className="font-body font-semibold text-[#1A1A1A] mt-4 pl-8">
               Arnav Sethi · Founder, Aryan Beverages, Pune
             </p>
           </div>

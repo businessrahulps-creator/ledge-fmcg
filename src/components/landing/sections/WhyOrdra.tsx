@@ -25,10 +25,10 @@ const blocks = [
 
 export function WhyOrdra() {
   return (
-    <section className="bg-white py-16 md:py-32">
+    <section className="bg-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
+          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             This isn't another ERP your field team will quit in three weeks.
           </h2>
         </AnimateIn>
@@ -36,11 +36,11 @@ export function WhyOrdra() {
         <div className="max-w-3xl mx-auto space-y-12">
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
-              <div className="border-l-4 border-indigo-500 pl-8">
-                <h3 className="font-heading font-bold text-[24px] text-midnight mb-4">
+              <div className="border-l-4 border-[#0D9488] pl-8">
+                <h3 className="font-heading font-bold text-[24px] text-[#1A1A1A] mb-4">
                   {block.title}
                 </h3>
-                <p className="font-body text-[17px] text-graphite leading-[1.7]">
+                <p className="font-body text-[17px] text-[#52525B] leading-[1.75]">
                   {block.content}
                 </p>
               </div>

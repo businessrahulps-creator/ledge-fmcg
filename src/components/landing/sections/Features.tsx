@@ -42,23 +42,22 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="bg-violet-50/20 py-16 md:py-32">
+    <section id="features" className="bg-[#F8F7F5] py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
+          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             Built for the way Indian distribution businesses actually run. Not for how someone in a boardroom imagined they do.
           </h2>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, i) => (
             <AnimateIn key={feature.title} delay={i * 0.08}>
-              <div className="bg-white border border-indigo-100 rounded-2xl p-8 transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-200">
-                <feature.icon size={24} className="text-accent-indigo mb-5" strokeWidth={1.5} />
-                <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
+              <div className="bg-white border border-[#E8E5E0] rounded-3xl p-8 transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+                <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A] mb-3">
                   {feature.title}
                 </h3>
-                <p className="font-body text-base text-graphite leading-[1.65]">
+                <p className="font-body text-base text-[#52525B] leading-[1.75]">
                   {feature.description}
                 </p>
               </div>

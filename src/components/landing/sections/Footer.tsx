@@ -23,12 +23,12 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-indigo-50/10 py-16 border-t border-indigo-100">
+    <footer className="bg-[#F8F7F5] py-16 border-t border-[#E8E5E0]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="font-body font-semibold text-[14px] text-midnight uppercase tracking-wider mb-4">
+              <h4 className="font-body font-semibold text-[14px] text-[#1A1A1A] uppercase tracking-wider mb-4">
                 {col.title}
               </h4>
               <ul className="space-y-3">
@@ -40,14 +40,14 @@ export function Footer() {
                       {isAnchor ? (
                         <a
                           href={href.replace("/", "")}
-                          className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                          className="font-body text-[14px] text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
                         >
                           {link}
                         </a>
                       ) : (
                         <Link
                           to={href}
-                          className="font-body text-[14px] text-graphite hover:text-midnight transition-colors duration-200"
+                          className="font-body text-[14px] text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
                         >
                           {link}
                         </Link>
@@ -60,10 +60,10 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-indigo-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-8 border-t border-[#E8E5E0] flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-midnight">Ledge</Link>
-            <span className="font-body text-sm text-lp-zinc">
+            <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-[#1A1A1A]">Ledge</Link>
+            <span className="font-body text-sm text-[#71717A]">
               © 2026 Ledge. All rights reserved.
             </span>
           </div>
@@ -73,7 +73,7 @@ export function Footer() {
               <a
                 key={href}
                 href={href}
-                className="text-lp-zinc hover:text-midnight transition-colors duration-200"
+                className="text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
               >
                 <Icon size={20} />
               </a>

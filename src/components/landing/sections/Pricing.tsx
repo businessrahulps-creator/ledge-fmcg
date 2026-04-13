@@ -18,7 +18,7 @@ const plans = [
     ],
     cta: "Start Free",
     highlighted: false,
-    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
+    ctaStyle: "border border-[#D4D1CC] text-[#1A1A1A] hover:border-[#A8A29E]",
   },
   {
     name: "Growth",
@@ -39,7 +39,7 @@ const plans = [
     ],
     cta: "Start 14-Day Free Trial",
     highlighted: true,
-    ctaStyle: "bg-indigo-600 text-white hover:bg-indigo-700",
+    ctaStyle: "bg-[#0D9488] text-white hover:bg-[#0F766E]",
   },
   {
     name: "Scale",
@@ -60,7 +60,7 @@ const plans = [
     ],
     cta: "Start 14-Day Free Trial",
     highlighted: false,
-    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
+    ctaStyle: "border border-[#D4D1CC] text-[#1A1A1A] hover:border-[#A8A29E]",
   },
   {
     name: "Enterprise",
@@ -78,61 +78,66 @@ const plans = [
     ],
     cta: "Talk to Us",
     highlighted: false,
-    ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
+    ctaStyle: "border border-[#D4D1CC] text-[#1A1A1A] hover:border-[#A8A29E]",
   },
 ];
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-white py-16 md:py-32">
+    <section id="pricing" className="bg-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-2 tracking-[-0.03em]">
+          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
             Start free. Pay when it's running your business.
           </h2>
-          <p className="font-body text-lg text-lp-zinc text-center mb-16">
+          <p className="font-body text-lg text-[#71717A] text-center mb-16">
             No setup fees. No annual lock-in. Cancel anytime. Every plan includes PWA install, offline support, and automatic updates.
           </p>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, i) => (
             <AnimateIn key={plan.name} delay={i * 0.08}>
               <div
-                className={`bg-white rounded-2xl p-8 flex flex-col h-full ${
+                className={`bg-white rounded-3xl p-8 flex flex-col h-full ${
                   plan.highlighted
-                    ? "border-2 border-indigo-500 relative shadow-[0_0_20px_rgba(79,70,229,0.1)]"
-                    : "border border-indigo-100"
+                    ? "border-2 border-[#0D9488] relative"
+                    : "border border-[#E8E5E0]"
                 }`}
+                style={{
+                  boxShadow: plan.highlighted
+                    ? "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(13,148,136,0.08)"
+                    : "0 1px 2px rgba(0,0,0,0.04)",
+                }}
               >
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0D9488] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
 
-                <h3 className="font-heading font-bold text-[20px] text-midnight">
+                <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A]">
                   {plan.name}
                 </h3>
 
-                <p className="font-body text-sm text-graphite mt-1">
+                <p className="font-body text-sm text-[#52525B] mt-1">
                   {plan.tagline}
                 </p>
 
                 <div className="mt-3">
                   {plan.price === "Custom" ? (
-                    <span className="font-heading font-extrabold text-[36px] text-midnight">
+                    <span className="font-heading font-extrabold text-[36px] text-[#1A1A1A]">
                       Custom
                     </span>
                   ) : (
                     <>
-                      <span className="text-lp-zinc text-base font-normal">
+                      <span className="text-[#71717A] text-base font-normal">
                         {plan.priceLabel}
                       </span>
-                      <span className="font-heading font-extrabold text-[36px] text-midnight">
+                      <span className="font-heading font-extrabold text-[36px] text-[#1A1A1A]">
                         {plan.price}
                       </span>
-                      <span className="text-lp-zinc text-base font-normal">
+                      <span className="text-[#71717A] text-base font-normal">
                         {plan.period}
                       </span>
                     </>
@@ -144,9 +149,9 @@ export function Pricing() {
                     <div key={f} className="flex items-start gap-2">
                       <Check
                         size={16}
-                        className="text-emerald-500 shrink-0 mt-0.5"
+                        className="text-[#0D9488] shrink-0 mt-0.5"
                       />
-                      <span className="font-body text-[15px] text-graphite">
+                      <span className="font-body text-[15px] text-[#52525B]">
                         {f}
                       </span>
                     </div>
@@ -155,7 +160,7 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3 rounded-full text-center font-semibold text-sm transition-all duration-200 block ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3 rounded-2xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
                 >
                   {plan.cta}
                 </Link>
@@ -165,10 +170,10 @@ export function Pricing() {
         </div>
 
         <div className="text-center mt-10 space-y-2">
-          <p className="font-body text-[15px] text-lp-zinc">
+          <p className="font-body text-[15px] text-[#71717A]">
             All plans include offline support, PWA install, automatic updates, and role-based access control.
           </p>
-          <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
+          <p className="font-body text-[15px] text-[#0D9488] font-medium hover:underline cursor-pointer">
             Need help deciding? Chat on WhatsApp →
           </p>
         </div>

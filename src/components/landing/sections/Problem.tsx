@@ -30,27 +30,26 @@ const cards = [
 
 export function Problem() {
   return (
-    <section className="bg-violet-50/30 py-16 md:py-32">
+    <section className="bg-[#F8F7F5] py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16">
         {/* Left - Sticky headline */}
         <div className="lg:col-span-4 lg:sticky lg:top-32 self-start">
           <AnimateIn>
-            <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight leading-[1.08] tracking-[-0.03em]">
+            <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] leading-[1.08] tracking-[-0.04em]">
               Distribution is complex enough. Your software shouldn't make it worse.
             </h2>
           </AnimateIn>
         </div>
 
         {/* Right - Pain point cards */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-8">
           {cards.map((card, i) => (
             <AnimateIn key={card.title} delay={i * 0.08}>
-              <div className="bg-white rounded-2xl p-8 border border-indigo-100">
-                <card.icon className="text-accent-indigo mb-4" size={24} />
-                <h3 className="font-heading font-bold text-[20px] text-midnight mb-3">
+              <div className="bg-white rounded-3xl p-8 border border-[#E8E5E0]" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+                <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A] mb-3">
                   {card.title}
                 </h3>
-                <p className="font-body text-base text-graphite leading-[1.7]">
+                <p className="font-body text-base text-[#52525B] leading-[1.75]">
                   {card.description}
                 </p>
               </div>

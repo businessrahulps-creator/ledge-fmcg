@@ -29,14 +29,14 @@ export function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-md border-b border-fog"
+          ? "bg-[#F8F7F5]/95 backdrop-blur-md border-b border-[#E8E5E0]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-midnight">Ledge</span>
+          <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-[#1A1A1A]">Ledge</span>
         </Link>
 
         {/* Center links  -  desktop */}
@@ -45,7 +45,7 @@ export function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="font-body font-medium text-[15px] text-graphite hover:text-midnight transition-colors duration-200"
+              className="font-body font-medium text-[15px] text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
             >
               {l.label}
             </a>
@@ -56,7 +56,7 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             to="/signup"
-            className="inline-flex items-center bg-indigo-600 text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-indigo-700 transition-colors duration-200"
+            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-2xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200"
           >
             Get Started Free
           </Link>
@@ -65,13 +65,13 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button className="md:hidden text-midnight p-2 -mr-2" aria-label="Open menu">
+            <button className="md:hidden text-[#1A1A1A] p-2 -mr-2" aria-label="Open menu">
               <Menu size={24} />
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="bg-white border-fog w-72 flex flex-col">
+          <SheetContent side="right" className="bg-white border-[#E8E5E0] w-72 flex flex-col">
             <SheetHeader>
-              <SheetTitle className="text-midnight font-heading">Menu</SheetTitle>
+              <SheetTitle className="text-[#1A1A1A] font-heading">Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-6 mt-8 flex-1">
               {links.map((l) => (
@@ -79,7 +79,7 @@ export function Navbar() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="font-body font-medium text-lg text-graphite hover:text-midnight transition-colors"
+                  className="font-body font-medium text-lg text-[#52525B] hover:text-[#1A1A1A] transition-colors"
                 >
                   {l.label}
                 </a>
@@ -88,7 +88,7 @@ export function Navbar() {
             <Link
               to="/signup"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-indigo-700 transition-colors mb-4"
+              className="inline-flex items-center justify-center bg-[#0D9488] text-white px-6 py-3 rounded-2xl font-body font-semibold text-base hover:bg-[#0F766E] transition-colors mb-4"
             >
               Get Started Free
             </Link>
