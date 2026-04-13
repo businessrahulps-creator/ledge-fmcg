@@ -153,7 +153,8 @@ export default function Billing() {
       quantity: l.quantity,
       unit: catalogProduct?.unit || "Pack",
       unitPrice: discountRatio > 0 ? Math.round((l.unitPrice * (1 - discountRatio)) * 100) / 100 : l.unitPrice,
-    })));
+    };
+    }));
     setStep(2);
   }
 
