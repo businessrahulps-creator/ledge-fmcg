@@ -24,7 +24,11 @@ export function UpdatePrompt() {
   }, []);
 
   const handleReload = useCallback(() => {
-    updateSW?.(true);
+    if (updateSW) {
+      updateSW(true).catch(() => window.location.reload());
+    } else {
+      window.location.reload();
+    }
   }, [updateSW]);
 
   if (!needRefresh) return null;
