@@ -56,7 +56,10 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             to="/signup"
-            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-3xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md"
+            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-3xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200"
+            style={{ boxShadow: "0 2px 8px rgba(13,148,136,0.15)" }}
+            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(13,148,136,0.2)")}
+            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(13,148,136,0.15)")}
           >
             Get Started Free
           </Link>
