@@ -1,37 +1,24 @@
 
 
-# Fix: iOS Auto-Zoom on Input Focus
+# Fix: Logged-in Users Sent to Landing Page on Reopen
 
 ## Problem
-On iOS Safari, when an input field has a font-size smaller than 16px, the browser automatically zooms in on focus. This breaks the "native app" feel — users see the page zoom and pan, making it feel like a website rather than an app.
+The root route `/` always shows the landing page regardless of auth state. When users close the app and reopen it, the browser navigates to `/` (the default), shows the marketing landing page, and users think they've been logged out — even though their session is still valid in localStorage.
 
-The current Input and Textarea components use `text-sm` (14px), which triggers this iOS behavior.
+## Root Cause
+The `Index` component (landing page) never checks if a user is already authenticated. It should redirect logged-in users straight to `/dashboard`.
 
 ## Fix
 
-### `src/index.css`
-Add a CSS rule targeting iOS to set all form inputs to 16px minimum font-size, preventing the auto-zoom while keeping the visual design intact:
+### `src/pages/Index.tsx`
+Add an auth check at the top of the component:
+- Import `useAuth` from AuthContext
+- If auth is still loading, show a brief spinner (prevents flash of landing page)
+- If user exists, `<Navigate to="/dashboard" />` immediately
+- Otherwise, render the landing page as usual
 
-```css
-/* Prevent iOS Safari auto-zoom on input focus */
-@supports (-webkit-touch-callout: none) {
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-}
-```
+This is a single-file, ~10-line change. Session persistence already works — the Supabase client stores tokens in localStorage and `AuthProvider` restores them via `getSession()`. The only missing piece is the redirect.
 
-This uses `@supports (-webkit-touch-callout: none)` which only matches iOS Safari/WebKit, so desktop styling remains unaffected.
-
-Additionally, add the `maximum-scale=1` attribute to the viewport meta tag in `index.html` as a secondary safeguard:
-
-### `index.html`
-Update the viewport meta tag:
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
-```
-
-## Files Changed
-- `src/index.css` — iOS-only 16px minimum on form inputs
-- `index.html` — viewport meta to prevent pinch-zoom scaling
+### Files Changed
+- `src/pages/Index.tsx` — redirect authenticated users to `/dashboard`
 
