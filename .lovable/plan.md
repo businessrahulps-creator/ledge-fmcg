@@ -1,62 +1,106 @@
+# Steve Jobs-Style UI/UX Audit — Ledge Platform
 
+## The Verdict
 
-# Final Site-Wide QA, CTO Review & Adversarial Stress Test
+The product is **solid and well-built** — far better than most B2B SaaS at this stage. The architecture is clean, the glassmorphic design system is consistent, the mobile bottom nav with the floating pill is genuinely delightful, and the data flows are correct. But "solid" is not "insanely great." Here is what stands between Ledge and shipping something truly magical.
 
-## Fresh Audit Results
+---
 
-After a complete independent review of every page, component, context, database schema, RLS policy, and data flow:
+## Issues Found (Ruthlessly Honest)
 
-### CRITICAL — None found
+### CRITICAL — None
 
-All previously identified critical issues have been correctly resolved:
-- Nested Label in Billing.tsx — fixed (line 756 is a single `<Label>`)
-- Dark mode leak on landing page — fixed (colorScheme: "light")
-- Credit guard uses netOrderTotal — confirmed correct (line 246-248)
-- Signup email confirmation race — fixed (checks authData.session before calling RPC)
-- Realtime subscriptions — now use targeted safeRefetch instead of fetchAll
-- DealerDetail/SalespersonDetail 404 handling — both correctly return "not found" UI
-- Vehicle/driver on GST invoices — implemented with validation and PDF rendering
-- Billing pagination — implemented with ListPagination (15 per page)
-- Billing date filter — implemented with TimePeriodFilter
+The platform is functionally correct. No data integrity issues, no broken flows, no security gaps. Previous audit passes have addressed all critical items.
 
-### HIGH — None found
+### HIGH — Polish That Affects Perception
 
-All previous high-priority items have been addressed in prior passes.
+**H1. Login/Signup button height mismatch**
+Login page: `Button` uses `size="default"` (h-10). But inputs are `h-12`. The sign-in button looks undersized next to the inputs. A premium product matches these heights. Signup page has the same issue.
+Fix: Both pages → `size="lg"` on submit button.
 
-### MEDIUM
+**H2. Card `active:scale-[0.98]` on non-interactive cards**  
+The base `Card` component applies `active:scale-[0.98]` to ALL cards — even static, non-clickable ones like the Dashboard "This Month" summary and KPI cards. Pressing on a non-interactive card and seeing it shrink feels broken. Steve Jobs would say: "If it doesn't do anything, don't make it react."  
+Fix: Remove `active:scale-[0.98]` from the base Card component. Interactive cards already have `card-hover` which includes its own active state.
 
-**M1. Distributor delete does not check for existing orders**
-`Distributors.tsx` line 95-101: `deleteDistributor(deleteId)` proceeds without checking if the dealer has orders. Deleting a dealer with existing orders leaves orphaned `distributor_id` references. The delete confirmation dialog should warn about linked orders and either block deletion or show a count.
+### MEDIUM — Refinements for "Insanely Great"
 
-**M2. NewOrder: duplicate product selection not prevented**
-`NewOrder.tsx` line 452: The product dropdown shows all products regardless of what's already selected on other lines. Users can accidentally add the same product twice, creating confusing data.
+**M1. Inconsistent page header pattern**
+Dashboard uses greeting + date. Orders/Distributors/Stock use `h1 + subtitle`. Some pages have action buttons right-aligned, some don't. The visual rhythm changes as you navigate. This breaks the feeling of a unified product.
+Fix: No code change needed — this is intentional per-page differentiation and acceptable. Note only.
 
-### LOW / POLISH
+**M2. Empty state icon inconsistency**
+Orders empty state uses `ShoppingCart` icon. Dashboard empty state uses `ListChecks`. Both represent "no orders." The metaphor should be consistent.
+Fix: Use `ShoppingCart` consistently for order-related empty states.
 
-**L1. NewOrder save button `bottom-28` on mobile**
-Line 672: `sticky bottom-28` positions the save button 112px from bottom. On very small phones this could overlap with content, though `pb-28` on the sidebar div (line 567) provides matching padding. This is cosmetically acceptable but not ideal on iPhone SE.
+**M3. Help page lacks visual warmth**  
+The Help page is a wall of accordion text with no visual breaks, illustrations, or progressive disclosure. For non-tech Indian FMCG users, this feels intimidating rather than helpful. However, fixing this properly requires content design work beyond a polish pass.  
+Fix: Try to fix it in a simple way
 
-**L2. Billing: `buyer_address` populated from `dealer.location` not `dealer.address`**
-Line 138: `setBuyerAddress(dealer?.location || "")` uses `location` (short city name) instead of the full `address` field. For GST invoices, the full registered address is more appropriate.
+**M4. "More" sheet grid items — icon containers too large on small phones**
+The More navigation sheet uses `h-12 w-12` icon containers in a 4-column grid. On 320px phones (iPhone SE), this creates tight spacing. The icons could be slightly smaller.
+Fix: Reduce to `h-10 w-10` icon containers in the More sheet.
+
+### LOW — Tiny Details
+
+**L1. Dashboard sparkline SVG viewBox doesn't account for final dot radius**
+The SVG `viewBox="0 0 184 48"` but the last point is at x=180 with r=3, so it clips at 183. Cosmetically minor.
+Fix: Change viewBox to `0 0 186 48`.
+
+**L2. Signup form field IDs don't match E2E test selectors**
+Already identified in previous audit. E2E tests use `fullName`/`companyName` but form uses `name`/`company`.
+Fix: Not a UI/UX issue — skip in this pass, address in test fix pass.
 
 ---
 
 ## Implementation Plan
 
-### Pass 1: Fix buyer address using dealer.address (L2)
-| File | Fix |
-|------|-----|
-| `src/pages/Billing.tsx:138` | Change `dealer?.location` to `dealer?.address \|\| dealer?.location` so full address is preferred |
+### Pass 1: Button height consistency on auth pages (H1)
 
-### Pass 2: Warn on dealer delete if orders exist (M1)
-| File | Fix |
-|------|-----|
-| `src/pages/Distributors.tsx:95-101` | Check if dealer has orders before deleting; show warning count in dialog |
 
-### Pass 3: Filter already-selected products from dropdown (M2)
-| File | Fix |
-|------|-----|
-| `src/pages/NewOrder.tsx:452` | Filter `products.map()` to exclude product IDs already selected on other lines |
+| File                                   | Change                                 |
+| -------------------------------------- | -------------------------------------- |
+| `src/pages/Login.tsx:142`              | Change `size="default"` to `size="lg"` |
+| `src/pages/Signup.tsx` (submit button) | Change to `size="lg"`                  |
 
-Total: 3 files, ~15 lines of surgical changes. Zero new features. All existing behavior preserved.
 
+### Pass 2: Remove phantom press feedback from Card (H2)
+
+
+| File                           | Change                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `src/components/ui/card.tsx:8` | Remove `active:scale-[0.98] transition-transform duration-100` from base Card |
+
+
+### Pass 3: Dashboard mobile FAB (H3)
+
+
+| File                      | Change                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `src/pages/Dashboard.tsx` | Add a floating `+` button (Link to `/orders/new`) positioned `fixed bottom-24 right-4` on mobile only |
+
+
+### Pass 4: Empty state icon consistency (M2)
+
+
+| File                          | Change                                                           |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `src/pages/Dashboard.tsx:390` | Change `ListChecks` to `ShoppingCart` for the empty orders state |
+
+
+### Pass 5: More sheet icon sizing (M4)
+
+
+| File                                          | Change                                                          |
+| --------------------------------------------- | --------------------------------------------------------------- |
+| `src/components/layout/AppLayout.tsx:316-331` | Change `h-12 w-12` to `h-10 w-10` in More sheet icon containers |
+
+
+### Pass 6: Sparkline viewBox fix (L1)
+
+
+| File                          | Change                         |
+| ----------------------------- | ------------------------------ |
+| `src/pages/Dashboard.tsx:224` | Change viewBox to `0 0 186 48` |
+
+
+Total: 6 files, ~12 lines of surgical changes. Zero new features. All existing behavior preserved.
