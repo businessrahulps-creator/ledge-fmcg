@@ -1,37 +1,62 @@
 
 
-# Fix: Premature Success Toasts on Delete (FK Constraint Errors)
+# Card Style Refinement — Premium Cursor Aesthetic
 
-## Root Cause
-The `makeOfflineCrud.remove()` function is async — it returns a Promise. But all 5 pages that call it do so **without `await`** and immediately show a success toast. When the DB rejects the delete (FK RESTRICT), the user sees both a success toast AND an error toast.
+## Honest Design Critique
 
-## Affected Pages
-1. **Distributors.tsx** — `deleteDistributor(deleteId)` + instant success toast
-2. **Salespersons.tsx** — `deleteSalesperson(deleteId)` + instant success toast
-3. **Stock.tsx** — `deleteProductCtx(deleteProductId)` + instant success toast
-4. **Stock.tsx** — `deleteLocation(deleteWarehouseLoc.id)` + instant success toast
-5. **Schemes.tsx** — `api.schemes.remove(deleteId)` + instant success toast
+**Why the Cursor cards feel more premium:**
 
-## Fix Strategy
+1. **Typography hierarchy is flatter.** Cursor uses a single weight system — name is bold but not oversized, metadata is regular weight. Ledge's cards have too many competing font sizes (name, location, phone, orders, currency, outstanding badge) creating visual noise.
 
-### Step 1: Make `makeOfflineCrud.remove()` return success/failure
+2. **No icons in content rows.** Cursor relies on whitespace and text alone. Ledge cards have MapPin, Phone, ShoppingCart, UserCheck icons next to every line — this adds clutter and makes cards feel "busy".
 
-Change `remove` in `src/context/data-utils.ts` to return `Promise<boolean>` — `true` if deleted, `false` if error. Move the success toast INTO the crud function (alongside the existing error toast), so callers don't need to manage toasts at all.
+3. **Minimal border/shadow.** Cursor cards use a single thin border with nearly invisible shadow. Ledge's `glass-card` has a multi-layer shadow (`0_0_0_1px`, `0_1px_2px`, `0_2px_8px`) that creates visible depth. Premium = flatter.
 
-### Step 2: Update all 5 delete handlers
+4. **Generous internal whitespace.** Cursor cards have more padding and more vertical spacing between elements. Ledge cards feel cramped — tight `gap-1`, `gap-1.5`, `mt-1` spacings.
 
-Make each `confirmDelete` function `async`, `await` the remove call, and remove the manual success toast (since it's now handled inside `remove`). Also improve the FK error message to be user-friendly (e.g., "Cannot delete — this dealer has existing orders").
+5. **Muted action buttons.** Cursor's CTAs are understated (small rounded pills, gray bg). Ledge's edit/delete icons sit visually heavy with colored destructive red.
 
-### Step 3: Improve FK error messages
+6. **No colored badges inside cards.** Cursor keeps cards monochrome. Ledge's "Outstanding" badge with red/amber/green backgrounds introduces noise.
 
-In `makeOfflineCrud.remove()`, detect the FK violation error string and replace the raw Postgres message with a human-readable one like "This dealer has orders linked to it. Remove those orders first."
+## What to change
 
-### Files Changed
+### Pass 1: `glass-card` utility (index.css)
+- Flatten shadow to single subtle layer: `shadow-[0_1px_3px_rgba(0,0,0,0.04)]`
+- Increase border radius to `rounded-xl` (keep `rounded-2xl`)
+- Slightly increase border opacity for crispness: `border-border/50`
+
+### Pass 2: Dealer cards (Distributors.tsx)
+- Remove MapPin and Phone icons — show location and contact as plain text lines
+- Reduce action button visual weight — smaller icons, remove red color from delete (use muted foreground)
+- Increase card padding to `p-5 md:p-6`
+- Use lighter separator: `border-border/30`
+- Make Outstanding badge more subtle — remove colored backgrounds, use muted text with a small dot indicator
+
+### Pass 3: Sales Team cards (Salespersons.tsx)
+- Remove the circular avatar icon container (`bg-primary/10` circle) — just show name directly like Cursor
+- Remove MapPin icon from region, Phone icon from phone — plain text
+- Same padding/separator treatment as dealers
+- Same muted action buttons
+
+### Pass 4: Stock product cards (Stock.tsx)
+- Same icon reduction and spacing treatment
+- Flatten HealthBadge to text-only (remove bg colors, use colored dot + text)
+
+### Pass 5: Dashboard Top Dealers/Products (Dashboard.tsx)
+- Already minimal, just ensure consistent glass-card shadow
+
+## Files Changed
 | File | Change |
 |------|--------|
-| `src/context/data-utils.ts` | `remove()` returns `boolean`, shows success toast internally, maps FK errors to friendly messages |
-| `src/pages/Distributors.tsx` | `await` the delete, remove manual success toast |
-| `src/pages/Salespersons.tsx` | Same pattern |
-| `src/pages/Stock.tsx` | Same for product + warehouse delete |
-| `src/pages/Schemes.tsx` | Same pattern |
+| `src/index.css` | Flatten `glass-card` shadow, soften `card-hover` |
+| `src/pages/Distributors.tsx` | Remove inline icons, increase spacing, mute action buttons, subtle outstanding badge |
+| `src/pages/Salespersons.tsx` | Remove avatar circle, inline icons, increase spacing, mute action buttons |
+| `src/pages/Stock.tsx` | Same icon/spacing treatment for product cards |
+| `src/pages/Dashboard.tsx` | No changes needed — already minimal |
+
+## What will NOT change
+- All component structure, props, data flow, navigation
+- All existing functionality and interactivity
+- Dark mode token values
+- Card grid layout (3-col responsive)
 
