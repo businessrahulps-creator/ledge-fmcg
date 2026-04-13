@@ -1,29 +1,30 @@
 
 
-# Fix: Stale Service Worker Serving Old App Version
+# Fix: Enrich Order Invoice PDF with Full Details
 
 ## Problem
-Customer on getledge.in sees an old version even after login/logout. Only incognito or full browser restart fixes it. This is because `registerType: "prompt"` makes the new service worker **wait** until all tabs close before activating.
+The Order Invoice PDF (exported from the order detail page) only shows basic info. Specifically:
+1. **Dispatch details** (vehicle, driver) appear only at the bottom in a small section — easy to miss, and not shown at all for pending orders
+2. **Distributor details** — only name is shown, no address or GSTIN
+3. **Company details** — no phone, email, PAN, or bank details
 
-## Solution (2 files, ~5 lines changed)
+The data exists in the database and is correctly mapped. The issue is the PDF template is too minimal compared to the full GST Invoice.
 
-### 1. `vite.config.ts` — Force immediate SW activation
-- Change `registerType` from `"prompt"` to `"autoUpdate"`
-- Add `skipWaiting: true` and `clientsClaim: true` to workbox config
-- This makes new service workers activate immediately on detection, replacing stale caches
+## Solution (2 files)
 
-### 2. `src/components/UpdatePrompt.tsx` — Adapt to autoUpdate
-- Change `registerSW` usage to match `autoUpdate` behavior
-- The prompt still shows briefly to inform users, then auto-reloads
-- Keep the 60-second poll for faster update detection
+### 1. `src/components/pdf/OrderInvoicePdf.tsx`
+- Add props for distributor details (address, GSTIN) and company info (phone, email, PAN, bank details)
+- Show distributor address and GSTIN under "Bill To"
+- Move dispatch details (vehicle, driver, dispatch date) into the "Order Details" meta section so they're prominent, not hidden at the bottom
+- Add a "Bank Details" section matching the GstInvoicePdf pattern
+- Remove the redundant bottom "Dispatch Details" section
+
+### 2. `src/pages/OrderDetail.tsx`
+- Look up the distributor from `api.dealers.list()` by `order.distributorId` to get address, GSTIN, state code
+- Pass full company info (phone, email, PAN, bank details) and distributor details to the PDF component
 
 ### What Changes for Users
-- **Before**: New version sits in "waiting" state → user must click "Reload" or close all tabs
-- **After**: New version activates automatically → page refreshes to load latest code
-- No more stale cache scenarios
-
-### No Risk
-- `skipWaiting` + `clientsClaim` is the standard pattern used by Google's own PWA guidance
-- Existing cached data (localStorage, IndexedDB) is unaffected
-- Only static asset cache (JS/CSS/HTML) gets refreshed
+- **Before**: Minimal invoice with just distributor name, line items, and a small dispatch section at the bottom
+- **After**: Professional invoice with distributor address/GSTIN, company bank details/contact info, and dispatch info prominently displayed in the order metadata section
+- Works for all users across the platform — component-level fix
 
