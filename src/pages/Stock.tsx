@@ -317,6 +317,7 @@ export default function Stock() {
                     variant="outline"
                     size="icon"
                     className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+                    aria-label="Export CSV"
                     onClick={() => {
                       exportCsv(
                         csvFilename("products"),
@@ -339,6 +340,7 @@ export default function Stock() {
                     variant="outline"
                     size="icon"
                     className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+                    aria-label="Export PDF"
                     onClick={() => setProductsPdfOpen(true)}
                   >
                     <FileText className="h-4 w-4" />

@@ -125,6 +125,7 @@ export default function Orders() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              aria-label="Export CSV"
               onClick={() => {
                 const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
                 exportCsv(
@@ -154,6 +155,7 @@ export default function Orders() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              aria-label="Export PDF"
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
