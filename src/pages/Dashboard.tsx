@@ -324,7 +324,7 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
-              <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
+              <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all ›</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.length === 0 ? (
