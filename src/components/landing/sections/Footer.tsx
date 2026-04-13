@@ -71,7 +71,7 @@ export function Footer() {
           <div className="flex items-center gap-4">
             {socials.map(({ icon: Icon, href }) => (
               <a
-                key={Icon.displayName}
+                key={href}
                 href={href}
                 className="text-lp-zinc hover:text-midnight transition-colors duration-200"
               >

@@ -184,7 +184,7 @@ export default function Schemes() {
 
   return (
     <AppLayout>
-      <div ref={containerRef} className="relative overflow-y-auto">
+      <div ref={containerRef} className="relative">
         {/* Pull-to-refresh */}
         <div
           className="flex items-center justify-center overflow-hidden transition-[height] duration-200 ease-out"

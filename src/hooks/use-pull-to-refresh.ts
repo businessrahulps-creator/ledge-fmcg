@@ -7,6 +7,16 @@ interface UsePullToRefreshOptions {
   deadZone?: number;
 }
 
+function getScrollParent(el: HTMLElement | null): HTMLElement | null {
+  let node = el?.parentElement ?? null;
+  while (node) {
+    const style = getComputedStyle(node);
+    if (/(auto|scroll)/.test(style.overflowY)) return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
 export function usePullToRefresh({
   onRefresh,
   threshold = 120,
@@ -23,7 +33,9 @@ export function usePullToRefresh({
     (e: TouchEvent) => {
       if (refreshing) return;
       const el = containerRef.current;
-      if (!el || el.scrollTop > 0) return;
+      if (!el) return;
+      const scrollParent = getScrollParent(el) || el;
+      if (scrollParent.scrollTop > 0) return;
       startY.current = e.touches[0].clientY;
       pulling.current = true;
     },
@@ -35,7 +47,6 @@ export function usePullToRefresh({
       if (!pulling.current || refreshing) return;
       const delta = e.touches[0].clientY - startY.current;
       if (delta > deadZone) {
-        // Rubber-band effect with high resistance
         setPullDistance(Math.min((delta - deadZone) * 0.35, maxPull));
       }
     },
@@ -47,7 +58,7 @@ export function usePullToRefresh({
     pulling.current = false;
     if (pullDistance >= threshold && !refreshing) {
       setRefreshing(true);
-      setPullDistance(threshold * 0.6); // Hold at spinner position
+      setPullDistance(threshold * 0.6);
       try {
         await onRefresh();
       } finally {
