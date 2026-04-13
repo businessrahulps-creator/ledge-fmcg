@@ -6,7 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Search, MapPin, Plus, Pencil, Trash2, Download } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
