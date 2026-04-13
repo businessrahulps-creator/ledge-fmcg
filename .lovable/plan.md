@@ -1,40 +1,37 @@
 
 
-# Fix: Pages Not Scrollable on Mobile and Web
+# Fix: All Pages Frozen / Not Scrollable
 
 ## Root Cause
-The CSS rule `overflow-x: hidden` applied to `html, body, #root` is causing scroll issues. On mobile browsers (especially Android Chrome), applying `overflow-x: hidden` to `html` or `body` can implicitly change the overflow model and create conflicting scroll containers. Combined with `overscroll-behavior-y: contain` on all three elements, the browser gets confused about which element should scroll.
+
+The outer layout container uses `min-h-screen` instead of `h-screen`. With `min-h-screen`, the flex container grows to fit all content — meaning `<main>`'s `overflow-y-auto` never activates because the element is never shorter than its content. Nothing scrolls.
 
 ## Fix
 
-### `src/index.css` — Remove problematic overflow rules from html/body
+### `src/components/layout/AppLayout.tsx` — line 118
 
-Change the current rule:
-```css
-html, body, #root {
-  overflow-x: hidden;
-  overscroll-behavior-y: contain;
-}
+Change the outer wrapper from:
+```
+<div className="flex min-h-screen w-full overflow-x-hidden bg-background">
+```
+to:
+```
+<div className="flex h-dvh w-full overflow-hidden bg-background">
 ```
 
-To only apply `overflow-x: hidden` on `#root` (not `html` or `body`), and move `overscroll-behavior-y: contain` to just `body`:
+`h-dvh` (dynamic viewport height) is the correct unit for mobile — it accounts for Android Chrome's collapsing address bar and iOS Safari's safe areas. `overflow-hidden` on the outer container ensures only `<main>` scrolls.
 
-```css
-body {
-  overscroll-behavior-y: contain;
-}
+### `src/components/layout/AppLayout.tsx` — line 123
 
-#root {
-  overflow-x: hidden;
-}
+Ensure the inner column also constrains height:
+```
+<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 ```
 
-This preserves the horizontal overflow prevention and pull-to-refresh suppression while restoring normal vertical scrolling on all browsers.
+Changed `overflow-x-hidden` to `overflow-hidden` so the column doesn't grow beyond bounds.
 
-### `src/components/layout/AppLayout.tsx` — Ensure main is scrollable
-
-The `<main>` element already has `overflow-y-auto` which is correct. No changes needed here — the CSS fix alone should resolve this.
+No other files need changes. The CSS in `index.css` is fine as-is.
 
 ## Files Changed
-- `src/index.css` — restructure overflow/overscroll rules to not block vertical scrolling
+- `src/components/layout/AppLayout.tsx` — two class changes on container divs
 
