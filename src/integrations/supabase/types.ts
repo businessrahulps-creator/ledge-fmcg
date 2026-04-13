@@ -1192,56 +1192,31 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_order_atomic:
-        | {
-            Args: {
-              p_company_id: string
-              p_date: string
-              p_delivery_status?: Database["public"]["Enums"]["delivery_status"]
-              p_dispatch_date?: string
-              p_dispatch_remarks?: string
-              p_distributor_id: string
-              p_distributor_name: string
-              p_driver_name?: string
-              p_godown_id?: string
-              p_payment_mode: Database["public"]["Enums"]["payment_mode"]
-              p_payment_status: Database["public"]["Enums"]["payment_status"]
-              p_salesperson_id: string
-              p_salesperson_name: string
-              p_total: number
-              p_vehicle?: string
-            }
-            Returns: {
-              id: string
-              order_number: string
-              seq: number
-            }[]
-          }
-        | {
-            Args: {
-              p_company_id: string
-              p_date: string
-              p_delivery_status?: Database["public"]["Enums"]["delivery_status"]
-              p_dispatch_date?: string
-              p_dispatch_remarks?: string
-              p_distributor_id: string
-              p_distributor_name: string
-              p_driver_name?: string
-              p_godown_id?: string
-              p_payment_mode: Database["public"]["Enums"]["payment_mode"]
-              p_payment_status: Database["public"]["Enums"]["payment_status"]
-              p_salesperson_id: string
-              p_salesperson_name: string
-              p_scheme_savings?: number
-              p_total: number
-              p_vehicle?: string
-            }
-            Returns: {
-              id: string
-              order_number: string
-              seq: number
-            }[]
-          }
+      insert_order_atomic: {
+        Args: {
+          p_company_id: string
+          p_date: string
+          p_delivery_status?: Database["public"]["Enums"]["delivery_status"]
+          p_dispatch_date?: string
+          p_dispatch_remarks?: string
+          p_distributor_id: string
+          p_distributor_name: string
+          p_driver_name?: string
+          p_godown_id?: string
+          p_payment_mode: Database["public"]["Enums"]["payment_mode"]
+          p_payment_status: Database["public"]["Enums"]["payment_status"]
+          p_salesperson_id: string
+          p_salesperson_name: string
+          p_scheme_savings?: number
+          p_total: number
+          p_vehicle?: string
+        }
+        Returns: {
+          id: string
+          order_number: string
+          seq: number
+        }[]
+      }
       seed_company_data: { Args: { p_company_id: string }; Returns: undefined }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
