@@ -172,7 +172,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ type: "spring", damping: 26, stiffness: 200 }}
                 className={`flex items-center justify-center gap-1.5 py-1 text-center text-xs ${
                   syncing
                     ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
@@ -224,7 +224,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       <motion.div
                         layoutId="nav-pill"
                         className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                        transition={{ type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
                         style={{ willChange: "transform" }}
                       />
                     )}
@@ -249,7 +249,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <motion.div
                     layoutId="nav-pill"
                     className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                    transition={{ type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
                     style={{ willChange: "transform" }}
                   />
                 )}
@@ -283,7 +283,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                 key={item.title}
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.2, delay: i * 0.03, ease: "easeOut" }}
+                                transition={{ type: "spring", damping: 26, stiffness: 200, delay: i * 0.04 }}
                               >
                                 <Link
                                   to={item.url}
