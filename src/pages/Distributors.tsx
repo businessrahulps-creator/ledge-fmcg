@@ -61,6 +61,8 @@ export default function Distributors() {
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedDealers = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
   const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;
+  const allOrders = api.orders.list();
+  const deleteDealerOrderCount = deleteId ? allOrders.filter(o => o.distributorId === deleteId).length : 0;
 
   const openNew = () => {
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
@@ -348,6 +350,11 @@ export default function Distributors() {
               <AlertDialogTitle>Remove Dealer</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span>? This action cannot be undone.
+                {deleteDealerOrderCount > 0 && (
+                  <span className="mt-2 block text-destructive font-medium">
+                    ⚠ This dealer has {deleteDealerOrderCount} order{deleteDealerOrderCount > 1 ? "s" : ""} linked. Removing will leave those orders without a dealer reference.
+                  </span>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

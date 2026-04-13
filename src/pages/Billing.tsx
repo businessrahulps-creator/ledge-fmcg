@@ -135,7 +135,7 @@ export default function Billing() {
     if (!order) return;
     const dealer = api.dealers.list().find(d => d.id === order.distributorId);
     setBuyerName(order.distributorName);
-    setBuyerAddress(dealer?.location || "");
+    setBuyerAddress(dealer?.address || dealer?.location || "");
     setVehicle(order.vehicle || "");
     setDriverName(order.driverName || "");
     setLines(order.lines.map(l => ({
