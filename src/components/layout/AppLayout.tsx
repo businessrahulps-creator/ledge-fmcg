@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
@@ -44,6 +44,7 @@ const moreGroups = [
     label: "Analyze",
     items: [
       { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+      { title: "Activity", url: "/activity", icon: History },
       { title: "Billing", url: "/billing", icon: FileText },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
@@ -262,35 +263,47 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-                <SheetContent side="bottom" className="rounded-t-[20px] pb-10 px-5 max-h-[70vh]">
-                  <SheetHeader className="pb-2">
-                    <SheetTitle className="text-base">More</SheetTitle>
+                <SheetContent side="bottom" className="rounded-t-[24px] px-6 pt-3 pb-12 max-h-[70vh]">
+                  {/* Drag handle */}
+                  <div className="w-10 h-1 rounded-full bg-muted-foreground/20 mx-auto mb-4" />
+                  <SheetHeader className="pb-3">
+                    <SheetTitle className="text-base font-semibold">More</SheetTitle>
                   </SheetHeader>
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {moreGroups.map((group) => (
                       <div key={group.label}>
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2 px-1">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-3 px-1">
                           {group.label}
                         </p>
-                        <div className="grid grid-cols-4 gap-1">
-                          {group.items.map((item) => {
+                        <div className="grid grid-cols-4 gap-2">
+                          {group.items.map((item, i) => {
                             const active = location.pathname.startsWith(item.url);
                             return (
-                              <Link
+                              <motion.div
                                 key={item.title}
-                                to={item.url}
-                                onClick={() => setMoreOpen(false)}
-                                className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-colors active:scale-95 ${
-                                  active
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-muted-foreground hover:bg-muted/50"
-                                }`}
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2, delay: i * 0.03, ease: "easeOut" }}
                               >
-                                <item.icon className="h-5 w-5" strokeWidth={active ? 2 : 1.5} />
-                                <span className={`text-[11px] ${active ? "font-bold" : "font-medium"}`}>
-                                  {item.title}
-                                </span>
-                              </Link>
+                                <Link
+                                  to={item.url}
+                                  onClick={() => setMoreOpen(false)}
+                                  className={`flex flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 ${
+                                    active
+                                      ? "bg-primary/10 text-primary"
+                                      : "text-muted-foreground hover:bg-muted/50"
+                                  }`}
+                                >
+                                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                                    active ? "bg-primary/10" : "bg-muted/40"
+                                  }`}>
+                                    <item.icon className="h-6 w-6" strokeWidth={active ? 2 : 1.5} />
+                                  </div>
+                                  <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>
+                                    {item.title}
+                                  </span>
+                                </Link>
+                              </motion.div>
                             );
                           })}
                         </div>
