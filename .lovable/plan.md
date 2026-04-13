@@ -1,16 +1,20 @@
 
 
-# Remove PDF Export from Stock Page
+# Remove PDF Export from Dealers and Sales Team Pages
 
-## Changes — 1 file (`src/pages/Stock.tsx`)
+## Changes — 2 files
 
-### Remove
-1. **Imports** (lines 11-13): Remove `downloadPdf`, `pdfFilename`, `formatCurrencyPdf`, `ExportPdfModal`, `PdfSection`, `ReportPdf`, and `FileText` icon
-2. **State** (lines 100-101): Remove `productsPdfOpen` and `inventoryPdfOpen` state
-3. **Config** (lines 103-107): Remove `stockPdfSections` array
-4. **Products PDF button** (lines 339-348): Remove the "Export PDF" button in the products toolbar
-5. **Warehouse PDF button** (lines 581-588): Remove the "Export PDF" button in the warehouse inventory toolbar
-6. **Modal components** (lines 890-981): Remove both `<ExportPdfModal>` instances (products + inventory)
+### 1. `src/pages/Distributors.tsx`
+- **Imports**: Remove `FileText`, `ExportPdfModal`, `PdfSection`, `downloadPdf`, `pdfFilename`, `ReportPdf`
+- **State**: Remove `pdfOpen` state variable
+- **Button**: Remove the "Export PDF" button from the toolbar
+- **Modal**: Remove the `<ExportPdfModal>` component at the bottom
 
-CSV export remains untouched. No other files affected.
+### 2. `src/pages/Salespersons.tsx`
+- **Imports**: Remove `FileText`, `ExportPdfModal`, `PdfSection`, `downloadPdf`, `pdfFilename`, `ReportPdf`
+- **State**: Remove `pdfOpen` state variable
+- **Button**: Remove the "Export PDF" button from the toolbar
+- **Modal**: Remove the `<ExportPdfModal>` component at the bottom
+
+CSV export remains untouched in both pages.
 
