@@ -25,7 +25,7 @@ export default function Index() {
   }
 
   return (
-    <div className="font-body antialiased scroll-smooth light" data-theme="light">
+    <div className="font-body antialiased scroll-smooth light" data-theme="light" style={{ colorScheme: "light" }}>
       <Navbar />
       <Hero />
       <TrustBar />

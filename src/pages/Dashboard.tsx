@@ -327,7 +327,9 @@ export default function Dashboard() {
               <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
-              {topDistributors.map((d, index) => (
+              {topDistributors.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No dealer data yet</p>
+              ) : topDistributors.map((d, index) => (
                 <div key={d.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium">{d.name}</span>
@@ -353,7 +355,9 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
               <Link to="/stock" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
-              {topProducts.map((p, index) => (
+              {topProducts.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No product data yet</p>
+              ) : topProducts.map((p, index) => (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium truncate mr-3">{p.name}</span>
