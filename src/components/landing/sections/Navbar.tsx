@@ -39,7 +39,7 @@ export function Navbar() {
           <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-midnight">Ledge</span>
         </Link>
 
-        {/* Center links — desktop */}
+        {/* Center links  -  desktop */}
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
             <a
@@ -52,7 +52,7 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* CTA — desktop */}
+        {/* CTA  -  desktop */}
         <div className="hidden md:block">
           <Link
             to="/signup"
