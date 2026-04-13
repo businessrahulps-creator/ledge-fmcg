@@ -200,6 +200,7 @@ export function makeOfflineCrud<T extends { id: string }>(
   options?: { allowOfflineDelete?: boolean },
 ) {
   const { companyId, persistEntityToCache, log } = deps;
+  const allowOfflineDelete = options?.allowOfflineDelete !== false; // default true
 
   const add = async (item: T) => {
     if (!companyId) return;
