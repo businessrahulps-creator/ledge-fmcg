@@ -4,12 +4,14 @@ interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void;
   threshold?: number;
   maxPull?: number;
+  deadZone?: number;
 }
 
 export function usePullToRefresh({
   onRefresh,
-  threshold = 80,
-  maxPull = 120,
+  threshold = 120,
+  maxPull = 150,
+  deadZone = 10,
 }: UsePullToRefreshOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pullDistance, setPullDistance] = useState(0);
@@ -32,9 +34,9 @@ export function usePullToRefresh({
     (e: TouchEvent) => {
       if (!pulling.current || refreshing) return;
       const delta = e.touches[0].clientY - startY.current;
-      if (delta > 0) {
-        // Rubber-band effect
-        setPullDistance(Math.min(delta * 0.5, maxPull));
+      if (delta > deadZone) {
+        // Rubber-band effect with high resistance
+        setPullDistance(Math.min((delta - deadZone) * 0.35, maxPull));
       }
     },
     [refreshing, maxPull]
