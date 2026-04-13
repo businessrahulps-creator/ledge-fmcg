@@ -703,13 +703,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const orderIds = ordersData.map(o => o.id);
       let allLines: any[] = [];
       let allOrderSchemes: any[] = [];
-      if (orderIds.length > 0) {
+      const CHUNK = 500;
+      for (let i = 0; i < orderIds.length; i += CHUNK) {
+        const chunk = orderIds.slice(i, i + CHUNK);
         const [linesRes, osRes] = await Promise.all([
-          supabase.from("order_lines").select("*").in("order_id", orderIds).range(0, 9999),
-          supabase.from("order_schemes").select("*").in("order_id", orderIds).range(0, 9999),
+          supabase.from("order_lines").select("*").in("order_id", chunk).range(0, 9999),
+          supabase.from("order_schemes").select("*").in("order_id", chunk).range(0, 9999),
         ]);
-        allLines = linesRes.data || [];
-        allOrderSchemes = osRes.data || [];
+        allLines.push(...(linesRes.data || []));
+        allOrderSchemes.push(...(osRes.data || []));
       }
       const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
       setOrders(mapped);
