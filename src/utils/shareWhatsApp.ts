@@ -65,8 +65,7 @@ export async function shareOrderOnWhatsApp(
 
     // Try Web Share API with file attachment (works on mobile)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      const text = buildOrderSummary(order, companyInfo.name);
-      await navigator.share({ files: [file], text });
+      await navigator.share({ files: [file], title: `Invoice ${order.orderNumber}` });
       toast.success("Invoice shared");
       return;
     }
@@ -214,8 +213,7 @@ export async function shareInvoiceOnWhatsApp(inv: InvoiceShareData) {
     toast.dismiss(loadingToast);
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      const text = buildInvoiceSummary(inv);
-      await navigator.share({ files: [file], text });
+      await navigator.share({ files: [file], title: `Invoice ${inv.invoiceNumber}` });
       toast.success("Invoice shared");
       return;
     }
