@@ -367,7 +367,7 @@ export default function NewOrder() {
             {/* Order Header */}
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Order Details</h2>
-              <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
+              <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
                   <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
