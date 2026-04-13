@@ -105,6 +105,7 @@ export default function Company() {
       if (updateError) throw updateError;
 
       setLogoUrl(publicUrl);
+      updateCompanyInfo({ logoUrl: publicUrl });
       toast.success("Logo uploaded", { description: "Company logo has been updated." });
     } catch (err: any) {
       toast.error("Upload failed", { description: err?.message || "Could not upload logo." });
@@ -131,6 +132,7 @@ export default function Company() {
         .eq("id", companyId);
       if (error) throw error;
       setLogoUrl("");
+      updateCompanyInfo({ logoUrl: "" });
       toast.success("Logo removed", { description: "Company logo has been removed." });
     } catch (err: any) {
       toast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
@@ -173,6 +175,20 @@ export default function Company() {
         return;
       }
     }
+    updateCompanyInfo({
+      name: sanitizeInput(companyName),
+      address: sanitizeInput(companyAddress),
+      gstin: sanitizeInput(companyGstin),
+      phone: sanitizeInput(companyPhone),
+      email: sanitizeInput(companyEmail),
+      pan: sanitizeInput(companyPan),
+      stateCode: sanitizeInput(companyStateCode),
+      bankName: sanitizeInput(bankName),
+      bankAccountName: sanitizeInput(bankAccountName),
+      bankAccount: sanitizeInput(bankAccount),
+      bankIfsc: sanitizeInput(bankIfsc),
+      invoicePrefix: sanitizeInput(invoicePrefix),
+    });
     toast.success("Settings saved", { description: "Company profile has been updated." });
   };
 
