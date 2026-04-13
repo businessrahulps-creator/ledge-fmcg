@@ -1,24 +1,26 @@
 
 
-# Fix: Logged-in Users Sent to Landing Page on Reopen
+# Add Branded Splash Screen
 
-## Problem
-The root route `/` always shows the landing page regardless of auth state. When users close the app and reopen it, the browser navigates to `/` (the default), shows the marketing landing page, and users think they've been logged out — even though their session is still valid in localStorage.
+## What
+Replace the plain spinner shown during auth loading with a polished splash screen featuring the Ledge wordmark and a subtle fade-out animation. This applies to both the Index page and ProtectedRoute loading states.
 
-## Root Cause
-The `Index` component (landing page) never checks if a user is already authenticated. It should redirect logged-in users straight to `/dashboard`.
+## Changes
 
-## Fix
+### 1. New component: `src/components/SplashScreen.tsx`
+- Full-screen centered layout with the app's background color
+- Ledge typographic wordmark (using existing `font-heading font-extrabold tracking-tight` classes)
+- Subtle pulse animation on the wordmark
+- A small "Loading..." text or minimal dot animation beneath
 
-### `src/pages/Index.tsx`
-Add an auth check at the top of the component:
-- Import `useAuth` from AuthContext
-- If auth is still loading, show a brief spinner (prevents flash of landing page)
-- If user exists, `<Navigate to="/dashboard" />` immediately
-- Otherwise, render the landing page as usual
+### 2. Update `src/pages/Index.tsx` (lines 18-24)
+- Replace the spinner div with `<SplashScreen />`
 
-This is a single-file, ~10-line change. Session persistence already works — the Supabase client stores tokens in localStorage and `AuthProvider` restores them via `getSession()`. The only missing piece is the redirect.
+### 3. Update `src/App.tsx` — `ProtectedRoute` (lines 57-63)
+- Replace the spinner div with `<SplashScreen />`
 
-### Files Changed
-- `src/pages/Index.tsx` — redirect authenticated users to `/dashboard`
+## Files Changed
+- `src/components/SplashScreen.tsx` — new branded splash component
+- `src/pages/Index.tsx` — use SplashScreen for auth loading
+- `src/App.tsx` — use SplashScreen in ProtectedRoute
 
