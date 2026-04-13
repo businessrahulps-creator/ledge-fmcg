@@ -53,7 +53,10 @@ export function Navbar() {
         </div>
 
         {/* CTA  -  desktop */}
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-4">
+          <Link to="/login" className="font-body font-medium text-[15px] text-[#52525B] hover:text-[#1A1A1A] transition-colors duration-200">
+            Sign in
+          </Link>
           <Link
             to="/signup"
             className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-3xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200"
@@ -88,6 +91,13 @@ export function Navbar() {
                 </a>
               ))}
             </div>
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="font-body font-medium text-base text-[#52525B] hover:text-[#1A1A1A] transition-colors text-center"
+            >
+              Sign in
+            </Link>
             <Link
               to="/signup"
               onClick={() => setOpen(false)}
