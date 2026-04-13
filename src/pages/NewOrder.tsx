@@ -112,9 +112,6 @@ export default function NewOrder() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 
-  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-    isDirty && currentLocation.pathname !== nextLocation.pathname
-  );
 
   // Auto-select godown if only one exists
   useEffect(() => {
