@@ -71,6 +71,7 @@ export default function Billing() {
   const api = useApi();
   const invoices = api.invoices.list();
   const orders = api.orders.list();
+  const products = api.products.list();
   const company = api.companyInfo;
   const [searchParams] = useSearchParams();
 
