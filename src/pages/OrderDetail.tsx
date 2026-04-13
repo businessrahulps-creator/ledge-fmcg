@@ -739,9 +739,27 @@ export default function OrderDetail() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  const dealer = distributors.find(d => d.id === order.distributorId);
                   downloadPdf(
                     pdfFilename("invoice", order.orderNumber),
-                    <OrderInvoicePdf order={order} companyName={companyInfo.name} companyAddress={companyInfo.address} gstin={companyInfo.gstin} logoUrl={companyInfo.logoUrl} />
+                    <OrderInvoicePdf
+                      order={order}
+                      companyName={companyInfo.name}
+                      companyAddress={companyInfo.address}
+                      gstin={companyInfo.gstin}
+                      logoUrl={companyInfo.logoUrl}
+                      companyPhone={companyInfo.phone}
+                      companyEmail={companyInfo.email}
+                      companyPan={companyInfo.pan}
+                      companyStateCode={companyInfo.stateCode}
+                      bankName={companyInfo.bankName}
+                      bankAccountName={companyInfo.bankAccountName}
+                      bankAccount={companyInfo.bankAccount}
+                      bankIfsc={companyInfo.bankIfsc}
+                      distributorAddress={dealer?.address}
+                      distributorGstin={dealer?.gstin}
+                      distributorStateCode={dealer?.stateCode}
+                    />
                   );
                 }}
               >
