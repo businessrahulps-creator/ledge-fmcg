@@ -1,37 +1,29 @@
 
 
-# Fix: All Pages Frozen / Not Scrollable
+# Fix: "GST Invoice" Label Wrapping to Two Lines
 
-## Root Cause
-
-The outer layout container uses `min-h-screen` instead of `h-screen`. With `min-h-screen`, the flex container grows to fit all content — meaning `<main>`'s `overflow-y-auto` never activates because the element is never shorter than its content. Nothing scrolls.
+## Problem
+On mobile, the document type selector buttons use a 2-column grid (`grid-cols-2`). The "GST Invoice" label is too long for the cell width at `text-xs` (12px), causing it to wrap onto two lines while the other labels ("Estimate", "Proforma", "Credit Note") fit fine.
 
 ## Fix
 
-### `src/components/layout/AppLayout.tsx` — line 118
+### `src/pages/Billing.tsx` — line 722
 
-Change the outer wrapper from:
-```
-<div className="flex min-h-screen w-full overflow-x-hidden bg-background">
-```
-to:
-```
-<div className="flex h-dvh w-full overflow-hidden bg-background">
-```
+Add `whitespace-nowrap` to the button class so the text never wraps, and reduce font size slightly on small screens so it fits:
 
-`h-dvh` (dynamic viewport height) is the correct unit for mobile — it accounts for Android Chrome's collapsing address bar and iOS Safari's safe areas. `overflow-hidden` on the outer container ensures only `<main>` scrolls.
-
-### `src/components/layout/AppLayout.tsx` — line 123
-
-Ensure the inner column also constrains height:
+Change:
 ```
-<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-all ${...}`}
+```
+To:
+```
+className={`rounded-lg border px-2 py-2.5 text-[11px] font-medium whitespace-nowrap transition-all ${...}`}
 ```
 
-Changed `overflow-x-hidden` to `overflow-hidden` so the column doesn't grow beyond bounds.
-
-No other files need changes. The CSS in `index.css` is fine as-is.
+The two changes:
+- `whitespace-nowrap` — prevents line wrapping
+- `px-3` → `px-2` and `text-xs` → `text-[11px]` — slightly tighter to ensure all four labels fit in the 2-column grid on narrow screens
 
 ## Files Changed
-- `src/components/layout/AppLayout.tsx` — two class changes on container divs
+- `src/pages/Billing.tsx` — one class change on the doc type selector button
 
