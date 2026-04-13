@@ -140,6 +140,7 @@ interface DataContextType {
   loading: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
+  updateCompanyInfo: (updates: Partial<CompanyInfo>) => void;
 
   orderPrefix: string;
   orderSequence: number;
@@ -1625,6 +1626,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         orders, distributors: computedDistributors, salespersons: computedSalespersons,
         products: computedProducts, locations, stockItems, schemes, loading, isOfflineData,
         companyInfo,
+        updateCompanyInfo: (updates: Partial<CompanyInfo>) => setCompanyInfo(prev => ({ ...prev, ...updates })),
         orderPrefix, orderSequence, setOrderPrefix,
         addOrder, updateOrder, deleteOrder,
         addDistributor: distCrud.add, updateDistributor: distCrud.update, deleteDistributor: distCrud.remove,

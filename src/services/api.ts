@@ -9,6 +9,7 @@ export function useApi() {
   return {
     loading: data.loading,
     companyInfo: data.companyInfo,
+    updateCompanyInfo: data.updateCompanyInfo,
     refreshAll: data.refreshAll,
     orders: {
       list: () => data.orders,
