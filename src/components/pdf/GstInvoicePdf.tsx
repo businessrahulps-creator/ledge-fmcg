@@ -105,6 +105,18 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
                   <Text style={s.metaValue}>{data.gstRate}%</Text>
                 </View>
               )}
+              {data.vehicle ? (
+                <View style={s.metaRow}>
+                  <Text style={s.metaLabel}>Vehicle</Text>
+                  <Text style={s.metaValue}>{data.vehicle}</Text>
+                </View>
+              ) : null}
+              {data.driverName ? (
+                <View style={s.metaRow}>
+                  <Text style={s.metaLabel}>Driver</Text>
+                  <Text style={s.metaValue}>{data.driverName}</Text>
+                </View>
+              ) : null}
             </View>
           </View>
         </View>
