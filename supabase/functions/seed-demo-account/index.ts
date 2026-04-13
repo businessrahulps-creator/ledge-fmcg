@@ -524,6 +524,7 @@ Deno.serve(async (req) => {
             seller_phone: COMPANY.phone,
             seller_email: COMPANY.email,
             seller_bank_name: COMPANY.bank_name,
+            seller_bank_account_name: COMPANY.bank_account_name,
             seller_bank_account: COMPANY.bank_account,
             seller_bank_ifsc: COMPANY.bank_ifsc,
             seller_logo_url: "",
