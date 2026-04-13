@@ -172,13 +172,8 @@ export default function NewOrder() {
   const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
-  // Credit guard computation
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
   const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
-  const netOrderTotal = Math.max(0, orderTotal - (appliedSchemes?.reduce((sum, a) => sum + a.savings, 0) || 0));
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? netOrderTotal : 0);
-  const creditLimit = selectedDealerObj?.creditLimit || 0;
-  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
   const isSuperAdmin = userRole === "super_admin";
 
   // --- Scheme auto-apply ---
