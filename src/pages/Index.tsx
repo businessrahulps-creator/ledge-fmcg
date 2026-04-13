@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { SplashScreen } from "@/components/SplashScreen";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Hero } from "@/components/landing/sections/Hero";
 import { TrustBar } from "@/components/landing/sections/TrustBar";
@@ -16,11 +17,7 @@ export default function Index() {
   const { user, loading, authReady } = useAuth();
 
   if (loading || !authReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   if (user) {
