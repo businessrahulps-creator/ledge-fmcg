@@ -1,48 +1,37 @@
 
 
-# Fix GST Invoice Account Holder Name + WhatsApp Share
+# Fix: Onboarding Logo Step Not Updating After Upload
 
-## Issues Found
+## Root Cause
 
-**1. Account Holder Name missing from GST Invoice PDF**
-- The `invoices` table has no `seller_bank_account_name` column
-- The `InvoicePdfData` interface lacks the field
-- The PDF template's Bank Details section only shows Bank, Account No, IFSC — no account holder name
-- The company table _does_ have `bank_account_name`, but it's never propagated to invoices
+`Company.tsx` uploads the logo and updates the database directly, but never updates `DataContext.companyInfo`. The onboarding checklist reads `api.companyInfo.logoUrl` from DataContext, which stays stale until a full page reload.
 
-**2. WhatsApp share not working in Billing**
-- `shareInvoiceOnWhatsApp(inv)` passes an `Invoice` object directly, but the function expects `InvoiceShareData`
-- The `Invoice` interface is missing a `sellerBankAccountName` field (needed for the PDF generation inside the share function)
-- The `GstInvoicePdf` component also needs the new field to render the account holder name
+The same issue affects all Company page fields (GSTIN, address, etc.) — saving company details doesn't propagate to DataContext either.
 
-## Plan
+## Fix
 
-### 1. Database migration — Add `seller_bank_account_name` to `invoices`
-```sql
-ALTER TABLE invoices ADD COLUMN IF NOT EXISTS seller_bank_account_name TEXT NOT NULL DEFAULT '';
+### 1. Add `updateCompanyInfo` to DataContext
+
+Expose a function that merges partial updates into the `companyInfo` state:
+
+```typescript
+updateCompanyInfo: (updates: Partial<CompanyInfo>) => void;
 ```
 
-### 2. Update `InvoicePdfData` interface + PDF template
-- Add `sellerBankAccountName` to `GstInvoicePdf`'s `InvoicePdfData` interface
-- Render "A/c Holder" card in the Bank Details section alongside Bank, Account No, IFSC
+Implementation: `setCompanyInfo(prev => ({ ...prev, ...updates }))`.
 
-### 3. Update `Invoice` interface in DataContext
-- Add `sellerBankAccountName: string` to the `Invoice` interface
-- Map `seller_bank_account_name` when fetching invoices
-- Include it when inserting/updating invoices (populate from company's `bankAccountName`)
+Add it to the context interface and the provider's value object.
 
-### 4. Update `InvoiceShareData` + share function
-- Add `sellerBankAccountName` to `InvoiceShareData` interface
-- Pass it through to `GstInvoicePdf` in the `shareInvoiceOnWhatsApp` function
+### 2. Call `updateCompanyInfo` from Company.tsx
 
-### 5. Update Billing page
-- Pass `sellerBankAccountName` when creating invoice PDF data for download and WhatsApp share
-- Ensure the field is populated from company info when creating new invoices
+- After logo upload succeeds: call `updateCompanyInfo({ logoUrl: publicUrl })`
+- After logo removal: call `updateCompanyInfo({ logoUrl: "" })`
+- After saving company details (the main save handler): call `updateCompanyInfo({ name, address, gstin, phone, email, ... })`
+
+This ensures the onboarding checklist (and any other consumer of `companyInfo`) updates immediately without requiring a page reload.
 
 ## Files Changed
-- `supabase/migrations/` — new migration for `seller_bank_account_name` column
-- `src/components/pdf/GstInvoicePdf.tsx` — add field to interface + render in Bank Details
-- `src/context/DataContext.tsx` — add to Invoice interface + fetch/save mapping
-- `src/utils/shareWhatsApp.ts` — add to InvoiceShareData + pass to PDF
-- `src/pages/Billing.tsx` — propagate field when creating/editing invoices
+
+- `src/context/DataContext.tsx` — add `updateCompanyInfo` to interface + provider
+- `src/pages/Company.tsx` — import and call `updateCompanyInfo` after logo upload/remove and company save
 
