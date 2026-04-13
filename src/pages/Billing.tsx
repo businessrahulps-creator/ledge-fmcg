@@ -138,12 +138,19 @@ export default function Billing() {
     setBuyerAddress(dealer?.address || dealer?.location || "");
     setVehicle(order.vehicle || "");
     setDriverName(order.driverName || "");
+
+    // Build invoice lines from order lines, adjusting for scheme savings
+    // Trade discounts are applied proportionally across lines so GST is computed on the net amount
+    const grossTotal = order.lines.reduce((s, l) => s + l.lineTotal, 0);
+    const savings = order.schemeSavings || 0;
+    const discountRatio = grossTotal > 0 && savings > 0 ? savings / grossTotal : 0;
+
     setLines(order.lines.map(l => ({
       productName: l.productName,
       hsnCode: "",
       quantity: l.quantity,
       unit: "Pack",
-      unitPrice: l.unitPrice,
+      unitPrice: discountRatio > 0 ? Math.round((l.unitPrice * (1 - discountRatio)) * 100) / 100 : l.unitPrice,
     })));
     setStep(2);
   }
