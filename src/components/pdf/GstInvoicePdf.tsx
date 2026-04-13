@@ -29,6 +29,7 @@ export interface InvoicePdfData {
   sellerPhone: string;
   sellerEmail: string;
   sellerBankName: string;
+  sellerBankAccountName?: string;
   sellerBankAccount: string;
   sellerBankIfsc: string;
   supplyType: string;
@@ -197,6 +198,12 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
                 <View style={s.summaryCard}>
                   <Text style={s.summaryLabel}>Bank</Text>
                   <Text style={{ fontSize: 9 }}>{data.sellerBankName}</Text>
+                </View>
+              )}
+              {data.sellerBankAccountName && (
+                <View style={s.summaryCard}>
+                  <Text style={s.summaryLabel}>A/c Holder</Text>
+                  <Text style={{ fontSize: 9 }}>{data.sellerBankAccountName}</Text>
                 </View>
               )}
               {data.sellerBankAccount && (

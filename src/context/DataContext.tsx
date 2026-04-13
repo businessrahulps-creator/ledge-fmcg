@@ -61,6 +61,7 @@ export interface Invoice {
   sellerPhone: string;
   sellerEmail: string;
   sellerBankName: string;
+  sellerBankAccountName: string;
   sellerBankAccount: string;
   sellerBankIfsc: string;
   sellerLogoUrl: string;
@@ -504,6 +505,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         sellerGstin: inv.seller_gstin || "", sellerPan: inv.seller_pan || "",
         sellerStateCode: inv.seller_state_code || "", sellerPhone: inv.seller_phone || "",
         sellerEmail: inv.seller_email || "", sellerBankName: inv.seller_bank_name || "",
+        sellerBankAccountName: (inv as any).seller_bank_account_name || "",
         sellerBankAccount: inv.seller_bank_account || "", sellerBankIfsc: inv.seller_bank_ifsc || "",
         sellerLogoUrl: inv.seller_logo_url || "",
         supplyType: inv.supply_type as Invoice["supplyType"],
@@ -1539,6 +1541,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         seller_phone: sanitizeInput(invoice.sellerPhone),
         seller_email: sanitizeInput(invoice.sellerEmail),
         seller_bank_name: sanitizeInput(invoice.sellerBankName),
+        seller_bank_account_name: sanitizeInput(invoice.sellerBankAccountName),
         seller_bank_account: sanitizeInput(invoice.sellerBankAccount),
         seller_bank_ifsc: sanitizeInput(invoice.sellerBankIfsc),
         seller_logo_url: invoice.sellerLogoUrl || "",
