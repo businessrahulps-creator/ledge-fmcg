@@ -185,6 +185,31 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   return results;
 }
 
+// --- FK error mapping ---
+
+const FK_ERROR_MAP: Record<string, { title: string; description: string }> = {
+  orders_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has orders linked to it. Remove or reassign those orders first." },
+  orders_salesperson_id_fkey: { title: "Cannot remove team member", description: "This salesperson has orders linked to them. Remove or reassign those orders first." },
+  order_lines_product_id_fkey: { title: "Cannot remove product", description: "This product is used in existing orders. Remove those orders first." },
+  claims_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has claims linked to it. Resolve those claims first." },
+  claims_order_id_fkey: { title: "Cannot remove order", description: "This order has claims linked to it. Resolve those claims first." },
+  claim_lines_product_id_fkey: { title: "Cannot remove product", description: "This product is referenced in existing claims." },
+  stock_deductions_product_id_fkey: { title: "Cannot remove product", description: "This product has stock deduction history." },
+  stock_deductions_godown_id_fkey: { title: "Cannot remove warehouse", description: "This warehouse has stock deduction history." },
+  secondary_sales_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has secondary sales records." },
+  secondary_sales_product_id_fkey: { title: "Cannot remove product", description: "This product has secondary sales records." },
+};
+
+function mapFkError(message: string, entityType: string): { title: string; description: string } {
+  for (const [key, val] of Object.entries(FK_ERROR_MAP)) {
+    if (message.includes(key)) return val;
+  }
+  if (message.includes("violates foreign key constraint")) {
+    return { title: `Cannot delete ${entityType}`, description: "Other records depend on this item. Remove them first." };
+  }
+  return { title: `Failed to delete ${entityType}`, description: message };
+}
+
 // --- Generic offline-aware CRUD factory ---
 
 export function makeOfflineCrud<T extends { id: string }>(
