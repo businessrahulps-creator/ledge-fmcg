@@ -131,6 +131,7 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html,
@@ -146,6 +147,22 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  /* Disable text selection on UI chrome only — content stays selectable */
+  nav, button, [role="button"], header, label, .sidebar,
+  [data-radix-collection-item], [data-sidebar] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Suppress iOS long-press previews on interactive elements */
+  a, button, [role="button"] {
+    -webkit-touch-callout: none;
+  }
+
+  main {
+    overscroll-behavior-y: contain;
   }
 }
 
@@ -205,5 +222,9 @@
   .dot-grid-bg {
     background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
     background-size: 24px 24px;
+  }
+
+  .touch-bounce {
+    @apply transition-transform duration-100 ease-out active:scale-[0.97];
   }
 }

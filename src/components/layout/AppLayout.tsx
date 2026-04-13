@@ -64,6 +64,16 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const handler = () => setScrolled(el.scrollTop > 2);
+    el.addEventListener("scroll", handler, { passive: true });
+    return () => el.removeEventListener("scroll", handler);
+  }, []);
   const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -111,7 +121,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-          <header className="sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-xl md:h-16 md:px-6">
+          <header className={`sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6 transition-shadow duration-200 ${scrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "shadow-none"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
             <SidebarTrigger className="mr-4 hidden md:flex" />
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>
@@ -201,9 +211,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
           </AnimatePresence>
 
-          <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
+          <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0">
-              {children}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ willChange: "opacity" }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </main>
 
