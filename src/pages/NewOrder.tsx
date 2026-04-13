@@ -175,7 +175,8 @@ export default function NewOrder() {
   // Credit guard computation
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
   const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? orderTotal : 0);
+  const netOrderTotal = Math.max(0, orderTotal - (appliedSchemes?.reduce((sum, a) => sum + a.savings, 0) || 0));
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? netOrderTotal : 0);
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
   const isSuperAdmin = userRole === "super_admin";
@@ -370,7 +371,7 @@ export default function NewOrder() {
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} max={new Date().toISOString().split("T")[0]} className="h-10 rounded-lg md:h-12" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>

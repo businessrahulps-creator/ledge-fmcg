@@ -99,6 +99,7 @@ export default function Login() {
                 type="email"
                 placeholder="you@company.com"
                 className="h-12 rounded-lg"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -124,6 +125,7 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="h-12 rounded-lg pr-10"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -149,6 +151,9 @@ export default function Login() {
           <Link to="/signup" className="font-medium text-primary hover:underline">
             Start free trial
           </Link>
+        </p>
+        <p className="text-center">
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to home</Link>
         </p>
       </div>
 

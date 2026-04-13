@@ -712,7 +712,7 @@ export default function Billing() {
 
               {/* Document Type */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold"><Label className="text-xs font-semibold">Document Type</Label></Label>
+                <Label className="text-xs font-semibold">Document Type</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {(Object.entries(docTypeLabels) as [DocType, string][]).map(([key, label]) => (
                     <button

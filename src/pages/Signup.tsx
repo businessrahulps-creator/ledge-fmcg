@@ -93,7 +93,7 @@ export default function Signup() {
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Work email</Label>
               <Input id="email" type="email" placeholder="rajesh@acmefmcg.in" className="h-12 rounded-lg"
-                value={email} onChange={(e) => setEmail(e.target.value)} />
+                autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div className="space-y-2">
@@ -104,6 +104,7 @@ export default function Signup() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Min. 8 characters"
                   className="h-12 rounded-lg pr-10"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -129,6 +130,9 @@ export default function Signup() {
           <Link to="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
+        </p>
+        <p className="text-center">
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to home</Link>
         </p>
       </div>
     </div>
