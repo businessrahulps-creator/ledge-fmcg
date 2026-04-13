@@ -199,7 +199,7 @@ export default function Billing() {
     if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
     if (lines.length === 0 || lines.every(l => !l.productName.trim())) { toast.error("No line items"); return; }
     if (docType === "gst_invoice" && (!vehicle.trim() || !driverName.trim())) {
-      toast.error("Vehicle and driver details are mandatory for GST invoices");
+      toast.error("Vehicle & driver details required", { description: "Fill in dispatch details on the order first, then generate the GST invoice." });
       return;
     }
 

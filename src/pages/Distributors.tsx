@@ -121,6 +121,7 @@ export default function Distributors() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              aria-label="Export PDF"
               onClick={() => setPdfOpen(true)}
             >
               <FileText className="h-4 w-4" />
@@ -130,6 +131,7 @@ export default function Distributors() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              aria-label="Export CSV"
               onClick={() => {
                 exportCsv(
                   csvFilename("dealers"),
