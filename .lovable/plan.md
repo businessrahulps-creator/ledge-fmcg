@@ -1,71 +1,77 @@
 
 
-# Rich Demo Account — asha@getledge.in (30× Volume)
+# Audit Report — Demo Account & Platform
 
-## Summary
-Create edge function `seed-demo-account` that provisions a richly-populated demo account with ~30× the originally planned data volume. Data is generated procedurally in loops to create a realistic, lived-in 30-day power-user account for Kerala & Tamil Nadu FMCG beverage distribution.
+## Data Integrity: PASS
 
-## Data Volumes
+All checks passed with zero issues:
 
-| Entity | Original | Now (30×) |
-|--------|----------|-----------|
-| Products | 15 | 45 beverage SKUs |
-| Dealers | 8 | 80+ across KL/TN |
-| Sales Team | 4 | 12 reps |
-| Godowns | 3 | 5 warehouses |
-| Orders | 20 | 500+ over 30 days |
-| Order Lines | ~40 | 1,500+ |
-| Schemes | 6 | 20 active schemes |
-| Targets | 6 | 40+ (monthly + quarterly) |
-| Claims | 4 | 50+ (mix of open/resolved) |
-| Invoices | 5 | 150+ GST invoices |
-| Invoice Lines | ~15 | 500+ |
-| Stock Items | 30 | 200+ (products × godowns) |
-| Activity Log | 15 | 400+ entries |
-| Order Schemes | ~10 | 300+ applied schemes |
+| Check | Result |
+|-------|--------|
+| Orphan references (dealers, salespersons, products, godowns, orders) | 0 orphans |
+| Order totals vs order_lines sum | All match |
+| Distributor aggregate counts/values vs actual orders | All match |
+| Salesperson aggregate counts vs actual orders | All match |
+| Product total_sold vs order_lines quantity sum | All match |
+| Duplicate order numbers | None |
+| Orders missing order_lines | None |
+| Claims missing claim_lines | None |
+| Targets referencing non-existent entities | None |
+| Invoice subtotals vs invoice_lines taxable_value sum | All match |
+| GST supply_type vs state codes | 100% correct |
+| User role assigned | super_admin confirmed |
+| Company sequence numbers | Correct (order: 533, invoice: 248) |
 
-## Technical Approach
+## Data Quality: PASS
 
-### Edge Function: `supabase/functions/seed-demo-account/index.ts`
+| Metric | Value |
+|--------|-------|
+| Orders | 532, spread evenly across 31 days (14–20/day) |
+| Payment statuses | paid (306), partial (143), pending (66) — realistic |
+| Delivery statuses | delivered (342), dispatched (158), pending (32) — realistic |
+| Stock health | 144 healthy, 42 low, 39 critical — good spread |
+| Active schemes | 16 active, 4 inactive — realistic |
+| Claims | 31 total, mix of open/resolved across damage/return/shortage |
+| GST logic | intra_state (185), inter_state (62) — all consistent |
 
-Uses service role key to bypass RLS. All data inserted via admin client in a single invocation.
+## New Signup Isolation: PASS
 
-**Procedural generation strategy:**
-- Pre-define arrays of realistic names, locations, SKUs, and prices
-- Use nested loops to generate orders (15-20 per day × 30 days)
-- Randomly assign dealers, salespersons, payment modes/statuses, delivery statuses
-- Apply schemes to ~60% of orders with calculated savings
-- Generate invoices for all delivered+paid orders
-- Distribute stock across all godowns with realistic health spread (60% healthy, 25% low, 15% critical)
-- Create claims for ~10% of delivered orders (damaged, expired, shortage)
-- Set targets for all salespersons (monthly) and top 20 dealers (quarterly)
-- Activity log entries for order placements, status changes, dealer additions, stock updates
+Other companies confirmed to have independent data. No demo seeding leaks.
 
-**Products catalog** — 45 South Indian beverages:
-- Packaged water (500ml, 1L, 2L, 5L, 20L)
-- Fruit juices (mango, orange, mixed fruit, guava, pomegranate — 200ml, 500ml, 1L)
-- Carbonated drinks (cola, lemon, orange, ginger — 300ml, 500ml, 2L)
-- Energy drinks (250ml, 500ml)
-- Traditional beverages (buttermilk, tender coconut, rose milk, jal jeera — 200ml, 500ml)
-- Sparkling water, soda (300ml, 750ml)
+---
 
-**Dealers** — 80+ with real Kerala/Tamil Nadu locations:
-- Kerala: Kochi (15), Trivandrum (12), Kollam (8), Alappuzha (8), Thrissur (6), Kozhikode (6)
-- Tamil Nadu: Chennai (10), Madurai (5), Coimbatore (5), Tiruchirappalli (5)
+## Bug Found: `safeRefetchOrders` missing chunking
 
-**Godowns**: Main Warehouse Kochi, Hub Chennai, Depot Coimbatore, Depot Trivandrum, Depot Madurai
+**Severity: Medium** — will cause silent data truncation or API errors for accounts with 500+ orders.
 
-**Company details**: "Asha Beverages Distributors", GSTIN 32AABCA1234F1ZP, Kerala state code 32, full bank info
+**Location:** `src/context/DataContext.tsx`, lines 706–710
 
-### Execution
-1. Deploy edge function
-2. Invoke once (with extended timeout — up to 60s for volume)
-3. Query DB to verify row counts
-4. Audit data consistency
+**Problem:** The initial data fetch uses `batchIn()` which chunks `.in()` queries at 500 IDs. But `safeRefetchOrders()` passes all order IDs (532 in this account) directly to `.in()` without chunking. This could:
+- Hit Postgres parameter limits
+- Exceed URL length limits for PostgREST
+- Silently drop order_lines/order_schemes for orders beyond the limit
 
-## Files Changed
-- `supabase/functions/seed-demo-account/index.ts` — NEW, ~800-1000 lines of procedural seed logic
+**Fix:** Refactor `safeRefetchOrders` to use the same `batchIn` pattern:
 
-## New Signups
-No changes needed — `setup_new_company` creates empty workspace only. This seed function is invoked manually once.
+```typescript
+// In safeRefetchOrders, replace direct .in() calls with chunked batches:
+const CHUNK = 500;
+let allLines: any[] = [];
+let allOrderSchemes: any[] = [];
+for (let i = 0; i < orderIds.length; i += CHUNK) {
+  const chunk = orderIds.slice(i, i + CHUNK);
+  const [linesRes, osRes] = await Promise.all([
+    supabase.from("order_lines").select("*").in("order_id", chunk),
+    supabase.from("order_schemes").select("*").in("order_id", chunk),
+  ]);
+  allLines.push(...(linesRes.data || []));
+  allOrderSchemes.push(...(osRes.data || []));
+}
+```
+
+## Files to Change
+- `src/context/DataContext.tsx` — fix `safeRefetchOrders` to use chunked `.in()` queries
+
+## Verdict
+Demo data is pristine — all relationships, aggregates, and business logic are consistent. One real bug found in the order refetch path that needs fixing before go-live with high-volume accounts.
 
