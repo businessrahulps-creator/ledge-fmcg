@@ -242,6 +242,12 @@ export default function NewOrder() {
 
   const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
 
+  // Credit guard (uses net total after scheme savings)
+  const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? netOrderTotal : 0);
+  const creditLimit = selectedDealerObj?.creditLimit || 0;
+  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
+
   const executeSave = async () => {
     // Validation
     if (!selectedDealer) {
