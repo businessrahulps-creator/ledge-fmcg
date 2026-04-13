@@ -197,8 +197,10 @@ export function makeOfflineCrud<T extends { id: string }>(
   toDbRow: (item: T) => Record<string, any>,
   entityLogType?: string,
   getLabel?: (item: T) => string,
+  options?: { allowOfflineDelete?: boolean },
 ) {
   const { companyId, persistEntityToCache, log } = deps;
+  const allowOfflineDelete = options?.allowOfflineDelete !== false; // default true
 
   const add = async (item: T) => {
     if (!companyId) return;
@@ -241,6 +243,10 @@ export function makeOfflineCrud<T extends { id: string }>(
 
   const remove = async (id: string) => {
     if (!navigator.onLine) {
+      if (!allowOfflineDelete) {
+        toast.error(`Cannot delete ${entityLogType || table} offline`, { description: "Please reconnect to delete." });
+        return;
+      }
       setter(prev => {
         const updated = prev.filter(x => x.id !== id);
         persistEntityToCache(cacheEntity, updated);

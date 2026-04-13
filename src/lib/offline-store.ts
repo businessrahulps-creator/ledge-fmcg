@@ -62,6 +62,8 @@ export interface QueuedMutation {
 
 const QUEUE_KEY = "queue:mutations";
 const RETRY_STATUS_KEY = "queue:retryStatus";
+/** Tracks idempotency keys of mutations we've already successfully replayed */
+const IDEMPOTENCY_KEY = "queue:idempotency";
 
 export type RetryStatusMap = Record<string, "success" | "failed">;
 
@@ -78,6 +80,29 @@ export async function setRetryStatus(status: RetryStatusMap) {
     await set(RETRY_STATUS_KEY, status);
   } catch (e) {
     console.warn("IDB retry status write failed:", e);
+  }
+}
+
+// --- Idempotency tracking ---
+
+async function getIdempotencySet(): Promise<Set<string>> {
+  try {
+    const arr = await get<string[]>(IDEMPOTENCY_KEY);
+    return new Set(arr || []);
+  } catch {
+    return new Set();
+  }
+}
+
+async function markIdempotent(mutationId: string) {
+  try {
+    const s = await getIdempotencySet();
+    s.add(mutationId);
+    // Keep only last 500 entries to avoid unbounded growth
+    const arr = [...s].slice(-500);
+    await set(IDEMPOTENCY_KEY, arr);
+  } catch (e) {
+    console.warn("IDB idempotency write failed:", e);
   }
 }
 
@@ -120,27 +145,38 @@ export async function updateMutationInQueue(id: string, patch: Partial<QueuedMut
 }
 
 /** Reconcile temp IDs: when an offline-created row gets a real server ID,
- *  rewrite all later queued mutations that reference the temp ID */
+ *  rewrite all later queued mutations that reference the temp ID.
+ *  Scans ALL string-valued payload fields, not just payload.id */
 export async function reconcileTempId(tempId: string, realId: string) {
   const queue = await getQueue();
   let changed = false;
   for (const m of queue) {
-    if (m.payload?.id === tempId) {
-      m.payload.id = realId;
-      changed = true;
+    if (!m.payload || typeof m.payload !== "object") continue;
+    for (const key of Object.keys(m.payload)) {
+      if (m.payload[key] === tempId) {
+        m.payload[key] = realId;
+        changed = true;
+      }
     }
   }
   if (changed) await set(QUEUE_KEY, queue);
 }
 
 // --- Replay single mutation ---
-// This is the unified replay helper used by both auto-sync and manual retry.
 
 export async function replaySingleMutation(
   mutation: QueuedMutation
 ): Promise<{ ok: true; realId?: string } | { ok: false; error: string }> {
   const { supabase } = await import("@/integrations/supabase/client");
   const { sanitizeInput } = await import("@/utils/sanitize");
+
+  // Idempotency check: skip if we already successfully replayed this mutation
+  const idempotencySet = await getIdempotencySet();
+  if (idempotencySet.has(mutation.id)) {
+    // Already replayed — just clean up the queue entry
+    await removeFromQueue(mutation.id);
+    return { ok: true };
+  }
 
   try {
     if (mutation.type === "insert_order_atomic") {
@@ -181,47 +217,60 @@ export async function replaySingleMutation(
         if (linesError) throw linesError;
       }
 
-      // Stock deduction if dispatched/delivered
+      // Stock deduction — wrapped in try-catch so partial failure doesn't lose the order
       if (p.godownId && (p.deliveryStatus === "dispatched" || p.deliveryStatus === "delivered")) {
-        const today = new Date().toISOString().split("T")[0];
-        for (const line of (p.lines || [])) {
-          await supabase.from("stock_deductions").insert({
-            company_id: p.companyId,
-            order_id: inserted.id,
-            product_id: line.productId,
-            godown_id: p.godownId,
-            quantity_deducted: line.quantity,
-            date: today,
-          });
+        try {
+          const today = new Date().toISOString().split("T")[0];
+          // Check if deductions already exist for this order (idempotency for partial replays)
+          const { data: existingDeductions } = await supabase
+            .from("stock_deductions").select("product_id")
+            .eq("order_id", inserted.id);
+          const alreadyDeducted = new Set((existingDeductions || []).map((d: any) => d.product_id));
 
-          // Fetch and update stock
-          const { data: existing } = await supabase
-            .from("stock_items").select("id, quantity")
-            .eq("company_id", p.companyId)
-            .eq("product_id", line.productId)
-            .eq("godown_id", p.godownId)
-            .maybeSingle();
+          for (const line of (p.lines || [])) {
+            if (alreadyDeducted.has(line.productId)) continue; // skip already-deducted
 
-          if (existing) {
-            await supabase.from("stock_items").update({
-              quantity: existing.quantity - line.quantity,
-              last_deducted_date: today,
-            }).eq("id", existing.id);
-          } else {
-            await supabase.from("stock_items").insert({
+            await supabase.from("stock_deductions").insert({
               company_id: p.companyId,
+              order_id: inserted.id,
               product_id: line.productId,
               godown_id: p.godownId,
-              quantity: -line.quantity,
-              threshold: 0,
-              last_deducted_date: today,
+              quantity_deducted: line.quantity,
+              date: today,
             });
+
+            const { data: existing } = await supabase
+              .from("stock_items").select("id, quantity")
+              .eq("company_id", p.companyId)
+              .eq("product_id", line.productId)
+              .eq("godown_id", p.godownId)
+              .maybeSingle();
+
+            if (existing) {
+              await supabase.from("stock_items").update({
+                quantity: existing.quantity - line.quantity,
+                last_deducted_date: today,
+              }).eq("id", existing.id);
+            } else {
+              await supabase.from("stock_items").insert({
+                company_id: p.companyId,
+                product_id: line.productId,
+                godown_id: p.godownId,
+                quantity: -line.quantity,
+                threshold: 0,
+                last_deducted_date: today,
+              });
+            }
           }
+        } catch (stockErr) {
+          console.error("Stock deduction during replay partially failed:", stockErr);
+          // Order + lines are already persisted — don't fail the whole mutation
         }
       }
 
+      // Mark as successfully replayed BEFORE removing from queue (idempotency)
+      await markIdempotent(mutation.id);
       await removeFromQueue(mutation.id);
-      // Reconcile temp IDs in remaining queue
       if (mutation.clientTempId) {
         await reconcileTempId(mutation.clientTempId, inserted.id);
       }
@@ -246,6 +295,7 @@ export async function replaySingleMutation(
       if (res.error) throw res.error;
     }
 
+    await markIdempotent(mutation.id);
     await removeFromQueue(mutation.id);
     return { ok: true };
   } catch (e: any) {
