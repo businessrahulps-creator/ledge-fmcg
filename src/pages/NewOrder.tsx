@@ -449,7 +449,9 @@ export default function NewOrder() {
                               <SelectValue placeholder="Select product" />
                             </SelectTrigger>
                             <SelectContent>
-                              {products.map((p) => (
+                              {products
+                                .filter((p) => p.id === line.productId || !lines.some((l) => l.id !== line.id && l.productId === p.id))
+                                .map((p) => (
                                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                               ))}
                             </SelectContent>
