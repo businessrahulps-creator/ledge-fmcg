@@ -447,6 +447,19 @@ export default function Billing() {
               <SelectItem value="credit_note">Credit Note</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
+            <SelectTrigger className="w-[160px] h-10">
+              <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="daily">Today</SelectItem>
+              <SelectItem value="weekly">Last 7 Days</SelectItem>
+              <SelectItem value="monthly">Last 30 Days</SelectItem>
+              <SelectItem value="yearly">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Invoice List */}
@@ -475,7 +488,7 @@ export default function Billing() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filtered.map(inv => {
+                    {paginatedList.map(inv => {
                       const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
                       return (
                         <TableRow key={inv.id} className="row-hover">
@@ -552,7 +565,7 @@ export default function Billing() {
 
               {/* Mobile cards */}
               <div className="space-y-3 p-3 md:hidden">
-                {filtered.map(inv => (
+                {paginatedList.map(inv => (
                   <div key={inv.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
@@ -605,9 +618,9 @@ export default function Billing() {
                 ))}
               </div>
             </>
-          
           )}
         </motion.div>
+        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
       {/* Create / Edit Document Dialog */}
