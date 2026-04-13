@@ -313,7 +313,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                     onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
                                     className={`flex w-full flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 text-muted-foreground hover:bg-muted/50`}
                                   >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/40">
                                       <item.icon className="h-6 w-6" strokeWidth={1.5} />
                                     </div>
                                     <span className="text-xs font-medium">{item.title}</span>
@@ -328,7 +328,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                         : "text-muted-foreground hover:bg-muted/50"
                                     }`}
                                   >
-                                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                                    <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
                                       active ? "bg-primary/10" : "bg-muted/40"
                                     }`}>
                                       <item.icon className="h-6 w-6" strokeWidth={active ? 2 : 1.5} />
