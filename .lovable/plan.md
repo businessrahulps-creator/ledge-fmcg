@@ -1,89 +1,81 @@
 
-
 # Final Site-Wide QA, CTO Review & Adversarial Stress Test
 
-## Audit Results
+## Fresh Audit Results
 
-### CRITICAL (Must fix before launch)
+After a complete codebase review of all pages, layouts, contexts, and data flows, here are the issues found:
 
-**C1. Billing.tsx — Double-nested Label tag (line 715)**
-`<Label><Label>Document Type</Label></Label>` renders nested `<label>` elements — invalid HTML, screen readers will announce twice. This was flagged in a previous audit but the fix was not applied.
+### CRITICAL — None found
 
-**C2. Landing page dark mode leak**
-`Index.tsx` uses `className="light"` but this doesn't actually force light color scheme. The CSS class `light` has no definition — only `.dark` is defined. Users with system dark mode will see the landing page with dark theme variables. Need `style={{ colorScheme: "light" }}` and wrapping class that forces light tokens.
+Previous critical issues (nested Label, dark mode leak) were correctly fixed in the last pass. The Billing.tsx label on line 715 is now a single `<Label>`. The Index.tsx has `style={{ colorScheme: "light" }}`. The credit guard correctly uses `netOrderTotal` after scheme savings.
 
-**C3. Pull-to-refresh scroll detection unreliable**
-`usePullToRefresh` calls `getScrollParent(el)` which walks up from `containerRef` looking for `overflow-y: auto|scroll`. But `containerRef` is on the content div, while the actual scrollable parent is `<main ref={mainRef}>` in AppLayout. The hook may find `<main>` correctly sometimes but the `scrollTop > 0` check on the scroll parent should prevent false triggers. However, on pages where the content div has its own `overflow-y-auto` (if any remain from previous bugs), pull-to-refresh will break.
+### HIGH
 
-### HIGH (Fix before launch)
+**H1. Realtime subscriptions for claims/invoices/targets/secondary_sales call `fetchAll` — too heavy**
+Lines 313-316 of DataContext.tsx: A single change to any claim, invoice, target, or secondary sale triggers a full `fetchAll` (all 10+ tables). This causes unnecessary network load and UI flicker. These should use targeted refetch functions like the other domains do (e.g., `orders.safeRefetch()`).
 
-**H1. No `autoComplete` attributes on Login/Signup forms**
-Login form lacks `autoComplete="email"` and `autoComplete="current-password"`. Signup form lacks `autoComplete="new-password"`. Password managers won't auto-fill correctly on mobile.
+**H2. Signup calls `setup_new_company` immediately — race with email confirmation**
+`Signup.tsx` line 46: After `signUp()`, it immediately calls `setup_new_company` RPC and navigates to `/dashboard`. If email confirmation is enabled (which it should be for production), the user gets a company created but the session may not persist. The signup flow should check `authData.session` — if null (email confirmation required), show a "check your email" message instead of calling the RPC.
 
-**H2. Signup flow calls `setup_new_company` before email verification**
-`Signup.tsx` immediately calls `supabase.rpc("setup_new_company")` after `signUp()` and navigates to `/dashboard`. If email confirmation is required (which it should be per project rules), the user gets a company created but can't log in again until email is confirmed. The RPC should only be called after first login, not during signup.
+**H3. Save button on NewOrder is `bottom-28` which may overlap bottom nav**
+Line 672: `sticky bottom-28` positions the save button 112px from the bottom. The bottom nav is `bottom-3` with padding. On smaller phones (iPhone SE, 320px width), the save button and bottom nav may visually collide when scrolled to bottom of a long order form.
 
-**H3. Missing keyboard dismiss on mobile for order form**
-On `NewOrder.tsx`, the quantity inputs use `inputMode="numeric"` which is correct, but the form doesn't dismiss the keyboard when tapping outside inputs. This is standard iOS behavior but causes the sticky save button to be obscured by the keyboard on some Android devices.
+### MEDIUM
 
-**H4. Dashboard empty state for Top Dealers/Products when no data**
-If a new company has zero orders, `topDistributors` and `topProducts` arrays are empty, but the glass-cards still render (empty). Should show a minimal empty state or hide the sections.
+**M1. NewOrder: duplicate product selection not prevented**
+Users can select the same product on multiple lines. This creates confusing data — quantities should be merged or a warning shown. The `products.map()` in the SelectContent on line 452 does not filter out already-selected products.
 
-**H5. Order total uses gross total, not net (after scheme savings)**
-In `NewOrder.tsx`, `orderTotal` on line 173 is `lines.reduce(...)` — gross total. But the credit guard on line 178 uses this gross total for `projectedOutstanding`. It should use `orderTotal - totalSchemeSavings` for accurate credit projection. Same issue: the order is saved with `total: validLines.reduce(...)` (line 296) — gross total, while scheme savings are tracked separately. This is consistent but the credit guard is misleading.
+**M2. Order lines allow zero unit price**
+NewOrder line 475: The price input accepts 0 without warning. A user could submit an order with ₹0 unit prices, creating a ₹0 total order.
 
-**H6. Footer social links missing `key` stability**
-`src/components/landing/sections/Footer.tsx` — if social links use array index as key, React may incorrectly recycle elements. Previous audit flagged using `href` as key — verify this was applied.
+**M3. Distributor delete does not check for existing orders**
+`Distributors.tsx` line 98: `deleteDistributor` is called without checking if the dealer has orders. Deleting a dealer with orders would leave orphaned `distributor_id` references on those orders.
 
-### MEDIUM (Fix for polish)
+**M4. Realtime channel has no debounce**
+DataContext.tsx lines 306-316: Each postgres_changes event fires a refetch immediately. Bulk operations (e.g., importing 10 orders) will trigger 10 rapid refetches. Should debounce by 500ms.
 
-**M1. Login/Signup pages lack link back to landing page**
-No way to navigate from `/login` or `/signup` back to the home page (`/`). Users who land directly on login have no escape route.
+**M5. `companyInfo.invoicePrefix` not exposed through `useApi()`**
+The `api` object doesn't expose `invoicePrefix` or `setInvoicePrefix`, forcing Billing.tsx to use it through the data context directly or via `companyInfo`.
 
-**M2. Settings page "Install App" card references `pwa-192.png`**
-The file `public/pwa-192.png` may not exist. If missing, broken image renders.
+**M6. DealerDetail/SalespersonDetail: no 404 handling for invalid IDs**
+`DealerDetail.tsx` line 50: If `dealer` is undefined (invalid ID in URL), the page should show a "not found" state. Currently it would crash on accessing properties of undefined.
 
-**M3. Order date input allows future dates without warning**
-`NewOrder.tsx` date input has no `max` constraint. Users can accidentally create orders dated in the future.
+**M7. Order total in Summary card shows gross total, not net**
+NewOrder line 626: The "Order Total" in the summary card shows `orderTotal` (gross). Below it, the schemes section shows "Effective Total". The summary card should show the net total or at least label it as "Gross Total" to avoid confusion.
 
-**M4. Distributor form `creditLimit` accepts negative values**
-No validation prevents negative credit limits in the dealer form.
+### LOW / POLISH
 
-**M5. `animate-fade-in` class used on Login/Signup but not defined**
-The class `animate-fade-in` is used in Login.tsx and Signup.tsx but may not be defined in Tailwind config or index.css.
+**L1. Dashboard: `maxDistVal` and `maxProdVal` could be 0 if data exists but all values are 0**
+Lines 145/148: `topDistributors[0]?.totalValue || 1` — if the first dealer has totalValue of 0, this correctly falls back to 1. But if all dealers have 0 value, the progress bars show 0% which is correct. No issue.
 
-**M6. Realtime channel doesn't subscribe to claims/invoices/targets/secondary_sales**
-`DataContext.tsx` line 306-312 subscribes to 7 tables but omits `claims`, `invoices`, `targets`, and `secondary_sales`. Changes from other team members won't appear in real-time for these entities.
-
-**M7. `DataContext.tsx` fetchAll uses `as any` casts extensively**
-Lines 151-155, 169-170, 204, 207, 210 use `(company as any)`, `("claims" as any)`, etc. These bypass type safety and indicate the generated Supabase types are out of date.
+**L2. AppLayout: duplicate Lucide icon imports**
+Line 5 and 13 both import from "lucide-react" separately. Minor, no functional impact.
 
 ---
 
 ## Implementation Plan
 
-### Pass 1: Critical fixes
+### Pass 1: Fix signup email confirmation handling
 | File | Fix |
 |------|-----|
-| `src/pages/Billing.tsx:715` | Remove nested `<Label>` — change to single `<Label>` |
-| `src/pages/Index.tsx:28` | Add `style={{ colorScheme: "light" }}` to force light theme |
-| `src/components/landing/sections/Footer.tsx` | Verify `href` key on social links |
+| `src/pages/Signup.tsx` | Check if `authData.session` is null after signup; if so, show "verify your email" message instead of calling RPC and navigating |
 
-### Pass 2: High-priority fixes
+### Pass 2: Fix DealerDetail/SalespersonDetail 404 handling
 | File | Fix |
 |------|-----|
-| `src/pages/Login.tsx` | Add `autoComplete` attributes to email/password inputs |
-| `src/pages/Signup.tsx` | Add `autoComplete` attributes; add note about email verification flow |
-| `src/pages/Dashboard.tsx` | Add empty-state guards for Top Dealers/Products sections |
-| `src/pages/NewOrder.tsx:178` | Use net total (after scheme savings) for credit guard projection |
+| `src/pages/DealerDetail.tsx` | Add early return with "not found" UI if `dealer` is undefined |
+| `src/pages/SalespersonDetail.tsx` | Same treatment |
 
-### Pass 3: Medium polish
+### Pass 3: Fix NewOrder summary label clarity
 | File | Fix |
 |------|-----|
-| `src/pages/Login.tsx` | Add "← Back to home" link |
-| `src/pages/Signup.tsx` | Add "← Back to home" link |
-| `src/pages/NewOrder.tsx` | Add `max={today}` to order date input |
-| `src/context/DataContext.tsx` | Add realtime subscriptions for missing tables |
+| `src/pages/NewOrder.tsx:625` | Change "Order Total" label to "Gross Total" when schemes are applied |
 
-All fixes are surgical single-line or few-line edits. No new features. No behavior changes. Existing classNames and data flows preserved.
+### Pass 4: Fix heavy fetchAll on realtime for claims/invoices/targets
+| File | Fix |
+|------|-----|
+| `src/context/domains/useBillingDomain.ts` | Add `safeRefetch` method |
+| `src/context/domains/useTargetsDomain.ts` | Add `safeRefetch` method |
+| `src/context/DataContext.tsx:313-316` | Use targeted safeRefetch instead of fetchAll |
 
+Total: 6 files, ~60 lines of surgical changes. Zero new features. All existing behavior preserved.
