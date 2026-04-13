@@ -1,62 +1,70 @@
 
 
-# Card Style Refinement — Premium Cursor Aesthetic
+# Landing Page Copy Replacement
 
-## Honest Design Critique
+## Summary
+Replace all textual content across 10 landing page section components with the exact new copy provided. No structural, layout, animation, or styling changes.
 
-**Why the Cursor cards feel more premium:**
+## Files to modify (text-only changes)
 
-1. **Typography hierarchy is flatter.** Cursor uses a single weight system — name is bold but not oversized, metadata is regular weight. Ledge's cards have too many competing font sizes (name, location, phone, orders, currency, outstanding badge) creating visual noise.
+### 1. `src/components/landing/sections/Navbar.tsx`
+- CTA button text: "Start Free Trial" → "Get Started Free" (lines 61, 92)
 
-2. **No icons in content rows.** Cursor relies on whitespace and text alone. Ledge cards have MapPin, Phone, ShoppingCart, UserCheck icons next to every line — this adds clutter and makes cards feel "busy".
+### 2. `src/components/landing/sections/Hero.tsx`
+- Headline (line 135): → "Every order your team placed today. Do you actually know about it?"
+- Subheadline (lines 142-144): → new longer paragraph about complete distribution management platform
+- Primary CTA (line 152): "Start Free Trial" → "Get Started Free"
+- Secondary CTA (line 158): "Watch a 2-Minute Demo" → "See How It Works"
+- Social proof line (line 166): → "Used by FMCG distribution businesses across India to replace spreadsheets, WhatsApp threads, and ERPs their teams hated."
+- Dashboard mockup KPIs (lines 15-18): Update values to ₹12,47,000 / 23 / 16 / 53% delivered
+- Dashboard mockup orders (lines 22-24): Keep same structure, can stay as-is (mockup visual placeholder matches)
 
-3. **Minimal border/shadow.** Cursor cards use a single thin border with nearly invisible shadow. Ledge's `glass-card` has a multi-layer shadow (`0_0_0_1px`, `0_1px_2px`, `0_2px_8px`) that creates visible depth. Premium = flatter.
+### 3. `src/components/landing/sections/TrustBar.tsx`
+- Companies array (lines 22-28): → "Aryan Beverages", "Nova Retail Co.", "Coastal Naturals", "Horizon Foods", "Sterling FMCG", "Crest Agencies"
+- Stats section: Replace numeric `StatBlock` components with 3 simple text blocks: "₹0 setup cost", "4 user roles built-in", "Works offline on any phone" (these are not numeric count-ups, so replace with plain `AnimateIn` divs)
+- Pull quote (lines 59-63): Replace quote text and attribution with new Arnav Sethi quote
 
-4. **Generous internal whitespace.** Cursor cards have more padding and more vertical spacing between elements. Ledge cards feel cramped — tight `gap-1`, `gap-1.5`, `mt-1` spacings.
+### 4. `src/components/landing/sections/Problem.tsx`
+- Section headline (line 39): stays the same ✓
+- Card titles and descriptions (lines 5-28): Replace all 4 cards with new headlines and longer body copy
 
-5. **Muted action buttons.** Cursor's CTAs are understated (small rounded pills, gray bg). Ledge's edit/delete icons sit visually heavy with colored destructive red.
+### 5. `src/components/landing/sections/HowItWorks.tsx`
+- Section headline (line 165): → "Three things happen when your team uses Ledge. All of them in under sixty seconds."
+- Step badges (lines 136, 143, 150): "Step 1/2/3" → "01/02/03"
+- Step titles and descriptions: Replace all 3 with new copy
+- Mockup content stays unchanged (visual placeholders)
 
-6. **No colored badges inside cards.** Cursor keeps cards monochrome. Ledge's "Outstanding" badge with red/amber/green backgrounds introduces noise.
+### 6. `src/components/landing/sections/Features.tsx`
+- Section headline (line 49): → "Built for the way Indian distribution businesses actually run. Not for how someone in a boardroom imagined they do."
+- All 6 feature card titles and descriptions: Replace with new copy
 
-## What to change
+### 7. `src/components/landing/sections/WhyOrdra.tsx`
+- Section headline (line 31): → "This isn't another ERP your field team will quit in three weeks."
+- All 4 blocks: Replace titles and content with new copy
 
-### Pass 1: `glass-card` utility (index.css)
-- Flatten shadow to single subtle layer: `shadow-[0_1px_3px_rgba(0,0,0,0.04)]`
-- Increase border radius to `rounded-xl` (keep `rounded-2xl`)
-- Slightly increase border opacity for crispness: `border-border/50`
+### 8. `src/components/landing/sections/Testimonials.tsx`
+- Section headline (line 35): → "From owners who stopped guessing."
+- All 4 testimonial quotes, names, and roles: Replace with new copy
 
-### Pass 2: Dealer cards (Distributors.tsx)
-- Remove MapPin and Phone icons — show location and contact as plain text lines
-- Reduce action button visual weight — smaller icons, remove red color from delete (use muted foreground)
-- Increase card padding to `p-5 md:p-6`
-- Use lighter separator: `border-border/30`
-- Make Outstanding badge more subtle — remove colored backgrounds, use muted text with a small dot indicator
+### 9. `src/components/landing/sections/Pricing.tsx`
+- Section headline (line 74): → "Start free. Pay when it's running your business."
+- Section subheadline (line 78): → "No setup fees. No annual lock-in. Cancel anytime. Every plan includes PWA install, offline support, and automatic updates."
+- All 4 plan features arrays: Replace with new detailed feature lists
+- Plan taglines: Add tagline text below plan names (requires adding a `tagline` field)
+- CTA text updates: "Start Free" stays, "Start 14-Day Trial" → "Start 14-Day Free Trial"
+- Footer note (lines 148-153): → "All plans include offline support, PWA install, automatic updates, and role-based access control. · Need help deciding? Chat on WhatsApp →"
 
-### Pass 3: Sales Team cards (Salespersons.tsx)
-- Remove the circular avatar icon container (`bg-primary/10` circle) — just show name directly like Cursor
-- Remove MapPin icon from region, Phone icon from phone — plain text
-- Same padding/separator treatment as dealers
-- Same muted action buttons
+### 10. `src/components/landing/sections/FinalCTA.tsx`
+- Headline (line 11): → "Your team is in the field right now. Orders are moving. Are you watching?"
+- Subheadline (line 16): → "Set up Ledge in under 15 minutes. See your first live order before the hour is up. No credit card. No IT department. No onboarding call."
+- CTA button (line 24): "Start Free. Takes 2 Minutes" → "Get Started Free"
 
-### Pass 4: Stock product cards (Stock.tsx)
-- Same icon reduction and spacing treatment
-- Flatten HealthBadge to text-only (remove bg colors, use colored dot + text)
+### 11. `src/components/landing/sections/Footer.tsx`
+- No text changes needed — columns and copyright already match ✓
 
-### Pass 5: Dashboard Top Dealers/Products (Dashboard.tsx)
-- Already minimal, just ensure consistent glass-card shadow
-
-## Files Changed
-| File | Change |
-|------|--------|
-| `src/index.css` | Flatten `glass-card` shadow, soften `card-hover` |
-| `src/pages/Distributors.tsx` | Remove inline icons, increase spacing, mute action buttons, subtle outstanding badge |
-| `src/pages/Salespersons.tsx` | Remove avatar circle, inline icons, increase spacing, mute action buttons |
-| `src/pages/Stock.tsx` | Same icon/spacing treatment for product cards |
-| `src/pages/Dashboard.tsx` | No changes needed — already minimal |
-
-## What will NOT change
-- All component structure, props, data flow, navigation
-- All existing functionality and interactivity
-- Dark mode token values
-- Card grid layout (3-col responsive)
+## Technical notes
+- TrustBar `StatBlock` components will be replaced with simple `AnimateIn` text divs since the new stats are not numeric
+- Pricing cards will get a `tagline` string field added to the `plans` data array
+- Hero dashboard mockup KPI values update to match the new copy's numbers
+- All changes are purely to string literals in data arrays and JSX text nodes
 
