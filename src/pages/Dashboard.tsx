@@ -464,14 +464,6 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
         </section>
       </div>
 
-      {/* Mobile FAB — quick order creation */}
-      <Link
-        to="/orders/new"
-        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,0.15),0_6px_20px_rgba(0,0,0,0.1)] active:scale-95 transition-transform md:hidden"
-        aria-label="New Order"
-      >
-        <Plus className="h-6 w-6" />
-      </Link>
       </div>
     </AppLayout>
   );
