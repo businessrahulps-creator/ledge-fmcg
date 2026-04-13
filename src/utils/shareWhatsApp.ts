@@ -118,6 +118,7 @@ export interface InvoiceShareData {
   sellerPhone: string;
   sellerEmail: string;
   sellerBankName: string;
+  sellerBankAccountName: string;
   sellerBankAccount: string;
   sellerBankIfsc: string;
   buyerAddress: string;
@@ -189,6 +190,7 @@ export async function shareInvoiceOnWhatsApp(inv: InvoiceShareData) {
         sellerPhone: inv.sellerPhone,
         sellerEmail: inv.sellerEmail,
         sellerBankName: inv.sellerBankName,
+        sellerBankAccountName: inv.sellerBankAccountName,
         sellerBankAccount: inv.sellerBankAccount,
         sellerBankIfsc: inv.sellerBankIfsc,
         supplyType: inv.supplyType,
