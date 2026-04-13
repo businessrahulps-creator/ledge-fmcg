@@ -1,90 +1,136 @@
 
 
-# Refactor: Split DataContext into Domain-Specific Contexts
+# Add Automated Testing for Core Flows
 
 ## Problem
-`DataContext.tsx` is 1,648 lines managing 10+ entity domains (orders, dealers, salespersons, products, stock, schemes, invoices, claims, targets, secondary sales) plus infrastructure (offline queue, realtime, caching). This makes it hard to maintain, test, and reason about.
+Only 7 utility test files exist (formatting, sanitization, scorecards). Zero integration tests for the domain hooks that drive all business logic, and zero E2E tests for critical user journeys.
 
-## Key Insight
-All 23 consumer files use `useApi()` from `src/services/api.ts`, which wraps `useData()`. None call `useData()` directly. This means we can restructure the internals without touching any page or component.
+## Strategy
 
-## Architecture
+Two layers of testing, prioritized by impact:
 
-```text
-DataProvider (orchestrator)
-├── CoreDataProvider     (fetchAll, realtime, offline sync, companyInfo)
-│   ├── OrdersProvider   (orders, order lines, order schemes, stock deduction)
-│   ├── DealersProvider  (distributors CRUD)
-│   ├── SalesProvider    (salespersons CRUD)
-│   ├── CatalogProvider  (products, schemes)
-│   ├── StockProvider    (stock items, locations/godowns)
-│   ├── BillingProvider  (invoices, claims)
-│   └── TargetsProvider  (targets, secondary sales)
-└── useData() — composes all sub-contexts into one object (unchanged interface)
+### Layer 1: Domain Hook Unit Tests (Vitest)
+Test each domain hook in isolation by mocking `supabase` and verifying state transitions. These are fast, deterministic, and cover the core business logic without needing a running backend.
+
+### Layer 2: E2E Tests (Playwright)
+Test critical user journeys through the real UI against the live preview. These validate the full stack — auth, database, UI interactions.
+
+---
+
+## Layer 1: Domain Hook Unit Tests
+
+Each test file creates a test harness using `renderHook` with mocked Supabase client. We mock `supabase.from()`, `supabase.rpc()`, and `navigator.onLine`.
+
+### Files to create:
+
+| File | What it tests |
+|------|---------------|
+| `src/context/domains/__tests__/useOrdersDomain.test.ts` | `addOrder` (online + offline), `updateOrder` (status transitions, stock deduction trigger), `deleteOrder`, `previewOrderNumber` |
+| `src/context/domains/__tests__/useDealersDomain.test.ts` | CRUD operations, offline queue enqueue |
+| `src/context/domains/__tests__/useCatalogDomain.test.ts` | Product + scheme CRUD |
+| `src/context/domains/__tests__/useStockDomain.test.ts` | Stock item CRUD, `deductStockForOrder` logic, godown management |
+| `src/context/domains/__tests__/useBillingDomain.test.ts` | Invoice creation (sequence number), claim creation (stock restore), status updates |
+| `src/context/domains/__tests__/useTargetsDomain.test.ts` | Target + secondary sale CRUD |
+| `src/utils/activityLog.test.ts` | `logActivity`, `fmtAmount` |
+| `src/context/__tests__/data-utils.test.ts` | `mapOrders`, `mapDistributor`, `batchIn`, `persistAllToCache` |
+
+### Key test scenarios for Orders (highest priority):
+
+1. **addOrder online** — mocks `supabase.rpc("insert_order_atomic")` returning `{id, order_number, seq}`, verifies order is added to state with correct number
+2. **addOrder offline** — sets `navigator.onLine = false`, verifies mutation is enqueued via `enqueueMutation`, temp ID assigned, sequence incremented locally
+3. **updateOrder with stock deduction** — transition from `pending` → `dispatched` with a godownId triggers `deductStockForOrder`
+4. **updateOrder without stock deduction** — transition from `dispatched` → `delivered` does NOT re-deduct
+5. **deleteOrder** — cascading delete of stock_deductions, order_schemes, order_lines, then order
+6. **deleteOrder offline** — returns false with error toast
+
+### Key test scenarios for Billing:
+
+1. **addInvoice** — mocks `get_next_invoice_number` RPC, verifies invoice number format, lines inserted
+2. **deleteInvoice** — final status blocks deletion
+3. **addClaim with stock restore** — verifies stock quantity incremented
+
+### Test harness pattern:
+
+```typescript
+// Shared mock factory
+function createMockSupabase() {
+  const mockFrom = vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    // chain terminators
+  });
+  return { from: mockFrom, rpc: vi.fn() };
+}
 ```
 
-## Approach
+Each domain hook is a plain function returning state + callbacks — we call it inside `renderHook` with mock deps.
 
-### Phase 1: Extract types (no behavior change)
-Create `src/context/data-types.ts` with all interfaces (`CompanyInfo`, `Invoice`, `SecondarySale`, `Target`, `Claim`, `ClaimLine`, `InvoiceLine`, `AddOrderResult`). Currently these are exported from DataContext — re-export them from the same path for backward compat.
+---
 
-### Phase 2: Extract shared utilities
-Create `src/context/data-utils.ts` with:
-- `mapOrders()` helper
-- `persistAllToCache()` / `persistEntityToCache()`
-- `makeOfflineCrud()` generic factory
-- `batchIn()` batch query helper
+## Layer 2: E2E Tests (Playwright)
 
-### Phase 3: Split into domain contexts
-Each file ~100-200 lines, following the same pattern:
-- `src/context/domains/OrdersContext.tsx` — addOrder, updateOrder, deleteOrder, orderPrefix, orderSequence, nextOrderNumber, previewOrderNumber, deductStockForOrder
-- `src/context/domains/DealersContext.tsx` — distributors CRUD via makeOfflineCrud
-- `src/context/domains/SalespersonsContext.tsx` — salespersons CRUD
-- `src/context/domains/CatalogContext.tsx` — products + schemes CRUD
-- `src/context/domains/StockContext.tsx` — stockItems, locations, godowns CRUD
-- `src/context/domains/BillingContext.tsx` — invoices + claims CRUD
-- `src/context/domains/TargetsContext.tsx` — targets + secondary sales CRUD
+### Files to create:
 
-### Phase 4: Core data provider
-`src/context/CoreDataContext.tsx` handles:
-- `fetchAll()` — loads all entities from DB, distributes to sub-contexts via shared setters
-- Realtime subscriptions (one channel, dispatches to domain refetch functions)
-- Offline queue sync on reconnect
-- IDB cache loading
-- `companyInfo` state
-- `loading` / `isOfflineData` flags
+| File | Journey |
+|------|---------|
+| `e2e/auth.spec.ts` | Signup → dashboard redirect, Login → dashboard, Login with wrong credentials → error toast, Logout → redirect to login |
+| `e2e/order-lifecycle.spec.ts` | Create order → verify in list → update payment status → update delivery status → verify stock deduction → delete order |
+| `e2e/billing.spec.ts` | Create GST invoice from order → verify in list → finalize → verify cannot delete |
 
-### Phase 5: Compose in DataContext
-`DataContext.tsx` shrinks to ~50 lines — just nests providers and re-exports `useData()` with the exact same `DataContextType` interface. `useApi()` and all 23 consumers remain untouched.
+### Auth test approach:
+- Use a dedicated test account (create via signup flow in test setup)
+- Store session for reuse across order/billing tests
 
-### Phase 6: Computed values
-Move `computedDistributors`, `computedSalespersons`, `computedProducts` into their respective domain contexts (they depend on orders, so they'll receive orders as a prop/context value).
+### E2E test pattern:
+```typescript
+import { test, expect } from "../playwright-fixture";
 
-## Files Created/Modified
+test("create order and verify in list", async ({ page }) => {
+  await page.goto("/login");
+  await page.fill('[id="email"]', testEmail);
+  await page.fill('[id="password"]', testPassword);
+  await page.click('button[type="submit"]');
+  await page.waitForURL("**/dashboard");
+  
+  await page.goto("/orders/new");
+  // Fill form fields, submit, verify redirect + toast
+});
+```
 
-| File | Action | ~Lines |
-|------|--------|--------|
-| `src/context/data-types.ts` | Create | ~130 |
-| `src/context/data-utils.ts` | Create | ~120 |
-| `src/context/domains/OrdersContext.tsx` | Create | ~200 |
-| `src/context/domains/DealersContext.tsx` | Create | ~80 |
-| `src/context/domains/SalespersonsContext.tsx` | Create | ~60 |
-| `src/context/domains/CatalogContext.tsx` | Create | ~120 |
-| `src/context/domains/StockContext.tsx` | Create | ~150 |
-| `src/context/domains/BillingContext.tsx` | Create | ~200 |
-| `src/context/domains/TargetsContext.tsx` | Create | ~100 |
-| `src/context/CoreDataContext.tsx` | Create | ~250 |
-| `src/context/DataContext.tsx` | Rewrite | ~80 |
+---
 
-## What stays the same
-- `useData()` return type — identical `DataContextType`
-- `useApi()` in `src/services/api.ts` — zero changes
-- All 23 consumer pages/components — zero changes
-- Offline queue, realtime, caching behavior — identical
-- Type exports from `@/context/DataContext` — re-exported
+## Execution Order
 
-## Risk mitigation
-- Exact same `DataContextType` interface ensures compile-time safety
-- Each domain context is independently testable
-- If any sub-context breaks, the error boundary catches it at the same level as today
+1. Create shared test utilities (`src/test/mock-supabase.ts`)
+2. `data-utils.test.ts` — pure functions, no mocking needed for mappers
+3. `useOrdersDomain.test.ts` — highest business value
+4. `useBillingDomain.test.ts` — second highest
+5. Remaining domain hooks
+6. E2E auth test
+7. E2E order lifecycle test
+8. E2E billing test
+
+## Files Created
+
+| File | Lines |
+|------|-------|
+| `src/test/mock-supabase.ts` | ~60 |
+| `src/context/__tests__/data-utils.test.ts` | ~120 |
+| `src/context/domains/__tests__/useOrdersDomain.test.ts` | ~200 |
+| `src/context/domains/__tests__/useBillingDomain.test.ts` | ~150 |
+| `src/context/domains/__tests__/useDealersDomain.test.ts` | ~80 |
+| `src/context/domains/__tests__/useCatalogDomain.test.ts` | ~80 |
+| `src/context/domains/__tests__/useStockDomain.test.ts` | ~120 |
+| `src/context/domains/__tests__/useTargetsDomain.test.ts` | ~60 |
+| `src/utils/activityLog.test.ts` | ~40 |
+| `e2e/auth.spec.ts` | ~80 |
+| `e2e/order-lifecycle.spec.ts` | ~120 |
+| `e2e/billing.spec.ts` | ~80 |
+
+Total: 12 new files, ~1,190 lines of test code. Zero changes to production code.
 
