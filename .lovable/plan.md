@@ -1,67 +1,86 @@
 
 
-# Visual Design Refresh — Uniform Cards, Icons, Symmetry
+# 100× Visual Elevation — Typography, Spacing, Buttons, Breathing Room
 
-## What changes
+## Audit Summary
 
-### 1. Spacing increase (all section files)
-- Section padding: `py-20 md:py-28` → `py-24 md:py-32`
-- Section heading margin-bottom: `mb-16` → `mb-20`
+1. **Headlines too large** — `text-[60px]` hero, `text-[44px]` sections, `text-[48px]` FinalCTA all wrap on desktop. Need to clamp to single-line.
+2. **Cramped spacing** — `py-24 md:py-32` is decent but card padding `p-8` and section `mb-20` don't create enough breathing room. Gap between sections feels uniform and flat.
+3. **Text density** — Body `leading-[1.75]` is good but `text-base`/`text-[17px]` with tight paragraph spacing makes cards feel text-heavy.
+4. **Buttons feel flat** — `rounded-2xl` with no shadow, no depth. Single-pixel hover scale. Need Fluent-level elevation.
 
-### 2. Problem section → 2x2 symmetric grid (`Problem.tsx`)
-- Change from 4+8 column sticky layout to centered headline + 2x2 card grid
-- Add Lucide icons rendered at top of each card (thin-line, `strokeWidth={1.5}`, size 24, `text-[#0D9488]`)
-- Icons: `MessageCircle`, `Table`, `Compass`, `Laptop` (already imported)
-- All 4 cards: equal height via `h-full` on grid items + `flex flex-col` on card
+## Changes per file (visual-only, zero text changes)
 
-### 3. Features section — add icons + equal height (`Features.tsx`)
-- Render `<feature.icon>` at top of each card (same thin-line style)
-- Icons already in data array: `BarChart3`, `ClipboardCheck`, `Users`, `Package`, `IndianRupee`, `CloudOff`
-- Cards: add `h-full flex flex-col`, description gets `flex-1`
+### All sections — Global rhythm
+- Section padding: `py-24 md:py-32` → `py-28 md:py-36`
+- Section heading mb: `mb-20` → `mb-16` (headings smaller now, need less gap)
+- Card padding: `p-8` → `p-10`
+- Card shadow resting: `0 1px 2px rgba(0,0,0,0.04)` → `0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)`
 
-### 4. Why Ledge → 2x2 card grid with icons (`WhyOrdra.tsx`)
-- Replace border-left list layout with 2x2 card grid (matching testimonials)
-- Add icons: `Smartphone`, `WifiOff`, `Shield`, `FileText` from lucide-react
-- Cards: `bg-white rounded-3xl p-8 border border-[#E8E5E0]` with icon at top
-- Equal height: `h-full flex flex-col`
+### `Navbar.tsx`
+- CTA button: add `shadow-sm` and `hover:shadow-md` for depth
 
-### 5. Pricing — add icons to tiers (`Pricing.tsx`)
-- Add icons per tier: `Gift` (Free), `TrendingUp` (Growth), `Layers` (Scale), `Building2` (Enterprise)
-- Render above plan name, thin-line `strokeWidth={1.5}` size 24
+### `Hero.tsx`
+- h1: `text-[34px] md:text-[60px]` → `text-[32px] md:text-[52px]` (fits single line)
+- Body: `text-[17px] md:text-[20px]` → `text-[16px] md:text-[18px]` with `leading-[1.6]`
+- Primary CTA: add `shadow-md hover:shadow-lg` for Fluent depth
+- Secondary CTA: add `shadow-sm hover:shadow-md`
+- Section padding: `py-24 md:py-32` → `py-28 md:py-36`
 
-### 6. How It Works — add icons to step badges (`HowItWorks.tsx`)
-- Add icons: `Smartphone` (step 1), `LayoutDashboard` (step 2), `Truck` (step 3)
-- Render icon next to badge number
+### `TrustBar.tsx`
+- Stats text: `text-[20px] md:text-[24px]` → `text-[18px] md:text-[20px]`
+- Pull quote padding: `p-8` → `p-10`
+- Section padding increase
 
-### 7. Testimonials — already symmetric ✓
-- Only spacing increase needed
+### `Problem.tsx`
+- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
+- Card title: `text-[20px]` → `text-[18px]`
+- Card body: `text-base` → `text-[15px]` with `leading-[1.7]`
+- Card padding: `p-8` → `p-10`
+- Card shadow: elevated resting shadow
 
-### 8. Hero, TrustBar, Navbar, FinalCTA, Footer, DeviceFrames
-- Only spacing increase (py-24/py-32)
-- No structural changes
+### `HowItWorks.tsx`
+- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[36px]`
+- Step title: `text-[24px] md:text-[28px]` → `text-[22px] md:text-[26px]`
+- Step body: `text-[17px]` → `text-[15px]` with `leading-[1.7]`
+- Step spacing: `space-y-24` → `space-y-28`
 
-## Files modified
+### `Features.tsx`
+- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[36px]`
+- Card title: `text-[20px]` → `text-[18px]`
+- Card body: `text-base` → `text-[15px]` with `leading-[1.7]`
+- Card padding: `p-8` → `p-10`
 
-| File | Changes |
-|------|---------|
-| `Problem.tsx` | 2x2 grid layout, render icons, equal-height cards |
-| `Features.tsx` | Render icons, equal-height cards |
-| `WhyOrdra.tsx` | 2x2 card grid with icons (replacing border-left blocks) |
-| `Pricing.tsx` | Add tier icons |
-| `HowItWorks.tsx` | Add step icons |
-| `Hero.tsx` | Spacing increase |
-| `TrustBar.tsx` | Spacing increase |
-| `Testimonials.tsx` | Spacing increase |
-| `FinalCTA.tsx` | Spacing increase |
-| `Footer.tsx` | No change |
-| `Navbar.tsx` | No change |
+### `WhyOrdra.tsx`
+- Same treatment as Problem cards: heading `md:text-[38px]`, card title `text-[18px]`, body `text-[15px] leading-[1.7]`, padding `p-10`
+
+### `Testimonials.tsx`
+- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
+- Card padding: `p-8` → `p-10`
+- Quote text: `text-base` → `text-[15px]` with `leading-[1.7]`
+
+### `Pricing.tsx`
+- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
+- Card padding: `p-8` → `p-10`
+- Feature text: `text-[15px]` stays
+- CTA button in each card: add `shadow-sm hover:shadow-md`, highlighted card CTA gets `shadow-md hover:shadow-lg`
+- Price font: `text-[36px]` → `text-[32px]`
+
+### `FinalCTA.tsx`
+- Heading: `text-[28px] md:text-[48px]` → `text-[26px] md:text-[40px]`
+- Body: `text-[20px]` → `text-[18px]`
+- CTA button: `px-8 py-4` → `px-10 py-4` + `shadow-lg hover:shadow-xl` for maximum premium depth
+- Section padding increase
+
+### `Footer.tsx`
+- No changes needed (already calm and minimal)
 
 ## What does NOT change
 - All text/copy verbatim
-- Component structure, section order, card counts
+- Component structure, section order, card counts, icons
 - All Framer Motion animations
-- Color palette (#F8F7F5, #1A1A1A, #0D9488, etc.)
-- Responsive breakpoints
-- Mockup content and device frames
+- Color palette
+- Responsive breakpoints and grid layouts
 - All Links, hrefs, routing
+- Mockup content and device frames
 
