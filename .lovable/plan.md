@@ -1,31 +1,24 @@
 
 
-# Fix: Blob URL Showing in WhatsApp Shares
+# Fix: Order Date Overflowing on Mobile
 
 ## Problem
-When sharing invoices/reports via WhatsApp using the Web Share API, the blob URL (`blob:https://getledge.in/...`) appears as visible text in the message. This looks unprofessional and confusing.
-
-## Root Cause
-`navigator.share({ files: [file], text })` passes both the file and text body. On iOS/WhatsApp, the blob URL of the file attachment leaks into the message preview. The `text` field is also redundant when a PDF file is already attached.
+The "Order Details" section uses `sm:grid-cols-3` which creates three columns starting at 640px. On phones narrower than that it's single column, but the date input still overflows because the native date picker renders a wide formatted date (e.g., "13 Apr 2026") that doesn't fit well in the available space.
 
 ## Fix
-In `src/utils/shareWhatsApp.ts`, for both `shareOrderOnWhatsApp` and `shareInvoiceOnWhatsApp`:
+In `src/pages/NewOrder.tsx` line 373:
+- Add `text-sm` and `w-full` to the date Input to ensure it fits within its container
+- Change the grid from `sm:grid-cols-3` to `md:grid-cols-3` so on mobile the three fields (Date, Dealer, Sales Person) stack vertically instead of cramming into three narrow columns
 
-1. When using Web Share API with files, pass **only** `files` and a short `title` — remove the `text` parameter so WhatsApp doesn't render any URL or duplicate summary alongside the PDF attachment
-2. The PDF itself contains all the invoice details, so the text summary is unnecessary when the file is attached
+### Changes
+**`src/pages/NewOrder.tsx`** (line 370):
+```
+// Before
+<div className="grid gap-3 sm:grid-cols-3 md:gap-4">
 
-**Before:**
-```typescript
-await navigator.share({ files: [file], text });
+// After
+<div className="grid gap-3 md:grid-cols-3 md:gap-4">
 ```
 
-**After:**
-```typescript
-await navigator.share({ files: [file], title: `Invoice ${order.orderNumber}` });
-```
-
-Same pattern for `shareInvoiceOnWhatsApp` (line 218).
-
-## Files Changed
-- `src/utils/shareWhatsApp.ts` — remove `text` from `navigator.share()` calls when files are present (2 locations: lines 69 and 218)
+This ensures all three fields stack on mobile and tablet-portrait, only going side-by-side on medium screens (768px+) where there's enough room.
 
