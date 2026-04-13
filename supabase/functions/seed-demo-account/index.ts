@@ -359,7 +359,7 @@ Deno.serve(async (req) => {
       "Channel Partner Discount", "Buttermilk Summer Push", "Soda Season Scheme",
       "Premium Energy Trade Offer", "Pineapple Juice Launch Offer",
     ];
-    const schemeTypes = ["percentage", "buy_x_get_y", "flat_amount", "percentage", "buy_x_get_y"];
+    const schemeTypes = ["percentage", "buy_x_get_y", "flat_discount", "percentage", "buy_x_get_y"];
     const schemeRows = schemeNames.map((name, i) => {
       const id = uuid();
       schemeIds.push(id);
@@ -451,13 +451,13 @@ Deno.serve(async (req) => {
           const scheme = schemeRows[schemeIdx];
           schemeSavings = scheme.scheme_type === "percentage"
             ? Math.round(orderTotal * scheme.discount_percent / 100)
-            : scheme.scheme_type === "flat_amount" ? scheme.flat_amount
+            : scheme.scheme_type === "flat_discount" ? scheme.flat_amount
             : Math.round(orderTotal * 0.05);
           allOrderSchemes.push({
             order_id: orderId, scheme_id: schemeIds[schemeIdx],
             scheme_name: scheme.name,
             scheme_label: scheme.scheme_type === "percentage" ? `${scheme.discount_percent}% off` :
-              scheme.scheme_type === "flat_amount" ? `₹${scheme.flat_amount} off` : `Buy ${scheme.buy_qty} Get ${scheme.free_qty}`,
+              scheme.scheme_type === "flat_discount" ? `₹${scheme.flat_amount} off` : `Buy ${scheme.buy_qty} Get ${scheme.free_qty}`,
             savings: schemeSavings,
           });
         }

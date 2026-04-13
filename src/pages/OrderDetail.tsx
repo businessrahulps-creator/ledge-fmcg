@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { formatCurrency, type Order, type OrderLine, type Scheme } from "@/data/mock-data";
+import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
+import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import type { Claim, ClaimLine } from "@/context/DataContext";
@@ -197,71 +198,13 @@ export default function OrderDetail() {
 
   const editTotal = editLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
 
-  // Scheme auto-apply for edited lines
-  const appliedSchemes = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const eligible: { scheme: Scheme; savings: number; label: string }[] = [];
-    const activeSchemes = allSchemes.filter(s =>
-      s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
-    );
-    const validLines = editLines.filter(l => l.productId && l.quantity > 0);
-    for (const s of activeSchemes) {
-      if (s.dealerId && s.dealerId !== editDealerId) continue;
-      if (s.minOrderValue > 0 && editTotal < s.minOrderValue) continue;
-      if (s.productId) {
-        const matchingLine = validLines.find(l => l.productId === s.productId);
-        if (!matchingLine) continue;
-        if (s.minQty > 0 && matchingLine.quantity < s.minQty) continue;
-      } else if (s.minQty > 0) {
-        const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-        if (totalQty < s.minQty) continue;
-      }
-      let savings = 0;
-      let label = "";
-      switch (s.schemeType) {
-        case "percentage": {
-          if (s.productId) {
-            const line = validLines.find(l => l.productId === s.productId);
-            savings = line ? (line.quantity * line.unitPrice * s.discountPercent) / 100 : 0;
-          } else {
-            savings = (editTotal * s.discountPercent) / 100;
-          }
-          label = `${s.discountPercent}% off`;
-          break;
-        }
-        case "buy_x_get_y": {
-          if (s.productId) {
-            const line = validLines.find(l => l.productId === s.productId);
-            if (line && line.quantity >= s.buyQty) {
-              const sets = Math.floor(line.quantity / s.buyQty);
-              savings = sets * s.freeQty * line.unitPrice;
-              label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
-            }
-          } else {
-            const sorted = [...validLines].sort((a, b) => b.unitPrice - a.unitPrice);
-            if (sorted.length > 0) {
-              const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-              if (totalQty >= s.buyQty) {
-                const sets = Math.floor(totalQty / s.buyQty);
-                savings = sets * s.freeQty * sorted[0].unitPrice;
-              }
-            }
-            label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
-          }
-          break;
-        }
-        case "flat_discount": {
-          savings = s.flatAmount;
-          label = `${formatCurrency(s.flatAmount)} off`;
-          break;
-        }
-      }
-      if (savings > 0) eligible.push({ scheme: s, savings, label });
-    }
-    return eligible;
-  }, [allSchemes, editDealerId, editTotal, editLines]);
-
-  const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
+  // Scheme auto-apply (centralized pricing engine)
+  const pricing = useMemo(
+    () => computeOrderPricing(editLines, allSchemes, editDealerId),
+    [allSchemes, editDealerId, editLines],
+  );
+  const appliedSchemes = pricing.appliedSchemes;
+  const totalSchemeSavings = pricing.totalSchemeSavings;
 
   const executeSaveOrder = async () => {
     if (!order) return;
@@ -315,12 +258,7 @@ export default function OrderDetail() {
       lines: newLines,
       total: newTotal,
       schemeSavings: totalSchemeSavings,
-      appliedSchemes: appliedSchemes.map(a => ({
-        schemeId: a.scheme.id,
-        schemeName: a.scheme.name,
-        schemeLabel: a.label,
-        savings: a.savings,
-      })),
+      appliedSchemes: serializeAppliedSchemes(appliedSchemes),
     });
     setIsSaving(false);
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });

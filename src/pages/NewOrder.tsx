@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
-import type { Scheme } from "@/data/mock-data";
+import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import {
   Select,
@@ -176,71 +176,13 @@ export default function NewOrder() {
   const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
   const isSuperAdmin = userRole === "super_admin";
 
-  // --- Scheme auto-apply ---
-  const appliedSchemes = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const eligible: { scheme: Scheme; savings: number; label: string }[] = [];
-    const activeSchemes = allSchemes.filter(s =>
-      s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today)
-    );
-    for (const s of activeSchemes) {
-      if (s.dealerId && s.dealerId !== selectedDealer) continue;
-      if (s.minOrderValue > 0 && orderTotal < s.minOrderValue) continue;
-      const validLines = lines.filter(l => l.productId && l.quantity > 0);
-      if (s.productId) {
-        const matchingLine = validLines.find(l => l.productId === s.productId);
-        if (!matchingLine) continue;
-        if (s.minQty > 0 && matchingLine.quantity < s.minQty) continue;
-      } else if (s.minQty > 0) {
-        const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-        if (totalQty < s.minQty) continue;
-      }
-      let savings = 0;
-      let label = "";
-      switch (s.schemeType) {
-        case "percentage": {
-          if (s.productId) {
-            const line = validLines.find(l => l.productId === s.productId);
-            savings = line ? (line.quantity * line.unitPrice * s.discountPercent) / 100 : 0;
-          } else {
-            savings = (orderTotal * s.discountPercent) / 100;
-          }
-          label = `${s.discountPercent}% off`;
-          break;
-        }
-        case "buy_x_get_y": {
-          if (s.productId) {
-            const line = validLines.find(l => l.productId === s.productId);
-            if (line && line.quantity >= s.buyQty) {
-              const sets = Math.floor(line.quantity / s.buyQty);
-              savings = sets * s.freeQty * line.unitPrice;
-              label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
-            }
-          } else {
-            const sorted = [...validLines].sort((a, b) => b.unitPrice - a.unitPrice);
-            if (sorted.length > 0) {
-              const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-              if (totalQty >= s.buyQty) {
-                const sets = Math.floor(totalQty / s.buyQty);
-                savings = sets * s.freeQty * sorted[0].unitPrice;
-              }
-            }
-            label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
-          }
-          break;
-        }
-        case "flat_discount": {
-          savings = s.flatAmount;
-          label = `${formatCurrency(s.flatAmount)} off`;
-          break;
-        }
-      }
-      if (savings > 0) eligible.push({ scheme: s, savings, label });
-    }
-    return eligible;
-  }, [allSchemes, selectedDealer, orderTotal, lines]);
-
-  const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
+  // --- Scheme auto-apply (centralized pricing engine) ---
+  const pricing = useMemo(
+    () => computeOrderPricing(lines, allSchemes, selectedDealer),
+    [allSchemes, selectedDealer, lines],
+  );
+  const appliedSchemes = pricing.appliedSchemes;
+  const totalSchemeSavings = pricing.totalSchemeSavings;
 
   // Credit guard (uses net total after scheme savings)
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
@@ -305,12 +247,7 @@ export default function NewOrder() {
       dispatchRemarks: remarks,
       godownId: selectedGodown || undefined,
       schemeSavings: totalSchemeSavings,
-      appliedSchemes: appliedSchemes.map(a => ({
-        schemeId: a.scheme.id,
-        schemeName: a.scheme.name,
-        schemeLabel: a.label,
-        savings: a.savings,
-      })),
+      appliedSchemes: serializeAppliedSchemes(appliedSchemes),
     };
 
     const result = await addOrder(order);
