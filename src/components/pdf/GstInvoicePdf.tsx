@@ -34,6 +34,8 @@ export interface InvoicePdfData {
   sellerBankIfsc: string;
   supplyType: string;
   gstRate: number;
+  vehicle: string;
+  driverName: string;
   lines: {
     productName: string;
     hsnCode: string;
