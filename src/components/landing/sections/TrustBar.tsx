@@ -12,7 +12,7 @@ const companies = [
 const stats = [
   "₹0 setup cost",
   "4 user roles built-in",
-  "Works offline on any phone",
+  "Works offline",
 ];
 
 export function TrustBar() {
