@@ -1,81 +1,48 @@
 
-# Final Site-Wide QA, CTO Review & Adversarial Stress Test
 
-## Fresh Audit Results
+# Plan: Vehicle/Driver on Invoices + Billing Pagination + Date Filter
 
-After a complete codebase review of all pages, layouts, contexts, and data flows, here are the issues found:
+## Three Issues to Address
 
-### CRITICAL — None found
+### 1. Vehicle & Driver Details on Invoices
+**Current state**: The `invoices` DB table and `Invoice` TypeScript type have no `vehicle` or `driver_name` fields. The invoice form doesn't capture them. The PDF doesn't render them.
 
-Previous critical issues (nested Label, dark mode leak) were correctly fixed in the last pass. The Billing.tsx label on line 715 is now a single `<Label>`. The Index.tsx has `style={{ colorScheme: "light" }}`. The credit guard correctly uses `netOrderTotal` after scheme savings.
+**Fix**:
+- **DB migration**: Add `vehicle text NOT NULL DEFAULT ''` and `driver_name text NOT NULL DEFAULT ''` columns to `invoices` table
+- **DB migration**: Backfill demo data — update existing invoices by joining on `source_order_id` to pull `vehicle` and `driver_name` from the linked `orders` row
+- **TypeScript types**: Add `vehicle` and `driver_name` to `Invoice` interface in `data-types.ts`
+- **Billing form**: Auto-populate vehicle/driver from the selected order (read-only, same as buyer name). Show them in Step 2 under a "Transport Details" section. For GST invoices, mark them with a visual indicator that they're required
+- **Validation**: On save, if `docType === "gst_invoice"` and vehicle or driver is empty, show toast error and block
+- **PDF**: Add vehicle/driver to `InvoicePdfData` interface and render them in `GstInvoicePdf.tsx` in the invoice details section
+- **`handleCreate`/`handleEdit`**: Include vehicle/driver in the data payload sent to `api.invoices.create/update`
 
-### HIGH
+### 2. Billing List Pagination (252 invoices = endless scroll)
+**Current state**: `filtered` array is rendered in full — no pagination. With 252 invoices in demo, this causes massive DOM and poor performance.
 
-**H1. Realtime subscriptions for claims/invoices/targets/secondary_sales call `fetchAll` — too heavy**
-Lines 313-316 of DataContext.tsx: A single change to any claim, invoice, target, or secondary sale triggers a full `fetchAll` (all 10+ tables). This causes unnecessary network load and UI flicker. These should use targeted refetch functions like the other domains do (e.g., `orders.safeRefetch()`).
+**Fix**:
+- Import `usePagination` and `ListPagination` (both already exist in the codebase)
+- Paginate `filtered` with `usePagination(filtered.length, 15)`
+- Slice `filtered` to `filtered.slice(from, to)` for rendering
+- Add `<ListPagination>` below the table/cards
 
-**H2. Signup calls `setup_new_company` immediately — race with email confirmation**
-`Signup.tsx` line 46: After `signUp()`, it immediately calls `setup_new_company` RPC and navigates to `/dashboard`. If email confirmation is enabled (which it should be for production), the user gets a company created but the session may not persist. The signup flow should check `authData.session` — if null (email confirmation required), show a "check your email" message instead of calling the RPC.
+### 3. Date Period Filter for Billing History
+**Current state**: Only text search and doc-type filter exist. No way to filter by date range.
 
-**H3. Save button on NewOrder is `bottom-28` which may overlap bottom nav**
-Line 672: `sticky bottom-28` positions the save button 112px from the bottom. The bottom nav is `bottom-3` with padding. On smaller phones (iPhone SE, 320px width), the save button and bottom nav may visually collide when scrolled to bottom of a long order form.
+**Fix**:
+- Import `TimePeriodFilter` and `filterByTimePeriod` from `src/components/reports/TimePeriodFilter.tsx`
+- Add a `timePeriod` state (default "all" — we'll add an "all" option)
+- Apply date filtering to the `filtered` memo, mapping `invoiceDate` to `date` for the filter function
+- Add a simple "All Time" + existing period options (Daily/Weekly/Monthly/Yearly) select next to the existing type filter
 
-### MEDIUM
+## Files Changed
 
-**M1. NewOrder: duplicate product selection not prevented**
-Users can select the same product on multiple lines. This creates confusing data — quantities should be merged or a warning shown. The `products.map()` in the SelectContent on line 452 does not filter out already-selected products.
+| File | Change |
+|------|--------|
+| `supabase migration` | Add `vehicle`, `driver_name` columns to `invoices`; backfill from orders |
+| `src/context/data-types.ts` | Add `vehicle`, `driver_name` to `Invoice` interface |
+| `src/pages/Billing.tsx` | Transport fields in form, validation for GST, pagination, date filter |
+| `src/components/pdf/GstInvoicePdf.tsx` | Add vehicle/driver to `InvoicePdfData` and render in PDF |
+| `src/context/domains/useBillingDomain.ts` | Map new DB columns in fetch/create/update |
 
-**M2. Order lines allow zero unit price**
-NewOrder line 475: The price input accepts 0 without warning. A user could submit an order with ₹0 unit prices, creating a ₹0 total order.
+~150 lines of changes across 5 files + 1 migration.
 
-**M3. Distributor delete does not check for existing orders**
-`Distributors.tsx` line 98: `deleteDistributor` is called without checking if the dealer has orders. Deleting a dealer with orders would leave orphaned `distributor_id` references on those orders.
-
-**M4. Realtime channel has no debounce**
-DataContext.tsx lines 306-316: Each postgres_changes event fires a refetch immediately. Bulk operations (e.g., importing 10 orders) will trigger 10 rapid refetches. Should debounce by 500ms.
-
-**M5. `companyInfo.invoicePrefix` not exposed through `useApi()`**
-The `api` object doesn't expose `invoicePrefix` or `setInvoicePrefix`, forcing Billing.tsx to use it through the data context directly or via `companyInfo`.
-
-**M6. DealerDetail/SalespersonDetail: no 404 handling for invalid IDs**
-`DealerDetail.tsx` line 50: If `dealer` is undefined (invalid ID in URL), the page should show a "not found" state. Currently it would crash on accessing properties of undefined.
-
-**M7. Order total in Summary card shows gross total, not net**
-NewOrder line 626: The "Order Total" in the summary card shows `orderTotal` (gross). Below it, the schemes section shows "Effective Total". The summary card should show the net total or at least label it as "Gross Total" to avoid confusion.
-
-### LOW / POLISH
-
-**L1. Dashboard: `maxDistVal` and `maxProdVal` could be 0 if data exists but all values are 0**
-Lines 145/148: `topDistributors[0]?.totalValue || 1` — if the first dealer has totalValue of 0, this correctly falls back to 1. But if all dealers have 0 value, the progress bars show 0% which is correct. No issue.
-
-**L2. AppLayout: duplicate Lucide icon imports**
-Line 5 and 13 both import from "lucide-react" separately. Minor, no functional impact.
-
----
-
-## Implementation Plan
-
-### Pass 1: Fix signup email confirmation handling
-| File | Fix |
-|------|-----|
-| `src/pages/Signup.tsx` | Check if `authData.session` is null after signup; if so, show "verify your email" message instead of calling RPC and navigating |
-
-### Pass 2: Fix DealerDetail/SalespersonDetail 404 handling
-| File | Fix |
-|------|-----|
-| `src/pages/DealerDetail.tsx` | Add early return with "not found" UI if `dealer` is undefined |
-| `src/pages/SalespersonDetail.tsx` | Same treatment |
-
-### Pass 3: Fix NewOrder summary label clarity
-| File | Fix |
-|------|-----|
-| `src/pages/NewOrder.tsx:625` | Change "Order Total" label to "Gross Total" when schemes are applied |
-
-### Pass 4: Fix heavy fetchAll on realtime for claims/invoices/targets
-| File | Fix |
-|------|-----|
-| `src/context/domains/useBillingDomain.ts` | Add `safeRefetch` method |
-| `src/context/domains/useTargetsDomain.ts` | Add `safeRefetch` method |
-| `src/context/DataContext.tsx:313-316` | Use targeted safeRefetch instead of fetchAll |
-
-Total: 6 files, ~60 lines of surgical changes. Zero new features. All existing behavior preserved.
