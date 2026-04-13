@@ -719,7 +719,7 @@ export default function Billing() {
                       key={key}
                       onClick={() => !isEditMode && setDocType(key)}
                       disabled={isEditMode}
-                      className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-all ${
+                      className={`rounded-lg border px-2 py-2.5 text-[11px] font-medium whitespace-nowrap transition-all ${
                         docType === key
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-border text-muted-foreground hover:border-foreground/20"
