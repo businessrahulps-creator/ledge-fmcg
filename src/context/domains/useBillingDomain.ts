@@ -4,6 +4,7 @@ import type { Order } from "@/data/mock-data";
 import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
 import { toast } from "sonner";
+import { enqueueMutation } from "@/lib/offline-store";
 
 interface BillingDeps extends DomainDeps {
   getOrders: () => Order[];
@@ -16,6 +17,13 @@ export function useBillingDomain(deps: BillingDeps) {
 
   const addInvoice = useCallback(async (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">): Promise<Invoice | null> => {
     if (!deps.companyId) return null;
+
+    // Block offline — invoice numbers require server-side sequence
+    if (!navigator.onLine) {
+      toast.error("Cannot create documents offline", { description: "Invoice numbering requires a server connection." });
+      return null;
+    }
+
     try {
       const { data: seqData, error: seqErr } = await supabase.rpc("get_next_invoice_number", { target_company_id: deps.companyId });
       if (seqErr) throw seqErr;
@@ -65,6 +73,14 @@ export function useBillingDomain(deps: BillingDeps) {
     const dbUpdates: Record<string, any> = {};
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
+
+    if (!navigator.onLine) {
+      setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
+      await enqueueMutation({ type: "update", table: "invoices", payload: { id, ...dbUpdates } });
+      toast("Saved offline — will sync when back online", { duration: 3000 });
+      return;
+    }
+
     const { error } = await supabase.from("invoices" as any).update(dbUpdates).eq("id", id);
     if (error) { toast.error("Failed to update document", { description: error.message }); return; }
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
@@ -73,6 +89,13 @@ export function useBillingDomain(deps: BillingDeps) {
   const deleteInvoice = useCallback(async (id: string) => {
     const inv = invoices.find(i => i.id === id);
     if (inv?.status === "final") { toast.error("Cannot delete finalized document"); return; }
+
+    // Block offline — deleting financial documents should only happen with server confirmation
+    if (!navigator.onLine) {
+      toast.error("Cannot delete documents offline", { description: "Please reconnect to delete." });
+      return;
+    }
+
     const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
     if (error) { toast.error("Failed to delete document", { description: error.message }); return; }
     setInvoices(prev => prev.filter(i => i.id !== id));
@@ -80,6 +103,13 @@ export function useBillingDomain(deps: BillingDeps) {
 
   const addClaim = useCallback(async (claim: Claim): Promise<boolean> => {
     if (!deps.companyId) return false;
+
+    // Block offline — claims involve stock restoration which needs server state
+    if (!navigator.onLine) {
+      toast.error("Cannot record claims offline", { description: "Stock restoration requires a server connection." });
+      return false;
+    }
+
     try {
       const { data, error } = await supabase.from("claims" as any).insert({
         company_id: deps.companyId, order_id: claim.orderId, order_number: claim.orderNumber,
@@ -129,6 +159,14 @@ export function useBillingDomain(deps: BillingDeps) {
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.resolutionNotes !== undefined) dbUpdates.resolution_notes = sanitizeInput(updates.resolutionNotes);
     if (updates.status === "resolved") dbUpdates.resolved_at = new Date().toISOString();
+
+    if (!navigator.onLine) {
+      setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
+      await enqueueMutation({ type: "update", table: "claims", payload: { id, ...dbUpdates } });
+      toast("Saved offline — will sync when back online", { duration: 3000 });
+      return;
+    }
+
     const { error } = await supabase.from("claims" as any).update(dbUpdates).eq("id", id);
     if (error) { toast.error("Failed to update claim", { description: error.message }); return; }
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
