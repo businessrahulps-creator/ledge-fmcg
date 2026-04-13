@@ -1,0 +1,72 @@
+import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { sanitizeInput } from "@/utils/sanitize";
+import type { DomainDeps, SecondarySale, Target } from "@/context/data-types";
+import { toast } from "sonner";
+
+export function useTargetsDomain(deps: DomainDeps) {
+  const [targets, setTargets] = useState<Target[]>([]);
+  const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
+
+  const addTarget = useCallback(async (target: Target) => {
+    if (!deps.companyId) return;
+    const { data, error } = await supabase.from("targets").insert({
+      company_id: deps.companyId, entity_type: target.entityType, entity_id: target.entityId,
+      entity_name: sanitizeInput(target.entityName), period_type: target.periodType,
+      period_start: target.periodStart, target_revenue: target.targetRevenue, target_orders: target.targetOrders,
+    } as any).select().single();
+    if (error) { toast.error("Failed to save target", { description: error.message }); return; }
+    if (data) {
+      const mapped: Target = {
+        id: (data as any).id, entityType: target.entityType, entityId: target.entityId,
+        entityName: target.entityName, periodType: target.periodType, periodStart: target.periodStart,
+        targetRevenue: target.targetRevenue, targetOrders: target.targetOrders,
+      };
+      setTargets(prev => [mapped, ...prev]);
+    }
+  }, [deps.companyId]);
+
+  const updateTarget = useCallback(async (target: Target) => {
+    const { error } = await supabase.from("targets").update({
+      target_revenue: target.targetRevenue, target_orders: target.targetOrders,
+      entity_name: sanitizeInput(target.entityName),
+    } as any).eq("id", target.id);
+    if (error) { toast.error("Failed to update target", { description: error.message }); return; }
+    setTargets(prev => prev.map(t => t.id === target.id ? target : t));
+  }, []);
+
+  const deleteTarget = useCallback(async (id: string) => {
+    const { error } = await supabase.from("targets").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete target", { description: error.message }); return; }
+    setTargets(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addSecondarySale = useCallback(async (sale: SecondarySale) => {
+    if (!deps.companyId) return;
+    const { data, error } = await supabase.from("secondary_sales").insert({
+      company_id: deps.companyId, distributor_id: sale.distributorId, product_id: sale.productId,
+      product_name: sanitizeInput(sale.productName), retailer_name: sanitizeInput(sale.retailerName),
+      quantity: sale.quantity, date: sale.date, remarks: sanitizeInput(sale.remarks),
+    } as any).select().single();
+    if (error) { toast.error("Failed to record secondary sale", { description: error.message }); return; }
+    if (data) {
+      const mapped: SecondarySale = {
+        id: (data as any).id, distributorId: sale.distributorId, productId: sale.productId,
+        productName: sale.productName, retailerName: sale.retailerName,
+        quantity: sale.quantity, date: sale.date, remarks: sale.remarks,
+      };
+      setSecondarySales(prev => [mapped, ...prev]);
+    }
+  }, [deps.companyId]);
+
+  const deleteSecondarySale = useCallback(async (id: string) => {
+    const { error } = await supabase.from("secondary_sales").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return; }
+    setSecondarySales(prev => prev.filter(s => s.id !== id));
+  }, []);
+
+  return {
+    targets, setTargets, secondarySales, setSecondarySales,
+    addTarget, updateTarget, deleteTarget, addSecondarySale, deleteSecondarySale,
+  };
+}
