@@ -1,96 +1,89 @@
 
 
-# Harden Data Strategy & Offline Queue Replay
+# Final Site-Wide QA, CTO Review & Adversarial Stress Test
 
-## Problems Identified
+## Audit Results
 
-After reviewing all domain hooks, `offline-store.ts`, `DataContext.tsx`, and `data-utils.ts`, here are the concrete issues:
+### CRITICAL (Must fix before launch)
 
-### 1. Inconsistent offline support across domains
-- **Orders, Dealers, Salespersons, Products, Schemes, Stock, Godowns**: Full offline CRUD (queue + optimistic state)
-- **Billing (Invoices, Claims)**: Zero offline support — `addInvoice`, `deleteInvoice`, `addClaim`, `updateClaim`, `updateInvoice` all call Supabase directly with no `navigator.onLine` check. They silently fail offline.
-- **Targets, Secondary Sales**: Zero offline support — same issue.
+**C1. Billing.tsx — Double-nested Label tag (line 715)**
+`<Label><Label>Document Type</Label></Label>` renders nested `<label>` elements — invalid HTML, screen readers will announce twice. This was flagged in a previous audit but the fix was not applied.
 
-### 2. Replay logic is fragile
-- **No idempotency**: If replay of an `insert` succeeds on the server but the `removeFromQueue` call fails (e.g. IDB write error), the mutation stays in the queue and gets replayed again, creating a duplicate row.
-- **No conflict detection for updates**: An update replayed after a refetch may overwrite newer server-side data. No `updated_at` check.
-- **Race condition in `reconcileTempId`**: Only checks `payload.id` — misses references to temp IDs in other payload fields (e.g. `distributor_id`, `order_id` in related mutations).
-- **Stock deduction in replay is non-transactional**: The `insert_order_atomic` replay manually inserts stock deductions line-by-line. If it fails partway, you get partial deductions with no rollback.
-- **Silent swallow in `syncQueue`**: Failed mutations after MAX_RETRIES are silently marked done. The user gets a generic "failed to sync" toast but no way to inspect or retry individual mutations.
+**C2. Landing page dark mode leak**
+`Index.tsx` uses `className="light"` but this doesn't actually force light color scheme. The CSS class `light` has no definition — only `.dark` is defined. Users with system dark mode will see the landing page with dark theme variables. Need `style={{ colorScheme: "light" }}` and wrapping class that forces light tokens.
 
-### 3. State divergence after sync
-- After replay, `fetchAll` is called to refresh — but the optimistic state may have accumulated changes that the refetch overwrites. This is mostly fine, but during the sync window, UI flickers and computed values (computed distributors/salespersons/products) briefly show stale data.
+**C3. Pull-to-refresh scroll detection unreliable**
+`usePullToRefresh` calls `getScrollParent(el)` which walks up from `containerRef` looking for `overflow-y: auto|scroll`. But `containerRef` is on the content div, while the actual scrollable parent is `<main ref={mainRef}>` in AppLayout. The hook may find `<main>` correctly sometimes but the `scrollTop > 0` check on the scroll parent should prevent false triggers. However, on pages where the content div has its own `overflow-y-auto` (if any remain from previous bugs), pull-to-refresh will break.
 
-### 4. Delete operations blocked offline (orders) but allowed offline (dealers, stock)
-- `deleteOrder` explicitly blocks offline deletion and returns false
-- `makeOfflineCrud.remove` queues offline deletions for dealers/products/etc.
-- This inconsistency means offline-deleted dealers can still appear in order forms, but offline-deleted orders cannot happen. Reasonable for orders, but the user gets no warning for dealers.
+### HIGH (Fix before launch)
 
----
+**H1. No `autoComplete` attributes on Login/Signup forms**
+Login form lacks `autoComplete="email"` and `autoComplete="current-password"`. Signup form lacks `autoComplete="new-password"`. Password managers won't auto-fill correctly on mobile.
 
-## Fix Plan
+**H2. Signup flow calls `setup_new_company` before email verification**
+`Signup.tsx` immediately calls `supabase.rpc("setup_new_company")` after `signUp()` and navigates to `/dashboard`. If email confirmation is required (which it should be per project rules), the user gets a company created but can't log in again until email is confirmed. The RPC should only be called after first login, not during signup.
 
-### Fix 1: Add offline guards to Billing & Targets domains
-**Files**: `useBillingDomain.ts`, `useTargetsDomain.ts`
+**H3. Missing keyboard dismiss on mobile for order form**
+On `NewOrder.tsx`, the quantity inputs use `inputMode="numeric"` which is correct, but the form doesn't dismiss the keyboard when tapping outside inputs. This is standard iOS behavior but causes the sticky save button to be obscured by the keyboard on some Android devices.
 
-Add `navigator.onLine` checks + `enqueueMutation` for:
-- `addInvoice` — queue as `insert` type with table `invoices` + separate `invoice_lines` insert
-- `deleteInvoice` — block offline (same as deleteOrder — finalized docs shouldn't be queued)
-- `addClaim` — queue as `insert` with stock restore deferred to replay
-- `updateClaim` / `updateInvoice` — queue as `update`
-- `addTarget`, `addSecondarySale` — already use `makeOfflineCrud` pattern? No — targets domain does direct Supabase calls. Add offline CRUD.
+**H4. Dashboard empty state for Top Dealers/Products when no data**
+If a new company has zero orders, `topDistributors` and `topProducts` arrays are empty, but the glass-cards still render (empty). Should show a minimal empty state or hide the sections.
 
-### Fix 2: Make replay idempotent
-**File**: `offline-store.ts`
+**H5. Order total uses gross total, not net (after scheme savings)**
+In `NewOrder.tsx`, `orderTotal` on line 173 is `lines.reduce(...)` — gross total. But the credit guard on line 178 uses this gross total for `projectedOutstanding`. It should use `orderTotal - totalSchemeSavings` for accurate credit projection. Same issue: the order is saved with `total: validLines.reduce(...)` (line 296) — gross total, while scheme savings are tracked separately. This is consistent but the credit guard is misleading.
 
-- For `insert` type: Add an `idempotency_key` field (the mutation `id`) to the payload. Before inserting, check if a row with that idempotency key already exists. For orders, the `insert_order_atomic` RPC already handles uniqueness via `order_number`, but for dealers/products, duplicates are possible.
-- For `insert_order_atomic`: Wrap the post-RPC steps (lines + stock deductions) so that if the order already exists (from a prior partial replay), skip the RPC and just insert missing lines.
-- For `update` type: Add `updated_at` comparison — only apply if the row hasn't been modified since the mutation was queued.
+**H6. Footer social links missing `key` stability**
+`src/components/landing/sections/Footer.tsx` — if social links use array index as key, React may incorrectly recycle elements. Previous audit flagged using `href` as key — verify this was applied.
 
-### Fix 3: Broader temp ID reconciliation
-**File**: `offline-store.ts`
+### MEDIUM (Fix for polish)
 
-Update `reconcileTempId` to scan all payload fields (not just `payload.id`) for the temp UUID string, replacing any occurrence. This handles cases like an offline-created dealer whose ID appears in a subsequently queued order's `distributorId`.
+**M1. Login/Signup pages lack link back to landing page**
+No way to navigate from `/login` or `/signup` back to the home page (`/`). Users who land directly on login have no escape route.
 
-### Fix 4: Make stock deduction in replay safer
-**File**: `offline-store.ts`
+**M2. Settings page "Install App" card references `pwa-192.png`**
+The file `public/pwa-192.png` may not exist. If missing, broken image renders.
 
-Move the stock deduction logic for `insert_order_atomic` replay into a single RPC call or at minimum wrap it in a try-catch that records partial progress, so a retry doesn't double-deduct.
+**M3. Order date input allows future dates without warning**
+`NewOrder.tsx` date input has no `max` constraint. Users can accidentally create orders dated in the future.
 
-### Fix 5: Add retry UI for stuck mutations
-**File**: `src/pages/Settings.tsx` (existing)
+**M4. Distributor form `creditLimit` accepts negative values**
+No validation prevents negative credit limits in the dealer form.
 
-Add a "Pending Changes" section that shows:
-- Count of queued mutations
-- Each mutation: type, table, timestamp, attempts, lastError
-- "Retry" button per mutation and "Retry All" button
-- "Discard" button for permanently failed mutations
+**M5. `animate-fade-in` class used on Login/Signup but not defined**
+The class `animate-fade-in` is used in Login.tsx and Signup.tsx but may not be defined in Tailwind config or index.css.
 
-### Fix 6: Unify the offline delete policy
-**Files**: `data-utils.ts` (makeOfflineCrud)
+**M6. Realtime channel doesn't subscribe to claims/invoices/targets/secondary_sales**
+`DataContext.tsx` line 306-312 subscribes to 7 tables but omits `claims`, `invoices`, `targets`, and `secondary_sales`. Changes from other team members won't appear in real-time for these entities.
 
-Add an option `allowOfflineDelete` (default: true for simple entities, false for orders/invoices). When false, show the same blocking toast as `deleteOrder`.
+**M7. `DataContext.tsx` fetchAll uses `as any` casts extensively**
+Lines 151-155, 169-170, 204, 207, 210 use `(company as any)`, `("claims" as any)`, etc. These bypass type safety and indicate the generated Supabase types are out of date.
 
 ---
 
-## Files Changed
+## Implementation Plan
 
-| File | Change | ~Lines |
-|------|--------|--------|
-| `src/lib/offline-store.ts` | Idempotency keys, broader reconciliation, safer stock replay | ~80 added |
-| `src/context/domains/useBillingDomain.ts` | Offline guards for all 5 operations | ~60 added |
-| `src/context/domains/useTargetsDomain.ts` | Offline guards for targets + secondary sales | ~30 added |
-| `src/context/data-utils.ts` | `allowOfflineDelete` option in makeOfflineCrud | ~10 changed |
-| `src/pages/Settings.tsx` | "Pending Changes" UI section | ~80 added |
-| `src/context/DataContext.tsx` | Pass queue inspection to Settings via context | ~5 added |
+### Pass 1: Critical fixes
+| File | Fix |
+|------|-----|
+| `src/pages/Billing.tsx:715` | Remove nested `<Label>` — change to single `<Label>` |
+| `src/pages/Index.tsx:28` | Add `style={{ colorScheme: "light" }}` to force light theme |
+| `src/components/landing/sections/Footer.tsx` | Verify `href` key on social links |
 
-Total: 6 files, ~265 lines of changes. Zero breaking changes to existing API.
+### Pass 2: High-priority fixes
+| File | Fix |
+|------|-----|
+| `src/pages/Login.tsx` | Add `autoComplete` attributes to email/password inputs |
+| `src/pages/Signup.tsx` | Add `autoComplete` attributes; add note about email verification flow |
+| `src/pages/Dashboard.tsx` | Add empty-state guards for Top Dealers/Products sections |
+| `src/pages/NewOrder.tsx:178` | Use net total (after scheme savings) for credit guard projection |
 
-## Execution Order
-1. `offline-store.ts` — idempotency + reconciliation hardening
-2. `useBillingDomain.ts` — offline support
-3. `useTargetsDomain.ts` — offline support
-4. `data-utils.ts` — delete policy flag
-5. `Settings.tsx` — retry UI
-6. `DataContext.tsx` — wire up queue state
+### Pass 3: Medium polish
+| File | Fix |
+|------|-----|
+| `src/pages/Login.tsx` | Add "← Back to home" link |
+| `src/pages/Signup.tsx` | Add "← Back to home" link |
+| `src/pages/NewOrder.tsx` | Add `max={today}` to order date input |
+| `src/context/DataContext.tsx` | Add realtime subscriptions for missing tables |
+
+All fixes are surgical single-line or few-line edits. No new features. No behavior changes. Existing classNames and data flows preserved.
 
