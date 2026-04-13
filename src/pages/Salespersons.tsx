@@ -6,10 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Search, Pencil, Trash2, UserCheck, Phone, MapPin, Download, FileText } from "lucide-react";
-import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { Plus, Search, Pencil, Trash2, UserCheck, Phone, MapPin, Download } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +44,7 @@ export default function Salespersons() {
   const [editItem, setEditItem] = useState<Salesperson | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [pdfOpen, setPdfOpen] = useState(false);
+  
 
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
@@ -109,16 +106,6 @@ export default function Salespersons() {
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">Manage your sales team</p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-              aria-label="Export PDF"
-              onClick={() => setPdfOpen(true)}
-            >
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Export PDF</span>
-            </Button>
             <Button
               variant="outline"
               size="icon"
@@ -257,37 +244,6 @@ export default function Salespersons() {
           </AlertDialog>
         )}
 
-        <ExportPdfModal
-          open={pdfOpen}
-          onOpenChange={setPdfOpen}
-          title="Export Sales Team PDF"
-          sections={[
-            { id: "summary", label: "Summary (total members, orders, value)" },
-            { id: "memberList", label: "Member List" },
-          ] satisfies PdfSection[]}
-          onGenerate={async (sel) => {
-            const rows: string[][] = [];
-            if (sel.summary) {
-              rows.push(["Total Members", String(filtered.length)]);
-              rows.push(["Total Orders", String(filtered.reduce((s, m) => s + m.totalOrders, 0))]);
-              rows.push(["Total Value", formatCurrency(filtered.reduce((s, m) => s + m.totalValue, 0))]);
-              rows.push(["", ""]);
-            }
-            if (sel.memberList) {
-              filtered.forEach((m) => {
-                rows.push([m.name, `${m.region} · ${m.phone} · ${m.totalOrders} orders · ${formatCurrency(m.totalValue)}`]);
-              });
-            }
-            const columns = [
-              { header: "Name", width: "35%" },
-              { header: "Details", width: "65%" },
-            ];
-            downloadPdf(
-              pdfFilename("sales-team"),
-              ReportPdf({ title: "Sales Team Report", subtitle: `${filtered.length} members`, columns, rows, companyName: "" })
-            );
-          }}
-        />
       </div>
     </AppLayout>
   );
