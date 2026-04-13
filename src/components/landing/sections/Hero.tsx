@@ -129,7 +129,7 @@ export function Hero() {
         {/* Left - Text */}
         <div>
           <motion.h1
-            className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#1A1A1A] leading-[1.08] tracking-[-0.04em]"
+            className="font-heading font-extrabold text-[28px] md:text-[46px] text-[#1A1A1A] leading-[1.08] tracking-[-0.04em]"
             {...fadeUp(0)}
           >
             Every order your team placed today. Do you actually know about it?
@@ -145,20 +145,26 @@ export function Hero() {
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-sm text-white bg-[#0D9488] hover:bg-[#0F766E] px-7 py-3 rounded-3xl hover:scale-[1.01] transition-all duration-200 shadow-md hover:shadow-lg"
+              className="font-body font-semibold text-sm text-white bg-[#0D9488] hover:bg-[#0F766E] px-7 py-3 rounded-3xl hover:scale-[1.01] transition-all duration-200"
+              style={{ boxShadow: "0 2px 8px rgba(13,148,136,0.18), 0 1px 3px rgba(0,0,0,0.06)" }}
+              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 6px 20px rgba(13,148,136,0.25), 0 2px 6px rgba(0,0,0,0.08)")}
+              onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(13,148,136,0.18), 0 1px 3px rgba(0,0,0,0.06)")}
             >
               Get Started Free
             </Link>
             <a
               href="#how-it-works"
-              className="font-body font-medium text-sm text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] px-7 py-3 rounded-3xl transition-all duration-200 shadow-sm hover:shadow-md"
+              className="font-body font-medium text-sm text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] px-7 py-3 rounded-3xl transition-all duration-200"
+              style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 3px 12px rgba(0,0,0,0.1)")}
+              onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)")}
             >
               See How It Works
             </a>
           </motion.div>
 
           <motion.p
-            className="font-body text-sm text-[#71717A] mt-6"
+            className="font-body text-sm text-[#71717A] mt-8"
             {...fadeUp(0.4)}
           >
             Used by FMCG distribution businesses across India to replace spreadsheets, WhatsApp threads, and ERPs their teams hated.

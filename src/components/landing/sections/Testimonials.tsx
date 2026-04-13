@@ -32,7 +32,7 @@ export function Testimonials() {
     <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             From owners who stopped guessing.
           </h2>
         </AnimateIn>

@@ -91,7 +91,7 @@ export function Pricing() {
     <section id="pricing" className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
             Start free. Pay when it's running your business.
           </h2>
           <p className="font-body text-lg text-[#71717A] text-center mb-16">
@@ -166,7 +166,12 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3 rounded-3xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.highlighted ? "shadow-md hover:shadow-lg" : "shadow-sm hover:shadow-md"} ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3 rounded-3xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  style={{
+                    boxShadow: plan.highlighted
+                      ? "0 2px 8px rgba(13,148,136,0.18), 0 1px 3px rgba(0,0,0,0.06)"
+                      : "0 1px 4px rgba(0,0,0,0.06)",
+                  }}
                 >
                   {plan.cta}
                 </Link>

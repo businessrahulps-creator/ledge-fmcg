@@ -33,7 +33,7 @@ export function WhyOrdra() {
     <section className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             This isn't another ERP your field team will quit in three weeks.
           </h2>
         </AnimateIn>
@@ -41,7 +41,7 @@ export function WhyOrdra() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
-              <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
+              <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
                 <block.icon size={24} strokeWidth={1.5} className="text-[#0D9488] mb-4" />
                 <h3 className="font-heading font-bold text-[18px] text-[#1A1A1A] mb-3">
                   {block.title}
