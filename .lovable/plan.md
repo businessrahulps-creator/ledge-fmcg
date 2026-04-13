@@ -1,86 +1,68 @@
 
 
-# 100× Visual Elevation — Typography, Spacing, Buttons, Breathing Room
+# Final $100K Elevation Pass — Typography, Spacing, Button Depth
 
-## Audit Summary
+## Current state vs. target
 
-1. **Headlines too large** — `text-[60px]` hero, `text-[44px]` sections, `text-[48px]` FinalCTA all wrap on desktop. Need to clamp to single-line.
-2. **Cramped spacing** — `py-24 md:py-32` is decent but card padding `p-8` and section `mb-20` don't create enough breathing room. Gap between sections feels uniform and flat.
-3. **Text density** — Body `leading-[1.75]` is good but `text-base`/`text-[17px]` with tight paragraph spacing makes cards feel text-heavy.
-4. **Buttons feel flat** — `rounded-2xl` with no shadow, no depth. Single-pixel hover scale. Need Fluent-level elevation.
+The page is already well-structured with the right palette, icons, and symmetry. This pass tightens three things:
 
-## Changes per file (visual-only, zero text changes)
+1. **Headlines** — Several are still large enough to wrap on desktop. Scale down ~2-4px on mobile, ~4-6px on desktop.
+2. **Spacing** — Cards already at `p-10` and sections at `py-28 md:py-36`, which is good. Heading `mb-16` stays. Only the Hero body and FinalCTA body need slightly more generous `leading`.
+3. **Buttons** — Need stronger Fluent-style elevation. Currently `shadow-md hover:shadow-lg` on Hero primary and `shadow-sm hover:shadow-md` elsewhere. Upgrade to richer multi-layer shadows.
 
-### All sections — Global rhythm
-- Section padding: `py-24 md:py-32` → `py-28 md:py-36`
-- Section heading mb: `mb-20` → `mb-16` (headings smaller now, need less gap)
-- Card padding: `p-8` → `p-10`
-- Card shadow resting: `0 1px 2px rgba(0,0,0,0.04)` → `0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)`
+## Changes per file
 
 ### `Navbar.tsx`
-- CTA button: add `shadow-sm` and `hover:shadow-md` for depth
+- CTA: `shadow-sm hover:shadow-md` → custom richer shadow via `style` prop: `boxShadow: "0 2px 8px rgba(13,148,136,0.15)"` resting, hover `"0 4px 16px rgba(13,148,136,0.2)"`
 
 ### `Hero.tsx`
-- h1: `text-[34px] md:text-[60px]` → `text-[32px] md:text-[52px]` (fits single line)
-- Body: `text-[17px] md:text-[20px]` → `text-[16px] md:text-[18px]` with `leading-[1.6]`
-- Primary CTA: add `shadow-md hover:shadow-lg` for Fluent depth
-- Secondary CTA: add `shadow-sm hover:shadow-md`
-- Section padding: `py-24 md:py-32` → `py-28 md:py-36`
+- h1: `text-[32px] md:text-[52px]` → `text-[28px] md:text-[46px]` (ensures single-line on ~1120px viewport)
+- Body: already `text-[16px] md:text-[18px] leading-[1.6]` — no change
+- Primary CTA: replace `shadow-md hover:shadow-lg` with richer `style={{ boxShadow }}` using teal-tinted shadows
+- Secondary CTA: same treatment with neutral shadows
+- Social proof line: `mt-6` → `mt-8` for more breathing room
 
 ### `TrustBar.tsx`
-- Stats text: `text-[20px] md:text-[24px]` → `text-[18px] md:text-[20px]`
-- Pull quote padding: `p-8` → `p-10`
-- Section padding increase
+- No changes needed — already refined
 
 ### `Problem.tsx`
-- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
-- Card title: `text-[20px]` → `text-[18px]`
-- Card body: `text-base` → `text-[15px]` with `leading-[1.7]`
-- Card padding: `p-8` → `p-10`
-- Card shadow: elevated resting shadow
+- Heading: `text-[26px] md:text-[38px]` → `text-[24px] md:text-[34px]`
+- Card hover: add `hover:border-[#D4D1CC]` transition for subtle interactivity
+- No other changes
 
 ### `HowItWorks.tsx`
-- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[36px]`
-- Step title: `text-[24px] md:text-[28px]` → `text-[22px] md:text-[26px]`
-- Step body: `text-[17px]` → `text-[15px]` with `leading-[1.7]`
-- Step spacing: `space-y-24` → `space-y-28`
+- Heading: `text-[26px] md:text-[36px]` → `text-[24px] md:text-[32px]`
+- Step title: `text-[22px] md:text-[26px]` → `text-[20px] md:text-[24px]`
 
 ### `Features.tsx`
-- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[36px]`
-- Card title: `text-[20px]` → `text-[18px]`
-- Card body: `text-base` → `text-[15px]` with `leading-[1.7]`
-- Card padding: `p-8` → `p-10`
+- Heading: `text-[26px] md:text-[36px]` → `text-[24px] md:text-[32px]`
 
 ### `WhyOrdra.tsx`
-- Same treatment as Problem cards: heading `md:text-[38px]`, card title `text-[18px]`, body `text-[15px] leading-[1.7]`, padding `p-10`
+- Heading: `text-[26px] md:text-[38px]` → `text-[24px] md:text-[34px]`
+- Card hover: add `hover:border-[#D4D1CC]` transition
 
 ### `Testimonials.tsx`
-- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
-- Card padding: `p-8` → `p-10`
-- Quote text: `text-base` → `text-[15px]` with `leading-[1.7]`
+- Heading: `text-[26px] md:text-[38px]` → `text-[24px] md:text-[34px]`
 
 ### `Pricing.tsx`
-- Heading: `text-[28px] md:text-[44px]` → `text-[26px] md:text-[38px]`
-- Card padding: `p-8` → `p-10`
-- Feature text: `text-[15px]` stays
-- CTA button in each card: add `shadow-sm hover:shadow-md`, highlighted card CTA gets `shadow-md hover:shadow-lg`
-- Price font: `text-[36px]` → `text-[32px]`
+- Heading: `text-[26px] md:text-[38px]` → `text-[24px] md:text-[34px]`
+- CTA buttons: upgrade to teal-tinted `boxShadow` on highlighted, neutral on others
 
 ### `FinalCTA.tsx`
-- Heading: `text-[28px] md:text-[48px]` → `text-[26px] md:text-[40px]`
-- Body: `text-[20px]` → `text-[18px]`
-- CTA button: `px-8 py-4` → `px-10 py-4` + `shadow-lg hover:shadow-xl` for maximum premium depth
-- Section padding increase
+- Heading: `text-[26px] md:text-[40px]` → `text-[24px] md:text-[36px]`
+- CTA button: upgrade to premium teal-tinted `boxShadow` (deepest elevation on page)
+- Body: `mt-6` → `mt-8`
+- Button wrapper: `mt-10` → `mt-12`
 
 ### `Footer.tsx`
-- No changes needed (already calm and minimal)
+- No changes
 
 ## What does NOT change
 - All text/copy verbatim
-- Component structure, section order, card counts, icons
+- Component structure, section order, card counts, icons, symmetry
 - All Framer Motion animations
-- Color palette
-- Responsive breakpoints and grid layouts
+- Color palette, responsive breakpoints, grid layouts
 - All Links, hrefs, routing
 - Mockup content and device frames
+- Card padding (already `p-10`), section padding (already `py-28 md:py-36`)
 
