@@ -15,9 +15,9 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
     return (
       <motion.div
         ref={innerRef}
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, delay, ease: "easeOut" }}
+        transition={{ type: "spring", damping: 26, stiffness: 200, delay }}
         className={className}
       >
         {children}
