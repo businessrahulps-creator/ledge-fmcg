@@ -22,33 +22,35 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
   const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const safeRefetch = useCallback(async () => {
-    if (!deps.companyId) return;
-    // Debounce rapid calls (e.g. realtime INSERT + UPDATE in quick succession)
+  const safeRefetch = useCallback(() => {
+    if (!deps.companyId) return Promise.resolve();
     if (refetchTimer.current) clearTimeout(refetchTimer.current);
     return new Promise<void>((resolve) => {
       refetchTimer.current = setTimeout(async () => {
         refetchTimer.current = null;
         try {
-      const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999);
-      if (!ordersData) return;
-      const orderIds = ordersData.map(o => o.id);
-      let allLines: any[] = [];
-      let allOrderSchemes: any[] = [];
-      const CHUNK = 500;
-      for (let i = 0; i < orderIds.length; i += CHUNK) {
-        const chunk = orderIds.slice(i, i + CHUNK);
-        const [linesRes, osRes] = await Promise.all([
-          supabase.from("order_lines").select("*").in("order_id", chunk).range(0, 9999),
-          supabase.from("order_schemes").select("*").in("order_id", chunk).range(0, 9999),
-        ]);
-        allLines.push(...(linesRes.data || []));
-        allOrderSchemes.push(...(osRes.data || []));
-      }
-      const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
-      setOrders(mapped);
-      if (deps.companyId) cacheData(deps.companyId, "orders", mapped);
-    } catch { /* ignore */ }
+          const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999);
+          if (!ordersData) { resolve(); return; }
+          const orderIds = ordersData.map(o => o.id);
+          let allLines: any[] = [];
+          let allOrderSchemes: any[] = [];
+          const CHUNK = 500;
+          for (let i = 0; i < orderIds.length; i += CHUNK) {
+            const chunk = orderIds.slice(i, i + CHUNK);
+            const [linesRes, osRes] = await Promise.all([
+              supabase.from("order_lines").select("*").in("order_id", chunk).range(0, 9999),
+              supabase.from("order_schemes").select("*").in("order_id", chunk).range(0, 9999),
+            ]);
+            allLines.push(...(linesRes.data || []));
+            allOrderSchemes.push(...(osRes.data || []));
+          }
+          const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
+          setOrders(mapped);
+          if (deps.companyId) cacheData(deps.companyId, "orders", mapped);
+        } catch { /* ignore */ }
+        resolve();
+      }, 500);
+    });
   }, [deps.companyId]);
 
   const addOrder = useCallback(async (order: Order): Promise<AddOrderResult> => {
