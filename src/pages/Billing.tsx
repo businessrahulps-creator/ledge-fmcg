@@ -145,11 +145,13 @@ export default function Billing() {
     const savings = order.schemeSavings || 0;
     const discountRatio = grossTotal > 0 && savings > 0 ? savings / grossTotal : 0;
 
-    setLines(order.lines.map(l => ({
+    setLines(order.lines.map(l => {
+      const catalogProduct = products.find(p => p.id === l.productId);
+      return {
       productName: l.productName,
-      hsnCode: "",
+      hsnCode: catalogProduct?.hsnCode || "",
       quantity: l.quantity,
-      unit: "Pack",
+      unit: catalogProduct?.unit || "Pack",
       unitPrice: discountRatio > 0 ? Math.round((l.unitPrice * (1 - discountRatio)) * 100) / 100 : l.unitPrice,
     })));
     setStep(2);

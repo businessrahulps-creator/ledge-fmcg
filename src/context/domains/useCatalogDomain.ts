@@ -13,7 +13,7 @@ export function useCatalogDomain(deps: DomainDeps) {
 
   const prodCrud = useMemo(() => makeOfflineCrud<Product>(
     deps, "products", setProducts, "products",
-    p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice }),
+    p => ({ name: sanitizeInput(p.name), sku: sanitizeInput(p.sku), unit: sanitizeInput(p.unit), base_price: p.basePrice, hsn_code: sanitizeInput(p.hsnCode || "") }),
     "product", p => `${p.name} — ${fmtAmount(p.basePrice)}`,
   ), [deps.companyId, deps.persistEntityToCache, deps.log]);
 
