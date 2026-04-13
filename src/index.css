@@ -176,9 +176,9 @@
 
 @layer utilities {
   .glass-card {
-    @apply rounded-2xl bg-card border border-border/40 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_2px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.03)]
+    @apply rounded-2xl bg-card border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.04)]
            transition-[transform,opacity,box-shadow,border-color] duration-200
-           dark:border-border/40 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_1px_2px_rgba(0,0,0,0.15)];
+           dark:border-border/50 dark:shadow-[0_1px_2px_rgba(0,0,0,0.2)];
   }
 
   .row-hover {
@@ -187,7 +187,7 @@
 
   .card-hover {
     @apply transition-[transform,box-shadow,border-color] duration-200 ease-out 
-           hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border
+           hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:border-border
            active:scale-[0.98] active:shadow-sm;
   }
 

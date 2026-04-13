@@ -139,35 +139,25 @@ export default function Salespersons() {
             <div
               key={s.id}
               onClick={() => navigate(`/salespersons/${s.id}`)}
-              className="cursor-pointer glass-card card-hover p-4 md:p-6"
+              className="cursor-pointer glass-card card-hover p-5 md:p-6"
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5 md:gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 md:h-10 md:w-10">
-                    <UserCheck className="h-4 w-4 text-primary md:h-5 md:w-5" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold md:text-base">{s.name}</h3>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground md:text-xs">
-                      <MapPin className="h-3 w-3" strokeWidth={1.5} />
-                      {s.region}
-                    </div>
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold md:text-base">{s.name}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{s.region}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{s.phone}</p>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-10 w-10 active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
-                    <Pencil className="h-3.5 w-3.5" />
+                <div className="flex gap-0.5 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
+                    <Pencil className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
-                    <Trash2 className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground md:mt-3">
-                <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs md:mt-4 md:pt-4 md:text-sm">
-                <span>{s.totalOrders} orders</span>
+              <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4 text-xs md:text-sm">
+                <span className="text-muted-foreground">{s.totalOrders} orders</span>
                 <span className="font-semibold">{formatCurrency(s.totalValue)}</span>
               </div>
             </div>
