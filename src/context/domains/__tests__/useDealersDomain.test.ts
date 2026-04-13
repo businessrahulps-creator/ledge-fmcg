@@ -38,12 +38,12 @@ describe("useDealersDomain", () => {
 
     const { result } = renderHook(() => useDealersDomain(deps));
     await act(async () => {
-      await result.current.addDistributor(makeDealer());
+      await result.current.add(makeDealer());
     });
 
     expect(mockFrom).toHaveBeenCalledWith("distributors");
-    expect(result.current.distributors).toHaveLength(1);
-    expect(result.current.distributors[0].id).toBe("d-new");
+    expect(result.current.rawDistributors).toHaveLength(1);
+    expect(result.current.rawDistributors[0].id).toBe("d-new");
   });
 
   it("add dealer offline — enqueues mutation", async () => {
@@ -52,11 +52,11 @@ describe("useDealersDomain", () => {
 
     const { result } = renderHook(() => useDealersDomain(deps));
     await act(async () => {
-      await result.current.addDistributor(makeDealer());
+      await result.current.add(makeDealer());
     });
 
     expect(enqueueMutation).toHaveBeenCalledWith(expect.objectContaining({ type: "insert", table: "distributors" }));
-    expect(result.current.distributors).toHaveLength(1);
+    expect(result.current.rawDistributors).toHaveLength(1);
   });
 
   it("delete dealer online — removes from state", async () => {
@@ -70,9 +70,9 @@ describe("useDealersDomain", () => {
     });
 
     await act(async () => {
-      await result.current.deleteDistributor("d1");
+      await result.current.remove("d1");
     });
 
-    expect(result.current.distributors).toHaveLength(0);
+    expect(result.current.rawDistributors).toHaveLength(0);
   });
 });
