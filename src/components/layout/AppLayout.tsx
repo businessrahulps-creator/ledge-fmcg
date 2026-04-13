@@ -263,13 +263,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-                <SheetContent side="bottom" className="rounded-t-[24px] px-6 pt-3 pb-12 max-h-[70vh]">
+                <SheetContent side="bottom" className="rounded-t-[24px] px-6 pt-3 pb-12 max-h-[85vh]">
                   {/* Drag handle */}
                   <div className="w-10 h-1 rounded-full bg-muted-foreground/20 mx-auto mb-4" />
                   <SheetHeader className="pb-3">
                     <SheetTitle className="text-base font-semibold">More</SheetTitle>
                   </SheetHeader>
-                  <div className="space-y-6">
+                  <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-100px)]">
                     {moreGroups.map((group) => (
                       <div key={group.label}>
                         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-3 px-1">
