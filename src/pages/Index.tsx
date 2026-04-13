@@ -25,7 +25,7 @@ export default function Index() {
   }
 
   return (
-    <div className="font-body antialiased scroll-smooth">
+    <div className="font-body antialiased scroll-smooth light" data-theme="light">
       <Navbar />
       <Hero />
       <TrustBar />
