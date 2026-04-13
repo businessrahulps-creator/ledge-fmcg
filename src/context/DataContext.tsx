@@ -312,8 +312,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => { catalog.safeRefetchSchemes(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'claims', filter: `company_id=eq.${companyId}` }, () => { billing.safeRefetchClaims(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, () => { billing.safeRefetchInvoices(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => { targetsAndSS.safeRefetchTargets(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => { targetsAndSS.safeRefetchSecondarySales(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => { targets.safeRefetchTargets(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => { targets.safeRefetchSecondarySales(); })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') console.warn('Realtime channel error — will retry automatically');
         });
