@@ -3,27 +3,27 @@ import { AnimateIn } from "../AnimateIn";
 const testimonials = [
   {
     quote:
-      "I used to call six team members every evening just to know what we sold. Now I open the dashboard at 5 PM and see every order and payment. My family says I am noticeably less stressed.",
-    name: "Rajesh Menon",
-    role: "Owner, SouthSpice Distributors · Kochi",
+      "I used to run the whole operation from my head — who ordered what, who still owes me, which godown is low. Now it's all in Ledge. I check the dashboard before I start my day. That's it.",
+    name: "Arnav Sethi",
+    role: "Owner, Aryan Beverages, Pune",
   },
   {
     quote:
-      "We paid a premium for legacy software, but my team hated it and kept reverting to WhatsApp. I sent them the Ledge link, and by lunch, all eight were using it without a single complaint.",
-    name: "Priya Radhakrishnan",
-    role: "Operations Head, GreenLeaf Naturals · Madurai",
+      "My team was using three different WhatsApp groups and a shared Excel file to manage orders. I showed them Ledge on a Monday afternoon. By Wednesday, the Excel file hadn't been opened once. No instruction needed — they just used it.",
+    name: "Priya Anand",
+    role: "Operations Head, Coastal Naturals, Kochi",
   },
   {
     quote:
-      "A critical stock alert saved our festival season. We moved inventory from our Salem warehouse the same day, saving us lakhs in potential lost orders.",
-    name: "S. Prakash",
-    role: "Warehouse Manager, TamilNadu Retail Supply · Tiruppur",
+      "The stock health view changed how I manage godowns. I caught a critical low on our top SKU four days before it would have been a problem. Moved inventory the same evening. Festival season went perfectly. That one call saved us.",
+    name: "Dev Sharma",
+    role: "Warehouse Lead, Nova Retail Co., Chennai",
   },
   {
     quote:
-      "Earlier, I had to call the office for every little detail. Now I see exactly what each dealer needs and their pending payments right on my phone. It saves me hours every week.",
-    name: "Murugan K.",
-    role: "Field Sales, Deccan Consumer Products · Mysore",
+      "Before Ledge I had to call the office twice before every dealer visit just to check outstanding and last order details. Now I open the dealer profile on my phone in the car. I walk in knowing everything. Dealers notice.",
+    name: "Rohan Nair",
+    role: "Senior Sales Executive, Sterling FMCG, Bangalore",
   },
 ];
 
@@ -33,7 +33,7 @@ export function Testimonials() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-16 tracking-[-0.03em]">
-            Run by business owners who demand clarity.
+            From owners who stopped guessing.
           </h2>
         </AnimateIn>
 

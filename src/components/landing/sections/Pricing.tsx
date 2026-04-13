@@ -8,11 +8,13 @@ const plans = [
     price: "0",
     priceLabel: "₹",
     period: "/month",
+    tagline: "Try it on your actual business. No card required.",
     features: [
-      "Up to 3 users",
-      "50 orders/month",
+      "3 users",
+      "50 orders per month",
       "1 warehouse",
-      "Basic dashboard",
+      "Dashboard + order management",
+      "Dealer and product catalogue",
     ],
     cta: "Start Free",
     highlighted: false,
@@ -23,14 +25,19 @@ const plans = [
     price: "2,499",
     priceLabel: "₹",
     period: "/month",
+    tagline: "For distribution businesses ready to replace the spreadsheet.",
     features: [
       "Up to 15 users",
       "Unlimited orders",
-      "Multi-warehouse stock",
-      "Dealer analytics",
-      "Payment tracking",
+      "Multi-warehouse inventory with stock health alerts",
+      "Full dealer profiles — lifetime value, outstanding, order history",
+      "Payment tracking across Cash, UPI, Cheque, Bank Transfer",
+      "Promotional scheme management",
+      "Sales team performance tracking",
+      "CSV export for all reports",
+      "All 4 GST document types with PDF generation",
     ],
-    cta: "Start 14-Day Trial",
+    cta: "Start 14-Day Free Trial",
     highlighted: true,
     ctaStyle: "bg-indigo-600 text-white hover:bg-indigo-700",
   },
@@ -39,14 +46,19 @@ const plans = [
     price: "5,999",
     priceLabel: "₹",
     period: "/month",
+    tagline: "For mid-size operations managing multiple teams and serious volume.",
     features: [
       "Unlimited users",
       "Everything in Growth",
-      "Advanced reports",
+      "5 report modules — Dealer, Product, Payment, Dispatch, Sales Team",
+      "Revenue and order targets per salesperson and dealer",
+      "Claims and returns management with resolution workflow",
+      "Secondary sales tracking (distributor to retailer)",
+      "Full activity log and audit trail",
       "Custom permissions",
-      "Dedicated support",
+      "Priority support",
     ],
-    cta: "Start 14-Day Trial",
+    cta: "Start 14-Day Free Trial",
     highlighted: false,
     ctaStyle: "border border-indigo-200 text-indigo-700 hover:border-indigo-400",
   },
@@ -55,10 +67,14 @@ const plans = [
     price: "Custom",
     priceLabel: "",
     period: "",
+    tagline: "For large distribution operations that need dedicated setup and integrations.",
     features: [
-      "Custom integrations (Tally, SAP)",
-      "Multi-brand support",
-      "On-premise option",
+      "Everything in Scale",
+      "Tally / SAP integration",
+      "Multi-brand workspace support",
+      "On-premise deployment option",
+      "Dedicated onboarding",
+      "SLA-backed support",
     ],
     cta: "Talk to Us",
     highlighted: false,
@@ -72,10 +88,10 @@ export function Pricing() {
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-midnight text-center mb-2 tracking-[-0.03em]">
-            Simple pricing. Start free. Grow when ready.
+            Start free. Pay when it's running your business.
           </h2>
           <p className="font-body text-lg text-lp-zinc text-center mb-16">
-            No setup fees. No annual lock-in. Cancel anytime.
+            No setup fees. No annual lock-in. Cancel anytime. Every plan includes PWA install, offline support, and automatic updates.
           </p>
         </AnimateIn>
 
@@ -99,7 +115,11 @@ export function Pricing() {
                   {plan.name}
                 </h3>
 
-                <div className="mt-2">
+                <p className="font-body text-sm text-graphite mt-1">
+                  {plan.tagline}
+                </p>
+
+                <div className="mt-3">
                   {plan.price === "Custom" ? (
                     <span className="font-heading font-extrabold text-[36px] text-midnight">
                       Custom
@@ -146,10 +166,10 @@ export function Pricing() {
 
         <div className="text-center mt-10 space-y-2">
           <p className="font-body text-[15px] text-lp-zinc">
-            All plans include PWA install and automatic updates.
+            All plans include offline support, PWA install, automatic updates, and role-based access control.
           </p>
           <p className="font-body text-[15px] text-accent-indigo font-medium hover:underline cursor-pointer">
-            Need help choosing? Chat on WhatsApp
+            Need help deciding? Chat on WhatsApp →
           </p>
         </div>
       </div>

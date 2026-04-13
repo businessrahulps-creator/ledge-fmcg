@@ -58,7 +58,7 @@ export function Navbar() {
             to="/signup"
             className="inline-flex items-center bg-indigo-600 text-white px-6 py-2.5 rounded-full font-body font-semibold text-sm hover:bg-indigo-700 transition-colors duration-200"
           >
-            Start Free Trial
+            Get Started Free
           </Link>
         </div>
 
@@ -90,7 +90,7 @@ export function Navbar() {
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-full font-body font-semibold text-base hover:bg-indigo-700 transition-colors mb-4"
             >
-              Start Free Trial
+              Get Started Free
             </Link>
           </SheetContent>
         </Sheet>

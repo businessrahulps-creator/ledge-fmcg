@@ -8,12 +8,12 @@ export function FinalCTA() {
       <div className="max-w-7xl mx-auto px-6 text-center">
         <AnimateIn>
           <h2 className="font-heading font-extrabold text-[28px] md:text-[48px] text-midnight max-w-3xl mx-auto leading-[1.1]">
-            Right now, your team is taking an order. Can you see it?
+            Your team is in the field right now. Orders are moving. Are you watching?
           </h2>
         </AnimateIn>
 
         <p className="font-body text-[20px] text-graphite max-w-xl mx-auto mt-6">
-          Set up Ledge in 15 minutes. Regain complete control over your daily distribution.
+          Set up Ledge in under 15 minutes. See your first live order before the hour is up. No credit card. No IT department. No onboarding call.
         </p>
 
         <div className="flex justify-center gap-4 mt-10 flex-wrap">
@@ -21,7 +21,7 @@ export function FinalCTA() {
             to="/signup"
             className="bg-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-indigo-700 hover:scale-[1.02] transition-all duration-200 inline-flex items-center text-base"
           >
-            Start Free. Takes 2 Minutes
+            Get Started Free
           </Link>
         </div>
       </div>
