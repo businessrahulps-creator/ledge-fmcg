@@ -50,7 +50,7 @@ export function TrustBar() {
               "
             </span>
             <p className="font-body text-lg text-graphite italic leading-[1.7] pl-8">
-              The first time I opened Ledge on a Friday evening and just… saw everything — every order, every payment, every dispatch for the week — I realized I'd been running blind for years.
+              The first time I opened Ledge on a Friday evening and just… saw everything - every order, every payment, every dispatch for the week - I realized I'd been running blind for years.
             </p>
             <p className="font-body font-semibold text-midnight mt-4 pl-8">
               Arnav Sethi · Founder, Aryan Beverages, Pune

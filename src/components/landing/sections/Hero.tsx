@@ -126,7 +126,7 @@ export function Hero() {
   return (
     <section className="min-h-screen flex items-center pt-16 px-6" style={{ background: "radial-gradient(ellipse at 50% 0%, #EDE9FE 0%, #F5F3FF 30%, #FFFFFF 70%)" }}>
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* Left — Text */}
+        {/* Left - Text */}
         <div>
           <motion.h1
             className="font-heading font-extrabold text-[34px] md:text-[60px] text-midnight leading-[1.08] tracking-[-0.03em]"
@@ -139,7 +139,7 @@ export function Hero() {
             className="font-body text-[17px] md:text-[20px] text-graphite leading-[1.6] max-w-xl mt-6"
             {...fadeUp(0.2)}
           >
-            Ledge is a complete distribution management platform — order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
+            Ledge is a complete distribution management platform - order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
           </motion.p>
 
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
@@ -166,7 +166,7 @@ export function Hero() {
 
         </div>
 
-        {/* Right — Dashboard Mockup */}
+        {/* Right - Dashboard Mockup */}
         <motion.div
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}

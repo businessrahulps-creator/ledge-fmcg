@@ -3,13 +3,13 @@ import { AnimateIn } from "../AnimateIn";
 const testimonials = [
   {
     quote:
-      "I used to run the whole operation from my head — who ordered what, who still owes me, which godown is low. Now it's all in Ledge. I check the dashboard before I start my day. That's it.",
+      "I used to run the whole operation from my head - who ordered what, who still owes me, which godown is low. Now it's all in Ledge. I check the dashboard before I start my day. That's it.",
     name: "Arnav Sethi",
     role: "Owner, Aryan Beverages, Pune",
   },
   {
     quote:
-      "My team was using three different WhatsApp groups and a shared Excel file to manage orders. I showed them Ledge on a Monday afternoon. By Wednesday, the Excel file hadn't been opened once. No instruction needed — they just used it.",
+      "My team was using three different WhatsApp groups and a shared Excel file to manage orders. I showed them Ledge on a Monday afternoon. By Wednesday, the Excel file hadn't been opened once. No instruction needed - they just used it.",
     name: "Priya Anand",
     role: "Operations Head, Coastal Naturals, Kochi",
   },
