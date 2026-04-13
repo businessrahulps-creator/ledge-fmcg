@@ -30,7 +30,7 @@ const plans = [
       "Up to 15 users",
       "Unlimited orders",
       "Multi-warehouse inventory with stock health alerts",
-      "Full dealer profiles — lifetime value, outstanding, order history",
+      "Full dealer profiles - lifetime value, outstanding, order history",
       "Payment tracking across Cash, UPI, Cheque, Bank Transfer",
       "Promotional scheme management",
       "Sales team performance tracking",
@@ -50,7 +50,7 @@ const plans = [
     features: [
       "Unlimited users",
       "Everything in Growth",
-      "5 report modules — Dealer, Product, Payment, Dispatch, Sales Team",
+      "5 report modules - Dealer, Product, Payment, Dispatch, Sales Team",
       "Revenue and order targets per salesperson and dealer",
       "Claims and returns management with resolution workflow",
       "Secondary sales tracking (distributor to retailer)",

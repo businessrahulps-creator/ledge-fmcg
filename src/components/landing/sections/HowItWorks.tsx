@@ -135,7 +135,7 @@ const steps = [
     badge: "01",
     title: "Your field team places an order from their phone. In under a minute.",
     description:
-      "They open Ledge — no app store, no download, just a link they installed to their home screen. They select the dealer, add the products, apply any active scheme, set the payment mode. Done. The order gets a sequential number the moment it's submitted. Nothing falls through.",
+      "They open Ledge - no app store, no download, just a link they installed to their home screen. They select the dealer, add the products, apply any active scheme, set the payment mode. Done. The order gets a sequential number the moment it's submitted. Nothing falls through.",
     mockup: OrderMockup,
     reversed: false,
   },
@@ -143,15 +143,15 @@ const steps = [
     badge: "02",
     title: "You see it on your dashboard immediately.",
     description:
-      "The order is live. Revenue updates. Pending dispatch count moves. You're not waiting for an evening summary — you're watching your business happen, the way you'd watch a bank balance. Every order, every salesperson, every dealer. Right there.",
+      "The order is live. Revenue updates. Pending dispatch count moves. You're not waiting for an evening summary - you're watching your business happen, the way you'd watch a bank balance. Every order, every salesperson, every dealer. Right there.",
     mockup: DashboardMiniMockup,
     reversed: true,
   },
   {
     badge: "03",
-    title: "Your ops team dispatches, stocks adjust, invoices generate — automatically.",
+    title: "Your ops team dispatches, stocks adjust, invoices generate - automatically.",
     description:
-      "When dispatch is marked, inventory deducts from the right godown. The invoice builds itself from the order — CGST, SGST, or IGST calculated based on state codes. Your accountant generates a GST-compliant PDF without touching a calculator. No double entry. No reconciliation ritual.",
+      "When dispatch is marked, inventory deducts from the right godown. The invoice builds itself from the order - CGST, SGST, or IGST calculated based on state codes. Your accountant generates a GST-compliant PDF without touching a calculator. No double entry. No reconciliation ritual.",
     mockup: StockMockup,
     reversed: false,
   },

@@ -4,7 +4,7 @@ const blocks = [
   {
     title: "It installs from a link. No app store. No IT department. No training day.",
     content:
-      "Ledge is a Progressive Web App. You send your team a URL. They tap \"Add to Home Screen.\" It's on their phone in 90 seconds. Works on any basic Android device. No version updates to manage. No permissions to configure. Start to first live order in under two minutes — we've timed it.",
+      "Ledge is a Progressive Web App. You send your team a URL. They tap \"Add to Home Screen.\" It's on their phone in 90 seconds. Works on any basic Android device. No version updates to manage. No permissions to configure. Start to first live order in under two minutes - we've timed it.",
   },
   {
     title: "It works when the network doesn't.",
@@ -14,12 +14,12 @@ const blocks = [
   {
     title: "Four roles. One system. Everyone sees exactly what they should.",
     content:
-      "The business owner sees everything. The sales manager tracks team performance, targets, and dispatch. The accountant handles payments, invoicing, and GST compliance — without touching inventory quantities. The field salesperson sees their dealers, their orders, their numbers. Role-based access, not role-based chaos.",
+      "The business owner sees everything. The sales manager tracks team performance, targets, and dispatch. The accountant handles payments, invoicing, and GST compliance - without touching inventory quantities. The field salesperson sees their dealers, their orders, their numbers. Role-based access, not role-based chaos.",
   },
   {
     title: "GST-compliant billing that builds itself from your orders.",
     content:
-      "Select an order. Choose GST Invoice, Estimate, Proforma, or Credit Note. CGST/SGST for intra-state, IGST for inter-state — auto-calculated from the state codes on the buyer and seller profiles. Amount in words in the Indian numbering system. Sequential invoice numbers with your prefix. PDF generated in one click. Suresh doesn't need to open Tally for this anymore.",
+      "Select an order. Choose GST Invoice, Estimate, Proforma, or Credit Note. CGST/SGST for intra-state, IGST for inter-state - auto-calculated from the state codes on the buyer and seller profiles. Amount in words in the Indian numbering system. Sequential invoice numbers with your prefix. PDF generated in one click. Suresh doesn't need to open Tally for this anymore.",
   },
 ];
 
