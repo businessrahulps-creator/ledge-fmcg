@@ -138,6 +138,8 @@ export function mapInvoice(inv: any, invoiceLines: any[]): Invoice {
     grandTotal: Number(inv.grand_total || 0), roundOff: Number(inv.round_off || 0),
     amountInWords: inv.amount_in_words || "", notes: inv.notes || "",
     status: inv.status as Invoice["status"],
+    vehicle: inv.vehicle || "",
+    driverName: inv.driver_name || "",
     lines: invoiceLines
       .filter((l: any) => l.invoice_id === inv.id)
       .map((l: any) => ({

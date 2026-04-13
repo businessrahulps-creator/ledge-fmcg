@@ -66,6 +66,8 @@ export interface Invoice {
   amountInWords: string;
   notes: string;
   status: "draft" | "final";
+  vehicle: string;
+  driverName: string;
   lines: InvoiceLine[];
   createdAt: string;
 }

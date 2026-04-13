@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft, Truck, CalendarDays } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 import { pdf } from "@react-pdf/renderer";
@@ -31,6 +31,9 @@ import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";
 import { useSearchParams } from "react-router-dom";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
+import { filterByTimePeriod, type TimePeriod } from "@/components/reports/TimePeriodFilter";
 
 type DocType = Invoice["docType"];
 
@@ -77,6 +80,7 @@ export default function Billing() {
   const [saving, setSaving] = useState(false);
   const [orderSearch, setOrderSearch] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">("all");
 
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
@@ -93,6 +97,8 @@ export default function Billing() {
   const [gstRate, setGstRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<LineInput[]>([]);
+  const [vehicle, setVehicle] = useState("");
+  const [driverName, setDriverName] = useState("");
 
   const resetForm = () => {
     setDocType("gst_invoice");
@@ -105,6 +111,8 @@ export default function Billing() {
     setGstRate(18);
     setNotes("");
     setLines([]);
+    setVehicle("");
+    setDriverName("");
     setEditingInvoice(null);
     setStep(1);
     setOrderSearch("");
@@ -128,6 +136,8 @@ export default function Billing() {
     const dealer = api.dealers.list().find(d => d.id === order.distributorId);
     setBuyerName(order.distributorName);
     setBuyerAddress(dealer?.location || "");
+    setVehicle(order.vehicle || "");
+    setDriverName(order.driverName || "");
     setLines(order.lines.map(l => ({
       productName: l.productName,
       hsnCode: "",
@@ -149,6 +159,8 @@ export default function Billing() {
     setSupplyType(inv.supplyType as "intra_state" | "inter_state");
     setGstRate(inv.gstRate);
     setNotes(inv.notes || "");
+    setVehicle(inv.vehicle || "");
+    setDriverName(inv.driverName || "");
     setLines(inv.lines.map(l => ({
       productName: l.productName,
       hsnCode: l.hsnCode || "",
@@ -186,6 +198,10 @@ export default function Billing() {
     }
     if (!buyerName.trim()) { toast.error("Buyer name is required"); return; }
     if (lines.length === 0 || lines.every(l => !l.productName.trim())) { toast.error("No line items"); return; }
+    if (docType === "gst_invoice" && (!vehicle.trim() || !driverName.trim())) {
+      toast.error("Vehicle and driver details are mandatory for GST invoices");
+      return;
+    }
 
     setSaving(true);
     const invoiceLines: InvoiceLine[] = lines.filter(l => l.productName.trim()).map(l => ({
@@ -228,6 +244,8 @@ export default function Billing() {
       roundOff: calculated.roundOff,
       amountInWords: numberToWords(calculated.grandTotal),
       notes,
+      vehicle,
+      driverName,
       lines: invoiceLines,
     };
 
@@ -278,6 +296,8 @@ export default function Billing() {
     setSupplyType(inv.supplyType as "intra_state" | "inter_state");
     setGstRate(inv.gstRate);
     setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+    setVehicle(inv.vehicle || "");
+    setDriverName(inv.driverName || "");
     if (inv.sourceOrderId) setSourceOrderId(inv.sourceOrderId);
     setLines(inv.lines.map(l => ({
       productName: l.productName,
@@ -321,6 +341,8 @@ export default function Billing() {
       roundOff: inv.roundOff,
       amountInWords: inv.amountInWords,
       notes: inv.notes,
+      vehicle: inv.vehicle || "",
+      driverName: inv.driverName || "",
     };
 
     try {
@@ -347,8 +369,14 @@ export default function Billing() {
       const q = search.toLowerCase();
       list = list.filter(i => i.invoiceNumber.toLowerCase().includes(q) || i.buyerName.toLowerCase().includes(q));
     }
+    if (timePeriod !== "all") {
+      list = filterByTimePeriod(list.map(i => ({ ...i, date: i.invoiceDate })), timePeriod).map(({ date, ...rest }) => rest as typeof list[number]);
+    }
     return list;
-  }, [invoices, filterType, search]);
+  }, [invoices, filterType, search, timePeriod]);
+
+  const { page, totalPages, from, to, setPage } = usePagination(filtered.length, 15);
+  const paginatedList = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
   // Get linked documents for each order
   const getOrderDocuments = useCallback((orderId: string) => {
@@ -421,6 +449,19 @@ export default function Billing() {
               <SelectItem value="credit_note">Credit Note</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
+            <SelectTrigger className="w-[160px] h-10">
+              <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="daily">Today</SelectItem>
+              <SelectItem value="weekly">Last 7 Days</SelectItem>
+              <SelectItem value="monthly">Last 30 Days</SelectItem>
+              <SelectItem value="yearly">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Invoice List */}
@@ -449,7 +490,7 @@ export default function Billing() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filtered.map(inv => {
+                    {paginatedList.map(inv => {
                       const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
                       return (
                         <TableRow key={inv.id} className="row-hover">
@@ -526,7 +567,7 @@ export default function Billing() {
 
               {/* Mobile cards */}
               <div className="space-y-3 p-3 md:hidden">
-                {filtered.map(inv => (
+                {paginatedList.map(inv => (
                   <div key={inv.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
@@ -579,9 +620,9 @@ export default function Billing() {
                 ))}
               </div>
             </>
-          
           )}
         </motion.div>
+        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
 
       {/* Create / Edit Document Dialog */}
@@ -777,7 +818,27 @@ export default function Billing() {
                 </div>
               )}
 
-              {/* Line Items */}
+              {/* Transport Details */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold">Transport Details</h3>
+                  {docType === "gst_invoice" && (
+                    <span className="text-[10px] text-destructive font-medium">Required for GST</span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Vehicle Number</Label>
+                    <Input value={vehicle} onChange={e => setVehicle(e.target.value.toUpperCase())} placeholder="MH-01-AB-1234" className="font-mono" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Driver Name</Label>
+                    <Input value={driverName} onChange={e => setDriverName(e.target.value)} placeholder="Driver name" />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold">Line Items</h3>

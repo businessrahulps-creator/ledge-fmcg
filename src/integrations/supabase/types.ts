@@ -387,6 +387,7 @@ export type Database = {
           company_id: string
           created_at: string
           doc_type: string
+          driver_name: string
           grand_total: number
           gst_rate: number
           id: string
@@ -414,6 +415,7 @@ export type Database = {
           supply_type: string
           total_tax: number
           updated_at: string
+          vehicle: string
         }
         Insert: {
           amount_in_words?: string
@@ -425,6 +427,7 @@ export type Database = {
           company_id: string
           created_at?: string
           doc_type?: string
+          driver_name?: string
           grand_total?: number
           gst_rate?: number
           id?: string
@@ -452,6 +455,7 @@ export type Database = {
           supply_type?: string
           total_tax?: number
           updated_at?: string
+          vehicle?: string
         }
         Update: {
           amount_in_words?: string
@@ -463,6 +467,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           doc_type?: string
+          driver_name?: string
           grand_total?: number
           gst_rate?: number
           id?: string
@@ -490,6 +495,7 @@ export type Database = {
           supply_type?: string
           total_tax?: number
           updated_at?: string
+          vehicle?: string
         }
         Relationships: []
       }

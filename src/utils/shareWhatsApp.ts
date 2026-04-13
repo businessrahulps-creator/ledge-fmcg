@@ -125,6 +125,8 @@ export interface InvoiceShareData {
   roundOff: number;
   amountInWords: string;
   notes: string;
+  vehicle?: string;
+  driverName?: string;
 }
 
 function buildInvoiceSummary(inv: InvoiceShareData): string {
@@ -194,6 +196,8 @@ export async function shareInvoiceOnWhatsApp(inv: InvoiceShareData) {
         sellerBankIfsc: inv.sellerBankIfsc,
         supplyType: inv.supplyType,
         gstRate: inv.gstRate,
+        vehicle: inv.vehicle || "",
+        driverName: inv.driverName || "",
         lines: inv.lines,
         subtotal: inv.subtotal,
         cgstAmount: inv.cgstAmount,
