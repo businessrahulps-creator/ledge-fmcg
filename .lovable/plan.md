@@ -1,106 +1,92 @@
-# Steve Jobs-Style UI/UX Audit — Ledge Platform
 
-## The Verdict
 
-The product is **solid and well-built** — far better than most B2B SaaS at this stage. The architecture is clean, the glassmorphic design system is consistent, the mobile bottom nav with the floating pill is genuinely delightful, and the data flows are correct. But "solid" is not "insanely great." Here is what stands between Ledge and shipping something truly magical.
+# Apple HIG-Guided UI/UX Refinement — Final Pass
 
----
+## Audit Summary
 
-## Issues Found (Ruthlessly Honest)
+After studying Apple's HIG principles (Hierarchy, Harmony, Consistency, Motion, Feedback) and reviewing every major screen, the app is already well-built with good spring animations, glassmorphic cards, and a clean hierarchy. However, several details fall short of Apple's standard of calm, effortless precision.
 
-### CRITICAL — None
+## Issues Found
 
-The platform is functionally correct. No data integrity issues, no broken flows, no security gaps. Previous audit passes have addressed all critical items.
+### HIGH — Perception & Feel
 
-### HIGH — Polish That Affects Perception
+**H1. Page transition feels abrupt — no spatial continuity**
+The `AnimatePresence` page transition in `AppLayout.tsx` uses only `opacity` with `duration: 0.15`. Apple HIG emphasizes that transitions should provide spatial context. A subtle `y` offset (4px) combined with the existing spring system would create a gentle "settling" feel rather than a flat opacity swap.
+- File: `src/components/layout/AppLayout.tsx:219-222`
+- Fix: Add `y: 4` to initial state, use spring transition instead of duration
 
-**H1. Login/Signup button height mismatch**
-Login page: `Button` uses `size="default"` (h-10). But inputs are `h-12`. The sign-in button looks undersized next to the inputs. A premium product matches these heights. Signup page has the same issue.
-Fix: Both pages → `size="lg"` on submit button.
+**H2. Pull-to-refresh spinner lacks spring physics**
+The pull-to-refresh indicator in Dashboard/Orders uses CSS `rotate()` via inline style — no spring physics. Apple's pull-to-refresh uses fluid, physics-based resistance. The spinner rotation should use the motion system's spring presets.
+- File: `src/pages/Dashboard.tsx:161-168`
+- Fix: Already acceptable — the rotation maps linearly to pull distance which is correct iOS behavior. Skip.
 
-**H2. Card `active:scale-[0.98]` on non-interactive cards**  
-The base `Card` component applies `active:scale-[0.98]` to ALL cards — even static, non-clickable ones like the Dashboard "This Month" summary and KPI cards. Pressing on a non-interactive card and seeing it shrink feels broken. Steve Jobs would say: "If it doesn't do anything, don't make it react."  
-Fix: Remove `active:scale-[0.98]` from the base Card component. Interactive cards already have `card-hover` which includes its own active state.
+**H3. Bottom nav `active:scale-90` is too aggressive**
+Apple's tab bar items don't scale on press at all — they rely on color change for feedback. A 10% scale reduction feels jarring and un-Apple-like. Reduce to `active:scale-95` or remove entirely.
+- File: `src/components/layout/AppLayout.tsx:244, 268`
+- Fix: Change `active:scale-90` to `active:scale-[0.97]`
 
-### MEDIUM — Refinements for "Insanely Great"
+**H4. FAB shadow lacks depth layering**
+The Dashboard FAB uses `shadow-lg` which is a single flat shadow. Apple's floating elements use layered shadows (a tight, dark shadow + a diffuse, lighter one) for realistic depth.
+- File: `src/pages/Dashboard.tsx:470`
+- Fix: Replace `shadow-lg` with `shadow-[0_2px_8px_rgba(0,0,0,0.15),0_6px_20px_rgba(0,0,0,0.1)]`
 
-**M1. Inconsistent page header pattern**
-Dashboard uses greeting + date. Orders/Distributors/Stock use `h1 + subtitle`. Some pages have action buttons right-aligned, some don't. The visual rhythm changes as you navigate. This breaks the feeling of a unified product.
-Fix: No code change needed — this is intentional per-page differentiation and acceptable. Note only.
+### MEDIUM — Consistency & Harmony
 
-**M2. Empty state icon inconsistency**
-Orders empty state uses `ShoppingCart` icon. Dashboard empty state uses `ListChecks`. Both represent "no orders." The metaphor should be consistent.
-Fix: Use `ShoppingCart` consistently for order-related empty states.
+**M1. Inconsistent motion imports — inline springs vs motion.ts presets**
+Dashboard, Orders, AppLayout all define inline `{ type: "spring", damping: 26, stiffness: 200 }` instead of importing `spring.default` from `motion.ts`. This creates drift risk and violates HIG's consistency principle.
+- Fix: Replace inline spring configs with imports from `motion.ts` across Dashboard, AppLayout, and SetupChecklist. (Note: this is a refactor for maintainability — no visual change. Defer to a separate pass.)
 
-**M3. Help page lacks visual warmth**  
-The Help page is a wall of accordion text with no visual breaks, illustrations, or progressive disclosure. For non-tech Indian FMCG users, this feels intimidating rather than helpful. However, fixing this properly requires content design work beyond a polish pass.  
-Fix: Try to fix it in a simple way
+**M2. "More" sheet drag handle needs larger touch target**
+The drag handle in the bottom sheet (`w-10 h-1`) has no explicit touch target. Apple's sheet handles have a minimum 44pt touch area around them.
+- File: `src/components/layout/AppLayout.tsx:291`
+- Fix: Wrap in a `py-2` container for implicit 44px touch target (the div already has padding above, so this is fine as-is). Skip.
 
-**M4. "More" sheet grid items — icon containers too large on small phones**
-The More navigation sheet uses `h-12 w-12` icon containers in a 4-column grid. On 320px phones (iPhone SE), this creates tight spacing. The icons could be slightly smaller.
-Fix: Reduce to `h-10 w-10` icon containers in the More sheet.
+**M3. Onboarding emoji ("🎉", "👋") breaks premium tone**
+Apple never uses emoji in system UI. The onboarding checklist uses "🎉" and the Help page uses "👋". These feel playful but not premium.
+- Files: `src/components/onboarding/SetupChecklist.tsx:83`, `src/pages/Help.tsx:32`
+- Fix: Remove emojis. The visual hierarchy (icons, typography) should do the work.
+
+**M4. Section headers lack consistent vertical rhythm**
+Dashboard sections use `mb-4` for section header spacing. But the `space-y-8` container already provides 32px gaps. The headers' `mb-4` creates uneven spacing between the header text and the card below vs. the gap above. Apple HIG demands precise vertical rhythm.
+- Fix: This is actually correct — `mb-4` controls header-to-content distance while `space-y-8` controls section-to-section. No change needed.
 
 ### LOW — Tiny Details
 
-**L1. Dashboard sparkline SVG viewBox doesn't account for final dot radius**
-The SVG `viewBox="0 0 184 48"` but the last point is at x=180 with r=3, so it clips at 183. Cosmetically minor.
-Fix: Change viewBox to `0 0 186 48`.
+**L1. "View all →" links use ASCII arrow instead of proper chevron**
+Apple uses `›` (right-pointing single quotation mark) or an SF Symbol chevron, never `→`. The arrow looks utilitarian rather than elegant.
+- Files: Dashboard.tsx lines 327, 355, 384
+- Fix: Replace `→` with `›` for a cleaner feel.
 
-**L2. Signup form field IDs don't match E2E test selectors**
-Already identified in previous audit. E2E tests use `fullName`/`companyName` but form uses `name`/`company`.
-Fix: Not a UI/UX issue — skip in this pass, address in test fix pass.
+**L2. Status badge dot size inconsistency**
+`StatusBadge` uses `h-1.5 w-1.5` (6px) dots. Apple's status indicators typically use slightly larger 8px dots for better visibility.
+- Fix: Keep as-is — the 6px dots work well at the small badge scale. Skip.
 
 ---
 
-## Implementation Plan
+## Implementation Plan (4 passes, ~15 lines changed)
 
-### Pass 1: Button height consistency on auth pages (H1)
+### Pass 1: Smoother page transitions (H1)
+| File | Change |
+|------|--------|
+| `src/components/layout/AppLayout.tsx:219-222` | Add `y: 4` to initial, use spring transition |
 
+### Pass 2: Softer bottom nav press feedback (H3)
+| File | Change |
+|------|--------|
+| `src/components/layout/AppLayout.tsx:244` | `active:scale-90` → `active:scale-[0.97]` |
+| `src/components/layout/AppLayout.tsx:268` | Same change |
 
-| File                                   | Change                                 |
-| -------------------------------------- | -------------------------------------- |
-| `src/pages/Login.tsx:142`              | Change `size="default"` to `size="lg"` |
-| `src/pages/Signup.tsx` (submit button) | Change to `size="lg"`                  |
+### Pass 3: FAB layered shadow + remove emojis (H4, M3)
+| File | Change |
+|------|--------|
+| `src/pages/Dashboard.tsx:470` | Replace `shadow-lg` with layered shadow |
+| `src/components/onboarding/SetupChecklist.tsx:83` | Remove "🎉" |
+| `src/pages/Help.tsx:32` | Remove "👋" |
 
+### Pass 4: Refined "View all" links (L1)
+| File | Change |
+|------|--------|
+| `src/pages/Dashboard.tsx:327,355,384` | Replace `→` with `›` |
 
-### Pass 2: Remove phantom press feedback from Card (H2)
+Total: 4 files, ~12 lines of surgical changes. Zero new features. All existing behavior preserved.
 
-
-| File                           | Change                                                                        |
-| ------------------------------ | ----------------------------------------------------------------------------- |
-| `src/components/ui/card.tsx:8` | Remove `active:scale-[0.98] transition-transform duration-100` from base Card |
-
-
-### Pass 3: Dashboard mobile FAB (H3)
-
-
-| File                      | Change                                                                                                |
-| ------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `src/pages/Dashboard.tsx` | Add a floating `+` button (Link to `/orders/new`) positioned `fixed bottom-24 right-4` on mobile only |
-
-
-### Pass 4: Empty state icon consistency (M2)
-
-
-| File                          | Change                                                           |
-| ----------------------------- | ---------------------------------------------------------------- |
-| `src/pages/Dashboard.tsx:390` | Change `ListChecks` to `ShoppingCart` for the empty orders state |
-
-
-### Pass 5: More sheet icon sizing (M4)
-
-
-| File                                          | Change                                                          |
-| --------------------------------------------- | --------------------------------------------------------------- |
-| `src/components/layout/AppLayout.tsx:316-331` | Change `h-12 w-12` to `h-10 w-10` in More sheet icon containers |
-
-
-### Pass 6: Sparkline viewBox fix (L1)
-
-
-| File                          | Change                         |
-| ----------------------------- | ------------------------------ |
-| `src/pages/Dashboard.tsx:224` | Change viewBox to `0 0 186 48` |
-
-
-Total: 6 files, ~12 lines of surgical changes. Zero new features. All existing behavior preserved.
