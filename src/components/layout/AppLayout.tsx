@@ -326,6 +326,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </div>
                 </SheetContent>
               </Sheet>
+              <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
             </div>
           </nav>
         </div>
