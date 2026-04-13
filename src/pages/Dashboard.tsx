@@ -463,7 +463,6 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
           )}
         </section>
       </div>
-      </div>
 
       {/* Mobile FAB — quick order creation */}
       <Link
