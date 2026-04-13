@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { sanitizeInput } from "@/utils/sanitize";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Building2, Upload, X } from "lucide-react";
+import { Building2, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,7 @@ export default function Company() {
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
@@ -149,6 +150,8 @@ export default function Company() {
   };
 
   const saveCompany = async () => {
+    setIsSaving(true);
+    try {
     if (orderPrefix !== savedPrefix) {
       api.orders.setPrefix(sanitizeInput(orderPrefix));
     }
@@ -190,6 +193,9 @@ export default function Company() {
       invoicePrefix: sanitizeInput(invoicePrefix),
     });
     toast.success("Settings saved", { description: "Company profile has been updated." });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -332,7 +338,10 @@ export default function Company() {
               </p>
             </div>
 
-            <Button onClick={handleSaveClick}>Save Changes</Button>
+            <Button onClick={handleSaveClick} disabled={isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
           </div>
         </motion.div>
 
