@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { BrowserFrame, GradientStage } from "../DeviceFrames";
 
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay, ease: "easeOut" as const },
+  transition: { type: "spring" as const, damping: 26, stiffness: 200, delay },
 });
 
 
@@ -170,9 +170,9 @@ export function Hero() {
 
         {/* Right — Dashboard Mockup */}
         <motion.div
-          initial={{ x: 60, opacity: 0 }}
+          initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.2 }}
           className="w-full max-w-lg mx-auto"
           style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
         >

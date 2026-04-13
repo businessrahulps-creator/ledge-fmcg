@@ -435,8 +435,8 @@ export default function NewOrder() {
                       key={line.id}
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      transition={{ type: "spring", damping: 20, stiffness: 300 }}
                       className="rounded-lg border border-border/50 bg-muted/20 p-3 md:p-4"
                     >
                       <div className="grid gap-3 sm:grid-cols-12 sm:items-end">
