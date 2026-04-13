@@ -6,6 +6,7 @@ import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, Refre
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
+import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 
@@ -100,6 +101,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -285,24 +287,36 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ type: "spring", damping: 26, stiffness: 200, delay: i * 0.04 }}
                               >
-                                <Link
-                                  to={item.url}
-                                  onClick={() => setMoreOpen(false)}
-                                  className={`flex flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 ${
-                                    active
-                                      ? "bg-primary/10 text-primary"
-                                      : "text-muted-foreground hover:bg-muted/50"
-                                  }`}
-                                >
-                                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                                    active ? "bg-primary/10" : "bg-muted/40"
-                                  }`}>
-                                    <item.icon className="h-6 w-6" strokeWidth={active ? 2 : 1.5} />
-                                  </div>
-                                  <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>
-                                    {item.title}
-                                  </span>
-                                </Link>
+                                {item.url === "/activity" ? (
+                                  <button
+                                    onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
+                                    className={`flex w-full flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 text-muted-foreground hover:bg-muted/50`}
+                                  >
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40">
+                                      <item.icon className="h-6 w-6" strokeWidth={1.5} />
+                                    </div>
+                                    <span className="text-xs font-medium">{item.title}</span>
+                                  </button>
+                                ) : (
+                                  <Link
+                                    to={item.url}
+                                    onClick={() => setMoreOpen(false)}
+                                    className={`flex flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 ${
+                                      active
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-muted-foreground hover:bg-muted/50"
+                                    }`}
+                                  >
+                                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                                      active ? "bg-primary/10" : "bg-muted/40"
+                                    }`}>
+                                      <item.icon className="h-6 w-6" strokeWidth={active ? 2 : 1.5} />
+                                    </div>
+                                    <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>
+                                      {item.title}
+                                    </span>
+                                  </Link>
+                                )}
                               </motion.div>
                             );
                           })}
