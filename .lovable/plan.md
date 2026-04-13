@@ -1,64 +1,41 @@
 
 
-# Audit Trail / Activity Log
+# Premium "More" Menu Redesign
 
-## Problem
-The app has no record of *who* changed *what* and *when*. The only history is ephemeral notifications. For Indian FMCG businesses, an audit trail is critical for accountability (order edits, payment status changes, stock adjustments, dealer modifications).
+## Current State
+The bottom-sheet "More" menu uses a plain grid layout with small icons, thin section labels, and minimal visual hierarchy. It works but feels utilitarian.
 
-## Solution
-A database-backed `activity_log` table that captures entity-level changes, surfaced via a simple Activity History panel.
+## Proposed Changes — all in `src/components/layout/AppLayout.tsx`
 
-## Database
+### 1. Drag handle indicator
+Add a small rounded pill bar at the top of the sheet (like iOS action sheets) — a `div` with `w-10 h-1 rounded-full bg-muted-foreground/20 mx-auto mb-3`.
 
-### New table: `activity_log`
-```text
-id           uuid  PK  default gen_random_uuid()
-company_id   uuid  NOT NULL
-user_id      uuid  NOT NULL
-user_name    text  NOT NULL default ''
-entity_type  text  NOT NULL   -- 'order','dealer','product','stock_item','salesperson','scheme','claim','invoice'
-entity_id    uuid  NOT NULL
-action       text  NOT NULL   -- 'created','updated','deleted','status_changed'
-summary      text  NOT NULL   -- human-readable: "Changed payment status from pending to paid"
-metadata     jsonb NOT NULL default '{}'  -- old/new values for key fields
-created_at   timestamptz NOT NULL default now()
-```
+### 2. Larger, more tactile icon buttons
+- Increase icon container to 48×48px with a subtle `bg-muted/40` rounded-2xl background behind each icon
+- Active state gets `bg-primary/10` with primary-colored icon
+- Increase icon size from `h-5 w-5` to `h-6 w-6`
+- Add `gap-2` between icon and label
 
-### RLS
-- SELECT: `company_id = get_company_id()`
-- INSERT: `company_id = get_company_id()`
-- No UPDATE/DELETE (append-only)
+### 3. Better typography
+- Section labels: slightly larger (`text-xs`), with `text-muted-foreground/50` and a thin bottom border or dotted separator
+- Item labels: `text-xs font-medium` (up from `text-[11px]`)
 
-### Index
-- `(company_id, entity_type, entity_id, created_at DESC)` for fast entity-scoped lookups
-- `(company_id, created_at DESC)` for global feed
+### 4. Spacing and padding
+- More generous padding: `px-6 pt-2 pb-12`
+- Group spacing: `space-y-6` (up from `space-y-5`)
+- Grid gap: `gap-2` (up from `gap-1`)
 
-## Code Changes
+### 5. Subtle entry animation
+- Add `framer-motion` stagger on the grid items — each icon fades in and shifts up slightly with a 30ms stagger delay
 
-### 1. `src/context/DataContext.tsx` — logging helper
-Add a `logActivity()` function that inserts into `activity_log` after each mutation (create/update/delete) for orders, dealers, salespersons, products, stock items, schemes, claims, and invoices. Each existing mutation function gets a single `logActivity(...)` call appended. The summary is auto-generated (e.g., "Created order ORD-2026-0009", "Updated delivery status to dispatched").
+### 6. Activity History shortcut
+- Add an "Activity" item to the Analyze group (History icon, links to opening the ActivityLog sheet or a dedicated route), so the audit trail is accessible from mobile
 
-### 2. `src/components/layout/ActivityLog.tsx` — new component
-A slide-out Sheet (triggered from the sidebar or header) showing a reverse-chronological feed of recent activity. Each entry shows: icon by entity type, summary text, user name, and relative timestamp. Filterable by entity type. Loads the most recent 50 entries with a "Load more" button.
-
-### 3. `src/components/layout/AppSidebar.tsx`
-Add an "Activity" link in the sidebar navigation (History/ClockIcon).
-
-### 4. Entity detail pages (OrderDetail, DealerDetail, SalespersonDetail)
-Add a collapsible "History" section at the bottom showing activity entries filtered to that specific entity.
-
-## What gets logged
-| Action | Summary example |
-|--------|----------------|
-| Order created | "Created order ORD-2026-0009 for Sharma Traders — ₹40,500" |
-| Order status changed | "Changed payment status from pending to paid" |
-| Order deleted | "Deleted order ORD-2026-0009" |
-| Dealer created/updated/deleted | "Added dealer Patel Distributors" |
-| Product price changed | "Updated Premium Basmati Rice 5kg — price ₹450 → ₹480" |
-| Stock adjusted | "Adjusted Sunflower Oil 1L at Main Warehouse: 280 → 250" |
+## Files Changed
+- `src/components/layout/AppLayout.tsx` — all visual changes to the More sheet
 
 ## Impact
-- Append-only, no performance impact on reads (indexed queries)
-- ~1 extra INSERT per mutation — negligible overhead
-- No changes to existing mutation logic beyond appending the log call
+- No functional changes, purely visual polish
+- Matches premium iOS-style action sheet patterns
+- Better touch targets (48px icons vs current ~40px)
 
