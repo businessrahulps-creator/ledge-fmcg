@@ -1,111 +1,67 @@
 
 
-# Visual Design Refresh — Cursor-Style Premium Aesthetic
+# Visual Design Refresh — Uniform Cards, Icons, Symmetry
 
-## Design System Changes
+## What changes
 
-### Color Palette
-- Page background: warm off-white `#F8F7F5` (replacing white/indigo gradients)
-- Card fill: `#FFFFFF` with very subtle border `#E8E5E0`
-- Headings: `#1A1A1A` (deep charcoal, replacing `text-midnight`)
-- Body text: `#52525B` (slate-600)
-- Muted text: `#71717A` (slate-500)
-- Primary accent: `#0D9488` (deep teal, replacing indigo-600) — used sparingly for CTAs and badges only
-- Section alternation: `#F8F7F5` and `#FFFFFF` (no more indigo/violet washes)
+### 1. Spacing increase (all section files)
+- Section padding: `py-20 md:py-28` → `py-24 md:py-32`
+- Section heading margin-bottom: `mb-16` → `mb-20`
 
-### Typography
-- Headlines stay Plus Jakarta Sans but tighter tracking `[-0.04em]` and slightly larger scale
-- Body stays Inter, generous `leading-[1.75]`
+### 2. Problem section → 2x2 symmetric grid (`Problem.tsx`)
+- Change from 4+8 column sticky layout to centered headline + 2x2 card grid
+- Add Lucide icons rendered at top of each card (thin-line, `strokeWidth={1.5}`, size 24, `text-[#0D9488]`)
+- Icons: `MessageCircle`, `Table`, `Compass`, `Laptop` (already imported)
+- All 4 cards: equal height via `h-full` on grid items + `flex flex-col` on card
 
-### Cards
-- `rounded-3xl` (up from 2xl)
-- Shadow: `shadow-[0_1px_2px_rgba(0,0,0,0.04)]` (nearly invisible)
-- Border: `border-[#E8E5E0]` (warm neutral, not indigo)
-- No colored borders, no indigo tints
+### 3. Features section — add icons + equal height (`Features.tsx`)
+- Render `<feature.icon>` at top of each card (same thin-line style)
+- Icons already in data array: `BarChart3`, `ClipboardCheck`, `Users`, `Package`, `IndianRupee`, `CloudOff`
+- Cards: add `h-full flex flex-col`, description gets `flex-1`
 
-### Buttons
-- Primary: `bg-[#0D9488] text-white rounded-2xl` with `hover:bg-[#0F766E] hover:scale-[1.01]`
-- Secondary: `border border-[#D4D1CC] text-[#1A1A1A] rounded-2xl`
-- Larger padding: `px-7 py-3`
+### 4. Why Ledge → 2x2 card grid with icons (`WhyOrdra.tsx`)
+- Replace border-left list layout with 2x2 card grid (matching testimonials)
+- Add icons: `Smartphone`, `WifiOff`, `Shield`, `FileText` from lucide-react
+- Cards: `bg-white rounded-3xl p-8 border border-[#E8E5E0]` with icon at top
+- Equal height: `h-full flex flex-col`
 
-### Spacing
-- All sections: `py-20 md:py-28` (more generous)
-- Card grid gaps: `gap-8`
+### 5. Pricing — add icons to tiers (`Pricing.tsx`)
+- Add icons per tier: `Gift` (Free), `TrendingUp` (Growth), `Layers` (Scale), `Building2` (Enterprise)
+- Render above plan name, thin-line `strokeWidth={1.5}` size 24
 
-## Files to Modify (visual-only, no text/structure changes)
+### 6. How It Works — add icons to step badges (`HowItWorks.tsx`)
+- Add icons: `Smartphone` (step 1), `LayoutDashboard` (step 2), `Truck` (step 3)
+- Render icon next to badge number
 
-### 1. `src/components/landing/sections/Navbar.tsx`
-- Scrolled bg: `bg-[#F8F7F5]/95` with warm border
-- CTA: teal rounded-2xl button
-- Link hover: `hover:text-[#1A1A1A]`
+### 7. Testimonials — already symmetric ✓
+- Only spacing increase needed
 
-### 2. `src/components/landing/sections/Hero.tsx`
-- Background: solid `#F8F7F5` (remove radial gradient)
-- Text colors: `#1A1A1A` heading, `#52525B` body
-- CTAs: teal primary, warm neutral secondary
-- Social proof: `#71717A`
-- Dashboard mockup: replace indigo accents with teal; warm neutral borders
+### 8. Hero, TrustBar, Navbar, FinalCTA, Footer, DeviceFrames
+- Only spacing increase (py-24/py-32)
+- No structural changes
 
-### 3. `src/components/landing/DeviceFrames.tsx`
-- BrowserFrame: `border-[#E8E5E0]`, warm shadow, title bar `bg-[#F8F7F5]`
-- PhoneFrame: darker neutral bezel `#1A1A1A` to `#27272A`
-- GradientStage: soften to warm neutral ambient (remove indigo/violet radials, use subtle warm cream gradients)
+## Files modified
 
-### 4. `src/components/landing/sections/TrustBar.tsx`
-- Section bg: `bg-[#F8F7F5]` (no indigo wash)
-- Marquee text: `#C4C4C4` stays (already muted)
-- Pull quote card: `bg-white border-[#E8E5E0]` (no violet wash)
-- Quote mark: `text-[#D4D1CC]` (neutral, not indigo)
-
-### 5. `src/components/landing/sections/Problem.tsx`
-- Section bg: `bg-[#F8F7F5]`
-- Cards: `rounded-3xl border-[#E8E5E0]` bg-white, no icon rendering (remove `<card.icon>` JSX but keep icon in data array for structure)
-- Border-left on sticky headline removed or changed to `border-[#0D9488]` thin accent
-
-### 6. `src/components/landing/sections/HowItWorks.tsx`
-- Section bg: `bg-white`
-- Step badge: `bg-[#F0FDFA] text-[#0D9488]` (teal tint, not purple)
-- Text colors updated to new palette
-
-### 7. `src/components/landing/sections/Features.tsx`
-- Section bg: `bg-[#F8F7F5]`
-- Cards: `rounded-3xl border-[#E8E5E0]`, remove icon rendering (no `<feature.icon>`)
-- Hover: `hover:border-[#D4D1CC]` only (no translate)
-
-### 8. `src/components/landing/sections/WhyOrdra.tsx`
-- Section bg: `bg-white`
-- Border-left: `border-[#0D9488]` (teal accent)
-- Text colors updated
-
-### 9. `src/components/landing/sections/Testimonials.tsx`
-- Section bg: `bg-[#F8F7F5]`
-- Cards: `rounded-3xl border-[#E8E5E0]`
-- Quote mark: `text-[#D4D1CC]` (neutral)
-- Divider: `border-[#E8E5E0]`
-
-### 10. `src/components/landing/sections/Pricing.tsx`
-- Section bg: `bg-white`
-- Cards: `rounded-3xl border-[#E8E5E0]`
-- Highlighted card: `border-2 border-[#0D9488]` with subtle teal shadow
-- "Most Popular" badge: `bg-[#0D9488] text-white`
-- Check icons: `text-[#0D9488]` (teal, not emerald)
-- CTA buttons: teal primary for highlighted, warm neutral secondary for others
-
-### 11. `src/components/landing/sections/FinalCTA.tsx`
-- Background: `bg-[#F8F7F5]` (no gradient)
-- CTA: teal rounded-2xl
-- Text colors updated
-
-### 12. `src/components/landing/sections/Footer.tsx`
-- Background: `bg-[#F8F7F5]`
-- Border: `border-[#E8E5E0]`
-- Text colors updated
+| File | Changes |
+|------|---------|
+| `Problem.tsx` | 2x2 grid layout, render icons, equal-height cards |
+| `Features.tsx` | Render icons, equal-height cards |
+| `WhyOrdra.tsx` | 2x2 card grid with icons (replacing border-left blocks) |
+| `Pricing.tsx` | Add tier icons |
+| `HowItWorks.tsx` | Add step icons |
+| `Hero.tsx` | Spacing increase |
+| `TrustBar.tsx` | Spacing increase |
+| `Testimonials.tsx` | Spacing increase |
+| `FinalCTA.tsx` | Spacing increase |
+| `Footer.tsx` | No change |
+| `Navbar.tsx` | No change |
 
 ## What does NOT change
-- All text content verbatim
+- All text/copy verbatim
 - Component structure, section order, card counts
-- All Framer Motion animations and AnimateIn usage
-- Responsive behavior (grid breakpoints, mobile sheet menu)
-- All Links, hrefs, and routing
-- All mockup data (KPIs, orders, products)
+- All Framer Motion animations
+- Color palette (#F8F7F5, #1A1A1A, #0D9488, etc.)
+- Responsive breakpoints
+- Mockup content and device frames
+- All Links, hrefs, routing
 
