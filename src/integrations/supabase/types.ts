@@ -397,6 +397,7 @@ export type Database = {
           round_off: number
           seller_address: string
           seller_bank_account: string
+          seller_bank_account_name: string
           seller_bank_ifsc: string
           seller_bank_name: string
           seller_email: string
@@ -434,6 +435,7 @@ export type Database = {
           round_off?: number
           seller_address?: string
           seller_bank_account?: string
+          seller_bank_account_name?: string
           seller_bank_ifsc?: string
           seller_bank_name?: string
           seller_email?: string
@@ -471,6 +473,7 @@ export type Database = {
           round_off?: number
           seller_address?: string
           seller_bank_account?: string
+          seller_bank_account_name?: string
           seller_bank_ifsc?: string
           seller_bank_name?: string
           seller_email?: string

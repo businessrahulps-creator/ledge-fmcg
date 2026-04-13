@@ -1,0 +1,1 @@
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS seller_bank_account_name TEXT NOT NULL DEFAULT '';
