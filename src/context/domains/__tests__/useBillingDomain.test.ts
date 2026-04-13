@@ -33,7 +33,7 @@ function makeInvoice(overrides = {}) {
     sellerLogoUrl: "", supplyType: "intra_state" as const, gstRate: 18,
     subtotal: 1000, cgstAmount: 90, sgstAmount: 90, igstAmount: 0,
     totalTax: 180, grandTotal: 1180, roundOff: 0,
-    amountInWords: "One Thousand", notes: "", status: "draft" as const,
+    amountInWords: "One Thousand", notes: "", status: "draft" as const, vehicle: "", driverName: "",
     lines: [{ productName: "Widget", hsnCode: "1234", quantity: 10, unit: "Pack", unitPrice: 100, taxableValue: 1000 }],
     ...overrides,
   };
@@ -93,7 +93,7 @@ describe("useBillingDomain", () => {
         sellerLogoUrl: "", supplyType: "intra_state", gstRate: 18,
         subtotal: 0, cgstAmount: 0, sgstAmount: 0, igstAmount: 0,
         totalTax: 0, grandTotal: 0, roundOff: 0,
-        amountInWords: "", notes: "", createdAt: "2026-01-01",
+        amountInWords: "", notes: "", vehicle: "", driverName: "", createdAt: "2026-01-01",
       }]);
     });
 
