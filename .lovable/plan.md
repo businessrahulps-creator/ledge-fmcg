@@ -1,83 +1,71 @@
 
 
-# Pre-Launch QA, CTO & Security Audit Report
+# Rich Demo Account — asha@getledge.in (30× Volume)
 
-## Security Scan Results
+## Summary
+Create edge function `seed-demo-account` that provisions a richly-populated demo account with ~30× the originally planned data volume. Data is generated procedurally in loops to create a realistic, lived-in 30-day power-user account for Kerala & Tamil Nadu FMCG beverage distribution.
 
-**4 findings** from the automated security scan:
+## Data Volumes
 
-| # | Severity | Finding | Fix |
-|---|----------|---------|-----|
-| 1 | **ERROR** | Realtime channels have no authorization — any authenticated user can subscribe to any company's data changes | Add Realtime authorization policies scoped to `get_company_id()` |
-| 2 | WARN | Privilege escalation risk — first `user_roles` insert is done via `setup_new_company` (SECURITY DEFINER), which is correct, but the RLS INSERT policy on `user_roles` technically allows any super_admin to grant roles. Acceptable for now. | Mark as reviewed — bootstrapping is server-side via RPC |
-| 3 | WARN | `invoice_lines` table missing UPDATE policy | Add UPDATE policy matching existing pattern |
-| 4 | WARN | `order_schemes` table missing UPDATE policy | Add UPDATE policy matching existing pattern |
+| Entity | Original | Now (30×) |
+|--------|----------|-----------|
+| Products | 15 | 45 beverage SKUs |
+| Dealers | 8 | 80+ across KL/TN |
+| Sales Team | 4 | 12 reps |
+| Godowns | 3 | 5 warehouses |
+| Orders | 20 | 500+ over 30 days |
+| Order Lines | ~40 | 1,500+ |
+| Schemes | 6 | 20 active schemes |
+| Targets | 6 | 40+ (monthly + quarterly) |
+| Claims | 4 | 50+ (mix of open/resolved) |
+| Invoices | 5 | 150+ GST invoices |
+| Invoice Lines | ~15 | 500+ |
+| Stock Items | 30 | 200+ (products × godowns) |
+| Activity Log | 15 | 400+ entries |
+| Order Schemes | ~10 | 300+ applied schemes |
 
-**Database linter**: Clean — no issues found.
+## Technical Approach
 
-## Code Quality Audit
+### Edge Function: `supabase/functions/seed-demo-account/index.ts`
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Console.log statements | CLEAN | None found in src/ |
-| TODO/FIXME/HACK | CLEAN | Only 1 false positive (XXXXX phone placeholder in landing mock) |
-| TypeScript `as any` usage | 274 instances across 11 files | Most are for tables not yet in generated types (activity_log, claims, invoices). Expected — will resolve when types regenerate. Not a launch blocker. |
-| Error boundaries | GOOD | Global `ErrorBoundary` + per-page `PageErrorBoundary` |
-| Auth flow | GOOD | Email signup with email verification, password reset, protected routes |
-| RLS on all 21 tables | GOOD | Every table has RLS enabled |
-| No secrets in client code | GOOD | Only anon key exposed (expected) |
+Uses service role key to bypass RLS. All data inserted via admin client in a single invocation.
 
-## index.html Issues
+**Procedural generation strategy:**
+- Pre-define arrays of realistic names, locations, SKUs, and prices
+- Use nested loops to generate orders (15-20 per day × 30 days)
+- Randomly assign dealers, salespersons, payment modes/statuses, delivery statuses
+- Apply schemes to ~60% of orders with calculated savings
+- Generate invoices for all delivered+paid orders
+- Distribute stock across all godowns with realistic health spread (60% healthy, 25% low, 15% critical)
+- Create claims for ~10% of delivered orders (damaged, expired, shortage)
+- Set targets for all salespersons (monthly) and top 20 dealers (quarterly)
+- Activity log entries for order placements, status changes, dealer additions, stock updates
 
-| Issue | Severity | Fix |
-|-------|----------|-----|
-| Duplicate `meta description` — line 6 (correct) and line 18 ("Lovable Generated Project") | Low | Remove line 18 |
-| Stale `meta author` says "Lovable" — should be "Ledge" | Low | Update to "Ledge" |
-| `TODO` comment on line 21 | Low | Remove |
-| ~20 blank lines (31-57) cluttering `<head>` | Low | Clean up |
-| `twitter:site` says "@Lovable" — should be your handle | Low | Update or remove |
+**Products catalog** — 45 South Indian beverages:
+- Packaged water (500ml, 1L, 2L, 5L, 20L)
+- Fruit juices (mango, orange, mixed fruit, guava, pomegranate — 200ml, 500ml, 1L)
+- Carbonated drinks (cola, lemon, orange, ginger — 300ml, 500ml, 2L)
+- Energy drinks (250ml, 500ml)
+- Traditional beverages (buttermilk, tender coconut, rose milk, jal jeera — 200ml, 500ml)
+- Sparkling water, soda (300ml, 750ml)
 
-## Publish Settings
+**Dealers** — 80+ with real Kerala/Tamil Nadu locations:
+- Kerala: Kochi (15), Trivandrum (12), Kollam (8), Alappuzha (8), Thrissur (6), Kozhikode (6)
+- Tamil Nadu: Chennai (10), Madurai (5), Coimbatore (5), Tiruchirappalli (5)
 
-- Published: Yes, public
-- Badge hidden: Yes
-- Custom domain: Not configured (using ledge-fmcg.lovable.app)
+**Godowns**: Main Warehouse Kochi, Hub Chennai, Depot Coimbatore, Depot Trivandrum, Depot Madurai
 
-## Plan — Fixes to Apply
+**Company details**: "Asha Beverages Distributors", GSTIN 32AABCA1234F1ZP, Kerala state code 32, full bank info
 
-### 1. Database migration — Add missing UPDATE policies + Realtime auth
+### Execution
+1. Deploy edge function
+2. Invoke once (with extended timeout — up to 60s for volume)
+3. Query DB to verify row counts
+4. Audit data consistency
 
-```sql
--- invoice_lines UPDATE policy
-CREATE POLICY "Company members can update invoice lines"
-ON invoice_lines FOR UPDATE TO authenticated
-USING (EXISTS (SELECT 1 FROM invoices i WHERE i.id = invoice_lines.invoice_id AND i.company_id = get_company_id()))
-WITH CHECK (EXISTS (SELECT 1 FROM invoices i WHERE i.id = invoice_lines.invoice_id AND i.company_id = get_company_id()));
+## Files Changed
+- `supabase/functions/seed-demo-account/index.ts` — NEW, ~800-1000 lines of procedural seed logic
 
--- order_schemes UPDATE policy  
-CREATE POLICY "Company members can update order schemes"
-ON order_schemes FOR UPDATE TO authenticated
-USING (EXISTS (SELECT 1 FROM orders o WHERE o.id = order_schemes.order_id AND o.company_id = get_company_id()))
-WITH CHECK (EXISTS (SELECT 1 FROM orders o WHERE o.id = order_schemes.order_id AND o.company_id = get_company_id()));
-```
-
-### 2. Clean up index.html
-- Remove duplicate/stale meta tags (description, author, TODO comment)
-- Update twitter:site
-- Remove blank lines
-
-### 3. Mark privilege escalation finding as reviewed
-The `setup_new_company` RPC is SECURITY DEFINER and handles bootstrapping correctly. No code change needed — just acknowledge.
-
-### Files Changed
-- `index.html` — meta tag cleanup
-- 1 database migration — 2 UPDATE policies
-
-### What's NOT blocking launch
-- `as any` casts — cosmetic, types will auto-regenerate
-- Realtime authorization — currently no realtime features are actively used in production flows (it's only for logo URL refresh on settings). Low risk, can be addressed post-launch.
-- Telegram integration — deferred
-
-## Verdict
-After applying the 2 missing UPDATE policies and cleaning up index.html meta tags, the app is **good to go live**.
+## New Signups
+No changes needed — `setup_new_company` creates empty workspace only. This seed function is invoked manually once.
 
