@@ -17,7 +17,6 @@ export function createChainMock(resolvedValue: { data: any; error: any } = { dat
   chain.then = undefined; // Prevent auto-thenable — callers must call .single() or await the builder
   // Allow awaiting the chain directly (e.g. .insert(...) without .single())
   const promise = Promise.resolve(resolvedValue);
-  chain[Symbol.for("nodejs.util.inspect.custom")] = () => "ChainMock";
   // Make the chain thenable so `await supabase.from(...).insert(...)` works
   chain.then = promise.then.bind(promise);
   chain.catch = promise.catch.bind(promise);
