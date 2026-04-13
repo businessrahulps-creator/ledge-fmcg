@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft, Truck, CalendarDays } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 import { pdf } from "@react-pdf/renderer";
@@ -31,6 +31,9 @@ import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";
 import { useSearchParams } from "react-router-dom";
+import { usePagination } from "@/hooks/use-pagination";
+import { ListPagination } from "@/components/ui/list-pagination";
+import { filterByTimePeriod, type TimePeriod } from "@/components/reports/TimePeriodFilter";
 
 type DocType = Invoice["docType"];
 
@@ -77,6 +80,7 @@ export default function Billing() {
   const [saving, setSaving] = useState(false);
   const [orderSearch, setOrderSearch] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">("all");
 
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
@@ -93,6 +97,8 @@ export default function Billing() {
   const [gstRate, setGstRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<LineInput[]>([]);
+  const [vehicle, setVehicle] = useState("");
+  const [driverName, setDriverName] = useState("");
 
   const resetForm = () => {
     setDocType("gst_invoice");
@@ -105,6 +111,8 @@ export default function Billing() {
     setGstRate(18);
     setNotes("");
     setLines([]);
+    setVehicle("");
+    setDriverName("");
     setEditingInvoice(null);
     setStep(1);
     setOrderSearch("");
@@ -128,6 +136,8 @@ export default function Billing() {
     const dealer = api.dealers.list().find(d => d.id === order.distributorId);
     setBuyerName(order.distributorName);
     setBuyerAddress(dealer?.location || "");
+    setVehicle(order.vehicle || "");
+    setDriverName(order.driverName || "");
     setLines(order.lines.map(l => ({
       productName: l.productName,
       hsnCode: "",
@@ -149,6 +159,8 @@ export default function Billing() {
     setSupplyType(inv.supplyType as "intra_state" | "inter_state");
     setGstRate(inv.gstRate);
     setNotes(inv.notes || "");
+    setVehicle(inv.vehicle || "");
+    setDriverName(inv.driverName || "");
     setLines(inv.lines.map(l => ({
       productName: l.productName,
       hsnCode: l.hsnCode || "",
