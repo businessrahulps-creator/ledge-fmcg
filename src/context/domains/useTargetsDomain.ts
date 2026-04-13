@@ -57,17 +57,18 @@ export function useTargetsDomain(deps: DomainDeps) {
     setTargets(prev => prev.map(t => t.id === target.id ? target : t));
   }, []);
 
-  const deleteTarget = useCallback(async (id: string) => {
+  const deleteTarget = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
       setTargets(prev => prev.filter(t => t.id !== id));
       await enqueueMutation({ type: "delete", table: "targets", payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
 
     const { error } = await supabase.from("targets").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete target", { description: error.message }); return; }
+    if (error) { toast.error("Failed to delete target", { description: error.message }); return false; }
     setTargets(prev => prev.filter(t => t.id !== id));
+    return true;
   }, []);
 
   const addSecondarySale = useCallback(async (sale: SecondarySale) => {
@@ -100,17 +101,18 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
   }, [deps.companyId]);
 
-  const deleteSecondarySale = useCallback(async (id: string) => {
+  const deleteSecondarySale = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
       setSecondarySales(prev => prev.filter(s => s.id !== id));
       await enqueueMutation({ type: "delete", table: "secondary_sales", payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
 
     const { error } = await supabase.from("secondary_sales").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return; }
+    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return false; }
     setSecondarySales(prev => prev.filter(s => s.id !== id));
+    return true;
   }, []);
 
   const safeRefetchTargets = useCallback(async () => {
