@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Hero } from "@/components/landing/sections/Hero";
 import { TrustBar } from "@/components/landing/sections/TrustBar";
@@ -11,6 +13,20 @@ import { FinalCTA } from "@/components/landing/sections/FinalCTA";
 import { Footer } from "@/components/landing/sections/Footer";
 
 export default function Index() {
+  const { user, loading, authReady } = useAuth();
+
+  if (loading || !authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="font-body antialiased scroll-smooth">
       <Navbar />
