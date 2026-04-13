@@ -51,7 +51,7 @@ export function OrderInvoicePdf({
     <Document>
       <Page size="A4" style={s.page}>
         <PdfHeader
-          title={`Invoice ${order.orderNumber}`}
+          title={`Order Summary ${order.orderNumber}`}
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}

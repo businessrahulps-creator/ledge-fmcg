@@ -236,9 +236,6 @@ export default function Settings() {
 
   useEffect(() => { loadTeam(); }, [loadTeam]);
 
-  const openNewMember = () => {
-    // Invite-by-email not yet implemented; show placeholder
-  };
 
   const saveMember = async () => {
     if (!editMember?.name || !editMember?.email || !companyId) return;
@@ -327,11 +324,7 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground md:text-sm">
                   {teamLoading ? "Loading…" : `${team.length} team members`}
                 </p>
-                <Button size="sm" className="md:size-default" disabled>
-                  <Plus className="h-4 w-4" />
-                  Invite Member
-                  <span className="ml-1 text-[10px] font-normal opacity-60">Coming soon</span>
-                </Button>
+                <span className="text-xs text-muted-foreground">Share the signup link to invite new members</span>
               </div>
 
               <div className="glass-card overflow-hidden">
