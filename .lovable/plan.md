@@ -1,48 +1,62 @@
 
 
-# Plan: Vehicle/Driver on Invoices + Billing Pagination + Date Filter
+# Final Site-Wide QA, CTO Review & Adversarial Stress Test
 
-## Three Issues to Address
+## Fresh Audit Results
 
-### 1. Vehicle & Driver Details on Invoices
-**Current state**: The `invoices` DB table and `Invoice` TypeScript type have no `vehicle` or `driver_name` fields. The invoice form doesn't capture them. The PDF doesn't render them.
+After a complete independent review of every page, component, context, database schema, RLS policy, and data flow:
 
-**Fix**:
-- **DB migration**: Add `vehicle text NOT NULL DEFAULT ''` and `driver_name text NOT NULL DEFAULT ''` columns to `invoices` table
-- **DB migration**: Backfill demo data — update existing invoices by joining on `source_order_id` to pull `vehicle` and `driver_name` from the linked `orders` row
-- **TypeScript types**: Add `vehicle` and `driver_name` to `Invoice` interface in `data-types.ts`
-- **Billing form**: Auto-populate vehicle/driver from the selected order (read-only, same as buyer name). Show them in Step 2 under a "Transport Details" section. For GST invoices, mark them with a visual indicator that they're required
-- **Validation**: On save, if `docType === "gst_invoice"` and vehicle or driver is empty, show toast error and block
-- **PDF**: Add vehicle/driver to `InvoicePdfData` interface and render them in `GstInvoicePdf.tsx` in the invoice details section
-- **`handleCreate`/`handleEdit`**: Include vehicle/driver in the data payload sent to `api.invoices.create/update`
+### CRITICAL — None found
 
-### 2. Billing List Pagination (252 invoices = endless scroll)
-**Current state**: `filtered` array is rendered in full — no pagination. With 252 invoices in demo, this causes massive DOM and poor performance.
+All previously identified critical issues have been correctly resolved:
+- Nested Label in Billing.tsx — fixed (line 756 is a single `<Label>`)
+- Dark mode leak on landing page — fixed (colorScheme: "light")
+- Credit guard uses netOrderTotal — confirmed correct (line 246-248)
+- Signup email confirmation race — fixed (checks authData.session before calling RPC)
+- Realtime subscriptions — now use targeted safeRefetch instead of fetchAll
+- DealerDetail/SalespersonDetail 404 handling — both correctly return "not found" UI
+- Vehicle/driver on GST invoices — implemented with validation and PDF rendering
+- Billing pagination — implemented with ListPagination (15 per page)
+- Billing date filter — implemented with TimePeriodFilter
 
-**Fix**:
-- Import `usePagination` and `ListPagination` (both already exist in the codebase)
-- Paginate `filtered` with `usePagination(filtered.length, 15)`
-- Slice `filtered` to `filtered.slice(from, to)` for rendering
-- Add `<ListPagination>` below the table/cards
+### HIGH — None found
 
-### 3. Date Period Filter for Billing History
-**Current state**: Only text search and doc-type filter exist. No way to filter by date range.
+All previous high-priority items have been addressed in prior passes.
 
-**Fix**:
-- Import `TimePeriodFilter` and `filterByTimePeriod` from `src/components/reports/TimePeriodFilter.tsx`
-- Add a `timePeriod` state (default "all" — we'll add an "all" option)
-- Apply date filtering to the `filtered` memo, mapping `invoiceDate` to `date` for the filter function
-- Add a simple "All Time" + existing period options (Daily/Weekly/Monthly/Yearly) select next to the existing type filter
+### MEDIUM
 
-## Files Changed
+**M1. Distributor delete does not check for existing orders**
+`Distributors.tsx` line 95-101: `deleteDistributor(deleteId)` proceeds without checking if the dealer has orders. Deleting a dealer with existing orders leaves orphaned `distributor_id` references. The delete confirmation dialog should warn about linked orders and either block deletion or show a count.
 
-| File | Change |
-|------|--------|
-| `supabase migration` | Add `vehicle`, `driver_name` columns to `invoices`; backfill from orders |
-| `src/context/data-types.ts` | Add `vehicle`, `driver_name` to `Invoice` interface |
-| `src/pages/Billing.tsx` | Transport fields in form, validation for GST, pagination, date filter |
-| `src/components/pdf/GstInvoicePdf.tsx` | Add vehicle/driver to `InvoicePdfData` and render in PDF |
-| `src/context/domains/useBillingDomain.ts` | Map new DB columns in fetch/create/update |
+**M2. NewOrder: duplicate product selection not prevented**
+`NewOrder.tsx` line 452: The product dropdown shows all products regardless of what's already selected on other lines. Users can accidentally add the same product twice, creating confusing data.
 
-~150 lines of changes across 5 files + 1 migration.
+### LOW / POLISH
+
+**L1. NewOrder save button `bottom-28` on mobile**
+Line 672: `sticky bottom-28` positions the save button 112px from bottom. On very small phones this could overlap with content, though `pb-28` on the sidebar div (line 567) provides matching padding. This is cosmetically acceptable but not ideal on iPhone SE.
+
+**L2. Billing: `buyer_address` populated from `dealer.location` not `dealer.address`**
+Line 138: `setBuyerAddress(dealer?.location || "")` uses `location` (short city name) instead of the full `address` field. For GST invoices, the full registered address is more appropriate.
+
+---
+
+## Implementation Plan
+
+### Pass 1: Fix buyer address using dealer.address (L2)
+| File | Fix |
+|------|-----|
+| `src/pages/Billing.tsx:138` | Change `dealer?.location` to `dealer?.address \|\| dealer?.location` so full address is preferred |
+
+### Pass 2: Warn on dealer delete if orders exist (M1)
+| File | Fix |
+|------|-----|
+| `src/pages/Distributors.tsx:95-101` | Check if dealer has orders before deleting; show warning count in dialog |
+
+### Pass 3: Filter already-selected products from dropdown (M2)
+| File | Fix |
+|------|-----|
+| `src/pages/NewOrder.tsx:452` | Filter `products.map()` to exclude product IDs already selected on other lines |
+
+Total: 3 files, ~15 lines of surgical changes. Zero new features. All existing behavior preserved.
 
