@@ -17,7 +17,7 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="bg-[#F8F7F5] py-24 md:py-32">
+    <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
         <div className="overflow-hidden">
@@ -35,7 +35,7 @@ export function TrustBar() {
           {stats.map((stat, i) => (
             <AnimateIn key={stat} delay={i * 0.1}>
               <div className="text-center px-4">
-                <div className="font-heading font-extrabold text-[20px] md:text-[24px] text-[#1A1A1A] mb-1">
+                <div className="font-heading font-extrabold text-[18px] md:text-[20px] text-[#1A1A1A] mb-1">
                   {stat}
                 </div>
               </div>
@@ -45,7 +45,7 @@ export function TrustBar() {
 
         {/* Pull Quote */}
         <AnimateIn delay={0.15} className="mt-12">
-          <div className="bg-white rounded-3xl p-8 max-w-2xl mx-auto relative border border-[#E8E5E0]" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+          <div className="bg-white rounded-3xl p-10 max-w-2xl mx-auto relative border border-[#E8E5E0]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
             <span className="absolute top-4 left-6 text-6xl font-serif text-[#D4D1CC] opacity-40 leading-none select-none">
               "
             </span>

@@ -29,10 +29,10 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="bg-[#F8F7F5] py-24 md:py-32">
+    <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-20 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             From owners who stopped guessing.
           </h2>
         </AnimateIn>
@@ -41,11 +41,11 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <div key={t.name} className="h-full">
               <AnimateIn delay={i * 0.1} className="h-full">
-                <div className="bg-white rounded-3xl p-8 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+                <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
                   <span className="font-heading font-extrabold text-6xl text-[#D4D1CC] opacity-40 leading-none block mb-2">
                     "
                   </span>
-                  <p className="font-body text-base text-[#52525B] leading-[1.75] flex-1">
+                  <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
                     {t.quote}
                   </p>
                   <div className="mt-6 pt-6 border-t border-[#E8E5E0]">
