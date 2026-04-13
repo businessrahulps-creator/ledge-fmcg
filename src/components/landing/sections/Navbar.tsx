@@ -56,7 +56,7 @@ export function Navbar() {
         <div className="hidden md:block">
           <Link
             to="/signup"
-            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-2xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200"
+            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-3xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md"
           >
             Get Started Free
           </Link>

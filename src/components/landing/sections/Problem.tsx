@@ -30,10 +30,10 @@ const cards = [
 
 export function Problem() {
   return (
-    <section className="bg-[#F8F7F5] py-24 md:py-32">
+    <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-20 leading-[1.08] tracking-[-0.04em] max-w-3xl mx-auto">
+          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-16 leading-[1.08] tracking-[-0.04em] max-w-3xl mx-auto">
             Distribution is complex enough. Your software shouldn't make it worse.
           </h2>
         </AnimateIn>
@@ -41,12 +41,12 @@ export function Problem() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {cards.map((card, i) => (
             <AnimateIn key={card.title} delay={i * 0.08}>
-              <div className="bg-white rounded-3xl p-8 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+              <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
                 <card.icon size={24} strokeWidth={1.5} className="text-[#0D9488] mb-4" />
-                <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A] mb-3">
+                <h3 className="font-heading font-bold text-[18px] text-[#1A1A1A] mb-3">
                   {card.title}
                 </h3>
-                <p className="font-body text-base text-[#52525B] leading-[1.75] flex-1">
+                <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
                   {card.description}
                 </p>
               </div>

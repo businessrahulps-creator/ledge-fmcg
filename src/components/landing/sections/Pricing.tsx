@@ -88,13 +88,13 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-white py-24 md:py-32">
+    <section id="pricing" className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[26px] md:text-[38px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
             Start free. Pay when it's running your business.
           </h2>
-          <p className="font-body text-lg text-[#71717A] text-center mb-20">
+          <p className="font-body text-lg text-[#71717A] text-center mb-16">
             No setup fees. No annual lock-in. Cancel anytime. Every plan includes PWA install, offline support, and automatic updates.
           </p>
         </AnimateIn>
@@ -103,15 +103,15 @@ export function Pricing() {
           {plans.map((plan, i) => (
             <AnimateIn key={plan.name} delay={i * 0.08}>
               <div
-                className={`bg-white rounded-3xl p-8 flex flex-col h-full ${
+                className={`bg-white rounded-3xl p-10 flex flex-col h-full ${
                   plan.highlighted
                     ? "border-2 border-[#0D9488] relative"
                     : "border border-[#E8E5E0]"
                 }`}
                 style={{
                   boxShadow: plan.highlighted
-                    ? "0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(13,148,136,0.08)"
-                    : "0 1px 2px rgba(0,0,0,0.04)",
+                    ? "0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(13,148,136,0.08)"
+                    : "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)",
                 }}
               >
                 {plan.highlighted && (
@@ -132,7 +132,7 @@ export function Pricing() {
 
                 <div className="mt-3">
                   {plan.price === "Custom" ? (
-                    <span className="font-heading font-extrabold text-[36px] text-[#1A1A1A]">
+                    <span className="font-heading font-extrabold text-[32px] text-[#1A1A1A]">
                       Custom
                     </span>
                   ) : (
@@ -140,7 +140,7 @@ export function Pricing() {
                       <span className="text-[#71717A] text-base font-normal">
                         {plan.priceLabel}
                       </span>
-                      <span className="font-heading font-extrabold text-[36px] text-[#1A1A1A]">
+                      <span className="font-heading font-extrabold text-[32px] text-[#1A1A1A]">
                         {plan.price}
                       </span>
                       <span className="text-[#71717A] text-base font-normal">
@@ -166,7 +166,7 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3 rounded-2xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3 rounded-3xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.highlighted ? "shadow-md hover:shadow-lg" : "shadow-sm hover:shadow-md"} ${plan.ctaStyle}`}
                 >
                   {plan.cta}
                 </Link>

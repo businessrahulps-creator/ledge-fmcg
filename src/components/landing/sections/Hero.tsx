@@ -124,19 +124,19 @@ function DashboardMockup() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen flex items-center pt-16 px-6 bg-[#F8F7F5] py-24 md:py-32">
+    <section className="min-h-screen flex items-center pt-16 px-6 bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left - Text */}
         <div>
           <motion.h1
-            className="font-heading font-extrabold text-[34px] md:text-[60px] text-[#1A1A1A] leading-[1.08] tracking-[-0.04em]"
+            className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#1A1A1A] leading-[1.08] tracking-[-0.04em]"
             {...fadeUp(0)}
           >
             Every order your team placed today. Do you actually know about it?
           </motion.h1>
 
           <motion.p
-            className="font-body text-[17px] md:text-[20px] text-[#52525B] leading-[1.75] max-w-xl mt-6"
+            className="font-body text-[16px] md:text-[18px] text-[#52525B] leading-[1.6] max-w-xl mt-6"
             {...fadeUp(0.2)}
           >
             Ledge is a complete distribution management platform - order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
@@ -145,13 +145,13 @@ export function Hero() {
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-sm text-white bg-[#0D9488] hover:bg-[#0F766E] px-7 py-3 rounded-2xl hover:scale-[1.01] transition-all duration-200"
+              className="font-body font-semibold text-sm text-white bg-[#0D9488] hover:bg-[#0F766E] px-7 py-3 rounded-3xl hover:scale-[1.01] transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Get Started Free
             </Link>
             <a
               href="#how-it-works"
-              className="font-body font-medium text-sm text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] px-7 py-3 rounded-2xl transition-all duration-200"
+              className="font-body font-medium text-sm text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] px-7 py-3 rounded-3xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               See How It Works
             </a>
