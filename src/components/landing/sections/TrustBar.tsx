@@ -17,7 +17,7 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="bg-[#F8F7F5] py-20">
+    <section className="bg-[#F8F7F5] py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
         <div className="overflow-hidden">

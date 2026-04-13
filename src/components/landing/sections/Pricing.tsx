@@ -1,10 +1,11 @@
-import { Check } from "lucide-react";
+import { Check, Gift, TrendingUp, Layers, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimateIn } from "../AnimateIn";
 
 const plans = [
   {
     name: "Free",
+    icon: Gift,
     price: "0",
     priceLabel: "₹",
     period: "/month",
@@ -22,6 +23,7 @@ const plans = [
   },
   {
     name: "Growth",
+    icon: TrendingUp,
     price: "2,499",
     priceLabel: "₹",
     period: "/month",
@@ -43,6 +45,7 @@ const plans = [
   },
   {
     name: "Scale",
+    icon: Layers,
     price: "5,999",
     priceLabel: "₹",
     period: "/month",
@@ -64,6 +67,7 @@ const plans = [
   },
   {
     name: "Enterprise",
+    icon: Building2,
     price: "Custom",
     priceLabel: "",
     period: "",
@@ -84,13 +88,13 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-white py-20 md:py-28">
+    <section id="pricing" className="bg-white py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
           <h2 className="font-heading font-bold text-[28px] md:text-[44px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
             Start free. Pay when it's running your business.
           </h2>
-          <p className="font-body text-lg text-[#71717A] text-center mb-16">
+          <p className="font-body text-lg text-[#71717A] text-center mb-20">
             No setup fees. No annual lock-in. Cancel anytime. Every plan includes PWA install, offline support, and automatic updates.
           </p>
         </AnimateIn>
@@ -115,6 +119,8 @@ export function Pricing() {
                     Most Popular
                   </span>
                 )}
+
+                <plan.icon size={24} strokeWidth={1.5} className="text-[#0D9488] mb-3" />
 
                 <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A]">
                   {plan.name}
