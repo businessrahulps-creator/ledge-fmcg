@@ -816,7 +816,27 @@ export default function Billing() {
                 </div>
               )}
 
-              {/* Line Items */}
+              {/* Transport Details */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold">Transport Details</h3>
+                  {docType === "gst_invoice" && (
+                    <span className="text-[10px] text-destructive font-medium">Required for GST</span>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Vehicle Number</Label>
+                    <Input value={vehicle} onChange={e => setVehicle(e.target.value.toUpperCase())} placeholder="MH-01-AB-1234" className="font-mono" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Driver Name</Label>
+                    <Input value={driverName} onChange={e => setDriverName(e.target.value)} placeholder="Driver name" />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold">Line Items</h3>
