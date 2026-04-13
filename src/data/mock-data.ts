@@ -42,6 +42,7 @@ export interface Product {
   sku: string;
   unit: string;
   basePrice: number;
+  hsnCode: string;
   totalSold: number;
 }
 

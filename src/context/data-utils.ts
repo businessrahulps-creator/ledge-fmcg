@@ -54,7 +54,7 @@ export function mapSalesperson(s: any): Salesperson {
 }
 
 export function mapProduct(p: any): Product {
-  return { id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), totalSold: p.total_sold ?? 0 };
+  return { id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price), hsnCode: p.hsn_code || "", totalSold: p.total_sold ?? 0 };
 }
 
 export function mapGodown(g: any): GodownLocation {

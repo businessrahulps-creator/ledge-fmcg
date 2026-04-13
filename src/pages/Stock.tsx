@@ -133,7 +133,7 @@ export default function Stock() {
   const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
 
   const openNewProduct = () => {
-    setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, totalSold: 0 });
+    setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, hsnCode: "", totalSold: 0 });
     setIsNewProduct(true);
   };
 
@@ -689,9 +689,15 @@ export default function Stock() {
                     <Input value={editProduct.unit} onChange={(e) => setEditProduct({ ...editProduct, unit: e.target.value })} placeholder="Pack" className="h-10 rounded-lg" />
                   </div>
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Base Price (₹) *</Label>
-                  <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-10 rounded-lg" />
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">HSN Code</Label>
+                    <Input value={editProduct.hsnCode} onChange={(e) => setEditProduct({ ...editProduct, hsnCode: e.target.value })} placeholder="e.g. 1006" className="h-10 rounded-lg font-mono" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Base Price (₹) *</Label>
+                    <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-10 rounded-lg" />
+                  </div>
                 </div>
               </div>
             )}
