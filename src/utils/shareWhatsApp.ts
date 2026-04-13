@@ -125,6 +125,8 @@ export interface InvoiceShareData {
   roundOff: number;
   amountInWords: string;
   notes: string;
+  vehicle?: string;
+  driverName?: string;
 }
 
 function buildInvoiceSummary(inv: InvoiceShareData): string {
