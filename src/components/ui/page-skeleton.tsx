@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 function GlassSkeleton({ className = "" }: { className?: string }) {
-  return <Skeleton className={`bg-muted/50 ${className}`} />;
+  return <Skeleton className={`bg-muted ${className}`} />;
 }
 
 export function DashboardSkeleton() {

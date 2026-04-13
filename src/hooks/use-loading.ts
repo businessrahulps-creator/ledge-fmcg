@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export function usePageLoading(dataLoading?: boolean, delay = 300): boolean {
+export function usePageLoading(dataLoading?: boolean, delay = 0): boolean {
   const [timerDone, setTimerDone] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setTimerDone(true), delay);
