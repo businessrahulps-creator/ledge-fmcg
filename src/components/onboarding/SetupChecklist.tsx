@@ -80,7 +80,7 @@ export function SetupChecklist() {
         <div className="flex-1 min-w-0">
           {isBrandNew ? (
             <>
-              <h2 className="text-base font-bold tracking-tight text-foreground">Welcome to Ledge! 🎉</h2>
+              <h2 className="text-base font-bold tracking-tight text-foreground">Welcome to Ledge</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Let's get your workspace ready in 5 minutes.</p>
             </>
           ) : (
