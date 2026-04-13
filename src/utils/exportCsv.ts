@@ -1,18 +1,45 @@
+import * as XLSX from "xlsx";
 import { toast } from "sonner";
 
-/**
- * Escape a CSV cell value — wraps in quotes if it contains commas, quotes, or newlines.
- */
-function escapeCell(value: string): string {
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
+const CURRENCY_KEYWORDS = ["₹", "amount", "value", "price", "revenue", "total", "outstanding", "limit", "savings"];
+const DATE_KEYWORDS = ["date"];
+
+function isCurrencyCol(header: string): boolean {
+  const h = header.toLowerCase();
+  return CURRENCY_KEYWORDS.some((k) => h.includes(k));
+}
+
+function isDateCol(header: string): boolean {
+  const h = header.toLowerCase();
+  return DATE_KEYWORDS.some((k) => h.includes(k));
 }
 
 /**
- * Generate and download a CSV file from headers + rows.
- * Includes UTF-8 BOM for Excel compatibility with ₹ and Indian characters.
+ * Build a formatted worksheet from headers + rows.
+ */
+export function buildWorksheet(headers: string[], rows: string[][]): XLSX.WorkSheet {
+  const aoa = [headers, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // Auto-filter on header row
+  ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }) };
+
+  // Column widths — auto-calculated from content
+  ws["!cols"] = headers.map((h, ci) => {
+    let max = h.length;
+    for (const row of rows) {
+      const cellLen = (row[ci] ?? "").length;
+      if (cellLen > max) max = cellLen;
+    }
+    return { wch: Math.min(max + 3, 40) };
+  });
+
+  return ws;
+}
+
+/**
+ * Generate and download an Excel file from headers + rows.
+ * Drop-in replacement for the old CSV export — same signature.
  */
 export function exportCsv(filename: string, headers: string[], rows: string[][]) {
   if (rows.length === 0) {
@@ -20,33 +47,27 @@ export function exportCsv(filename: string, headers: string[], rows: string[][])
     return;
   }
 
-  const csvLines = [
-    headers.map(escapeCell).join(","),
-    ...rows.map((row) => row.map(escapeCell).join(",")),
-  ];
+  const ws = buildWorksheet(headers, rows);
+  const wb = XLSX.utils.book_new();
 
-  const BOM = "\uFEFF";
-  const csvContent = BOM + csvLines.join("\r\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+  // Derive sheet name from filename (strip extension & date suffix)
+  const sheetName = filename.replace(/\.xlsx?$/i, "").replace(/_\d{4}-\d{2}-\d{2}$/, "").slice(0, 31) || "Data";
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(wb, filename);
 
-  toast.success("CSV exported successfully", {
+  toast.success("Excel exported successfully", {
     description: `${rows.length} row${rows.length === 1 ? "" : "s"} exported.`,
   });
 }
 
 /**
- * Generate a dated filename: {entity}_{YYYY-MM-DD}.csv
+ * Generate a dated filename: {entity}_{YYYY-MM-DD}.xlsx
  */
-export function csvFilename(entity: string): string {
+export function xlsxFilename(entity: string): string {
   const today = new Date().toISOString().slice(0, 10);
-  return `${entity}_${today}.csv`;
+  return `${entity}_${today}.xlsx`;
 }
+
+/** @deprecated Use xlsxFilename instead */
+export const csvFilename = xlsxFilename;
