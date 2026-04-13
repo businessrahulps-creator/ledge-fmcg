@@ -197,6 +197,7 @@ export function makeOfflineCrud<T extends { id: string }>(
   toDbRow: (item: T) => Record<string, any>,
   entityLogType?: string,
   getLabel?: (item: T) => string,
+  options?: { allowOfflineDelete?: boolean },
 ) {
   const { companyId, persistEntityToCache, log } = deps;
 
