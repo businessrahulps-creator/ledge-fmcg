@@ -1,24 +1,20 @@
 
 
-# Fix: Order Date Overflowing on Mobile
+# Fix: Activity Link in Mobile Nav Goes to 404
 
 ## Problem
-The "Order Details" section uses `sm:grid-cols-3` which creates three columns starting at 640px. On phones narrower than that it's single column, but the date input still overflows because the native date picker renders a wide formatted date (e.g., "13 Apr 2026") that doesn't fit well in the available space.
+On mobile, the "More" sheet lists "Activity" as a `<Link to="/activity">`, but there is no `/activity` route — the Activity Log is a Sheet/drawer component, not a page. On desktop, the sidebar correctly opens the `<ActivityLog>` sheet via `onClick`. On mobile, tapping it navigates to a nonexistent route, showing 404.
 
 ## Fix
-In `src/pages/NewOrder.tsx` line 373:
-- Add `text-sm` and `w-full` to the date Input to ensure it fits within its container
-- Change the grid from `sm:grid-cols-3` to `md:grid-cols-3` so on mobile the three fields (Date, Dealer, Sales Person) stack vertically instead of cramming into three narrow columns
+In `src/components/layout/AppLayout.tsx`:
 
-### Changes
-**`src/pages/NewOrder.tsx`** (line 370):
-```
-// Before
-<div className="grid gap-3 sm:grid-cols-3 md:gap-4">
+1. Import the `ActivityLog` component
+2. Add `activityOpen` state
+3. In the `moreGroups` rendering (line ~288), intercept the Activity item: instead of rendering a `<Link>`, render a `<button>` that opens the ActivityLog sheet and closes the More sheet
+4. Render the `<ActivityLog>` sheet alongside the More sheet
 
-// After
-<div className="grid gap-3 md:grid-cols-3 md:gap-4">
-```
+This keeps the Activity item visually identical in the grid but opens the sheet drawer instead of navigating.
 
-This ensures all three fields stack on mobile and tablet-portrait, only going side-by-side on medium screens (768px+) where there's enough room.
+## Files Changed
+- `src/components/layout/AppLayout.tsx` — special-case the Activity item to open the sheet instead of navigating to `/activity`
 
