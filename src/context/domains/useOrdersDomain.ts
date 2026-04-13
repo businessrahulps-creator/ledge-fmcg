@@ -20,9 +20,16 @@ export function useOrdersDomain(deps: OrdersDeps) {
   const ordersRef = useRef(orders);
   ordersRef.current = orders;
 
+  const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const safeRefetch = useCallback(async () => {
     if (!deps.companyId) return;
-    try {
+    // Debounce rapid calls (e.g. realtime INSERT + UPDATE in quick succession)
+    if (refetchTimer.current) clearTimeout(refetchTimer.current);
+    return new Promise<void>((resolve) => {
+      refetchTimer.current = setTimeout(async () => {
+        refetchTimer.current = null;
+        try {
       const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999);
       if (!ordersData) return;
       const orderIds = ordersData.map(o => o.id);
@@ -86,6 +93,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
         p_dispatch_date: order.dispatchDate || null, p_vehicle: sanitizeInput(order.vehicle),
         p_driver_name: sanitizeInput(order.driverName), p_delivery_status: order.deliveryStatus,
         p_dispatch_remarks: sanitizeInput(order.dispatchRemarks), p_godown_id: order.godownId || null,
+        p_scheme_savings: order.schemeSavings || 0,
       });
       if (rpcError) throw rpcError;
       const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
@@ -104,9 +112,6 @@ export function useOrdersDomain(deps: OrdersDeps) {
         if (linesError) throw linesError;
       }
 
-      if (order.schemeSavings > 0) {
-        await supabase.from("orders").update({ scheme_savings: order.schemeSavings } as any).eq("id", inserted.id);
-      }
       if (order.appliedSchemes && order.appliedSchemes.length > 0) {
         await supabase.from("order_schemes").insert(
           order.appliedSchemes.map(s => ({
