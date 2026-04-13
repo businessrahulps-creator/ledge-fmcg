@@ -157,10 +157,10 @@ export default function Schemes() {
     toast.success(s.isActive ? "Scheme deactivated" : "Scheme activated");
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteId) {
-      api.schemes.remove(deleteId);
-      toast.success("Scheme deleted");
+      const ok = await api.schemes.remove(deleteId);
+      if (ok) toast.success("Scheme deleted");
       setDeleteId(null);
     }
   };

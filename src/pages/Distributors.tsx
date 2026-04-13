@@ -91,11 +91,11 @@ export default function Distributors() {
     setEditItem(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
     const d = items.find((i) => i.id === deleteId);
-    deleteDistributor(deleteId);
-    toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
+    const ok = await deleteDistributor(deleteId);
+    if (ok) toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
     setDeleteId(null);
   };
 

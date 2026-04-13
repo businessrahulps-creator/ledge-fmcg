@@ -185,6 +185,31 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   return results;
 }
 
+// --- FK error mapping ---
+
+const FK_ERROR_MAP: Record<string, { title: string; description: string }> = {
+  orders_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has orders linked to it. Remove or reassign those orders first." },
+  orders_salesperson_id_fkey: { title: "Cannot remove team member", description: "This salesperson has orders linked to them. Remove or reassign those orders first." },
+  order_lines_product_id_fkey: { title: "Cannot remove product", description: "This product is used in existing orders. Remove those orders first." },
+  claims_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has claims linked to it. Resolve those claims first." },
+  claims_order_id_fkey: { title: "Cannot remove order", description: "This order has claims linked to it. Resolve those claims first." },
+  claim_lines_product_id_fkey: { title: "Cannot remove product", description: "This product is referenced in existing claims." },
+  stock_deductions_product_id_fkey: { title: "Cannot remove product", description: "This product has stock deduction history." },
+  stock_deductions_godown_id_fkey: { title: "Cannot remove warehouse", description: "This warehouse has stock deduction history." },
+  secondary_sales_distributor_id_fkey: { title: "Cannot remove dealer", description: "This dealer has secondary sales records." },
+  secondary_sales_product_id_fkey: { title: "Cannot remove product", description: "This product has secondary sales records." },
+};
+
+function mapFkError(message: string, entityType: string): { title: string; description: string } {
+  for (const [key, val] of Object.entries(FK_ERROR_MAP)) {
+    if (message.includes(key)) return val;
+  }
+  if (message.includes("violates foreign key constraint")) {
+    return { title: `Cannot delete ${entityType}`, description: "Other records depend on this item. Remove them first." };
+  }
+  return { title: `Failed to delete ${entityType}`, description: message };
+}
+
 // --- Generic offline-aware CRUD factory ---
 
 export function makeOfflineCrud<T extends { id: string }>(
@@ -243,11 +268,11 @@ export function makeOfflineCrud<T extends { id: string }>(
     if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
       if (!allowOfflineDelete) {
         toast.error(`Cannot delete ${entityLogType || table} offline`, { description: "Please reconnect to delete." });
-        return;
+        return false;
       }
       setter(prev => {
         const updated = prev.filter(x => x.id !== id);
@@ -256,12 +281,17 @@ export function makeOfflineCrud<T extends { id: string }>(
       });
       await enqueueMutation({ type: "delete", table, payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     const { error } = await supabase.from(table as any).delete().eq("id", id);
-    if (error) { toast.error(`Failed to delete ${table}`, { description: error.message }); return; }
+    if (error) {
+      const friendly = mapFkError(error.message, entityLogType || table);
+      toast.error(friendly.title, { description: friendly.description });
+      return false;
+    }
     setter(prev => prev.filter(x => x.id !== id));
     if (entityLogType) log(entityLogType, id, "deleted", `Deleted ${entityLogType}`);
+    return true;
   };
 
   return { add, update, remove };

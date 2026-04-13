@@ -74,7 +74,7 @@ export function useStockDomain(deps: DomainDeps) {
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
   }, [deps.persistEntityToCache]);
 
-  const deleteStockItem = useCallback(async (id: string) => {
+  const deleteStockItem = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {
       setStockItems(prev => {
         const updated = prev.filter(x => x.id !== id);
@@ -83,11 +83,12 @@ export function useStockDomain(deps: DomainDeps) {
       });
       await enqueueMutation({ type: "delete", table: "stock_items", payload: { id } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     const { error } = await supabase.from("stock_items").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete stock item", { description: error.message }); return; }
+    if (error) { toast.error("Failed to delete stock item", { description: error.message }); return false; }
     setStockItems(prev => prev.filter(x => x.id !== id));
+    return true;
   }, [deps.persistEntityToCache]);
 
   const safeRefetchGodowns = useCallback(async () => {
