@@ -180,8 +180,8 @@ export default function Dashboard() {
           <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
             Updated {timeAgo}
             <span className="text-muted-foreground/30">·</span>
-            <button onClick={() => { if (!loading) api.refreshAll(); }} className={cn("underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors", loading && "opacity-50 pointer-events-none")}>
-              {loading ? "Refreshing…" : "Refresh"}
+            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors", isLoading && "opacity-50 pointer-events-none")}>
+              {isLoading ? "Refreshing…" : "Refresh"}
             </button>
           </p>
 
