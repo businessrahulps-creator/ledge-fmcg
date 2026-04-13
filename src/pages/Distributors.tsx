@@ -6,7 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, ShoppingCart, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Search, MapPin, Plus, Pencil, Trash2, Download } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -158,51 +158,44 @@ export default function Distributors() {
             <div
               key={d.id}
               onClick={() => navigate(`/distributors/${d.id}`)}
-              className="cursor-pointer glass-card card-hover p-4 md:p-6"
+              className="cursor-pointer glass-card card-hover p-5 md:p-6"
             >
               <div className="flex items-start justify-between">
-                <div>
+                <div className="min-w-0 flex-1">
                   <h3 className="text-sm font-semibold md:text-base">{d.name}</h3>
                   {d.location && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground md:mt-2 md:text-sm">
-                      <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                      {d.location}
-                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground md:mt-2">{d.location}</p>
                   )}
                   {d.contact && (
-                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground md:text-sm">
-                      <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                      {d.contact}
-                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{d.contact}</p>
                   )}
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-10 w-10 active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
-                    <Pencil className="h-3.5 w-3.5" />
+                <div className="flex gap-0.5 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
+                    <Pencil className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
-                    <Trash2 className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
-              <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3 md:mt-4 md:pt-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm">
-                    <ShoppingCart className="h-3 w-3 text-muted-foreground md:h-3.5 md:w-3.5" strokeWidth={1.5} />
-                    <span>{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
-                  </div>
-                  <span className="text-xs font-semibold md:text-sm">{formatCurrency(d.totalValue)}</span>
+              <div className="mt-4 flex flex-col gap-2 border-t border-border/30 pt-4">
+                <div className="flex items-center justify-between text-xs md:text-sm">
+                  <span className="text-muted-foreground">{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
+                  <span className="font-semibold">{formatCurrency(d.totalValue)}</span>
                 </div>
                 {(() => {
                   const limit = d.creditLimit || 0;
                   const outstanding = d.outstandingAmount || 0;
                   if (limit === 0 && outstanding === 0) return null;
                   const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-                  const color = limit === 0 ? "text-muted-foreground" : pct >= 100 ? "text-red-600 dark:text-red-400" : pct >= 70 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400";
-                  const bgColor = limit === 0 ? "bg-muted/50" : pct >= 100 ? "bg-red-500/10" : pct >= 70 ? "bg-amber-500/10" : "bg-emerald-500/10";
+                  const dotColor = limit === 0 ? "bg-muted-foreground" : pct >= 100 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-emerald-500";
                   return (
-                    <div className={`flex items-center justify-between rounded-md px-2 py-1 text-[11px] font-medium ${bgColor} ${color}`}>
-                      <span>Outstanding</span>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+                        Outstanding
+                      </span>
                       <span>{formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}</span>
                     </div>
                   );

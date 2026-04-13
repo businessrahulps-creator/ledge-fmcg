@@ -43,15 +43,15 @@ import {
 import { toast } from "sonner";
 
 function HealthBadge({ health }: { health: string }) {
-  const styles: Record<string, string> = {
-    healthy: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
-    low: "bg-amber-50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
-    critical: "bg-red-50 text-red-500 dark:bg-red-500/20 dark:text-red-400",
+  const dotColor: Record<string, string> = {
+    healthy: "bg-emerald-500",
+    low: "bg-amber-500",
+    critical: "bg-red-500",
   };
   const labels: Record<string, string> = { healthy: "Healthy", low: "Low", critical: "Critical" };
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${styles[health] || ""}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${health === "healthy" ? "bg-emerald-500" : health === "low" ? "bg-amber-500" : "bg-red-500"}`} />
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+      <span className={`h-1.5 w-1.5 rounded-full ${dotColor[health] || "bg-muted-foreground"}`} />
       {labels[health] || health}
     </span>
   );
@@ -365,7 +365,7 @@ export default function Stock() {
                                 <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setDeleteProductId(p.id)}>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground" onClick={() => setDeleteProductId(p.id)}>
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                               </div>
@@ -449,39 +449,33 @@ export default function Stock() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
                       onClick={() => setSelectedWarehouse(isSelected ? null : loc.id)}
-                      className={`cursor-pointer glass-card card-hover p-4 md:p-5 transition-all ${isSelected ? "ring-2 ring-primary" : ""}`}
+                      className={`cursor-pointer glass-card card-hover p-5 md:p-6 transition-all ${isSelected ? "ring-2 ring-primary" : ""}`}
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted">
-                            <Warehouse className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold md:text-base">{loc.name}</h3>
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground md:text-xs">
-                              <MapPin className="h-3 w-3" strokeWidth={1.5} />
-                              {loc.address.split(",").slice(-2).join(",").trim()}
-                            </div>
-                          </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-semibold md:text-base">{loc.name}</h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {loc.address.split(",").slice(-2).join(",").trim()}
+                          </p>
                         </div>
                         {!isAccountant && (
-                          <div className="flex gap-0.5">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
-                              <Pencil className="h-3.5 w-3.5" />
+                          <div className="flex gap-0.5 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
+                              <Pencil className="h-3 w-3" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
-                              <Trash2 className="h-3.5 w-3.5" />
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={(e) => { e.stopPropagation(); setDeleteWarehouseLoc(loc); }}>
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         )}
                       </div>
-                      <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs md:text-sm">
+                      <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4 text-xs md:text-sm">
                         <span className="text-muted-foreground">{stats.totalSKUs} products</span>
                         <span className="font-semibold">{formatCurrency(stats.totalValue)}</span>
                       </div>
                       {stats.lowStockCount > 0 && (
-                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-amber-600 md:text-xs">
-                          <AlertTriangle className="h-3 w-3" />
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground md:text-xs">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                           {stats.lowStockCount} low stock item{stats.lowStockCount !== 1 ? "s" : ""}
                         </div>
                       )}
