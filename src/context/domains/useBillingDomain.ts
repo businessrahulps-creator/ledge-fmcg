@@ -74,6 +74,8 @@ export function useBillingDomain(deps: BillingDeps) {
     const dbUpdates: Record<string, any> = {};
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
+    if (updates.vehicle !== undefined) dbUpdates.vehicle = updates.vehicle;
+    if (updates.driverName !== undefined) dbUpdates.driver_name = updates.driverName;
 
     if (!navigator.onLine) {
       setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
