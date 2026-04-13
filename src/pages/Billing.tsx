@@ -367,8 +367,14 @@ export default function Billing() {
       const q = search.toLowerCase();
       list = list.filter(i => i.invoiceNumber.toLowerCase().includes(q) || i.buyerName.toLowerCase().includes(q));
     }
+    if (timePeriod !== "all") {
+      list = filterByTimePeriod(list.map(i => ({ ...i, date: i.invoiceDate })), timePeriod).map(({ date, ...rest }) => rest as typeof list[number]);
+    }
     return list;
-  }, [invoices, filterType, search]);
+  }, [invoices, filterType, search, timePeriod]);
+
+  const { page, totalPages, from, to, setPage } = usePagination(filtered.length, 15);
+  const paginatedList = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
   // Get linked documents for each order
   const getOrderDocuments = useCallback((orderId: string) => {
