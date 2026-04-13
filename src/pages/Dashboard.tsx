@@ -324,7 +324,7 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
-              <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
+              <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all ›</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topDistributors.length === 0 ? (
@@ -352,7 +352,7 @@ className="h-full rounded-full bg-primary/40 dark:bg-primary/40"
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold md:text-base">Top Products</h2>
-              <Link to="/stock" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
+              <Link to="/stock" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all ›</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
               {topProducts.length === 0 ? (
@@ -381,7 +381,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
         <section>
            <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold md:text-base">Recent Orders</h2>
-            <Link to="/orders" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all →</Link>
+            <Link to="/orders" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all ›</Link>
           </div>
 
           {recentOrders.length === 0 ? (
@@ -467,7 +467,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
       {/* Mobile FAB — quick order creation */}
       <Link
         to="/orders/new"
-        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform md:hidden"
+        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,0.15),0_6px_20px_rgba(0,0,0,0.1)] active:scale-95 transition-transform md:hidden"
         aria-label="New Order"
       >
         <Plus className="h-6 w-6" />

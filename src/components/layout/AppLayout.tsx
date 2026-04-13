@@ -216,11 +216,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  style={{ willChange: "opacity" }}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ type: "spring", damping: 26, stiffness: 200 }}
+                  style={{ willChange: "opacity, transform" }}
                 >
                   {children}
                 </motion.div>
@@ -241,7 +241,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     key={item.title}
                     to={item.url}
                     aria-current={isActive ? "page" : undefined}
-                    className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-90"
+className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-[0.97]"
                   >
                     {isActive && (
                       <motion.div
@@ -265,7 +265,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               {/* More menu — Sheet drawer */}
               <button
                 onClick={() => setMoreOpen(true)}
-                className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-90"
+className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-[0.97]"
                 aria-label="More navigation options"
               >
                 {isMoreActive && (
