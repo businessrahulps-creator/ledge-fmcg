@@ -16,11 +16,11 @@ export default function TermsOfService() {
         </div>
       </section>
       <main className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <p className="text-graphite leading-relaxed mb-8">
+        <p className="text-[#52525B] leading-relaxed mb-8">
           These Terms of Service ("Terms") govern your use of the Ledge platform at getledge.in, operated by Ledge (India) ("Ledge", "we", "our", or "us"). By creating an account or using the platform, you agree to these Terms.
         </p>
 
-        <hr className="border-fog my-10" />
+        <hr className="border-[#E8E5E0] my-10" />
 
         <Section title="Who Can Use Ledge">
           <p>

@@ -16,11 +16,11 @@ export default function RefundPolicy() {
         </div>
       </section>
       <main className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <p className="text-graphite leading-relaxed mb-8">
+        <p className="text-[#52525B] leading-relaxed mb-8">
           This Refund Policy applies to all paid subscriptions on the Ledge platform at getledge.in, operated by Ledge (India) ("Ledge", "we", "our", or "us").
         </p>
 
-        <hr className="border-fog my-10" />
+        <hr className="border-[#E8E5E0] my-10" />
 
         <Section title="Free Trial">
           <p>
