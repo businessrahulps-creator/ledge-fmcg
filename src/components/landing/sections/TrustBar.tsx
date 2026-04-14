@@ -11,7 +11,7 @@ const companies = [
 
 const stats = [
   "₹0 setup cost",
-  "Access Levels",
+  "Access Control",
   "Works offline",
 ];
 
