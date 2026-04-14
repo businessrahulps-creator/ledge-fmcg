@@ -1,5 +1,7 @@
 import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
+import { motion } from "framer-motion";
 import { AnimateIn } from "../AnimateIn";
+import { spring } from "@/lib/motion";
 import { BrowserFrame, PhoneFrame, GradientStage } from "../DeviceFrames";
 import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
 
@@ -73,7 +75,7 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             Three things happen when your team uses Ledge. All of them in under sixty seconds.
           </h2>
@@ -97,9 +99,15 @@ export function HowItWorks() {
                       {step.description}
                     </p>
                   </div>
-                  <div className={step.reversed ? "lg:order-1" : ""}>
+                  <motion.div
+                    className={step.reversed ? "lg:order-1" : ""}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={spring.gentle}
+                  >
                     <MockupComponent />
-                  </div>
+                  </motion.div>
                 </div>
               </AnimateIn>
             );

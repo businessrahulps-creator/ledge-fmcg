@@ -1,5 +1,6 @@
 import { Smartphone, WifiOff, ShieldCheck, Receipt } from "lucide-react";
-import { AnimateIn } from "../AnimateIn";
+import { motion } from "framer-motion";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
   {
@@ -32,16 +33,21 @@ export function WhyOrdra() {
   return (
     <section className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             This isn't another ERP your field team will quit in three weeks.
           </h2>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {blocks.map((block, i) => (
-            <AnimateIn key={block.title} delay={i * 0.1}>
-              <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
+            <StaggerItem key={block.title}>
+              <motion.div
+                className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-shadow duration-300"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
+                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              >
                 <div className="flex items-center gap-3 mb-5">
                   <span className="bg-[#27272A] text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shrink-0">
                     {String(i + 1).padStart(2, "0")}
@@ -54,10 +60,10 @@ export function WhyOrdra() {
                 <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
                   {block.content}
                 </p>
-              </div>
-            </AnimateIn>
+              </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
-import { AnimateIn } from "../AnimateIn";
+import { motion } from "framer-motion";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const testimonials = [
   {
@@ -31,34 +32,37 @@ export function Testimonials() {
   return (
     <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             From owners who stopped guessing.
           </h2>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {testimonials.map((t, i) => (
-            <div key={t.name} className="h-full">
-              <AnimateIn delay={i * 0.1} className="h-full">
-                <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
-                  <span className="font-heading font-extrabold text-6xl text-[#D4D1CC] opacity-40 leading-none block mb-2">
-                    "
-                  </span>
-                  <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
-                    {t.quote}
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {testimonials.map((t) => (
+            <StaggerItem key={t.name} variant="scaleUp">
+              <motion.div
+                className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-shadow duration-300"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
+                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              >
+                <span className="font-heading font-extrabold text-6xl text-[#D4D1CC] opacity-40 leading-none block mb-2">
+                  "
+                </span>
+                <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
+                  {t.quote}
+                </p>
+                <div className="mt-6 pt-6 border-t border-[#E8E5E0]">
+                  <p className="font-body font-bold text-base text-[#1A1A1A]">
+                    {t.name}
                   </p>
-                  <div className="mt-6 pt-6 border-t border-[#E8E5E0]">
-                    <p className="font-body font-bold text-base text-[#1A1A1A]">
-                      {t.name}
-                    </p>
-                    <p className="font-body text-sm text-[#71717A]">{t.role}</p>
-                  </div>
+                  <p className="font-body text-sm text-[#71717A]">{t.role}</p>
                 </div>
-              </AnimateIn>
-            </div>
+              </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

@@ -1,5 +1,7 @@
 import { MessageCircle, Table, Compass, Laptop } from "lucide-react";
-import { AnimateIn } from "../AnimateIn";
+import { motion } from "framer-motion";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { hoverLift } from "@/lib/motion";
 
 const cards = [
   {
@@ -32,16 +34,21 @@ export function Problem() {
   return (
     <section className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 leading-[1.08] tracking-[-0.04em] max-w-3xl mx-auto">
             Distribution is complex enough. Your software shouldn't make it worse.
           </h2>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {cards.map((card, i) => (
-            <AnimateIn key={card.title} delay={i * 0.08}>
-              <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {cards.map((card) => (
+            <StaggerItem key={card.title}>
+              <motion.div
+                {...hoverLift}
+                className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-shadow duration-300"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
+                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+              >
                 <div className="w-14 h-14 rounded-full bg-[#F4F4F5] flex items-center justify-center mb-5">
                   <card.icon size={28} strokeWidth={1.5} className="text-[#27272A]" />
                 </div>
@@ -51,10 +58,10 @@ export function Problem() {
                 <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
                   {card.description}
                 </p>
-              </div>
-            </AnimateIn>
+              </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

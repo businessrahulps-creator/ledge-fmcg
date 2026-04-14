@@ -1,6 +1,7 @@
 import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { spring, staggerContainer, fadeUp } from "@/lib/motion";
 import awsLogo from "@/assets/aws-logo.png";
 
 const linkMap: Record<string, string> = {
@@ -27,9 +28,15 @@ export function Footer() {
   return (
     <footer className="bg-[#F8F7F5] py-16 border-t border-[#E8E5E0]">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          variants={staggerContainer(0.06)}
+        >
           {columns.map((col) => (
-            <div key={col.title}>
+            <motion.div key={col.title} variants={fadeUp} transition={spring.default}>
               <h4 className="font-body font-semibold text-[14px] text-[#1A1A1A] uppercase tracking-wider mb-4">
                 {col.title}
               </h4>
@@ -58,15 +65,13 @@ export function Footer() {
                   );
                 })}
               </ul>
-            </div>
+            </motion.div>
           ))}
 
           {/* Status & Infrastructure column */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.1 }}
+            variants={fadeUp}
+            transition={spring.default}
             className="flex flex-col gap-4"
           >
             <h4 className="font-body font-semibold text-[14px] text-[#1A1A1A] uppercase tracking-wider mb-0">
@@ -101,7 +106,7 @@ export function Footer() {
               </span>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
 
         <div className="mt-12 pt-8 border-t border-[#E8E5E0] flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
