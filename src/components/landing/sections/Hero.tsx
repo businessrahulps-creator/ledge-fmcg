@@ -3,6 +3,12 @@ import { motion } from "framer-motion";
 import { BrowserFrame, GradientStage } from "../DeviceFrames";
 import { DashboardSvg } from "../illustrations/SvgIllustrations";
 
+const fadeUp = (delay: number) => ({
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+  transition: { type: "spring" as const, damping: 26, stiffness: 200, delay },
+});
+
 function DashboardMockup() {
   return (
     <BrowserFrame url="app.ledge.in/dashboard">
