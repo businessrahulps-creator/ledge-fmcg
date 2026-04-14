@@ -19,7 +19,7 @@ function DashboardMockup() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen flex items-center pt-16 px-6 bg-[#F8F7F5] py-28 md:py-36">
+    <section className="min-h-screen flex items-center px-6 bg-[#F8F7F5] pt-32 pb-28 md:py-36">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left - Text */}
         <div>
