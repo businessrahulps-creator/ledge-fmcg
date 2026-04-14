@@ -1,21 +1,16 @@
 
 
-# Upgrade Mobile Nav Icons to Match Landing Page Quality
+# Fix "All systems operational" to single line on mobile
 
 ## Problem
-The mobile navigation uses generic, AI-typical Lucide icons (`Home`, `Sparkles`, `RefreshCw`, `CreditCard`) that feel basic compared to the purposeful, specific icons used throughout the landing page sections.
+The status badge text "All systems operational" wraps to two lines on mobile due to the container being too narrow.
 
-## Icon Replacements
+## Fix
+In `src/components/landing/sections/Footer.tsx` (line 91), add `whitespace-nowrap` to the text span so it stays on one line:
 
-| Link | Current Icon | New Icon | Why |
-|------|-------------|----------|-----|
-| Home | `Home` | `LayoutDashboard` | Matches the dashboard-first identity used in Features section |
-| Features | `Sparkles` | `Layers` | Already used in Features section for the product itself |
-| How It Works | `RefreshCw` | `Route` | Matches the lifecycle/journey metaphor used in Features |
-| Pricing | `CreditCard` | `IndianRupee` | Matches the billing icon used in Features section — more relevant for Indian FMCG |
+```
+<span className="font-body text-[13px] font-medium text-[#3F3F46] relative whitespace-nowrap">
+```
 
-These are the exact same icons already used on the landing page's Features section, so the nav will feel cohesive rather than disconnected.
-
-## File changed
-**`src/components/landing/sections/Navbar.tsx`** — swap the 4 icon imports and update the `links` array. Also reduce `strokeWidth` to `1.5` for a thinner, more refined look.
+Single file, single line change.
 
