@@ -1,15 +1,15 @@
 import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 import { BrowserFrame, PhoneFrame, GradientStage } from "../DeviceFrames";
-import orderShot from "@/assets/order-shot.webp";
-import dashboardShot from "@/assets/dashboard-shot.webp";
-import stockShot from "@/assets/stock-shot.webp";
+import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
 
 function OrderMockup() {
   return (
     <GradientStage variant="lavender">
       <PhoneFrame>
-        <img src={orderShot} alt="New order creation form" className="w-full block" loading="lazy" />
+        <div className="p-3 bg-white">
+          <OrderFormSvg />
+        </div>
       </PhoneFrame>
     </GradientStage>
   );
@@ -19,7 +19,9 @@ function DashboardMiniMockup() {
   return (
     <GradientStage variant="indigo">
       <BrowserFrame url="app.ledge.in/dashboard">
-        <img src={dashboardShot} alt="Ledge dashboard with KPIs and analytics" className="w-full block" loading="lazy" />
+        <div className="p-4 bg-white">
+          <DashboardMiniSvg />
+        </div>
       </BrowserFrame>
     </GradientStage>
   );
@@ -29,7 +31,9 @@ function StockMockup() {
   return (
     <GradientStage variant="emerald">
       <BrowserFrame url="app.ledge.in/stock">
-        <img src={stockShot} alt="Stock inventory with product details" className="w-full block" loading="lazy" />
+        <div className="p-4 bg-white">
+          <InvoiceStockSvg />
+        </div>
       </BrowserFrame>
     </GradientStage>
   );
