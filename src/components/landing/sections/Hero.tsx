@@ -21,7 +21,7 @@ function DashboardMockup() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen flex items-center px-6 bg-[#F8F7F5] pt-32 pb-28 md:py-36">
+    <section className="min-h-screen flex items-center px-6 bg-[#F8F7F5] pt-32 pb-28 md:py-36 overflow-hidden">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left - Text */}
         <div>
@@ -70,17 +70,20 @@ export function Hero() {
         </div>
 
         {/* Right - Dashboard Mockup */}
-        <motion.div
-          initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.2 }}
+        <div
           className="w-full max-w-2xl mx-auto"
-          style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
+          style={{ perspective: "1200px" }}
         >
-          <GradientStage variant="indigo">
-            <DashboardMockup />
-          </GradientStage>
-        </motion.div>
+          <motion.div
+            initial={{ x: 40, opacity: 0, rotateY: 0, rotateX: 0 }}
+            animate={{ x: 0, opacity: 1, rotateY: -4, rotateX: 2 }}
+            transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.2 }}
+          >
+            <GradientStage variant="indigo">
+              <DashboardMockup />
+            </GradientStage>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

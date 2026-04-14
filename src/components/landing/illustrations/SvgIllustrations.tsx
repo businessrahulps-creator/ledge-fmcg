@@ -61,14 +61,14 @@ export function DashboardSvg() {
   ];
 
   const bars = [
-    { w: 280, label: "Mon" },
-    { w: 200, label: "Tue" },
-    { w: 340, label: "Wed" },
-    { w: 160, label: "Thu" },
-    { w: 240, label: "Fri" },
-    { w: 300, label: "Sat" },
-    { w: 120, label: "Sun" },
-    { w: 260, label: "Today" },
+    { w: 240, label: "Mon" },
+    { w: 170, label: "Tue" },
+    { w: 300, label: "Wed" },
+    { w: 140, label: "Thu" },
+    { w: 210, label: "Fri" },
+    { w: 260, label: "Sat" },
+    { w: 100, label: "Sun" },
+    { w: 220, label: "Today" },
   ];
 
   const orders = [
