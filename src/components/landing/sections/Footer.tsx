@@ -95,7 +95,7 @@ export function Footer() {
 
             {/* AWS infrastructure line */}
             <div className="flex items-center gap-1.5">
-              <AwsLogo />
+              <img src={awsLogo} alt="AWS" className="h-3 w-auto grayscale opacity-50" />
               <span className="font-body text-[12px] text-[#A1A1AA]">
                 Hosted on AWS · Asia Pacific (Mumbai)
               </span>
