@@ -1,21 +1,46 @@
 
 
-# Fix AWS Logo in Footer
+# Premium Mobile Navigation Redesign
 
-## Problem
-The inline SVG paths for the AWS logo are malformed — wrong viewBox, bad transforms, and incomplete path data causing a distorted rendering.
+## What changes
 
-## Solution
-Replace the broken inline SVG with the official AWS logo image (user-provided), compressed and saved to `src/assets/`. Render it as an `<img>` tag at the correct small size (monochrome via CSS grayscale filter to match the muted footer aesthetic).
+Redesign the mobile Sheet menu in `Navbar.tsx` to match the Perplexity-style left-side drawer: full-height, clean icon-based navigation links, spacious layout, and two equal-width CTA buttons pinned at the bottom.
 
-## Steps
+## Design
 
-1. **Compress and copy** the uploaded AWS logo (`df69333c05cd1c97716a8064c3ee21e0.png`) to `src/assets/aws-logo.png` — resize to ~80px wide for the small footer usage
-2. **`src/components/landing/sections/Footer.tsx`** — Replace the `AwsLogo` SVG component with an `<img>` import:
-   - `import awsLogo from "@/assets/aws-logo.png"`
-   - Render as `<img src={awsLogo} alt="AWS" className="h-3 w-auto grayscale opacity-50" />` inline next to the text
-   - Remove the old `AwsLogo` function entirely
+```text
+┌─────────────────────────────┐
+│  Menu                    ✕  │
+│                             │
+│  🏠  Home                   │
+│  ⚡  Features               │
+│  🔄  How It Works           │
+│  💰  Pricing                │
+│                             │
+│                             │
+│         (spacer)            │
+│                             │
+│  ┌─────────────────────┐    │
+│  │    Sign Up           │    │  ← dark bg, white text
+│  └─────────────────────┘    │
+│  ┌─────────────────────┐    │
+│  │    Log in            │    │  ← light bg, dark text, same size
+│  └─────────────────────┘    │
+└─────────────────────────────┘
+```
 
-## What does NOT change
-- Status badge, shimmer animation, footer layout, links, copyright
+## Changes to `src/components/landing/sections/Navbar.tsx`
+
+- **Sheet side**: Change from `side="right"` to `side="left"` to match Perplexity
+- **Add "Home" link**: New first item linking to `/#` or top of page
+- **Add icons**: Use Lucide icons (Home, Sparkles, RefreshCw, CreditCard) next to each nav link for premium feel
+- **Link styling**: Larger text (~`text-[17px]`), `text-[#52525B]`, generous vertical spacing (`gap-5`), icon + label layout
+- **Bottom CTAs**: Two full-width buttons of equal size stacked at the bottom:
+  - "Sign Up" — `bg-[#27272A] text-white rounded-2xl py-3.5 text-base font-semibold`
+  - "Log in" — `bg-[#F4F4F5] text-[#1A1A1A] rounded-2xl py-3.5 text-base font-semibold`
+- **Sheet width**: Increase to `w-80` for more breathing room
+- **Close button**: Keep the built-in Sheet X button, style it as a circle like Perplexity (`rounded-full border`)
+
+## Files modified (1)
+- `src/components/landing/sections/Navbar.tsx`
 
