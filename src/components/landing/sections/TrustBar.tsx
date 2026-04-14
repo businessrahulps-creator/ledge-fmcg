@@ -35,7 +35,7 @@ export function TrustBar() {
           {stats.map((stat, i) => (
             <AnimateIn key={stat} delay={i * 0.1}>
               <div className="text-center px-1 md:px-4">
-                <div className="font-heading font-extrabold text-[13px] md:text-[20px] text-[#1A1A1A] mb-1 whitespace-nowrap">
+                <div className="font-heading md:text-[20px] text-[#1A1A1A] mb-1 whitespace-nowrap font-thin text-xs">
                   {stat}
                 </div>
               </div>
