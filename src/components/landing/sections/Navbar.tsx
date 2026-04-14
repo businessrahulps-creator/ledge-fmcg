@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, Home, Sparkles, RefreshCw, CreditCard } from "lucide-react";
+import { Menu, LayoutDashboard, Layers, Route, IndianRupee } from "lucide-react";
 import {
   Sheet,
   SheetContent,
