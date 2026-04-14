@@ -1,19 +1,37 @@
 
 
-# Fix Login & Signup Button Color Mismatch
+# Fix Trial Period: 14 days → 30 days
 
-## Problem
-The landing page CTAs use `bg-[#27272A]` (dark charcoal), but the Login and Signup pages use the default `<Button>` component which renders with `bg-primary` (teal `hsl(160, 45%, 40%)`). This creates a jarring color disconnect when navigating from the landing page to auth pages.
+All references to "14-day free trial" across the marketing site need to be updated to "30-day free trial".
 
-## Fix — 2 files
+## Changes (7 files)
 
-### 1. `src/pages/Login.tsx`
-Override the "Sign in" button to match the landing page style:
-- Add `className="w-full bg-[#27272A] hover:bg-[#1A1A1A] text-white rounded-full"` to the submit Button
+### 1. `src/components/landing/sections/Pricing.tsx`
+- Line 46: `"Start 14-Day Free Trial"` → `"Start 30-Day Free Trial"`
+- Line 68: `"Start 14-Day Free Trial"` → `"Start 30-Day Free Trial"`
 
-### 2. `src/pages/Signup.tsx`
-Override the "Start free trial" button similarly:
-- Add `className="w-full bg-[#27272A] hover:bg-[#1A1A1A] text-white rounded-full"` to the submit Button
+### 2. `src/components/landing/FinalCTA.tsx` (old component)
+- Line 34: `14 days free` → `30 days free`
 
-Two lines changed, one per file. Everything else stays the same.
+### 3. `src/components/landing/HeroSection.tsx` (old component)
+- Line 165: `14-day free trial` → `30-day free trial`
+
+### 4. `src/components/landing/PricingSection.tsx` (old component)
+- Line 9: `"for 14 days"` → `"for 30 days"`
+- Line 45: `Start free for 14 days` → `Start free for 30 days`
+
+### 5. `src/pages/TermsOfService.tsx`
+- Line 49: `14-day free trial` → `30-day free trial`
+- Line 98: Keep "14 days' notice" — this is about legal notice period, not trial
+
+### 6. `src/pages/RefundPolicy.tsx`
+- Line 27: `14-day free trial` → `30-day free trial`
+
+### 7. `src/pages/PrivacyPolicy.tsx`
+- Line 85: Keep "14 days" — this is about policy change notice period, not trial
+
+### 8. `src/pages/Signup.tsx`
+- Line 80: Already says "30-day free trial" — no change needed
+
+Simple find-and-replace across 6 files. No structural changes.
 
