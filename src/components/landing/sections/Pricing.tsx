@@ -168,7 +168,7 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3.5 rounded-2xl text-center font-semibold text-xs transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3.5 rounded-full text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
                   style={{
                     boxShadow: plan.highlighted
                       ? "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)"
@@ -186,9 +186,9 @@ export function Pricing() {
           <p className="font-body text-[15px] text-[#71717A]">
             All plans include offline support, PWA install, automatic updates, and role-based access control.
           </p>
-          <p className="font-body text-[15px] text-[#27272A] font-medium hover:underline cursor-pointer">
+          <a href="https://wa.me/919876543210?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing" target="_blank" rel="noopener noreferrer" className="font-body text-[15px] text-[#27272A] font-medium hover:underline cursor-pointer inline-block">
             Need help deciding? Chat on WhatsApp →
-          </p>
+          </a>
         </div>
       </div>
     </section>

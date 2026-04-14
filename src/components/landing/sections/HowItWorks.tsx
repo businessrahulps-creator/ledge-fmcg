@@ -74,7 +74,7 @@ export function HowItWorks() {
     <section id="how-it-works" className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn>
-          <h2 className="font-heading font-bold text-[24px] md:text-[32px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
+          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             Three things happen when your team uses Ledge. All of them in under sixty seconds.
           </h2>
         </AnimateIn>

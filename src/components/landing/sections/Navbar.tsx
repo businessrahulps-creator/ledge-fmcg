@@ -62,7 +62,7 @@ export function Navbar() {
           </Link>
           <Link
             to="/signup"
-            className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-2xl font-body font-semibold hover:bg-[#1A1A1A] hover:scale-[1.01] transition-all duration-200 text-xs"
+            className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-[#1A1A1A] hover:scale-[1.01] transition-all duration-200 text-sm"
             style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
             onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.15)")}
             onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)")}
