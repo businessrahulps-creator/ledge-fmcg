@@ -1,18 +1,21 @@
 
 
-# Shrink "All systems operational" Badge for Mobile
+# Fix Hero CTA Buttons for Mobile — Premium, Polished Layout
 
 ## Problem
-The status badge overflows its container on mobile (390px viewport) due to padding and font size.
+On mobile (390px), the two hero buttons are side-by-side with mismatched sizes — "Get Started Free" uses `text-xs` with heavy padding while "See How It Works" uses `text-sm` with different padding and border-radius. They look unfinished and inconsistent.
 
-## Fix — `src/components/landing/sections/Footer.tsx`
+## Fix — `src/components/landing/sections/Hero.tsx`
 
-Reduce the badge's padding, gap, font size, and dot size:
+Stack buttons vertically on mobile, make them full-width and identical in size:
 
-- **Line 77** — Container: `gap-2 px-3.5 py-2` → `gap-1.5 px-2.5 py-1.5`
-- **Line 87** — Dot wrapper: `h-2 w-2` → `h-1.5 w-1.5`
-- **Lines 88-89** — Inner dots: `h-2 w-2` → `h-1.5 w-1.5`
-- **Line 91** — Text: `text-[13px]` → `text-[11px]`
+- **Layout**: Change `flex-wrap gap-4` → `flex flex-col sm:flex-row gap-3 sm:gap-4` so buttons stack on mobile, go side-by-side on larger screens
+- **"Get Started Free"**: `text-xs px-8 py-3.5 rounded-2xl` → `w-full sm:w-auto text-base px-8 py-4 rounded-full text-center justify-center`
+- **"See How It Works"**: `text-sm px-7 py-3 rounded-3xl` → `w-full sm:w-auto text-base px-8 py-4 rounded-full text-center justify-center font-semibold`
+- Both buttons get identical `py-4 text-base font-semibold rounded-full` for a premium, consistent look matching the screenshot reference
 
-Single file, 4 small changes.
+## What does NOT change
+- Desktop layout (buttons go side-by-side via `sm:flex-row`)
+- Colors, shadows, hover effects
+- Rest of the Hero section
 
