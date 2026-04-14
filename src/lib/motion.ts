@@ -22,7 +22,7 @@ export const stagger = {
 
 // ── Reusable animation variants ────────────────────────────────
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
@@ -36,6 +36,16 @@ export const scaleIn: Variants = {
   visible: { opacity: 1, scale: 1 },
 };
 
+export const scaleUp: Variants = {
+  hidden: { opacity: 0, scale: 0.97, y: 8 },
+  visible: { opacity: 1, scale: 1, y: 0 },
+};
+
+export const blurFadeUp: Variants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+
 // ── Container variant with stagger ─────────────────────────────
 export const staggerContainer = (staggerTime = stagger.default): Variants => ({
   hidden: {},
@@ -43,3 +53,17 @@ export const staggerContainer = (staggerTime = stagger.default): Variants => ({
     transition: { staggerChildren: staggerTime },
   },
 });
+
+// ── Hover / Tap presets ────────────────────────────────────────
+export const hoverLift = {
+  whileHover: { y: -4, transition: { type: "spring", damping: 20, stiffness: 300 } },
+};
+
+export const tapScale = {
+  whileTap: { scale: 0.97 },
+};
+
+export const ctaHover = {
+  whileHover: { scale: 1.02, transition: { type: "spring", damping: 20, stiffness: 300 } },
+  whileTap: { scale: 0.97 },
+};
