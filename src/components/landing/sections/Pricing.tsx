@@ -168,7 +168,7 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3.5 rounded-2xl text-center font-semibold text-base transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3.5 rounded-2xl text-center font-semibold text-xs transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
                   style={{
                     boxShadow: plan.highlighted
                       ? "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)"
