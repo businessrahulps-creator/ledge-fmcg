@@ -1,38 +1,34 @@
 
 
-# Fix Overflow, Sparklines & Icon Colors
+# Status + Infrastructure Badge in Footer Grid (4th Column)
 
-## Issues identified
+## Concept
 
-1. **#ORD-243 row overflows** in `DashboardSvg`: Container bottom is at y=348 (y=244 + height=104). The 5th row renders at y=348, right at the edge — text baseline sits outside. Fix: remove the 5th order row (keep 4 rows).
+Place the animated status badge and AWS infrastructure line as the **4th column** in the existing `grid-cols-2 md:grid-cols-4` grid — right next to the Legal column. This fills the empty space naturally without adding a new row.
 
-2. **Sparklines look artificial**: All 4 KPI sparklines trend upward — feels fake and distracting. Fix: remove sparklines entirely from `DashboardSvg`. The KPI cards look cleaner without them.
+## Layout
 
-3. **Icon colors mismatch**: Icons across Problem, WhyOrdra, Features, Pricing, and HowItWorks badges all use teal `#0D9488` with `bg-[#F0FDFA]`. The button color is charcoal `#27272A`. Fix: change all icon colors to `text-[#27272A]` and their circle backgrounds to `bg-[#F4F4F5]` (light neutral gray).
+```text
+Product       Company       Legal              Status
+─────────     ─────────     ──────────────     ─────────────────────
+Features      About Us      Privacy Policy     ● All systems operational
+Pricing       Contact       Terms of Service   ☁ AWS · Asia Pacific (Mumbai)
+                            Refund Policy
+```
 
-## Files modified (5)
+## What gets built
 
-1. **`src/components/landing/illustrations/SvgIllustrations.tsx`**
-   - Remove `#ORD-243` (5th entry) from the `orders` array in `DashboardSvg`
-   - Remove all 4 sparkline `<motion.path>` elements and the `sparklines` array
+**`src/components/landing/sections/Footer.tsx`** — single file change:
 
-2. **`src/components/landing/sections/HowItWorks.tsx`**
-   - Badge: `bg-[#F0FDFA] text-[#0D9488]` → `bg-[#F4F4F5] text-[#27272A]`
+- Add a 4th `<div>` inside the grid after the `columns.map()` loop
+- **Status badge**: A pill with a pulsing green dot (`animate-pulse`), text "All systems operational", and a shimmer border effect (CSS `@keyframes` via inline style or Tailwind arbitrary `animate-[shimmer_3s_linear_infinite]`)
+- **AWS line**: Below the pill, muted text "Hosted on AWS · Asia Pacific (Mumbai)" with an inline monochrome AWS SVG logo (~20px wide)
+- Framer Motion `motion.div` with `initial={{ opacity: 0, y: 8 }}` / `whileInView={{ opacity: 1, y: 0 }}` for entrance
 
-3. **`src/components/landing/sections/Problem.tsx`**
-   - Icon circle: `bg-[#F0FDFA]` → `bg-[#F4F4F5]`, icon: `text-[#0D9488]` → `text-[#27272A]`
-
-4. **`src/components/landing/sections/WhyOrdra.tsx`**
-   - Same icon color swap
-
-5. **`src/components/landing/sections/Features.tsx`**
-   - Same icon color swap
-
-6. **`src/components/landing/sections/Pricing.tsx`**
-   - Same icon color swap
+**`tailwind.config.ts`** — add `shimmer` keyframe for the gradient border sweep animation
 
 ## What does NOT change
-- All text, copy, layout, spacing, section order
-- SVG structure for OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg
-- Device frames, animations, GradientStage
+- The 3 existing link columns (Product, Company, Legal)
+- Copyright bar, social icons
+- No new dependencies
 
