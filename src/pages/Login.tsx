@@ -139,7 +139,7 @@ export default function Login() {
               </div>
             </div>
 
-            <Button className="w-full" size="lg" type="submit" disabled={loading}>
+            <Button className="w-full bg-[#27272A] hover:bg-[#1A1A1A] text-white rounded-full" size="lg" type="submit" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Sign in
             </Button>
