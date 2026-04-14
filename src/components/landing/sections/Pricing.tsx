@@ -41,7 +41,7 @@ const plans = [
     ],
     cta: "Start 14-Day Free Trial",
     highlighted: true,
-    ctaStyle: "bg-[#0D9488] text-white hover:bg-[#0F766E]",
+    ctaStyle: "bg-[#27272A] text-white hover:bg-[#1A1A1A]",
   },
   {
     name: "Scale",
@@ -105,17 +105,17 @@ export function Pricing() {
               <div
                 className={`bg-white rounded-3xl p-10 flex flex-col h-full ${
                   plan.highlighted
-                    ? "border-2 border-[#0D9488] relative"
+                    ? "border-2 border-[#27272A] relative"
                     : "border border-[#E8E5E0]"
                 }`}
                 style={{
                   boxShadow: plan.highlighted
-                    ? "0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(13,148,136,0.08)"
+                    ? "0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.06)"
                     : "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)",
                 }}
               >
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0D9488] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#27272A] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
@@ -166,10 +166,10 @@ export function Pricing() {
 
                 <Link
                   to="/signup"
-                  className={`mt-8 w-full py-3 rounded-3xl text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  className={`mt-8 w-full py-3.5 rounded-2xl text-center font-semibold text-base transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
                   style={{
                     boxShadow: plan.highlighted
-                      ? "0 2px 8px rgba(13,148,136,0.18), 0 1px 3px rgba(0,0,0,0.06)"
+                      ? "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)"
                       : "0 1px 4px rgba(0,0,0,0.06)",
                   }}
                 >
