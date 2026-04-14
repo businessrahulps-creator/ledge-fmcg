@@ -1,6 +1,7 @@
 import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import awsLogo from "@/assets/aws-logo.png";
 
 const linkMap: Record<string, string> = {
   "Features": "/#features",
@@ -21,17 +22,6 @@ const columns = [
 const socials = [
   { icon: Linkedin, href: "https://www.linkedin.com/in/asha-ps-6b0673207/" },
 ];
-
-function AwsLogo() {
-  return (
-    <svg width="20" height="12" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block">
-      <path d="M11.2 17.6c-3.7 2.7-9 4.2-13.6 4.2-6.4 0-12.2-2.4-16.6-6.3-.3-.3 0-.7.4-.5 4.7 2.8 10.6 4.4 16.6 4.4 4.1 0 8.6-.8 12.7-2.6.6-.2 1.1.4.5.8z" transform="translate(18 4)" fill="#A1A1AA"/>
-      <path d="M12.8 15.9c-.5-.6-3.1-.3-4.3-.1-.4 0-.4-.3-.1-.5 2.1-1.5 5.5-1.1 5.9-.6.4.5-.1 4.1-2.1 5.8-.3.3-.6.1-.5-.2.5-1.2 1.5-3.8 1.1-4.4z" transform="translate(18 4)" fill="#A1A1AA"/>
-      <path d="M8.6 2.6V.9c0-.3.2-.4.4-.4h7.5c.3 0 .4.2.4.4v1.4c0 .2-.2.5-.6 1.1l-3.9 5.5c1.4 0 3 .2 4.3.9.3.2.4.4.4.7v1.8c0 .3-.3.6-.6.4-2.5-1.3-5.9-1.5-8.7 0-.3.1-.6-.1-.6-.4V10c0-.3 0-.8.3-1.3l4.5-6.4H8.9c-.2 0-.4-.2-.4-.4v-.3z" transform="translate(0 4)" fill="#A1A1AA"/>
-      <path d="M27 12.4h-2.3c-.2 0-.4-.2-.4-.4V.9c0-.2.2-.4.4-.4h2.1c.2 0 .4.2.4.4v1.6h0c.5-1.5 1.6-2.2 3-2.2 1.4 0 2.3.7 2.9 2.2.5-1.5 1.8-2.2 3.1-2.2 1 0 2 .4 2.6 1.3.7 1 .6 2.4.6 3.6v7.2c0 .2-.2.4-.4.4h-2.3c-.2 0-.4-.2-.4-.4V6c0-.5 0-1.7-.1-2.2-.1-.8-.6-1-1.2-1-.5 0-1 .3-1.2.9-.2.5-.2 1.4-.2 2.3v6c0 .2-.2.4-.4.4h-2.3c-.2 0-.4-.2-.4-.4V6c0-1.3.2-3.2-1.3-3.2-1.5 0-1.4 1.9-1.4 3.2v6c0 .2-.2.4-.4.4z" transform="translate(-4 4)" fill="#A1A1AA"/>
-    </svg>
-  );
-}
 
 export function Footer() {
   return (
@@ -105,7 +95,7 @@ export function Footer() {
 
             {/* AWS infrastructure line */}
             <div className="flex items-center gap-1.5">
-              <AwsLogo />
+              <img src={awsLogo} alt="AWS" className="h-3 w-auto grayscale opacity-50" />
               <span className="font-body text-[12px] text-[#A1A1AA]">
                 Hosted on AWS · Asia Pacific (Mumbai)
               </span>
