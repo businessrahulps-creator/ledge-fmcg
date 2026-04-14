@@ -1,43 +1,38 @@
 
 
-# Refine Overflow + Add Subtle Attention Layer
+# Fix Overflow, Sparklines & Icon Colors
 
-## Overflow Fixes
+## Issues identified
 
-**Problem**: The Hero mockup's `perspective(1200px) rotateY(-4deg)` combined with `max-w-2xl` and the `initial={{ x: 40 }}` spring causes content to extend beyond the viewport on medium screens. The section has no overflow clipping.
+1. **#ORD-243 row overflows** in `DashboardSvg`: Container bottom is at y=348 (y=244 + height=104). The 5th row renders at y=348, right at the edge — text baseline sits outside. Fix: remove the 5th order row (keep 4 rows).
 
-**Fix 1 — Hero section**: Add `overflow-hidden` to the `<section>` element to clip any perspective overflow.
+2. **Sparklines look artificial**: All 4 KPI sparklines trend upward — feels fake and distracting. Fix: remove sparklines entirely from `DashboardSvg`. The KPI cards look cleaner without them.
 
-**Fix 2 — Hero mockup container**: The Framer Motion `style={{ transform: "perspective(...)" }}` conflicts with the `animate` transform. Framer Motion overrides `style.transform` when animating `x`. Wrap the perspective in a parent div so both transforms compose correctly:
-- Outer div: `style={{ perspective: "1200px" }}`  
-- Inner motion.div: animates `x`, `rotateY: -4`, `rotateX: 2` via Framer Motion props (not inline style)
+3. **Icon colors mismatch**: Icons across Problem, WhyOrdra, Features, Pricing, and HowItWorks badges all use teal `#0D9488` with `bg-[#F0FDFA]`. The button color is charcoal `#27272A`. Fix: change all icon colors to `text-[#27272A]` and their circle backgrounds to `bg-[#F4F4F5]` (light neutral gray).
 
-This ensures the entry animation and the resting perspective both work without one overriding the other.
+## Files modified (5)
 
-**Fix 3 — DashboardSvg bar widths**: The longest bar is `w: 340` starting at `x: 60` = 400. The container rect is `x: 16, width: 408` = 424. The bar sits within bounds but visually the 340px bar is quite long. Scale down bar widths proportionally so the longest bar is ~320 (fits comfortably within the 408-wide container with padding).
+1. **`src/components/landing/illustrations/SvgIllustrations.tsx`**
+   - Remove `#ORD-243` (5th entry) from the `orders` array in `DashboardSvg`
+   - Remove all 4 sparkline `<motion.path>` elements and the `sparklines` array
 
-## Additional Animation Layer (additive, non-destructive)
+2. **`src/components/landing/sections/HowItWorks.tsx`**
+   - Badge: `bg-[#F0FDFA] text-[#0D9488]` → `bg-[#F4F4F5] text-[#27272A]`
 
-**Concept**: A single soft radial glow behind each device frame that fades in ~200ms after the frame appears and then gently pulses once (opacity 0 → 0.06 → 0.03). Think of it as a subtle "spotlight" that lands on the illustration. This is what Apple does on their product pages — a diffused light bloom behind the product image.
+3. **`src/components/landing/sections/Problem.tsx`**
+   - Icon circle: `bg-[#F0FDFA]` → `bg-[#F4F4F5]`, icon: `text-[#0D9488]` → `text-[#27272A]`
 
-**Implementation**: Add a `::before` pseudo-element (or an absolutely-positioned div) on the `GradientStage` wrapper that:
-- Is a 80% width/height radial gradient circle, centered, using `rgba(39,39,42,0.06)` (charcoal at 6% opacity)
-- Animates: `opacity: 0 → 1` over 1s, delayed 0.8s after section enters view
-- One-shot, no loop
-- `pointer-events: none`, `z-index: 0`
+4. **`src/components/landing/sections/WhyOrdra.tsx`**
+   - Same icon color swap
 
-This draws the eye to the mockup without touching the SVGs at all. It's extremely subtle — just enough ambient light to create visual weight.
+5. **`src/components/landing/sections/Features.tsx`**
+   - Same icon color swap
 
-**Risk assessment**: Very low. It's a background glow behind existing elements. If it looks bad, removing it is a one-line delete.
-
-## Files Modified (2)
-
-1. **`src/components/landing/sections/Hero.tsx`** — Add `overflow-hidden` to section, fix perspective/animation composition
-2. **`src/components/landing/DeviceFrames.tsx`** — Add ambient glow div inside `GradientStage` (affects all mockups automatically)
+6. **`src/components/landing/sections/Pricing.tsx`**
+   - Same icon color swap
 
 ## What does NOT change
-- All SVG illustrations (untouched)
-- All text, copy, layout, spacing
-- HowItWorks structure
-- Any other section
+- All text, copy, layout, spacing, section order
+- SVG structure for OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg
+- Device frames, animations, GradientStage
 
