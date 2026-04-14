@@ -59,10 +59,10 @@ export function Navbar() {
           </Link>
           <Link
             to="/signup"
-            className="inline-flex items-center bg-[#0D9488] text-white px-7 py-2.5 rounded-3xl font-body font-semibold text-sm hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200"
-            style={{ boxShadow: "0 2px 8px rgba(13,148,136,0.15)" }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(13,148,136,0.2)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(13,148,136,0.15)")}
+            className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-2xl font-body font-semibold text-base hover:bg-[#1A1A1A] hover:scale-[1.01] transition-all duration-200"
+            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.15)")}
+            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)")}
           >
             Get Started Free
           </Link>
@@ -101,7 +101,7 @@ export function Navbar() {
             <Link
               to="/signup"
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center bg-[#0D9488] text-white px-6 py-3 rounded-2xl font-body font-semibold text-base hover:bg-[#0F766E] transition-colors mb-4"
+              className="inline-flex items-center justify-center bg-[#27272A] text-white px-8 py-3.5 rounded-2xl font-body font-semibold text-base hover:bg-[#1A1A1A] transition-colors mb-4"
             >
               Get Started Free
             </Link>

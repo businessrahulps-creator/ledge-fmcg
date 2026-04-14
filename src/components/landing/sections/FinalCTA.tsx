@@ -19,10 +19,10 @@ export function FinalCTA() {
         <div className="flex justify-center gap-4 mt-12 flex-wrap">
           <Link
             to="/signup"
-            className="bg-[#0D9488] text-white px-10 py-4 rounded-3xl font-semibold hover:bg-[#0F766E] hover:scale-[1.01] transition-all duration-200 inline-flex items-center text-base"
-            style={{ boxShadow: "0 4px 14px rgba(13,148,136,0.25), 0 2px 6px rgba(0,0,0,0.08)" }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 28px rgba(13,148,136,0.3), 0 3px 10px rgba(0,0,0,0.1)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 14px rgba(13,148,136,0.25), 0 2px 6px rgba(0,0,0,0.08)")}
+            className="bg-[#27272A] text-white px-10 py-4 rounded-2xl font-semibold hover:bg-[#1A1A1A] hover:scale-[1.01] transition-all duration-200 inline-flex items-center text-base"
+            style={{ boxShadow: "0 4px 14px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)" }}
+            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 28px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.1)")}
+            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 14px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)")}
           >
             Get Started Free
           </Link>
