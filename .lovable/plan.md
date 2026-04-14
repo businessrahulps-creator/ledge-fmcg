@@ -1,46 +1,36 @@
 
 
-# Replace HTML Mockups with Real Screenshots
+# Unify All Landing Page Buttons to Dark Charcoal
 
-## The Problem
-The Hero section (`DashboardMockup`), and HowItWorks section (`OrderMockup`, `DashboardMiniMockup`, `StockMockup`) use inline HTML divs styled to look like app screens. These read as wireframes/placeholders rather than a real product — undermining the premium feel.
+## What's changing
+Every button/CTA across the landing page switches from teal (`#0D9488`) to a dark charcoal (`#27272A` / hover `#1A1A1A`) matching the second reference image. Button sizing is standardized to `px-8 py-3.5 rounded-2xl text-base` everywhere, including mobile nav.
 
-## What We Need From You
-Please upload **3 screenshots** of the actual Ledge app:
+## Files to edit
 
-1. **Dashboard** — the main dashboard with KPIs, chart, and recent orders visible (used in Hero + HowItWorks step 2)
-2. **New Order screen** — the mobile order creation form (used in HowItWorks step 1)
-3. **Stock page** — the stock health table with colored badges (used in HowItWorks step 3)
+### 1. `src/components/landing/sections/Navbar.tsx`
+- **Desktop CTA** (line ~62): `bg-[#0D9488]` → `bg-[#27272A]`, hover → `hover:bg-[#1A1A1A]`, shadow rgba updated to neutral black, size → `px-8 py-3 rounded-2xl text-base`
+- **Mobile CTA** (line ~104): Same color + size swap, `rounded-2xl`
 
-Take these at the highest resolution possible. Desktop screenshots work best for the dashboard and stock views; a narrow/mobile viewport works best for the order screen.
+### 2. `src/components/landing/sections/Hero.tsx`
+- **Hero CTA** (line ~43): `bg-[#0D9488]` → `bg-[#27272A]`, hover → `hover:bg-[#1A1A1A]`, shadow rgba neutral, size → `px-8 py-3.5 rounded-2xl text-base`
 
-## Implementation Plan
+### 3. `src/components/landing/sections/FinalCTA.tsx`
+- **Final CTA** (line ~22): Same color swap, shadow neutral, size → `px-10 py-4 rounded-2xl text-base`
 
-### 1. Add screenshot images to `/public/`
-Save the uploaded images as optimized WebP/PNG files (e.g. `dashboard-shot.webp`, `order-shot.webp`, `stock-shot.webp`).
-
-### 2. Refactor `Hero.tsx` — `DashboardMockup` component
-- Remove the entire inline HTML mockup (KPI grid, chart bars, order rows — ~90 lines)
-- Replace with a single `<img>` tag inside the existing `BrowserFrame` wrapper
-- The image fills the frame naturally with `w-full` and proper `alt` text
-- All surrounding layout (GradientStage, perspective transform, motion) stays identical
-
-### 3. Refactor `HowItWorks.tsx` — all 3 mockup components
-- **OrderMockup**: Remove `OrderMockupContent` HTML → replace with `<img>` inside existing `PhoneFrame`
-- **DashboardMiniMockup**: Remove inline KPI/chart HTML → replace with `<img>` inside existing `BrowserFrame`
-- **StockMockup**: Remove inline table HTML → replace with `<img>` inside existing `BrowserFrame`
-- Each mockup component shrinks from 30-50 lines to ~5 lines
-
-### 4. DeviceFrames stay untouched
-The `BrowserFrame`, `PhoneFrame`, and `GradientStage` wrappers remain exactly as-is — they provide the premium macOS/phone chrome around the screenshot.
+### 4. `src/components/landing/sections/Pricing.tsx`
+- **Highlighted plan CTA style** (line ~44): `bg-[#0D9488]` → `bg-[#27272A]`, hover → `hover:bg-[#1A1A1A]`
+- **Highlighted plan border** (line ~108): `border-[#0D9488]` → `border-[#27272A]`
+- **"Most Popular" badge** (line ~118): `bg-[#0D9488]` → `bg-[#27272A]`
+- **Plan icon color** (line ~123): stays teal (accent, not a button)
+- **Check icon color** (line ~158): stays teal (accent, not a button)
+- **"Chat on WhatsApp"** (line ~187): stays teal (text link, not a button)
+- **CTA box-shadow** (line ~172): neutral black shadows
+- **CTA sizing** (line ~169): standardized `py-3.5 rounded-2xl text-base`
 
 ## What does NOT change
-- All text/copy, section order, layout grids, animations
-- Device frame components (traffic lights, notch, chrome)
-- GradientStage backdrops and perspective transforms
-- Color palette, spacing, typography, buttons
-- Any section other than Hero and HowItWorks
-
-## Net result
-~200 lines of fragile HTML mockup code replaced with 3 clean `<img>` tags inside the same premium device frames. The page instantly looks like a real product, not a prototype.
+- All copy/text verbatim
+- Section structure, order, layout, animations
+- Teal accent on icons, checkmarks, and text links (only buttons change)
+- Sign in text link styling
+- Typography, spacing between sections
 
