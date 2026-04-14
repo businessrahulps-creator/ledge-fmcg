@@ -88,7 +88,7 @@ export function Footer() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="font-body text-[13px] font-medium text-[#3F3F46] relative">
+              <span className="font-body text-[13px] font-medium text-[#3F3F46] relative whitespace-nowrap">
                 All systems operational
               </span>
             </div>
