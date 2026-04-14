@@ -1,6 +1,7 @@
 import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import awsLogo from "@/assets/aws-logo.png";
 
 const linkMap: Record<string, string> = {
   "Features": "/#features",
