@@ -1,15 +1,13 @@
 
 
-# Fix: Replace Receipt Icon in WhyOrdra Section
+# Export Landing Page Copy as Markdown
 
-## Problem
-The `Receipt` icon from Lucide contains a dollar sign (`$`), which is inappropriate for an Indian FMCG brand.
+## Task
+Extract all text content from the Ledge landing page (Navbar → Hero → TrustBar → Problem → HowItWorks → Features → WhyOrdra → Testimonials → Pricing → FinalCTA → Footer) into a single `.md` file and save it to `/mnt/documents/`.
 
-## Fix — 1 file
+## Approach
+Write a Python script that outputs a well-structured markdown file with all the copy organized by section. No code changes to the project.
 
-### `src/components/landing/sections/WhyOrdra.tsx`
-- Replace `Receipt` import with `FileText` (a clean document icon with no currency symbol — appropriate for billing/invoicing context)
-- Update the icon reference in the `blocks` array
-
-One import change, one reference change. Nothing else touched.
+## Output
+`/mnt/documents/ledge-landing-page-copy.md`
 
