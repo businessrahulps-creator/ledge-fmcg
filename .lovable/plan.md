@@ -1,103 +1,84 @@
 
 
-# Replace Screenshot Mockups with Single-Color SVG Illustrations
+# Upgrade SVG Illustrations — Charcoal Color, Text Labels, Larger Size, More Detail
 
-## What's changing
-The 4 static `.webp` screenshots (Hero dashboard, HowItWorks steps 1-3) get replaced with clean, minimalist SVG illustrations drawn in a single emerald color (`#0D9488`). Each SVG animates once on scroll — a subtle stroke-drawing effect + gentle fade/scale — then stops. Everything else stays identical.
+## Issues found in audit
+
+1. **Wrong color**: SVGs use teal `#0D9488` but buttons use charcoal `#27272A`. The illustrations feel disconnected from the page's primary visual anchor.
+2. **No text**: Pure abstract lines with no context — a viewer can't tell what the shapes represent without reading the section copy.
+3. **Too small**: Hero mockup is `max-w-lg` (~512px). HowItWorks phone frame is `max-w-[280px]`. These feel like thumbnails, not hero-grade visuals.
+4. **Too sparse**: The SVGs have minimal elements (e.g., DashboardMini has only 3 KPI cards and 4 rows). They feel like wireframe sketches, not premium product representations.
+5. **ViewBox cramped**: `DashboardSvg` is 408×280 — small aspect ratio with tight padding. Needs more breathing room.
+
+## Changes
+
+### Color system (SvgIllustrations.tsx)
+Replace all teal with charcoal:
+- `C` → `#27272A`
+- `FILL_BG` → `rgba(39,39,42,0.04)`
+- `FILL_ACCENT` → `rgba(39,39,42,0.10)`
+- Stroke width stays `1px`
+
+### Add minimal SVG `<text>` labels
+Small, tasteful labels using `font-size: 9-11px`, `fill: #27272A`, `opacity: 0.5-0.7`, `font-family: sans-serif`. These animate in with the same fade timing. Examples:
+
+**DashboardSvg**: KPI labels — "Revenue", "Orders", "Dispatch", "Delivery". Bar chart title — "This Week". Order rows — "#ORD-247", "#ORD-246", "#ORD-245" with status pills "Delivered", "Pending", "Dispatched".
+
+**OrderFormSvg**: "Select Dealer" in dropdown. Product rows — "Maggi 2-Min 12pk", "Surf Excel 1kg", "Parle-G 800g". Scheme pill — "Diwali 5+1". Radio labels — "Cash", "UPI", "Cheque". Button — "Place Order".
+
+**DashboardMiniSvg**: KPI labels — "₹4.8L", "230", "₹57K". Section header — "Recent Orders". Row labels — "#247 Sharma Stores", "#246 Gupta Trading".
+
+**InvoiceStockSvg**: Table headers — "Item", "Qty", "Rate", "GST", "Amount". GST labels — "CGST 9%", "SGST 9%", "Total". Button — "Download PDF".
+
+### Increase size
+
+**Hero.tsx**: Change `max-w-lg` to `max-w-2xl` on the mockup wrapper. The BrowserFrame fills the full column width.
+
+**HowItWorks.tsx**: Phone frame `max-w-[280px]` → `max-w-[320px]`. Browser frames already scale to column width (no change needed). The visual column gets more breathing room.
+
+**SVG viewBoxes**: Expand with more padding:
+- `DashboardSvg`: `0 0 408 280` → `0 0 440 320` (more internal spacing between sections)
+- `OrderFormSvg`: `0 0 240 400` → `0 0 260 440` (add a 4th product line, more vertical space)
+- `DashboardMiniSvg`: `0 0 396 220` → `0 0 420 260` (5 rows instead of 4, more spacing)
+- `InvoiceStockSvg`: `0 0 396 280` → `0 0 420 320` (5 data rows instead of 4)
+
+### More detail (richer illustrations)
+
+**DashboardSvg** additions:
+- Add a 5th and 6th bar to the chart (8 total bars, varying widths)
+- Add a mini sparkline (SVG path) inside each KPI card
+- Add 2 more order rows (5 total)
+- Add status pill labels next to row badges
+
+**OrderFormSvg** additions:
+- Add a 4th product line
+- Add a subtotal/total section between the scheme tag and radio buttons
+- Add a small "₹" symbol next to price lines
+
+**DashboardMiniSvg** additions:
+- Add a 5th order row
+- Add a small "Live" pulse indicator (circle with opacity pulse) next to the header
+
+**InvoiceStockSvg** additions:
+- Add a 5th data row
+- Add horizontal divider between GST area and table
+- Add a small invoice number label at the top
+
+### Animation refinements
+- Text labels fade in 200ms after their parent element (creates a nice layered reveal)
+- Sparklines inside KPI cards draw with `pathLength` after the card fades in
+- Slightly longer stagger between elements (120ms instead of 80-100ms) for a more deliberate, premium choreography
+
+## Files modified (3)
+
+1. **`src/components/landing/illustrations/SvgIllustrations.tsx`** — Color swap, add text labels, expand viewBoxes, add more elements, refine animation timing
+2. **`src/components/landing/sections/Hero.tsx`** — Change `max-w-lg` → `max-w-2xl`
+3. **`src/components/landing/DeviceFrames.tsx`** — PhoneFrame `max-w-[280px]` → `max-w-[320px]`
 
 ## What does NOT change
-- All text, copy, section structure, layout grids, spacing, symmetry
-- Device frames (BrowserFrame, PhoneFrame, GradientStage) — kept exactly as-is
-- Icons, buttons, colors, fonts, animations outside the mockups
-- Features, Problem, WhyOrdra, Pricing, Testimonials, TrustBar sections
-
-## Design rules
-- **Single color only**: `#0D9488` (existing teal) for all strokes and fills
-- **Fill opacity**: `0.06` for card backgrounds, `0.12` for active/accent areas — creates depth without adding colors
-- **Stroke**: `1px`, `round` cap/join
-- **Corner radius**: `6px` on cards, `4px` on smaller elements — matches the rounded modern feel
-- **No text inside SVGs** — just abstract shapes representing UI elements (rectangles, lines, circles)
-- **Responsive**: `viewBox` based, scales to container width
-
-## Animation spec
-- Trigger: `useInView({ once: true })`
-- Entry: `opacity: 0 → 1` over 800ms + `scale: 0.98 → 1` over 800ms (spring, damping 30)
-- SVG paths: `strokeDashoffset` draws lines over 1.2s with `ease-out`
-- Card fills: stagger fade-in, 100ms apart
-- Plays once. No looping. No bounce.
-
-## SVG illustrations (4 total)
-
-### 1. Hero Dashboard SVG (`DashboardSvg`)
-```
-┌────┐ ┌────┐ ┌────┐ ┌────┐   ← 4 KPI cards (rounded rects, teal fill 0.06)
-└────┘ └────┘ └────┘ └────┘
-┌──────────────────────────┐
-│ ████ ██████ ███ ████████ │   ← Horizontal bar chart (4 bars, varying width)
-│ ██████████ ████ ██       │
-└──────────────────────────┘
-┌──────────────────────────┐
-│ ── ── ── ── ── ── ── ── │   ← 3 order rows (line + small rect per row)
-│ ── ── ── ── ── ── ── ── │
-│ ── ── ── ── ── ── ── ── │
-└──────────────────────────┘
-```
-Used inside the existing `BrowserFrame` + `GradientStage` in Hero.
-
-### 2. Order Form SVG (`OrderFormSvg`)
-```
-┌──────────────────┐
-│ [▼ Dealer Name ] │   ← Dropdown (rounded rect + chevron)
-├──────────────────┤
-│ Product 1  Qty ₹ │   ← 3 product line rows
-│ Product 2  Qty ₹ │
-│ Product 3  Qty ₹ │
-├──────────────────┤
-│ [Scheme tag]     │   ← Small pill shape
-│ ○ Cash ○ UPI     │   ← Radio circles
-├──────────────────┤
-│   [ Submit ▸ ]   │   ← Button rect
-└──────────────────┘
-```
-Used inside the existing `PhoneFrame` + `GradientStage` in HowItWorks step 1.
-
-### 3. Dashboard Mini SVG (`DashboardMiniSvg`)
-Same concept as Hero but simplified — 3 KPI cards + a few order list rows. Used in `BrowserFrame` + `GradientStage` for step 2.
-
-### 4. Invoice/Stock SVG (`InvoiceStockSvg`)
-```
-┌──────────────────────────┐
-│ Item   Qty   Rate   Amt  │   ← Table header
-│ ───── ───── ───── ─────  │
-│ ───── ───── ───── ─────  │   ← 3-4 line item rows
-│ ───── ───── ───── ─────  │
-├──────────────────────────┤
-│        CGST  [ ████ ]    │   ← GST breakdown boxes
-│        SGST  [ ████ ]    │
-│        Total [ ████ ]    │
-├──────────────────────────┤
-│   [↓ Download PDF]       │   ← Button-like rect with arrow icon
-└──────────────────────────┘
-```
-Used in `BrowserFrame` + `GradientStage` for step 3.
-
-## Files
-
-### New (1)
-`src/components/landing/illustrations/SvgIllustrations.tsx`
-- Exports: `DashboardSvg`, `OrderFormSvg`, `DashboardMiniSvg`, `InvoiceStockSvg`
-- Each is a React component rendering an inline `<svg>` with `viewBox`
-- Uses `motion.rect`, `motion.line`, `motion.path` from framer-motion for the draw animation
-- Uses `useInView` for scroll trigger
-
-### Modified (2)
-1. `src/components/landing/sections/Hero.tsx`
-   - Remove `dashboardShot` import
-   - Replace `<img>` inside `BrowserFrame` with `<DashboardSvg />`
-
-2. `src/components/landing/sections/HowItWorks.tsx`
-   - Remove all 3 `.webp` imports
-   - Replace `OrderMockup` contents with `<OrderFormSvg />`
-   - Replace `DashboardMiniMockup` contents with `<DashboardMiniSvg />`
-   - Replace `StockMockup` contents with `<InvoiceStockSvg />`
+- All section copy, layout structure, section order, spacing
+- Device frame styling (BrowserFrame, GradientStage appearances)
+- HowItWorks text, badges, icons
+- Features, Problem, WhyOrdra, Pricing, Testimonials sections
+- Button styles, fonts, animations outside SVGs
 
