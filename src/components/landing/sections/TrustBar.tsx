@@ -11,7 +11,7 @@ const companies = [
 
 const stats = [
   "₹0 setup cost",
-  "4 user roles built-in",
+  "Access Levels",
   "Works offline",
 ];
 
