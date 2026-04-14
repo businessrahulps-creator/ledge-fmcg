@@ -31,7 +31,7 @@ export function FinalCTA() {
           </div>
 
           <p className="text-sm text-[#55556A]">
-            14 days free · No credit card needed · Cancel anytime
+            30 days free · No credit card needed · Cancel anytime · No credit card needed · Cancel anytime
           </p>
         </AnimateIn>
       </div>

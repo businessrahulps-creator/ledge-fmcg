@@ -6,7 +6,7 @@ const plans = [
   {
     name: "Free Trial",
     price: "₹0",
-    period: "for 14 days",
+    period: "for 30 days",
     features: [
       "Full access to all features",
       "Up to 3 team members",
@@ -42,7 +42,7 @@ export function PricingSection() {
               Simple, honest pricing.
             </h2>
             <p className="text-base text-[#8888A0]">
-              Start free for 14 days. No credit card required.
+              Start free for 30 days. No credit card required.. No credit card required.
             </p>
           </div>
         </AnimateIn>

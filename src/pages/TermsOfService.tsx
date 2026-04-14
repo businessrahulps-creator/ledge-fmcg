@@ -46,7 +46,7 @@ export default function TermsOfService() {
             <li><strong>Enterprise</strong> — Custom pricing. Tally/SAP integrations, multi-brand support, and on-premise options. Contact us for a quote.</li>
           </ul>
           <p className="mt-4">
-            Paid plans include a <strong>14-day free trial</strong>. No payment is charged during the trial. You can cancel before the trial ends at no cost.
+            Paid plans include a <strong>Paid plans include a <strong>30-day free trial</strong>. No payment is charged during the trial. You can cancel before the trial ends at no cost.</strong>. No payment is charged during the trial. You can cancel before the trial ends at no cost.
           </p>
         </Section>
 
