@@ -120,8 +120,8 @@ export function Pricing() {
                   </span>
                 )}
 
-                <div className="w-14 h-14 rounded-full bg-[#F0FDFA] flex items-center justify-center mb-5">
-                  <plan.icon size={28} strokeWidth={1.5} className="text-[#0D9488]" />
+                <div className="w-14 h-14 rounded-full bg-[#F4F4F5] flex items-center justify-center mb-5">
+                  <plan.icon size={28} strokeWidth={1.5} className="text-[#27272A]" />
                 </div>
 
                 <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A]">
@@ -155,9 +155,9 @@ export function Pricing() {
                 <div className="mt-6 space-y-3 flex-1">
                   {plan.features.map((f) => (
                     <div key={f} className="flex items-start gap-2">
-                      <Check
+                       <Check
                         size={16}
-                        className="text-[#0D9488] shrink-0 mt-0.5"
+                        className="text-[#27272A] shrink-0 mt-0.5"
                       />
                       <span className="font-body text-[15px] text-[#52525B]">
                         {f}
@@ -186,7 +186,7 @@ export function Pricing() {
           <p className="font-body text-[15px] text-[#71717A]">
             All plans include offline support, PWA install, automatic updates, and role-based access control.
           </p>
-          <p className="font-body text-[15px] text-[#0D9488] font-medium hover:underline cursor-pointer">
+          <p className="font-body text-[15px] text-[#27272A] font-medium hover:underline cursor-pointer">
             Need help deciding? Chat on WhatsApp →
           </p>
         </div>

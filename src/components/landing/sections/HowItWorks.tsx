@@ -86,7 +86,7 @@ export function HowItWorks() {
               <AnimateIn key={step.badge} delay={i * 0.1}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="bg-[#F0FDFA] text-[#0D9488] text-sm font-semibold px-3 py-1 rounded-full inline-flex items-center gap-2 mb-4">
+                    <span className="bg-[#F4F4F5] text-[#27272A] text-sm font-semibold px-3 py-1 rounded-full inline-flex items-center gap-2 mb-4">
                       <step.icon size={16} strokeWidth={1.5} />
                       {step.badge}
                     </span>
