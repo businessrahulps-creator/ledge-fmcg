@@ -1,84 +1,43 @@
 
 
-# Upgrade SVG Illustrations — Charcoal Color, Text Labels, Larger Size, More Detail
+# Refine Overflow + Add Subtle Attention Layer
 
-## Issues found in audit
+## Overflow Fixes
 
-1. **Wrong color**: SVGs use teal `#0D9488` but buttons use charcoal `#27272A`. The illustrations feel disconnected from the page's primary visual anchor.
-2. **No text**: Pure abstract lines with no context — a viewer can't tell what the shapes represent without reading the section copy.
-3. **Too small**: Hero mockup is `max-w-lg` (~512px). HowItWorks phone frame is `max-w-[280px]`. These feel like thumbnails, not hero-grade visuals.
-4. **Too sparse**: The SVGs have minimal elements (e.g., DashboardMini has only 3 KPI cards and 4 rows). They feel like wireframe sketches, not premium product representations.
-5. **ViewBox cramped**: `DashboardSvg` is 408×280 — small aspect ratio with tight padding. Needs more breathing room.
+**Problem**: The Hero mockup's `perspective(1200px) rotateY(-4deg)` combined with `max-w-2xl` and the `initial={{ x: 40 }}` spring causes content to extend beyond the viewport on medium screens. The section has no overflow clipping.
 
-## Changes
+**Fix 1 — Hero section**: Add `overflow-hidden` to the `<section>` element to clip any perspective overflow.
 
-### Color system (SvgIllustrations.tsx)
-Replace all teal with charcoal:
-- `C` → `#27272A`
-- `FILL_BG` → `rgba(39,39,42,0.04)`
-- `FILL_ACCENT` → `rgba(39,39,42,0.10)`
-- Stroke width stays `1px`
+**Fix 2 — Hero mockup container**: The Framer Motion `style={{ transform: "perspective(...)" }}` conflicts with the `animate` transform. Framer Motion overrides `style.transform` when animating `x`. Wrap the perspective in a parent div so both transforms compose correctly:
+- Outer div: `style={{ perspective: "1200px" }}`  
+- Inner motion.div: animates `x`, `rotateY: -4`, `rotateX: 2` via Framer Motion props (not inline style)
 
-### Add minimal SVG `<text>` labels
-Small, tasteful labels using `font-size: 9-11px`, `fill: #27272A`, `opacity: 0.5-0.7`, `font-family: sans-serif`. These animate in with the same fade timing. Examples:
+This ensures the entry animation and the resting perspective both work without one overriding the other.
 
-**DashboardSvg**: KPI labels — "Revenue", "Orders", "Dispatch", "Delivery". Bar chart title — "This Week". Order rows — "#ORD-247", "#ORD-246", "#ORD-245" with status pills "Delivered", "Pending", "Dispatched".
+**Fix 3 — DashboardSvg bar widths**: The longest bar is `w: 340` starting at `x: 60` = 400. The container rect is `x: 16, width: 408` = 424. The bar sits within bounds but visually the 340px bar is quite long. Scale down bar widths proportionally so the longest bar is ~320 (fits comfortably within the 408-wide container with padding).
 
-**OrderFormSvg**: "Select Dealer" in dropdown. Product rows — "Maggi 2-Min 12pk", "Surf Excel 1kg", "Parle-G 800g". Scheme pill — "Diwali 5+1". Radio labels — "Cash", "UPI", "Cheque". Button — "Place Order".
+## Additional Animation Layer (additive, non-destructive)
 
-**DashboardMiniSvg**: KPI labels — "₹4.8L", "230", "₹57K". Section header — "Recent Orders". Row labels — "#247 Sharma Stores", "#246 Gupta Trading".
+**Concept**: A single soft radial glow behind each device frame that fades in ~200ms after the frame appears and then gently pulses once (opacity 0 → 0.06 → 0.03). Think of it as a subtle "spotlight" that lands on the illustration. This is what Apple does on their product pages — a diffused light bloom behind the product image.
 
-**InvoiceStockSvg**: Table headers — "Item", "Qty", "Rate", "GST", "Amount". GST labels — "CGST 9%", "SGST 9%", "Total". Button — "Download PDF".
+**Implementation**: Add a `::before` pseudo-element (or an absolutely-positioned div) on the `GradientStage` wrapper that:
+- Is a 80% width/height radial gradient circle, centered, using `rgba(39,39,42,0.06)` (charcoal at 6% opacity)
+- Animates: `opacity: 0 → 1` over 1s, delayed 0.8s after section enters view
+- One-shot, no loop
+- `pointer-events: none`, `z-index: 0`
 
-### Increase size
+This draws the eye to the mockup without touching the SVGs at all. It's extremely subtle — just enough ambient light to create visual weight.
 
-**Hero.tsx**: Change `max-w-lg` to `max-w-2xl` on the mockup wrapper. The BrowserFrame fills the full column width.
+**Risk assessment**: Very low. It's a background glow behind existing elements. If it looks bad, removing it is a one-line delete.
 
-**HowItWorks.tsx**: Phone frame `max-w-[280px]` → `max-w-[320px]`. Browser frames already scale to column width (no change needed). The visual column gets more breathing room.
+## Files Modified (2)
 
-**SVG viewBoxes**: Expand with more padding:
-- `DashboardSvg`: `0 0 408 280` → `0 0 440 320` (more internal spacing between sections)
-- `OrderFormSvg`: `0 0 240 400` → `0 0 260 440` (add a 4th product line, more vertical space)
-- `DashboardMiniSvg`: `0 0 396 220` → `0 0 420 260` (5 rows instead of 4, more spacing)
-- `InvoiceStockSvg`: `0 0 396 280` → `0 0 420 320` (5 data rows instead of 4)
-
-### More detail (richer illustrations)
-
-**DashboardSvg** additions:
-- Add a 5th and 6th bar to the chart (8 total bars, varying widths)
-- Add a mini sparkline (SVG path) inside each KPI card
-- Add 2 more order rows (5 total)
-- Add status pill labels next to row badges
-
-**OrderFormSvg** additions:
-- Add a 4th product line
-- Add a subtotal/total section between the scheme tag and radio buttons
-- Add a small "₹" symbol next to price lines
-
-**DashboardMiniSvg** additions:
-- Add a 5th order row
-- Add a small "Live" pulse indicator (circle with opacity pulse) next to the header
-
-**InvoiceStockSvg** additions:
-- Add a 5th data row
-- Add horizontal divider between GST area and table
-- Add a small invoice number label at the top
-
-### Animation refinements
-- Text labels fade in 200ms after their parent element (creates a nice layered reveal)
-- Sparklines inside KPI cards draw with `pathLength` after the card fades in
-- Slightly longer stagger between elements (120ms instead of 80-100ms) for a more deliberate, premium choreography
-
-## Files modified (3)
-
-1. **`src/components/landing/illustrations/SvgIllustrations.tsx`** — Color swap, add text labels, expand viewBoxes, add more elements, refine animation timing
-2. **`src/components/landing/sections/Hero.tsx`** — Change `max-w-lg` → `max-w-2xl`
-3. **`src/components/landing/DeviceFrames.tsx`** — PhoneFrame `max-w-[280px]` → `max-w-[320px]`
+1. **`src/components/landing/sections/Hero.tsx`** — Add `overflow-hidden` to section, fix perspective/animation composition
+2. **`src/components/landing/DeviceFrames.tsx`** — Add ambient glow div inside `GradientStage` (affects all mockups automatically)
 
 ## What does NOT change
-- All section copy, layout structure, section order, spacing
-- Device frame styling (BrowserFrame, GradientStage appearances)
-- HowItWorks text, badges, icons
-- Features, Problem, WhyOrdra, Pricing, Testimonials sections
-- Button styles, fonts, animations outside SVGs
+- All SVG illustrations (untouched)
+- All text, copy, layout, spacing
+- HowItWorks structure
+- Any other section
 
