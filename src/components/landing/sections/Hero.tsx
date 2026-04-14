@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BrowserFrame, GradientStage } from "../DeviceFrames";
-import dashboardShot from "@/assets/dashboard-shot.webp";
+import { DashboardSvg } from "../illustrations/SvgIllustrations";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 12 },
@@ -12,7 +12,9 @@ const fadeUp = (delay: number) => ({
 function DashboardMockup() {
   return (
     <BrowserFrame url="app.ledge.in/dashboard">
-      <img src={dashboardShot} alt="Ledge dashboard showing revenue, orders, and dealer analytics" className="w-full block" loading="eager" />
+      <div className="p-4 bg-white">
+        <DashboardSvg />
+      </div>
     </BrowserFrame>
   );
 }
