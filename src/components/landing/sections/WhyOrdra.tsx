@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, Shield, FileText } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, Receipt } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 
 const blocks = [

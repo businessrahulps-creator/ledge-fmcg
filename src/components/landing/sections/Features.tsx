@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardCheck, Users, Package, IndianRupee, CloudOff } from "lucide-react";
+import { LayoutDashboard, Route, Contact, Warehouse, IndianRupee, Layers } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 
 const features = [
