@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, Shield, FileText } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, Receipt } from "lucide-react";
 import { AnimateIn } from "../AnimateIn";
 
 const blocks = [
@@ -15,13 +15,13 @@ const blocks = [
       "Your salesperson is in a basement godown or a market with spotty signal. Ledge keeps working. Orders placed offline go into a queue and sync the moment connectivity returns. Dealer data and product catalogues are cached locally. The field doesn't stop because the internet did.",
   },
   {
-    icon: Shield,
+    icon: ShieldCheck,
     title: "Four roles. One system. Everyone sees exactly what they should.",
     content:
       "The business owner sees everything. The sales manager tracks team performance, targets, and dispatch. The accountant handles payments, invoicing, and GST compliance - without touching inventory quantities. The field salesperson sees their dealers, their orders, their numbers. Role-based access, not role-based chaos.",
   },
   {
-    icon: FileText,
+    icon: Receipt,
     title: "GST-compliant billing that builds itself from your orders.",
     content:
       "Select an order. Choose GST Invoice, Estimate, Proforma, or Credit Note. CGST/SGST for intra-state, IGST for inter-state - auto-calculated from the state codes on the buyer and seller profiles. Amount in words in the Indian numbering system. Sequential invoice numbers with your prefix. PDF generated in one click. Suresh doesn't need to open Tally for this anymore.",
@@ -42,7 +42,9 @@ export function WhyOrdra() {
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
               <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
-                <block.icon size={24} strokeWidth={1.5} className="text-[#0D9488] mb-4" />
+                <div className="w-14 h-14 rounded-full bg-[#F0FDFA] flex items-center justify-center mb-5">
+                  <block.icon size={28} strokeWidth={1.5} className="text-[#0D9488]" />
+                </div>
                 <h3 className="font-heading font-bold text-[18px] text-[#1A1A1A] mb-3">
                   {block.title}
                 </h3>

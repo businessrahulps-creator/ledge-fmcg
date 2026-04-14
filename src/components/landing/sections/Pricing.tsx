@@ -120,7 +120,9 @@ export function Pricing() {
                   </span>
                 )}
 
-                <plan.icon size={24} strokeWidth={1.5} className="text-[#0D9488] mb-3" />
+                <div className="w-14 h-14 rounded-full bg-[#F0FDFA] flex items-center justify-center mb-5">
+                  <plan.icon size={28} strokeWidth={1.5} className="text-[#0D9488]" />
+                </div>
 
                 <h3 className="font-heading font-bold text-[20px] text-[#1A1A1A]">
                   {plan.name}
