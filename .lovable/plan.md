@@ -1,23 +1,26 @@
 
 
-# Fix Hero Section Mobile Spacing
+# Fix TrustBar Stats — Single Line on Mobile
 
 ## Problem
-On mobile (390px), the hero section content sits too close to the fixed navbar. The section has `pt-16` (64px) but the navbar is `h-16` (64px), so content starts immediately below the nav with zero breathing room.
+At 390px, the stat texts ("₹0 setup cost", "4 user roles built-in", "Works offline") wrap to multiple lines because `text-[18px]` is too large for a 3-column grid on mobile.
 
-## Fix — `Hero.tsx` line 22
+## Fix — `src/components/landing/sections/TrustBar.tsx` line 38
 
-Change `pt-16` to `pt-28` on mobile, keeping the desktop padding unchanged:
+Reduce mobile font size from `text-[18px]` to `text-[13px]` and remove horizontal padding on mobile so all three stats fit on one line:
 
 ```
-- className="min-h-screen flex items-center pt-16 px-6 bg-[#F8F7F5] py-28 md:py-36"
-+ className="min-h-screen flex items-center px-6 bg-[#F8F7F5] pt-32 pb-28 md:py-36"
+- <div className="text-center px-4">
+-   <div className="font-heading font-extrabold text-[18px] md:text-[20px] text-[#1A1A1A] mb-1">
++ <div className="text-center px-1 md:px-4">
++   <div className="font-heading font-extrabold text-[13px] md:text-[20px] text-[#1A1A1A] mb-1 whitespace-nowrap">
 ```
 
-This gives 128px top padding on mobile (64px nav + 64px breathing room), while desktop stays at `py-36`. The `items-center` vertical centering still works but content won't crowd the nav.
+- `text-[13px]` on mobile → fits all three in one line at 390px
+- `whitespace-nowrap` prevents any wrapping
+- `px-1` on mobile reduces wasted space between columns
+- Desktop stays at `text-[20px]` with `px-4`
 
 ## What does NOT change
-- All copy, buttons, mockup, animations, colors
-- Desktop layout
-- Navbar height or position
+- Stat text content, section layout, animations, colors, pull quote
 
