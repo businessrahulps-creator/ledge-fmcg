@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, ShieldCheck, Receipt } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
