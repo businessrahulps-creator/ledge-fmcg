@@ -5,18 +5,22 @@ export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-white font-body antialiased scroll-smooth">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 pt-28 pb-20">
-        <h1 className="font-heading font-extrabold text-4xl tracking-tight text-midnight mb-2">
-          Terms of Service
-        </h1>
-        <p className="text-graphite mb-10">
-          <strong>Last updated:</strong> April 7, 2026
-        </p>
-        <p className="text-graphite leading-relaxed mb-8">
+      <section className="pt-28 pb-14 md:pt-36 md:pb-20 bg-[#F8F7F5]">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <h1 className="font-heading font-extrabold text-4xl md:text-5xl tracking-[-0.04em] text-[#1A1A1A]">
+            Terms of Service
+          </h1>
+          <p className="font-body text-[#52525B] mt-4">
+            Last updated: April 7, 2026
+          </p>
+        </div>
+      </section>
+      <main className="max-w-3xl mx-auto px-6 py-12 md:py-20">
+        <p className="text-[#52525B] leading-relaxed mb-8">
           These Terms of Service ("Terms") govern your use of the Ledge platform at getledge.in, operated by Ledge (India) ("Ledge", "we", "our", or "us"). By creating an account or using the platform, you agree to these Terms.
         </p>
 
-        <hr className="border-fog my-10" />
+        <hr className="border-[#E8E5E0] my-10" />
 
         <Section title="Who Can Use Ledge">
           <p>
@@ -130,9 +134,9 @@ export default function TermsOfService() {
 function Section({ title, children, last = false }: { title: string; children: React.ReactNode; last?: boolean }) {
   return (
     <>
-      <h2 className="font-heading font-bold text-xl text-midnight mb-4">{title}</h2>
-      <div className="text-graphite leading-relaxed space-y-3">{children}</div>
-      {!last && <hr className="border-fog my-10" />}
+      <h2 className="font-heading font-bold text-xl text-[#1A1A1A] mb-4">{title}</h2>
+      <div className="text-[#52525B] leading-relaxed space-y-3">{children}</div>
+      {!last && <hr className="border-[#E8E5E0] my-10" />}
     </>
   );
 }

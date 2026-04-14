@@ -116,6 +116,8 @@ export function Footer() {
               <a
                 key={href}
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
               >
                 <Icon size={20} />

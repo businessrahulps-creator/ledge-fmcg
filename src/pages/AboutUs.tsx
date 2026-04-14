@@ -52,10 +52,10 @@ export default function AboutUs() {
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-28 pb-14 md:pt-36 md:pb-20 bg-snow">
+      <section className="pt-28 pb-14 md:pt-36 md:pb-20 bg-[#F8F7F5]">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <motion.h1
-            className="font-heading font-extrabold text-4xl md:text-5xl tracking-[-0.04em] text-midnight"
+            className="font-heading font-extrabold text-4xl md:text-5xl tracking-[-0.04em] text-[#1A1A1A]"
             variants={fadeUp}
             initial="hidden"
             animate="visible"
@@ -64,7 +64,7 @@ export default function AboutUs() {
             About Us
           </motion.h1>
           <motion.p
-            className="mt-4 font-body text-lg text-graphite max-w-xl mx-auto"
+            className="mt-4 font-body text-lg text-[#52525B] max-w-xl mx-auto"
             variants={fadeUp}
             initial="hidden"
             animate="visible"
@@ -88,22 +88,22 @@ export default function AboutUs() {
               custom={0}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-mist">
-                  <s.icon size={20} className="text-midnight" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F4F4F5]">
+                  <s.icon size={20} className="text-[#1A1A1A]" />
                 </div>
-                <h2 className="font-heading font-bold text-xl text-midnight">
+                <h2 className="font-heading font-bold text-xl text-[#1A1A1A]">
                   {s.title}
                 </h2>
               </div>
               <div className="space-y-4 pl-[52px]">
                 {s.content.map((p, i) => (
-                  <p key={i} className="font-body text-[15px] text-graphite leading-relaxed">
+                  <p key={i} className="font-body text-[15px] text-[#52525B] leading-relaxed">
                     {p}
                   </p>
                 ))}
               </div>
               {idx < sections.length - 1 && (
-                <hr className="mt-14 border-fog" />
+                <hr className="mt-14 border-[#E8E5E0]" />
               )}
             </motion.div>
           ))}
@@ -116,36 +116,36 @@ export default function AboutUs() {
             viewport={{ once: true, margin: "-60px" }}
             custom={0}
           >
-            <hr className="mb-14 border-fog" />
+            <hr className="mb-14 border-[#E8E5E0]" />
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-mist">
-                <Mail size={20} className="text-midnight" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F4F4F5]">
+                <Mail size={20} className="text-[#1A1A1A]" />
               </div>
-              <h2 className="font-heading font-bold text-xl text-midnight">
+              <h2 className="font-heading font-bold text-xl text-[#1A1A1A]">
                 Get in Touch
               </h2>
             </div>
             <div className="pl-[52px] space-y-4">
-              <p className="font-body text-[15px] text-graphite leading-relaxed">
+              <p className="font-body text-[15px] text-[#52525B] leading-relaxed">
                 We would love to hear from you — whether you have a question, a feature request, or want to see how Ledge fits your business.
               </p>
-              <div className="font-body text-[15px] text-graphite space-y-1">
+              <div className="font-body text-[15px] text-[#52525B] space-y-1">
                 <p>
                   Email:{" "}
-                  <a href="mailto:ashaoviyaps@gmail.com" className="text-midnight underline underline-offset-2">
+                  <a href="mailto:ashaoviyaps@gmail.com" className="text-[#1A1A1A] underline underline-offset-2">
                     ashaoviyaps@gmail.com
                   </a>
                 </p>
                 <p>
                   Website:{" "}
-                  <a href="https://getledge.in" target="_blank" rel="noopener noreferrer" className="text-midnight underline underline-offset-2">
+                  <a href="https://getledge.in" target="_blank" rel="noopener noreferrer" className="text-[#1A1A1A] underline underline-offset-2">
                     getledge.in
                   </a>
                 </p>
               </div>
               <a
                 href="mailto:ashaoviyaps@gmail.com"
-                className="inline-flex items-center bg-indigo-600 text-white px-8 py-3 rounded-full font-body font-semibold text-sm hover:bg-indigo-700 transition-colors duration-200 mt-2"
+                className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold text-sm hover:bg-[#1A1A1A] transition-colors duration-200 mt-2"
               >
                 Get in Touch
               </a>
