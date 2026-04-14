@@ -42,7 +42,7 @@ export function Hero() {
           <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-base text-white bg-[#27272A] hover:bg-[#1A1A1A] px-8 py-3.5 rounded-2xl hover:scale-[1.01] transition-all duration-200"
+              className="font-body font-semibold text-white bg-[#27272A] hover:bg-[#1A1A1A] px-8 py-3.5 rounded-2xl hover:scale-[1.01] transition-all duration-200 text-xs"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)" }}
               onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.08)")}
               onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)")}
