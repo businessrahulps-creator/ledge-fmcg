@@ -53,12 +53,8 @@ export function DashboardSvg() {
     { x: 328, w: 96, label: "Delivery", value: "94%" },
   ];
 
-  const sparklines = [
-    "M0,12 L6,8 L12,10 L18,4 L24,6 L30,2 L36,5",
-    "M0,10 L6,6 L12,8 L18,3 L24,7 L30,4 L36,2",
-    "M0,8 L6,10 L12,5 L18,7 L24,3 L30,6 L36,1",
-    "M0,6 L6,10 L12,4 L18,8 L24,2 L30,5 L36,3",
-  ];
+
+
 
   const bars = [
     { w: 240, label: "Mon" },
