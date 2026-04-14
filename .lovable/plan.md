@@ -1,34 +1,21 @@
 
 
-# Status + Infrastructure Badge in Footer Grid (4th Column)
+# Fix AWS Logo in Footer
 
-## Concept
+## Problem
+The inline SVG paths for the AWS logo are malformed — wrong viewBox, bad transforms, and incomplete path data causing a distorted rendering.
 
-Place the animated status badge and AWS infrastructure line as the **4th column** in the existing `grid-cols-2 md:grid-cols-4` grid — right next to the Legal column. This fills the empty space naturally without adding a new row.
+## Solution
+Replace the broken inline SVG with the official AWS logo image (user-provided), compressed and saved to `src/assets/`. Render it as an `<img>` tag at the correct small size (monochrome via CSS grayscale filter to match the muted footer aesthetic).
 
-## Layout
+## Steps
 
-```text
-Product       Company       Legal              Status
-─────────     ─────────     ──────────────     ─────────────────────
-Features      About Us      Privacy Policy     ● All systems operational
-Pricing       Contact       Terms of Service   ☁ AWS · Asia Pacific (Mumbai)
-                            Refund Policy
-```
-
-## What gets built
-
-**`src/components/landing/sections/Footer.tsx`** — single file change:
-
-- Add a 4th `<div>` inside the grid after the `columns.map()` loop
-- **Status badge**: A pill with a pulsing green dot (`animate-pulse`), text "All systems operational", and a shimmer border effect (CSS `@keyframes` via inline style or Tailwind arbitrary `animate-[shimmer_3s_linear_infinite]`)
-- **AWS line**: Below the pill, muted text "Hosted on AWS · Asia Pacific (Mumbai)" with an inline monochrome AWS SVG logo (~20px wide)
-- Framer Motion `motion.div` with `initial={{ opacity: 0, y: 8 }}` / `whileInView={{ opacity: 1, y: 0 }}` for entrance
-
-**`tailwind.config.ts`** — add `shimmer` keyframe for the gradient border sweep animation
+1. **Compress and copy** the uploaded AWS logo (`df69333c05cd1c97716a8064c3ee21e0.png`) to `src/assets/aws-logo.png` — resize to ~80px wide for the small footer usage
+2. **`src/components/landing/sections/Footer.tsx`** — Replace the `AwsLogo` SVG component with an `<img>` import:
+   - `import awsLogo from "@/assets/aws-logo.png"`
+   - Render as `<img src={awsLogo} alt="AWS" className="h-3 w-auto grayscale opacity-50" />` inline next to the text
+   - Remove the old `AwsLogo` function entirely
 
 ## What does NOT change
-- The 3 existing link columns (Product, Company, Legal)
-- Copyright bar, social icons
-- No new dependencies
+- Status badge, shimmer animation, footer layout, links, copyright
 
