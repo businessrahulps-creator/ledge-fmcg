@@ -91,6 +91,15 @@ export function GradientStage({
       className={`relative rounded-3xl p-6 md:p-10 ${className}`}
       style={{ background: gradients[variant] }}
     >
+      {/* Ambient glow — subtle spotlight behind the mockup */}
+      <div
+        className="absolute inset-0 rounded-3xl pointer-events-none z-0 animate-[ambientGlow_1.8s_ease-out_0.8s_forwards]"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(39,39,42,0.06), transparent 70%)",
+          opacity: 0,
+        }}
+      />
       {/* Subtle dot pattern */}
       <div
         className="absolute inset-0 rounded-3xl opacity-[0.02]"
