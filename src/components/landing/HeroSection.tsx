@@ -162,7 +162,7 @@ export function HeroSection() {
             </a>
           </div>
           <p className="text-sm text-[#55556A]">
-            14-day free trial · No credit card required · Cancel anytime
+            30-day free trial · No credit card required · Cancel anytime · No credit card required · Cancel anytime
           </p>
         </AnimateIn>
 
