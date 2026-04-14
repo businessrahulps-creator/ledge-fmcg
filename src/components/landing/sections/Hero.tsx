@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { spring } from "@/lib/motion";
 import { BrowserFrame, GradientStage } from "../DeviceFrames";
 import { DashboardSvg } from "../illustrations/SvgIllustrations";
 
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  transition: { type: "spring" as const, damping: 26, stiffness: 200, delay },
+  initial: { opacity: 0, y: 20, filter: "blur(4px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  transition: { ...spring.default as object, delay },
 });
 
 function DashboardMockup() {
@@ -18,6 +19,8 @@ function DashboardMockup() {
     </BrowserFrame>
   );
 }
+
+const MotionLink = motion.create(Link);
 
 export function Hero() {
   return (
@@ -34,35 +37,37 @@ export function Hero() {
 
           <motion.p
             className="font-body text-[16px] md:text-[18px] text-[#52525B] leading-[1.6] max-w-xl mt-6"
-            {...fadeUp(0.2)}
+            {...fadeUp(0.12)}
           >
             Ledge is a complete distribution management platform - order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
           </motion.p>
 
-          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8" {...fadeUp(0.3)}>
-            <Link
+          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8" {...fadeUp(0.2)}>
+            <MotionLink
               to="/signup"
-              className="font-body font-semibold text-white bg-[#27272A] hover:bg-[#1A1A1A] w-full sm:w-auto text-base px-8 py-4 rounded-full text-center hover:scale-[1.01] transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              transition={spring.snappy}
+              className="font-body font-semibold text-white bg-[#27272A] hover:bg-[#1A1A1A] w-full sm:w-auto text-base px-8 py-4 rounded-full text-center transition-colors duration-200"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)" }}
-              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.08)")}
-              onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)")}
             >
               Get Started Free
-            </Link>
-            <a
+            </MotionLink>
+            <motion.a
               href="#how-it-works"
-              className="font-body font-semibold text-base text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] w-full sm:w-auto px-8 py-4 rounded-full text-center transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              transition={spring.snappy}
+              className="font-body font-semibold text-base text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] w-full sm:w-auto px-8 py-4 rounded-full text-center transition-colors duration-200"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 3px 12px rgba(0,0,0,0.1)")}
-              onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)")}
             >
               See How It Works
-            </a>
+            </motion.a>
           </motion.div>
 
           <motion.p
             className="font-body text-sm text-[#71717A] mt-8"
-            {...fadeUp(0.4)}
+            {...fadeUp(0.28)}
           >
             Used by FMCG distribution businesses across India to replace spreadsheets, WhatsApp threads, and ERPs their teams hated.
           </motion.p>
@@ -77,11 +82,16 @@ export function Hero() {
           <motion.div
             initial={{ x: 40, opacity: 0, rotateY: 0, rotateX: 0 }}
             animate={{ x: 0, opacity: 1, rotateY: -4, rotateX: 2 }}
-            transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.2 }}
+            transition={{ ...spring.gentle as object, delay: 0.15 }}
           >
-            <GradientStage variant="indigo">
-              <DashboardMockup />
-            </GradientStage>
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <GradientStage variant="indigo">
+                <DashboardMockup />
+              </GradientStage>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { LayoutDashboard, Route, Contact, Warehouse, IndianRupee, Layers } from "lucide-react";
-import { AnimateIn } from "../AnimateIn";
+import { motion } from "framer-motion";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const features = [
   {
@@ -44,16 +45,21 @@ export function Features() {
   return (
     <section id="features" className="bg-[#F8F7F5] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
             Built for the way Indian distribution businesses actually run. Not for how someone in a boardroom imagined they do.
           </h2>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, i) => (
-            <AnimateIn key={feature.title} delay={i * 0.08}>
-              <div className="bg-white border border-[#E8E5E0] rounded-3xl p-10 transition-all duration-300 hover:border-[#D4D1CC] h-full flex flex-col" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature) => (
+            <StaggerItem key={feature.title}>
+              <motion.div
+                className="bg-white border border-[#E8E5E0] rounded-3xl p-10 transition-shadow duration-300 h-full flex flex-col"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
+                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              >
                 <div className="w-14 h-14 rounded-full bg-[#F4F4F5] flex items-center justify-center mb-5">
                   <feature.icon size={28} strokeWidth={1.5} className="text-[#27272A]" />
                 </div>
@@ -63,10 +69,10 @@ export function Features() {
                 <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
                   {feature.description}
                 </p>
-              </div>
-            </AnimateIn>
+              </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

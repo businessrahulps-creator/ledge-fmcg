@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Menu, LayoutDashboard, Layers, Route, IndianRupee } from "lucide-react";
+import { spring } from "@/lib/motion";
 import {
   Sheet,
   SheetContent,
@@ -29,7 +31,10 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav
+    <motion.nav
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={spring.default}
       className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
         scrolled
           ? "bg-[#F8F7F5]/95 backdrop-blur-md border-b border-[#E8E5E0]"
@@ -60,15 +65,15 @@ export function Navbar() {
           <Link to="/login" className="font-body font-medium text-[15px] text-[#52525B] hover:text-[#1A1A1A] transition-colors duration-200">
             Sign in
           </Link>
-          <Link
-            to="/signup"
-            className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-[#1A1A1A] hover:scale-[1.01] transition-all duration-200 text-sm"
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.15)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)")}
-          >
-            Get Started Free
-          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={spring.snappy}>
+            <Link
+              to="/signup"
+              className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-[#1A1A1A] transition-colors duration-200 text-sm"
+              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+            >
+              Get Started Free
+            </Link>
+          </motion.div>
         </div>
 
         {/* Mobile hamburger */}
@@ -122,6 +127,6 @@ export function Navbar() {
           </SheetContent>
         </Sheet>
       </div>
-    </nav>
+    </motion.nav>
   );
 }

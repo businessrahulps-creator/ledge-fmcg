@@ -1,6 +1,10 @@
 import { Check, Gift, TrendingUp, Layers, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { AnimateIn } from "../AnimateIn";
+import { motion } from "framer-motion";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { spring } from "@/lib/motion";
+
+const MotionLink = motion.create(Link);
 
 const plans = [
   {
@@ -90,7 +94,7 @@ export function Pricing() {
   return (
     <section id="pricing" className="bg-white py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
-        <AnimateIn>
+        <AnimateIn variant="blurFadeUp">
           <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-2 tracking-[-0.04em]">
             Start free. Pay when it's running your business.
           </h2>
@@ -99,11 +103,11 @@ export function Pricing() {
           </p>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, i) => (
-            <AnimateIn key={plan.name} delay={i * 0.08}>
-              <div
-                className={`bg-white rounded-3xl p-10 flex flex-col h-full ${
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          {plans.map((plan) => (
+            <StaggerItem key={plan.name}>
+              <motion.div
+                className={`bg-white rounded-3xl p-10 flex flex-col h-full transition-shadow duration-300 ${
                   plan.highlighted
                     ? "border-2 border-[#27272A] relative"
                     : "border border-[#E8E5E0]"
@@ -113,6 +117,11 @@ export function Pricing() {
                     ? "0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.06)"
                     : "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)",
                 }}
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)",
+                }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
               >
                 {plan.highlighted && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#27272A] text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
@@ -166,9 +175,11 @@ export function Pricing() {
                   ))}
                 </div>
 
-                <Link
+                <MotionLink
                   to="/signup"
-                  className={`mt-8 w-full py-3.5 rounded-full text-center font-semibold text-sm transition-all duration-200 hover:scale-[1.01] block ${plan.ctaStyle}`}
+                  whileTap={{ scale: 0.97 }}
+                  transition={spring.snappy}
+                  className={`mt-8 w-full py-3.5 rounded-full text-center font-semibold text-sm transition-colors duration-200 block ${plan.ctaStyle}`}
                   style={{
                     boxShadow: plan.highlighted
                       ? "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)"
@@ -176,11 +187,11 @@ export function Pricing() {
                   }}
                 >
                   {plan.cta}
-                </Link>
-              </div>
-            </AnimateIn>
+                </MotionLink>
+              </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
         <div className="text-center mt-10 space-y-2">
           <p className="font-body text-[15px] text-[#71717A]">

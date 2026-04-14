@@ -1,4 +1,4 @@
-import { AnimateIn } from "../AnimateIn";
+import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const companies = [
   "Aryan Beverages",
@@ -20,8 +20,8 @@ export function TrustBar() {
     <section className="py-16 md:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
-        <div className="overflow-hidden">
-          <div className="flex gap-12 animate-marquee w-max items-center">
+        <div className="overflow-hidden group">
+          <div className="flex gap-12 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
             {[...companies, ...companies].map((name, i) => (
               <span key={i} className="text-lg font-semibold text-[#D4D1CC] whitespace-nowrap shrink-0">
                 {name}
@@ -31,20 +31,20 @@ export function TrustBar() {
         </div>
 
         {/* Stat Row */}
-        <div className="grid grid-cols-3 max-w-3xl mx-auto text-center mt-12">
-          {stats.map((stat, i) => (
-            <AnimateIn key={stat} delay={i * 0.1}>
+        <StaggerContainer className="grid grid-cols-3 max-w-3xl mx-auto text-center mt-12">
+          {stats.map((stat) => (
+            <StaggerItem key={stat}>
               <div className="text-center px-1 md:px-4">
                 <div className="font-heading text-sm md:text-lg text-[#1A1A1A] mb-1 whitespace-nowrap font-semibold">
                   {stat}
                 </div>
               </div>
-            </AnimateIn>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Pull Quote */}
-        <AnimateIn delay={0.15} className="mt-12">
+        <AnimateIn delay={0.15} variant="scaleUp" className="mt-12">
           <div className="bg-white rounded-3xl p-10 max-w-2xl mx-auto relative border border-[#E8E5E0]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
             <span className="absolute top-4 left-6 text-6xl font-serif text-[#D4D1CC] opacity-40 leading-none select-none">
               "
