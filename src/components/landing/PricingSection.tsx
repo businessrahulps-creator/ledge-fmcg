@@ -6,7 +6,7 @@ const plans = [
   {
     name: "Free Trial",
     price: "₹0",
-    period: period: "for 30 days",,
+    period: "for 30 days",
     features: [
       "Full access to all features",
       "Up to 3 team members",
