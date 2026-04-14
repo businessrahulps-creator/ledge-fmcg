@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/sheet";
 
 const links = [
-  { label: "Home", href: "/#", icon: Home },
-  { label: "Features", href: "/#features", icon: Sparkles },
-  { label: "How It Works", href: "/#how-it-works", icon: RefreshCw },
-  { label: "Pricing", href: "/#pricing", icon: CreditCard },
+  { label: "Home", href: "/#", icon: LayoutDashboard },
+  { label: "Features", href: "/#features", icon: Layers },
+  { label: "How It Works", href: "/#how-it-works", icon: Route },
+  { label: "Pricing", href: "/#pricing", icon: IndianRupee },
 ];
 
 const desktopLinks = links.slice(1); // exclude Home from desktop nav
