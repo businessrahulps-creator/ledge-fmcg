@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, Home, Sparkles, RefreshCw, CreditCard } from "lucide-react";
+import { Menu, LayoutDashboard, Layers, Route, IndianRupee } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/sheet";
 
 const links = [
-  { label: "Home", href: "/#", icon: Home },
-  { label: "Features", href: "/#features", icon: Sparkles },
-  { label: "How It Works", href: "/#how-it-works", icon: RefreshCw },
-  { label: "Pricing", href: "/#pricing", icon: CreditCard },
+  { label: "Home", href: "/#", icon: LayoutDashboard },
+  { label: "Features", href: "/#features", icon: Layers },
+  { label: "How It Works", href: "/#how-it-works", icon: Route },
+  { label: "Pricing", href: "/#pricing", icon: IndianRupee },
 ];
 
 const desktopLinks = links.slice(1); // exclude Home from desktop nav
@@ -96,7 +96,7 @@ export function Navbar() {
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3.5 px-3 py-3 rounded-xl font-body font-medium text-[17px] text-[#52525B] hover:text-[#1A1A1A] hover:bg-[#F4F4F5] transition-all duration-150"
                   >
-                    <Icon size={20} strokeWidth={1.8} />
+                    <Icon size={20} strokeWidth={1.5} />
                     {l.label}
                   </a>
                 );
