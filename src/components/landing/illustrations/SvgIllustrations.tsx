@@ -76,7 +76,6 @@ export function DashboardSvg() {
     { id: "#ORD-246", name: "Gupta Trading", status: "Pending" },
     { id: "#ORD-245", name: "Patel Dist.", status: "Dispatched" },
     { id: "#ORD-244", name: "Singh Retail", status: "Delivered" },
-    { id: "#ORD-243", name: "Jain Agency", status: "Pending" },
   ];
 
   return (
@@ -111,18 +110,6 @@ export function DashboardSvg() {
           >
             {card.value}
           </motion.text>
-          {/* Sparkline */}
-          <motion.path
-            d={sparklines[i]}
-            stroke={C}
-            strokeWidth={1}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-            opacity={0.25}
-            transform={`translate(${card.x + card.w - 46}, ${28})`}
-            {...drawLine(inView, 0.3 + i * 0.12)}
-          />
         </g>
       ))}
 

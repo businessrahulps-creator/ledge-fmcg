@@ -42,8 +42,8 @@ export function WhyOrdra() {
           {blocks.map((block, i) => (
             <AnimateIn key={block.title} delay={i * 0.1}>
               <div className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-all duration-300 hover:border-[#D4D1CC]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
-                <div className="w-14 h-14 rounded-full bg-[#F0FDFA] flex items-center justify-center mb-5">
-                  <block.icon size={28} strokeWidth={1.5} className="text-[#0D9488]" />
+                <div className="w-14 h-14 rounded-full bg-[#F4F4F5] flex items-center justify-center mb-5">
+                  <block.icon size={28} strokeWidth={1.5} className="text-[#27272A]" />
                 </div>
                 <h3 className="font-heading font-bold text-[18px] text-[#1A1A1A] mb-3">
                   {block.title}
