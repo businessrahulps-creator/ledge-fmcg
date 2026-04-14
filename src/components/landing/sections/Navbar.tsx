@@ -96,7 +96,7 @@ export function Navbar() {
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3.5 px-3 py-3 rounded-xl font-body font-medium text-[17px] text-[#52525B] hover:text-[#1A1A1A] hover:bg-[#F4F4F5] transition-all duration-150"
                   >
-                    <Icon size={20} strokeWidth={1.8} />
+                    <Icon size={20} strokeWidth={1.5} />
                     {l.label}
                   </a>
                 );
