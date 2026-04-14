@@ -39,10 +39,10 @@ export function Hero() {
             Ledge is a complete distribution management platform - order capture, inventory, payments, GST invoicing, dealer intelligence, and sales performance, all in one place. Your field team uses it on their phone. You run the whole business from your dashboard.
           </motion.p>
 
-          <motion.div className="flex flex-wrap gap-4 mt-8" {...fadeUp(0.3)}>
+          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8" {...fadeUp(0.3)}>
             <Link
               to="/signup"
-              className="font-body font-semibold text-white bg-[#27272A] hover:bg-[#1A1A1A] px-8 py-3.5 rounded-2xl hover:scale-[1.01] transition-all duration-200 text-xs"
+              className="font-body font-semibold text-white bg-[#27272A] hover:bg-[#1A1A1A] w-full sm:w-auto text-base px-8 py-4 rounded-full text-center hover:scale-[1.01] transition-all duration-200"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)" }}
               onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.08)")}
               onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)")}
@@ -51,7 +51,7 @@ export function Hero() {
             </Link>
             <a
               href="#how-it-works"
-              className="font-body font-medium text-sm text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] px-7 py-3 rounded-3xl transition-all duration-200"
+              className="font-body font-semibold text-base text-[#1A1A1A] border border-[#D4D1CC] hover:border-[#A8A29E] w-full sm:w-auto px-8 py-4 rounded-full text-center transition-all duration-200"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
               onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 3px 12px rgba(0,0,0,0.1)")}
               onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)")}
