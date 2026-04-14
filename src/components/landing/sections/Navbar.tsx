@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Home, Sparkles, RefreshCw, CreditCard } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -10,10 +10,13 @@ import {
 } from "@/components/ui/sheet";
 
 const links = [
-  { label: "Features", href: "/#features" },
-  { label: "How It Works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Home", href: "/#", icon: Home },
+  { label: "Features", href: "/#features", icon: Sparkles },
+  { label: "How It Works", href: "/#how-it-works", icon: RefreshCw },
+  { label: "Pricing", href: "/#pricing", icon: CreditCard },
 ];
+
+const desktopLinks = links.slice(1); // exclude Home from desktop nav
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -41,7 +44,7 @@ export function Navbar() {
 
         {/* Center links  -  desktop */}
         <div className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
+          {desktopLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -75,36 +78,47 @@ export function Navbar() {
               <Menu size={24} />
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="bg-white border-[#E8E5E0] w-72 flex flex-col">
+          <SheetContent
+            side="left"
+            className="bg-white border-[#E8E5E0] w-80 flex flex-col p-6 [&>button]:rounded-full [&>button]:border [&>button]:border-[#E8E5E0] [&>button]:w-8 [&>button]:h-8 [&>button]:flex [&>button]:items-center [&>button]:justify-center"
+          >
             <SheetHeader>
-              <SheetTitle className="text-[#1A1A1A] font-heading">Menu</SheetTitle>
+              <SheetTitle className="text-[#1A1A1A] font-heading text-lg">Menu</SheetTitle>
             </SheetHeader>
-            <div className="flex flex-col gap-6 mt-8 flex-1">
-              {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="font-body font-medium text-lg text-[#52525B] hover:text-[#1A1A1A] transition-colors"
-                >
-                  {l.label}
-                </a>
-              ))}
+
+            <div className="flex flex-col gap-1 mt-6 flex-1">
+              {links.map((l) => {
+                const Icon = l.icon;
+                return (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3.5 px-3 py-3 rounded-xl font-body font-medium text-[17px] text-[#52525B] hover:text-[#1A1A1A] hover:bg-[#F4F4F5] transition-all duration-150"
+                  >
+                    <Icon size={20} strokeWidth={1.8} />
+                    {l.label}
+                  </a>
+                );
+              })}
             </div>
-            <Link
-              to="/login"
-              onClick={() => setOpen(false)}
-              className="font-body font-medium text-base text-[#52525B] hover:text-[#1A1A1A] transition-colors text-center"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/signup"
-              onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center bg-[#27272A] text-white px-8 py-3.5 rounded-2xl font-body font-semibold text-base hover:bg-[#1A1A1A] transition-colors mb-4"
-            >
-              Get Started Free
-            </Link>
+
+            <div className="flex flex-col gap-3 pb-2">
+              <Link
+                to="/signup"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center bg-[#27272A] text-white rounded-2xl py-3.5 font-body font-semibold text-base hover:bg-[#1A1A1A] transition-colors"
+              >
+                Get Started Free
+              </Link>
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center bg-[#F4F4F5] text-[#1A1A1A] rounded-2xl py-3.5 font-body font-semibold text-base hover:bg-[#E8E5E0] transition-colors"
+              >
+                Sign in
+              </Link>
+            </div>
           </SheetContent>
         </Sheet>
       </div>
