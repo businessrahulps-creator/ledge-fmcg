@@ -74,7 +74,7 @@ export function Footer() {
             </h4>
 
             {/* Animated status badge */}
-            <div className="relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#E8E5E0] shadow-sm w-fit overflow-hidden">
+            <div className="relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-[#E8E5E0] shadow-sm w-fit overflow-hidden">
               {/* Shimmer overlay */}
               <div
                 className="absolute inset-0 rounded-full pointer-events-none"
@@ -84,11 +84,11 @@ export function Footer() {
                   animation: "shimmer 3s linear infinite",
                 }}
               />
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
               </span>
-              <span className="font-body text-[13px] font-medium text-[#3F3F46] relative whitespace-nowrap">
+              <span className="font-body text-[11px] font-medium text-[#3F3F46] relative whitespace-nowrap">
                 All systems operational
               </span>
             </div>
