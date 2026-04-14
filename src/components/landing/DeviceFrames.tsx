@@ -46,7 +46,7 @@ export function PhoneFrame({
 }) {
   return (
     <div
-      className={`relative mx-auto max-w-[280px] ${className}`}
+      className={`relative mx-auto max-w-[320px] ${className}`}
       style={{
         boxShadow:
           "0 4px 12px rgba(0,0,0,0.06), 0 25px 60px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.03)",
