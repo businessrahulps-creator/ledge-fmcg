@@ -1,46 +1,21 @@
 
 
-# Premium Mobile Navigation Redesign
+# Upgrade Mobile Nav Icons to Match Landing Page Quality
 
-## What changes
+## Problem
+The mobile navigation uses generic, AI-typical Lucide icons (`Home`, `Sparkles`, `RefreshCw`, `CreditCard`) that feel basic compared to the purposeful, specific icons used throughout the landing page sections.
 
-Redesign the mobile Sheet menu in `Navbar.tsx` to match the Perplexity-style left-side drawer: full-height, clean icon-based navigation links, spacious layout, and two equal-width CTA buttons pinned at the bottom.
+## Icon Replacements
 
-## Design
+| Link | Current Icon | New Icon | Why |
+|------|-------------|----------|-----|
+| Home | `Home` | `LayoutDashboard` | Matches the dashboard-first identity used in Features section |
+| Features | `Sparkles` | `Layers` | Already used in Features section for the product itself |
+| How It Works | `RefreshCw` | `Route` | Matches the lifecycle/journey metaphor used in Features |
+| Pricing | `CreditCard` | `IndianRupee` | Matches the billing icon used in Features section — more relevant for Indian FMCG |
 
-```text
-┌─────────────────────────────┐
-│  Menu                    ✕  │
-│                             │
-│  🏠  Home                   │
-│  ⚡  Features               │
-│  🔄  How It Works           │
-│  💰  Pricing                │
-│                             │
-│                             │
-│         (spacer)            │
-│                             │
-│  ┌─────────────────────┐    │
-│  │    Sign Up           │    │  ← dark bg, white text
-│  └─────────────────────┘    │
-│  ┌─────────────────────┐    │
-│  │    Log in            │    │  ← light bg, dark text, same size
-│  └─────────────────────┘    │
-└─────────────────────────────┘
-```
+These are the exact same icons already used on the landing page's Features section, so the nav will feel cohesive rather than disconnected.
 
-## Changes to `src/components/landing/sections/Navbar.tsx`
-
-- **Sheet side**: Change from `side="right"` to `side="left"` to match Perplexity
-- **Add "Home" link**: New first item linking to `/#` or top of page
-- **Add icons**: Use Lucide icons (Home, Sparkles, RefreshCw, CreditCard) next to each nav link for premium feel
-- **Link styling**: Larger text (~`text-[17px]`), `text-[#52525B]`, generous vertical spacing (`gap-5`), icon + label layout
-- **Bottom CTAs**: Two full-width buttons of equal size stacked at the bottom:
-  - "Sign Up" — `bg-[#27272A] text-white rounded-2xl py-3.5 text-base font-semibold`
-  - "Log in" — `bg-[#F4F4F5] text-[#1A1A1A] rounded-2xl py-3.5 text-base font-semibold`
-- **Sheet width**: Increase to `w-80` for more breathing room
-- **Close button**: Keep the built-in Sheet X button, style it as a circle like Perplexity (`rounded-full border`)
-
-## Files modified (1)
-- `src/components/landing/sections/Navbar.tsx`
+## File changed
+**`src/components/landing/sections/Navbar.tsx`** — swap the 4 icon imports and update the `links` array. Also reduce `strokeWidth` to `1.5` for a thinner, more refined look.
 
