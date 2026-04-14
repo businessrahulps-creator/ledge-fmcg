@@ -74,7 +74,7 @@ export function Hero() {
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ type: "spring", damping: 26, stiffness: 200, delay: 0.2 }}
-          className="w-full max-w-lg mx-auto"
+          className="w-full max-w-2xl mx-auto"
           style={{ transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)" }}
         >
           <GradientStage variant="indigo">
