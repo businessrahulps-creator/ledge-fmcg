@@ -145,6 +145,11 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        ambientGlow: {
+          "0%": { opacity: "0" },
+          "60%": { opacity: "1" },
+          "100%": { opacity: "0.5" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
