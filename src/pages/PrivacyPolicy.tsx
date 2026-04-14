@@ -16,11 +16,11 @@ export default function PrivacyPolicy() {
         </div>
       </section>
       <main className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <p className="text-graphite leading-relaxed mb-8">
+        <p className="text-[#52525B] leading-relaxed mb-8">
           Ledge (India) ("Ledge", "we", "our", or "us") operates the Ledge platform at getledge.in. This page explains what data we collect, how we use it, and your rights as a user.
         </p>
 
-        <hr className="border-fog my-10" />
+        <hr className="border-[#E8E5E0] my-10" />
 
         <Section title="What We Collect">
           <p><strong>Account information</strong> — your name, email address, and password when you sign up.</p>

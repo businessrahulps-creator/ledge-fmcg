@@ -134,9 +134,9 @@ export default function TermsOfService() {
 function Section({ title, children, last = false }: { title: string; children: React.ReactNode; last?: boolean }) {
   return (
     <>
-      <h2 className="font-heading font-bold text-xl text-midnight mb-4">{title}</h2>
-      <div className="text-graphite leading-relaxed space-y-3">{children}</div>
-      {!last && <hr className="border-fog my-10" />}
+      <h2 className="font-heading font-bold text-xl text-[#1A1A1A] mb-4">{title}</h2>
+      <div className="text-[#52525B] leading-relaxed space-y-3">{children}</div>
+      {!last && <hr className="border-[#E8E5E0] my-10" />}
     </>
   );
 }
