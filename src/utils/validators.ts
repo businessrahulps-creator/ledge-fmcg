@@ -27,9 +27,25 @@ export function isValidIfsc(value: string): boolean {
 
 export function isValidIndianPhone(value: string): boolean {
   if (!value) return true;
-  // Strip spaces, dashes, +91 / 91 prefix
-  const cleaned = value.replace(/[\s-]/g, "").replace(/^(\+91|91)/, "");
-  return PHONE_REGEX.test(cleaned);
+  return PHONE_REGEX.test(normalizeIndianPhone(value));
+}
+
+/**
+ * Normalize an Indian phone number to canonical 10-digit form.
+ * Strips spaces, dashes, parentheses, dots, and any +91 / 91 / 0 prefix.
+ * Returns the cleaned digits — caller decides whether to validate.
+ * Examples:
+ *   "+91 98765 43210"  -> "9876543210"
+ *   "098765-43210"     -> "9876543210"
+ *   "(91) 9876543210"  -> "9876543210"
+ */
+export function normalizeIndianPhone(value: string): string {
+  if (!value) return "";
+  const digits = value.replace(/[^\d]/g, "");
+  // Strip leading 91 (country code) or 0 (STD prefix) if it leaves a 10-digit number
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return digits;
 }
 
 export function isValidStateCode(value: string): boolean {
