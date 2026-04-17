@@ -86,10 +86,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const subscribe = () => {
       if (!navigator.onLine) return;
       channel = supabase
-        .channel("notifications-realtime")
+        .channel(`notifications-realtime-${userId}`)
         .on(
           "postgres_changes",
-          { event: "INSERT", schema: "public", table: "notifications" },
+          { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
           (payload) => {
             const row = payload.new as DbNotification;
             setNotifications((prev) => {
@@ -100,7 +100,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         )
         .on(
           "postgres_changes",
-          { event: "UPDATE", schema: "public", table: "notifications" },
+          { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
           (payload) => {
             const row = payload.new as DbNotification;
             setNotifications((prev) =>

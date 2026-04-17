@@ -14,14 +14,9 @@ export const isInIframe = (() => {
 export const isPreviewHost = (() => {
   if (typeof window === "undefined") return false;
   const h = window.location.hostname;
-  return (
-    h.includes("id-preview--") ||
-    h.includes("lovableproject.com") ||
-    // Lovable preview subdomains live under *.lovable.app (e.g. id-preview--<id>.lovable.app)
-    // The published app uses a custom/published domain, NOT lovable.app, so this is safe.
-    h.endsWith(".lovable.app") ||
-    h === "lovable.app"
-  );
+  // Only the in-editor preview should disable PWA features.
+  // Published apps (including *.lovable.app and custom domains) must keep PWA fully enabled.
+  return h.includes("id-preview--") || h.includes("lovableproject.com");
 })();
 
 export const isPreviewEnv = isPreviewHost || isInIframe;

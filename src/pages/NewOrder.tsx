@@ -102,9 +102,9 @@ export default function NewOrder() {
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
 
-  // Unsaved changes guard — blocks in-app navigation + tab close.
+  // Warn on tab close while form is dirty (in-app nav not blocked by design).
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
-  const guard = useUnsavedChangesGuard(isDirty && !isSaving);
+  useUnsavedChangesGuard(isDirty && !isSaving);
 
 
   // Auto-select godown if only one exists
@@ -649,22 +649,6 @@ export default function NewOrder() {
           <AlertDialogAction onClick={() => { setCreditOverrideOpen(false); executeSave(); }}>
             Override & Save
           </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
-    {/* Unsaved changes guard */}
-    <AlertDialog open={guard.confirmOpen}>
-      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Discard unsaved order?</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have an order in progress. Leaving this page will lose your changes.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={guard.cancelLeave}>Stay on page</AlertDialogCancel>
-          <AlertDialogAction onClick={guard.confirmLeave}>Discard &amp; leave</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
