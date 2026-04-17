@@ -286,6 +286,21 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // Idempotency guard: bail if demo account already exists with company linked
+    const { data: existingUsers } = await admin.auth.admin.listUsers();
+    const existingDemo = existingUsers.users.find((u: any) => u.email === "asha@getledge.in");
+    if (existingDemo) {
+      const { data: prof } = await admin.from("profiles")
+        .select("company_id").eq("user_id", existingDemo.id).maybeSingle();
+      if (prof?.company_id) {
+        return new Response(JSON.stringify({
+          status: "already_seeded",
+          message: "Demo account already exists. Delete it first to re-seed.",
+          email: "asha@getledge.in",
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
+      }
+    }
+
     // 1. Create auth user
     const { data: authData, error: authErr } = await admin.auth.admin.createUser({
       email: "asha@getledge.in",
