@@ -135,8 +135,11 @@ export function useOrdersDomain(deps: OrdersDeps) {
       return { success: true, orderNumber };
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
-      toast.error("Failed to create order", { description: msg });
-      logError({ source: "rpc:insert_order_atomic", error: err, context: { distributorId: order.distributorId } });
+      handleSupabaseError(err, {
+        source: "rpc:insert_order_atomic",
+        title: "Failed to create order",
+        context: { distributorId: order.distributorId },
+      });
       return { success: false, error: msg };
     }
   }, [deps.companyId, deps.deductStockForOrder, orderPrefix, orderSequence, deps.persistEntityToCache, deps.log]);
@@ -179,19 +182,19 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
     if (Object.keys(dbUpdates).length > 0) {
       const { error } = await supabase.from("orders").update(dbUpdates as any).eq("id", id);
-      if (error) { toast.error("Failed to update order", { description: error.message }); return; }
+      if (error) { handleSupabaseError(error, { source: "crud:orders.update", title: "Failed to update order", context: { id } }); return; }
     }
 
     if (linesChanged && updates.lines) {
       const { error: delErr } = await supabase.from("order_lines").delete().eq("order_id", id);
-      if (delErr) { toast.error("Failed to update line items", { description: delErr.message }); return; }
+      if (delErr) { handleSupabaseError(delErr, { source: "crud:order_lines.delete", title: "Failed to update line items", context: { id } }); return; }
       if (updates.lines.length > 0) {
         const lineRows = updates.lines.map(l => ({
           order_id: id, product_id: l.productId, product_name: l.productName,
           quantity: l.quantity, unit_price: l.unitPrice, line_total: l.lineTotal,
         }));
         const { error: insErr } = await supabase.from("order_lines").insert(lineRows);
-        if (insErr) { toast.error("Failed to insert line items", { description: insErr.message }); return; }
+        if (insErr) { handleSupabaseError(insErr, { source: "crud:order_lines.insert", title: "Failed to insert line items", context: { id } }); return; }
       }
       await supabase.from("order_schemes").delete().eq("order_id", id);
       if (updates.appliedSchemes && updates.appliedSchemes.length > 0) {
@@ -244,8 +247,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       deps.log("order", id, "deleted", `Deleted order ${deletedOrder?.orderNumber || id}`);
       return true;
     } catch (err: any) {
-      toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
-      logError({ source: "crud:orders.delete", error: err, context: { id } });
+      handleSupabaseError(err, { source: "crud:orders.delete", title: "Failed to delete order", context: { id } });
       return false;
     }
   }, [deps.safeRefetchStockItems, deps.log]);
