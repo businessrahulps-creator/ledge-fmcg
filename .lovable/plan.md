@@ -1,67 +1,36 @@
 
 
-## The honest answer on PWA update timing
+## Problem
 
-You want offline support **and** fast updates. Here's the real-world timing with the current setup:
+Looking at the screenshot vs the code (`src/pages/OrderDetail.tsx` lines 663–728):
 
-| Scenario | Time to see update |
-|---|---|
-| App is open + tab visible | ~60s (poll interval) |
-| App closed, then reopened | Instant check, ~2-5s to download, then "Update" toast |
-| iPhone PWA, killed from app switcher | Up to **24 hours** (iOS Safari quirk — it aggressively caches the SW) |
-| iPhone PWA, never opened for days | Could be **days** until iOS revalidates |
+1. **Empty gap between Driver field and the action bar** — caused by `<div className="pb-48 md:pb-0" />` (line 663). This 192px spacer was added so the **fixed** action bar wouldn't overlap form fields when scrolling. But on this short form, the spacer creates a large empty band between Driver and the floating bar.
+2. **"Save Changes" wraps to its own row inside the bar** — `flex-wrap` + `mr-auto` on the icon group forces Save below when 4 icon buttons + Save can't fit on a 390px iPhone. That's why the bar looks tall and awkward.
+3. The bar is `fixed bottom-24` on mobile, floating above the bottom tab nav, which combined with the spacer makes the page feel disconnected.
 
-The screenshot you shared is the classic iOS PWA staleness problem. iOS Safari is the worst offender — Android Chrome usually updates within a minute.
+## Fix (surgical, mobile-only)
 
-## Root causes (why it keeps happening)
+**File: `src/pages/OrderDetail.tsx`**
 
-1. **`registerType: "autoUpdate"`** in `vite.config.ts` — this name is misleading. It auto-*activates* a new SW once detected, but it doesn't auto-*detect* faster. Detection still depends on the browser checking.
-2. **iOS throttles SW update checks aggressively** — sometimes only on cold launch, sometimes once per 24h.
-3. **No version banner in the UI** — user has no way to know they're stale or to force-check.
-4. **The "Update" toast** in `UpdatePrompt.tsx` only appears if the SW *detects* a new version. On iOS PWA, that detection often never fires while the app is in standalone mode.
+**Change 1 — Tighten the bottom spacer (line 663)**
+Replace `pb-48 md:pb-0` with `pb-32 md:pb-0`. The fixed bar is ~64px tall + sits at `bottom-24` (96px), so 128px of bottom padding is enough clearance — not 192px. This removes ~64px of dead space.
 
-## The fix — 4 layers, keeping offline support
+**Change 2 — Stop "Save Changes" from wrapping (lines 667–668)**
+- Remove `flex-wrap` from the outer flex container so children stay on one row.
+- Keep `gap-2` for spacing.
+- The inner icon group keeps `mr-auto` to push Save to the right.
+- Add `min-w-0` and `flex-shrink` behaviors so icon buttons can compress instead of wrapping.
 
-**Layer 1 — Aggressive update detection (code)**
-- Change polling from 60s → **20s** when tab is visible.
-- Add `navigator.serviceWorker.controller` check + `registration.update()` on **every route change**, not just on visibility.
-- Listen for `controllerchange` event and auto-reload (no toast needed for trivial updates).
+Result: one clean row — `[🗑] [📄] [💬] [↻] ……… [Save Changes]` — matching the original design intent.
 
-**Layer 2 — Cache-busting at the network layer (vite.config.ts)**
-- Set Workbox `cleanupOutdatedCaches: true` (already implicit, make it explicit).
-- Add `navigationPreload: true` so navigations always race the network.
-- Switch HTML navigation strategy to **NetworkFirst** with a 3s timeout — this means if you're online, you always get fresh HTML; if offline, you get cached. This is the #1 fix for stale iOS PWAs.
+**Change 3 — No other changes.** Activity History card, sticky positioning, bottom tab nav all stay as-is.
 
-**Layer 3 — Visible version indicator (UI)**
-- Show the build version (already exposed as `__APP_VERSION__`) in Settings → About, with a "Check for updates now" button.
-- If a new SW is waiting, show a small dot on the header refresh button (you already have `RefreshAppButton.tsx`).
-
-**Layer 4 — iOS escape hatch (the "outside the box" bit)**
-- Embed the build timestamp in `index.html` as a `<meta name="app-version">` tag.
-- On app load, fetch `/index.html?_=<timestamp>` (bypasses cache), parse the meta tag, compare to current `__APP_VERSION__`. If mismatch → show a forced "New version available" banner that calls `skipWaiting` + reload. This sidesteps iOS SW throttling entirely because it's a plain `fetch`, not a SW update check.
-
-## Realistic timing after these fixes
-
-| Scenario | Before | After |
-|---|---|---|
-| Android Chrome, app open | ~60s | **~5s** (Layer 4 catches it) |
-| iPhone PWA, app open | up to 24h | **~5s** (Layer 4 catches it) |
-| iPhone PWA, cold launch | ~5s | **~2s** (NetworkFirst HTML) |
-| Offline | Works ✅ | Works ✅ |
-
-## Files to change
-1. `vite.config.ts` — add `navigationPreload`, switch HTML to NetworkFirst, explicit `cleanupOutdatedCaches`.
-2. `src/components/UpdatePrompt.tsx` — faster polling, route-change checks, controllerchange listener, Layer 4 meta-tag check.
-3. `index.html` — inject `<meta name="app-version" content="...">`.
-4. `src/components/layout/RefreshAppButton.tsx` — small dot indicator when update is waiting.
-5. `src/pages/Settings.tsx` — show current build version + "Check now" button (small addition).
+## Files touched
+- `src/pages/OrderDetail.tsx` — 2 small edits (lines 663, 667)
 
 ## What stays the same
-- Offline support: ✅ kept
-- Installable PWA: ✅ kept
-- Asset caching (fonts, images, JS bundles): ✅ kept
-- The existing `UpdatePrompt` toast: ✅ kept as fallback
-
-## Honest caveat
-There is no setup on Earth that makes an iOS PWA update *instantly while closed*. Apple controls that. But Layer 4 guarantees the user sees the update **within ~2 seconds of opening the app** — which is the experience users actually care about.
+- Sticky-on-mobile, inline-on-desktop behavior
+- All button styles, colors, icons, handlers
+- Delete confirmation flow
+- Activity History section
 
