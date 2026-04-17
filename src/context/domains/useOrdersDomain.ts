@@ -8,6 +8,7 @@ import type { DomainDeps, AddOrderResult } from "@/context/data-types";
 import { fmtAmount, logActivity } from "@/utils/activityLog";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 interface OrdersDeps extends DomainDeps {
   deductStockForOrder: (orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>;
