@@ -247,6 +247,8 @@ export default function Company() {
       bankIfsc: sanitizeInput(bankIfsc),
       invoicePrefix: sanitizeInput(invoicePrefix),
     });
+    // Refresh dirty-tracking baseline so the form is no longer "dirty".
+    setSavedSnapshot(currentSnapshot);
     toast.success("Settings saved", { description: "Company profile has been updated." });
     } finally {
       setIsSaving(false);
