@@ -21,6 +21,9 @@ export function PaymentReport() {
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Order | null>(null);
 
+  // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
+  const netTotal = (o: Order) => o.total - (o.schemeSavings || 0);
+
   const periodFiltered = filterByTimePeriod(orders, period);
   const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.paymentStatus === filter);
   const [pdfOpen, setPdfOpen] = useState(false);
@@ -47,7 +50,7 @@ export function PaymentReport() {
         </Select>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
           <span className="whitespace-nowrap text-muted-foreground">
-            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + o.total, 0))}</span>
+            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
@@ -65,7 +68,7 @@ export function PaymentReport() {
                   o.orderNumber,
                   o.distributorName,
                   formatIndianDate(o.date),
-                  formatCurrency(o.total),
+                  formatCurrency(netTotal(o)),
                   o.paymentStatus,
                   o.paymentMode.replace("_", " "),
                 ])
@@ -102,7 +105,7 @@ export function PaymentReport() {
                   <td className="px-6 py-4 font-medium text-primary">{o.orderNumber}</td>
                   <td className="px-6 py-4">{o.distributorName}</td>
                   <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(o.date)}</td>
-                  <td className="px-6 py-4 text-right font-medium">{formatCurrency(o.total)}</td>
+                  <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(o))}</td>
                   <td className="px-6 py-4"><StatusBadge status={o.paymentStatus} /></td>
                   <td className="px-6 py-4 capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</td>
                 </tr>
@@ -120,7 +123,7 @@ export function PaymentReport() {
                   <span className="block truncate text-sm font-medium">{o.orderNumber}</span>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">{o.distributorName} · {formatIndianDate(o.date)}</p>
                 </div>
-                <span className="shrink-0 text-sm font-medium">{formatCurrency(o.total)}</span>
+                <span className="shrink-0 text-sm font-medium">{formatCurrency(netTotal(o))}</span>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <StatusBadge status={o.paymentStatus} />
@@ -154,7 +157,7 @@ export function PaymentReport() {
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Total</span>
-                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selected.total)}</p>
+                    <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(netTotal(selected))}</p>
                   </div>
                 </div>
 
@@ -200,7 +203,7 @@ export function PaymentReport() {
         sections={rptSections}
         title="Export Payment Report PDF"
         onGenerate={(sel) => {
-          const totalAmount = filtered.reduce((s, o) => s + o.total, 0);
+          const totalAmount = filtered.reduce((s, o) => s + netTotal(o), 0);
           downloadPdf(
             pdfFilename("payment-report"),
             <ReportPdf
@@ -229,7 +232,7 @@ export function PaymentReport() {
                 o.orderNumber,
                 o.distributorName,
                 formatIndianDate(o.date),
-                formatCurrencyPdf(o.total),
+                formatCurrencyPdf(netTotal(o)),
                 o.paymentStatus,
                 o.paymentMode.replace("_", " "),
               ])}

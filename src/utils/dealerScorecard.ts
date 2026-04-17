@@ -44,10 +44,13 @@ export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
   const last90 = dealerOrders.filter(o => inWindow(o, d90));
   const prev30 = dealerOrders.filter(o => inRange(o, d60, d30));
 
-  const totalValue30d = last30.reduce((s, o) => s + o.total, 0);
-  const totalValue90d = last90.reduce((s, o) => s + o.total, 0);
+  // Net revenue = invoiced amount after trade discounts (matches Dashboard / Billing convention)
+  const effectiveTotal = (o: Order) => o.total - (o.schemeSavings || 0);
+
+  const totalValue30d = last30.reduce((s, o) => s + effectiveTotal(o), 0);
+  const totalValue90d = last90.reduce((s, o) => s + effectiveTotal(o), 0);
   const avgOrderValue = dealerOrders.length > 0
-    ? dealerOrders.reduce((s, o) => s + o.total, 0) / dealerOrders.length
+    ? dealerOrders.reduce((s, o) => s + effectiveTotal(o), 0) / dealerOrders.length
     : 0;
 
   const paidCount = dealerOrders.filter(o => o.paymentStatus === "paid").length;
