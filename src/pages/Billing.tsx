@@ -33,7 +33,7 @@ import { numberToWords } from "@/utils/numberToWords";
 import { useSearchParams } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
-import { filterByTimePeriod, type TimePeriod } from "@/components/reports/TimePeriodFilter";
+import { filterByTimePeriod, periodRangeLabel, type TimePeriod } from "@/components/reports/TimePeriodFilter";
 
 type DocType = Invoice["docType"];
 
@@ -461,18 +461,23 @@ export default function Billing() {
             </SelectContent>
           </Select>
           <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
-            <SelectTrigger className="w-[160px] h-10">
+            <SelectTrigger className="w-[180px] h-10">
               <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Time</SelectItem>
               <SelectItem value="daily">Today</SelectItem>
-              <SelectItem value="weekly">Last 7 Days</SelectItem>
-              <SelectItem value="monthly">Last 30 Days</SelectItem>
-              <SelectItem value="yearly">Last Year</SelectItem>
+              <SelectItem value="weekly">Last 7 days</SelectItem>
+              <SelectItem value="monthly">Last 30 days</SelectItem>
+              <SelectItem value="yearly">Last 365 days</SelectItem>
             </SelectContent>
           </Select>
+          {timePeriod !== "all" && (
+            <span className="whitespace-nowrap text-[11px] text-muted-foreground/70 sm:ml-1">
+              Showing {periodRangeLabel(timePeriod)}
+            </span>
+          )}
         </div>
 
         {/* Invoice List */}
