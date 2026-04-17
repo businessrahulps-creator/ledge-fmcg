@@ -37,6 +37,7 @@ export default function Signup() {
         password,
         options: {
           data: { full_name: fullName, company_name: companyName },
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       });
       if (authError) throw authError;
