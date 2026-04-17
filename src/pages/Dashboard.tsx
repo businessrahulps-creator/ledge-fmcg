@@ -14,6 +14,10 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { ShoppingCart, Plus, AlertTriangle } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+const toIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function useTimeAgo(date: Date) {
   const [, setTick] = useState(0);
