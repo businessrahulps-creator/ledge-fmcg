@@ -1,54 +1,74 @@
 
-## Fix: preview showing an old build
+## Fix: preview keeps reverting to an old build
 
-### Likely root cause
-The preview is still running PWA update logic even though `main.tsx` tries to disable service workers in preview/iframe mode.
+### What I found
+The project already has preview guards in:
+- `src/main.tsx`
+- `src/App.tsx`
+- `src/components/UpdatePrompt.tsx`
 
-What I found:
-- `src/main.tsx` unregisters existing service workers on preview hosts / iframes.
-- But `src/App.tsx` still mounts `UpdatePrompt` unconditionally.
-- `src/components/UpdatePrompt.tsx` always calls `registerSW(...)`, which can re-register the service worker right after `main.tsx` unregisters it.
+But the shared detector in `src/lib/preview-env.ts` is incomplete:
 
-So the preview can get stuck on a stale cached build even after hard refresh. This matches what you’re seeing.
+```ts
+h.includes("id-preview--") || h.includes("lovableproject.com")
+```
+
+Your actual preview URL is on `...lovable.app`, not `lovableproject.com`.
+
+That means:
+- inside the editor iframe, preview is blocked only because `isInIframe` is true
+- but in any standalone/opened preview tab on the preview origin, the app is treated like production
+- PWA/service-worker logic can still register on the preview origin there
+- once that happens, the preview origin can keep serving stale cached assets and appear to jump between new and old builds
+
+So the issue is not your browser cache anymore; it is stale preview-origin PWA state.
 
 ### Implementation plan
-1. **Stop all PWA/service-worker registration in preview**
-   - Add the same preview/iframe guard used in `main.tsx` to `UpdatePrompt.tsx`.
-   - If running inside Lovable preview or any iframe, return early and do not call `registerSW`, polling, or update checks.
 
-2. **Make the guard consistent**
-   - Move the preview-environment detection into one shared helper so `main.tsx` and `UpdatePrompt.tsx` use the exact same logic.
-   - This avoids future mismatches where one file disables SW and another re-enables it.
+1. **Fix preview detection**
+   - Update `src/lib/preview-env.ts` so preview-host detection matches the real preview domain pattern (`id-preview--*.lovable.app`) instead of the outdated `lovableproject.com` check.
+   - Keep iframe detection too.
 
-3. **Aggressively clean stale preview caches**
-   - In preview/iframe mode, keep the existing unregister behavior and expand it to clear app caches as well.
-   - This helps remove already-cached old assets from previous registrations.
+2. **Apply the fixed guard consistently**
+   - Reuse that helper everywhere preview should behave differently:
+     - `src/main.tsx`
+     - `src/components/UpdatePrompt.tsx`
+     - `src/App.tsx`
+     - `src/hooks/use-install-prompt.ts`
 
-4. **Optionally gate the component at the app level**
-   - In `App.tsx`, only mount `UpdatePrompt` outside preview mode.
-   - This gives an extra layer of protection even if someone later edits `UpdatePrompt`.
+3. **Make preview cleanup stronger**
+   - In `src/main.tsx`, when `isPreviewEnv` is true:
+     - unregister all service workers
+     - clear all Cache Storage entries
+     - reset any global update flags used by `UpdatePrompt`
+   - This ensures a previously registered preview service worker cannot keep taking control.
+
+4. **Disable all PWA/update behavior in preview**
+   - Keep `UpdatePrompt` completely inert in preview.
+   - Also disable install-prompt behavior in preview so the preview never acts like an installable app.
+
+5. **Add one more safeguard for stale preview state**
+   - In preview mode, force-remove any manifest/installability hints that could encourage browser PWA behavior on the preview origin.
+   - This is optional but recommended as a belt-and-suspenders fix.
+
+### Why this should solve the “new build for a minute, then old build again” behavior
+Because the bug is likely not the current iframe session alone. It is that the preview origin was allowed to behave like a real PWA at some point, and that old service worker/cache keeps reclaiming control. Correct host detection plus aggressive cleanup stops that loop.
 
 ### Files to update
+- `src/lib/preview-env.ts`
 - `src/main.tsx`
 - `src/components/UpdatePrompt.tsx`
-- Possibly `src/App.tsx`
-- Optionally a tiny shared env helper in `src/lib` or `src/utils`
+- `src/App.tsx`
+- `src/hooks/use-install-prompt.ts`
 
-### Why this should fix it
-- Preview should never behave like an installed PWA.
-- Disabling SW registration in preview removes the main source of stale builds.
-- Clearing old caches ensures users stop seeing outdated JS/HTML bundles.
+### Verification after implementation
+- Open the preview and confirm the current build ID/version matches the latest code.
+- Reload multiple times and wait a minute to confirm it does not revert.
+- Open the preview in a separate tab and confirm it still shows the same latest build.
+- Confirm the published app still keeps normal update/install behavior.
 
 ### Out of scope
-- No changes to the published app’s normal update flow
-- No changes to install behavior on the real production domain
-- No routing or business-logic changes
-
-### Technical note
-This looks like a preview-only caching regression caused by:
-```text
-main.tsx: unregister old SW in preview
-App.tsx: mounts UpdatePrompt anyway
-UpdatePrompt.tsx: immediately registers SW again
-```
-So the fix is not “clear browser cache harder” — it’s to stop preview from participating in the PWA lifecycle at all.
+- No business-logic changes
+- No routing changes
+- No published-app redesign
+- No backend changes
