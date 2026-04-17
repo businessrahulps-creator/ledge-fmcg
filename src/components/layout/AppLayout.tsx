@@ -65,6 +65,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
+  const { isRefreshing } = useData();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
