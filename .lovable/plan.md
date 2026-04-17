@@ -1,45 +1,55 @@
 
 
-## Two issues, both rooted in the same structural bug
+## What's happening
 
-Looking at both screenshots:
+**Issue 1 — raw timestamp looks unprofessional**
+`__APP_VERSION__` is a Unix millisecond timestamp (`1776414083231`) injected at build time by `vite.config.ts`. It works as a unique identifier but reads like a database key, not a version.
 
-**Issue 1 — uneven padding inside the Save bar**
-The bar has `px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]`. On iPhone the safe-area inset adds ~34px to the bottom only — so top padding is 12px but bottom is ~46px. That's the visible asymmetry.
+**Issue 2 — "Released" date doesn't change after publish**
+The "Released" date in `AboutSection.tsx` is just `formatBuildDate(version)` — i.e. it formats the **same** `__APP_VERSION__` constant. So Build and Released are literally the same number rendered two ways.
 
-**Issue 2 — Save bar overlaps the History card when expanded**
-The Save bar is `fixed bottom-24` on mobile, so it floats over everything below it. The History card sits in normal flow underneath, so when you expand it, the bar covers the top of it. Also, the History card is currently rendered **outside** the main container `</div>` on line 729 (a stray closing div) — a structural bug.
+If Released is still showing the old time after you published, then the running JS bundle is still the old build — `__APP_VERSION__` is baked in at compile time and only changes when a fresh bundle loads. Two likely causes:
 
-## Root cause
+1. **You checked from inside the preview iframe / browser tab** that hadn't actually reloaded the new bundle yet. The "Check for updates" button calls `__ledgeTriggerUpdate`, which only reloads if it detects a new SW *or* a meta-tag mismatch. If neither fired (iOS throttling, or the SW already had the latest cached), no reload happened, so `__APP_VERSION__` is still the old constant.
+2. **The page reloaded but Service Worker served stale `index.html`**, so the meta-tag check compared old-to-old. Less likely now that we switched to NetworkFirst, but possible.
 
-The sticky/fixed action bar pattern is fighting the page. On a short form (390px viewport), there's plenty of room to just let the action bar **flow inline** above History — no need for it to float. Floating only made sense when the form was tall enough to scroll.
+So both issues are connected: the version string is ugly **and** there's no easy way to confirm visually whether you're actually on the new build.
 
-## Fix — make the action bar inline on mobile too (drop the `fixed` behavior)
+## Fix — 3 small changes
 
-**File: `src/pages/OrderDetail.tsx`**
+**File: `src/components/settings/AboutSection.tsx`**
 
-**Change 1 (line 663)** — Remove the spacer div entirely. Not needed once the bar is inline.
+1. **Pretty version label**: Format `__APP_VERSION__` as `Ledge v26.4.17.1351` — derived from the build timestamp:
+   - `v` + `YY.M.D.HHMM` (year.month.day.hour-minute, IST)
+   - Example: timestamp `1776414083231` → `Ledge v26.4.17.1351`
+   - Keep the raw timestamp shown smaller below as "Build ID" for debugging/support.
 
-**Change 2 (line 666)** — Change the bar wrapper from `fixed bottom-24 left-4 right-4 z-40 ... md:static ...` to a simple inline card: `rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none`.
-- Removes the asymmetric `pb-[calc(...)]` → top and bottom padding now both `py-3` (equal).
-- Removes `fixed` → bar no longer overlaps History.
-- Keeps the glass card look on mobile, keeps desktop unchanged.
+2. **Show both "Released" and "Running since"**:
+   - **Released**: formatted build date (when this bundle was compiled) — same as today, but now clearly labeled.
+   - **Running since**: `new Date()` captured on first mount — when *this tab* loaded the current bundle. Lets you visually confirm "yes, I just reloaded into a fresh build."
 
-**Change 3 (line 729)** — Fix the stray `</div>`. The History card should sit inside the main page container, not outside it. Move the closing div to after the History card so structure is: `[form] [action bar] [History] </container>`.
+3. **Make "Check for updates" honest**: After the check runs, if no update was found, also show a tiny inline note: `Last checked: 2:15 pm` so you can tell the check actually happened (currently the only feedback is a toast that disappears).
 
-## Result
+**File: `src/components/UpdatePrompt.tsx`** (tiny tweak)
+- When `__ledgeTriggerUpdate` finds no update via SW but the meta-version *matches*, return `false` as today — but also expose `window.__ledgeLastCheck = Date.now()` so AboutSection can read it.
 
-- Save bar has equal top/bottom padding (no safe-area asymmetry, since it's no longer floating above the home indicator).
-- Expanding History pushes content naturally — no overlap.
-- Page scrolls as one continuous flow: form → actions → history.
-- Desktop layout unchanged.
+## Why "Released" wasn't updating — the real diagnostic
+
+After this change, you'll see:
+- **Ledge v26.4.17.1351** (pretty version)
+- **Released**: 17 Apr 2026, 01:51 pm
+- **Running since**: 17 Apr 2026, 02:30 pm  ← if these two differ a lot, the build is old
+- **Last checked**: 02:31 pm
+- **Build ID**: 1776414083231
+
+If after publishing + tapping "Check for updates" the **Released** time doesn't move forward, it means the new bundle hasn't been fetched yet — most likely the Lovable CDN hasn't propagated the publish, or iOS is still serving cached `index.html`. The visible "Last checked" timestamp will at least confirm the check ran.
 
 ## Files touched
-- `src/pages/OrderDetail.tsx` — 3 small edits in lines 663–734.
+- `src/components/settings/AboutSection.tsx` — formatting + new fields
+- `src/components/UpdatePrompt.tsx` — expose `window.__ledgeLastCheck`
 
 ## What stays the same
-- All buttons, icons, handlers, styles, delete confirmation
-- Desktop inline behavior
-- History component itself
-- Bottom tab nav (sits below page content as always)
+- Build timestamp injection in `vite.config.ts`
+- All 4 layers of update detection
+- `RefreshAppButton` behavior
 
