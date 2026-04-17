@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +51,17 @@ export default function Company() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState<string>("");
+
+  // Build a stable string of all editable fields for dirty-detection.
+  const currentSnapshot = JSON.stringify({
+    companyName, orderPrefix, companyAddress, companyGstin, companyPhone,
+    companyEmail, companyPan, companyStateCode, bankName, bankAccountName,
+    bankAccount, bankIfsc, invoicePrefix, logoUrl,
+  });
+  const isDirty = savedSnapshot !== "" && currentSnapshot !== savedSnapshot;
+  const guard = useUnsavedChangesGuard(isDirty && !isSaving);
+
 
   useEffect(() => {
     if (!companyId) return;
@@ -73,6 +85,23 @@ export default function Company() {
           setBankAccount((data as any).bank_account || "");
           setBankIfsc((data as any).bank_ifsc || "");
           setInvoicePrefix((data as any).invoice_prefix || "INV");
+          // Seed dirty-tracking baseline once initial values are populated.
+          setSavedSnapshot(JSON.stringify({
+            companyName: data.name || "",
+            orderPrefix: savedPrefix,
+            companyAddress: data.address || "",
+            companyGstin: data.gstin || "",
+            companyPhone: (data as any).phone || "",
+            companyEmail: (data as any).email || "",
+            companyPan: (data as any).pan || "",
+            companyStateCode: (data as any).state_code || "",
+            bankName: (data as any).bank_name || "",
+            bankAccountName: (data as any).bank_account_name || "",
+            bankAccount: (data as any).bank_account || "",
+            bankIfsc: (data as any).bank_ifsc || "",
+            invoicePrefix: (data as any).invoice_prefix || "INV",
+            logoUrl: data.logo_url || "",
+          }));
         }
       });
   }, [companyId]);
@@ -218,6 +247,8 @@ export default function Company() {
       bankIfsc: sanitizeInput(bankIfsc),
       invoicePrefix: sanitizeInput(invoicePrefix),
     });
+    // Refresh dirty-tracking baseline so the form is no longer "dirty".
+    setSavedSnapshot(currentSnapshot);
     toast.success("Settings saved", { description: "Company profile has been updated." });
     } finally {
       setIsSaving(false);
@@ -392,6 +423,22 @@ export default function Company() {
               <AlertDialogAction onClick={() => { saveCompany(); setShowPrefixConfirm(false); }}>
                 Yes, Change Prefix
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Unsaved changes guard */}
+        <AlertDialog open={guard.confirmOpen}>
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You have unsaved company details. Leaving this page will lose your changes.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={guard.cancelLeave}>Stay on page</AlertDialogCancel>
+              <AlertDialogAction onClick={guard.confirmLeave}>Discard &amp; leave</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
