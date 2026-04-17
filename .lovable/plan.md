@@ -1,19 +1,34 @@
 
 
-The screenshot shows the **RefreshAppButton** rendering as a large circular button with a 2-tone refresh icon — it's visually heavy, bigger than the bell, and reads as a primary action rather than a quiet utility. That's the "sync feature UI/UX issue" — not the header `Syncing…` indicator from the last change.
+Root cause is in the shared tooltip primitive, not the refresh button itself.
 
-## Fix — make the Refresh button quiet and consistent with the bell
+## What’s happening
+- `RefreshAppButton` is using `TooltipContent side="bottom"`.
+- The shared `src/components/ui/tooltip.tsx` renders `TooltipPrimitive.Content` directly, without a `TooltipPrimitive.Portal`.
+- In `AppLayout`, the header sits inside containers with `overflow-hidden`, so the tooltip is being clipped and visually appears to slide under the dashboard area when hovered.
 
-**Single file: `src/components/layout/RefreshAppButton.tsx`**
+## Fix
+### 1) Update the shared tooltip component
+**File:** `src/components/ui/tooltip.tsx`
+- Wrap `TooltipPrimitive.Content` in `TooltipPrimitive.Portal`, matching how the project already handles popovers/dropdowns.
+- Keep the current styling and animations.
+- Slightly increase breathing room with a safer default offset if needed, but no visual redesign.
 
-1. Strip the filled/circular background — render as a plain `ghost` icon button matching `NotificationCenter`'s bell styling (same size box `h-9 w-9`, no background until hover).
-2. Use a single-tone `RefreshCw` icon at `h-[18px] w-[18px]` with `text-muted-foreground` (same weight as the bell), not the 2-tone `RefreshCwOff`/colored variant.
-3. While checking for updates, animate the icon with `animate-spin` instead of swapping to a different glyph.
-4. Keep tooltip "Check for updates" / success + "no update" toasts unchanged.
-5. Verify alignment in the header cluster (gap-3 already set in `AppLayout`) so Refresh + Bell sit as a matched pair.
+### 2) Keep the refresh button simple
+**File:** `src/components/layout/RefreshAppButton.tsx`
+- Leave the button styling and tooltip label as-is unless the portal fix reveals a minor spacing issue.
+- If needed, only make a tiny positioning tweak such as `sideOffset={8}` on this button’s tooltip.
+
+## Expected result
+- Hovering the refresh icon shows “Check for updates” fully above the app UI instead of being clipped under the dashboard.
+- Same fix also improves any other tooltip using this shared component.
+
+## Files to change
+1. `src/components/ui/tooltip.tsx`
+2. `src/components/layout/RefreshAppButton.tsx` only if a tiny offset adjustment is still needed after the portal fix
 
 ## Out of scope
-- No changes to the header `Syncing…` indicator (separate concern, working as designed).
-- No changes to `NotificationCenter`, `LiveClock`, role badge, or install button.
-- No changes to update-check logic or toasts.
+- No changes to refresh/update logic
+- No changes to the syncing indicator
+- No changes to header layout, bell, clock, or role badge
 
