@@ -1,74 +1,50 @@
 
-## Fix: preview keeps reverting to an old build
 
-### What I found
-The project already has preview guards in:
-- `src/main.tsx`
-- `src/App.tsx`
-- `src/components/UpdatePrompt.tsx`
+## QA + CTO check — scope & approach
 
-But the shared detector in `src/lib/preview-env.ts` is incomplete:
+I'll do a focused review across three lenses: **Correctness**, **Security**, **Architecture/scale**. Read-only — produces a written report, no code changes.
 
-```ts
-h.includes("id-preview--") || h.includes("lovableproject.com")
-```
+### What I'll inspect
 
-Your actual preview URL is on `...lovable.app`, not `lovableproject.com`.
+**1. Correctness & recent regressions**
+- Verify the preview-env fix actually disables PWA across all entry points (re-read `main.tsx`, `UpdatePrompt`, `App.tsx`, `use-install-prompt`, `vite.config.ts` PWA plugin config).
+- Verify `useUnsavedChangesGuard` no longer crashes and check all callers still work.
+- Spot-check `Billing.tsx` badge fix.
+- Look for other usages of `useBlocker`, `data router` APIs, or other react-router v6 data-mode hooks that could crash similarly.
 
-That means:
-- inside the editor iframe, preview is blocked only because `isInIframe` is true
-- but in any standalone/opened preview tab on the preview origin, the app is treated like production
-- PWA/service-worker logic can still register on the preview origin there
-- once that happens, the preview origin can keep serving stale cached assets and appear to jump between new and old builds
+**2. Security (CTO lens)**
+- Run `security--run_security_scan` for current Supabase findings.
+- Audit RLS coverage on all tables (`security--get_table_schema`).
+- Confirm `user_roles` separation pattern is followed (no roles on profiles table).
+- Check edge functions (`seed-demo-account`, `seed-test-accounts`) for auth gating and secret usage.
+- Confirm no secrets/keys leaked in client code; confirm anon key only is used on client.
+- Check auth flows: signup/login/reset password — email verification on, no anonymous sign-ins, password validation.
 
-So the issue is not your browser cache anymore; it is stale preview-origin PWA state.
+**3. Architecture & scale**
+- DataContext: confirm domain split, look for N+1 patterns, large in-memory caches, missing pagination.
+- Query limits: scan for Supabase queries missing `.range()`/`.limit()` (1000-row default risk).
+- Error handling: confirm `ErrorBoundary` + `PageErrorBoundary` cover all routes; check `errorLog` usage.
+- Bundle health: check `vite.config.ts` for code-splitting, lazy routes in `App.tsx`.
+- Test coverage: list existing vitest + playwright suites, flag critical paths missing tests (auth, order pricing, billing).
 
-### Implementation plan
+**4. Data integrity**
+- Look for migrations using CHECK constraints with `now()` (forbidden — must be triggers).
+- Confirm no triggers attached to reserved schemas.
+- Confirm activity_log append-only pattern is enforced via RLS.
 
-1. **Fix preview detection**
-   - Update `src/lib/preview-env.ts` so preview-host detection matches the real preview domain pattern (`id-preview--*.lovable.app`) instead of the outdated `lovableproject.com` check.
-   - Keep iframe detection too.
+### Deliverable
+A single structured report grouped by severity:
+- **P0 / blockers** — crashes, security holes, data loss risk
+- **P1 / important** — scale risks, missing tests on critical paths, UX regressions
+- **P2 / polish** — cleanup, consistency, nice-to-haves
 
-2. **Apply the fixed guard consistently**
-   - Reuse that helper everywhere preview should behave differently:
-     - `src/main.tsx`
-     - `src/components/UpdatePrompt.tsx`
-     - `src/App.tsx`
-     - `src/hooks/use-install-prompt.ts`
-
-3. **Make preview cleanup stronger**
-   - In `src/main.tsx`, when `isPreviewEnv` is true:
-     - unregister all service workers
-     - clear all Cache Storage entries
-     - reset any global update flags used by `UpdatePrompt`
-   - This ensures a previously registered preview service worker cannot keep taking control.
-
-4. **Disable all PWA/update behavior in preview**
-   - Keep `UpdatePrompt` completely inert in preview.
-   - Also disable install-prompt behavior in preview so the preview never acts like an installable app.
-
-5. **Add one more safeguard for stale preview state**
-   - In preview mode, force-remove any manifest/installability hints that could encourage browser PWA behavior on the preview origin.
-   - This is optional but recommended as a belt-and-suspenders fix.
-
-### Why this should solve the “new build for a minute, then old build again” behavior
-Because the bug is likely not the current iframe session alone. It is that the preview origin was allowed to behave like a real PWA at some point, and that old service worker/cache keeps reclaiming control. Correct host detection plus aggressive cleanup stops that loop.
-
-### Files to update
-- `src/lib/preview-env.ts`
-- `src/main.tsx`
-- `src/components/UpdatePrompt.tsx`
-- `src/App.tsx`
-- `src/hooks/use-install-prompt.ts`
-
-### Verification after implementation
-- Open the preview and confirm the current build ID/version matches the latest code.
-- Reload multiple times and wait a minute to confirm it does not revert.
-- Open the preview in a separate tab and confirm it still shows the same latest build.
-- Confirm the published app still keeps normal update/install behavior.
+Each finding includes: file/location, what's wrong, recommended fix, effort estimate.
 
 ### Out of scope
-- No business-logic changes
-- No routing changes
-- No published-app redesign
-- No backend changes
+- No code changes (read-only QA pass).
+- No design/visual review (separate concern).
+- No performance profiling in browser (would need explicit ask).
+
+### After the report
+You pick which findings to fix and I'll implement them in priority order.
+
