@@ -85,6 +85,23 @@ export default function Company() {
           setBankAccount((data as any).bank_account || "");
           setBankIfsc((data as any).bank_ifsc || "");
           setInvoicePrefix((data as any).invoice_prefix || "INV");
+          // Seed dirty-tracking baseline once initial values are populated.
+          setSavedSnapshot(JSON.stringify({
+            companyName: data.name || "",
+            orderPrefix: savedPrefix,
+            companyAddress: data.address || "",
+            companyGstin: data.gstin || "",
+            companyPhone: (data as any).phone || "",
+            companyEmail: (data as any).email || "",
+            companyPan: (data as any).pan || "",
+            companyStateCode: (data as any).state_code || "",
+            bankName: (data as any).bank_name || "",
+            bankAccountName: (data as any).bank_account_name || "",
+            bankAccount: (data as any).bank_account || "",
+            bankIfsc: (data as any).bank_ifsc || "",
+            invoicePrefix: (data as any).invoice_prefix || "INV",
+            logoUrl: data.logo_url || "",
+          }));
         }
       });
   }, [companyId]);
