@@ -12,22 +12,22 @@ import { toast } from "sonner";
  * If authReady && user && !companyId, force them through workspace setup.
  */
 export function NoCompanyGuard({ children }: { children: ReactNode }) {
-  const { user, companyId, authReady, refreshProfile } = useAuth();
+  const { user, companyId, authReady, profileLoaded, refreshProfile } = useAuth();
   const [companyName, setCompanyName] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Prefill from auth metadata when the modal becomes relevant
   useEffect(() => {
-    if (user && !companyId) {
+    if (user && profileLoaded && !companyId) {
       const meta = (user.user_metadata || {}) as Record<string, string>;
       setCompanyName((prev) => prev || meta.company_name || "");
       setFullName((prev) => prev || meta.full_name || "");
     }
-  }, [user, companyId]);
+  }, [user, companyId, profileLoaded]);
 
-  // Don't render the guard until auth is settled or while user is signed-out
-  if (!authReady || !user || companyId) {
+  // Don't render the guard until auth + profile are settled, or while signed-out
+  if (!authReady || !profileLoaded || !user || companyId) {
     return <>{children}</>;
   }
 
