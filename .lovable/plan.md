@@ -1,58 +1,87 @@
 
 
-## The real problem
+## Root cause (confirmed end-to-end)
 
-The day-of-week pills (`S M T W T F S`) on the Dashboard are confusing because:
+A new user with email confirmation goes through this path and ends up in a **broken half-signed-up state**:
 
-1. **No date is shown.** Users see "M" but don't know if that's *this* Monday, *last* Monday, or "Mondays in general".
-2. **Mixed semantics in one row.** Days *before today this week* = this week's data. Days *after today this week* = last week's data (because the filter looks for "the most recent occurrence of selectedDay"). Today is Friday → S, M, T, W, T = this week; S (Sat), S (Sun) = last weekend. That silent jump across week boundaries is exactly what's tripping people up.
-3. **Letters repeat.** Two "S"s and two "T"s with no other context.
-4. **Default selection is today**, but if today has zero orders the user assumes the whole feature is broken.
+1. `Signup.tsx` calls `supabase.auth.signUp(...)`. Because email confirmation is on, Supabase returns `{ user, session: null }`.
+2. The code hits `if (!authData.session)` → toasts "Check your email" → navigates to `/login`. **`setup_new_company` RPC is never called.**
+3. Meanwhile, the `on_auth_user_created` DB trigger inserts a row in `profiles` with `company_id = NULL`.
+4. User clicks the email link, lands on the app, logs in. `AuthContext` loads the profile fine but `companyId = null`.
+5. `DataContext` sees `authReady && !companyId` → wipes all state arrays and stops fetching. Settings / Dealers / Orders pages render empty.
+6. User tries to add a dealer / salesperson / order. `makeOfflineCrud.add` runs `if (!companyId) return;` — **silent no-op, no toast, no error**. UI may briefly show optimistic state in some flows but on refresh everything is gone.
+7. User opens Company page and fills the form. `saveCompany()` does `if (companyId) { ...update companies... }` — **silently skipped**. Only the local in-memory `updateCompanyInfo` runs, so it *looks* saved until refresh.
+8. Same user (`rajillamsougandhikam@gmail.com`) is sitting in the DB right now with `company_id = NULL` confirming this exactly.
 
-## Proposal — replace the abstract day pills with a concrete "Last 7 days" date strip
+There's no recovery path anywhere in the app for "logged in but no company" — no onboarding screen, no fallback, no error.
 
-Same shape (a horizontal row of 7 round buttons), but every pill shows a **real date**, in chronological order, ending today on the right. No more guessing which week.
+## Permanent fix
 
-### Visual
+A four-part fix that closes the gap forever, no matter how the user got into this state.
 
-```text
- Sat   Sun   Mon   Tue   Wed   Thu   Today
-  11    12    13    14    15    16    17
-                                      ●
+### 1. Auto-recover on every app load (the safety net)
+**`src/context/AuthContext.tsx`** — after `fetchProfile` loads the profile, if `profile.company_id IS NULL` AND `auth.users.raw_user_meta_data` has `company_name`, call `setup_new_company` automatically with the metadata captured at signup. Then re-fetch the profile.
+
+This single change retroactively rescues the existing orphan user the moment they next open the app, and prevents the bug for any future user who ends up half-signed-up.
+
+### 2. Fix the signup flow so company creation isn't lost on email-confirm
+**`src/pages/Signup.tsx`** — keep the existing "session immediately" path for backward compatibility, but when `!authData.session` (email confirmation case), the `full_name` and `company_name` are already passed to `signUp` via `options.data`, so the trigger and step (1) above will set things up correctly when the user verifies and logs in. Update the toast copy to say: *"Check your email to verify, then sign in — your workspace will be ready."*
+
+### 3. Add a hard "no company" guard so silent failures become loud
+**New component `src/components/onboarding/NoCompanyGuard.tsx`** rendered inside `AppLayout` (or wrapping `ProtectedRoute`). When `authReady && user && !companyId`:
+- Show a full-screen recovery modal: "Finish setting up your workspace" with `Company name` + `Your name` inputs (prefilled from `auth.user_metadata`).
+- Submitting calls `setup_new_company` then `refreshProfile` then reloads dashboard.
+- This guarantees the user can never see empty pages and silent-failing buttons again.
+
+### 4. Make CRUD failures impossible to miss
+**`src/context/data-utils.ts` `makeOfflineCrud.add/update/remove`** — replace the silent `if (!companyId) return;` with:
+```ts
+if (!companyId) {
+  toast.error("Workspace not set up", { description: "Please complete workspace setup first." });
+  return;
+}
+```
+**`src/pages/Company.tsx` `saveCompany`** — same: if `!companyId`, show an error toast and bail instead of pretending it saved.
+
+### 5. Backfill the existing affected user (one-time migration)
+A migration runs once to fix `rajillamsougandhikam@gmail.com` (and any future duplicates):
+```sql
+-- For each profile with NULL company_id, create a company from auth metadata
+DO $$
+DECLARE r RECORD; new_company_id uuid;
+BEGIN
+  FOR r IN
+    SELECT p.user_id, p.full_name,
+           COALESCE(u.raw_user_meta_data->>'company_name', 'My Workspace') AS company_name,
+           COALESCE(NULLIF(p.full_name,''), u.raw_user_meta_data->>'full_name', '') AS final_name
+    FROM profiles p JOIN auth.users u ON u.id = p.user_id
+    WHERE p.company_id IS NULL
+  LOOP
+    INSERT INTO companies (name, trial_ends_at) VALUES (r.company_name, now() + interval '30 days')
+    RETURNING id INTO new_company_id;
+    UPDATE profiles SET company_id = new_company_id, full_name = r.final_name WHERE user_id = r.user_id;
+    INSERT INTO user_roles (user_id, role) VALUES (r.user_id, 'super_admin') ON CONFLICT DO NOTHING;
+  END LOOP;
+END $$;
 ```
 
-- Each pill: weekday short label on top (`Sat`, `Sun`, …, `Today`), date number below.
-- 7 pills = the last 7 calendar days, oldest → newest, today always rightmost.
-- Selected pill: filled primary; today gets a subtle dot indicator even when not selected.
-- Default selected = **Today** (matches current behaviour, but now visually obvious).
-- Caption under the row: `Showing orders for Fri, 17 Apr 2026` — same explicit-date pattern we just rolled out across Reports/Performance.
-- Tooltip on the row: *"Showing the last 7 days. Tap any date to see orders for that day."*
+## Files changed
+1. **Migration** — backfill orphan profiles + (optional) make `setup_new_company` safe to call repeatedly (already idempotent — verified).
+2. `src/context/AuthContext.tsx` — auto-recover on profile load when `company_id IS NULL`.
+3. `src/pages/Signup.tsx` — clearer copy in the email-verify branch.
+4. `src/components/onboarding/NoCompanyGuard.tsx` — **new** full-screen recovery modal.
+5. `src/App.tsx` — mount `NoCompanyGuard` inside `ProtectedRoute`.
+6. `src/context/data-utils.ts` — toast errors in `add`/`update`/`remove` when `companyId` is missing instead of silent return.
+7. `src/pages/Company.tsx` — toast error in `saveCompany` when `companyId` is missing.
 
-### Why this fixes it
+## Out of scope
+- No changes to email-confirmation policy itself (don't disable it).
+- No changes to RLS policies — they're correct; the bug is purely the missing company link.
+- No changes to existing `setup_new_company` RPC (already idempotent — handles re-calls safely).
+- No changes to other domain CRUD logic, realtime, or sync queue.
 
-- **No more "is this last Monday or this Monday?"** — the date is right there on the pill.
-- **No more silent week-crossing.** The window is always literally "the last 7 days ending today", just like Reports.
-- **Consistency.** Same mental model as the rolling windows we just standardised in Reports/Performance/Billing.
-- **Empty state still makes sense.** "No orders on Fri, 17 Apr" reads naturally; "No orders on Friday" reads like a bug.
-- **Mobile-friendly.** 7 compact pills (`w-10 h-12`) fit comfortably on phones; same tap target size as today.
-
-### Filter logic change
-
-Replace the current `getDay()`-based filter with a simple date-equality match against the pill's actual ISO date. Simpler code, no week-boundary arithmetic, and the math now matches what the user sees.
-
-### Files to change
-
-1. **`src/pages/Dashboard.tsx`**
-   - Remove `DAYS` / `DAY_LABELS` constants and `selectedDay` (number 0–6).
-   - Add `last7Dates: Date[]` (oldest → today) and `selectedDate: string` (ISO `YYYY-MM-DD`), default to today's ISO.
-   - Replace the day-pill row with a date-pill row: weekday label + day number, "Today" label on the rightmost pill, subtle dot for today.
-   - Update `filteredOrders` to filter by `o.date === selectedDate`.
-   - Update empty state copy: `No orders on {formatIndianDate(selectedDate)}`.
-   - Add caption: `Showing orders for {weekday}, {formatIndianDate}`.
-   - Wrap the row in a `Tooltip` explaining the rolling 7-day window.
-
-### Out of scope
-- The 7-day sparkline above is fine — it already shows `last7Days` chronologically with "Today" emphasised. No change.
-- KPI cards continue to reflect the selected date.
-- No changes to other pages.
+## Why this is permanent
+- **Defence in depth:** trigger creates profile → AuthContext auto-recovers if no company → guard modal forces setup if auto-recover fails → all CRUD now reports errors loudly. There is no remaining path to silent data loss.
+- **Backfill** rescues the user already affected today.
+- **Idempotent recovery** (`setup_new_company` already checks for existing company) means repeated calls are safe.
 
