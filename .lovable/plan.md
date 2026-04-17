@@ -1,25 +1,25 @@
 
 
-## Phase 4 — Data Integrity, RLS, RBAC & Edge Functions Audit
+The `SEED_ADMIN_TOKEN` is a password that protects the two seeding edge functions (`seed-demo-account`, `seed-test-accounts`) so random people on the internet can't trigger them and spam your database with fake accounts.
 
-### Scope
-1. **DB trigger fix (carry-over from Phase 3)** — `refresh_entity_aggregates` uses gross `total` for `outstanding_amount` and `total_value`. Should be `total - scheme_savings` to match Dashboard/Billing/Reports.
-2. **RLS audit** — verify every table has appropriate policies; flag overly permissive ones.
-3. **RBAC enforcement** — accountant restrictions on stock/products/godowns; super_admin gates on schemes/roles. Verify client-side guards match server-side policies.
-4. **Edge functions** — `seed-demo-account`, `seed-test-accounts`: verify CORS, JWT handling, input validation, and that they're not callable by random users in prod.
-5. **Auth security** — run linter, check for leaked-password protection, OTP expiry.
-6. **Profiles policy review** — current policies look complex (self-update with company_id-locked check); validate they actually prevent privilege escalation.
+Looking at the situation again: these seeding functions are internal tools you only run manually during development. Since `<db-triggers>` shows no triggers exist (the previous trigger work didn't take effect), and the seed functions are now blocked by the token guard I already added in code, the safest move is:
 
-### Approach
-- Run `supabase--linter` + `security--run_security_scan` in parallel to surface known issues.
-- Read the two edge functions.
-- Apply migration to fix the aggregates trigger (uses `total - COALESCE(scheme_savings, 0)`).
-- Spot-check client RBAC guards (Stock page, Schemes page) against RLS.
+## Plan — Final Phase 4 cleanup
 
-### Out of scope
-- Restructuring RLS architecture (only fix concrete issues).
-- Adding new auth providers.
+1. **Re-apply the missing triggers** — `<db-triggers>` confirms `trg_refresh_aggregates_orders` and `trg_refresh_aggregates_order_lines` are NOT attached. The previous migration didn't stick. Re-run via a fresh migration so distributor outstanding / salesperson totals actually auto-update on order changes.
 
-### Deliverable
-`PHASE 4 COMPLETE` with: linter findings, RLS issues found/fixed, edge function status, trigger fix applied, files changed.
+2. **Backfill aggregates once** — recalculate `distributors.total_value`, `distributors.outstanding_amount`, `distributors.total_orders`, `salespersons.total_value`, `salespersons.total_orders`, and `products.total_sold` so existing data matches the new net-revenue formula immediately.
+
+3. **Lock down seed functions without needing a secret from you** — instead of using `SEED_ADMIN_TOKEN`, I'll change the guard to require a `super_admin` JWT from your own logged-in account. That way:
+   - No secret for you to manage.
+   - No one else can call them.
+   - You can still trigger them yourself if needed.
+
+4. **Verify** with a quick read query that triggers are attached and aggregates look sane.
+
+## What you need to do
+**Nothing.** No secrets to save, no settings to change. I'll handle it all in the next step once you approve.
+
+## Out of scope
+No new features, no UI changes, no auth provider changes.
 
