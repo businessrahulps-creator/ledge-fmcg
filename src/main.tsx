@@ -28,6 +28,15 @@ if (isPreviewEnv) {
   if (typeof caches !== "undefined") {
     caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
   }
+  // Reset global update flags used by UpdatePrompt so nothing thinks an update is pending
+  try {
+    (window as any).__ledgeHasUpdate = false;
+    (window as any).__ledgeTriggerUpdate = undefined;
+  } catch {}
+  // Strip manifest link so the preview origin can't be treated as installable
+  try {
+    document.querySelectorAll('link[rel="manifest"]').forEach((el) => el.parentNode?.removeChild(el));
+  } catch {}
 }
 
 

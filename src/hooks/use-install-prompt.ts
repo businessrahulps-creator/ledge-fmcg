@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { isPreviewEnv } from "@/lib/preview-env";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -52,7 +53,7 @@ export function useInstallPrompt() {
 
   const iosDevice = typeof navigator !== "undefined" && isIOS();
   const standalone = typeof window !== "undefined" && isStandalone();
-  const iframe = typeof window !== "undefined" && isInIframe();
+  const iframe = (typeof window !== "undefined" && isInIframe()) || isPreviewEnv;
 
   useEffect(() => {
     if (iframe || standalone) return;
