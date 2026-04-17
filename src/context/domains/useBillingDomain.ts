@@ -3,10 +3,96 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Order } from "@/data/mock-data";
 import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { logError } from "@/utils/errorLog";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
+
+type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"] & {
+  invoice_lines?: Database["public"]["Tables"]["invoice_lines"]["Row"][] | null;
+};
+type ClaimRow = Database["public"]["Tables"]["claims"]["Row"] & {
+  claim_lines?: Database["public"]["Tables"]["claim_lines"]["Row"][] | null;
+};
+
+/** Map a Supabase `invoices` row (with joined lines) to the in-app Invoice shape. */
+function mapInvoiceRow(inv: InvoiceRow): Invoice {
+  return {
+    id: inv.id,
+    invoiceNumber: inv.invoice_number,
+    invoiceDate: inv.invoice_date,
+    docType: inv.doc_type as Invoice["docType"],
+    sourceOrderId: inv.source_order_id ?? undefined,
+    buyerName: inv.buyer_name,
+    buyerAddress: inv.buyer_address,
+    buyerGstin: inv.buyer_gstin,
+    buyerStateCode: inv.buyer_state_code,
+    sellerName: inv.seller_name,
+    sellerAddress: inv.seller_address,
+    sellerGstin: inv.seller_gstin,
+    sellerPan: inv.seller_pan,
+    sellerStateCode: inv.seller_state_code,
+    sellerPhone: inv.seller_phone,
+    sellerEmail: inv.seller_email,
+    sellerBankName: inv.seller_bank_name,
+    sellerBankAccount: inv.seller_bank_account,
+    sellerBankIfsc: inv.seller_bank_ifsc,
+    sellerBankAccountName: inv.seller_bank_account_name,
+    sellerLogoUrl: inv.seller_logo_url,
+    supplyType: inv.supply_type as Invoice["supplyType"],
+    gstRate: inv.gst_rate,
+    subtotal: inv.subtotal,
+    cgstAmount: inv.cgst_amount,
+    sgstAmount: inv.sgst_amount,
+    igstAmount: inv.igst_amount,
+    totalTax: inv.total_tax,
+    grandTotal: inv.grand_total,
+    roundOff: inv.round_off,
+    amountInWords: inv.amount_in_words,
+    notes: inv.notes,
+    status: inv.status as Invoice["status"],
+    vehicle: inv.vehicle || "",
+    driverName: inv.driver_name || "",
+    createdAt: inv.created_at,
+    lines: (inv.invoice_lines || []).map(l => ({
+      id: l.id,
+      productName: l.product_name,
+      hsnCode: l.hsn_code,
+      quantity: l.quantity,
+      unit: l.unit,
+      unitPrice: l.unit_price,
+      taxableValue: l.taxable_value,
+    })),
+  } as Invoice;
+}
+
+/** Map a Supabase `claims` row (with joined lines) to the in-app Claim shape. */
+function mapClaimRow(c: ClaimRow): Claim {
+  return {
+    id: c.id,
+    orderId: c.order_id,
+    orderNumber: c.order_number,
+    distributorId: c.distributor_id,
+    distributorName: c.distributor_name,
+    claimType: c.claim_type as Claim["claimType"],
+    reason: c.reason,
+    status: c.status as Claim["status"],
+    totalClaimValue: c.total_claim_value,
+    restoreStock: c.restore_stock,
+    resolutionNotes: c.resolution_notes,
+    resolvedAt: c.resolved_at,
+    createdAt: c.created_at,
+    lines: (c.claim_lines || []).map(l => ({
+      id: l.id,
+      productId: l.product_id,
+      productName: l.product_name,
+      quantity: l.quantity,
+      unitPrice: l.unit_price,
+      lineTotal: l.line_total,
+    })),
+  } as Claim;
+}
 
 interface BillingDeps extends DomainDeps {
   getOrders: () => Order[];
@@ -181,13 +267,13 @@ export function useBillingDomain(deps: BillingDeps) {
   const safeRefetchInvoices = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const { data } = await supabase.from("invoices").select("*, invoice_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
-    if (data) setInvoices((data as any[]).map((inv: any) => ({ id: inv.id, invoiceNumber: inv.invoice_number, invoiceDate: inv.invoice_date, docType: inv.doc_type, sourceOrderId: inv.source_order_id, buyerName: inv.buyer_name, buyerAddress: inv.buyer_address, buyerGstin: inv.buyer_gstin, buyerStateCode: inv.buyer_state_code, sellerName: inv.seller_name, sellerAddress: inv.seller_address, sellerGstin: inv.seller_gstin, sellerPan: inv.seller_pan, sellerStateCode: inv.seller_state_code, sellerPhone: inv.seller_phone, sellerEmail: inv.seller_email, sellerBankName: inv.seller_bank_name, sellerBankAccount: inv.seller_bank_account, sellerBankIfsc: inv.seller_bank_ifsc, sellerBankAccountName: inv.seller_bank_account_name, sellerLogoUrl: inv.seller_logo_url, supplyType: inv.supply_type, gstRate: inv.gst_rate, subtotal: inv.subtotal, cgstAmount: inv.cgst_amount, sgstAmount: inv.sgst_amount, igstAmount: inv.igst_amount, totalTax: inv.total_tax, grandTotal: inv.grand_total, roundOff: inv.round_off, amountInWords: inv.amount_in_words, notes: inv.notes, status: inv.status, vehicle: inv.vehicle || "", driverName: inv.driver_name || "", createdAt: inv.created_at, lines: (inv.invoice_lines || []).map((l: any) => ({ id: l.id, productName: l.product_name, hsnCode: l.hsn_code, quantity: l.quantity, unit: l.unit, unitPrice: l.unit_price, taxableValue: l.taxable_value })) })));
+    if (data) setInvoices((data as unknown as InvoiceRow[]).map(mapInvoiceRow));
   }, [deps.companyId]);
 
   const safeRefetchClaims = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const { data } = await supabase.from("claims" as any).select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
-    if (data) setClaims((data as any[]).map((c: any) => ({ id: c.id, orderId: c.order_id, orderNumber: c.order_number, distributorId: c.distributor_id, distributorName: c.distributor_name, claimType: c.claim_type, reason: c.reason, status: c.status, totalClaimValue: c.total_claim_value, restoreStock: c.restore_stock, resolutionNotes: c.resolution_notes, resolvedAt: c.resolved_at, createdAt: c.created_at, lines: (c.claim_lines || []).map((l: any) => ({ id: l.id, productId: l.product_id, productName: l.product_name, quantity: l.quantity, unitPrice: l.unit_price, lineTotal: l.line_total })) })));
+    if (data) setClaims((data as unknown as ClaimRow[]).map(mapClaimRow));
   }, [deps.companyId]);
 
   return {

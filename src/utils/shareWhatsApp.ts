@@ -1,6 +1,7 @@
 import React from "react";
 import { toast } from "sonner";
 import type { Order } from "@/data/mock-data";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface CompanyInfo {
   name: string;
@@ -11,7 +12,7 @@ interface CompanyInfo {
 
 function buildOrderSummary(order: Order, companyName: string): string {
   const lines = order.lines
-    .map((l) => `  • ${l.productName} × ${l.quantity} = Rs. ${l.lineTotal.toLocaleString("en-IN")}`)
+    .map((l) => `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.lineTotal)}`)
     .join("\n");
 
   return [
@@ -25,7 +26,7 @@ function buildOrderSummary(order: Order, companyName: string): string {
     `*Items:*`,
     lines,
     "",
-    `💰 *Total: Rs. ${order.total.toLocaleString("en-IN")}*`,
+    `💰 *Total: ${formatCurrency(order.total)}*`,
     `💳 Payment: ${order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} (${order.paymentMode.replace("_", " ")})`,
     `🚚 Delivery: ${order.deliveryStatus.charAt(0).toUpperCase() + order.deliveryStatus.slice(1)}`,
   ]
@@ -137,14 +138,14 @@ function buildInvoiceSummary(inv: InvoiceShareData): string {
     credit_note: "Credit Note",
   };
   const lines = inv.lines
-    .map((l) => `  • ${l.productName} × ${l.quantity} = ₹${l.taxableValue.toLocaleString("en-IN")}`)
+    .map((l) => `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.taxableValue)}`)
     .join("\n");
 
   const isIntra = inv.supplyType === "intra_state";
   const taxLines = inv.totalTax > 0
     ? isIntra
-      ? `  CGST: ₹${inv.cgstAmount.toLocaleString("en-IN")}\n  SGST: ₹${inv.sgstAmount.toLocaleString("en-IN")}`
-      : `  IGST: ₹${inv.igstAmount.toLocaleString("en-IN")}`
+      ? `  CGST: ${formatCurrency(inv.cgstAmount)}\n  SGST: ${formatCurrency(inv.sgstAmount)}`
+      : `  IGST: ${formatCurrency(inv.igstAmount)}`
     : "";
 
   return [
@@ -157,9 +158,9 @@ function buildInvoiceSummary(inv: InvoiceShareData): string {
     `*Items:*`,
     lines,
     "",
-    `💰 Subtotal: ₹${inv.subtotal.toLocaleString("en-IN")}`,
+    `💰 Subtotal: ${formatCurrency(inv.subtotal)}`,
     taxLines,
-    `💰 *Grand Total: ₹${inv.grandTotal.toLocaleString("en-IN")}*`,
+    `💰 *Grand Total: ${formatCurrency(inv.grandTotal)}*`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -255,7 +256,7 @@ export function shareDealerOnWhatsApp(dealer: {
     `📍 Location: ${dealer.location}`,
     `📞 Contact: ${dealer.contact}`,
     `📦 Orders: ${dealer.totalOrders}`,
-    `💰 Total Value: Rs. ${dealer.totalValue.toLocaleString("en-IN")}`,
+    `💰 Total Value: ${formatCurrency(dealer.totalValue)}`,
   ].join("\n");
 
   const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;

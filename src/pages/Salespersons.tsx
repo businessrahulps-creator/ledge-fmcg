@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
   DialogContent,
@@ -73,14 +74,17 @@ export default function Salespersons() {
   const save = () => {
     if (!editItem?.name.trim()) { toast.error("Name required"); return; }
     if (!editItem?.phone.trim()) { toast.error("Phone required"); return; }
+    if (!isValidIndianPhone(editItem.phone)) { toast.error("Invalid phone", { description: "Enter a valid 10-digit Indian mobile number." }); return; }
     if (!editItem?.region.trim()) { toast.error("Region required"); return; }
     if (editItem.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editItem.email)) { toast.error("Invalid email"); return; }
+    const normalizedPhone = normalizeIndianPhone(editItem.phone);
+    const itemToSave = { ...editItem, phone: normalizedPhone || editItem.phone.trim() };
     if (isNew) {
-      addSalesperson(editItem);
-      toast.success("Team member added", { description: `${editItem.name} has been added.` });
+      addSalesperson(itemToSave);
+      toast.success("Team member added", { description: `${itemToSave.name} has been added.` });
     } else {
-      updateSalesperson(editItem);
-      toast.success("Team member updated", { description: `${editItem.name} has been updated.` });
+      updateSalesperson(itemToSave);
+      toast.success("Team member updated", { description: `${itemToSave.name} has been updated.` });
     }
     setEditItem(null);
   };
@@ -193,7 +197,7 @@ export default function Salespersons() {
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Phone *</Label>
-                    <Input value={editItem.phone} onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
+                    <Input type="tel" inputMode="tel" autoComplete="tel" value={editItem.phone} onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Region *</Label>

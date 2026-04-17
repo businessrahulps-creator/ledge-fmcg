@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
-import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES } from "@/utils/validators";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
   DialogContent,
@@ -98,12 +98,15 @@ export default function Distributors() {
       toast.error("Invalid IFSC", { description: "IFSC must be 11 characters (e.g. HDFC0001234)." });
       return;
     }
+    // Canonicalize phone before persisting (strip +91, spaces, dashes)
+    const normalizedPhone = normalizeIndianPhone(editItem.contact);
+    const itemToSave = { ...editItem, contact: normalizedPhone || editItem.contact.trim() };
     if (isNew) {
-      addDistributor(editItem);
-      toast.success("Dealer added", { description: `${editItem.name} has been added.` });
+      addDistributor(itemToSave);
+      toast.success("Dealer added", { description: `${itemToSave.name} has been added.` });
     } else {
-      updateDistributor(editItem);
-      toast.success("Dealer updated", { description: `${editItem.name} has been updated.` });
+      updateDistributor(itemToSave);
+      toast.success("Dealer updated", { description: `${itemToSave.name} has been updated.` });
     }
     setEditItem(null);
   };
@@ -266,7 +269,7 @@ export default function Distributors() {
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">Contact *</Label>
-                      <Input value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
+                      <Input type="tel" inputMode="tel" autoComplete="tel" value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
@@ -276,7 +279,7 @@ export default function Distributors() {
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
-                      <Input type="number" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                      <Input type="number" inputMode="decimal" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
                     </div>
                   </div>
                 </div>

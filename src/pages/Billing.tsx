@@ -30,6 +30,8 @@ import { GstInvoicePdf } from "@/components/pdf/GstInvoicePdf";
 import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";
+import { formatCurrency } from "@/utils/formatCurrency";
+import { isValidGstin } from "@/utils/validators";
 import { useSearchParams } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -212,6 +214,21 @@ export default function Billing() {
     if (docType === "gst_invoice" && (!vehicle.trim() || !driverName.trim())) {
       toast.error("Vehicle & driver details required", { description: "Fill in vehicle and driver details below, then save the invoice." });
       return;
+    }
+    // GST validation: GSTIN format + state-code consistency for tax invoices
+    if (docType === "gst_invoice" || docType === "credit_note") {
+      if (buyerGstin && !isValidGstin(buyerGstin)) {
+        toast.error("Invalid buyer GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
+        return;
+      }
+      if (buyerGstin && buyerStateCode && buyerGstin.slice(0, 2) !== buyerStateCode) {
+        toast.error("State code mismatch", { description: `Buyer GSTIN starts with ${buyerGstin.slice(0, 2)} but state code is ${buyerStateCode}. Fix one to match the other.` });
+        return;
+      }
+      if (!company.gstin || !isValidGstin(company.gstin)) {
+        toast.error("Seller GSTIN missing", { description: "Set a valid company GSTIN in Settings → Company before raising a tax invoice." });
+        return;
+      }
     }
 
     setSaving(true);
@@ -528,7 +545,7 @@ export default function Billing() {
                               <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</TableCell>
+                          <TableCell className="text-right font-mono text-sm tabular-nums">{formatCurrency(inv.grandTotal)}</TableCell>
                           <TableCell>
                             {inv.status === "final" && isDraftType(inv.docType) ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
@@ -601,7 +618,7 @@ export default function Billing() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
-                      <span className="text-sm font-bold">₹{inv.grandTotal.toLocaleString("en-IN")}</span>
+                      <span className="text-sm font-bold tabular-nums">{formatCurrency(inv.grandTotal)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">{inv.buyerName} · {inv.invoiceDate}</p>
                     <div className="flex items-center gap-1 pt-1 border-t border-border/40">
@@ -686,7 +703,7 @@ export default function Billing() {
                             <span className="text-sm font-medium">{o.orderNumber}</span>
                             <span className="text-xs text-muted-foreground ml-2">{o.distributorName}</span>
                           </div>
-                          <span className="shrink-0 text-sm font-semibold tabular-nums">₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                          <span className="shrink-0 text-sm font-semibold tabular-nums">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-0.5">
                           {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {o.salesperson}
@@ -710,7 +727,7 @@ export default function Billing() {
                             <span className="text-sm font-medium">{o.orderNumber}</span>
                             <span className="text-xs text-muted-foreground ml-2">{o.distributorName}</span>
                           </div>
-                          <span className="shrink-0 text-sm font-semibold tabular-nums">₹{(o.total - (o.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                          <span className="shrink-0 text-sm font-semibold tabular-nums">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-[10px] text-muted-foreground">
@@ -745,7 +762,7 @@ export default function Billing() {
                       <Link2 className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">{selectedOrder.orderNumber}</span>
                       <span className="text-xs text-muted-foreground">· {selectedOrder.distributorName}</span>
-                      <span className="text-xs font-mono text-muted-foreground">₹{(selectedOrder.total - (selectedOrder.schemeSavings || 0)).toLocaleString("en-IN")}</span>
+                      <span className="text-xs font-mono text-muted-foreground tabular-nums">{formatCurrency(selectedOrder.total - (selectedOrder.schemeSavings || 0))}</span>
                     </div>
                   </div>
                   {(() => {
@@ -828,7 +845,7 @@ export default function Billing() {
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs">GST Rate (%)</Label>
-                      <Input type="number" value={gstRate} onChange={e => setGstRate(Number(e.target.value))} className="max-w-[100px]" min={0} max={28} />
+                      <Input type="number" inputMode="decimal" value={gstRate} onChange={e => setGstRate(Number(e.target.value))} className="max-w-[100px]" min={0} max={28} />
                     </div>
                   </div>
                 </div>
@@ -885,7 +902,7 @@ export default function Billing() {
                       </div>
                       <div className="hidden sm:block sm:col-span-2 space-y-1 text-right">
                         {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}
-                        <p className="h-9 flex items-center justify-end text-xs font-mono">₹{round2(line.quantity * line.unitPrice).toLocaleString("en-IN")}</p>
+                        <p className="h-9 flex items-center justify-end text-xs font-mono tabular-nums">{formatCurrency(round2(line.quantity * line.unitPrice))}</p>
                       </div>
                     </div>
                   ))}
@@ -896,7 +913,7 @@ export default function Billing() {
               <div className="rounded-lg border border-border/50 p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-mono">₹{calculated.subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                  <span className="font-mono tabular-nums">{formatCurrency(calculated.subtotal)}</span>
                 </div>
                 {(docType === "gst_invoice" || docType === "credit_note") && supplyType === "intra_state" && (
                   <>
@@ -924,7 +941,7 @@ export default function Billing() {
                 )}
                 <div className="flex justify-between text-sm font-semibold border-t border-border/50 pt-2 mt-2">
                   <span>Grand Total</span>
-                  <span className="font-mono">₹{calculated.grandTotal.toLocaleString("en-IN")}</span>
+                  <span className="font-mono tabular-nums">{formatCurrency(calculated.grandTotal)}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground italic">{numberToWords(calculated.grandTotal)}</p>
               </div>
