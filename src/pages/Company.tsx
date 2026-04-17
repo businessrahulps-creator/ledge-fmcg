@@ -51,6 +51,17 @@ export default function Company() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState<string>("");
+
+  // Build a stable string of all editable fields for dirty-detection.
+  const currentSnapshot = JSON.stringify({
+    companyName, orderPrefix, companyAddress, companyGstin, companyPhone,
+    companyEmail, companyPan, companyStateCode, bankName, bankAccountName,
+    bankAccount, bankIfsc, invoicePrefix, logoUrl,
+  });
+  const isDirty = savedSnapshot !== "" && currentSnapshot !== savedSnapshot;
+  const guard = useUnsavedChangesGuard(isDirty && !isSaving);
+
 
   useEffect(() => {
     if (!companyId) return;
