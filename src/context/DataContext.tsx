@@ -13,7 +13,7 @@ import { logActivity } from "@/utils/activityLog";
 import {
   mapOrders, mapDistributor, mapSalesperson, mapProduct, mapGodown, mapStockItem,
   mapScheme, mapSecondarySale, mapTarget, mapClaim, mapInvoice,
-  persistAllToCache, batchIn,
+  persistAllToCache, batchIn, fetchAllChunked,
 } from "./data-utils";
 import type {
   DataContextType, CompanyInfo, DomainDeps,
@@ -184,22 +184,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
       }
 
+      // Each table is fetched in 1000-row pages until exhausted to bypass
+      // Supabase's silent SELECT cap (was previously losing rows past 1000).
       const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
-        supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("godowns").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
       ]);
 
-      const claimIds = ((claimsRes as any).data || []).map((c: any) => c.id);
-      const invoiceIds = ((invoicesRes as any).data || []).map((i: any) => i.id);
+      const claimIds = (claimsRes as any[]).map((c: any) => c.id);
+      const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
 
       const [claimLinesData, invoiceLinesData] = await Promise.all([
         batchIn("claim_lines", "claim_id", claimIds),
