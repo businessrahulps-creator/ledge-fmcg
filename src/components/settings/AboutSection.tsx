@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { RotateCw, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-declare const __APP_VERSION__: string;
+import { APP_VERSION, PRETTY_VERSION } from "@/lib/app-version";
 
 const IST_OPTS: Intl.DateTimeFormatOptions = {
   day: "2-digit",
