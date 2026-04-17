@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -11,7 +11,7 @@ import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-r
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -36,10 +36,25 @@ export default function Orders() {
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
-  const [search, setSearch] = useState(dealerParam);
-  const [paymentFilter, setPaymentFilter] = useState("all");
-  const [deliveryFilter, setDeliveryFilter] = useState("all");
+  // Persist filters across navigation (e.g. opening an order detail and coming back)
+  const FILTER_KEY = "orders:filters";
+  const restoredFilters = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem(FILTER_KEY);
+      return raw ? JSON.parse(raw) as { search?: string; payment?: string; delivery?: string } : {};
+    } catch { return {}; }
+  }, []);
+  const [search, setSearch] = useState(dealerParam || restoredFilters.search || "");
+  const [paymentFilter, setPaymentFilter] = useState(restoredFilters.payment || "all");
+  const [deliveryFilter, setDeliveryFilter] = useState(restoredFilters.delivery || "all");
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
+
+  // Save filters whenever they change so a back-nav restores them
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(FILTER_KEY, JSON.stringify({ search, payment: paymentFilter, delivery: deliveryFilter }));
+    } catch { /* quota or disabled — ignore */ }
+  }, [search, paymentFilter, deliveryFilter]);
 
   const handleRefresh = useCallback(async () => {
     if (api.refreshAll) {
@@ -102,7 +117,14 @@ export default function Orders() {
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
-  // Blocking page skeleton removed — empty-state handles first-paint.
+  // Show skeleton on first paint when we're loading and no orders are cached yet.
+  if (isLoading && orders.length === 0) {
+    return (
+      <AppLayout>
+        <TablePageSkeleton rows={6} />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
