@@ -25,9 +25,25 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        navigationPreload: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
+          // Layer 2: Always try network first for HTML navigations.
+          // This is the #1 fix for stale iOS PWAs — when online, users
+          // always get the latest HTML (which references the latest JS bundles).
+          // When offline, falls back to the cached shell.
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-navigations",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
