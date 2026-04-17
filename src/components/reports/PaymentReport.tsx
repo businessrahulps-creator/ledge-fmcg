@@ -21,6 +21,9 @@ export function PaymentReport() {
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Order | null>(null);
 
+  // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
+  const netTotal = (o: Order) => o.total - (o.schemeSavings || 0);
+
   const periodFiltered = filterByTimePeriod(orders, period);
   const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.paymentStatus === filter);
   const [pdfOpen, setPdfOpen] = useState(false);
