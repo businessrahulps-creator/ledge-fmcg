@@ -261,23 +261,50 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Day-of-week row */}
-          <div className="flex gap-2.5 mt-5">
-            {DAYS.map((d, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedDay(i)}
-                aria-label={DAY_LABELS[i]}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                  i === selectedDay
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+          {/* Last 7 days date picker */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex gap-2 mt-5">
+                  {last7Dates.map((d, i) => {
+                    const iso = toIsoDate(d);
+                    const isToday = iso === todayIso;
+                    const isSelected = iso === selectedDate;
+                    const weekdayLabel = isToday ? "Today" : DAY_SHORT[d.getDay()];
+                    const fullLabel = d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
+                    return (
+                      <button
+                        key={iso}
+                        onClick={() => setSelectedDate(iso)}
+                        aria-label={fullLabel}
+                        aria-pressed={isSelected}
+                        className={cn(
+                          "relative flex flex-col items-center justify-center w-11 h-12 rounded-xl text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          isSelected
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span className={cn("text-[9px] font-medium leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-70")}>
+                          {weekdayLabel}
+                        </span>
+                        <span className="text-sm font-bold tabular-nums leading-none">{d.getDate()}</span>
+                        {isToday && !isSelected && (
+                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs">
+                Showing the last 7 days. Tap any date to see orders for that day.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <p className="text-[11px] text-muted-foreground/70 mt-2">
+            Showing orders for {selectedDateObj.toLocaleDateString("en-IN", { weekday: "short" })}, {formatIndianDate(selectedDate)}
+          </p>
         </div>
 
         {/* KPI Grid */}
