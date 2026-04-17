@@ -294,9 +294,7 @@ export default function Targets() {
     }
   }, [api.targets]);
 
-  if (isLoading) {
-    return <AppLayout><DashboardSkeleton /></AppLayout>;
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   const dateOptions = periodType === "daily" ? dailyOptions : periodType === "weekly" ? weeklyOptions : monthOptions;
 

@@ -99,9 +99,7 @@ export default function Distributors() {
     setDeleteId(null);
   };
 
-  if (isLoading) {
-    return <AppLayout><ListPageSkeleton /></AppLayout>;
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>

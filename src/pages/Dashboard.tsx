@@ -106,9 +106,8 @@ export default function Dashboard() {
   const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
   const allZero = last7Days.every(d => d.value === 0);
 
-  if (isLoading) {
-    return <AppLayout><DashboardSkeleton /></AppLayout>;
-  }
+  // Note: blocking page skeleton removed — render layout immediately and let
+  // each section render inline skeletons via empty-state UIs while data streams in.
 
   // Parse date as local timezone to avoid UTC offset shifting the day
   // Only show orders from the current week (Mon-Sun containing today)

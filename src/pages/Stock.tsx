@@ -268,9 +268,7 @@ export default function Stock() {
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
 
-  if (isLoading) {
-    return <AppLayout><ListPageSkeleton cards={4} /></AppLayout>;
-  }
+  // Blocking page skeleton removed — sections render inline.
 
   return (
     <AppLayout>

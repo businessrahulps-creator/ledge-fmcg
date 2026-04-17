@@ -428,7 +428,7 @@ export default function Claims() {
     toast.success("Claim rejected");
   };
 
-  if (isLoading) return <AppLayout><TablePageSkeleton /></AppLayout>;
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>

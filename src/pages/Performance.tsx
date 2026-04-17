@@ -309,13 +309,7 @@ export default function Performance() {
     return alerts.slice(0, 6);
   }, [filteredOrders, stockItems, products, dealers]);
 
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <DashboardSkeleton />
-      </AppLayout>
-    );
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   const kpis = [
     {

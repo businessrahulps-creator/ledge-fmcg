@@ -180,7 +180,7 @@ export default function Schemes() {
   const activeSchemes = filteredSchemes.filter(s => s.isActive);
   const inactiveSchemes = filteredSchemes.filter(s => !s.isActive);
 
-  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>

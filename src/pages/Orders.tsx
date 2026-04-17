@@ -89,9 +89,7 @@ export default function Orders() {
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
-  if (isLoading) {
-    return <AppLayout><TablePageSkeleton /></AppLayout>;
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>
