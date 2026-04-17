@@ -42,7 +42,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
-import { SystemHealthCard } from "@/components/settings/SystemHealthCard";
+
 
 interface TeamMember {
   id: string;
@@ -624,8 +624,7 @@ export default function Settings() {
         {/* Install App Card — mobile only, shown when not installed */}
         <InstallAppCard />
 
-        {/* System Health — super admin only */}
-        {userRole === "super_admin" && <SystemHealthCard />}
+
 
         {/* Data Backup */}
         <div className="glass-card p-4 md:p-6 max-w-2xl">
