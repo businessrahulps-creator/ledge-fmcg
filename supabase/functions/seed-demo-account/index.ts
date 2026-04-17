@@ -244,13 +244,40 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Shared-secret guard: only callers with the admin token may run this.
-  const SEED_ADMIN_TOKEN = Deno.env.get("SEED_ADMIN_TOKEN");
-  const provided = req.headers.get("x-seed-admin-token");
-  if (!SEED_ADMIN_TOKEN || provided !== SEED_ADMIN_TOKEN) {
+  // Auth guard: caller must be a logged-in super_admin.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 401,
+    });
+  }
+  const authClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(
+    authHeader.replace("Bearer ", "")
+  );
+  if (claimsErr || !claimsData?.claims?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 401,
+    });
+  }
+  const callerId = claimsData.claims.sub;
+  const adminCheck = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data: roleRow } = await adminCheck
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", callerId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+  if (!roleRow) {
+    return new Response(JSON.stringify({ error: "Forbidden: super_admin required" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 403,
     });
   }
 
