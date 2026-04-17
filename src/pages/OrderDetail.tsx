@@ -5,7 +5,8 @@ import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
-import { OrderInvoicePdf } from "@/components/pdf/OrderInvoicePdf";
+// OrderInvoicePdf is dynamically imported on click to keep @react-pdf/renderer
+// out of the OrderDetail initial bundle and to avoid a static+dynamic chunking conflict.
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -676,8 +677,9 @@ export default function OrderDetail() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onClick={async () => {
                   const dealer = distributors.find(d => d.id === order.distributorId);
+                  const { OrderInvoicePdf } = await import("@/components/pdf/OrderInvoicePdf");
                   downloadPdf(
                     pdfFilename("invoice", order.orderNumber),
                     <OrderInvoicePdf
