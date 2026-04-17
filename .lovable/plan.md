@@ -1,21 +1,19 @@
 
 
-# Add subtle "syncing…" indicator in header
+The screenshot shows the **RefreshAppButton** rendering as a large circular button with a 2-tone refresh icon — it's visually heavy, bigger than the bell, and reads as a primary action rather than a quiet utility. That's the "sync feature UI/UX issue" — not the header `Syncing…` indicator from the last change.
 
-## Plan
-Show a small, unobtrusive indicator in the `AppLayout` header when `isRefreshing` is true (background fetch after cache-first paint).
+## Fix — make the Refresh button quiet and consistent with the bell
 
-### Changes — 1 file
-**`src/components/layout/AppLayout.tsx`**
-- Import `useData` from `@/context/DataContext`.
-- Read `isRefreshing` from the context.
-- Render a small inline element to the left of `LiveClock` (in the existing `ml-auto` cluster):
-  - Tiny spinning `Loader2` icon (h-3 w-3) + "Syncing…" text in `text-[11px] text-muted-foreground`.
-  - Hidden on very small screens (`hidden sm:inline-flex`) to avoid crowding mobile header.
-  - Wrapped in `AnimatePresence` + `motion.div` with fade/slide for smooth appear/disappear (matches existing offline banner pattern).
-  - Only renders when `isRefreshing && online` (avoid double-signaling alongside the offline banner).
+**Single file: `src/components/layout/RefreshAppButton.tsx`**
 
-### Out of scope
-- No new files, no context changes (`isRefreshing` already exposed from ISSUE 2).
-- No changes to the offline/syncing banner below the header (different semantic — that's for queued offline mutations).
+1. Strip the filled/circular background — render as a plain `ghost` icon button matching `NotificationCenter`'s bell styling (same size box `h-9 w-9`, no background until hover).
+2. Use a single-tone `RefreshCw` icon at `h-[18px] w-[18px]` with `text-muted-foreground` (same weight as the bell), not the 2-tone `RefreshCwOff`/colored variant.
+3. While checking for updates, animate the icon with `animate-spin` instead of swapping to a different glyph.
+4. Keep tooltip "Check for updates" / success + "no update" toasts unchanged.
+5. Verify alignment in the header cluster (gap-3 already set in `AppLayout`) so Refresh + Bell sit as a matched pair.
+
+## Out of scope
+- No changes to the header `Syncing…` indicator (separate concern, working as designed).
+- No changes to `NotificationCenter`, `LiveClock`, role badge, or install button.
+- No changes to update-check logic or toasts.
 
