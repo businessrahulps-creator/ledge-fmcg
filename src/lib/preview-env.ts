@@ -16,7 +16,11 @@ export const isPreviewHost = (() => {
   const h = window.location.hostname;
   return (
     h.includes("id-preview--") ||
-    h.includes("lovableproject.com")
+    h.includes("lovableproject.com") ||
+    // Lovable preview subdomains live under *.lovable.app (e.g. id-preview--<id>.lovable.app)
+    // The published app uses a custom/published domain, NOT lovable.app, so this is safe.
+    h.endsWith(".lovable.app") ||
+    h === "lovable.app"
   );
 })();
 
