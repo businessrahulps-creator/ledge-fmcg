@@ -230,7 +230,10 @@ export function makeOfflineCrud<T extends { id: string }>(
   const allowOfflineDelete = options?.allowOfflineDelete !== false; // default true
 
   const add = async (item: T) => {
-    if (!companyId) return;
+    if (!companyId) {
+      toast.error("Workspace not set up", { description: "Please complete workspace setup before adding data." });
+      return;
+    }
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
       setter(prev => {
@@ -252,6 +255,10 @@ export function makeOfflineCrud<T extends { id: string }>(
   };
 
   const update = async (item: T) => {
+    if (!companyId) {
+      toast.error("Workspace not set up", { description: "Please complete workspace setup before saving changes." });
+      return;
+    }
     if (!navigator.onLine) {
       setter(prev => {
         const updated = prev.map(x => x.id === item.id ? item : x);
@@ -269,6 +276,10 @@ export function makeOfflineCrud<T extends { id: string }>(
   };
 
   const remove = async (id: string): Promise<boolean> => {
+    if (!companyId) {
+      toast.error("Workspace not set up", { description: "Please complete workspace setup first." });
+      return false;
+    }
     if (!navigator.onLine) {
       if (!allowOfflineDelete) {
         toast.error(`Cannot delete ${entityLogType || table} offline`, { description: "Please reconnect to delete." });

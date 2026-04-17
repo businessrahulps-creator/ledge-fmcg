@@ -14,6 +14,7 @@ import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { SplashScreen } from "@/components/SplashScreen";
+import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -59,7 +60,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <SplashScreen />;
   }
   if (!user) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+  return <NoCompanyGuard>{children}</NoCompanyGuard>;
 }
 
 const App = () => (

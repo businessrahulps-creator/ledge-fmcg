@@ -150,12 +150,18 @@ export default function Company() {
   };
 
   const saveCompany = async () => {
+    if (!companyId) {
+      toast.error("Workspace not set up", {
+        description: "Please complete workspace setup before saving company details.",
+      });
+      return;
+    }
     setIsSaving(true);
     try {
     if (orderPrefix !== savedPrefix) {
       api.orders.setPrefix(sanitizeInput(orderPrefix));
     }
-    if (companyId) {
+    {
       const { error } = await supabase
         .from("companies")
         .update({
