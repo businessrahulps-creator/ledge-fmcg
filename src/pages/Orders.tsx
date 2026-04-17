@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
