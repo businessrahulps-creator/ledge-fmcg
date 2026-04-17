@@ -643,6 +643,22 @@ export default function NewOrder() {
       </AlertDialogContent>
     </AlertDialog>
 
+    {/* Unsaved changes guard */}
+    <AlertDialog open={guard.confirmOpen}>
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Discard unsaved order?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have an order in progress. Leaving this page will lose your changes.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={guard.cancelLeave}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={guard.confirmLeave}>Discard &amp; leave</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
   </>
   );
 }
