@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, u
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 import type { Order, Distributor, Salesperson, Product, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {
@@ -231,6 +232,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       console.error("Data fetch error:", err);
+      logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
       if (!navigator.onLine) await loadFromCache(cId);
     } finally {
       if (token === fetchTokenRef.current) {
@@ -283,7 +285,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
           for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             const result = await replaySingleMutation(mutation);
             if (result.ok) { succeeded = true; synced++; break; }
-            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, "error" in result ? result.error : "unknown");
+            const errMsg = "error" in result ? result.error : "unknown";
+            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, errMsg);
+            logError({ source: "sync:replay", error: errMsg, severity: "warning", context: { table: mutation.table, type: mutation.type, attempt } });
             if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 1000 * attempt));
           }
           if (!succeeded) await updateMutationInQueue(mutation.id, { attempts: MAX_RETRIES });

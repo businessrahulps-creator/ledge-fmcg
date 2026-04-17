@@ -5,6 +5,7 @@ import type { SecondarySale, Target, Claim, ClaimLine, Invoice, InvoiceLine } fr
 import { cacheData, enqueueMutation, type CacheableEntity } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 
 // --- Map DB rows to app types ---
 
@@ -232,6 +233,7 @@ export function makeOfflineCrud<T extends { id: string }>(
   const add = async (item: T) => {
     if (!companyId) {
       toast.error("Workspace not set up", { description: "Please complete workspace setup before adding data." });
+      logError({ source: `crud:${table}.add`, error: "Workspace not set up (companyId missing)", severity: "warning", context: { table } });
       return;
     }
     if (!navigator.onLine) {
@@ -246,7 +248,11 @@ export function makeOfflineCrud<T extends { id: string }>(
       return;
     }
     const { data, error } = await supabase.from(table as any).insert({ ...toDbRow(item), company_id: companyId }).select().single();
-    if (error) { toast.error(`Failed to add ${table}`, { description: error.message }); return; }
+    if (error) {
+      toast.error(`Failed to add ${table}`, { description: error.message });
+      logError({ source: `crud:${table}.add`, error, context: { table } });
+      return;
+    }
     if (data) {
       const newId = (data as any).id;
       setter(prev => [...prev, { ...item, id: newId }]);
@@ -257,6 +263,7 @@ export function makeOfflineCrud<T extends { id: string }>(
   const update = async (item: T) => {
     if (!companyId) {
       toast.error("Workspace not set up", { description: "Please complete workspace setup before saving changes." });
+      logError({ source: `crud:${table}.update`, error: "Workspace not set up (companyId missing)", severity: "warning", context: { table, id: item.id } });
       return;
     }
     if (!navigator.onLine) {
@@ -270,7 +277,11 @@ export function makeOfflineCrud<T extends { id: string }>(
       return;
     }
     const { error } = await supabase.from(table as any).update(toDbRow(item)).eq("id", item.id);
-    if (error) { toast.error(`Failed to update ${table}`, { description: error.message }); return; }
+    if (error) {
+      toast.error(`Failed to update ${table}`, { description: error.message });
+      logError({ source: `crud:${table}.update`, error, context: { table, id: item.id } });
+      return;
+    }
     setter(prev => prev.map(x => x.id === item.id ? item : x));
     if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
   };
@@ -278,6 +289,7 @@ export function makeOfflineCrud<T extends { id: string }>(
   const remove = async (id: string): Promise<boolean> => {
     if (!companyId) {
       toast.error("Workspace not set up", { description: "Please complete workspace setup first." });
+      logError({ source: `crud:${table}.remove`, error: "Workspace not set up (companyId missing)", severity: "warning", context: { table, id } });
       return false;
     }
     if (!navigator.onLine) {
@@ -298,6 +310,7 @@ export function makeOfflineCrud<T extends { id: string }>(
     if (error) {
       const friendly = mapFkError(error.message, entityLogType || table);
       toast.error(friendly.title, { description: friendly.description });
+      logError({ source: `crud:${table}.remove`, error, context: { table, id } });
       return false;
     }
     setter(prev => prev.filter(x => x.id !== id));

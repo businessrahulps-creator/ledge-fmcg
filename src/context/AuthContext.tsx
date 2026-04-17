@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import { logError } from "@/utils/errorLog";
 
 interface Profile {
   id: string;
@@ -76,7 +77,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             p_company_name: companyName,
             p_full_name: fullName,
           });
-          if (!rpcError) {
+          if (rpcError) {
+            logError({
+              source: "rpc:setup_new_company:auto-recovery",
+              error: rpcError,
+              context: { userId, hasCompanyName: true },
+            });
+          } else {
             const { data: refreshed } = await supabase
               .from("profiles")
               .select("*")
@@ -85,8 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (refreshed && mountedRef.current) setProfile(refreshed as Profile);
           }
         }
-      } catch {
-        // Auto-recovery best-effort; the NoCompanyGuard modal will catch the rest.
+      } catch (err) {
+        logError({ source: "auth:auto-recovery", error: err, severity: "warning", context: { userId } });
       }
     }
 

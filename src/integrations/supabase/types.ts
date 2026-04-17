@@ -331,6 +331,45 @@ export type Database = {
           },
         ]
       }
+      error_log: {
+        Row: {
+          company_id: string | null
+          context: Json
+          created_at: string
+          id: string
+          message: string
+          resolved: boolean
+          severity: string
+          source: string
+          stack: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          message?: string
+          resolved?: boolean
+          severity?: string
+          source: string
+          stack?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          message?: string
+          resolved?: boolean
+          severity?: string
+          source?: string
+          stack?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       godowns: {
         Row: {
           address: string
