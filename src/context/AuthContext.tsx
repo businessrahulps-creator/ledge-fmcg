@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       companyId: profile?.company_id ?? null,
       userRole,
       isAccountant: userRole === "accountant",
-      loading, authReady, signOut, refreshProfile,
+      loading, authReady, profileLoaded, signOut, refreshProfile,
     }}>
       {children}
     </AuthContext.Provider>
