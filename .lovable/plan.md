@@ -1,36 +1,45 @@
 
 
-## Problem
+## Two issues, both rooted in the same structural bug
 
-Looking at the screenshot vs the code (`src/pages/OrderDetail.tsx` lines 663–728):
+Looking at both screenshots:
 
-1. **Empty gap between Driver field and the action bar** — caused by `<div className="pb-48 md:pb-0" />` (line 663). This 192px spacer was added so the **fixed** action bar wouldn't overlap form fields when scrolling. But on this short form, the spacer creates a large empty band between Driver and the floating bar.
-2. **"Save Changes" wraps to its own row inside the bar** — `flex-wrap` + `mr-auto` on the icon group forces Save below when 4 icon buttons + Save can't fit on a 390px iPhone. That's why the bar looks tall and awkward.
-3. The bar is `fixed bottom-24` on mobile, floating above the bottom tab nav, which combined with the spacer makes the page feel disconnected.
+**Issue 1 — uneven padding inside the Save bar**
+The bar has `px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]`. On iPhone the safe-area inset adds ~34px to the bottom only — so top padding is 12px but bottom is ~46px. That's the visible asymmetry.
 
-## Fix (surgical, mobile-only)
+**Issue 2 — Save bar overlaps the History card when expanded**
+The Save bar is `fixed bottom-24` on mobile, so it floats over everything below it. The History card sits in normal flow underneath, so when you expand it, the bar covers the top of it. Also, the History card is currently rendered **outside** the main container `</div>` on line 729 (a stray closing div) — a structural bug.
+
+## Root cause
+
+The sticky/fixed action bar pattern is fighting the page. On a short form (390px viewport), there's plenty of room to just let the action bar **flow inline** above History — no need for it to float. Floating only made sense when the form was tall enough to scroll.
+
+## Fix — make the action bar inline on mobile too (drop the `fixed` behavior)
 
 **File: `src/pages/OrderDetail.tsx`**
 
-**Change 1 — Tighten the bottom spacer (line 663)**
-Replace `pb-48 md:pb-0` with `pb-32 md:pb-0`. The fixed bar is ~64px tall + sits at `bottom-24` (96px), so 128px of bottom padding is enough clearance — not 192px. This removes ~64px of dead space.
+**Change 1 (line 663)** — Remove the spacer div entirely. Not needed once the bar is inline.
 
-**Change 2 — Stop "Save Changes" from wrapping (lines 667–668)**
-- Remove `flex-wrap` from the outer flex container so children stay on one row.
-- Keep `gap-2` for spacing.
-- The inner icon group keeps `mr-auto` to push Save to the right.
-- Add `min-w-0` and `flex-shrink` behaviors so icon buttons can compress instead of wrapping.
+**Change 2 (line 666)** — Change the bar wrapper from `fixed bottom-24 left-4 right-4 z-40 ... md:static ...` to a simple inline card: `rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none`.
+- Removes the asymmetric `pb-[calc(...)]` → top and bottom padding now both `py-3` (equal).
+- Removes `fixed` → bar no longer overlaps History.
+- Keeps the glass card look on mobile, keeps desktop unchanged.
 
-Result: one clean row — `[🗑] [📄] [💬] [↻] ……… [Save Changes]` — matching the original design intent.
+**Change 3 (line 729)** — Fix the stray `</div>`. The History card should sit inside the main page container, not outside it. Move the closing div to after the History card so structure is: `[form] [action bar] [History] </container>`.
 
-**Change 3 — No other changes.** Activity History card, sticky positioning, bottom tab nav all stay as-is.
+## Result
+
+- Save bar has equal top/bottom padding (no safe-area asymmetry, since it's no longer floating above the home indicator).
+- Expanding History pushes content naturally — no overlap.
+- Page scrolls as one continuous flow: form → actions → history.
+- Desktop layout unchanged.
 
 ## Files touched
-- `src/pages/OrderDetail.tsx` — 2 small edits (lines 663, 667)
+- `src/pages/OrderDetail.tsx` — 3 small edits in lines 663–734.
 
 ## What stays the same
-- Sticky-on-mobile, inline-on-desktop behavior
-- All button styles, colors, icons, handlers
-- Delete confirmation flow
-- Activity History section
+- All buttons, icons, handlers, styles, delete confirmation
+- Desktop inline behavior
+- History component itself
+- Bottom tab nav (sits below page content as always)
 
