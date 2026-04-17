@@ -413,7 +413,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                 <ShoppingCart className="h-5 w-5 text-muted-foreground/60" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-sm font-medium">No orders on {DAY_LABELS[selectedDay]}</p>
+                <p className="text-sm font-medium">No orders on {formatIndianDate(selectedDate)}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Create an order to see it here</p>
               </div>
               <Link
