@@ -53,7 +53,7 @@ export function useInstallPrompt() {
 
   const iosDevice = typeof navigator !== "undefined" && isIOS();
   const standalone = typeof window !== "undefined" && isStandalone();
-  const iframe = typeof window !== "undefined" && isInIframe();
+  const iframe = (typeof window !== "undefined" && isInIframe()) || isPreviewEnv;
 
   useEffect(() => {
     if (iframe || standalone) return;
