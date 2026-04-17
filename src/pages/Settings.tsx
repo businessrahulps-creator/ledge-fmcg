@@ -42,7 +42,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
-import { SystemHealthCard } from "@/components/settings/SystemHealthCard";
+
 
 interface TeamMember {
   id: string;
