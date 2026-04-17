@@ -15,6 +15,8 @@ import { useOnlineStatus } from "@/hooks/use-online-status";
 import { ListPageSkeleton, DashboardPageSkeleton } from "@/components/ui/page-skeleton";
 import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
+import { isPreviewEnv } from "@/lib/preview-env";
+
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -73,7 +75,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <InstallPrompt />
-              <UpdatePrompt />
+              {!isPreviewEnv && <UpdatePrompt />}
               <OnlineStatusWatcher />
               <BrowserRouter>
                 <Routes>

@@ -18,23 +18,18 @@ if (typeof window !== "undefined") {
 }
 
 // Guard: never register service workers in Lovable preview / iframes
-const isInIframe = (() => {
-  try {
-    return window.self !== window.top;
-  } catch {
-    return true;
-  }
-})();
+import { isPreviewEnv } from "@/lib/preview-env";
 
-const isPreviewHost =
-  window.location.hostname.includes("id-preview--") ||
-  window.location.hostname.includes("lovableproject.com");
-
-if (isPreviewHost || isInIframe) {
+if (isPreviewEnv) {
   navigator.serviceWorker?.getRegistrations().then((regs) => {
     regs.forEach((r) => r.unregister());
   });
+  // Also nuke any caches left behind by a prior SW registration
+  if (typeof caches !== "undefined") {
+    caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+  }
 }
+
 
 createRoot(document.getElementById("root")!).render(<App />);
 
