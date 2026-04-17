@@ -134,7 +134,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("online", handleOnline);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [companyId]);
+  }, [companyId, user?.id]);
 
   const addNotification = useCallback(
     async (type: NotificationType, title: string, description: string) => {
