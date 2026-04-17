@@ -260,7 +260,7 @@ export default function Distributors() {
                 <div className="space-y-3 md:space-y-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Dealer Name *</Label>
-                    <Input value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-10 rounded-lg" />
+                    <Input autoFocus value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} placeholder="e.g. Sharma Traders" className="h-10 rounded-lg" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-1.5 md:space-y-2">

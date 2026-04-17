@@ -303,6 +303,7 @@ export default function Schemes() {
             <div className="space-y-1.5">
               <Label className="text-xs">Scheme Name *</Label>
               <Input
+                autoFocus
                 placeholder="e.g. Diwali Special Offer"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
