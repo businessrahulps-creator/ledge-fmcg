@@ -34,6 +34,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatIndianDate } from "@/utils/formatDate";
 import {
   AreaChart,
   Area,
@@ -376,31 +378,40 @@ export default function Performance() {
           {/* Time period pills + Export */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-1 rounded-full bg-muted/50 p-1 whitespace-nowrap shrink-0">
-                {PERIOD_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setPeriod(opt.value)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                      period === opt.value && period !== "custom"
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setPeriod("custom")}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    period === "custom"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Custom
-                </button>
-              </div>
+              <TooltipProvider delayDuration={300}>
+                <UITooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex gap-1 rounded-full bg-muted/50 p-1 whitespace-nowrap shrink-0">
+                      {PERIOD_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setPeriod(opt.value)}
+                          className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                            period === opt.value && period !== "custom"
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setPeriod("custom")}
+                        className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                          period === "custom"
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        Custom
+                      </button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs text-xs">
+                    Time windows are rolling — "7D" means the last 7 days ending today, not the calendar week.
+                  </TooltipContent>
+                </UITooltip>
+              </TooltipProvider>
               <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full shrink-0" onClick={() => setPdfOpen(true)}>
                 <Download className="h-3.5 w-3.5" />
                 <span>Export</span>
@@ -461,6 +472,17 @@ export default function Performance() {
                 </Popover>
               </div>
             )}
+            <p className="text-[11px] text-muted-foreground/70 sm:text-right">
+              Showing {period === "custom"
+                ? (customFrom || customTo)
+                  ? `${customFrom ? formatIndianDate(customFrom) : "—"} – ${customTo ? formatIndianDate(customTo) : "today"}`
+                  : "select dates"
+                : period === "today"
+                  ? formatIndianDate(new Date())
+                  : period === "ytd"
+                    ? `${formatIndianDate(new Date(new Date().getFullYear(), 0, 1))} – ${formatIndianDate(new Date())}`
+                    : `${formatIndianDate(cutoff)} – ${formatIndianDate(new Date())}`}
+            </p>
           </div>
         </div>
 
