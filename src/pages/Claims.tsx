@@ -471,13 +471,13 @@ export default function Claims() {
 
           <TabsContent value={tab} className="mt-4">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <RotateCcw className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No {tab === "all" ? "" : tab} claims</p>
-                <p className="text-xs text-muted-foreground">
-                  {tab === "open" ? "All clear! No pending returns or claims." : "Claims will appear here once recorded."}
-                </p>
-              </div>
+              <EmptyState
+                icon={RotateCcw}
+                title={`No ${tab === "all" ? "" : tab} claims`}
+                description={tab === "open" ? "All clear! No pending returns or claims." : "Claims will appear here once recorded."}
+                actionLabel={tab === "open" ? "New Claim" : undefined}
+                onAction={tab === "open" ? () => setNewClaimOpen(true) : undefined}
+              />
             ) : (
               <div className="space-y-3">
                 {filtered.map(claim => (
