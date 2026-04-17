@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +17,7 @@ export function RefreshAppButton() {
         if (!updated) {
           toast.success("You're on the latest version");
         }
-        // If updated === true, the page will reload momentarily
       } else {
-        // No SW registered (preview/iframe) — just reload
         toast.message("Refreshing…");
         setTimeout(() => window.location.reload(), 300);
       }
@@ -32,15 +29,17 @@ export function RefreshAppButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
           onClick={handleClick}
           aria-label="Check for updates"
-          className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+          className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-muted"
         >
-          <RefreshCw className={cn("h-4 w-4", checking && "animate-spin")} />
-        </Button>
+          <RefreshCw
+            className={cn("h-[18px] w-[18px] text-muted-foreground", checking && "animate-spin")}
+            strokeWidth={1.5}
+          />
+        </button>
       </TooltipTrigger>
       <TooltipContent side="bottom">Check for updates</TooltipContent>
     </Tooltip>
