@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { isPreviewEnv } from "@/lib/preview-env";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
