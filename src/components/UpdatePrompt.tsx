@@ -15,6 +15,7 @@ declare global {
     __ledgeTriggerUpdate?: () => Promise<boolean>;
     __ledgeHasUpdate?: boolean;
     __ledgeAppVersion?: string;
+    __ledgeLastCheck?: number;
   }
 }
 
