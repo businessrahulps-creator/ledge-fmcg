@@ -75,7 +75,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <InstallPrompt />
-              <UpdatePrompt />
+              {!isPreviewEnv && <UpdatePrompt />}
               <OnlineStatusWatcher />
               <BrowserRouter>
                 <Routes>
