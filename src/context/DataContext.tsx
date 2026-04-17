@@ -209,45 +209,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ]);
       if (token !== fetchTokenRef.current) return;
 
-      const dists = (distRes.data || []).map(mapDistributor);
+      const dists = (distRes as any[]).map(mapDistributor);
       dealers.setDistributors(dists);
       cacheData(cId, "distributors", dists);
 
-      const sps = (spRes.data || []).map(mapSalesperson);
+      const sps = (spRes as any[]).map(mapSalesperson);
       salespersons.setSalespersons(sps);
 
-      const prods = (prodRes.data || []).map(mapProduct);
+      const prods = (prodRes as any[]).map(mapProduct);
       catalog.setProducts(prods);
 
-      const gds = (godownRes.data || []).map(mapGodown);
+      const gds = (godownRes as any[]).map(mapGodown);
       stock.setLocations(gds);
 
-      const sis = (stockRes.data || []).map(si => mapStockItem(si, prods, gds));
+      const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
       stock.setStockItems(sis);
 
-      const mappedSchemes = (schemesRes.data || []).map((s: any) => mapScheme(s));
+      const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
       catalog.setSchemes(mappedSchemes);
 
-      const mappedSS = (ssRes.data || []).map((s: any) => mapSecondarySale(s));
+      const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
       targets.setSecondarySales(mappedSS);
 
-      const mappedTargets = ((targetsRes as any).data || []).map((t: any) => mapTarget(t));
+      const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       targets.setTargets(mappedTargets);
 
-      const mappedClaims = ((claimsRes as any).data || []).map((c: any) => mapClaim(c, claimLinesData));
+      const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
       billing.setClaims(mappedClaims);
 
-      const mappedInvoices = ((invoicesRes as any).data || []).map((inv: any) => mapInvoice(inv, invoiceLinesData));
+      const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, invoiceLinesData));
       billing.setInvoices(mappedInvoices);
 
-      const orderIds = (ordersRes.data || []).map(o => o.id);
+      const orderIds = (ordersRes as any[]).map((o: any) => o.id);
       const [allLines, allOrderSchemes] = await Promise.all([
         batchIn("order_lines", "order_id", orderIds),
         batchIn("order_schemes", "order_id", orderIds),
       ]);
       if (token !== fetchTokenRef.current) return;
 
-      const mappedOrders = mapOrders(ordersRes.data || [], allLines, allOrderSchemes);
+      const mappedOrders = mapOrders((ordersRes as any[]) || [], allLines, allOrderSchemes);
       orders.setOrders(mappedOrders);
       setIsOfflineData(false);
 
