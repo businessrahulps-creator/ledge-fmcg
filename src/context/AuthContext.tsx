@@ -47,16 +47,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
+    let loadedProfile: Profile | null = null;
     try {
       const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
         .single();
-      if (data && mountedRef.current) setProfile(data as Profile);
+      if (data && mountedRef.current) {
+        loadedProfile = data as Profile;
+        setProfile(loadedProfile);
+      }
     } catch {
       // Profile fetch failure should never affect auth state
     }
+
+    // Auto-recover: if profile exists but has no company, try to create one
+    // from auth metadata captured at signup. This rescues users who signed up
+    // with email confirmation enabled (where setup_new_company was never called).
+    if (loadedProfile && !loadedProfile.company_id) {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const meta = (authUser?.user_metadata || {}) as Record<string, string>;
+        const companyName = meta.company_name?.trim();
+        const fullName = (meta.full_name || loadedProfile.full_name || "").trim();
+        if (companyName) {
+          const { error: rpcError } = await supabase.rpc("setup_new_company", {
+            p_company_name: companyName,
+            p_full_name: fullName,
+          });
+          if (!rpcError) {
+            const { data: refreshed } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("user_id", userId)
+              .single();
+            if (refreshed && mountedRef.current) setProfile(refreshed as Profile);
+          }
+        }
+      } catch {
+        // Auto-recovery best-effort; the NoCompanyGuard modal will catch the rest.
+      }
+    }
+
     // Fetch role
     try {
       const { data: roleData } = await supabase

@@ -42,7 +42,9 @@ export default function Signup() {
       if (!authData.user) throw new Error("Signup failed");
 
       if (!authData.session) {
-        toast.success("Check your email", { description: "We sent a verification link — confirm it, then sign in." });
+        toast.success("Check your email to verify", {
+          description: "Confirm the link, then sign in — your workspace will be ready.",
+        });
         navigate("/login");
         return;
       }
