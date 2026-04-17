@@ -1,21 +1,30 @@
 
 
-## Fix: Sticky action bar covers Driver/Vehicle fields on mobile
+## Phase 1 — Auth Audit: Confirmed Decisions
 
-### Root cause
-In `src/pages/OrderDetail.tsx` (line 663–726), the action bar is `fixed bottom-24` on mobile. The form ends right before it with no bottom padding, so the bar floats over the last row (Dispatch Date / Vehicle / Driver). User cannot see/tap the Driver field — exactly what the screenshot shows.
+User confirmed:
+- Trial = **30 days** (current code is correct, no change)
+- New signups stay **empty** (no `seed_company_data` call — current behavior is correct)
 
-### Fix (one file, minimal)
-**`src/pages/OrderDetail.tsx`** — add bottom padding to the scrollable form container on mobile so the last row clears the floating bar (~80px bar + 96px bottom offset + safe area). Use `pb-48 md:pb-0` on the form wrapper that holds the dispatch/vehicle/driver block (or on the outer page container).
+### Now I'll do (default mode, read-only DB queries + targeted code fixes only):
 
-Simplest, safest change: add `pb-48 md:pb-0` to the parent wrapper of the form section ending at line 661, so on mobile there's enough space below the Driver field for the floating action bar to sit without overlapping. Desktop is unaffected (bar is static there).
+1. **DB sanity queries** (4 reads):
+   - Orphan profiles (no `company_id`) older than 1h
+   - Users without a `user_roles` row
+   - Recent signups (last 7 days) health check
+   - `error_log` entries from `auth:*` sources, last 7 days
 
-### Why this is the right fix
-- Doesn't change layout/behaviour of the action bar (which users like floating).
-- Pure spacing fix — no risk to save/delete/claim handlers.
-- Matches the same pattern used elsewhere in the app for sticky bottom bars.
+2. **Verify `on_auth_user_created` trigger is actually attached** to `auth.users`. The `<db-triggers>` block says "no triggers" — if the function exists but isn't wired, every new signup silently skips profile creation and relies on `setup_new_company` to create the profile. Need to confirm via `pg_trigger` query. If missing → migration to recreate the trigger.
 
-### Out of scope
-- No changes to action bar contents, order, or styling.
-- No changes to History accordion or other sections.
+3. **Code fixes (only if confirmed needed)**:
+   - `Signup.tsx`: add `emailRedirectTo: ${window.location.origin}/login` to `supabase.auth.signUp()` so the email-confirmation link lands on the right URL (currently unset → defaults to Supabase's site URL which may be wrong on custom domain `getledge.in`).
+   - No other auth code changes planned.
+
+4. **Skipped (out of scope for Phase 1)**:
+   - GSTIN/phone validation — not collected at signup, will check on Settings/Dealer forms in Phase 2.
+   - Trial banner UI — Phase 2.
+   - RLS — Phase 4.
+
+### Deliverable
+Reply with `PHASE 1 COMPLETE` listing: queries run, trigger status, fixes applied, files changed. Then await your go-ahead for Phase 2.
 
