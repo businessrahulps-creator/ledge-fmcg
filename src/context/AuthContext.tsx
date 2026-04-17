@@ -21,6 +21,7 @@ interface AuthContextType {
   isAccountant: boolean;
   loading: boolean;
   authReady: boolean;
+  profileLoaded: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
