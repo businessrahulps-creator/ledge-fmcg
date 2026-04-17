@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
 import { useApi } from "@/services/api";
@@ -283,7 +284,14 @@ export default function Stock() {
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
 
-  // Blocking page skeleton removed — sections render inline.
+  // First-paint skeleton for cold loads (no cached products + still fetching)
+  if (isLoading && products.length === 0 && locations.length === 0) {
+    return (
+      <AppLayout>
+        <ListPageSkeleton cards={6} />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -657,7 +665,7 @@ export default function Stock() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Product Name *</Label>
-                  <Input value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-10 rounded-lg" />
+                  <Input autoFocus value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-10 rounded-lg" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
@@ -717,7 +725,7 @@ export default function Stock() {
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Warehouse Name *</Label>
-                  <Input value={editWarehouse.name} onChange={(e) => setEditWarehouse({ ...editWarehouse, name: e.target.value })} placeholder="e.g. Main Warehouse — Kochi" className="h-10 rounded-lg" />
+                  <Input autoFocus value={editWarehouse.name} onChange={(e) => setEditWarehouse({ ...editWarehouse, name: e.target.value })} placeholder="e.g. Main Warehouse — Kochi" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Address</Label>

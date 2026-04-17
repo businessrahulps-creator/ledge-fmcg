@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useApi } from "@/services/api";
-import { GstInvoicePdf } from "@/components/pdf/GstInvoicePdf";
+// GstInvoicePdf is dynamically imported on click to keep the heavy
+// @react-pdf/renderer module out of the initial Billing bundle.
 import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";
@@ -35,6 +36,8 @@ import { isValidGstin } from "@/utils/validators";
 import { useSearchParams } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
+import { TablePageSkeleton } from "@/components/ui/page-skeleton";
+import { usePageLoading } from "@/hooks/use-loading";
 import { filterByTimePeriod, periodRangeLabel, type TimePeriod } from "@/components/reports/TimePeriodFilter";
 
 type DocType = Invoice["docType"];
@@ -77,13 +80,31 @@ export default function Billing() {
   const company = api.companyInfo;
   const [searchParams] = useSearchParams();
 
+  const isLoading = usePageLoading(api.loading);
+
+  // Persist filters across navigation (e.g. opening a draft and coming back)
+  const FILTER_KEY = "billing:filters";
+  const restoredFilters = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem(FILTER_KEY);
+      return raw ? JSON.parse(raw) as { search?: string; type?: string; period?: TimePeriod | "all" } : {};
+    } catch { return {}; }
+  }, []);
+
   const [showCreate, setShowCreate] = useState(false);
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
+  const [search, setSearch] = useState(restoredFilters.search || "");
+  const [filterType, setFilterType] = useState<string>(restoredFilters.type || "all");
   const [saving, setSaving] = useState(false);
   const [orderSearch, setOrderSearch] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
-  const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">("all");
+  const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">(restoredFilters.period || "all");
+
+  // Save filters to sessionStorage so they survive a back-nav
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(FILTER_KEY, JSON.stringify({ search, type: filterType, period: timePeriod }));
+    } catch { /* quota — ignore */ }
+  }, [search, filterType, timePeriod]);
 
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Invoice | null>(null);
@@ -374,6 +395,9 @@ export default function Billing() {
     };
 
     try {
+      // Lazy-load the heavy GstInvoicePdf component (and the @react-pdf/renderer
+      // chunk it pulls in) only when the user actually downloads a PDF.
+      const { GstInvoicePdf } = await import("@/components/pdf/GstInvoicePdf");
       const blob = await pdf(<GstInvoicePdf data={pdfData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -436,6 +460,15 @@ export default function Billing() {
   const dialogDesc = isEditMode
     ? `Editing ${editingInvoice?.invoiceNumber}. Changes will be saved immediately.`
     : step === 1 ? "Pick an order to create a billing document from." : "Fill in document details.";
+
+  // First-paint skeleton for cold loads
+  if (isLoading && invoices.length === 0) {
+    return (
+      <AppLayout>
+        <TablePageSkeleton rows={6} />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

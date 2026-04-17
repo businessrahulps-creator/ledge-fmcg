@@ -4,7 +4,7 @@ import type { GodownLocation, StockItem } from "@/data/godown-data";
 import type { OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapGodown, mapProduct } from "@/context/data-utils";
+import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { toast } from "sonner";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
@@ -112,20 +112,11 @@ export function useStockDomain(deps: DomainDeps) {
         supabase.from("products").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
         supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
       ]);
-      const freshProducts = (prodRes.data || []).map(p => ({ id: p.id, name: p.name, sku: p.sku, unit: p.unit, basePrice: Number(p.base_price) }));
-      const freshGodowns = (gdRes.data || []).map(g => ({ id: g.id, name: g.name }));
-      const siData = siRes.data;
-      if (siData) {
-        const mapped = siData.map(si => {
-          const prod = freshProducts.find(p => p.id === si.product_id);
-          const gd = freshGodowns.find(g => g.id === si.godown_id);
-          return {
-            id: si.id, productId: si.product_id, godownId: si.godown_id,
-            productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",
-            godownName: gd?.name || "", quantity: si.quantity, threshold: si.threshold,
-            basePrice: prod?.basePrice || 0, lastDeductedDate: si.last_deducted_date,
-          };
-        });
+      if (siRes.data) {
+        // Use the canonical mapStockItem helper for consistency with other refetch paths.
+        const freshProducts = (prodRes.data || []).map(mapProduct);
+        const freshGodowns = (gdRes.data || []).map(mapGodown);
+        const mapped = siRes.data.map(si => mapStockItem(si, freshProducts, freshGodowns));
         setStockItems(mapped);
         cacheData(deps.companyId, "stockItems", mapped);
       }
