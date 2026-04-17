@@ -105,8 +105,16 @@ export default function Stock() {
     }
   }, [selectedWarehouse]);
 
-  const getProductStock = (productId: string) =>
-    stockItemsList.filter((si) => si.productId === productId).reduce((sum, si) => sum + si.quantity, 0);
+  // Precompute per-product total stock once per render. Eliminates the
+  // per-row .filter().reduce() scan that ran for every product card.
+  const stockByProduct = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const si of stockItemsList) {
+      map.set(si.productId, (map.get(si.productId) || 0) + si.quantity);
+    }
+    return map;
+  }, [stockItemsList]);
+  const getProductStock = (productId: string) => stockByProduct.get(productId) || 0;
 
   const isLoading = usePageLoading(api.loading);
   const debouncedProductSearch = useDebounce(productSearch);
@@ -159,13 +167,20 @@ export default function Stock() {
 
   const activeLocations = locations.filter((l) => l.isActive);
 
-  const getWarehouseStats = (warehouseId: string) => {
-    const items = stockItemsList.filter((si) => si.godownId === warehouseId);
-    const totalSKUs = items.length;
-    const totalValue = items.reduce((sum, si) => sum + si.quantity * si.basePrice, 0);
-    const lowStockCount = items.filter((si) => getStockHealth(si.quantity, si.threshold) !== "healthy").length;
-    return { totalSKUs, totalValue, lowStockCount };
-  };
+  // Precompute warehouse stats in a single pass instead of three filters per warehouse card.
+  const statsByWarehouse = useMemo(() => {
+    const map = new Map<string, { totalSKUs: number; totalValue: number; lowStockCount: number }>();
+    for (const si of stockItemsList) {
+      const cur = map.get(si.godownId) || { totalSKUs: 0, totalValue: 0, lowStockCount: 0 };
+      cur.totalSKUs += 1;
+      cur.totalValue += si.quantity * si.basePrice;
+      if (getStockHealth(si.quantity, si.threshold) !== "healthy") cur.lowStockCount += 1;
+      map.set(si.godownId, cur);
+    }
+    return map;
+  }, [stockItemsList]);
+  const getWarehouseStats = (warehouseId: string) =>
+    statsByWarehouse.get(warehouseId) || { totalSKUs: 0, totalValue: 0, lowStockCount: 0 };
 
   const openNewWarehouse = () => {
     setEditWarehouse({ id: `g${Date.now()}`, name: "", address: "", isActive: true });

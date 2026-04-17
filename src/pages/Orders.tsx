@@ -62,9 +62,22 @@ export default function Orders() {
   const isLoading = usePageLoading(api.loading);
   const debouncedSearch = useDebounce(search);
 
+  // Index invoices by sourceOrderId once per render — converts the per-row O(invoices)
+  // scan into O(1) lookup. Big win when an account accrues many invoices.
+  const invoicesByOrderId = useMemo(() => {
+    const map = new Map<string, typeof invoices>();
+    for (const inv of invoices) {
+      if (!inv.sourceOrderId) continue;
+      const arr = map.get(inv.sourceOrderId);
+      if (arr) arr.push(inv);
+      else map.set(inv.sourceOrderId, [inv]);
+    }
+    return map;
+  }, [invoices]);
+
   const getOrderBillingStatus = useCallback((orderId: string) => {
-    const docs = invoices.filter(inv => inv.sourceOrderId === orderId);
-    if (docs.length === 0) return null;
+    const docs = invoicesByOrderId.get(orderId);
+    if (!docs || docs.length === 0) return null;
     const gstFinal = docs.find(d => d.docType === "gst_invoice" && d.status === "final");
     if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" };
     const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
@@ -74,7 +87,7 @@ export default function Orders() {
     const estimate = docs.find(d => d.docType === "estimate");
     if (estimate) return { label: "Estimate", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" };
     return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
-  }, [invoices]);
+  }, [invoicesByOrderId]);
 
   const filtered = useMemo(() => orders.filter((o) => {
     const q = debouncedSearch.toLowerCase();
