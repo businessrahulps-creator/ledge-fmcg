@@ -16,8 +16,7 @@ export const isPreviewHost = (() => {
   const h = window.location.hostname;
   return (
     h.includes("id-preview--") ||
-    h.includes("lovableproject.com") ||
-    h.includes("lovable.app")
+    h.includes("lovableproject.com")
   );
 })();
 
