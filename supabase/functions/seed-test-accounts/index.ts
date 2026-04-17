@@ -21,6 +21,16 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Shared-secret guard: only callers with the admin token may run this.
+  const SEED_ADMIN_TOKEN = Deno.env.get("SEED_ADMIN_TOKEN");
+  const provided = req.headers.get("x-seed-admin-token");
+  if (!SEED_ADMIN_TOKEN || provided !== SEED_ADMIN_TOKEN) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 401,
+    });
+  }
+
   try {
     const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
