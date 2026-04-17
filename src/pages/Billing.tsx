@@ -997,13 +997,16 @@ export default function Billing() {
               </div>
 
               <DialogFooter>
-                {!isEditMode && (
-                  <Button variant="outline" onClick={() => { setStep(1); setSourceOrderId(""); setLines([]); setBuyerName(""); setBuyerAddress(""); setOrderSearch(""); }} className="gap-1.5 mr-auto">
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    Back
-                  </Button>
-                )}
                 <Button variant="outline" onClick={() => { setShowCreate(false); resetForm(); }}>Cancel</Button>
+                <Button onClick={handleCreate} disabled={saving}>
+                  {saving
+                    ? isEditMode ? "Saving…" : "Creating…"
+                    : isEditMode
+                      ? "Save Changes"
+                      : isDraftType(docType) ? "Create as Draft" : "Create Document"
+                  }
+                </Button>
+              </DialogFooter>
                 <Button onClick={handleCreate} disabled={saving}>
                   {saving
                     ? isEditMode ? "Saving…" : "Creating…"
