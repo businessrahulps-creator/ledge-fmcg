@@ -1,34 +1,79 @@
 
 
-## Match LiveClock + role badge to quiet utility style
+# Permanent fix: ambiguous time period selectors
 
-Goal: make `LiveClock` and the role `Badge` feel like peers of the bell/refresh icons — same muted weight, consistent spacing, no visual heaviness.
+## The real problem
+Two different time-period systems exist with confusing labels:
 
-### Current state
-- `LiveClock`: `font-mono text-[10px] sm:text-xs text-muted-foreground` with an "IST" suffix at `text-[8px]` — already muted but the mono font + IST tag makes it noisier than the icons.
-- Role `Badge`: uses `variant="secondary"` which renders a filled pill background — visually heavier than the ghost icons next to it.
-- Header cluster uses `gap-3`.
+**Reports + Billing** (`TimePeriodFilter`):
+- Dropdown shows: **Daily / Weekly / Monthly / Yearly**
+- Internally means: last 1 / 7 / 30 / 365 days (rolling window from today)
+- Users read "Weekly" as *this calendar week* (Mon–Sun) or *last week* — but it's actually *last 7 days from now*
+- "Yearly" reads as *this year* but is actually *last 365 days*
+- Summary line says "Yearly: ₹X" with no date range — users can't verify
 
-### Changes — single file: `src/components/layout/AppLayout.tsx`
+**Performance page**: pills `Today / 7D / 30D / 90D / 6M / YTD / Custom` — clearer but still no visible date range, so users can't sanity-check the numbers.
 
-1. **Role badge** — drop the filled `Badge` component; replace with a plain inline `<span>`:
-   - `hidden sm:inline-flex items-center text-[11px] font-medium text-muted-foreground capitalize`
-   - No background, no border — reads as quiet metadata, matching icon color weight.
-   - Remove the `Badge` import if no longer used.
+The fix is the same on both: **make the date range explicit and use unambiguous wording**.
 
-2. **LiveClock** — minor refinements in `src/components/layout/LiveClock.tsx`:
-   - Keep mono font (time still benefits from tabular alignment) but bump to `text-[11px]` to match the new badge.
-   - Use `text-muted-foreground` (drop the `/60` variants if any) at the same opacity as the bell icon's default state.
-   - Tighten the IST suffix: `text-[9px] font-medium opacity-70` and `ml-0.5` for cleaner spacing.
+## The fix
 
-3. **Header cluster spacing** — change `gap-3` to `gap-2` so the icons + clock + role text sit as a tight, balanced row (icons themselves have internal `h-9 w-9` padding, so `gap-2` gives ~8px breathing room which matches Apple-style toolbars).
+### 1. Rewrite `TimePeriodFilter` labels (single source of truth)
+**File:** `src/components/reports/TimePeriodFilter.tsx`
 
-### Out of scope
-- No changes to `RefreshAppButton`, `NotificationCenter`, syncing indicator, install button, or sidebar trigger.
-- No changes to mobile bottom nav.
-- No color token changes.
+Replace the four ambiguous options with explicit "Last N days" wording — same as the Performance page convention — and update `periodLabel()` to match.
 
-### Files
-1. `src/components/layout/AppLayout.tsx` — replace Badge with span, adjust gap
-2. `src/components/layout/LiveClock.tsx` — refine sizing/opacity
+| Old value | Old label | New label |
+|---|---|---|
+| `daily` | Daily | Today |
+| `weekly` | Weekly | Last 7 days |
+| `monthly` | Monthly | Last 30 days |
+| `yearly` | Yearly | Last 365 days |
+
+Keep the type values (`daily`/`weekly`/etc.) so no consumer code breaks. Only the user-facing strings change. The cutoff math is already correct (rolling window) — labels now match the math.
+
+Also export a new helper:
+```ts
+getPeriodRange(period): { from: Date; to: Date; label: string }
+```
+which returns the actual date range (e.g., `Mar 18 – Apr 17, 2026`) for display.
+
+### 2. Show the actual date range below every filter
+For each report consumer (`PaymentReport`, `DispatchReport`, `DistributorReport`, `ProductReport`, `SalesTeamReport`) and `Billing.tsx`:
+- Render a small caption beside/under the filter:
+  `Showing 18 Mar 2026 – 17 Apr 2026` (uses `formatIndianDate`)
+- This eliminates all ambiguity — users see exactly which dates feed the numbers.
+
+### 3. Apply same treatment to Performance page
+**File:** `src/pages/Performance.tsx`
+- Below the pill row, add the same date-range caption: `Showing DD MMM YYYY – DD MMM YYYY` (using existing `getCutoffDate`).
+- For Custom, show the picked range. For YTD, show `1 Jan 2026 – Today`.
+- Keep the existing pill labels (`7D`, `30D`, etc.) — they're industry-standard analytics shorthand and the new caption removes the ambiguity.
+
+### 4. Add a tooltip on each filter trigger
+- `TimePeriodFilter` `SelectTrigger` and Performance pills get a tooltip:
+  *"Time windows are rolling — 'Last 7 days' means the last 7 days ending today, not the calendar week."*
+- One-time clarification, doesn't add visual noise.
+
+## Files changed
+1. `src/components/reports/TimePeriodFilter.tsx` — relabel options, add `getPeriodRange()` helper, add tooltip
+2. `src/components/reports/PaymentReport.tsx` — show date range caption
+3. `src/components/reports/DispatchReport.tsx` — show date range caption
+4. `src/components/reports/DistributorReport.tsx` — show date range caption
+5. `src/components/reports/ProductReport.tsx` — show date range caption
+6. `src/components/reports/SalesTeamReport.tsx` — show date range caption
+7. `src/pages/Billing.tsx` — show date range caption next to filter
+8. `src/pages/Performance.tsx` — show date range caption below pill row, add tooltip
+
+## Out of scope
+- Targets page (`Targets.tsx`) — uses anchored period dates already; not ambiguous.
+- DealerDetail / SalespersonDetail period labels (already say "Today / This Week / This Month" with anchored dates).
+- No backend / data-shape changes.
+- No new dependencies.
+
+## Why this is the permanent fix
+- **Removes the ambiguity at the source** (label = exactly what the math does).
+- **Always-visible date range** gives users a way to verify numbers themselves — no more "is this last week or this week?".
+- **Single helper** (`getPeriodRange`) ensures every consumer stays in sync forever.
+- **Matches mental model**: Indian FMCG users think in "last N days" (e.g. "kitne din ka data?") more than calendar buckets — confirmed by the existing dashboard copy on Help page ("Daily — Dashboard for order count").
 
