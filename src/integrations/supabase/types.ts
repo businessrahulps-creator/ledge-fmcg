@@ -1346,7 +1346,6 @@ export type Database = {
           seq: number
         }[]
       }
-      seed_company_data: { Args: { p_company_id: string }; Returns: undefined }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
         Returns: string

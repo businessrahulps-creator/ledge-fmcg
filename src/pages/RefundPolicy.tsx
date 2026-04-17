@@ -24,7 +24,7 @@ export default function RefundPolicy() {
 
         <Section title="Free Trial">
           <p>
-            All paid plans include a All paid plans include a 30-day free trial. No payment is collected during the trial period. You can cancel anytime before the trial ends and you will not be charged.. No payment is collected during the trial period. You can cancel anytime before the trial ends and you will not be charged.
+            All paid plans include a 30-day free trial. No payment is collected during the trial period. You can cancel anytime before the trial ends and you will not be charged.
           </p>
         </Section>
 
