@@ -42,6 +42,7 @@ export function useData() {
 export function DataProvider({ children }: { children: ReactNode }) {
   const { companyId, authReady, user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOfflineData, setIsOfflineData] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "",
@@ -137,8 +138,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Fetch all data
-  const fetchAll = useCallback(async (cId: string, token: number) => {
-    setLoading(true);
+  const fetchAll = useCallback(async (cId: string, token: number, isBackground = false) => {
+    if (isBackground) setIsRefreshing(true);
+    else setLoading(true);
     try {
       const { data: company } = await supabase
         .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
@@ -231,15 +233,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
       console.error("Data fetch error:", err);
       if (!navigator.onLine) await loadFromCache(cId);
     } finally {
-      if (token === fetchTokenRef.current) setLoading(false);
+      if (token === fetchTokenRef.current) {
+        setLoading(false);
+        setIsRefreshing(false);
+      }
     }
   }, [loadFromCache]);
 
   useEffect(() => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
-    fetchAll(companyId, token);
-  }, [companyId, fetchAll]);
+    let cancelled = false;
+    // Cache-first: paint instantly from IDB, then refresh in background.
+    (async () => {
+      const hadCache = await loadFromCache(companyId);
+      if (cancelled || token !== fetchTokenRef.current) return;
+      if (hadCache) {
+        // Page can render now; fetch fresh data in background without blocking UI.
+        setLoading(false);
+        fetchAll(companyId, token, true);
+      } else {
+        // Cold start — show skeletons while fetching.
+        fetchAll(companyId, token, false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [companyId, fetchAll, loadFromCache]);
 
   // Sync queue on reconnect
   useEffect(() => {
@@ -368,7 +387,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         orders: orders.orders, distributors: computedDistributors, salespersons: computedSalespersons,
         products: computedProducts, locations: stock.locations, stockItems: stock.stockItems,
-        schemes: catalog.schemes, loading, isOfflineData, companyInfo, updateCompanyInfo,
+        schemes: catalog.schemes, loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
         orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
         addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
         addDistributor: dealers.add, updateDistributor: dealers.update, deleteDistributor: dealers.remove,
