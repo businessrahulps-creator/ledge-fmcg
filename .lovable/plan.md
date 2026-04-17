@@ -1,34 +1,34 @@
 
 
-Root cause is in the shared tooltip primitive, not the refresh button itself.
+## Match LiveClock + role badge to quiet utility style
 
-## What’s happening
-- `RefreshAppButton` is using `TooltipContent side="bottom"`.
-- The shared `src/components/ui/tooltip.tsx` renders `TooltipPrimitive.Content` directly, without a `TooltipPrimitive.Portal`.
-- In `AppLayout`, the header sits inside containers with `overflow-hidden`, so the tooltip is being clipped and visually appears to slide under the dashboard area when hovered.
+Goal: make `LiveClock` and the role `Badge` feel like peers of the bell/refresh icons — same muted weight, consistent spacing, no visual heaviness.
 
-## Fix
-### 1) Update the shared tooltip component
-**File:** `src/components/ui/tooltip.tsx`
-- Wrap `TooltipPrimitive.Content` in `TooltipPrimitive.Portal`, matching how the project already handles popovers/dropdowns.
-- Keep the current styling and animations.
-- Slightly increase breathing room with a safer default offset if needed, but no visual redesign.
+### Current state
+- `LiveClock`: `font-mono text-[10px] sm:text-xs text-muted-foreground` with an "IST" suffix at `text-[8px]` — already muted but the mono font + IST tag makes it noisier than the icons.
+- Role `Badge`: uses `variant="secondary"` which renders a filled pill background — visually heavier than the ghost icons next to it.
+- Header cluster uses `gap-3`.
 
-### 2) Keep the refresh button simple
-**File:** `src/components/layout/RefreshAppButton.tsx`
-- Leave the button styling and tooltip label as-is unless the portal fix reveals a minor spacing issue.
-- If needed, only make a tiny positioning tweak such as `sideOffset={8}` on this button’s tooltip.
+### Changes — single file: `src/components/layout/AppLayout.tsx`
 
-## Expected result
-- Hovering the refresh icon shows “Check for updates” fully above the app UI instead of being clipped under the dashboard.
-- Same fix also improves any other tooltip using this shared component.
+1. **Role badge** — drop the filled `Badge` component; replace with a plain inline `<span>`:
+   - `hidden sm:inline-flex items-center text-[11px] font-medium text-muted-foreground capitalize`
+   - No background, no border — reads as quiet metadata, matching icon color weight.
+   - Remove the `Badge` import if no longer used.
 
-## Files to change
-1. `src/components/ui/tooltip.tsx`
-2. `src/components/layout/RefreshAppButton.tsx` only if a tiny offset adjustment is still needed after the portal fix
+2. **LiveClock** — minor refinements in `src/components/layout/LiveClock.tsx`:
+   - Keep mono font (time still benefits from tabular alignment) but bump to `text-[11px]` to match the new badge.
+   - Use `text-muted-foreground` (drop the `/60` variants if any) at the same opacity as the bell icon's default state.
+   - Tighten the IST suffix: `text-[9px] font-medium opacity-70` and `ml-0.5` for cleaner spacing.
 
-## Out of scope
-- No changes to refresh/update logic
-- No changes to the syncing indicator
-- No changes to header layout, bell, clock, or role badge
+3. **Header cluster spacing** — change `gap-3` to `gap-2` so the icons + clock + role text sit as a tight, balanced row (icons themselves have internal `h-9 w-9` padding, so `gap-2` gives ~8px breathing room which matches Apple-style toolbars).
+
+### Out of scope
+- No changes to `RefreshAppButton`, `NotificationCenter`, syncing indicator, install button, or sidebar trigger.
+- No changes to mobile bottom nav.
+- No color token changes.
+
+### Files
+1. `src/components/layout/AppLayout.tsx` — replace Badge with span, adjust gap
+2. `src/components/layout/LiveClock.tsx` — refine sizing/opacity
 
