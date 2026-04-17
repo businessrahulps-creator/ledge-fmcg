@@ -1,27 +1,35 @@
 
 
-## Fix: Redundant "Back" button cluttering mobile billing flow
+## Fix: "GST Invoice" badge wrapping to two lines in Billing table
 
 ### Problem
-In `Billing.tsx` (line 988–1004), the create-invoice dialog footer renders three buttons: **Back**, **Cancel**, **Create as Draft / Create Document**. On mobile, `DialogFooter` stacks these vertically, putting a separate "Back" button below "Cancel" — visually redundant since Cancel already exits the flow, and "Back" looks like a third action competing with the primary CTA. Users complained it feels cluttered.
-
-On desktop the layout is fine (buttons sit inline, right-aligned with Back pushed left via `mr-auto`).
+In `src/pages/Billing.tsx` the Type column badge uses `inline-flex` without `whitespace-nowrap`, so on narrower viewports the label "GST Invoice" wraps onto two lines inside the rounded pill, producing the awkward two-line oval seen in the screenshot. The same pattern exists in 4 places (desktop table, mobile card, Orders page linked-docs chip, source-order existing-docs chip).
 
 ### Fix (single-file, surgical)
 
-**`src/pages/Billing.tsx`** — line ~988–1004 (DialogFooter in step 2 of create-invoice dialog)
+**`src/pages/Billing.tsx`** — add `whitespace-nowrap` to the four badge spans rendering `docTypeLabels[...]`:
 
-- Move the "Back" affordance out of `DialogFooter` and render it as a subtle inline link/ghost button at the **top of step 2's content** (next to or above the section heading), where it acts as a navigational "go back to order selection" instead of competing with primary actions.
-- On mobile this removes a stacked button entirely; on desktop it becomes a small ghost link near the top — cleaner and more conventional (matches the standard "wizard back arrow at top-left" pattern used elsewhere in the app, e.g. detail pages).
-- Keep the existing reset logic (`setStep(1); setSourceOrderId(""); setLines([]); ...`) wired to the new top placement.
-- Remove the `Back` button from `DialogFooter` so only **Cancel** + primary CTA remain — exactly what mobile users expect.
+- Line 564 (desktop table Type cell)
+- Line 639 (mobile card)
+- Line 770 (compact docs chip on Orders-linked column)
+- Line 820 (existing docs chip in step 2 of create dialog)
+
+Change pattern:
+```
+className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ...`}
+```
+→
+```
+className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ...`}
+```
+
+Additionally, give the desktop Type column a small min-width so the cell doesn't squeeze the pill: add `className="w-[110px]"` to the Type `<TableHead>` (the only structural tweak, keeps layout stable across screen sizes).
 
 ### Why this works
-- Eliminates the third stacked button on mobile (the actual complaint).
-- Preserves the ability to go back to step 1 — just relocates it to a less prominent, more discoverable spot.
-- No behavioral change to step 1, edit mode, or desktop primary actions.
-- No other files touched, no logic changes, no styling tokens changed.
+- `whitespace-nowrap` prevents the label from breaking at the space between "GST" and "Invoice" — the pill stays a clean single-line oval on every viewport (Mac, Windows, mobile).
+- The 110px column width guarantees enough room for "GST Invoice" without forcing it on Estimate/Proforma which are shorter.
+- No label changes (still reads "GST Invoice"), no color/token changes, no logic changes.
 
 ### Out of scope
-No changes to step 1, edit mode, validation, PDF generation, dialog open/close, or any other Billing logic.
+No changes to PDF rendering, dialog flows, filters, or any non-badge styling.
 
