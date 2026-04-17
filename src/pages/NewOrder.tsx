@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -101,16 +102,9 @@ export default function NewOrder() {
   const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
 
-  // Unsaved changes guard
+  // Unsaved changes guard — blocks in-app navigation + tab close.
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
-
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (isDirty) e.preventDefault();
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [isDirty]);
+  const guard = useUnsavedChangesGuard(isDirty && !isSaving);
 
 
   // Auto-select godown if only one exists
