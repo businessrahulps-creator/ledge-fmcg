@@ -2,7 +2,8 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History, Loader2 } from "lucide-react";
+import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { RefreshAppButton } from "./RefreshAppButton";
@@ -64,6 +65,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
+  const { isRefreshing } = useData();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -128,6 +130,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
             <div className="ml-auto flex items-center gap-3">
+              <AnimatePresence>
+                {isRefreshing && online && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 4 }}
+                    transition={{ duration: 0.2 }}
+                    className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
+                  >
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Syncing…
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <LiveClock />
               {userRole && (
                 <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
