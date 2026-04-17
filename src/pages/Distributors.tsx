@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
-import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone } from "@/utils/validators";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES } from "@/utils/validators";
 import {
   Dialog,
   DialogContent,
