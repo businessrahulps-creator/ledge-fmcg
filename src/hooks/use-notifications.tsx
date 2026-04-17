@@ -55,10 +55,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Fetch on mount / when companyId changes, with offline cache fallback
   // Realtime: pause when offline, resume when online
   useEffect(() => {
-    if (!companyId) {
+    if (!companyId || !user?.id) {
       setNotifications([]);
       return;
     }
+    const userId = user.id;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
