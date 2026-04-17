@@ -1,56 +1,43 @@
 
 
-## Final Review — Remaining Polish Opportunities
+## Plan — Ship items 1-8 (skip #9)
 
-After re-auditing the post-Category-1–5 + QA-fix codebase, here's what's actually left. No new features, all tiny.
+Eight tiny polish improvements, sequenced safely. No new features.
 
----
+### 1. Skeleton loaders on list pages
+Replace `Loading...` text in `Orders.tsx`, `Billing.tsx`, `Stock.tsx` with existing `TablePageSkeleton` / `ListPageSkeleton` from `page-skeleton.tsx`.
 
-IMPROVEMENT SUGGESTIONS
+### 2. Confirm dialogs for destructive actions
+Audit delete buttons in `Distributors.tsx`, `Salespersons.tsx`, `Stock.tsx` (warehouses + products). Wrap any raw delete handlers in the existing `AlertDialog` pattern already used elsewhere.
 
-### UX / Polish
+### 3. Auto-focus first input in Create modals
+Add `autoFocus` to the first input field of New Dealer, New Salesperson, New Warehouse, New Product, New Scheme, New Target modals.
 
-1. **Telephone & numeric inputs use `inputMode="tel"` / `"decimal"` everywhere**
-   Phone fields (Distributors, Salespersons, Company) and price/amount fields still use plain `type="text"` — adding `inputMode` pops the right Android keypad and saves taps for field salespeople.
-   *Impact: High · Effort: Very Small*
+### 4. Lazy-load PDF components
+Wrap `OrderInvoicePdf`, `GstInvoicePdf`, `DealerStatementPdf`, `SalespersonStatementPdf`, `PerformanceReportPdf`, `ReportPdf` imports in `React.lazy()` at their consumer sites (`ExportPdfModal.tsx`, `Billing.tsx`, etc.). Wrap render in `<Suspense>` with a small spinner.
 
-2. **Tabular numerics in money columns**
-   Several tables (Orders totals column, OrderDetail lines, Billing list) don't use `tabular-nums` — adding the class makes columns of ₹ amounts align cleanly during scroll.
-   *Impact: Medium · Effort: Very Small*
+### 5. Guard zero/negative qty & price in NewOrder
+In `NewOrder.tsx` save handler, validate every line: `quantity > 0` and `price > 0`. If not, `toast.error` and abort save.
 
-### Performance & Responsiveness
+### 6. Persist filters on Orders & Billing
+Read/write active filter state (search, status, date range) to `sessionStorage` keyed by page name. Restore on mount.
 
-3. **Strip `console.*` in production builds**
-   90 `console.log/warn/error` calls ship to users; adding Vite's `esbuild.drop: ["console", "debugger"]` in `vite.config.ts` (prod only) shrinks bundle slightly and stops leaking internal errors to end-user devtools.
-   *Impact: Medium · Effort: Very Small*
+### 7. Extract row-mappers in `useOrdersDomain` & `useStockDomain`
+Mirror the `mapInvoiceRow` / `mapClaimRow` pattern from `useBillingDomain`. Add `mapOrderRow`, `mapStockItemRow`, `mapGodownRow`, `mapProductRow` (where missing) using `Database` row types. Replace inline `(x: any) => ({...})` calls.
 
-### Reliability & Edge Cases
+### 8. Amount in words on GST invoice PDF
+In `GstInvoicePdf.tsx`, import `numberToWords` and render "Rupees X Only" line under the grand total. Already has the helper, just needs wiring.
 
-4. **Replace remaining `.toLocaleString("en-IN")` direct calls with `formatCurrency`**
-   ~15 sites in `Billing.tsx`, `OrderDetail.tsx`, `shareWhatsApp.ts` still hand-roll currency. Funnelling through the canonical helper guarantees one source of truth for ₹ symbol, decimals, and the lakh/crore grouping fix shipped in Category 1.
-   *Impact: High · Effort: Very Small*
+### Execution order
+P0 (visible polish): 1 → 2 → 3 → 8
+P1 (perf + reliability): 4 → 5 → 6
+P2 (refactor): 7
 
-5. **Tighten `: any` usage in domain hooks**
-   `useBillingDomain.ts` row-mapping uses `(data as any[]).map((inv: any) => …)` — the Supabase generated `Database` types are available, casting to the row type instead of `any` catches column-rename bugs at compile time.
-   *Impact: Medium · Effort: Small*
+Will ship sequentially, one consolidated `POLISH PASS COMPLETE` summary at the end.
 
-### Code Quality / Maintainability
+### Files touched
+`Orders.tsx`, `Billing.tsx`, `Stock.tsx`, `Distributors.tsx`, `Salespersons.tsx`, `NewOrder.tsx`, plus relevant New* modal components, `ExportPdfModal.tsx`, `GstInvoicePdf.tsx`, `useOrdersDomain.ts`, `useStockDomain.ts`. No new files, no new deps.
 
-6. **Extract row-mappers from domain hooks**
-   The 200-char inline `inv => ({...})` mappers in `useBillingDomain` (and similar in orders/stock domains) are hard to read and duplicated between fetch + realtime paths. Move each to a `mapInvoiceRow(row)` function in the same file.
-   *Impact: Medium · Effort: Small*
-
-### Indian FMCG Specific Improvements
-
-7. **Phone number normalization on save**
-   When a user pastes "+91 98765 43210" or "098765-43210" into a dealer/salesperson phone field, store it as the canonical 10-digit form. Prevents WhatsApp share failures and duplicate-dealer bugs from cosmetic-only differences.
-   *Impact: High · Effort: Very Small*
-
-8. **GST validation on invoice generation**
-   When generating a GST invoice, verify the dealer has a valid GSTIN and a state code matching the first 2 digits — otherwise auto-fall-back to a non-GST cash bill and show a soft warning. Prevents filing-time chaos for the accountant.
-   *Impact: High · Effort: Small*
-
----
-
-8 suggestions, all "tiny but high-impact". Awaiting your pick before any code changes.
+### Stays the same
+All business logic, RLS, realtime, validation rules, design tokens, mobile-first layout.
 
