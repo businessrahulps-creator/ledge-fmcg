@@ -60,7 +60,7 @@ export default function Company() {
     bankAccount, bankIfsc, invoicePrefix, logoUrl,
   });
   const isDirty = savedSnapshot !== "" && currentSnapshot !== savedSnapshot;
-  const guard = useUnsavedChangesGuard(isDirty && !isSaving);
+  useUnsavedChangesGuard(isDirty && !isSaving);
 
 
   useEffect(() => {
@@ -427,21 +427,6 @@ export default function Company() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Unsaved changes guard */}
-        <AlertDialog open={guard.confirmOpen}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
-              <AlertDialogDescription>
-                You have unsaved company details. Leaving this page will lose your changes.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={guard.cancelLeave}>Stay on page</AlertDialogCancel>
-              <AlertDialogAction onClick={guard.confirmLeave}>Discard &amp; leave</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </AppLayout>
   );

@@ -17,24 +17,25 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import { isPreviewEnv } from "@/lib/preview-env";
 
+// Eager: entry/auth routes (small + needed immediately)
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Orders from "./pages/Orders";
-import NewOrder from "./pages/NewOrder";
-import Distributors from "./pages/Distributors";
-import Salespersons from "./pages/Salespersons";
-import Stock from "./pages/Stock";
-import Schemes from "./pages/Schemes";
-import Targets from "./pages/Targets";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
-import OrderDetail from "./pages/OrderDetail";
-import DealerDetail from "./pages/DealerDetail";
-import SalespersonDetail from "./pages/SalespersonDetail";
 
-// Lazy-loaded pages (heavy or infrequent)
+// Lazy: authenticated app pages
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Orders = lazy(() => import("./pages/Orders"));
+const NewOrder = lazy(() => import("./pages/NewOrder"));
+const OrderDetail = lazy(() => import("./pages/OrderDetail"));
+const Distributors = lazy(() => import("./pages/Distributors"));
+const DealerDetail = lazy(() => import("./pages/DealerDetail"));
+const Salespersons = lazy(() => import("./pages/Salespersons"));
+const SalespersonDetail = lazy(() => import("./pages/SalespersonDetail"));
+const Stock = lazy(() => import("./pages/Stock"));
+const Schemes = lazy(() => import("./pages/Schemes"));
+const Targets = lazy(() => import("./pages/Targets"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Performance = lazy(() => import("./pages/Performance"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -88,17 +89,17 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Dashboard /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Orders /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><NewOrder /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><OrderDetail /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DealerDetail /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><Distributors /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Stock /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><SalespersonDetail /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Salespersons /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Schemes /></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Targets /></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<DashboardPageSkeleton />}><Dashboard /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Orders /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><NewOrder /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><OrderDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><DealerDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Distributors /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Stock /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><SalespersonDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Salespersons /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Schemes /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Targets /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Claims /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Billing /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Company /></Suspense></PageErrorBoundary></ProtectedRoute>} />

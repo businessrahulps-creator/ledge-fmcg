@@ -55,10 +55,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Fetch on mount / when companyId changes, with offline cache fallback
   // Realtime: pause when offline, resume when online
   useEffect(() => {
-    if (!companyId) {
+    if (!companyId || !user?.id) {
       setNotifications([]);
       return;
     }
+    const userId = user.id;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
@@ -86,10 +87,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const subscribe = () => {
       if (!navigator.onLine) return;
       channel = supabase
-        .channel("notifications-realtime")
+        .channel(`notifications-realtime-${userId}`)
         .on(
           "postgres_changes",
-          { event: "INSERT", schema: "public", table: "notifications" },
+          { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
           (payload) => {
             const row = payload.new as DbNotification;
             setNotifications((prev) => {
@@ -100,7 +101,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         )
         .on(
           "postgres_changes",
-          { event: "UPDATE", schema: "public", table: "notifications" },
+          { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
           (payload) => {
             const row = payload.new as DbNotification;
             setNotifications((prev) =>
@@ -133,7 +134,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("online", handleOnline);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [companyId]);
+  }, [companyId, user?.id]);
 
   const addNotification = useCallback(
     async (type: NotificationType, title: string, description: string) => {
