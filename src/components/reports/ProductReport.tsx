@@ -3,7 +3,7 @@ import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { useApi } from "@/services/api";
-import { TimePeriodFilter, filterByTimePeriod, periodLabel, type TimePeriod } from "./TimePeriodFilter";
+import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
@@ -65,6 +65,7 @@ export function ProductReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
         </div>
         <div className="sm:ml-auto">
           <Button
