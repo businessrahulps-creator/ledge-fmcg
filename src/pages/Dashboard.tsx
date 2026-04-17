@@ -77,7 +77,14 @@ export default function Dashboard() {
   const distributors = api.dealers.list();
   const products = api.products.list();
   const today = new Date();
-  const [selectedDay, setSelectedDay] = useState(today.getDay());
+  const todayIso = toIsoDate(today);
+  const last7Dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    return d;
+  });
+  const [selectedDate, setSelectedDate] = useState(todayIso);
+  const selectedDateObj = new Date(selectedDate + "T00:00:00");
   const firstName = profile?.full_name?.split(" ")[0];
 
   // This Month aggregates
