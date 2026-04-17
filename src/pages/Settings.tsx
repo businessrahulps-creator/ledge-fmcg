@@ -316,6 +316,7 @@ export default function Settings() {
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="about" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">About</TabsTrigger>
             </TabsList>
           </div>
 
@@ -562,6 +563,12 @@ export default function Settings() {
                   </div>
                 )}
               </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="about">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="space-y-4">
+              <AboutSection />
             </motion.div>
           </TabsContent>
         </Tabs>
