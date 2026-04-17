@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, u
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 import type { Order, Distributor, Salesperson, Product, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
 import {

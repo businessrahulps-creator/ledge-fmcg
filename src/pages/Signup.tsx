@@ -7,6 +7,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -61,6 +62,7 @@ export default function Signup() {
       navigate("/dashboard");
     } catch (err: any) {
       toast.error("Signup failed", { description: err.message });
+      logError({ source: "auth:signup", error: err, context: { hasCompanyName: !!companyName } });
     } finally {
       setLoading(false);
     }

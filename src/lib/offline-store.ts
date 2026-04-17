@@ -264,6 +264,15 @@ export async function replaySingleMutation(
           }
         } catch (stockErr) {
           console.error("Stock deduction during replay partially failed:", stockErr);
+          try {
+            const { logError } = await import("@/utils/errorLog");
+            logError({
+              source: "sync:replay.stock_deduction",
+              error: stockErr,
+              severity: "warning",
+              context: { orderId: inserted.id },
+            });
+          } catch { /* ignore */ }
           // Order + lines are already persisted — don't fail the whole mutation
         }
       }
@@ -304,6 +313,15 @@ export async function replaySingleMutation(
       attempts: (mutation.attempts || 0) + 1,
       lastError: errMsg,
     });
+    try {
+      const { logError } = await import("@/utils/errorLog");
+      logError({
+        source: "sync:replaySingleMutation",
+        error: e,
+        severity: "warning",
+        context: { table: mutation.table, type: mutation.type, attempts: (mutation.attempts || 0) + 1 },
+      });
+    } catch { /* ignore */ }
     return { ok: false, error: errMsg };
   }
 }

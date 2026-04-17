@@ -12,6 +12,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/utils/errorLog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,6 +155,7 @@ export default function Company() {
       toast.error("Workspace not set up", {
         description: "Please complete workspace setup before saving company details.",
       });
+      logError({ source: "crud:companies.update", error: "Workspace not set up (companyId missing)", severity: "warning" });
       return;
     }
     setIsSaving(true);
@@ -181,6 +183,7 @@ export default function Company() {
         .eq("id", companyId);
       if (error) {
         toast.error("Error saving", { description: error.message });
+        logError({ source: "crud:companies.update", error, context: { companyId } });
         return;
       }
     }

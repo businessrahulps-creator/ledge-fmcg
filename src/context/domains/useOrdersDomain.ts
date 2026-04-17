@@ -7,6 +7,7 @@ import { mapOrders } from "@/context/data-utils";
 import type { DomainDeps, AddOrderResult } from "@/context/data-types";
 import { fmtAmount, logActivity } from "@/utils/activityLog";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 
 interface OrdersDeps extends DomainDeps {
   deductStockForOrder: (orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>;
@@ -134,6 +135,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
       toast.error("Failed to create order", { description: msg });
+      logError({ source: "rpc:insert_order_atomic", error: err, context: { distributorId: order.distributorId } });
       return { success: false, error: msg };
     }
   }, [deps.companyId, deps.deductStockForOrder, orderPrefix, orderSequence, deps.persistEntityToCache, deps.log]);
@@ -242,6 +244,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       return true;
     } catch (err: any) {
       toast.error("Failed to delete order", { description: err?.message || "Unknown error" });
+      logError({ source: "crud:orders.delete", error: err, context: { id } });
       return false;
     }
   }, [deps.safeRefetchStockItems, deps.log]);

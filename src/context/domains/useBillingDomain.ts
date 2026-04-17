@@ -5,6 +5,7 @@ import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
+import { logError } from "@/utils/errorLog";
 
 interface BillingDeps extends DomainDeps {
   getOrders: () => Order[];
@@ -66,6 +67,7 @@ export function useBillingDomain(deps: BillingDeps) {
       return newInvoice;
     } catch (err: any) {
       toast.error("Failed to create document", { description: err?.message || "Unknown error" });
+      logError({ source: "crud:invoices.add", error: err, context: { docType: invoice.docType } });
       return null;
     }
   }, [deps.companyId]);
@@ -154,6 +156,7 @@ export function useBillingDomain(deps: BillingDeps) {
       return true;
     } catch (err: any) {
       toast.error("Failed to record claim", { description: err?.message || "Unknown error" });
+      logError({ source: "crud:claims.add", error: err, context: { orderId: claim.orderId } });
       return false;
     }
   }, [deps.companyId, deps.getOrders, deps.safeRefetchStockItems]);
