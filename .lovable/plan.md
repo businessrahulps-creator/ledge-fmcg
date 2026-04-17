@@ -1,48 +1,51 @@
 
 
-## Pre-Demo Audit Plan — 5 Phases + Final Sign-off
+## Bug: Flash of "Finish setting up your workspace" modal on every login
 
-I'll work strictly one phase at a time, replying `PHASE X COMPLETE` after each. No new features — only fixes for bugs, calculations, security, performance, and spec deviations.
+### Root cause
 
-### Phase 1 — Auth, Signup & Workspace
-- Walk `Signup.tsx` → `setup_new_company` RPC → `NoCompanyGuard` → `AuthContext.fetchProfile` auto-recovery path.
-- Verify: email confirm flow, super_admin assignment, 14-day trial (note: RPC currently sets `30 days`, spec says 14 — flag & fix).
-- Audit RLS on `profiles`, `user_roles`, `companies` for cross-tenant leaks.
-- Validate GSTIN/phone client-side at signup.
-- Check `Login.tsx`, `ResetPassword.tsx` for missing redirectTo, frontend-only role checks.
+In `AuthContext.tsx`, `authReady` is set to `true` immediately when the auth session resolves, but the `profile` fetch is scheduled via `setTimeout(..., 0)` (correctly, to avoid Supabase deadlock). This means there is a render window where:
 
-### Phase 2 — Every Page UI/UX
-- Visit every route: Dashboard, Orders, NewOrder, OrderDetail, Distributors, DealerDetail, Salespersons, SalespersonDetail, Stock, Schemes, Targets, Billing, Claims, Reports, Performance, Settings, Company, Help, About, Contact, Privacy, Terms, Refund, 404.
-- Check mobile (375px) vs desktop layouts, bottom nav, sidebar, glass cards, animations, theme tokens, INR formatting consistency, skeleton loaders.
-- Fix visual glitches, overflow, missing `tabular-nums`, broken empty states.
+- `authReady === true`
+- `user !== null`
+- `profile === null` → `companyId === null`
 
-### Phase 3 — Business Flows & Calculations
-- E2E: order create (atomic `insert_order_atomic`, line totals, scheme savings, confetti, notification), edit, dealer/salesperson CRUD, stock CRUD with health badges, all 5 reports + time filters.
-- Audit every formula: dashboard KPIs, top-N charts, report aggregates (`reduce` chains in `Reports.tsx`, `Dashboard.tsx`, `dealerScorecard.ts`, `salespersonScorecard.ts`), stock value, outstanding, health thresholds, day-of-week filter.
-- Verify Export PDF (lazy-loaded) + Export CSV against real data shape.
+`NoCompanyGuard` checks only `!authReady || !user || companyId`, so during that window it renders the workspace setup modal — the "flash" the customer reported. Once the profile resolves (typically <300ms on desktop, but easily 500–1500ms on mobile), it disappears.
 
-### Phase 4 — Security & DB Integrity
-- Run `supabase--linter` + `security--run_security_scan`.
-- Audit every RLS policy for `get_company_id()` correctness, missing INSERT/UPDATE policies, `SECURITY DEFINER` functions for `search_path` hygiene.
-- Confirm no service_role key in client bundle, no `dangerouslySetInnerHTML` with user input, all forms validate length + type.
-- Check realtime subscriptions filter by `company_id`.
+This affects **both desktop and mobile**, just more visible on mobile due to slower networks/CPUs.
 
-### Phase 5 — Performance, PWA, Tech Debt
-- Bundle audit: identify heavy imports, confirm lazy PDFs ship in separate chunks, kill unused deps.
-- DataContext fetch: verify parallel queries + no N+1 + proper `.range(0, 9999)` limits.
-- PWA: install prompt, offline toasts, SW update prompt fires on new deploy, asset cache invalidation.
-- Stock quantity persistence bug (spec §9): trace `deductStockForOrder` + `restore_stock_on_deduction_delete` trigger for race / double-deduction.
-- Cross-tab realtime sync smoke test.
+### Fix (one-file, surgical)
 
-### Final Phase (only on "PROCEED TO FINAL PHASE")
-Full regression + polish pass + `FINAL AUDIT COMPLETE — READY FOR DEMO` summary.
+Add a `profileLoaded` boolean to `AuthContext` that flips true only after the profile fetch attempt completes (success or empty). Then change `NoCompanyGuard` to also wait for `profileLoaded` before deciding to show the modal.
 
-### Rules I'll honor
-- No new features — fixes only.
-- One phase at a time, wait for next prompt between phases.
-- Each phase ends with `PHASE X COMPLETE` + change list.
-- Migrations only when an RLS / function fix genuinely needs DB change.
-- Will use read tools to ground every fix; no speculative edits.
+Files:
 
-Starting with **Phase 1** on approval.
+1. **`src/context/AuthContext.tsx`**
+   - Add `profileLoaded: boolean` state, default `false`.
+   - In `fetchProfile`, always set `profileLoaded = true` in a `finally` block (covers success, missing row, error, and the auto-recovery path).
+   - When `onAuthStateChange` fires with no user, set `profileLoaded = true` (nothing to load).
+   - Reset `profileLoaded = false` whenever a new `user.id` starts loading.
+   - Expose `profileLoaded` via context type + provider value.
+
+2. **`src/components/onboarding/NoCompanyGuard.tsx`**
+   - Pull `profileLoaded` from `useAuth()`.
+   - Change the early-return guard from
+     `if (!authReady || !user || companyId) return children;`
+     to
+     `if (!authReady || !profileLoaded || !user || companyId) return children;`
+   - Result: while the profile is still loading post-auth, we render children (the page/skeleton) instead of flashing the setup modal. Real users with a company never see the modal; users genuinely missing a company still see it once the fetch confirms `company_id === null`.
+
+3. **`src/pages/Index.tsx`** (defensive, tiny)
+   - Already gated on `loading || !authReady` showing `SplashScreen`. No change needed — the redirect to `/dashboard` is fine because `ProtectedRoute` will then run the corrected guard.
+
+### Why this fully fixes it
+
+- The setup modal now only appears when we've **confirmed** the profile has no `company_id`, not during the unknown-state window.
+- No regression for legitimate first-time signups: `setup_new_company` runs in `Signup.tsx` before navigating, and the auto-recovery path in `fetchProfile` still runs and updates `profile` before `profileLoaded` flips true (it's in the same async function; the `finally` only fires after recovery completes).
+- No regression for returning users: once the profile loads with a `company_id`, the guard short-circuits as before.
+- Works identically on desktop and mobile — fixes both.
+
+### Out of scope
+
+No DB changes. No new features. No styling changes. No changes to `Signup.tsx` flow, RPC, or RLS.
 
