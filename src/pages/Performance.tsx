@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
-import { DashboardSkeleton } from "@/components/ui/page-skeleton";
+
 import { formatCurrency } from "@/data/mock-data";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -309,13 +309,7 @@ export default function Performance() {
     return alerts.slice(0, 6);
   }, [filteredOrders, stockItems, products, dealers]);
 
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <DashboardSkeleton />
-      </AppLayout>
-    );
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   const kpis = [
     {

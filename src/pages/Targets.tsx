@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
-import { DashboardSkeleton } from "@/components/ui/page-skeleton";
+
 import { formatCurrency } from "@/data/mock-data";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -294,9 +294,7 @@ export default function Targets() {
     }
   }, [api.targets]);
 
-  if (isLoading) {
-    return <AppLayout><DashboardSkeleton /></AppLayout>;
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   const dateOptions = periodType === "daily" ? dailyOptions : periodType === "weekly" ? weeklyOptions : monthOptions;
 

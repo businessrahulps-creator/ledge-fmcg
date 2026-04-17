@@ -8,6 +8,7 @@ export function useApi() {
 
   return {
     loading: data.loading,
+    isRefreshing: data.isRefreshing,
     companyInfo: data.companyInfo,
     updateCompanyInfo: data.updateCompanyInfo,
     refreshAll: data.refreshAll,

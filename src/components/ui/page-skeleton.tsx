@@ -4,10 +4,83 @@ function GlassSkeleton({ className = "" }: { className?: string }) {
   return <Skeleton className={`bg-muted ${className}`} />;
 }
 
+/* ---------- Per-section skeleton atoms ---------- */
+
+export function KpiCardSkeleton() {
+  return (
+    <div className="glass-card p-5">
+      <GlassSkeleton className="h-3 w-16 rounded mb-3" />
+      <GlassSkeleton className="h-6 w-24 rounded" />
+    </div>
+  );
+}
+
+export function KpiGridSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <KpiCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function ListRowSkeleton() {
+  return (
+    <div className="glass-card p-4">
+      <div className="flex items-center justify-between mb-2">
+        <GlassSkeleton className="h-3.5 w-32 rounded" />
+        <GlassSkeleton className="h-3.5 w-16 rounded" />
+      </div>
+      <div className="flex items-center justify-between">
+        <GlassSkeleton className="h-2.5 w-40 rounded" />
+        <GlassSkeleton className="h-5 w-14 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+export function ListRowsSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-2.5">
+      {Array.from({ length: rows }).map((_, i) => (
+        <ListRowSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function TableRowSkeleton() {
+  return (
+    <div className="px-6 py-4 border-b border-border/50 flex items-center gap-6">
+      <GlassSkeleton className="h-3.5 w-24 rounded" />
+      <GlassSkeleton className="h-3.5 w-28 rounded" />
+      <GlassSkeleton className="h-3.5 w-20 rounded" />
+      <GlassSkeleton className="h-3.5 w-16 rounded ml-auto" />
+      <GlassSkeleton className="h-5 w-12 rounded-full" />
+    </div>
+  );
+}
+
+export function TableRowsSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="hidden md:block glass-card overflow-hidden">
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRowSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function ChartSkeleton({ className = "h-48" }: { className?: string }) {
+  return <GlassSkeleton className={`w-full rounded-lg ${className}`} />;
+}
+
+/* ---------- Legacy full-page skeletons (kept for backward compatibility) ---------- */
+
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-200">
-      {/* Header */}
       <div>
         <GlassSkeleton className="h-3 w-32 rounded" />
         <GlassSkeleton className="h-6 w-48 rounded mt-2" />
@@ -17,18 +90,7 @@ export function DashboardSkeleton() {
           ))}
         </div>
       </div>
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="glass-card p-5">
-            <GlassSkeleton className="h-3 w-16 rounded mb-3" />
-            <GlassSkeleton className="h-6 w-24 rounded" />
-          </div>
-        ))}
-      </div>
-
-      {/* Two columns */}
+      <KpiGridSkeleton />
       <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
         {Array.from({ length: 2 }).map((_, col) => (
           <div key={col}>
@@ -50,46 +112,6 @@ export function DashboardSkeleton() {
           </div>
         ))}
       </div>
-
-      {/* Recent Orders */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <GlassSkeleton className="h-4 w-28 rounded" />
-          <GlassSkeleton className="h-3 w-14 rounded" />
-        </div>
-        <div className="space-y-2.5 md:hidden">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="glass-card p-4">
-              <div className="flex items-center justify-between mb-2">
-                <GlassSkeleton className="h-3.5 w-32 rounded" />
-                <GlassSkeleton className="h-3.5 w-16 rounded" />
-              </div>
-              <div className="flex items-center justify-between">
-                <GlassSkeleton className="h-2.5 w-40 rounded" />
-                <div className="flex gap-1.5">
-                  <GlassSkeleton className="h-5 w-12 rounded-full" />
-                  <GlassSkeleton className="h-5 w-14 rounded-full" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="hidden md:block glass-card overflow-hidden">
-          <div className="px-6 py-3 border-b border-border">
-            <GlassSkeleton className="h-3 w-full rounded" />
-          </div>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="px-6 py-4 border-b border-border/50 flex items-center gap-6">
-              <GlassSkeleton className="h-3.5 w-24 rounded" />
-              <GlassSkeleton className="h-3.5 w-28 rounded" />
-              <GlassSkeleton className="h-3.5 w-20 rounded" />
-              <GlassSkeleton className="h-3.5 w-16 rounded ml-auto" />
-              <GlassSkeleton className="h-5 w-12 rounded-full" />
-              <GlassSkeleton className="h-5 w-14 rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -108,21 +130,8 @@ export function ListPageSkeleton({ cards = 6 }: { cards?: number }) {
       <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
         {Array.from({ length: cards }).map((_, i) => (
           <div key={i} className="glass-card p-4 md:p-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <GlassSkeleton className="h-4 w-28 rounded" />
-                <GlassSkeleton className="h-3 w-24 rounded" />
-                <GlassSkeleton className="h-3 w-20 rounded" />
-              </div>
-              <div className="flex gap-1">
-                <GlassSkeleton className="h-8 w-8 rounded" />
-                <GlassSkeleton className="h-8 w-8 rounded" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-              <GlassSkeleton className="h-3 w-20 rounded" />
-              <GlassSkeleton className="h-3 w-16 rounded" />
-            </div>
+            <GlassSkeleton className="h-4 w-28 rounded mb-2" />
+            <GlassSkeleton className="h-3 w-24 rounded" />
           </div>
         ))}
       </div>
@@ -140,50 +149,7 @@ export function TablePageSkeleton({ rows = 8 }: { rows?: number }) {
         </div>
         <GlassSkeleton className="h-10 w-32 rounded-lg" />
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <GlassSkeleton className="h-11 flex-1 rounded-lg md:h-12" />
-        <GlassSkeleton className="h-11 w-full rounded-lg sm:w-44 md:h-12" />
-        <GlassSkeleton className="h-11 w-full rounded-lg sm:w-44 md:h-12" />
-      </div>
-      <div className="glass-card overflow-hidden">
-        {/* Mobile */}
-        <div className="md:hidden">
-          {Array.from({ length: rows }).map((_, i) => (
-            <div key={i} className="border-b border-border/50 px-4 py-2.5">
-              <div className="flex items-center justify-between">
-                <GlassSkeleton className="h-3 w-24 rounded" />
-                <GlassSkeleton className="h-3 w-16 rounded" />
-              </div>
-              <GlassSkeleton className="h-2.5 w-40 rounded mt-1" />
-              <div className="mt-1.5 flex gap-1.5">
-                <GlassSkeleton className="h-5 w-12 rounded-full" />
-                <GlassSkeleton className="h-5 w-14 rounded-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* Desktop */}
-        <div className="hidden md:block">
-          <div className="px-6 py-3 border-b border-border">
-            <div className="flex gap-6">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <GlassSkeleton key={i} className="h-3 w-20 rounded" />
-              ))}
-            </div>
-          </div>
-          {Array.from({ length: rows }).map((_, i) => (
-            <div key={i} className="px-6 py-4 border-b border-border/50 flex items-center gap-6">
-              <GlassSkeleton className="h-3.5 w-24 rounded" />
-              <GlassSkeleton className="h-3.5 w-20 rounded" />
-              <GlassSkeleton className="h-3.5 w-28 rounded" />
-              <GlassSkeleton className="h-3.5 w-24 rounded" />
-              <GlassSkeleton className="h-3.5 w-16 rounded ml-auto" />
-              <GlassSkeleton className="h-5 w-12 rounded-full" />
-              <GlassSkeleton className="h-5 w-14 rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <TableRowsSkeleton rows={rows} />
     </div>
   );
 }

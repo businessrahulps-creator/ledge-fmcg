@@ -3,7 +3,7 @@ import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loa
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
-import { TablePageSkeleton } from "@/components/ui/page-skeleton";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -428,7 +428,7 @@ export default function Claims() {
     toast.success("Claim rejected");
   };
 
-  if (isLoading) return <AppLayout><TablePageSkeleton /></AppLayout>;
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>

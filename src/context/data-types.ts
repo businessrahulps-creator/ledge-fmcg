@@ -129,6 +129,7 @@ export interface DataContextType {
   schemes: Scheme[];
   secondarySales: SecondarySale[];
   loading: boolean;
+  isRefreshing: boolean;
   isOfflineData: boolean;
   companyInfo: CompanyInfo;
   updateCompanyInfo: (updates: Partial<CompanyInfo>) => void;

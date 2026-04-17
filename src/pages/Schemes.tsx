@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
-import { DashboardSkeleton } from "@/components/ui/page-skeleton";
+
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -180,7 +180,7 @@ export default function Schemes() {
   const activeSchemes = filteredSchemes.filter(s => s.isActive);
   const inactiveSchemes = filteredSchemes.filter(s => !s.isActive);
 
-  if (isLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>

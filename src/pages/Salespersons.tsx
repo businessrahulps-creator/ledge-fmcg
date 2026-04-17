@@ -3,7 +3,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
-import { ListPageSkeleton } from "@/components/ui/page-skeleton";
+
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, UserCheck, Download } from "lucide-react";
@@ -93,9 +93,7 @@ export default function Salespersons() {
     setDeleteId(null);
   };
 
-  if (isLoading) {
-    return <AppLayout><ListPageSkeleton /></AppLayout>;
-  }
+  // Blocking page skeleton removed — empty-state handles first-paint.
 
   return (
     <AppLayout>
