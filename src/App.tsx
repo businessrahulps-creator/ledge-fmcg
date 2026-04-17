@@ -12,7 +12,7 @@ import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
-import { ListPageSkeleton } from "@/components/ui/page-skeleton";
+import { ListPageSkeleton, DashboardPageSkeleton } from "@/components/ui/page-skeleton";
 import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import Index from "./pages/Index";
