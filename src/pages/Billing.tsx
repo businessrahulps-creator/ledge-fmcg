@@ -545,7 +545,7 @@ export default function Billing() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs w-[110px]">Type</TableHead>
                       <TableHead className="text-xs">Number</TableHead>
                       <TableHead className="text-xs">Date</TableHead>
                       <TableHead className="text-xs">Buyer</TableHead>
@@ -561,7 +561,7 @@ export default function Billing() {
                       return (
                         <TableRow key={inv.id} className="row-hover">
                           <TableCell>
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
+                            <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
                               {docTypeLabels[inv.docType] || inv.docType}
                             </span>
                           </TableCell>
@@ -636,7 +636,7 @@ export default function Billing() {
                 {paginatedList.map(inv => (
                   <div key={inv.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
+                      <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
                         {docTypeLabels[inv.docType] || inv.docType}
                       </span>
                       {inv.status === "final" && isDraftType(inv.docType) ? (
@@ -767,7 +767,7 @@ export default function Billing() {
                             {new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                           </span>
                           {docs.map(d => (
-                            <span key={d.id} className={`inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-medium ${docTypeBadgeColors[d.docType] || 'bg-muted text-muted-foreground'}`}>
+                            <span key={d.id} className={`inline-flex items-center whitespace-nowrap rounded-full px-1.5 py-0 text-[9px] font-medium ${docTypeBadgeColors[d.docType] || 'bg-muted text-muted-foreground'}`}>
                               {docTypeLabels[d.docType]}
                             </span>
                           ))}
@@ -817,7 +817,7 @@ export default function Billing() {
                         <p className="text-[10px] text-muted-foreground mb-1">Existing documents for this order:</p>
                         <div className="flex flex-wrap gap-1">
                           {existingDocs.map(doc => (
-                            <span key={doc.id} className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.docType]}`}>
+                            <span key={doc.id} className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.docType]}`}>
                               {docTypeLabels[doc.docType]} · {doc.invoiceNumber} ({doc.status})
                             </span>
                           ))}
