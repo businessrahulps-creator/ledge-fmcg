@@ -1007,15 +1007,6 @@ export default function Billing() {
                   }
                 </Button>
               </DialogFooter>
-                <Button onClick={handleCreate} disabled={saving}>
-                  {saving
-                    ? isEditMode ? "Saving…" : "Creating…"
-                    : isEditMode
-                      ? "Save Changes"
-                      : isDraftType(docType) ? "Create as Draft" : "Create Document"
-                  }
-                </Button>
-              </DialogFooter>
             </div>
           )}
         </DialogContent>
