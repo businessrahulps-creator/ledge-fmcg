@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { logError } from "@/utils/errorLog";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
+import { fetchAllChunked } from "@/context/data-utils";
 
 type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"] & {
   invoice_lines?: Database["public"]["Tables"]["invoice_lines"]["Row"][] | null;
@@ -266,14 +267,18 @@ export function useBillingDomain(deps: BillingDeps) {
 
   const safeRefetchInvoices = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
-    const { data } = await supabase.from("invoices").select("*, invoice_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
-    if (data) setInvoices((data as unknown as InvoiceRow[]).map(mapInvoiceRow));
+    const data = await fetchAllChunked<InvoiceRow>(() =>
+      supabase.from("invoices").select("*, invoice_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+    );
+    setInvoices(data.map(mapInvoiceRow));
   }, [deps.companyId]);
 
   const safeRefetchClaims = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
-    const { data } = await supabase.from("claims" as any).select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false });
-    if (data) setClaims((data as unknown as ClaimRow[]).map(mapClaimRow));
+    const data = await fetchAllChunked<ClaimRow>(() =>
+      supabase.from("claims" as any).select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+    );
+    setClaims(data.map(mapClaimRow));
   }, [deps.companyId]);
 
   return {
