@@ -13,7 +13,7 @@ import { logActivity } from "@/utils/activityLog";
 import {
   mapOrders, mapDistributor, mapSalesperson, mapProduct, mapGodown, mapStockItem,
   mapScheme, mapSecondarySale, mapTarget, mapClaim, mapInvoice,
-  persistAllToCache, batchIn,
+  persistAllToCache, batchIn, fetchAllChunked,
 } from "./data-utils";
 import type {
   DataContextType, CompanyInfo, DomainDeps,
@@ -184,22 +184,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
         });
       }
 
+      // Each table is fetched in 1000-row pages until exhausted to bypass
+      // Supabase's silent SELECT cap (was previously losing rows past 1000).
       const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
-        supabase.from("distributors").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("salespersons").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("products").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("godowns").select("*").eq("company_id", cId).order("name").range(0, 9999),
-        supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }).range(0, 9999),
+        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name")),
+        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
       ]);
 
-      const claimIds = ((claimsRes as any).data || []).map((c: any) => c.id);
-      const invoiceIds = ((invoicesRes as any).data || []).map((i: any) => i.id);
+      const claimIds = (claimsRes as any[]).map((c: any) => c.id);
+      const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
 
       const [claimLinesData, invoiceLinesData] = await Promise.all([
         batchIn("claim_lines", "claim_id", claimIds),
@@ -207,45 +209,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ]);
       if (token !== fetchTokenRef.current) return;
 
-      const dists = (distRes.data || []).map(mapDistributor);
+      const dists = (distRes as any[]).map(mapDistributor);
       dealers.setDistributors(dists);
       cacheData(cId, "distributors", dists);
 
-      const sps = (spRes.data || []).map(mapSalesperson);
+      const sps = (spRes as any[]).map(mapSalesperson);
       salespersons.setSalespersons(sps);
 
-      const prods = (prodRes.data || []).map(mapProduct);
+      const prods = (prodRes as any[]).map(mapProduct);
       catalog.setProducts(prods);
 
-      const gds = (godownRes.data || []).map(mapGodown);
+      const gds = (godownRes as any[]).map(mapGodown);
       stock.setLocations(gds);
 
-      const sis = (stockRes.data || []).map(si => mapStockItem(si, prods, gds));
+      const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
       stock.setStockItems(sis);
 
-      const mappedSchemes = (schemesRes.data || []).map((s: any) => mapScheme(s));
+      const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
       catalog.setSchemes(mappedSchemes);
 
-      const mappedSS = (ssRes.data || []).map((s: any) => mapSecondarySale(s));
+      const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
       targets.setSecondarySales(mappedSS);
 
-      const mappedTargets = ((targetsRes as any).data || []).map((t: any) => mapTarget(t));
+      const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       targets.setTargets(mappedTargets);
 
-      const mappedClaims = ((claimsRes as any).data || []).map((c: any) => mapClaim(c, claimLinesData));
+      const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
       billing.setClaims(mappedClaims);
 
-      const mappedInvoices = ((invoicesRes as any).data || []).map((inv: any) => mapInvoice(inv, invoiceLinesData));
+      const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, invoiceLinesData));
       billing.setInvoices(mappedInvoices);
 
-      const orderIds = (ordersRes.data || []).map(o => o.id);
+      const orderIds = (ordersRes as any[]).map((o: any) => o.id);
       const [allLines, allOrderSchemes] = await Promise.all([
         batchIn("order_lines", "order_id", orderIds),
         batchIn("order_schemes", "order_id", orderIds),
       ]);
       if (token !== fetchTokenRef.current) return;
 
-      const mappedOrders = mapOrders(ordersRes.data || [], allLines, allOrderSchemes);
+      const mappedOrders = mapOrders((ordersRes as any[]) || [], allLines, allOrderSchemes);
       orders.setOrders(mappedOrders);
       setIsOfflineData(false);
 

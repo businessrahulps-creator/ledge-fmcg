@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Order, OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { mapOrders } from "@/context/data-utils";
+import { mapOrders, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps, AddOrderResult } from "@/context/data-types";
 import { fmtAmount, logActivity } from "@/utils/activityLog";
 import { toast } from "sonner";
@@ -31,20 +31,22 @@ export function useOrdersDomain(deps: OrdersDeps) {
       refetchTimer.current = setTimeout(async () => {
         refetchTimer.current = null;
         try {
-          const { data: ordersData } = await supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999);
+          const ordersData = await fetchAllChunked<any>(() =>
+            supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+          );
           if (!ordersData) { resolve(); return; }
           const orderIds = ordersData.map(o => o.id);
-          let allLines: any[] = [];
-          let allOrderSchemes: any[] = [];
+          const allLines: any[] = [];
+          const allOrderSchemes: any[] = [];
           const CHUNK = 500;
           for (let i = 0; i < orderIds.length; i += CHUNK) {
             const chunk = orderIds.slice(i, i + CHUNK);
             const [linesRes, osRes] = await Promise.all([
-              supabase.from("order_lines").select("*").in("order_id", chunk).range(0, 9999),
-              supabase.from("order_schemes").select("*").in("order_id", chunk).range(0, 9999),
+              fetchAllChunked<any>(() => supabase.from("order_lines").select("*").in("order_id", chunk)),
+              fetchAllChunked<any>(() => supabase.from("order_schemes").select("*").in("order_id", chunk)),
             ]);
-            allLines.push(...(linesRes.data || []));
-            allOrderSchemes.push(...(osRes.data || []));
+            allLines.push(...linesRes);
+            allOrderSchemes.push(...osRes);
           }
           const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
           setOrders(mapped);

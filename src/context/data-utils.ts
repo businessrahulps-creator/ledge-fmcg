@@ -187,6 +187,31 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   return results;
 }
 
+// --- Chunked full-table fetch ---
+//
+// Supabase silently caps any single SELECT at 1000 rows. We need every row for
+// the in-memory DataContext, so we page through the result set 1000 rows at a
+// time using `.range(from, to)` until we get a short page. Pass a `build`
+// function that returns the base query (filters + ordering applied) — we'll
+// add the range each iteration.
+export async function fetchAllChunked<T = any>(
+  build: () => any,
+  pageSize = 1000,
+  maxPages = 200, // safety cap: 200 * 1000 = 200k rows per table
+): Promise<T[]> {
+  const results: T[] = [];
+  for (let page = 0; page < maxPages; page++) {
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+    const { data, error } = await build().range(from, to);
+    if (error) throw error;
+    const rows = (data || []) as T[];
+    results.push(...rows);
+    if (rows.length < pageSize) break;
+  }
+  return results;
+}
+
 // --- FK error mapping ---
 
 const FK_ERROR_MAP: Record<string, { title: string; description: string }> = {

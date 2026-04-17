@@ -7,18 +7,27 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const TEST_PASSWORD = Deno.env.get("TEST_ACCOUNT_PASSWORD") ?? "";
 
 const TEST_ACCOUNTS = [
-  { email: "test1@getledge.in", password: "TestLedge@2026", fullName: "Arun Menon", companyName: "TestCo Kerala" },
-  { email: "test2@getledge.in", password: "TestLedge@2026", fullName: "Priya Rao", companyName: "TestCo Bangalore" },
-  { email: "test3@getledge.in", password: "TestLedge@2026", fullName: "Vikram Singh", companyName: "TestCo Mumbai" },
-  { email: "test4@getledge.in", password: "TestLedge@2026", fullName: "Neha Sharma", companyName: "TestCo Delhi" },
-  { email: "test5@getledge.in", password: "TestLedge@2026", fullName: "Karthik Rajan", companyName: "TestCo Chennai" },
+  { email: "test1@getledge.in", fullName: "Arun Menon", companyName: "TestCo Kerala" },
+  { email: "test2@getledge.in", fullName: "Priya Rao", companyName: "TestCo Bangalore" },
+  { email: "test3@getledge.in", fullName: "Vikram Singh", companyName: "TestCo Mumbai" },
+  { email: "test4@getledge.in", fullName: "Neha Sharma", companyName: "TestCo Delhi" },
+  { email: "test5@getledge.in", fullName: "Karthik Rajan", companyName: "TestCo Chennai" },
 ];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Refuse to run unless the password secret is configured.
+  if (!TEST_PASSWORD) {
+    return new Response(
+      JSON.stringify({ error: "Server is missing TEST_ACCOUNT_PASSWORD secret" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+    );
   }
 
   // Auth guard: caller must be a logged-in super_admin.
@@ -70,7 +79,7 @@ Deno.serve(async (req) => {
         // 1. Create auth user (auto-confirm email)
         const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
           email: account.email,
-          password: account.password,
+          password: TEST_PASSWORD,
           email_confirm: true,
           user_metadata: { full_name: account.fullName, company_name: account.companyName },
         });
