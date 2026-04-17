@@ -10,7 +10,7 @@ import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
 import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
-import { Badge } from "@/components/ui/badge";
+
 
 import { RotateCcw, Target } from "lucide-react";
 import { getQueue } from "@/lib/offline-store";
@@ -129,7 +129,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-2">
               <AnimatePresence>
                 {isRefreshing && online && (
                   <motion.div
@@ -146,9 +146,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </AnimatePresence>
               <LiveClock />
               {userRole && (
-                <Badge variant="secondary" className="hidden text-[10px] capitalize sm:inline-flex">
+                <span className="hidden sm:inline-flex items-center text-[11px] font-medium capitalize text-muted-foreground">
                   {userRole.replace("_", " ")}
-                </Badge>
+                </span>
               )}
               {/* Desktop Install App button */}
               {showDesktopInstall && (
