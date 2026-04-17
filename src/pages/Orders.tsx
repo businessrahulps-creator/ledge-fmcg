@@ -349,7 +349,10 @@ export default function Orders() {
           open={pdfModalOpen}
           onOpenChange={setPdfModalOpen}
           sections={ordersPdfSections}
-          onGenerate={(sel) => {
+          onGenerate={async (sel) => {
+            // Lazy-load the heavy @react-pdf/renderer-based ReportPdf only on click,
+            // so it doesn't bloat the initial Orders bundle.
+            const { ReportPdf } = await import("@/components/pdf/ReportPdf");
             const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
             const totalAmount = filtered.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
             downloadPdf(
