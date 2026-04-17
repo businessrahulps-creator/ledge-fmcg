@@ -6,6 +6,7 @@ import { cacheData, enqueueMutation, type CacheableEntity } from "@/lib/offline-
 import { sanitizeInput } from "@/utils/sanitize";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 // --- Map DB rows to app types ---
 
@@ -249,8 +250,7 @@ export function makeOfflineCrud<T extends { id: string }>(
     }
     const { data, error } = await supabase.from(table as any).insert({ ...toDbRow(item), company_id: companyId }).select().single();
     if (error) {
-      toast.error(`Failed to add ${table}`, { description: error.message });
-      logError({ source: `crud:${table}.add`, error, context: { table } });
+      handleSupabaseError(error, { source: `crud:${table}.add`, title: `Failed to add ${entityLogType || table}`, context: { table } });
       return;
     }
     if (data) {
@@ -278,8 +278,7 @@ export function makeOfflineCrud<T extends { id: string }>(
     }
     const { error } = await supabase.from(table as any).update(toDbRow(item)).eq("id", item.id);
     if (error) {
-      toast.error(`Failed to update ${table}`, { description: error.message });
-      logError({ source: `crud:${table}.update`, error, context: { table, id: item.id } });
+      handleSupabaseError(error, { source: `crud:${table}.update`, title: `Failed to update ${entityLogType || table}`, context: { table, id: item.id } });
       return;
     }
     setter(prev => prev.map(x => x.id === item.id ? item : x));
