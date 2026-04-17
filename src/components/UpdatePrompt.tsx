@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { registerSW } from "virtual:pwa-register";
 import { toast } from "sonner";
+import { isPreviewEnv } from "@/lib/preview-env";
+
 
 const UPDATED_KEY = "ledge_just_updated";
 const TOAST_ID = "ledge-update-available";
