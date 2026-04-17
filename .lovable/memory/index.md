@@ -6,6 +6,7 @@ Mobile-first PWA for Indian FMCG distribution. Ledge brand, typographic wordmark
 Lovable Cloud backend with RLS. DataContext for session state.
 Modals for simple CRUD only; full pages for complex detail views.
 No Google OAuth — user explicitly removed it.
+Free trial is 30 days, NOT 14 — ignore any spec text saying otherwise.
 
 ## Memories
 - [Color tokens](mem://style/design-system) — Token-based color system aligned with Fluent 2 neutrals, glassmorphic cards, and semantic accents
