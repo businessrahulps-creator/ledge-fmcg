@@ -131,7 +131,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(sess?.user ?? null);
         if (!sess?.user) {
           setProfile(null);
+          setUserRole(null);
+          setProfileLoaded(true); // nothing to load when signed out
         } else {
+          setProfileLoaded(false); // new session — profile not loaded yet
           // Fire-and-forget profile fetch — never awaited in callback
           setTimeout(() => fetchProfile(sess.user.id), 0);
         }
@@ -146,7 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
+        setProfileLoaded(false);
         fetchProfile(sess.user.id);
+      } else {
+        setProfileLoaded(true);
       }
       setLoading(false);
       setAuthReady(true);
