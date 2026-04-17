@@ -1,79 +1,58 @@
 
 
-# Permanent fix: ambiguous time period selectors
-
 ## The real problem
-Two different time-period systems exist with confusing labels:
 
-**Reports + Billing** (`TimePeriodFilter`):
-- Dropdown shows: **Daily / Weekly / Monthly / Yearly**
-- Internally means: last 1 / 7 / 30 / 365 days (rolling window from today)
-- Users read "Weekly" as *this calendar week* (Mon–Sun) or *last week* — but it's actually *last 7 days from now*
-- "Yearly" reads as *this year* but is actually *last 365 days*
-- Summary line says "Yearly: ₹X" with no date range — users can't verify
+The day-of-week pills (`S M T W T F S`) on the Dashboard are confusing because:
 
-**Performance page**: pills `Today / 7D / 30D / 90D / 6M / YTD / Custom` — clearer but still no visible date range, so users can't sanity-check the numbers.
+1. **No date is shown.** Users see "M" but don't know if that's *this* Monday, *last* Monday, or "Mondays in general".
+2. **Mixed semantics in one row.** Days *before today this week* = this week's data. Days *after today this week* = last week's data (because the filter looks for "the most recent occurrence of selectedDay"). Today is Friday → S, M, T, W, T = this week; S (Sat), S (Sun) = last weekend. That silent jump across week boundaries is exactly what's tripping people up.
+3. **Letters repeat.** Two "S"s and two "T"s with no other context.
+4. **Default selection is today**, but if today has zero orders the user assumes the whole feature is broken.
 
-The fix is the same on both: **make the date range explicit and use unambiguous wording**.
+## Proposal — replace the abstract day pills with a concrete "Last 7 days" date strip
 
-## The fix
+Same shape (a horizontal row of 7 round buttons), but every pill shows a **real date**, in chronological order, ending today on the right. No more guessing which week.
 
-### 1. Rewrite `TimePeriodFilter` labels (single source of truth)
-**File:** `src/components/reports/TimePeriodFilter.tsx`
+### Visual
 
-Replace the four ambiguous options with explicit "Last N days" wording — same as the Performance page convention — and update `periodLabel()` to match.
-
-| Old value | Old label | New label |
-|---|---|---|
-| `daily` | Daily | Today |
-| `weekly` | Weekly | Last 7 days |
-| `monthly` | Monthly | Last 30 days |
-| `yearly` | Yearly | Last 365 days |
-
-Keep the type values (`daily`/`weekly`/etc.) so no consumer code breaks. Only the user-facing strings change. The cutoff math is already correct (rolling window) — labels now match the math.
-
-Also export a new helper:
-```ts
-getPeriodRange(period): { from: Date; to: Date; label: string }
+```text
+ Sat   Sun   Mon   Tue   Wed   Thu   Today
+  11    12    13    14    15    16    17
+                                      ●
 ```
-which returns the actual date range (e.g., `Mar 18 – Apr 17, 2026`) for display.
 
-### 2. Show the actual date range below every filter
-For each report consumer (`PaymentReport`, `DispatchReport`, `DistributorReport`, `ProductReport`, `SalesTeamReport`) and `Billing.tsx`:
-- Render a small caption beside/under the filter:
-  `Showing 18 Mar 2026 – 17 Apr 2026` (uses `formatIndianDate`)
-- This eliminates all ambiguity — users see exactly which dates feed the numbers.
+- Each pill: weekday short label on top (`Sat`, `Sun`, …, `Today`), date number below.
+- 7 pills = the last 7 calendar days, oldest → newest, today always rightmost.
+- Selected pill: filled primary; today gets a subtle dot indicator even when not selected.
+- Default selected = **Today** (matches current behaviour, but now visually obvious).
+- Caption under the row: `Showing orders for Fri, 17 Apr 2026` — same explicit-date pattern we just rolled out across Reports/Performance.
+- Tooltip on the row: *"Showing the last 7 days. Tap any date to see orders for that day."*
 
-### 3. Apply same treatment to Performance page
-**File:** `src/pages/Performance.tsx`
-- Below the pill row, add the same date-range caption: `Showing DD MMM YYYY – DD MMM YYYY` (using existing `getCutoffDate`).
-- For Custom, show the picked range. For YTD, show `1 Jan 2026 – Today`.
-- Keep the existing pill labels (`7D`, `30D`, etc.) — they're industry-standard analytics shorthand and the new caption removes the ambiguity.
+### Why this fixes it
 
-### 4. Add a tooltip on each filter trigger
-- `TimePeriodFilter` `SelectTrigger` and Performance pills get a tooltip:
-  *"Time windows are rolling — 'Last 7 days' means the last 7 days ending today, not the calendar week."*
-- One-time clarification, doesn't add visual noise.
+- **No more "is this last Monday or this Monday?"** — the date is right there on the pill.
+- **No more silent week-crossing.** The window is always literally "the last 7 days ending today", just like Reports.
+- **Consistency.** Same mental model as the rolling windows we just standardised in Reports/Performance/Billing.
+- **Empty state still makes sense.** "No orders on Fri, 17 Apr" reads naturally; "No orders on Friday" reads like a bug.
+- **Mobile-friendly.** 7 compact pills (`w-10 h-12`) fit comfortably on phones; same tap target size as today.
 
-## Files changed
-1. `src/components/reports/TimePeriodFilter.tsx` — relabel options, add `getPeriodRange()` helper, add tooltip
-2. `src/components/reports/PaymentReport.tsx` — show date range caption
-3. `src/components/reports/DispatchReport.tsx` — show date range caption
-4. `src/components/reports/DistributorReport.tsx` — show date range caption
-5. `src/components/reports/ProductReport.tsx` — show date range caption
-6. `src/components/reports/SalesTeamReport.tsx` — show date range caption
-7. `src/pages/Billing.tsx` — show date range caption next to filter
-8. `src/pages/Performance.tsx` — show date range caption below pill row, add tooltip
+### Filter logic change
 
-## Out of scope
-- Targets page (`Targets.tsx`) — uses anchored period dates already; not ambiguous.
-- DealerDetail / SalespersonDetail period labels (already say "Today / This Week / This Month" with anchored dates).
-- No backend / data-shape changes.
-- No new dependencies.
+Replace the current `getDay()`-based filter with a simple date-equality match against the pill's actual ISO date. Simpler code, no week-boundary arithmetic, and the math now matches what the user sees.
 
-## Why this is the permanent fix
-- **Removes the ambiguity at the source** (label = exactly what the math does).
-- **Always-visible date range** gives users a way to verify numbers themselves — no more "is this last week or this week?".
-- **Single helper** (`getPeriodRange`) ensures every consumer stays in sync forever.
-- **Matches mental model**: Indian FMCG users think in "last N days" (e.g. "kitne din ka data?") more than calendar buckets — confirmed by the existing dashboard copy on Help page ("Daily — Dashboard for order count").
+### Files to change
+
+1. **`src/pages/Dashboard.tsx`**
+   - Remove `DAYS` / `DAY_LABELS` constants and `selectedDay` (number 0–6).
+   - Add `last7Dates: Date[]` (oldest → today) and `selectedDate: string` (ISO `YYYY-MM-DD`), default to today's ISO.
+   - Replace the day-pill row with a date-pill row: weekday label + day number, "Today" label on the rightmost pill, subtle dot for today.
+   - Update `filteredOrders` to filter by `o.date === selectedDate`.
+   - Update empty state copy: `No orders on {formatIndianDate(selectedDate)}`.
+   - Add caption: `Showing orders for {weekday}, {formatIndianDate}`.
+   - Wrap the row in a `Tooltip` explaining the rolling 7-day window.
+
+### Out of scope
+- The 7-day sparkline above is fine — it already shows `last7Days` chronologically with "Today" emphasised. No change.
+- KPI cards continue to reflect the selected date.
+- No changes to other pages.
 
