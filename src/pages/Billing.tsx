@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useApi } from "@/services/api";
-import { GstInvoicePdf } from "@/components/pdf/GstInvoicePdf";
+// GstInvoicePdf is dynamically imported on click to keep the heavy
+// @react-pdf/renderer module out of the initial Billing bundle.
 import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import type { Invoice, InvoiceLine } from "@/context/DataContext";
 import { numberToWords } from "@/utils/numberToWords";

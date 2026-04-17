@@ -202,6 +202,16 @@ export default function NewOrder() {
       return;
     }
 
+    // Guard against zero/negative unit prices — prevents accidental ₹0 invoices
+    const invalidPriceLine = validLines.find((l) => l.unitPrice <= 0);
+    if (invalidPriceLine) {
+      const product = products.find((p) => p.id === invalidPriceLine.productId);
+      toast.error("Invalid price", {
+        description: `${product?.name || "A product"} has a price of ₹${invalidPriceLine.unitPrice}. Set a price greater than 0.`,
+      });
+      return;
+    }
+
     // Require godown if dispatching/delivering
     if ((deliveryStatus === "dispatched" || deliveryStatus === "delivered") && !selectedGodown) {
       toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
