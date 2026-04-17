@@ -153,3 +153,23 @@ export function TablePageSkeleton({ rows = 8 }: { rows?: number }) {
     </div>
   );
 }
+
+/**
+ * Skeleton tuned for dashboard-style pages (Performance, Reports):
+ * header, KPI grid, and a couple of chart blocks.
+ */
+export function DashboardPageSkeleton() {
+  return (
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-200">
+      <div>
+        <GlassSkeleton className="h-6 w-40 rounded" />
+        <GlassSkeleton className="h-3 w-64 rounded mt-2" />
+      </div>
+      <KpiGridSkeleton />
+      <div className="md:grid md:grid-cols-2 md:gap-6 space-y-6 md:space-y-0">
+        <ChartSkeleton className="h-56" />
+        <ChartSkeleton className="h-56" />
+      </div>
+    </div>
+  );
+}
