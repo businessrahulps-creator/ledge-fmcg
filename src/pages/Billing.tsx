@@ -545,7 +545,7 @@ export default function Billing() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs w-[110px]">Type</TableHead>
                       <TableHead className="text-xs">Number</TableHead>
                       <TableHead className="text-xs">Date</TableHead>
                       <TableHead className="text-xs">Buyer</TableHead>
