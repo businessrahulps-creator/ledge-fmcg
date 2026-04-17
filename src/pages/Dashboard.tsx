@@ -14,6 +14,10 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { ShoppingCart, Plus, AlertTriangle } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+const toIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function useTimeAgo(date: Date) {
   const [, setTick] = useState(0);
@@ -29,8 +33,7 @@ function useTimeAgo(date: Date) {
   return `${hrs}h ago`;
 }
 
-const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -74,7 +77,14 @@ export default function Dashboard() {
   const distributors = api.dealers.list();
   const products = api.products.list();
   const today = new Date();
-  const [selectedDay, setSelectedDay] = useState(today.getDay());
+  const todayIso = toIsoDate(today);
+  const last7Dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    return d;
+  });
+  const [selectedDate, setSelectedDate] = useState(todayIso);
+  const selectedDateObj = new Date(selectedDate + "T00:00:00");
   const firstName = profile?.full_name?.split(" ")[0];
 
   // This Month aggregates
@@ -109,21 +119,8 @@ export default function Dashboard() {
   // Note: blocking page skeleton removed — render layout immediately and let
   // each section render inline skeletons via empty-state UIs while data streams in.
 
-  // Parse date as local timezone to avoid UTC offset shifting the day
-  // Only show orders from the current week (Mon-Sun containing today)
-  const filteredOrders = orders.filter((o) => {
-    const orderDate = new Date(o.date + "T00:00:00");
-    if (orderDate.getDay() !== selectedDay) return false;
-    // Current week boundary: find the most recent occurrence of selectedDay
-    const diff = (today.getDay() - selectedDay + 7) % 7;
-    const target = new Date(today);
-    target.setDate(today.getDate() - diff);
-    target.setHours(0, 0, 0, 0);
-    // Only show if the order date matches this week's occurrence
-    return orderDate.getFullYear() === target.getFullYear() &&
-      orderDate.getMonth() === target.getMonth() &&
-      orderDate.getDate() === target.getDate();
-  });
+  // Filter orders by the exact selected date (rolling 7-day window picker)
+  const filteredOrders = orders.filter((o) => o.date === selectedDate);
 
   const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
   const totalOrders = filteredOrders.length;
@@ -264,23 +261,50 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Day-of-week row */}
-          <div className="flex gap-2.5 mt-5">
-            {DAYS.map((d, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedDay(i)}
-                aria-label={DAY_LABELS[i]}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                  i === selectedDay
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+          {/* Last 7 days date picker */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex gap-2 mt-5">
+                  {last7Dates.map((d, i) => {
+                    const iso = toIsoDate(d);
+                    const isToday = iso === todayIso;
+                    const isSelected = iso === selectedDate;
+                    const weekdayLabel = isToday ? "Today" : DAY_SHORT[d.getDay()];
+                    const fullLabel = d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
+                    return (
+                      <button
+                        key={iso}
+                        onClick={() => setSelectedDate(iso)}
+                        aria-label={fullLabel}
+                        aria-pressed={isSelected}
+                        className={cn(
+                          "relative flex flex-col items-center justify-center w-11 h-12 rounded-xl text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          isSelected
+                            ? "bg-primary text-primary-foreground shadow-md"
+                            : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span className={cn("text-[9px] font-medium leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-70")}>
+                          {weekdayLabel}
+                        </span>
+                        <span className="text-sm font-bold tabular-nums leading-none">{d.getDate()}</span>
+                        {isToday && !isSelected && (
+                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs text-xs">
+                Showing the last 7 days. Tap any date to see orders for that day.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <p className="text-[11px] text-muted-foreground/70 mt-2">
+            Showing orders for {selectedDateObj.toLocaleDateString("en-IN", { weekday: "short" })}, {formatIndianDate(selectedDate)}
+          </p>
         </div>
 
         {/* KPI Grid */}
@@ -389,7 +413,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                 <ShoppingCart className="h-5 w-5 text-muted-foreground/60" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-sm font-medium">No orders on {DAY_LABELS[selectedDay]}</p>
+                <p className="text-sm font-medium">No orders on {formatIndianDate(selectedDate)}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Create an order to see it here</p>
               </div>
               <Link
