@@ -4,9 +4,11 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const buildTimestamp = Date.now().toString();
+  return {
   define: {
-    __APP_VERSION__: JSON.stringify(Date.now().toString()),
+    __APP_VERSION__: JSON.stringify(buildTimestamp),
   },
   server: {
     host: "::",
@@ -18,6 +20,12 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    {
+      name: "html-inject-build-timestamp",
+      transformIndexHtml(html: string) {
+        return html.replace(/%BUILD_TIMESTAMP%/g, buildTimestamp);
+      },
+    },
     VitePWA({
       registerType: "autoUpdate",
       devOptions: { enabled: false },
@@ -89,4 +97,5 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
-}));
+  };
+});
