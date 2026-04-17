@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
-import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone } from "@/utils/validators";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES } from "@/utils/validators";
 import {
   Dialog,
   DialogContent,
@@ -291,8 +291,14 @@ export default function Distributors() {
                   <div className="space-y-3 md:space-y-4">
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">GSTIN</Label>
-                      <Input value={editItem.gstin} onChange={(e) => setEditItem({ ...editItem, gstin: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15) })} maxLength={15} className="h-10 rounded-lg max-w-[300px] font-mono" placeholder="22AAAAA0000A1Z5" />
-                      <p className="text-[10px] text-muted-foreground md:text-xs">15-digit GST Identification Number</p>
+                      <Input value={editItem.gstin} onChange={(e) => {
+                        const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15);
+                        // Auto-prefill state code from GSTIN's first 2 digits — only when empty (never overwrite).
+                        const codePrefix = cleaned.slice(0, 2);
+                        const shouldPrefill = codePrefix.length === 2 && /^\d{2}$/.test(codePrefix) && !editItem.stateCode;
+                        setEditItem({ ...editItem, gstin: cleaned, ...(shouldPrefill ? { stateCode: codePrefix } : {}) });
+                      }} maxLength={15} className="h-10 rounded-lg max-w-[300px] font-mono" placeholder="22AAAAA0000A1Z5" />
+                      <p className="text-[10px] text-muted-foreground md:text-xs">15-digit GST Identification Number{editItem.stateCode && INDIAN_STATE_CODES[editItem.stateCode] ? ` · ${INDIAN_STATE_CODES[editItem.stateCode]}` : ""}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5 md:space-y-2">

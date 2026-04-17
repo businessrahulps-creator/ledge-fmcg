@@ -4,6 +4,7 @@ import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, SecondarySale, Target } from "@/context/data-types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 export function useTargetsDomain(deps: DomainDeps) {
   const [targets, setTargets] = useState<Target[]>([]);
@@ -28,7 +29,7 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
 
     const { data, error } = await supabase.from("targets").insert(dbRow as any).select().single();
-    if (error) { toast.error("Failed to save target", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:targets.add", title: "Failed to save target" }); return; }
     if (data) {
       const mapped: Target = {
         id: (data as any).id, entityType: target.entityType, entityId: target.entityId,
@@ -53,7 +54,7 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
 
     const { error } = await supabase.from("targets").update(dbUpdates as any).eq("id", target.id);
-    if (error) { toast.error("Failed to update target", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:targets.update", title: "Failed to update target", context: { id: target.id } }); return; }
     setTargets(prev => prev.map(t => t.id === target.id ? target : t));
   }, []);
 
@@ -66,7 +67,7 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
 
     const { error } = await supabase.from("targets").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete target", { description: error.message }); return false; }
+    if (error) { handleSupabaseError(error, { source: "crud:targets.delete", title: "Failed to delete target", context: { id } }); return false; }
     setTargets(prev => prev.filter(t => t.id !== id));
     return true;
   }, []);
@@ -90,7 +91,7 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
 
     const { data, error } = await supabase.from("secondary_sales").insert(dbRow as any).select().single();
-    if (error) { toast.error("Failed to record secondary sale", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:secondary_sales.add", title: "Failed to record secondary sale" }); return; }
     if (data) {
       const mapped: SecondarySale = {
         id: (data as any).id, distributorId: sale.distributorId, productId: sale.productId,
@@ -110,7 +111,7 @@ export function useTargetsDomain(deps: DomainDeps) {
     }
 
     const { error } = await supabase.from("secondary_sales").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete secondary sale", { description: error.message }); return false; }
+    if (error) { handleSupabaseError(error, { source: "crud:secondary_sales.delete", title: "Failed to delete secondary sale", context: { id } }); return false; }
     setSecondarySales(prev => prev.filter(s => s.id !== id));
     return true;
   }, []);

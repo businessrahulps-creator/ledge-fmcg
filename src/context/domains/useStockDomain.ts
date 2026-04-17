@@ -7,6 +7,7 @@ import { sanitizeInput } from "@/utils/sanitize";
 import { makeOfflineCrud, mapGodown, mapProduct } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { toast } from "sonner";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 export function useStockDomain(deps: DomainDeps) {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
@@ -43,7 +44,7 @@ export function useStockDomain(deps: DomainDeps) {
       company_id: deps.companyId, product_id: si.productId, godown_id: si.godownId,
       quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
     }, { onConflict: "company_id,product_id,godown_id" }).select().single();
-    if (error) { toast.error("Failed to add stock item", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:stock_items.add", title: "Failed to add stock item" }); return; }
     if (data) {
       setStockItems(prev => {
         const exists = prev.some(x => x.id === data.id);
@@ -70,7 +71,7 @@ export function useStockDomain(deps: DomainDeps) {
     const { error } = await supabase.from("stock_items").update({
       quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
     }).eq("id", si.id);
-    if (error) { toast.error("Failed to update stock item", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:stock_items.update", title: "Failed to update stock item", context: { id: si.id } }); return; }
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
   }, [deps.persistEntityToCache]);
 
@@ -86,7 +87,7 @@ export function useStockDomain(deps: DomainDeps) {
       return true;
     }
     const { error } = await supabase.from("stock_items").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete stock item", { description: error.message }); return false; }
+    if (error) { handleSupabaseError(error, { source: "crud:stock_items.delete", title: "Failed to delete stock item", context: { id } }); return false; }
     setStockItems(prev => prev.filter(x => x.id !== id));
     return true;
   }, [deps.persistEntityToCache]);
