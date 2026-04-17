@@ -787,6 +787,17 @@ export default function Billing() {
           {/* Step 2: Document Form (after order selected or in edit mode) */}
           {(isEditMode || step === 2) && (
             <div className="space-y-5">
+              {/* Inline back link (replaces footer Back button) */}
+              {!isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => { setStep(1); setSourceOrderId(""); setLines([]); setBuyerName(""); setBuyerAddress(""); setOrderSearch(""); }}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors -mt-1"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Change order
+                </button>
+              )}
               {/* Selected order summary (new mode only) */}
               {!isEditMode && selectedOrder && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
