@@ -174,6 +174,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   )}
                 </div>
               )}
+              <RefreshAppButton />
               <NotificationCenter />
             </div>
           </header>
