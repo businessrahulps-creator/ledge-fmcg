@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [authReady, setAuthReady] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
