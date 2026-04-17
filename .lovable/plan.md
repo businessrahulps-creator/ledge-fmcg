@@ -1,59 +1,69 @@
 
 
-## Plan — Category 1: UX / Polish (suggestions 1–4)
+## Plan — Categories 2–5 (suggestions 5–10)
 
-I'll explore the relevant files first, then present the concrete edits per suggestion. Since this is plan mode, I'll lay out exactly what changes in each file. After approval, I implement Category 1, reply with the completion line, and proceed to Category 2 in the next turn.
+Implementing the remaining 6 suggestions across 4 categories. One category at a time, minimal & backwards-compatible.
 
-### Suggestion 1 — Indian number formatting everywhere (lakhs/crores)
+---
 
-**Goal:** Ensure all currency renders use `en-IN` grouping (₹12,45,678).
+### Category 2 — Performance & Responsiveness
 
-**Approach:** Audit `src/utils/` and pages for currency formatting. Most code likely already uses `Intl.NumberFormat('en-IN')`, but a few PDFs and dashboard tiles use raw `toLocaleString()` or manual formatters. Centralize via a single helper.
+**#5 Memoize heavy DataContext selectors**
+Audit `src/context/domains/*.ts` for `.reduce`/`.filter`/`.map` chains computed on every render. Wrap the top offenders in `useMemo` keyed on source arrays.
+- Likely targets: `useOrdersDomain` (totals, dealer rollups), `useBillingDomain` (outstanding aggregates), `useStockDomain` (stock health computations), `useTargetsDomain` (achievement %).
+- Verify with `code--view` first; only memoize where the function is actually called repeatedly per render.
 
-**Plan:**
-- Add `formatINR(n)` and `formatINRCompact(n)` to `src/utils/formatDate.ts` (or new `src/utils/formatCurrency.ts`).
-- Audit & replace inconsistent call sites in: `Dashboard.tsx`, `Reports.tsx`, `Performance.tsx`, `OrderDetail.tsx`, `DealerDetail.tsx`, `SalespersonDetail.tsx`, PDF components (`OrderInvoicePdf`, `GstInvoicePdf`, `DealerStatementPdf`, `PerformanceReportPdf`, `SalespersonStatementPdf`), and report components.
-- Keep existing `formatCurrencyPdf` in `exportPdf.ts` but route it through the same helper for consistency.
+**#6 Virtualize long lists (Orders, Stock items)**
+Add `@tanstack/react-virtual` (small, ~5KB, already common in shadcn projects). Apply only when list length > 100 to avoid changing UX for typical accounts.
+- `src/pages/Orders.tsx` — virtualize the desktop `<tbody>` rows AND the mobile card list.
+- `src/pages/Stock.tsx` — virtualize the products table.
+- Keep pagination intact as a fallback; virtualization layered on top of `paginatedOrders` is overkill, so apply to `filtered` directly when length > 100 and skip pagination in that branch.
+- Decision: simpler & safer — virtualize *within* the current paginated slice only when slice > 100. Avoids changing pagination UX. (Will confirm during implementation by reading current page sizes.)
 
-### Suggestion 2 — Empty-state illustrations & CTAs on every list page
+---
 
-**Goal:** Friendly empty states with a primary CTA on Orders, Dealers, Stock, Salespersons, Distributors, Schemes, Targets, Claims.
+### Category 3 — Reliability & Edge Cases
 
-**Approach:** Create one reusable `<EmptyState>` component (icon + title + description + CTA button), use lucide icons (already in deps — no new dep). Drop into each list page where the current "No data" / blank state lives.
+**#7 Global Supabase error → toast funnel**
+Add a tiny helper `src/utils/handleSupabaseError.ts` that takes an error/PostgrestError and shows a user-friendly sonner toast with a sensible default message (network vs auth vs constraint vs generic). Log full error to `errorLog`.
+- Wire into existing mutation paths in `src/services/api.ts` and the domain hooks where `.from(...).insert/update/delete` is called. Replace ad-hoc `toast.error(error.message)` calls.
 
-**Plan:**
-- New file: `src/components/ui/empty-state.tsx` — small component: `{ icon, title, description, actionLabel, onAction }`.
-- Wire into: `Orders.tsx`, `Distributors.tsx` (Dealers), `Stock.tsx` (both Products + Warehouses tabs), `Salespersons.tsx`, `Schemes.tsx`, `Targets.tsx`, `Claims.tsx`.
-- Each gets a contextual message + CTA that opens the existing "create" flow (no new logic).
+**#8 Offline write queue flush on reconnect**
+Inspect `src/lib/offline-store.ts` to see queue shape. Add:
+- `flushPendingWrites()` exported function that iterates the queue and replays each via the api layer.
+- `useOnlineStatus` hook (already exists) gains a `useEffect` that calls `flushPendingWrites()` on `online` event, then shows `toast.success("Synced N offline changes")`.
+- Failed replays stay in queue with a retry counter; surface a single error toast if any fail.
 
-### Suggestion 3 — Confirm-before-leave on dirty forms
+---
 
-**Goal:** Prevent accidental data loss on `NewOrder`, `DealerDetail`, `Company`.
+### Category 4 — Code Quality / Maintainability
 
-**Approach:** Use React Router's `useBlocker` (already on react-router-dom v6+). One small hook wraps it.
+**#9 Consolidate duplicate landing components**
+Two folders: `src/components/landing/*` (top-level) vs `src/components/landing/sections/*`.
+- Read both sets, identify which is actually imported by the live landing page (`src/pages/Index.tsx` likely).
+- Delete the unused set. No visual change.
+- Update any stale imports.
 
-**Plan:**
-- New hook: `src/hooks/use-unsaved-changes-guard.ts` — accepts a `boolean isDirty`, blocks navigation, shows a confirm dialog (use existing `AlertDialog` from `@/components/ui/alert-dialog`).
-- Also wires `beforeunload` for tab close / refresh.
-- Wire into `NewOrder.tsx`, `DealerDetail.tsx`, `Company.tsx` — track dirty state from existing form state (each already has local form state).
+---
 
-### Suggestion 4 — Skeleton parity across lazy routes
+### Category 5 — Indian FMCG Specific Improvements
 
-**Goal:** `Performance` and `Claims` lazy fallbacks should match their actual layout (dashboard-like, not list-like).
+**#10 GSTIN auto-uppercase + state-code prefill**
+- Add `INDIAN_STATE_CODES` map in `src/utils/validators.ts` (e.g. `"27" → "Maharashtra"`).
+- In `DealerDetail.tsx` (and any dealer create modal): on GSTIN `onChange`, force uppercase. When 2+ chars entered and state field is empty, auto-fill state from the code lookup.
+- Non-destructive: only prefill when state is blank — never overwrite a user value.
 
-**Approach:** Add small variant to existing `page-skeleton.tsx`.
+---
 
-**Plan:**
-- Edit `src/components/ui/page-skeleton.tsx` — add `DashboardPageSkeleton` (KPI grid + chart blocks) export alongside existing `ListPageSkeleton`.
-- Edit `src/App.tsx` (or wherever `lazy(...)` fallbacks are configured) — use `DashboardPageSkeleton` for `Performance` and `Claims` routes.
-
-### Files touched (Category 1)
-- **New:** `src/utils/formatCurrency.ts`, `src/components/ui/empty-state.tsx`, `src/hooks/use-unsaved-changes-guard.ts`
-- **Edited:** `src/components/ui/page-skeleton.tsx`, `src/App.tsx`, `src/utils/exportPdf.ts`, `src/pages/Dashboard.tsx`, `src/pages/Reports.tsx`, `src/pages/Performance.tsx`, `src/pages/OrderDetail.tsx`, `src/pages/DealerDetail.tsx`, `src/pages/SalespersonDetail.tsx`, `src/pages/Orders.tsx`, `src/pages/Distributors.tsx`, `src/pages/Stock.tsx`, `src/pages/Salespersons.tsx`, `src/pages/Schemes.tsx`, `src/pages/Targets.tsx`, `src/pages/Claims.tsx`, `src/pages/NewOrder.tsx`, `src/pages/Company.tsx`, plus PDF components listed above.
+### Files touched (all 4 categories)
+- **Edited:** `src/context/domains/useOrdersDomain.ts`, `useBillingDomain.ts`, `useStockDomain.ts`, `useTargetsDomain.ts` (memoization), `src/pages/Orders.tsx`, `src/pages/Stock.tsx` (virtualization), `src/services/api.ts` + relevant domain hooks (error funnel), `src/lib/offline-store.ts`, `src/hooks/use-online-status.tsx` (queue flush), `src/pages/Index.tsx` or imports (landing dedupe), `src/pages/DealerDetail.tsx`, `src/utils/validators.ts` (GSTIN/state).
+- **New:** `src/utils/handleSupabaseError.ts`.
+- **Possibly removed:** one of the two `src/components/landing/*` subfolders (TBD after audit).
+- **Dep added:** `@tanstack/react-virtual` (only one new dep, minimal & justified for #6).
 
 ### Stays the same
-- All business logic, validation, RLS, real-time sync, PWA behavior, mobile-first layout, design tokens.
-- No new dependencies.
+- All business logic, RLS, real-time sync, PWA behavior, Indian locale, mobile-first design, design tokens, validation rules.
 
-After Category 1 ships I'll proceed to Category 2 (Performance) in the next message, following the same plan-then-implement pattern.
+### Execution order
+After approval I'll ship Category 2 → reply `CATEGORY COMPLETE: Performance & Responsiveness` → Category 3 → Category 4 → Category 5 → final `ALL IMPROVEMENTS COMPLETE`.
 
