@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone } from "@/utils/validators";
 import {
   Dialog,
   DialogContent,
@@ -79,6 +80,22 @@ export default function Distributors() {
     }
     if (!editItem?.contact.trim()) {
       toast.error("Contact required", { description: "Please enter a contact number." });
+      return;
+    }
+    if (!isValidIndianPhone(editItem.contact)) {
+      toast.error("Invalid contact number", { description: "Enter a valid 10-digit Indian mobile number." });
+      return;
+    }
+    if (!isValidGstin(editItem.gstin)) {
+      toast.error("Invalid GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
+      return;
+    }
+    if (!isValidPan(editItem.pan)) {
+      toast.error("Invalid PAN", { description: "PAN must be 10 characters (e.g. AAAAA0000A)." });
+      return;
+    }
+    if (!isValidIfsc(editItem.bankIfsc)) {
+      toast.error("Invalid IFSC", { description: "IFSC must be 11 characters (e.g. HDFC0001234)." });
       return;
     }
     if (isNew) {

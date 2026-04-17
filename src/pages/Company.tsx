@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { sanitizeInput } from "@/utils/sanitize";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone } from "@/utils/validators";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Loader2, Upload, X } from "lucide-react";
@@ -156,6 +157,22 @@ export default function Company() {
         description: "Please complete workspace setup before saving company details.",
       });
       logError({ source: "crud:companies.update", error: "Workspace not set up (companyId missing)", severity: "warning" });
+      return;
+    }
+    if (!isValidGstin(companyGstin)) {
+      toast.error("Invalid GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
+      return;
+    }
+    if (!isValidPan(companyPan)) {
+      toast.error("Invalid PAN", { description: "PAN must be 10 characters (e.g. AAAAA0000A)." });
+      return;
+    }
+    if (!isValidIndianPhone(companyPhone)) {
+      toast.error("Invalid phone", { description: "Enter a valid 10-digit Indian mobile number." });
+      return;
+    }
+    if (!isValidIfsc(bankIfsc)) {
+      toast.error("Invalid IFSC", { description: "IFSC must be 11 characters (e.g. HDFC0001234)." });
       return;
     }
     setIsSaving(true);
