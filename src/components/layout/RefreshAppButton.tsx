@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -6,6 +6,15 @@ import { cn } from "@/lib/utils";
 
 export function RefreshAppButton() {
   const [checking, setChecking] = useState(false);
+  const [hasUpdate, setHasUpdate] = useState(false);
+
+  // Poll the global flag set by UpdatePrompt
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHasUpdate(!!window.__ledgeHasUpdate);
+    }, 2000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleClick = async () => {
     if (checking) return;
@@ -33,15 +42,23 @@ export function RefreshAppButton() {
           type="button"
           onClick={handleClick}
           aria-label="Check for updates"
-          className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-muted"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-muted"
         >
           <RefreshCw
             className={cn("h-[18px] w-[18px] text-muted-foreground", checking && "animate-spin")}
             strokeWidth={1.5}
           />
+          {hasUpdate && !checking && (
+            <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+          )}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="bottom">Check for updates</TooltipContent>
+      <TooltipContent side="bottom">
+        {hasUpdate ? "Update available — tap to install" : "Check for updates"}
+      </TooltipContent>
     </Tooltip>
   );
 }

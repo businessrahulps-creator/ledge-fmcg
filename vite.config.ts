@@ -4,9 +4,11 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const buildTimestamp = Date.now().toString();
+  return {
   define: {
-    __APP_VERSION__: JSON.stringify(Date.now().toString()),
+    __APP_VERSION__: JSON.stringify(buildTimestamp),
   },
   server: {
     host: "::",
@@ -18,6 +20,12 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    {
+      name: "html-inject-build-timestamp",
+      transformIndexHtml(html: string) {
+        return html.replace(/%BUILD_TIMESTAMP%/g, buildTimestamp);
+      },
+    },
     VitePWA({
       registerType: "autoUpdate",
       devOptions: { enabled: false },
@@ -25,9 +33,25 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        navigationPreload: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
+          // Layer 2: Always try network first for HTML navigations.
+          // This is the #1 fix for stale iOS PWAs — when online, users
+          // always get the latest HTML (which references the latest JS bundles).
+          // When offline, falls back to the cached shell.
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-navigations",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
@@ -73,4 +97,5 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
-}));
+  };
+});
