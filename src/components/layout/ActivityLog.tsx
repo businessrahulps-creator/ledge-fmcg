@@ -61,7 +61,10 @@ export function ActivityLog({ open, onOpenChange }: Props) {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
-  const fetchEntries = useCallback(async (append = false) => {
+  // Cursor-based pagination: page through using the oldest loaded `created_at`
+  // as the next anchor. Avoids the silent 1000-row Supabase cap and remains
+  // correct even when new rows arrive mid-session.
+  const fetchEntries = useCallback(async (cursor: string | null) => {
     if (!companyId) return;
     setLoading(true);
     try {
@@ -70,28 +73,23 @@ export function ActivityLog({ open, onOpenChange }: Props) {
         .select("*")
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
-        .range(append ? entries.length : 0, (append ? entries.length : 0) + PAGE_SIZE - 1);
+        .limit(PAGE_SIZE);
 
-      if (filter !== "all") {
-        query = query.eq("entity_type", filter);
-      }
+      if (filter !== "all") query = query.eq("entity_type", filter);
+      if (cursor) query = query.lt("created_at", cursor);
 
       const { data } = await query;
       const rows = ((data as any) || []) as ActivityEntry[];
       setHasMore(rows.length === PAGE_SIZE);
-      if (append) {
-        setEntries(prev => [...prev, ...rows]);
-      } else {
-        setEntries(rows);
-      }
+      setEntries(prev => (cursor ? [...prev, ...rows] : rows));
     } finally {
       setLoading(false);
     }
-  }, [companyId, filter, entries.length]);
+  }, [companyId, filter]);
 
   useEffect(() => {
-    if (open) fetchEntries(false);
-  }, [open, filter, companyId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (open) fetchEntries(null);
+  }, [open, filter, companyId, fetchEntries]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -141,7 +139,7 @@ export function ActivityLog({ open, onOpenChange }: Props) {
               variant="ghost"
               size="sm"
               className="w-full mt-2"
-              onClick={() => fetchEntries(true)}
+              onClick={() => fetchEntries(entries[entries.length - 1]?.created_at ?? null)}
               disabled={loading}
             >
               {loading ? "Loading…" : "Load more"}
