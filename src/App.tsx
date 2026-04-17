@@ -100,8 +100,8 @@ const App = () => (
                   <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Claims /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Billing /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Company /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Reports /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<DashboardPageSkeleton />}><Reports /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<DashboardPageSkeleton />}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Settings /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={<ListPageSkeleton />}><Help /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
