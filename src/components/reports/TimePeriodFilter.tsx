@@ -1,4 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatIndianDate } from "@/utils/formatDate";
 
 export type TimePeriod = "daily" | "weekly" | "monthly" | "yearly";
 
@@ -7,23 +9,71 @@ interface TimePeriodFilterProps {
   onChange: (value: TimePeriod) => void;
 }
 
+const PERIOD_LABELS: Record<TimePeriod, string> = {
+  daily: "Today",
+  weekly: "Last 7 days",
+  monthly: "Last 30 days",
+  yearly: "Last 365 days",
+};
+
 export function TimePeriodFilter({ value, onChange }: TimePeriodFilterProps) {
   return (
-    <Select value={value} onValueChange={(v) => onChange(v as TimePeriod)}>
-      <SelectTrigger className="h-10 w-full rounded-lg sm:w-40">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="daily">Daily</SelectItem>
-        <SelectItem value="weekly">Weekly</SelectItem>
-        <SelectItem value="monthly">Monthly</SelectItem>
-        <SelectItem value="yearly">Yearly</SelectItem>
-      </SelectContent>
-    </Select>
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="w-full sm:w-auto">
+            <Select value={value} onValueChange={(v) => onChange(v as TimePeriod)}>
+              <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Today</SelectItem>
+                <SelectItem value="weekly">Last 7 days</SelectItem>
+                <SelectItem value="monthly">Last 30 days</SelectItem>
+                <SelectItem value="yearly">Last 365 days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-xs text-xs">
+          Time windows are rolling — "Last 7 days" means the last 7 days ending today, not the calendar week.
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
-/** Filter orders by time period relative to today's date */
+/** Get start date (cutoff) and end date (today) for the selected period */
+export function getPeriodRange(period: TimePeriod): { from: Date; to: Date } {
+  const to = new Date();
+  const from = new Date();
+  from.setHours(0, 0, 0, 0);
+
+  switch (period) {
+    case "daily":
+      // from = today 00:00, to = now
+      break;
+    case "weekly":
+      from.setDate(to.getDate() - 6); // last 7 days inclusive of today
+      break;
+    case "monthly":
+      from.setDate(to.getDate() - 29); // last 30 days inclusive
+      break;
+    case "yearly":
+      from.setDate(to.getDate() - 364); // last 365 days inclusive
+      break;
+  }
+  return { from, to };
+}
+
+/** Human-readable date range caption, e.g. "18 Mar 2026 – 17 Apr 2026" */
+export function periodRangeLabel(period: TimePeriod): string {
+  const { from, to } = getPeriodRange(period);
+  if (period === "daily") return formatIndianDate(to);
+  return `${formatIndianDate(from)} – ${formatIndianDate(to)}`;
+}
+
+/** Filter items by time period relative to today's date (rolling window) */
 export function filterByTimePeriod<T extends { date: string }>(items: T[], period: TimePeriod): T[] {
   const now = new Date();
   const cutoff = new Date();
@@ -50,10 +100,5 @@ export function filterByTimePeriod<T extends { date: string }>(items: T[], perio
 }
 
 export function periodLabel(period: TimePeriod): string {
-  switch (period) {
-    case "daily": return "Today";
-    case "weekly": return "Last 7 Days";
-    case "monthly": return "Last 30 Days";
-    case "yearly": return "Last Year";
-  }
+  return PERIOD_LABELS[period];
 }
