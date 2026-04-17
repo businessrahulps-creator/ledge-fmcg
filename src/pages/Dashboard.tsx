@@ -33,8 +33,7 @@ function useTimeAgo(date: Date) {
   return `${hrs}h ago`;
 }
 
-const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const DAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function getGreeting() {
   const h = new Date().getHours();
