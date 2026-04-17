@@ -119,21 +119,8 @@ export default function Dashboard() {
   // Note: blocking page skeleton removed — render layout immediately and let
   // each section render inline skeletons via empty-state UIs while data streams in.
 
-  // Parse date as local timezone to avoid UTC offset shifting the day
-  // Only show orders from the current week (Mon-Sun containing today)
-  const filteredOrders = orders.filter((o) => {
-    const orderDate = new Date(o.date + "T00:00:00");
-    if (orderDate.getDay() !== selectedDay) return false;
-    // Current week boundary: find the most recent occurrence of selectedDay
-    const diff = (today.getDay() - selectedDay + 7) % 7;
-    const target = new Date(today);
-    target.setDate(today.getDate() - diff);
-    target.setHours(0, 0, 0, 0);
-    // Only show if the order date matches this week's occurrence
-    return orderDate.getFullYear() === target.getFullYear() &&
-      orderDate.getMonth() === target.getMonth() &&
-      orderDate.getDate() === target.getDate();
-  });
+  // Filter orders by the exact selected date (rolling 7-day window picker)
+  const filteredOrders = orders.filter((o) => o.date === selectedDate);
 
   const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
   const totalOrders = filteredOrders.length;
