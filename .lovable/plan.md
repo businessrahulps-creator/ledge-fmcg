@@ -1,39 +1,25 @@
 
 
-## Phase 2 — Every Page, UI/UX & Visual Polish (audit plan)
+## Phase 4 — Data Integrity, RLS, RBAC & Edge Functions Audit
 
-I'll audit each route by reading the page files, checking for layout/locale/responsiveness issues, and only fixing concrete bugs (no redesigns, no new features).
-
-### Routes to inspect
-1. `/` (Index/landing) — already polished, skim only
-2. `/login`, `/signup`, `/reset-password`
-3. `/dashboard`
-4. `/orders`, `/orders/new`, `/orders/:id`
-5. `/distributors`, `/distributors/:id`
-6. `/salespersons`, `/salespersons/:id`
-7. `/stock`, `/schemes`, `/claims`, `/targets`, `/billing`, `/performance`, `/reports`
-8. `/settings`, `/help`, `/company`
-9. Legal: `/privacy-policy`, `/terms-of-service`, `/refund-policy`, `/about-us`, `/contact`
-10. `*` (NotFound)
-
-### What I'm specifically looking for
-- **Mobile sticky-bar overlap** — same class of bug as OrderDetail. Check Distributors/Salesperson detail pages, NewOrder, Settings.
-- **INR formatting consistency** — `toLocaleString('en-IN')` everywhere, no raw `$` or `toFixed(2)` without locale.
-- **GSTIN/phone validation** on Settings (Company tab) and Distributor forms.
-- **Skeleton loaders** present on heavy pages.
-- **Bottom-nav overlap** on mobile pages (pages need `pb-20` or similar).
-- **Empty states** on tables.
-- **Broken imports / dead routes** in `App.tsx`.
+### Scope
+1. **DB trigger fix (carry-over from Phase 3)** — `refresh_entity_aggregates` uses gross `total` for `outstanding_amount` and `total_value`. Should be `total - scheme_savings` to match Dashboard/Billing/Reports.
+2. **RLS audit** — verify every table has appropriate policies; flag overly permissive ones.
+3. **RBAC enforcement** — accountant restrictions on stock/products/godowns; super_admin gates on schemes/roles. Verify client-side guards match server-side policies.
+4. **Edge functions** — `seed-demo-account`, `seed-test-accounts`: verify CORS, JWT handling, input validation, and that they're not callable by random users in prod.
+5. **Auth security** — run linter, check for leaked-password protection, OTP expiry.
+6. **Profiles policy review** — current policies look complex (self-update with company_id-locked check); validate they actually prevent privilege escalation.
 
 ### Approach
-1. Read `App.tsx` to enumerate active routes.
-2. Batch-read top-suspect pages in parallel (Settings, Distributors, NewOrder, Stock, Reports, NotFound).
-3. Grep for `toFixed(2)` without `en-IN`, raw `$` symbols, missing `pb-` on mobile.
-4. Fix only confirmed bugs (no speculative refactors).
+- Run `supabase--linter` + `security--run_security_scan` in parallel to surface known issues.
+- Read the two edge functions.
+- Apply migration to fix the aggregates trigger (uses `total - COALESCE(scheme_savings, 0)`).
+- Spot-check client RBAC guards (Stock page, Schemes page) against RLS.
 
 ### Out of scope
-- Visual redesigns, animation tweaks, copy changes.
-- Anything covered by Phase 3 (calculations) or Phase 4 (security).
+- Restructuring RLS architecture (only fix concrete issues).
+- Adding new auth providers.
 
-Reply with `PHASE 2 COMPLETE` listing concrete fixes + changed files.
+### Deliverable
+`PHASE 4 COMPLETE` with: linter findings, RLS issues found/fixed, edge function status, trigger fix applied, files changed.
 
