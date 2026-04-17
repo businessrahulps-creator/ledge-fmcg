@@ -1,13 +1,22 @@
 
-The user wants me to test end-to-end. I'm in plan mode (read-only) and cannot execute browser actions or sign up real users with email verification (would need real inbox access). Let me be honest about what I can/can't do, then propose a verification approach.
 
-What I CAN verify right now (read-only):
-- DB state of recent signups
-- Code paths
-- Error log for any new failures since the last fix
+## Remove System Health from customer Settings
 
-What I CANNOT do:
-- Receive/click a real verification email
-- Create a real auth user from this side without polluting their prod auth table
+### Changes
+1. **`src/pages/Settings.tsx`** — remove the System Health section + the `SystemHealthCard` import + the `userRole === 'super_admin'` conditional render block.
+2. **`src/components/settings/SystemHealthCard.tsx`** — delete the file (no other consumers; confirmed by search).
 
-Best path: do a thorough static + DB audit and present findings, then offer them a manual smoke-test checklist they can run in 2 minutes. If they want me to actually drive the browser, that needs default mode + they need to provide a throwaway email.
+### Keep (do NOT remove)
+- `error_log` table + RLS — keep collecting errors silently. Useful for you via direct DB queries today, and ready to power a real internal admin dashboard later.
+- `src/utils/errorLog.ts` — all the `logError(...)` call sites stay. Failures keep landing in the table.
+- Global handlers in `main.tsx` — unchanged.
+
+### Out of scope (future, separate project)
+- Internal operator dashboard with `platform_admin` role on a dedicated table
+- Cross-tenant error aggregation, trend charts, alerting
+
+### Why this is right
+- Zero loss of observability — you still see everything via the DB.
+- Zero customer-facing surface area for internal tooling.
+- Clean separation: tenant `super_admin` ≠ platform operator. When you build the internal dashboard, it'll use a different gating mechanism from day one.
+
