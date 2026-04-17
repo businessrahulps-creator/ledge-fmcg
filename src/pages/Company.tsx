@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { sanitizeInput } from "@/utils/sanitize";
-import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone } from "@/utils/validators";
+import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Loader2, Upload, X } from "lucide-react";
@@ -323,7 +323,7 @@ export default function Company() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Phone</Label>
-                <Input value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} className="h-10 rounded-lg" placeholder="+91 98100 12345" />
+                <Input type="tel" inputMode="tel" autoComplete="tel" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} className="h-10 rounded-lg" placeholder="+91 98100 12345" />
               </div>
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Email</Label>
