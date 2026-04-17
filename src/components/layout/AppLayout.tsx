@@ -5,6 +5,7 @@ import { useLocation, Link } from "react-router-dom";
 import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
+import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
 import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
