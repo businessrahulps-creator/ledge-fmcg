@@ -58,6 +58,22 @@ export default function Signup() {
 
       await refreshProfile();
 
+      // Safety net: confirm the profile actually has company_id before navigating.
+      // If the rare race happens, NoCompanyGuard will take over from the dashboard.
+      const { data: confirmed } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("user_id", authData.user.id)
+        .single();
+      if (!confirmed?.company_id) {
+        logError({
+          source: "auth:signup:company-id-missing-post-setup",
+          error: new Error("Profile has no company_id after setup_new_company"),
+          severity: "warning",
+          context: { userId: authData.user.id },
+        });
+      }
+
       toast.success("Welcome to Ledge!", { description: "Your workspace is ready." });
       navigate("/dashboard");
     } catch (err: any) {

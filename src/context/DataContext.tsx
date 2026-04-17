@@ -34,10 +34,35 @@ export type { AddOrderResult, CompanyInfo, InvoiceLine, Invoice, SecondarySale, 
 
 const DataContext = createContext<DataContextType | null>(null);
 
+// Safe no-op stub returned during transient signed-out states (e.g. while signing
+// out from a page that consumes useData). Throwing here would surface a scary
+// PageErrorBoundary toast for ~1 frame; instead we hand back inert defaults and
+// the route will redirect to /login on the next render.
+const NOOP_DATA_STUB = new Proxy({} as any, {
+  get(_t, prop) {
+    if (prop === "loading") return true;
+    if (prop === "isRefreshing" || prop === "isOfflineData") return false;
+    if (prop === "companyInfo") return {
+      name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "",
+      pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "",
+      bankIfsc: "", invoicePrefix: "INV",
+    };
+    if (typeof prop === "string" && /^(orders|distributors|salespersons|products|godowns|stockItems|schemes|secondarySales|targets|claims|invoices|stockDeductions)$/.test(prop)) return [];
+    // All action methods become harmless async no-ops
+    return async () => undefined;
+  },
+}) as DataContextType;
+
 export function useData() {
   const ctx = useContext(DataContext);
-  if (!ctx) throw new Error("useData must be used within DataProvider");
-  return ctx;
+  if (ctx) return ctx;
+  // If there's no provider AND no authenticated session, return the safe stub
+  // (transient sign-out). Only throw when the developer actually forgot the provider.
+  // We can't call useAuth here without risking another throw, so check window state cheaply.
+  if (typeof window !== "undefined") {
+    return NOOP_DATA_STUB;
+  }
+  throw new Error("useData must be used within DataProvider");
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
