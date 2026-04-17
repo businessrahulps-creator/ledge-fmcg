@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { RotateCw, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-declare const __APP_VERSION__: string;
+import { APP_VERSION, PRETTY_VERSION } from "@/lib/app-version";
 
 const IST_OPTS: Intl.DateTimeFormatOptions = {
   day: "2-digit",
@@ -33,39 +32,13 @@ function formatBuildDate(ts: string): string {
   return new Intl.DateTimeFormat("en-IN", IST_OPTS).format(d);
 }
 
-/**
- * Format the build timestamp into a friendly version label like
- * "Ledge v26.4.17.1351" → year.month.day.HHMM in IST.
- */
-function formatPrettyVersion(ts: string): string {
-  const d = tsToDate(ts);
-  if (!d) return `Ledge ${ts}`;
-  // Pull IST parts via formatToParts so we don't depend on the host TZ.
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  const yy = get("year");
-  const m = get("month");
-  const day = get("day");
-  const hh = get("hour").padStart(2, "0");
-  const mm = get("minute").padStart(2, "0");
-  return `Ledge v${yy}.${m}.${day}.${hh}${mm}`;
-}
-
 export function AboutSection() {
   const [checking, setChecking] = useState(false);
   const [lastCheck, setLastCheck] = useState<number | null>(null);
   const [runningSince] = useState<Date>(() => new Date());
 
-  const version = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
-  const prettyVersion = formatPrettyVersion(version);
+  const version = APP_VERSION;
+  const prettyVersion = PRETTY_VERSION;
 
   // Pick up the global last-check timestamp set by UpdatePrompt.
   useEffect(() => {

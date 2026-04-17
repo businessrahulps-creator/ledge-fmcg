@@ -35,6 +35,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { ActivityLog } from "@/components/layout/ActivityLog";
+import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
 
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
@@ -268,6 +269,19 @@ export function AppSidebar() {
             );
           })}
         </SidebarMenu>
+
+        <Link
+          to="/settings"
+          className="mt-3 block text-center font-mono text-muted-foreground/60 transition-colors hover:text-muted-foreground"
+          aria-label="App version — open Settings"
+          title={PRETTY_VERSION}
+        >
+          {collapsed ? (
+            <span className="text-[9px] tracking-tight">{SHORT_VERSION}</span>
+          ) : (
+            <span className="text-[10px]">{PRETTY_VERSION}</span>
+          )}
+        </Link>
       </SidebarFooter>
 
       <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
