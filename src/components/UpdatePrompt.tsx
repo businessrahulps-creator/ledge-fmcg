@@ -15,6 +15,7 @@ declare global {
     __ledgeTriggerUpdate?: () => Promise<boolean>;
     __ledgeHasUpdate?: boolean;
     __ledgeAppVersion?: string;
+    __ledgeLastCheck?: number;
   }
 }
 
@@ -116,6 +117,7 @@ export function UpdatePrompt() {
 
       // Also do a Layer 4 check — handles iOS where SW.update() is throttled.
       const remote = await checkRemoteVersion();
+      window.__ledgeLastCheck = Date.now();
       if (remote && remote !== __APP_VERSION__) {
         window.__ledgeHasUpdate = true;
         triggerReload();
