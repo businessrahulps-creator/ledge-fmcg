@@ -1,30 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
-import { useBlocker } from "react-router-dom";
 
 /**
- * Guards an in-progress form against accidental navigation / tab close.
+ * Guards an in-progress form against accidental tab close / hard refresh.
  *
- * Behavior:
- * - When `isDirty` is true and the user attempts in-app navigation,
- *   `useBlocker` pauses it and exposes a confirm UI via `confirmOpen`.
- * - When the user attempts a tab close / hard refresh, a native
- *   `beforeunload` prompt is shown (browsers customise the message).
+ * Router-agnostic: uses only the native `beforeunload` event so it works
+ * with both data routers and the classic <BrowserRouter>.
  *
- * The hook is UI-agnostic; the consuming component renders an AlertDialog
- * bound to `confirmOpen` / `confirmLeave` / `cancelLeave`.
+ * In-app navigation blocking is intentionally not handled here — pages
+ * that need it should implement their own confirm flow on cancel/back.
+ *
+ * The returned `confirmOpen` / `confirmLeave` / `cancelLeave` are kept
+ * for API compatibility with existing callers but are inert (no in-app
+ * navigation is ever blocked, so the dialog never opens automatically).
  */
 export function useUnsavedChangesGuard(isDirty: boolean) {
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      isDirty && currentLocation.pathname !== nextLocation.pathname,
-  );
-
-  // Browser-level guard for tab close / hard refresh.
   useEffect(() => {
     if (!isDirty) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-      // Modern browsers ignore the message but require returnValue to be set.
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", handler);
@@ -32,21 +25,8 @@ export function useUnsavedChangesGuard(isDirty: boolean) {
   }, [isDirty]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // Surface the blocker as a controlled dialog.
-  useEffect(() => {
-    if (blocker.state === "blocked") setConfirmOpen(true);
-  }, [blocker.state]);
-
-  const confirmLeave = useCallback(() => {
-    setConfirmOpen(false);
-    if (blocker.state === "blocked") blocker.proceed();
-  }, [blocker]);
-
-  const cancelLeave = useCallback(() => {
-    setConfirmOpen(false);
-    if (blocker.state === "blocked") blocker.reset();
-  }, [blocker]);
+  const confirmLeave = useCallback(() => setConfirmOpen(false), []);
+  const cancelLeave = useCallback(() => setConfirmOpen(false), []);
 
   return { confirmOpen, confirmLeave, cancelLeave };
 }
