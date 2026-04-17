@@ -375,6 +375,9 @@ export default function Billing() {
     };
 
     try {
+      // Lazy-load the heavy GstInvoicePdf component (and the @react-pdf/renderer
+      // chunk it pulls in) only when the user actually downloads a PDF.
+      const { GstInvoicePdf } = await import("@/components/pdf/GstInvoicePdf");
       const blob = await pdf(<GstInvoicePdf data={pdfData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
