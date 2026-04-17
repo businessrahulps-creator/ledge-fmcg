@@ -6,6 +6,7 @@ import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { logError } from "@/utils/errorLog";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 interface BillingDeps extends DomainDeps {
   getOrders: () => Order[];
@@ -66,8 +67,7 @@ export function useBillingDomain(deps: BillingDeps) {
       setInvoices(prev => [newInvoice, ...prev]);
       return newInvoice;
     } catch (err: any) {
-      toast.error("Failed to create document", { description: err?.message || "Unknown error" });
-      logError({ source: "crud:invoices.add", error: err, context: { docType: invoice.docType } });
+      handleSupabaseError(err, { source: "crud:invoices.add", title: "Failed to create document", context: { docType: invoice.docType } });
       return null;
     }
   }, [deps.companyId]);
@@ -87,7 +87,7 @@ export function useBillingDomain(deps: BillingDeps) {
     }
 
     const { error } = await supabase.from("invoices" as any).update(dbUpdates).eq("id", id);
-    if (error) { toast.error("Failed to update document", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:invoices.update", title: "Failed to update document", context: { id } }); return; }
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
   }, []);
 
@@ -102,7 +102,7 @@ export function useBillingDomain(deps: BillingDeps) {
     }
 
     const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
-    if (error) { toast.error("Failed to delete document", { description: error.message }); return false; }
+    if (error) { handleSupabaseError(error, { source: "crud:invoices.delete", title: "Failed to delete document", context: { id } }); return false; }
     setInvoices(prev => prev.filter(i => i.id !== id));
     return true;
   }, [invoices]);
@@ -155,8 +155,7 @@ export function useBillingDomain(deps: BillingDeps) {
       setClaims(prev => [newClaim, ...prev]);
       return true;
     } catch (err: any) {
-      toast.error("Failed to record claim", { description: err?.message || "Unknown error" });
-      logError({ source: "crud:claims.add", error: err, context: { orderId: claim.orderId } });
+      handleSupabaseError(err, { source: "crud:claims.add", title: "Failed to record claim", context: { orderId: claim.orderId } });
       return false;
     }
   }, [deps.companyId, deps.getOrders, deps.safeRefetchStockItems]);
@@ -175,7 +174,7 @@ export function useBillingDomain(deps: BillingDeps) {
     }
 
     const { error } = await supabase.from("claims" as any).update(dbUpdates).eq("id", id);
-    if (error) { toast.error("Failed to update claim", { description: error.message }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:claims.update", title: "Failed to update claim", context: { id } }); return; }
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
   }, []);
 
