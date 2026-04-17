@@ -472,6 +472,17 @@ export default function Performance() {
                 </Popover>
               </div>
             )}
+            <p className="text-[11px] text-muted-foreground/70 sm:text-right">
+              Showing {period === "custom"
+                ? (customFrom || customTo)
+                  ? `${customFrom ? formatIndianDate(customFrom) : "—"} – ${customTo ? formatIndianDate(customTo) : "today"}`
+                  : "select dates"
+                : period === "today"
+                  ? formatIndianDate(new Date())
+                  : period === "ytd"
+                    ? `${formatIndianDate(new Date(new Date().getFullYear(), 0, 1))} – ${formatIndianDate(new Date())}`
+                    : `${formatIndianDate(cutoff)} – ${formatIndianDate(new Date())}`}
+            </p>
           </div>
         </div>
 
