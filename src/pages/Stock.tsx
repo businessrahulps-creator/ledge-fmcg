@@ -4,7 +4,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
-import { ListPageSkeleton } from "@/components/ui/page-skeleton";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";

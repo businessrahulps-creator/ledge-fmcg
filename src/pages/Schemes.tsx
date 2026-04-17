@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
-import { DashboardSkeleton } from "@/components/ui/page-skeleton";
+
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

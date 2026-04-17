@@ -5,7 +5,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
-import { TablePageSkeleton } from "@/components/ui/page-skeleton";
+
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
