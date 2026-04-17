@@ -1,51 +1,27 @@
 
 
-## Bug: Flash of "Finish setting up your workspace" modal on every login
+## Fix: Redundant "Back" button cluttering mobile billing flow
 
-### Root cause
+### Problem
+In `Billing.tsx` (line 988–1004), the create-invoice dialog footer renders three buttons: **Back**, **Cancel**, **Create as Draft / Create Document**. On mobile, `DialogFooter` stacks these vertically, putting a separate "Back" button below "Cancel" — visually redundant since Cancel already exits the flow, and "Back" looks like a third action competing with the primary CTA. Users complained it feels cluttered.
 
-In `AuthContext.tsx`, `authReady` is set to `true` immediately when the auth session resolves, but the `profile` fetch is scheduled via `setTimeout(..., 0)` (correctly, to avoid Supabase deadlock). This means there is a render window where:
+On desktop the layout is fine (buttons sit inline, right-aligned with Back pushed left via `mr-auto`).
 
-- `authReady === true`
-- `user !== null`
-- `profile === null` → `companyId === null`
+### Fix (single-file, surgical)
 
-`NoCompanyGuard` checks only `!authReady || !user || companyId`, so during that window it renders the workspace setup modal — the "flash" the customer reported. Once the profile resolves (typically <300ms on desktop, but easily 500–1500ms on mobile), it disappears.
+**`src/pages/Billing.tsx`** — line ~988–1004 (DialogFooter in step 2 of create-invoice dialog)
 
-This affects **both desktop and mobile**, just more visible on mobile due to slower networks/CPUs.
+- Move the "Back" affordance out of `DialogFooter` and render it as a subtle inline link/ghost button at the **top of step 2's content** (next to or above the section heading), where it acts as a navigational "go back to order selection" instead of competing with primary actions.
+- On mobile this removes a stacked button entirely; on desktop it becomes a small ghost link near the top — cleaner and more conventional (matches the standard "wizard back arrow at top-left" pattern used elsewhere in the app, e.g. detail pages).
+- Keep the existing reset logic (`setStep(1); setSourceOrderId(""); setLines([]); ...`) wired to the new top placement.
+- Remove the `Back` button from `DialogFooter` so only **Cancel** + primary CTA remain — exactly what mobile users expect.
 
-### Fix (one-file, surgical)
-
-Add a `profileLoaded` boolean to `AuthContext` that flips true only after the profile fetch attempt completes (success or empty). Then change `NoCompanyGuard` to also wait for `profileLoaded` before deciding to show the modal.
-
-Files:
-
-1. **`src/context/AuthContext.tsx`**
-   - Add `profileLoaded: boolean` state, default `false`.
-   - In `fetchProfile`, always set `profileLoaded = true` in a `finally` block (covers success, missing row, error, and the auto-recovery path).
-   - When `onAuthStateChange` fires with no user, set `profileLoaded = true` (nothing to load).
-   - Reset `profileLoaded = false` whenever a new `user.id` starts loading.
-   - Expose `profileLoaded` via context type + provider value.
-
-2. **`src/components/onboarding/NoCompanyGuard.tsx`**
-   - Pull `profileLoaded` from `useAuth()`.
-   - Change the early-return guard from
-     `if (!authReady || !user || companyId) return children;`
-     to
-     `if (!authReady || !profileLoaded || !user || companyId) return children;`
-   - Result: while the profile is still loading post-auth, we render children (the page/skeleton) instead of flashing the setup modal. Real users with a company never see the modal; users genuinely missing a company still see it once the fetch confirms `company_id === null`.
-
-3. **`src/pages/Index.tsx`** (defensive, tiny)
-   - Already gated on `loading || !authReady` showing `SplashScreen`. No change needed — the redirect to `/dashboard` is fine because `ProtectedRoute` will then run the corrected guard.
-
-### Why this fully fixes it
-
-- The setup modal now only appears when we've **confirmed** the profile has no `company_id`, not during the unknown-state window.
-- No regression for legitimate first-time signups: `setup_new_company` runs in `Signup.tsx` before navigating, and the auto-recovery path in `fetchProfile` still runs and updates `profile` before `profileLoaded` flips true (it's in the same async function; the `finally` only fires after recovery completes).
-- No regression for returning users: once the profile loads with a `company_id`, the guard short-circuits as before.
-- Works identically on desktop and mobile — fixes both.
+### Why this works
+- Eliminates the third stacked button on mobile (the actual complaint).
+- Preserves the ability to go back to step 1 — just relocates it to a less prominent, more discoverable spot.
+- No behavioral change to step 1, edit mode, or desktop primary actions.
+- No other files touched, no logic changes, no styling tokens changed.
 
 ### Out of scope
-
-No DB changes. No new features. No styling changes. No changes to `Signup.tsx` flow, RPC, or RLS.
+No changes to step 1, edit mode, validation, PDF generation, dialog open/close, or any other Billing logic.
 
