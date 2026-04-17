@@ -1,30 +1,39 @@
 
 
-## Phase 1 — Auth Audit: Confirmed Decisions
+## Phase 2 — Every Page, UI/UX & Visual Polish (audit plan)
 
-User confirmed:
-- Trial = **30 days** (current code is correct, no change)
-- New signups stay **empty** (no `seed_company_data` call — current behavior is correct)
+I'll audit each route by reading the page files, checking for layout/locale/responsiveness issues, and only fixing concrete bugs (no redesigns, no new features).
 
-### Now I'll do (default mode, read-only DB queries + targeted code fixes only):
+### Routes to inspect
+1. `/` (Index/landing) — already polished, skim only
+2. `/login`, `/signup`, `/reset-password`
+3. `/dashboard`
+4. `/orders`, `/orders/new`, `/orders/:id`
+5. `/distributors`, `/distributors/:id`
+6. `/salespersons`, `/salespersons/:id`
+7. `/stock`, `/schemes`, `/claims`, `/targets`, `/billing`, `/performance`, `/reports`
+8. `/settings`, `/help`, `/company`
+9. Legal: `/privacy-policy`, `/terms-of-service`, `/refund-policy`, `/about-us`, `/contact`
+10. `*` (NotFound)
 
-1. **DB sanity queries** (4 reads):
-   - Orphan profiles (no `company_id`) older than 1h
-   - Users without a `user_roles` row
-   - Recent signups (last 7 days) health check
-   - `error_log` entries from `auth:*` sources, last 7 days
+### What I'm specifically looking for
+- **Mobile sticky-bar overlap** — same class of bug as OrderDetail. Check Distributors/Salesperson detail pages, NewOrder, Settings.
+- **INR formatting consistency** — `toLocaleString('en-IN')` everywhere, no raw `$` or `toFixed(2)` without locale.
+- **GSTIN/phone validation** on Settings (Company tab) and Distributor forms.
+- **Skeleton loaders** present on heavy pages.
+- **Bottom-nav overlap** on mobile pages (pages need `pb-20` or similar).
+- **Empty states** on tables.
+- **Broken imports / dead routes** in `App.tsx`.
 
-2. **Verify `on_auth_user_created` trigger is actually attached** to `auth.users`. The `<db-triggers>` block says "no triggers" — if the function exists but isn't wired, every new signup silently skips profile creation and relies on `setup_new_company` to create the profile. Need to confirm via `pg_trigger` query. If missing → migration to recreate the trigger.
+### Approach
+1. Read `App.tsx` to enumerate active routes.
+2. Batch-read top-suspect pages in parallel (Settings, Distributors, NewOrder, Stock, Reports, NotFound).
+3. Grep for `toFixed(2)` without `en-IN`, raw `$` symbols, missing `pb-` on mobile.
+4. Fix only confirmed bugs (no speculative refactors).
 
-3. **Code fixes (only if confirmed needed)**:
-   - `Signup.tsx`: add `emailRedirectTo: ${window.location.origin}/login` to `supabase.auth.signUp()` so the email-confirmation link lands on the right URL (currently unset → defaults to Supabase's site URL which may be wrong on custom domain `getledge.in`).
-   - No other auth code changes planned.
+### Out of scope
+- Visual redesigns, animation tweaks, copy changes.
+- Anything covered by Phase 3 (calculations) or Phase 4 (security).
 
-4. **Skipped (out of scope for Phase 1)**:
-   - GSTIN/phone validation — not collected at signup, will check on Settings/Dealer forms in Phase 2.
-   - Trial banner UI — Phase 2.
-   - RLS — Phase 4.
-
-### Deliverable
-Reply with `PHASE 1 COMPLETE` listing: queries run, trigger status, fixes applied, files changed. Then await your go-ahead for Phase 2.
+Reply with `PHASE 2 COMPLETE` listing concrete fixes + changed files.
 
