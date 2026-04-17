@@ -1,66 +1,65 @@
 
 
-## In-app error logging (Sentry-style, no external dep)
+## Auth/Signup Audit — Findings & Fix Plan
 
-Use Lovable Cloud — same pattern as the existing `activity_log`. A new `error_log` table captures all silent backend failures, and a viewer in Settings lets the founder triage them.
+### What I checked
+- `Signup.tsx`, `Login.tsx`, `ResetPassword.tsx`, `AuthContext.tsx`, `App.tsx`, `NoCompanyGuard.tsx`
+- Live DB: 14 users, recent signups, orphan profiles
+- `error_log` table for silent failures
+- Auth logs and `on_auth_user_created` trigger
 
-### 1. New table: `error_log`
-Migration creates:
-- `id uuid pk`, `created_at timestamptz default now()`
-- `company_id uuid` (nullable — pre-company errors still log), `user_id uuid` (nullable)
-- `severity text` (`error` | `warning` | `info`)
-- `source text` (e.g. `rpc:setup_new_company`, `crud:distributors.add`, `sync:replay`)
-- `message text`, `stack text`
-- `context jsonb` (route, payload sketch, attempt count, online state, user agent)
-- `resolved boolean default false`
+### Findings
 
-RLS: only `super_admin` of a company can `SELECT`; `INSERT` allowed for any authenticated user (so failures from broken-state users like the orphan case still land).
+**🟢 Working correctly**
+- Email/password signup with auto-session → `setup_new_company` runs → workspace ready ✅
+- Email-confirm signup → trigger creates profile → on first login `AuthContext` auto-recovers via metadata ✅
+- `NoCompanyGuard` is a hard backstop ✅
+- Login, forgot password, reset password flow all correct ✅
+- Recent users (asha, rahulps, raj illam, etc.) all have `company_id` populated correctly ✅
+- The `rajillamsougandhikam@gmail.com` orphan from yesterday is now fully fixed (has company "Raj Illam") ✅
 
-### 2. New util: `src/utils/errorLog.ts`
-Single fire-and-forget function:
-```ts
-logError({ source, error, severity?, context? })
-```
-- Captures `message`, `stack`, current route, `navigator.onLine`, user agent.
-- Best-effort insert into `error_log`; on failure, queues to IndexedDB `idb-keyval` under `errorlog:queue` and replays on next online tick.
-- Also calls `console.error` so dev tools still show it.
-- Rate-limits identical errors (same `source + message`) to once per 30s to avoid floods.
+**🟡 Two real issues found**
 
-### 3. Wire it into the silent-failure spots
-Add `logError(...)` calls in the catch blocks / error branches that currently just `console.error` or fail silently:
-- **`src/context/AuthContext.tsx`** — auto-recovery `setup_new_company` failure.
-- **`src/context/data-utils.ts`** — `makeOfflineCrud.add/update/remove` when `companyId` missing AND when Supabase returns an error.
-- **`src/context/DataContext.tsx`** — data fetch errors (line 233), sync replay failures (line 286).
-- **`src/lib/offline-store.ts`** — `replaySingleMutation` errors and stock-deduction partial failures.
-- **`src/context/domains/useOrdersDomain.ts`** and other domain hooks — RPC error branches.
-- **`src/pages/Signup.tsx`**, **`Company.tsx`** — RPC failures.
-- **Global**: `window.addEventListener("unhandledrejection")` + `window.onerror` in `main.tsx` to catch anything unanticipated.
+**Issue 1 — One legacy orphan still exists (pre-fix)**
+- `oviyaashaps@gmail.com` (April 8, before backfill) has NO profile row at all (not just missing company — the entire profiles row is missing). Auto-recovery can't help because it queries the profiles row first. If they log in today, `NoCompanyGuard` will show but submitting will fail because `setup_new_company` updates the profile row that doesn't exist.
+- **Fix**: One-time migration to insert the missing profile row from `auth.users` data, then auto-recovery handles the rest. (Idempotent — safe to re-run.)
 
-### 4. Viewer: `src/pages/Settings.tsx` → new "System Health" card (super-admin only)
-- Lists last 50 errors grouped by `source`, with count, last-seen time, severity badge.
-- Expand row → shows message, stack, context JSON.
-- Actions: "Mark resolved", "Copy details" (for support).
-- Empty state: "No errors logged. ✨"
-- Hidden for non-super-admin roles (uses existing `userRole`).
+**Issue 2 — Live error in production logs (caught by our new error_log!)**
+- `error_log` shows: `useData must be used within DataProvider` firing on `/settings` route, twice in last 5 min.
+- Cause: when a user signs out from Settings, the `DataProvider` unmounts (because `companyId` becomes null and an internal re-render path), but the lazy-loaded `Settings` component's render closure briefly still calls `useData()`. This isn't crashing the app (caught by `PageErrorBoundary`) but it's noise and would scare a demo user if they saw the error toast.
+- **Fix**: In `useData()`, return a safe empty fallback instead of throwing when context is null AND we're in a transient state (signing out / no auth). The throw stays for true developer mistakes (called outside `<DataProvider>` tree at all).
 
-### 5. Optional retention
-Migration adds a comment recommending periodic cleanup (no cron — keep it simple). Viewer auto-limits to 500 most recent rows in the query.
+### Plan
 
-## Files
-1. **Migration** — create `error_log` table + RLS policies.
-2. `src/utils/errorLog.ts` — new util with offline queue + rate limiting.
-3. `src/main.tsx` — global handlers.
-4. `src/context/AuthContext.tsx`, `src/context/data-utils.ts`, `src/context/DataContext.tsx`, `src/lib/offline-store.ts`, `src/context/domains/useOrdersDomain.ts`, `src/context/domains/useBillingDomain.ts`, `src/pages/Signup.tsx`, `src/pages/Company.tsx` — wire `logError` into existing catch blocks.
-5. `src/pages/Settings.tsx` — new "System Health" section visible to super-admin only.
+**1. Migration — backfill missing profile rows**
+For any `auth.users` row with no matching `profiles` row, insert one. Then any orphan with metadata gets recovered automatically on next login by existing `AuthContext` logic. Belt-and-suspenders: also call `setup_new_company`-equivalent inline for them (insert company + link + role) when metadata has `company_name`.
 
-## Out of scope
-- No external service (Sentry, LogRocket) — stays inside Lovable Cloud, no new keys.
-- No PII scrubbing rules beyond not logging full payloads (we only log a small "context sketch").
-- No alerting/email — viewer-only for v1.
-- No changes to `activity_log` (different concern: user actions vs. system errors).
+**2. Soften `useData()` throw**
+Change the error-throwing behaviour to: if `companyId` and `user` are both null (signed-out / signing-out state), return a no-op stub instead of throwing. Throw only when `user` exists but no provider — a true bug.
 
-## Why this is right-sized
-- Reuses the proven `activity_log` pattern (table + util + fire-and-forget).
-- Captures exactly the kind of bug we just fixed: orphan-company silent CRUD no-ops would have lit up under `source=crud:*` with `message="Workspace not set up"` immediately.
-- Zero perf cost on happy path, zero new dependencies, zero ops overhead.
+**3. Add a tiny safety net in `Signup.tsx`**
+After `setup_new_company` succeeds in the immediate-session path, also re-fetch profile to confirm `company_id` is set before navigating. If it isn't (extremely rare race), show a friendly "Finishing setup..." then `NoCompanyGuard` takes over. No new flows — just a guarantee.
+
+**4. Smoke-test checklist for you to run before demos** (no code, just steps to follow once changes ship):
+- Sign up fresh email → verify → log in → confirm dashboard loads, can add a dealer, refresh persists ✅
+- Sign up with auto-session (if email confirm later disabled) → confirm same ✅
+- Log in with existing user → no flicker, no errors ✅
+- Forgot password → email link → set new password → land on dashboard ✅
+- Sign out → log back in → no `useData` errors ✅
+
+### Files
+1. **Migration** — backfill missing `profiles` rows + auto-create companies for any with metadata
+2. `src/context/DataContext.tsx` — soft-return from `useData()` when signed out instead of throwing
+3. `src/pages/Signup.tsx` — re-fetch profile post-`setup_new_company` to guarantee company_id before navigating
+
+### Out of scope
+- No changes to email confirmation policy
+- No changes to RLS or `setup_new_company` RPC
+- No new UI surfaces — all fixes are internal hardening
+
+### Why this makes you demo-safe
+- Every existing user now has a working profile + company (after migration)
+- Every future signup has 3 layers of safety: trigger → AuthContext auto-recovery → NoCompanyGuard
+- The one remaining noisy console error during sign-out goes silent
+- Any new failure mode would land in `error_log` immediately so we'd see it before users complain
 
