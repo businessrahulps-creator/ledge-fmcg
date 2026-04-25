@@ -9,6 +9,7 @@ import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 // out of the OrderDetail initial bundle and to avoid a static+dynamic chunking conflict.
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
@@ -470,10 +471,12 @@ export default function OrderDetail() {
                   />
                 </div>
                 <div className="w-24 text-right">
-                  <Input
-                    type="number"
+                  <NumberInput
+                    allowDecimal
+                    allowEmpty={false}
+                    min={0}
                     value={line.unitPrice}
-                    onChange={e => updateLine(line.id, "unitPrice", Number(e.target.value))}
+                    onValueChange={v => updateLine(line.id, "unitPrice", v ?? 0)}
                     placeholder="Price"
                     className="h-9 text-xs text-right"
                   />
@@ -840,12 +843,12 @@ export default function OrderDetail() {
                         <td className="px-3 py-2 font-medium">{line.productName}</td>
                         <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
                         <td className="px-3 py-2 text-right">
-                          <Input
-                            type="number"
+                          <NumberInput
+                            allowEmpty={false}
                             min={0}
                             max={line.quantity}
                             value={claimQuantities[i] ?? 0}
-                            onChange={e => setClaimQuantities(prev => ({ ...prev, [i]: Math.min(line.quantity, Math.max(0, parseInt(e.target.value) || 0)) }))}
+                            onValueChange={v => setClaimQuantities(prev => ({ ...prev, [i]: v ?? 0 }))}
                             className="h-8 w-16 text-right text-xs ml-auto"
                           />
                         </td>
