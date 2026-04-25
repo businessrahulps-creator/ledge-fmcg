@@ -92,10 +92,34 @@ export default function Stock() {
 
   const [confirmDeleteStockItem, setConfirmDeleteStockItem] = useState(false);
   const [editStockItem, setEditStockItem] = useState<StockItem | null>(null);
+  // Original quantity captured when opening the Edit dialog (so we can compute deltas).
+  const [editOriginalQty, setEditOriginalQty] = useState<number>(0);
+  // Adjustment intent for the Edit Inventory dialog.
+  type AdjustIntent = "add" | "remove" | "set";
+  const [adjustIntent, setAdjustIntent] = useState<AdjustIntent>("add");
+  // Delta value entered by the user (null = empty field).
+  const [adjustDelta, setAdjustDelta] = useState<number | null>(null);
 
   const [addStockOpen, setAddStockOpen] = useState(false);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
+
+  // Reset adjustment state whenever the Edit dialog opens with a new item.
+  useEffect(() => {
+    if (editStockItem) {
+      setEditOriginalQty(editStockItem.quantity);
+      setAdjustIntent("add");
+      setAdjustDelta(null);
+    }
+  }, [editStockItem?.id]);
+
+  // Compute the resulting quantity based on intent + delta.
+  const computedNewQty = useMemo(() => {
+    const d = adjustDelta ?? 0;
+    if (adjustIntent === "add") return editOriginalQty + d;
+    if (adjustIntent === "remove") return Math.max(0, editOriginalQty - d);
+    return d; // "set"
+  }, [adjustIntent, adjustDelta, editOriginalQty]);
 
   const inventoryRef = useRef<HTMLDivElement>(null);
 
@@ -218,8 +242,29 @@ export default function Stock() {
 
   const saveStockItemFn = () => {
     if (!editStockItem) return;
-    updateStockItem(editStockItem);
-    toast.success("Inventory updated", { description: `${editStockItem.productName} has been updated.` });
+    // Validate: if intent is add/remove, delta must be > 0. For "set" allow 0.
+    if (adjustIntent !== "set" && (!adjustDelta || adjustDelta <= 0)) {
+      toast.error("Enter a quantity", {
+        description: adjustIntent === "add" ? "Type how many units to add." : "Type how many units to remove.",
+      });
+      return;
+    }
+    if (adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty) {
+      toast.error("Cannot remove more than current stock", {
+        description: `Only ${editOriginalQty} units are currently in stock.`,
+      });
+      return;
+    }
+    const finalQty = computedNewQty;
+    const delta = finalQty - editOriginalQty;
+    const updated: StockItem = { ...editStockItem, quantity: finalQty };
+    updateStockItem(updated);
+    const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
+    const absDelta = Math.abs(delta);
+    toast.success(
+      delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
+      { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
+    );
     setEditStockItem(null);
   };
 
@@ -578,7 +623,8 @@ export default function Stock() {
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
                               <PackagePlus className="h-4 w-4" />
-                              Add Stock
+                              <span className="hidden sm:inline">Add Product</span>
+                              <span className="sm:hidden">Add</span>
                             </Button>
                           )}
                         </div>
@@ -785,28 +831,88 @@ export default function Stock() {
                   <span className="text-[10px] text-muted-foreground md:text-xs">Product</span>
                   <p className="mt-0.5 text-sm font-medium">{editStockItem.productName}</p>
                   <p className="text-[10px] text-muted-foreground font-mono">{editStockItem.sku}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Current stock: <span className="font-semibold text-foreground">{editOriginalQty} {editStockItem.unit || "units"}</span>
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Quantity</Label>
-                    <NumberInput
-                      allowEmpty={false}
-                      min={0}
-                      value={editStockItem.quantity}
-                      onValueChange={(v) => setEditStockItem({ ...editStockItem, quantity: v ?? 0 })}
-                      className="h-10 rounded-lg"
-                    />
+
+                {/* Intent picker */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">What do you want to do?</Label>
+                  <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1">
+                    {([
+                      { id: "add", label: "Add stock" },
+                      { id: "remove", label: "Remove stock" },
+                      { id: "set", label: "Set exact" },
+                    ] as { id: AdjustIntent; label: string }[]).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => { setAdjustIntent(opt.id); setAdjustDelta(null); }}
+                        className={`h-9 rounded-md text-xs font-medium transition-colors ${
+                          adjustIntent === opt.id
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
-                    <NumberInput
-                      allowEmpty={false}
-                      min={0}
-                      value={editStockItem.threshold}
-                      onValueChange={(v) => setEditStockItem({ ...editStockItem, threshold: v ?? 0 })}
-                      className="h-10 rounded-lg"
-                    />
+                </div>
+
+                {/* Delta input */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">
+                    {adjustIntent === "add" && "Quantity to add"}
+                    {adjustIntent === "remove" && "Quantity to remove"}
+                    {adjustIntent === "set" && "New quantity"}
+                  </Label>
+                  <NumberInput
+                    allowEmpty
+                    min={0}
+                    value={adjustDelta}
+                    onValueChange={setAdjustDelta}
+                    placeholder={adjustIntent === "set" ? String(editOriginalQty) : "0"}
+                    autoFocus
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+
+                {/* Live preview */}
+                {(adjustDelta !== null && adjustDelta >= 0) && (
+                  <div
+                    className={`rounded-lg border px-3 py-2.5 text-xs ${
+                      adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty
+                        ? "border-red-500/40 bg-red-500/5 text-red-600 dark:text-red-400"
+                        : "border-border bg-muted/30 text-foreground"
+                    }`}
+                  >
+                    {adjustIntent === "add" && (
+                      <>New stock will be: <span className="font-semibold">{editOriginalQty} + {adjustDelta} = {computedNewQty} {editStockItem.unit || "units"}</span></>
+                    )}
+                    {adjustIntent === "remove" && (
+                      (adjustDelta ?? 0) > editOriginalQty
+                        ? <>Cannot remove {adjustDelta} units — only {editOriginalQty} in stock.</>
+                        : <>New stock will be: <span className="font-semibold">{editOriginalQty} − {adjustDelta} = {computedNewQty} {editStockItem.unit || "units"}</span></>
+                    )}
+                    {adjustIntent === "set" && (
+                      <>Stock will be set to: <span className="font-semibold">{computedNewQty} {editStockItem.unit || "units"}</span> (was {editOriginalQty})</>
+                    )}
                   </div>
+                )}
+
+                {/* Threshold (kept as direct edit) */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
+                  <NumberInput
+                    allowEmpty={false}
+                    min={0}
+                    value={editStockItem.threshold}
+                    onValueChange={(v) => setEditStockItem({ ...editStockItem, threshold: v ?? 0 })}
+                    className="h-10 rounded-lg"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Get notified when stock drops to or below this number.</p>
                 </div>
               </div>
             )}
@@ -837,41 +943,57 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
 
-        {/* Add Stock */}
+        {/* Add New Product to Warehouse — only lists products NOT already stocked here.
+            For products already in this warehouse, users adjust via the row's Edit dialog. */}
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">Add Stock</DialogTitle>
-              <DialogDescription className="sr-only">Add a new stock item to a warehouse</DialogDescription>
+              <DialogTitle className="text-base md:text-lg">Add Product to Warehouse</DialogTitle>
+              <DialogDescription className="text-xs">
+                Add a product that isn't yet stocked in this warehouse. To change the quantity of a product already here, click its row in the inventory list.
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-3 md:space-y-4">
-              <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Product *</Label>
-                <Select value={addStockProductId} onValueChange={setAddStockProductId}>
-                  <SelectTrigger className="h-10 rounded-lg">
-                    <SelectValue placeholder="Select product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Quantity to Add *</Label>
-                <NumberInput
-                  allowEmpty={false}
-                  min={1}
-                  value={addStockQty}
-                  onValueChange={(v) => setAddStockQty(v ?? 1)}
-                  className="h-10 rounded-lg"
-                />
-              </div>
-            </div>
+            {(() => {
+              const stockedProductIds = new Set(
+                stockItemsList.filter((si) => si.godownId === selectedWarehouse).map((si) => si.productId),
+              );
+              const availableProducts = products.filter((p) => !stockedProductIds.has(p.id));
+              return (
+                <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Product *</Label>
+                    <Select value={addStockProductId} onValueChange={setAddStockProductId}>
+                      <SelectTrigger className="h-10 rounded-lg">
+                        <SelectValue placeholder={availableProducts.length === 0 ? "All products already stocked here" : "Select product"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableProducts.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {availableProducts.length === 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Every product is already in this warehouse. Update quantities by clicking a row above.
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Initial Quantity *</Label>
+                    <NumberInput
+                      allowEmpty={false}
+                      min={1}
+                      value={addStockQty}
+                      onValueChange={(v) => setAddStockQty(v ?? 1)}
+                      className="h-10 rounded-lg"
+                    />
+                  </div>
+                </div>
+              );
+            })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock}>Add Stock</Button>
+              <Button onClick={handleAddStock}>Add to Warehouse</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
