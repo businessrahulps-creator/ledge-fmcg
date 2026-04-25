@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import {
   ClipboardList, UserRound, Package, UserCheck, Gift, RotateCcw,
-  FileText, Boxes, History,
+  FileText, Boxes, History, Warehouse,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,6 +23,7 @@ const ENTITY_ICONS: Record<string, React.ElementType> = {
   claim: RotateCcw,
   invoice: FileText,
   stock_item: Boxes,
+  warehouse: Warehouse,
 };
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -34,6 +35,7 @@ const ENTITY_LABELS: Record<string, string> = {
   claim: "Returns",
   invoice: "Invoices",
   stock_item: "Stock",
+  warehouse: "Warehouses",
 };
 
 interface ActivityEntry {
