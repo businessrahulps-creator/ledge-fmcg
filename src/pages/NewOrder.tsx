@@ -498,12 +498,11 @@ export default function NewOrder() {
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Qty</Label>
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              value={line.quantityStr}
-                              onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
-                              onBlur={() => handleQuantityBlur(line.id)}
+                            <NumberInput
+                              allowEmpty
+                              min={1}
+                              value={line.quantity}
+                              onValueChange={(v) => updateLine(line.id, "quantity", v)}
                               className="h-10 rounded-lg md:h-12"
                             />
                           </div>
