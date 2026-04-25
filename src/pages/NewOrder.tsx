@@ -329,7 +329,8 @@ export default function NewOrder() {
               gravity: 0.9,
               startVelocity: 45,
               origin: { x: originX, y: 0.7 },
-              colors: ["#3B82F6", "#60A5FA", "#A78BFA", "#34D399", "#FBBF24"],
+              // Ledge brand-moment palette: purple → coral gradient
+              colors: ["#7C3AED", "#9D5BF5", "#C46FB6", "#FF8A3D", "#FFA800"],
             });
           fire(0.3);
           setTimeout(() => fire(0.7), 180);
