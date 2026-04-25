@@ -77,8 +77,7 @@ interface EditLineState {
   id: string;
   productId: string;
   productName: string;
-  quantity: number;
-  quantityStr: string;
+  quantity: number | null;
   unitPrice: number;
 }
 
