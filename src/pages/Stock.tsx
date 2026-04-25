@@ -943,41 +943,57 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
 
-        {/* Add Stock */}
+        {/* Add New Product to Warehouse — only lists products NOT already stocked here.
+            For products already in this warehouse, users adjust via the row's Edit dialog. */}
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">Add Stock</DialogTitle>
-              <DialogDescription className="sr-only">Add a new stock item to a warehouse</DialogDescription>
+              <DialogTitle className="text-base md:text-lg">Add Product to Warehouse</DialogTitle>
+              <DialogDescription className="text-xs">
+                Add a product that isn't yet stocked in this warehouse. To change the quantity of a product already here, click its row in the inventory list.
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-3 md:space-y-4">
-              <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Product *</Label>
-                <Select value={addStockProductId} onValueChange={setAddStockProductId}>
-                  <SelectTrigger className="h-10 rounded-lg">
-                    <SelectValue placeholder="Select product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">Quantity to Add *</Label>
-                <NumberInput
-                  allowEmpty={false}
-                  min={1}
-                  value={addStockQty}
-                  onValueChange={(v) => setAddStockQty(v ?? 1)}
-                  className="h-10 rounded-lg"
-                />
-              </div>
-            </div>
+            {(() => {
+              const stockedProductIds = new Set(
+                stockItemsList.filter((si) => si.godownId === selectedWarehouse).map((si) => si.productId),
+              );
+              const availableProducts = products.filter((p) => !stockedProductIds.has(p.id));
+              return (
+                <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Product *</Label>
+                    <Select value={addStockProductId} onValueChange={setAddStockProductId}>
+                      <SelectTrigger className="h-10 rounded-lg">
+                        <SelectValue placeholder={availableProducts.length === 0 ? "All products already stocked here" : "Select product"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableProducts.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {availableProducts.length === 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Every product is already in this warehouse. Update quantities by clicking a row above.
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Initial Quantity *</Label>
+                    <NumberInput
+                      allowEmpty={false}
+                      min={1}
+                      value={addStockQty}
+                      onValueChange={(v) => setAddStockQty(v ?? 1)}
+                      className="h-10 rounded-lg"
+                    />
+                  </div>
+                </div>
+              );
+            })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock}>Add Stock</Button>
+              <Button onClick={handleAddStock}>Add to Warehouse</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
