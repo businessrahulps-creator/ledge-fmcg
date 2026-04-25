@@ -240,4 +240,16 @@
   .touch-bounce {
     @apply transition-transform duration-100 ease-out active:scale-[0.97];
   }
+
+  /* Ledge brand-moment utilities — restricted to splash, empty states, order celebration, sidebar wordmark. */
+  .brand-gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--brand-gradient);
+  }
+  .brand-gradient-bg {
+    background-image: var(--brand-gradient);
+  }
+  .brand-gradient-soft-bg {
+    background-image: var(--brand-gradient-soft);
+  }
 }
