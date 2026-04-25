@@ -39,8 +39,7 @@ import {
 interface OrderLineState {
   id: string;
   productId: string;
-  quantity: number;
-  quantityStr: string;
+  quantity: number | null;
   unitPrice: number;
 }
 
