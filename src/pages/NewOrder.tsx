@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
 import {
   AlertDialog,
