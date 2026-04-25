@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   House,
   ClipboardList,
@@ -31,8 +31,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
-import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { ActivityLog } from "@/components/layout/ActivityLog";
 import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
@@ -67,37 +65,8 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { companyId } = useAuth();
   const { companyIncomplete } = useOnboarding();
-  const [logoUrl, setLogoUrl] = useState<string>("");
   const [activityOpen, setActivityOpen] = useState(false);
-
-  useEffect(() => {
-    if (!companyId) return;
-    supabase
-      .from("companies")
-      .select("logo_url")
-      .eq("id", companyId)
-      .single()
-      .then(({ data }) => {
-        if (data?.logo_url) setLogoUrl(data.logo_url);
-      });
-
-    const channel = supabase
-      .channel("company-logo")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "companies", filter: `id=eq.${companyId}` },
-        (payload) => {
-          if (payload.new && typeof (payload.new as any).logo_url === "string") {
-            setLogoUrl((payload.new as any).logo_url);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [companyId]);
 
   const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive = location.pathname.startsWith(item.url);
@@ -149,16 +118,11 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-card">
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          {logoUrl ? (
-            <img src={logoUrl} alt="Company logo" className="h-7 w-7 rounded-md object-cover shrink-0" />
+          {collapsed ? (
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary shrink-0">
+              L
+            </span>
           ) : (
-            collapsed ? (
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary shrink-0">
-                L
-              </span>
-            ) : null
-          )}
-          {!collapsed && (
             <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
           )}
         </Link>
