@@ -129,12 +129,12 @@ interface InlineTargetRowProps {
 }
 
 function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave }: InlineTargetRowProps) {
-  const [revInput, setRevInput] = useState(existingTarget?.targetRevenue?.toString() || "");
-  const [ordInput, setOrdInput] = useState(existingTarget?.targetOrders?.toString() || "");
+  const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
+  const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
 
-  const targetRev = Number(revInput) || 0;
-  const targetOrd = Number(ordInput) || 0;
+  const targetRev = revInput ?? 0;
+  const targetOrd = ordInput ?? 0;
   const revStatus = getStatus(actualRevenue, targetRev);
   const ordStatus = getStatus(actualOrders, targetOrd);
   const revPct = targetRev > 0 ? Math.min((actualRevenue / targetRev) * 100, 120) : 0;
