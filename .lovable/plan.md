@@ -1,41 +1,49 @@
-# Add first-order celebration to NewOrder save flow
+# Fix: Irreversible self-demotion from Super Admin → Sales Manager / Accountant
 
-## Verification (already done)
-- `src/pages/NewOrder.tsx` lines 324–330: success path uses a plain `toast.success(...)` then `navigate("/orders")` after 800ms. **No confetti, no milestone messaging.**
-- `mem://features/orders` documents an "enterprise-calm" feedback style — no celebration on every save. The user-facing report ("missing confetti on first order") is consistent with treating the *very first* order as a milestone exception, while keeping subsequent saves calm.
-- `canvas-confetti` and `@types/canvas-confetti` are already in `package.json` — no new dependency.
-- A helper `trackFirstOrderCreated()` already exists in `src/hooks/use-install-prompt.ts` and is already called on every successful save (it's a localStorage flag for the install prompt, not for celebration).
+## Root cause (verified)
 
-## UX decision
-Celebrate **only the first order ever saved** in this workspace. Every subsequent order keeps the existing calm toast + redirect. This honors the "enterprise-calm" memory while still giving the founder a real "you shipped it" moment on the milestone.
+In `src/pages/Settings.tsx` (lines ~242–266), the team-member edit dialog lets a user change **their own** role to any value, including `sales_manager` or `accountant`.
 
-## Plan
+The Supabase RLS policy `Super admins can manage same-company roles` on `user_roles` requires `has_role(auth.uid(), 'super_admin')` for **both UPDATE and DELETE**. The moment a Super Admin saves a self-demotion:
+- They lose `super_admin` privilege.
+- They can no longer update *any* row in `user_roles` — including their own.
+- If they are the only Super Admin in the workspace (the common case for a founder testing the app), **no one can restore the role**. It's a permanent lockout.
 
-### 1. `src/pages/NewOrder.tsx` — celebrate the first order
-In the `executeSave` success branch (around lines 324–330):
+This matches the user's report exactly: "changed his status from admin to sales manager; after that, he couldn't go back."
 
-- Detect the milestone using the in-memory `orders` array (already in scope from `useData`): `const isFirstEverOrder = orders.length === 0;` — evaluated **before** `addOrder` runs so the new order doesn't count itself. Stash it in a local before the `await addOrder(order)` call.
-- On success:
-  - If `isFirstEverOrder`:
-    - Fire `canvas-confetti` with a tasteful 2-burst sequence (origin slightly left + slightly right, ~120 particles total, brand colors from the design tokens — primary blue + neutral accents). Spread 70, ticks 200, gravity 0.9. Wrapped in `try/catch` so a failure never blocks navigation.
-    - Show a richer toast: `toast.success("Your first order is in! 🎉", { description: \`#${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}\`, duration: 4500 })`.
-    - Extend the redirect delay to ~1800ms so the confetti has room to breathe.
-  - Else: keep the existing calm toast + 800ms redirect exactly as today.
-- Keep the existing `addNotification(...)` call and `trackFirstOrderCreated()` call unchanged for both branches.
+## Fix scope (now)
 
-### 2. Import
-Add `import confetti from "canvas-confetti";` at the top of `NewOrder.tsx`. No other files change.
+Pure UI-level **prevention guardrail** — no DB migration, no RLS change, no RBAC refactor. The next-month role-based feature pass will handle proper transfer-of-ownership flows; this fix just stops new users from falling into the trap.
 
-### 3. Memory update
-Append a short note to `mem://features/orders` clarifying: *"First order ever saved triggers a confetti burst + milestone toast. All subsequent saves stay calm (single toast + redirect)."* This reconciles the contradiction between the index ("multi-phase celebration") and the current calm pattern.
+### Changes — `src/pages/Settings.tsx` only
 
-## Out of scope (intentionally)
-- No celebration on every save — would clash with the "enterprise-calm" rule.
-- No changes to validation, save logic, credit-limit gate, scheme calculation, navigation route, or notification center.
-- No new dependency — `canvas-confetti` already installed.
-- No changes to the Orders list page or detail page.
+1. **Lock the role dropdown when editing yourself.**
+   In the edit dialog (lines ~610–622), detect `isSelf = editMember.userId === user?.id` (pull `user` from `useAuth()`, already imported elsewhere in the file or easily added).
+   - When `isSelf` is true: render the role `Select` as **disabled** with the current role still visible, and show a small helper line beneath it: *"You can't change your own role. Ask another Super Admin to do it for you."*
+   - When `isSelf` is false: behaves exactly as today.
+
+2. **Defense-in-depth in `saveMember`** (lines ~242–266).
+   Before calling the `user_roles` update, if `editMember.userId === user?.id && editMember.role !== originalRole`, short-circuit with `toast.error("You can't change your own role. Ask another Super Admin to do it for you.")` and return. This catches anyone who bypasses the disabled control (devtools, stale state).
+   - To know `originalRole`, capture it when opening the edit dialog (stash on `editMember` as `originalRole`, or look it up from the `team` array by `editMember.id`).
+
+3. **Also guard self-removal** (lines ~268–281, `confirmRemoveMember`).
+   Same pattern: if `deleteMember.userId === user?.id`, block with a toast. Removing yourself has the same lockout shape and is worth fixing in the same pass.
+
+4. **No changes** to:
+   - The role dropdown options (still shows all three roles for *other* members).
+   - RLS policies, DB functions, or migrations.
+   - Any other page (`AuthContext`, `NewOrder`, `Schemes`, `OrderDetail` only *read* roles — unaffected).
+   - The "Sole Super Admin" edge case (a workspace with one admin demoting *another* user is not the reported bug; addressing it requires DB-level "must keep ≥1 super_admin" checks, which belong in next month's RBAC pass).
+
+## Out of scope (deferred to next month's role-based feature pass)
+
+- Server-side trigger enforcing "every company must retain ≥1 super_admin" (proper fix for the sole-admin edge case).
+- "Transfer ownership" flow (promote another member, then demote self atomically).
+- Recovery RPC for already-locked-out users (one-off — the user asking is the only known case; can be unlocked manually via a migration if needed, ask before doing).
+- Any change to the `app_role` enum or RLS policy structure.
 
 ## Result
-- The very first order a workspace ever creates triggers a confetti burst + a "Your first order is in! 🎉" toast with the order number, dealer, and amount.
-- Every order after that uses the existing calm toast + 800ms redirect — unchanged.
-- Zero risk to save logic, validation, or any other order flow.
+
+- A Super Admin **cannot accidentally demote or remove themselves** from the Settings UI. The control is visibly disabled with a clear explanation, and the save handler refuses the operation as a backstop.
+- All other team-management flows (editing other members, changing their roles, removing them) are unchanged.
+- Zero risk to existing data, RLS, or permissions. Ships in one file.

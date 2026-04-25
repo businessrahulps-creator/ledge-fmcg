@@ -242,6 +242,17 @@ export default function Settings() {
   const saveMember = async () => {
     if (!editMember?.name || !editMember?.email || !companyId) return;
     if (isNewMember) return; // New member creation disabled
+
+    // Defense-in-depth: prevent self role-change (would cause RLS lockout)
+    const original = team.find((t) => t.id === editMember.id);
+    const isSelf = editMember.userId === user?.id;
+    if (isSelf && original && original.role !== editMember.role) {
+      toast.error("You can't change your own role", {
+        description: "Ask another Super Admin to update it for you.",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const { error: profileError } = await supabase
@@ -267,6 +278,13 @@ export default function Settings() {
 
   const confirmRemoveMember = async () => {
     if (!deleteMember) return;
+    if (deleteMember.userId === user?.id) {
+      toast.error("You can't remove yourself", {
+        description: "Ask another Super Admin to remove your account.",
+      });
+      setDeleteMember(null);
+      return;
+    }
     setSaving(true);
     try {
       await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
@@ -609,7 +627,11 @@ export default function Settings() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Role</Label>
-                  <Select value={editMember.role} onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}>
+                  <Select
+                    value={editMember.role}
+                    onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}
+                    disabled={editMember.userId === user?.id}
+                  >
                     <SelectTrigger className="h-10 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
@@ -619,6 +641,11 @@ export default function Settings() {
                       <SelectItem value="accountant">Accountant</SelectItem>
                     </SelectContent>
                   </Select>
+                  {editMember.userId === user?.id && (
+                    <p className="text-[11px] text-muted-foreground">
+                      You can't change your own role. Ask another Super Admin to do it for you.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
