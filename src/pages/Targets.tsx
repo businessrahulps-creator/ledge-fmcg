@@ -6,6 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { formatCurrency } from "@/data/mock-data";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } from "lucide-react";
