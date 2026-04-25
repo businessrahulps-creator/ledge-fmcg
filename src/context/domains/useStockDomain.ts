@@ -22,6 +22,7 @@ export function useStockDomain(deps: DomainDeps) {
   // Stock Items — custom upsert logic
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!deps.companyId) return;
+    const summary = `Added ${si.quantity} ${si.unit || "units"} of ${si.productName} to ${si.godownName}`;
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
       setStockItems(prev => {
@@ -37,6 +38,7 @@ export function useStockDomain(deps: DomainDeps) {
           quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
         },
       });
+      deps.log("stock_item", tempId, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
@@ -51,8 +53,9 @@ export function useStockDomain(deps: DomainDeps) {
         if (exists) return prev.map(x => x.id === data.id ? { ...si, id: data.id } : x);
         return [...prev, { ...si, id: data.id }];
       });
+      deps.log("stock_item", data.id, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
     }
-  }, [deps.companyId, deps.persistEntityToCache]);
+  }, [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   const updateStockItem = useCallback(async (si: StockItem) => {
     if (!navigator.onLine) {
