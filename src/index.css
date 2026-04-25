@@ -49,18 +49,18 @@
     --accent: 35 15% 93%;
     --accent-foreground: 30 10% 14%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 100% 71%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 55% 42%;
+    --success: 172 93% 37%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 80% 50%;
+    --warning: 38 100% 50%;
     --warning-foreground: 30 10% 10%;
 
     --border: 35 10% 87%;
     --input: 35 10% 87%;
-    --ring: 160 45% 40%;
+    --ring: 222 84% 56%;
 
     --radius: 0.75rem;
 
