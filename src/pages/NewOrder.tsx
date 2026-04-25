@@ -429,7 +429,7 @@ export default function NewOrder() {
             )}
 
             {/* Order Lines */}
-            <section className="glass-card p-4 md:p-6">
+            <section ref={productsSectionRef} className="glass-card p-4 md:p-6">
               <div className="mb-3 flex items-center justify-between md:mb-4">
                 <h2 className="text-sm font-semibold md:text-base">Products</h2>
                 <Button variant="ghost" size="sm" onClick={addLine} className="h-9">
