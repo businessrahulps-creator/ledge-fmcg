@@ -192,8 +192,6 @@ export default function NewOrder() {
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
-  const executeSave = async () => {
-    // Validation
   // --- Derived validation state (used for inline errors) ---
   const validLines = lines.filter((l) => l.productId && l.quantity > 0);
   const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
