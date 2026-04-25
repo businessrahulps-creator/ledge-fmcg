@@ -534,10 +534,10 @@ export default function NewOrder() {
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Source Warehouse {(deliveryStatus === "dispatched" || deliveryStatus === "delivered") ? "*" : ""}</Label>
+                <div ref={warehouseFieldRef} className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Source Warehouse *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
-                    <SelectTrigger className="h-10 rounded-lg md:h-12">
+                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select warehouse" />
                     </SelectTrigger>
                     <SelectContent>
@@ -546,10 +546,21 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.warehouse && (
+                    <p className="text-xs text-destructive">Warehouse is required for every order.</p>
+                  )}
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dispatch Date</Label>
-                  <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
+                <div ref={dispatchDateFieldRef} className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Dispatch Date {dispatchDateRequired ? "*" : ""}</Label>
+                  <Input
+                    type="date"
+                    value={dispatchDate}
+                    onChange={(e) => setDispatchDate(e.target.value)}
+                    className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dispatchDate ? "border-destructive" : ""}`}
+                  />
+                  {attemptedSave && errors.dispatchDate && (
+                    <p className="text-xs text-destructive">Dispatch date is required when delivery is set to Dispatched or Delivered.</p>
+                  )}
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
