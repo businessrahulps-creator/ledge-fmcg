@@ -449,12 +449,11 @@ export default function OrderDetail() {
                   </Select>
                 </div>
                 <div className="w-20">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={line.quantityStr}
-                    onChange={e => updateLine(line.id, "quantity", e.target.value)}
-                    onBlur={() => handleQuantityBlur(line.id)}
+                  <NumberInput
+                    allowEmpty
+                    min={1}
+                    value={line.quantity}
+                    onValueChange={v => updateLine(line.id, "quantity", v)}
                     placeholder="Qty"
                     className="h-9 text-xs text-right"
                   />
@@ -471,7 +470,7 @@ export default function OrderDetail() {
                   />
                 </div>
                 <div className="w-20 flex items-center justify-end gap-1">
-                  <span className="text-xs font-medium">{formatCurrency(line.quantity * line.unitPrice)}</span>
+                  <span className="text-xs font-medium">{formatCurrency((line.quantity ?? 0) * line.unitPrice)}</span>
                   {editLines.length > 1 && (
                     <button onClick={() => removeLine(line.id)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
                       <X className="h-3.5 w-3.5" />
