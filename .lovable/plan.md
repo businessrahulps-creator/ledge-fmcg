@@ -1,109 +1,90 @@
-# Fix Number Input UX (Empty + Leading Zero + Mobile Keyboard)
+## Problem
 
-## The Problem
+The Stock page exposes **two overlapping affordances** that conflict with each other:
 
-Across the app, almost every numeric field uses this pattern:
+1. **"Add Stock"** button (top-right) → adds quantity to existing balance (delta).
+2. **"Edit Inventory"** dialog (per row) → shows the **current quantity in an editable field** (absolute set).
 
-```tsx
-<Input
-  type="number"
-  value={state.qty}              // a number
-  onChange={(e) => setState({ ...state, qty: parseInt(e.target.value) || 0 })}
-/>
+Users opening *Edit Inventory* see `221` and instinctively type `50` next to it or replace it with `+50`, not realizing they just **overwrote 221 → 50**. Others freeze and try to mentally compute `221 + 50 = 271` before typing it back. Both flows lose user trust around inventory accuracy — the most safety-critical number in the app.
+
+Root cause: a single text field is being used for two semantically different operations (set vs. adjust), with no indication of which is happening.
+
+## Proposed Solution: Intent-First Stock Adjustment
+
+Replace the raw "Quantity" input in *Edit Inventory* with an **intent picker + delta input**, and surface a clear before/after preview so the user always sees what's about to happen.
+
+### New Edit Inventory dialog layout
+
+```
+┌─ Edit Inventory ──────────────────────────────┐
+│  AquaPure Packaged Water 5L · APW–5L           │
+│                                                │
+│  Current stock: 221 units                      │
+│                                                │
+│  What do you want to do?                       │
+│  ( • Add stock )  ( Remove stock )  ( Set exact )│
+│                                                │
+│  Quantity to add                               │
+│  [ 50            ]   units                     │
+│                                                │
+│  ┌──────────────────────────────────────────┐ │
+│  │ New stock will be: 221 + 50 = 271 units  │ │
+│  └──────────────────────────────────────────┘ │
+│                                                │
+│  Low stock threshold                           │
+│  [ 59            ]                             │
+│                                                │
+│  [Remove from Warehouse]                       │
+│  [Cancel]               [Save Changes]         │
+└────────────────────────────────────────────────┘
 ```
 
-This causes three real-world UX failures users keep hitting:
+### Three intents (segmented control)
 
-1. **Can't clear the field.** Backspace empties the input → `parseInt("")` is `NaN` → `|| 0` snaps state back to `0` → display shows `0` → user must manually highlight and overwrite.
-2. **Leading zero.** Field shows `0`, user types `5` → display becomes `05` (or `50` depending on cursor) instead of `5`.
-3. **Wrong mobile keyboard.** `type="number"` on iOS shows a keyboard with `,` and `-` and the wrong layout; on Android it varies. The numeric keypad (`inputMode="numeric"` / `decimal"`) is what users actually want.
+| Intent | Field label | Computed result | When users pick this |
+|---|---|---|---|
+| **Add stock** *(default)* | "Quantity to add" | `current + delta` | New shipment received, restock |
+| **Remove stock** | "Quantity to remove" | `current − delta` (clamped ≥ 0) | Damage, expiry, manual write-off |
+| **Set exact** | "New quantity" | `delta` (absolute) | Stock count correction after audit |
 
-### Where this hurts (15+ inputs)
+- Default intent = **Add stock** (most common action, and matches what users were trying to do incorrectly).
+- The delta input always **starts empty** — never pre-filled with the current quantity. This eliminates the "do I edit this number?" confusion entirely.
+- A **live preview line** ("New stock will be: 221 + 50 = **271 units**") sits directly under the input. For *Remove*, it shows the subtraction; for *Set exact*, it shows just the absolute value with a subtle warning style if the change is large (e.g., >50% delta from current).
 
-- **Stock**: `basePrice`, warehouse `quantity`, `threshold`, `addStockQty` (`Stock.tsx` lines 687, 795, 805, 866)
-- **Schemes**: `discountPercent`, `buyQty`, `freeQty`, `flatAmount`, `minOrderValue`, `minQty` (`Schemes.tsx` lines 357–415)
-- **Targets**: monthly/yearly target values (`Targets.tsx` lines 182, 203)
-- **Performance**: `dailyTarget` (`Performance.tsx` line 549)
-- **NewOrder**: line `unitPrice` (line 527) — note that `quantity` already uses the correct pattern with a `quantityStr` shadow
-- **OrderDetail**: line `unitPrice` (line 476), claim `quantity` (line 848)
-- **Claims**: claim `quantity` (line 356)
-- **Distributors**: `creditLimit` (line 282)
-- **DealerDetail**: standing-order `quantity` (line 531)
-- **Billing**: editable `gstRate` (line 894)
+### Threshold stays as a direct edit
+The low-stock threshold is a configuration value (not a running balance), so it remains a normal `NumberInput` — there's no ambiguity there.
 
-The `quantityStr` pattern in `NewOrder.tsx` (lines 42, 154, 166–171) is the proven shape of the fix — we just need to extract and reuse it.
+### Audit trail
+Every save logs to `activity_log` with the intent and delta, e.g. *"Added 50 units to AquaPure 5L (221 → 271)"* — much more useful than the current "updated stock item" entry.
 
-## The Fix: One Reusable `NumberInput` Component
+## Consolidating the two flows
 
-Create `src/components/ui/number-input.tsx` that wraps the existing `<Input>` and handles the edge cases internally, so callers stay simple.
+Once *Edit Inventory* supports "Add stock" properly, the standalone **"Add Stock" top-right button** becomes redundant for products already in the warehouse. We keep it but **rescope its purpose**:
 
-### Behavior (the "best-practice" UX)
+- Rename it to **"Add New Product to Warehouse"** (or similar) and only allow selecting products that are *not yet* present in this warehouse.
+- For products already present, clicking that button could even short-circuit and open the row's Edit dialog with intent pre-selected to "Add stock".
 
-| Action | Result |
-|---|---|
-| Empty field | Stays empty (no snap to `0`); state value is `null` (or `0` if `allowEmpty=false`) |
-| Type `5` over `0` | Displays `5`, not `05` |
-| Type `0` then `5` | Displays `5` |
-| Type `1.2` (when `decimal`) | Allowed |
-| Type letters / extra dots | Silently rejected (input doesn't update) |
-| Blur with empty + `min` set | Snaps to `min` (or stays empty if `allowEmpty`) |
-| Blur with value below `min` / above `max` | Clamps to range |
-| Mobile keyboard | `inputMode="numeric"` (integer) or `inputMode="decimal"` |
-| Desktop spinners | Hidden (CSS) — they're cluttered and rarely used |
-| Increment buttons | Optional `showSteppers` prop renders large +/- buttons (useful for Qty fields, opt-in) |
+This removes the "two doors that do the same thing" problem.
 
-### API
+## Files to change
 
-```tsx
-<NumberInput
-  value={state.qty}                 // number | null
-  onValueChange={(n) => setState({ ...state, qty: n })}
-  min={0}
-  max={28}
-  allowDecimal                      // false → integer-only
-  allowEmpty                        // default true; false forces a number always
-  placeholder="0"
-  className="h-10 rounded-lg"
-/>
-```
+- **`src/pages/Stock.tsx`**
+  - Replace the Quantity `NumberInput` in the Edit Inventory dialog with an intent segmented control + delta input + computed preview.
+  - Update `saveStockItemFn` to apply the intent (`current + delta`, `current − delta` clamped, or `delta`) when persisting.
+  - Update `handleAddStock` and the *Add Stock* dialog: filter the product dropdown to products not already stocked at the selected warehouse; rename the trigger button + dialog title to make its purpose distinct.
+  - Use existing `NumberInput` for the delta field (`allowEmpty`, `min={1}` for Add/Remove, `min={0}` for Set exact).
+- **`src/utils/activityLog.ts`** (lightweight): extend the stock-item update log entry to include before/after quantities and intent.
+- **`mem://features/stock-management`**: update note to record the intent-based adjustment pattern.
 
-Internally:
-- Keep a local `string` state for what's typed (the `quantityStr` trick).
-- On every keystroke, validate against a regex (`/^\d*$/` or `/^\d*\.?\d*$/`), reject invalid input, and emit the parsed number (or `null` for empty) to the parent.
-- On blur, normalize: strip leading zeros (`"05"` → `"5"`), clamp to `min`/`max`, and re-sync the display string with the committed value.
-- Use `type="text"` under the hood (not `type="number"`) — this is the only reliable way to prevent browser auto-formatting and get consistent behavior across iOS/Android/desktop.
+## What we're explicitly NOT doing now
 
-### Files to add
+- No new database schema (no `stock_movements` ledger table). The next-month RBAC/audit pass is a better moment for that. For now, `activity_log` carries the breadcrumb.
+- No batch adjustments (multi-row select + adjust). One row at a time is fine for V1.
+- No barcode-scan flow — also a future polish item.
 
-- **`src/components/ui/number-input.tsx`** — new component (~80 lines)
-- **`src/components/ui/__tests__/number-input.test.tsx`** — vitest coverage for: empty clearing, leading-zero stripping, decimal toggle, min/max clamping, paste handling
+## Why this works for the user base
 
-### Files to migrate (replace `<Input type="number" ...>` + `parseInt || 0`)
-
-1. `src/pages/Stock.tsx` (4 inputs)
-2. `src/pages/Schemes.tsx` (6 inputs)
-3. `src/pages/NewOrder.tsx` (price field — keep existing qty pattern, optionally also swap it to `NumberInput` for consistency)
-4. `src/pages/OrderDetail.tsx` (2 inputs)
-5. `src/pages/Claims.tsx` (1 input)
-6. `src/pages/Targets.tsx` (2 inputs)
-7. `src/pages/Performance.tsx` (1 input — daily target)
-8. `src/pages/Distributors.tsx` (credit limit)
-9. `src/pages/DealerDetail.tsx` (standing-order qty)
-10. `src/pages/Billing.tsx` (GST rate)
-
-State types stay as `number` — the only call-site change is swapping the JSX and the `onChange` for `onValueChange`. For fields where `null` would break math (e.g. unitPrice in calculations), pass `allowEmpty={false}` so the value stays a number, while still avoiding the leading-zero bug during typing.
-
-### Memory update
-
-Add `mem://style/number-inputs` documenting the rule:
-> All numeric form fields use `<NumberInput>` from `@/components/ui/number-input`. Never use `<Input type="number">` + `parseInt(e.target.value) || 0` — it traps users in a `0` state and prevents clearing.
-
-## Out of Scope (intentionally)
-
-- Currency formatting with thousand separators while typing (₹1,23,456) — adds complexity, can come later if requested.
-- Long-press accelerating steppers — wait for real demand.
-- Touch this in the AI features sprint (next month) — this is a foundational UX fix that should land first so the new screens use the right pattern.
-
-## Risk
-
-Very low. The change is mechanical, the proven pattern already exists in `NewOrder.tsx`, and each migrated input remains visually identical — only the typing behavior improves. Tests + a manual pass on Stock + Schemes (the highest-frequency pages) will confirm.
+- **Mobile users** never have to position a cursor inside a pre-filled number — they just type the delta. No more "01 / can't backspace zero" follow-on confusion.
+- **The mental math goes away** — the dialog does the arithmetic and shows it.
+- **Mistakes become visible before save** — the live preview line acts as a built-in confirmation.
+- **Matches how distributors actually think**: "I received 50 cartons today" → pick *Add stock*, type *50*, done.
