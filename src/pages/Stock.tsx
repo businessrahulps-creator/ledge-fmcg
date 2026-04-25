@@ -92,10 +92,34 @@ export default function Stock() {
 
   const [confirmDeleteStockItem, setConfirmDeleteStockItem] = useState(false);
   const [editStockItem, setEditStockItem] = useState<StockItem | null>(null);
+  // Original quantity captured when opening the Edit dialog (so we can compute deltas).
+  const [editOriginalQty, setEditOriginalQty] = useState<number>(0);
+  // Adjustment intent for the Edit Inventory dialog.
+  type AdjustIntent = "add" | "remove" | "set";
+  const [adjustIntent, setAdjustIntent] = useState<AdjustIntent>("add");
+  // Delta value entered by the user (null = empty field).
+  const [adjustDelta, setAdjustDelta] = useState<number | null>(null);
 
   const [addStockOpen, setAddStockOpen] = useState(false);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
+
+  // Reset adjustment state whenever the Edit dialog opens with a new item.
+  useEffect(() => {
+    if (editStockItem) {
+      setEditOriginalQty(editStockItem.quantity);
+      setAdjustIntent("add");
+      setAdjustDelta(null);
+    }
+  }, [editStockItem?.id]);
+
+  // Compute the resulting quantity based on intent + delta.
+  const computedNewQty = useMemo(() => {
+    const d = adjustDelta ?? 0;
+    if (adjustIntent === "add") return editOriginalQty + d;
+    if (adjustIntent === "remove") return Math.max(0, editOriginalQty - d);
+    return d; // "set"
+  }, [adjustIntent, adjustDelta, editOriginalQty]);
 
   const inventoryRef = useRef<HTMLDivElement>(null);
 
