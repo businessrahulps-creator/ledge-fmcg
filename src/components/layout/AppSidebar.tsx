@@ -34,6 +34,8 @@ import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { ActivityLog } from "@/components/layout/ActivityLog";
 import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
+import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeMark from "@/assets/ledge-mark.png";
 
 const overviewNav = [
   { title: "Dashboard", url: "/dashboard", icon: House },
@@ -119,11 +121,9 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
           {collapsed ? (
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary shrink-0">
-              L
-            </span>
+            <img src={ledgeMark} alt="Ledge" className="h-7 w-7 object-contain shrink-0" />
           ) : (
-            <span className="brand-gradient-text font-heading font-extrabold text-xl tracking-[-0.04em]">Ledge</span>
+            <img src={ledgeLogo} alt="Ledge" className="h-7 w-auto object-contain" />
           )}
         </Link>
       </SidebarHeader>
