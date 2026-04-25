@@ -16,7 +16,7 @@ export function useStockDomain(deps: DomainDeps) {
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
     deps, "godowns", setLocations, "locations",
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
-    "stock_item", l => l.name,
+    "warehouse", l => l.name,
   ), [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   // Stock Items — custom upsert logic
