@@ -1,53 +1,101 @@
+# Brand alignment: roll Ledge palette into the platform
+
+3 phases, warm neutrals preserved. All changes flow through CSS tokens — components untouched except 4 designated "Ledge moments."
+
 ## Goal
 
-Close the gaps from today's QA so **every** numeric form field in the app uses the canonical `NumberInput`. No new features, no behavior change for users — just consistency, and removal of the last places where a leading-zero / can't-empty bug *could* sneak back in.
+Bring the platform into visual alignment with the Ledge brand palette **without losing the calm, premium, enterprise feel** that makes the dashboard usable for 6+ hour FMCG operations sessions.
 
-## Scope (4 surgical edits)
+## Guiding principles
 
-### 1. `src/pages/Targets.tsx` — `InlineTargetRow`
-**Current:** raw `<Input type="text">` + manual regex + `Number(input) || 0`. Functionally OK today, but bypasses the standard.
-**Fix:** Replace both Revenue Target and Orders Target inputs with `<NumberInput>`.
-- Revenue: `allowDecimal={true}`, `allowEmpty={true}`, `min={0}`.
-- Orders: `allowDecimal={false}`, `allowEmpty={true}`, `min={0}`.
-- Drop the local `revInput` / `ordInput` string state — store numbers directly (`targetRev: number | null`).
-- Keep the existing `onBlur={handleSave}` autosave behavior. `dirty` flag stays.
-- Empty field → treat as `0` only at save time (so users can fully clear without flicker).
+- **Tokens, not hardcoded colors.** All changes go through `src/index.css` CSS variables.
+- **Calm > vivid in data-dense surfaces.** Tables, badges, sidebar, cards stay quiet.
+- **Brand energy is rationed.** Gradient Purple + Coral appear only in 4 designated moments.
+- **Warm neutrals untouched.** Backgrounds, cards, borders, sidebar keep current warm-stone palette.
+- **Both light + dark mode tuned.** Brand colors slightly desaturated in dark mode to prevent glow.
 
-### 2. `src/pages/NewOrder.tsx` — order line quantity
-**Current:** shadow-string `quantityStr` + `parseInt`, with `quantity: 0` when empty.
-**Fix:**
-- Drop `quantityStr` from `OrderLineState`.
-- Change `quantity` to `number | null` in the line model.
-- Use `<NumberInput allowEmpty={true} min={1}>` for the input.
-- Update `getLineTotal` and `orderTotal` to treat `null` as `0`.
-- Update validation: existing "must have at least one line with qty > 0" check stays; just read `l.quantity ?? 0`.
-- Remove `handleQuantityBlur` — `NumberInput`'s built-in blur clamp replaces it.
+---
 
-### 3. `src/pages/OrderDetail.tsx` — line quantity edit
-**Current:** same shadow-string pattern as NewOrder (line 179).
-**Fix:** Mirror the NewOrder change exactly — same model shift (`number | null`), same `NumberInput` swap, same null-as-zero treatment in totals.
+## Phase 1 — Semantic remap (status colors adopt brand language)
 
-### 4. `src/pages/Billing.tsx` — read-only quantity / unit price (lines 940, 948)
-**Current:** `<Input type="number" readOnly />` for display-only cells.
-**Fix:** Change to `<Input type="text" readOnly value={String(line.quantity)} />` (or just render as text in the cell). `type="number"` on a read-only field still shows browser spinners on some platforms and is semantically wrong for display.
+**File:** `src/index.css`
 
-## Out of scope
-- No DataContext schema change.
-- No change to `saveOrderFn` / API payload shape (a `null` quantity is normalized to `0` at save, exactly matching today's behavior on submit).
-- Targets autosave timing untouched.
-- Stock page already migrated this morning — not retouched.
+| Token | From | To (brand) |
+|---|---|---|
+| `--success` light | `152 55% 42%` | `172 93% 37%` ≈ Teal `#06B6A4` |
+| `--success` dark | `152 50% 48%` | `172 70% 48%` |
+| `--warning` | `38 80% 50%` | `38 100% 50%` ≈ Amber `#FFA800` |
+| `--destructive` light | `0 72% 51%` | `0 100% 71%` ≈ Coral Pink `#FF6B6B` |
+| `--destructive` dark | `0 72% 55%` | `0 90% 68%` |
+
+Every status badge, alert, toast, validation message inherits automatically — zero component changes.
+
+---
+
+## Phase 2 — Primary action color shifts to Electric Blue
+
+**File:** `src/index.css`
+
+| Token | From | To |
+|---|---|---|
+| `--primary` light | `160 45% 40%` | `222 84% 56%` ≈ Electric Blue `#2563EB` |
+| `--primary` dark | `160 40% 55%` | `222 75% 65%` |
+| `--ring` light/dark | matches old primary | matches new primary |
+| `--sidebar-ring` light/dark | matches old primary | matches new primary |
+| `--accent` dark | `160 35% 48%` | `222 60% 55%` |
+
+`--sidebar-primary` stays warm — sidebar is navigation, not action. Tinting it blue would dominate the left rail.
+
+---
+
+## Phase 3 — "Ledge moments" with Gradient Purple + Coral
+
+### 3a. New brand tokens
+
+Add to `src/index.css`:
+```css
+--brand-purple: 262 83% 58%;        /* #7C3AED */
+--brand-coral: 22 100% 62%;          /* #FF8A3D */
+--brand-gradient: linear-gradient(90deg, hsl(262 83% 58%) 0%, hsl(22 100% 62%) 100%);
+--brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 58% / 0.08) 0%, hsl(22 100% 62% / 0.08) 100%);
+```
+
+Add utility classes `.brand-gradient-text` and `.brand-gradient-bg`.
+
+### 3b. The 4 Ledge moments
+
+| # | Surface | File | Treatment |
+|---|---|---|---|
+| 1 | Splash screen logo wash | `src/components/SplashScreen.tsx` | Gradient halo behind wordmark |
+| 2 | Empty state accent | `src/components/ui/empty-state.tsx` | Soft gradient halo behind icon; icon stroke in `--brand-purple` |
+| 3 | Order saved celebration | `src/pages/NewOrder.tsx` | Tint celebration with brand gradient instead of generic green |
+| 4 | Sidebar wordmark | `src/components/layout/AppSidebar.tsx` | `brand-gradient-text` on "Ledge" only (icon stays mono) |
+
+**Explicitly NOT applied to:** buttons, links, badges, table rows, sidebar background, card backgrounds, hover states.
+
+### 3c. Memory updates
+
+- Update `mem://style/design-system` — new semantic mapping, Electric Blue primary, warm neutrals retained.
+- Create `mem://style/brand-moments` — the 4 designated moments + constraint that Purple/Coral never appear elsewhere in-app.
+- Update `mem://index.md` Core line.
+
+---
+
+## Out of scope (intentionally)
+
+- Landing page — already on brand palette.
+- Card backgrounds, borders, sidebar surface, body text — warm stone preserved.
+- Charts, PDFs — keep current palette.
+- Component rewrites — only 4 brand-moment files touched.
 
 ## Verification
-- `tsc --noEmit` clean.
-- `bunx vitest run` green (114 tests, no input-specific tests should break).
-- Manual smoke (mental walkthrough only — no preview test required from the user):
-  - Targets: clear a value → field stays empty, save → persists as 0. Type `50` → no leading zero.
-  - NewOrder: clear quantity → line total recalculates as 0, can't submit; type `2` → totals update; backspace works freely.
-  - OrderDetail: same as NewOrder while editing an existing order.
-  - Billing read-only cells: no native spinners, value renders identically.
 
-## Memory
-Append a one-line note to `mem://style/number-inputs.md`: *"Verified: all numeric form fields across Stock, Targets, Orders (NewOrder + OrderDetail), Schemes, Performance, Distributors, Claims, DealerDetail, Billing now use NumberInput. Read-only numeric displays should use `type="text"`, not `type="number"`."*
+1. TypeScript check + 114 existing tests must pass unchanged.
+2. Visual sweep on `/dashboard`, `/orders`, `/stock`, `/billing`, `/settings`, `/login` — light + dark.
+3. Status badge audit across Orders / Stock / Billing.
+4. Splash + empty state + sidebar wordmark + order celebration land correctly.
+5. `rg` sweep for hardcoded `text-teal-*`, `bg-teal-*`, `text-emerald-*` shadowing new tokens; replace with semantic tokens.
 
-## Why this is safe to ship today
-Every change is a like-for-like swap to a component that has already been in production for the rest of the app since this morning. No new pathways, no API changes, no migrations. The only user-visible difference is *good* — empty fields actually stay empty on these last four screens too.
+## Risk
+
+**Low.** Phase 1+2 are CSS-variable-only, fully reversible by reverting one file. Phase 3 touches 4 isolated components. No database, no logic, no API surface affected. Rollback < 5 minutes.

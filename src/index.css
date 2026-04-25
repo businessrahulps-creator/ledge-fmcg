@@ -37,7 +37,7 @@
     --popover: 40 25% 99%;
     --popover-foreground: 30 10% 14%;
 
-    --primary: 160 45% 40%;
+    --primary: 222 84% 56%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 35 15% 93%;
@@ -49,18 +49,18 @@
     --accent: 35 15% 93%;
     --accent-foreground: 30 10% 14%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 100% 71%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 55% 42%;
+    --success: 172 93% 37%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 80% 50%;
+    --warning: 38 100% 50%;
     --warning-foreground: 30 10% 10%;
 
     --border: 35 10% 87%;
     --input: 35 10% 87%;
-    --ring: 160 45% 40%;
+    --ring: 222 84% 56%;
 
     --radius: 0.75rem;
 
@@ -71,7 +71,13 @@
     --sidebar-accent: 35 15% 93%;
     --sidebar-accent-foreground: 30 10% 20%;
     --sidebar-border: 35 10% 90%;
-    --sidebar-ring: 160 45% 40%;
+    --sidebar-ring: 222 84% 56%;
+
+    /* Ledge brand moments — used only in 4 designated places: splash, empty states, order celebration, sidebar wordmark. Never in buttons/badges/links. */
+    --brand-purple: 262 83% 58%;
+    --brand-coral: 22 100% 62%;
+    --brand-gradient: linear-gradient(90deg, hsl(262 83% 58%) 0%, hsl(22 100% 62%) 100%);
+    --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 58% / 0.10) 0%, hsl(22 100% 62% / 0.10) 100%);
 
     --surface: 40 25% 99%;
     --surface-border: 35 10% 91%;
@@ -89,7 +95,7 @@
     --popover: 30 5% 10%;
     --popover-foreground: 30 5% 93%;
 
-    --primary: 160 40% 55%;
+    --primary: 222 75% 65%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 30 4% 14%;
@@ -98,21 +104,21 @@
     --muted: 30 4% 14%;
     --muted-foreground: 30 4% 52%;
 
-    --accent: 160 35% 48%;
+    --accent: 222 60% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 0 90% 68%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 50% 48%;
+    --success: 172 70% 48%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 80% 50%;
+    --warning: 38 100% 50%;
     --warning-foreground: 30 10% 10%;
 
     --border: 30 4% 17%;
     --input: 30 4% 17%;
-    --ring: 160 40% 55%;
+    --ring: 222 75% 65%;
 
     --sidebar-background: 30 6% 7%;
     --sidebar-foreground: 30 5% 93%;
@@ -121,10 +127,16 @@
     --sidebar-accent: 30 4% 12%;
     --sidebar-accent-foreground: 30 5% 93%;
     --sidebar-border: 30 4% 17%;
-    --sidebar-ring: 160 40% 55%;
+    --sidebar-ring: 222 75% 65%;
 
     --surface: 30 5% 10%;
     --surface-border: 30 4% 17%;
+
+    /* Brand moments — same hues, slightly lifted for dark backgrounds */
+    --brand-purple: 262 83% 68%;
+    --brand-coral: 22 100% 68%;
+    --brand-gradient: linear-gradient(90deg, hsl(262 83% 68%) 0%, hsl(22 100% 68%) 100%);
+    --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 68% / 0.14) 0%, hsl(22 100% 68% / 0.14) 100%);
   }
 }
 
@@ -227,5 +239,17 @@
 
   .touch-bounce {
     @apply transition-transform duration-100 ease-out active:scale-[0.97];
+  }
+
+  /* Ledge brand-moment utilities — restricted to splash, empty states, order celebration, sidebar wordmark. */
+  .brand-gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--brand-gradient);
+  }
+  .brand-gradient-bg {
+    background-image: var(--brand-gradient);
+  }
+  .brand-gradient-soft-bg {
+    background-image: var(--brand-gradient-soft);
   }
 }

@@ -1,7 +1,9 @@
 # Project Memory
 
 ## Core
-Dark/light themed, glassmorphic cards, semantic tokens. Primary blue, Fluent 2 neutrals.
+Dark/light themed, glassmorphic cards, semantic tokens. Primary Electric Blue #2563EB. Warm stone neutrals (do NOT shift to cool grays).
+Status semantics: success=Teal #06B6A4, warning=Amber #FFA800, destructive=Coral Pink #FF6B6B.
+Brand gradient (Purple #7C3AED → Coral #FF8A3D) is rationed: ONLY splash, empty states, order celebration, sidebar wordmark. Never on buttons/badges/links/rows/cards.
 Mobile-first PWA for Indian FMCG distribution. Ledge brand, typographic wordmark.
 Lovable Cloud backend with RLS. DataContext for session state.
 Modals for simple CRUD only; full pages for complex detail views.
@@ -9,7 +11,8 @@ No Google OAuth — user explicitly removed it.
 Free trial is 30 days, NOT 14 — ignore any spec text saying otherwise.
 
 ## Memories
-- [Color tokens](mem://style/design-system) — Token-based color system aligned with Fluent 2 neutrals, glassmorphic cards, and semantic accents
+- [Color tokens](mem://style/design-system) — Semantic token system; Electric Blue primary, brand status colors, warm stone neutrals retained
+- [Brand moments](mem://style/brand-moments) — The 4 designated places where Gradient Purple/Coral may appear in-app
 - [Landing page](mem://style/landing-page) — Light-themed landing page aligned with dashboard
 - [Branding assets](mem://style/branding-assets) — Colorful checkmark graphic for favicon and app icon
 - [Pricing tiers](mem://auth/pricing-tiers) — Four-tier pricing: Free, Growth, Scale, Enterprise
