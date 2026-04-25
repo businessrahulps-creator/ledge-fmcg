@@ -242,8 +242,29 @@ export default function Stock() {
 
   const saveStockItemFn = () => {
     if (!editStockItem) return;
-    updateStockItem(editStockItem);
-    toast.success("Inventory updated", { description: `${editStockItem.productName} has been updated.` });
+    // Validate: if intent is add/remove, delta must be > 0. For "set" allow 0.
+    if (adjustIntent !== "set" && (!adjustDelta || adjustDelta <= 0)) {
+      toast.error("Enter a quantity", {
+        description: adjustIntent === "add" ? "Type how many units to add." : "Type how many units to remove.",
+      });
+      return;
+    }
+    if (adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty) {
+      toast.error("Cannot remove more than current stock", {
+        description: `Only ${editOriginalQty} units are currently in stock.`,
+      });
+      return;
+    }
+    const finalQty = computedNewQty;
+    const delta = finalQty - editOriginalQty;
+    const updated: StockItem = { ...editStockItem, quantity: finalQty };
+    updateStockItem(updated);
+    const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
+    const absDelta = Math.abs(delta);
+    toast.success(
+      delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
+      { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
+    );
     setEditStockItem(null);
   };
 
