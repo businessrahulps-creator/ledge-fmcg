@@ -10,6 +10,7 @@ import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
@@ -684,7 +685,7 @@ export default function Stock() {
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Base Price (₹) *</Label>
-                    <Input type="number" value={editProduct.basePrice} onChange={(e) => setEditProduct({ ...editProduct, basePrice: parseFloat(e.target.value) || 0 })} className="h-10 rounded-lg" />
+                    <NumberInput allowDecimal allowEmpty={false} min={0} value={editProduct.basePrice} onValueChange={(v) => setEditProduct({ ...editProduct, basePrice: v ?? 0 })} className="h-10 rounded-lg" />
                   </div>
                 </div>
               </div>
@@ -788,21 +789,21 @@ export default function Stock() {
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Quantity</Label>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      allowEmpty={false}
                       min={0}
                       value={editStockItem.quantity}
-                      onChange={(e) => setEditStockItem({ ...editStockItem, quantity: parseInt(e.target.value) || 0 })}
+                      onValueChange={(v) => setEditStockItem({ ...editStockItem, quantity: v ?? 0 })}
                       className="h-10 rounded-lg"
                     />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
-                    <Input
-                      type="number"
+                    <NumberInput
+                      allowEmpty={false}
                       min={0}
                       value={editStockItem.threshold}
-                      onChange={(e) => setEditStockItem({ ...editStockItem, threshold: parseInt(e.target.value) || 0 })}
+                      onValueChange={(v) => setEditStockItem({ ...editStockItem, threshold: v ?? 0 })}
                       className="h-10 rounded-lg"
                     />
                   </div>
@@ -859,11 +860,11 @@ export default function Stock() {
               </div>
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Quantity to Add *</Label>
-                <Input
-                  type="number"
+                <NumberInput
+                  allowEmpty={false}
                   min={1}
                   value={addStockQty}
-                  onChange={(e) => setAddStockQty(parseInt(e.target.value) || 0)}
+                  onValueChange={(v) => setAddStockQty(v ?? 1)}
                   className="h-10 rounded-lg"
                 />
               </div>
