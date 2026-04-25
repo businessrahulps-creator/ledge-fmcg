@@ -320,15 +320,41 @@ export default function NewOrder() {
       appliedSchemes: serializeAppliedSchemes(appliedSchemes),
     };
 
+    const isFirstEverOrder = existingOrders.length === 0;
     const result = await addOrder(order);
     setIsSaving(false);
 
     if (result.success) {
       trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
-      toast.success(`Order #${result.orderNumber} created successfully!`);
 
-      setTimeout(() => navigate("/orders"), 800);
+      if (isFirstEverOrder) {
+        // Milestone: first order ever in this workspace
+        try {
+          const fire = (originX: number) =>
+            confetti({
+              particleCount: 60,
+              spread: 70,
+              ticks: 200,
+              gravity: 0.9,
+              startVelocity: 45,
+              origin: { x: originX, y: 0.7 },
+              colors: ["#3B82F6", "#60A5FA", "#A78BFA", "#34D399", "#FBBF24"],
+            });
+          fire(0.3);
+          setTimeout(() => fire(0.7), 180);
+        } catch {
+          // canvas-confetti failure must never block navigation
+        }
+        toast.success("Your first order is in! 🎉", {
+          description: `#${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`,
+          duration: 4500,
+        });
+        setTimeout(() => navigate("/orders"), 1800);
+      } else {
+        toast.success(`Order #${result.orderNumber} created successfully!`);
+        setTimeout(() => navigate("/orders"), 800);
+      }
     }
     // If !result.success, toast was already shown by DataContext
   };
