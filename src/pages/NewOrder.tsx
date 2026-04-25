@@ -194,35 +194,93 @@ export default function NewOrder() {
 
   const executeSave = async () => {
     // Validation
-    if (!selectedDealer) {
+  // --- Derived validation state (used for inline errors) ---
+  const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+  const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
+  const errors = {
+    dealer: !selectedDealer,
+    salesperson: !selectedSalesperson,
+    products: validLines.length === 0,
+    invalidPriceLine: validLines.find((l) => l.unitPrice <= 0),
+    warehouse: !selectedGodown,
+    dispatchDate: dispatchDateRequired && !dispatchDate,
+  };
+
+  // Stock availability per line (warning only, not blocking)
+  const stockItems = api.stock.items.list();
+  const selectedGodownObj = godowns.find(g => g.id === selectedGodown);
+  const stockWarnings = useMemo(() => {
+    if (!selectedGodown) return new Map<string, string>();
+    const warnings = new Map<string, string>();
+    for (const line of lines) {
+      if (!line.productId || line.quantity <= 0) continue;
+      const stock = stockItems.find(
+        s => s.productId === line.productId && s.godownId === selectedGodown,
+      );
+      const available = stock?.quantity ?? 0;
+      if (line.quantity > available) {
+        warnings.set(
+          line.id,
+          `Only ${available} ${stock?.unit || "units"} available at ${selectedGodownObj?.name ?? "this warehouse"}`,
+        );
+      }
+    }
+    return warnings;
+  }, [lines, stockItems, selectedGodown, selectedGodownObj?.name]);
+
+  const scrollToFirstError = () => {
+    let target: HTMLElement | null = null;
+    if (errors.dealer) target = dealerFieldRef.current;
+    else if (errors.salesperson) target = salespersonFieldRef.current;
+    else if (errors.products || errors.invalidPriceLine) target = productsSectionRef.current;
+    else if (errors.warehouse) target = warehouseFieldRef.current;
+    else if (errors.dispatchDate) target = dispatchDateFieldRef.current;
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const executeSave = async () => {
+    setAttemptedSave(true);
+
+    // Validation
+    if (errors.dealer) {
       toast.error("Dealer required", { description: "Please select a dealer for this order." });
+      scrollToFirstError();
       return;
     }
 
-    if (!selectedSalesperson) {
+    if (errors.salesperson) {
       toast.error("Sales person required", { description: "Please select a sales person for this order." });
+      scrollToFirstError();
       return;
     }
 
-    const validLines = lines.filter((l) => l.productId && l.quantity > 0);
-    if (validLines.length === 0) {
+    if (errors.products) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
+      scrollToFirstError();
       return;
     }
 
     // Guard against zero/negative unit prices — prevents accidental ₹0 invoices
-    const invalidPriceLine = validLines.find((l) => l.unitPrice <= 0);
-    if (invalidPriceLine) {
-      const product = products.find((p) => p.id === invalidPriceLine.productId);
+    if (errors.invalidPriceLine) {
+      const product = products.find((p) => p.id === errors.invalidPriceLine!.productId);
       toast.error("Invalid price", {
-        description: `${product?.name || "A product"} has a price of ₹${invalidPriceLine.unitPrice}. Set a price greater than 0.`,
+        description: `${product?.name || "A product"} has a price of ₹${errors.invalidPriceLine.unitPrice}. Set a price greater than 0.`,
       });
+      scrollToFirstError();
       return;
     }
 
-    // Require godown if dispatching/delivering
-    if ((deliveryStatus === "dispatched" || deliveryStatus === "delivered") && !selectedGodown) {
-      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
+    // Warehouse is now ALWAYS required (not just for dispatched/delivered)
+    if (errors.warehouse) {
+      toast.error("Warehouse required", { description: "Please select a source warehouse for this order." });
+      scrollToFirstError();
+      return;
+    }
+
+    // Dispatch date required when delivery status is dispatched or delivered
+    if (errors.dispatchDate) {
+      toast.error("Dispatch date required", { description: "Please select a dispatch date for dispatched/delivered orders." });
+      scrollToFirstError();
       return;
     }
 
