@@ -79,6 +79,7 @@ export default function NewOrder() {
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const allSchemes = api.schemes.list();
   const addOrder = api.orders.create;
+  const existingOrders = api.orders.list();
   const { addNotification } = useNotifications();
   const { userRole } = useAuth();
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
