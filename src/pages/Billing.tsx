@@ -160,6 +160,8 @@ export default function Billing() {
     const dealer = api.dealers.list().find(d => d.id === order.distributorId);
     setBuyerName(order.distributorName);
     setBuyerAddress(dealer?.address || dealer?.location || "");
+    setBuyerGstin(dealer?.gstin || "");
+    setBuyerStateCode(dealer?.stateCode || "");
     setVehicle(order.vehicle || "");
     setDriverName(order.driverName || "");
 
@@ -344,7 +346,7 @@ export default function Billing() {
     setBuyerStateCode(inv.buyerStateCode);
     setSupplyType(inv.supplyType as "intra_state" | "inter_state");
     setGstRate(inv.gstRate);
-    setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+    setNotes(inv.notes || "");
     setVehicle(inv.vehicle || "");
     setDriverName(inv.driverName || "");
     if (inv.sourceOrderId) setSourceOrderId(inv.sourceOrderId);
