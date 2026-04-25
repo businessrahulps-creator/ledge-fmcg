@@ -278,6 +278,13 @@ export default function Settings() {
 
   const confirmRemoveMember = async () => {
     if (!deleteMember) return;
+    if (deleteMember.userId === user?.id) {
+      toast.error("You can't remove yourself", {
+        description: "Ask another Super Admin to remove your account.",
+      });
+      setDeleteMember(null);
+      return;
+    }
     setSaving(true);
     try {
       await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
