@@ -151,7 +151,6 @@ export default function OrderDetail() {
         productId: l.productId,
         productName: l.productName,
         quantity: l.quantity,
-        quantityStr: String(l.quantity),
         unitPrice: l.unitPrice,
       })));
     }
@@ -162,7 +161,7 @@ export default function OrderDetail() {
 
   // Line editing helpers
   const addLine = () => {
-    setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, quantityStr: "1", unitPrice: 0 }]);
+    setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitPrice: 0 }]);
   };
 
   const removeLine = (lineId: string) => {
@@ -170,15 +169,13 @@ export default function OrderDetail() {
     setEditLines(prev => prev.filter(l => l.id !== lineId));
   };
 
-  const updateLine = (lineId: string, field: keyof EditLineState, value: string | number) => {
+  const updateLine = (lineId: string, field: keyof EditLineState, value: string | number | null) => {
     setEditLines(prev => prev.map(l => {
       if (l.id !== lineId) return l;
       if (field === "quantity") {
-        const raw = String(value).replace(/[^0-9]/g, "");
-        const num = raw === "" ? 0 : parseInt(raw, 10);
-        return { ...l, quantity: num, quantityStr: raw };
+        return { ...l, quantity: value as number | null };
       }
-      const updated = { ...l, [field]: value };
+      const updated = { ...l, [field]: value } as EditLineState;
       if (field === "productId") {
         const product = products.find(p => p.id === value);
         if (product) {
@@ -187,13 +184,6 @@ export default function OrderDetail() {
         }
       }
       return updated;
-    }));
-  };
-
-  const handleQuantityBlur = (lineId: string) => {
-    setEditLines(prev => prev.map(l => {
-      if (l.id !== lineId) return l;
-      return { ...l, quantityStr: String(l.quantity || 0) };
     }));
   };
 
