@@ -508,10 +508,19 @@ export default function NewOrder() {
                           </Button>
                         </div>
                       </div>
+                      {stockWarnings.has(line.id) && (
+                        <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <span>{stockWarnings.get(line.id)}</span>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
               </div>
+              {attemptedSave && errors.products && (
+                <p className="mt-2 text-xs text-destructive">Add at least one product with quantity greater than 0.</p>
+              )}
 
               <div className="mt-4 flex justify-end border-t border-border pt-3 md:mt-6 md:pt-4">
                 <div className="text-right">
