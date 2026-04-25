@@ -87,7 +87,7 @@ export default function NewOrder() {
   const firstProductRef = useRef<HTMLButtonElement>(null);
 
   const [lines, setLines] = useState<OrderLineState[]>([
-    { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
+    { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
