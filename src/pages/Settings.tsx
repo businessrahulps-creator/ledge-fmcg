@@ -242,6 +242,17 @@ export default function Settings() {
   const saveMember = async () => {
     if (!editMember?.name || !editMember?.email || !companyId) return;
     if (isNewMember) return; // New member creation disabled
+
+    // Defense-in-depth: prevent self role-change (would cause RLS lockout)
+    const original = team.find((t) => t.id === editMember.id);
+    const isSelf = editMember.userId === user?.id;
+    if (isSelf && original && original.role !== editMember.role) {
+      toast.error("You can't change your own role", {
+        description: "Ask another Super Admin to update it for you.",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const { error: profileError } = await supabase
