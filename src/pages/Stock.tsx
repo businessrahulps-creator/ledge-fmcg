@@ -830,28 +830,88 @@ export default function Stock() {
                   <span className="text-[10px] text-muted-foreground md:text-xs">Product</span>
                   <p className="mt-0.5 text-sm font-medium">{editStockItem.productName}</p>
                   <p className="text-[10px] text-muted-foreground font-mono">{editStockItem.sku}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Current stock: <span className="font-semibold text-foreground">{editOriginalQty} {editStockItem.unit || "units"}</span>
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Quantity</Label>
-                    <NumberInput
-                      allowEmpty={false}
-                      min={0}
-                      value={editStockItem.quantity}
-                      onValueChange={(v) => setEditStockItem({ ...editStockItem, quantity: v ?? 0 })}
-                      className="h-10 rounded-lg"
-                    />
+
+                {/* Intent picker */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">What do you want to do?</Label>
+                  <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1">
+                    {([
+                      { id: "add", label: "Add stock" },
+                      { id: "remove", label: "Remove stock" },
+                      { id: "set", label: "Set exact" },
+                    ] as { id: AdjustIntent; label: string }[]).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => { setAdjustIntent(opt.id); setAdjustDelta(null); }}
+                        className={`h-9 rounded-md text-xs font-medium transition-colors ${
+                          adjustIntent === opt.id
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
-                  <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
-                    <NumberInput
-                      allowEmpty={false}
-                      min={0}
-                      value={editStockItem.threshold}
-                      onValueChange={(v) => setEditStockItem({ ...editStockItem, threshold: v ?? 0 })}
-                      className="h-10 rounded-lg"
-                    />
+                </div>
+
+                {/* Delta input */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">
+                    {adjustIntent === "add" && "Quantity to add"}
+                    {adjustIntent === "remove" && "Quantity to remove"}
+                    {adjustIntent === "set" && "New quantity"}
+                  </Label>
+                  <NumberInput
+                    allowEmpty
+                    min={0}
+                    value={adjustDelta}
+                    onValueChange={setAdjustDelta}
+                    placeholder={adjustIntent === "set" ? String(editOriginalQty) : "0"}
+                    autoFocus
+                    className="h-10 rounded-lg"
+                  />
+                </div>
+
+                {/* Live preview */}
+                {(adjustDelta !== null && adjustDelta >= 0) && (
+                  <div
+                    className={`rounded-lg border px-3 py-2.5 text-xs ${
+                      adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty
+                        ? "border-red-500/40 bg-red-500/5 text-red-600 dark:text-red-400"
+                        : "border-border bg-muted/30 text-foreground"
+                    }`}
+                  >
+                    {adjustIntent === "add" && (
+                      <>New stock will be: <span className="font-semibold">{editOriginalQty} + {adjustDelta} = {computedNewQty} {editStockItem.unit || "units"}</span></>
+                    )}
+                    {adjustIntent === "remove" && (
+                      (adjustDelta ?? 0) > editOriginalQty
+                        ? <>Cannot remove {adjustDelta} units — only {editOriginalQty} in stock.</>
+                        : <>New stock will be: <span className="font-semibold">{editOriginalQty} − {adjustDelta} = {computedNewQty} {editStockItem.unit || "units"}</span></>
+                    )}
+                    {adjustIntent === "set" && (
+                      <>Stock will be set to: <span className="font-semibold">{computedNewQty} {editStockItem.unit || "units"}</span> (was {editOriginalQty})</>
+                    )}
                   </div>
+                )}
+
+                {/* Threshold (kept as direct edit) */}
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
+                  <NumberInput
+                    allowEmpty={false}
+                    min={0}
+                    value={editStockItem.threshold}
+                    onValueChange={(v) => setEditStockItem({ ...editStockItem, threshold: v ?? 0 })}
+                    className="h-10 rounded-lg"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Get notified when stock drops to or below this number.</p>
                 </div>
               </div>
             )}
