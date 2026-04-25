@@ -71,7 +71,13 @@
     --sidebar-accent: 35 15% 93%;
     --sidebar-accent-foreground: 30 10% 20%;
     --sidebar-border: 35 10% 90%;
-    --sidebar-ring: 160 45% 40%;
+    --sidebar-ring: 222 84% 56%;
+
+    /* Ledge brand moments — used only in 4 designated places: splash, empty states, order celebration, sidebar wordmark. Never in buttons/badges/links. */
+    --brand-purple: 262 83% 58%;
+    --brand-coral: 22 100% 62%;
+    --brand-gradient: linear-gradient(90deg, hsl(262 83% 58%) 0%, hsl(22 100% 62%) 100%);
+    --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 58% / 0.10) 0%, hsl(22 100% 62% / 0.10) 100%);
 
     --surface: 40 25% 99%;
     --surface-border: 35 10% 91%;
