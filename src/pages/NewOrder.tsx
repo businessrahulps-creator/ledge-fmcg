@@ -379,10 +379,10 @@ export default function NewOrder() {
                   <Label className="text-xs md:text-sm">Order Date</Label>
                   <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="h-10 rounded-lg md:h-12" />
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
+                <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
                    <Select value={selectedDealer} onValueChange={setSelectedDealer}>
-                     <SelectTrigger className="h-10 rounded-lg md:h-12">
+                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dealer ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select dealer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -391,11 +391,14 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.dealer && (
+                    <p className="text-xs text-destructive">Please select a dealer.</p>
+                  )}
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
+                <div ref={salespersonFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Sales Person *</Label>
                   <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
-                    <SelectTrigger className="h-10 rounded-lg md:h-12">
+                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.salesperson ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select sales person" />
                     </SelectTrigger>
                     <SelectContent>
@@ -404,6 +407,9 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.salesperson && (
+                    <p className="text-xs text-destructive">Please select a sales person.</p>
+                  )}
                 </div>
               </div>
             </section>
