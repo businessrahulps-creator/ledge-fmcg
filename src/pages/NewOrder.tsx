@@ -92,6 +92,14 @@ export default function NewOrder() {
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
+  const [attemptedSave, setAttemptedSave] = useState(false);
+
+  // Refs for scroll-to-first-error
+  const dealerFieldRef = useRef<HTMLDivElement>(null);
+  const salespersonFieldRef = useRef<HTMLDivElement>(null);
+  const warehouseFieldRef = useRef<HTMLDivElement>(null);
+  const dispatchDateFieldRef = useRef<HTMLDivElement>(null);
+  const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
@@ -184,37 +192,93 @@ export default function NewOrder() {
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
+  // --- Derived validation state (used for inline errors) ---
+  const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+  const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
+  const errors = {
+    dealer: !selectedDealer,
+    salesperson: !selectedSalesperson,
+    products: validLines.length === 0,
+    invalidPriceLine: validLines.find((l) => l.unitPrice <= 0),
+    warehouse: !selectedGodown,
+    dispatchDate: dispatchDateRequired && !dispatchDate,
+  };
+
+  // Stock availability per line (warning only, not blocking)
+  const stockItems = api.stock.items.list();
+  const selectedGodownObj = godowns.find(g => g.id === selectedGodown);
+  const stockWarnings = useMemo(() => {
+    if (!selectedGodown) return new Map<string, string>();
+    const warnings = new Map<string, string>();
+    for (const line of lines) {
+      if (!line.productId || line.quantity <= 0) continue;
+      const stock = stockItems.find(
+        s => s.productId === line.productId && s.godownId === selectedGodown,
+      );
+      const available = stock?.quantity ?? 0;
+      if (line.quantity > available) {
+        warnings.set(
+          line.id,
+          `Only ${available} ${stock?.unit || "units"} available at ${selectedGodownObj?.name ?? "this warehouse"}`,
+        );
+      }
+    }
+    return warnings;
+  }, [lines, stockItems, selectedGodown, selectedGodownObj?.name]);
+
+  const scrollToFirstError = () => {
+    let target: HTMLElement | null = null;
+    if (errors.dealer) target = dealerFieldRef.current;
+    else if (errors.salesperson) target = salespersonFieldRef.current;
+    else if (errors.products || errors.invalidPriceLine) target = productsSectionRef.current;
+    else if (errors.warehouse) target = warehouseFieldRef.current;
+    else if (errors.dispatchDate) target = dispatchDateFieldRef.current;
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   const executeSave = async () => {
+    setAttemptedSave(true);
+
     // Validation
-    if (!selectedDealer) {
+    if (errors.dealer) {
       toast.error("Dealer required", { description: "Please select a dealer for this order." });
+      scrollToFirstError();
       return;
     }
 
-    if (!selectedSalesperson) {
+    if (errors.salesperson) {
       toast.error("Sales person required", { description: "Please select a sales person for this order." });
+      scrollToFirstError();
       return;
     }
 
-    const validLines = lines.filter((l) => l.productId && l.quantity > 0);
-    if (validLines.length === 0) {
+    if (errors.products) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
+      scrollToFirstError();
       return;
     }
 
     // Guard against zero/negative unit prices — prevents accidental ₹0 invoices
-    const invalidPriceLine = validLines.find((l) => l.unitPrice <= 0);
-    if (invalidPriceLine) {
-      const product = products.find((p) => p.id === invalidPriceLine.productId);
+    if (errors.invalidPriceLine) {
+      const product = products.find((p) => p.id === errors.invalidPriceLine!.productId);
       toast.error("Invalid price", {
-        description: `${product?.name || "A product"} has a price of ₹${invalidPriceLine.unitPrice}. Set a price greater than 0.`,
+        description: `${product?.name || "A product"} has a price of ₹${errors.invalidPriceLine.unitPrice}. Set a price greater than 0.`,
       });
+      scrollToFirstError();
       return;
     }
 
-    // Require godown if dispatching/delivering
-    if ((deliveryStatus === "dispatched" || deliveryStatus === "delivered") && !selectedGodown) {
-      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
+    // Warehouse is now ALWAYS required (not just for dispatched/delivered)
+    if (errors.warehouse) {
+      toast.error("Warehouse required", { description: "Please select a source warehouse for this order." });
+      scrollToFirstError();
+      return;
+    }
+
+    // Dispatch date required when delivery status is dispatched or delivered
+    if (errors.dispatchDate) {
+      toast.error("Dispatch date required", { description: "Please select a dispatch date for dispatched/delivered orders." });
+      scrollToFirstError();
       return;
     }
 
@@ -268,6 +332,17 @@ export default function NewOrder() {
   };
 
   const handleSave = () => {
+    setAttemptedSave(true);
+
+    // Run base validation first so missing fields are surfaced before the credit-limit gate
+    const hasBlockingError =
+      errors.dealer || errors.salesperson || errors.products ||
+      !!errors.invalidPriceLine || errors.warehouse || errors.dispatchDate;
+    if (hasBlockingError) {
+      executeSave();
+      return;
+    }
+
     if (exceedsCreditLimit) {
       if (isSuperAdmin) {
         setCreditOverrideOpen(true);
@@ -315,10 +390,10 @@ export default function NewOrder() {
                   <Label className="text-xs md:text-sm">Order Date</Label>
                   <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="h-10 rounded-lg md:h-12" />
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
+                <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
                    <Select value={selectedDealer} onValueChange={setSelectedDealer}>
-                     <SelectTrigger className="h-10 rounded-lg md:h-12">
+                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dealer ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select dealer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -327,11 +402,14 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.dealer && (
+                    <p className="text-xs text-destructive">Please select a dealer.</p>
+                  )}
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
+                <div ref={salespersonFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Sales Person *</Label>
                   <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
-                    <SelectTrigger className="h-10 rounded-lg md:h-12">
+                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.salesperson ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select sales person" />
                     </SelectTrigger>
                     <SelectContent>
@@ -340,6 +418,9 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.salesperson && (
+                    <p className="text-xs text-destructive">Please select a sales person.</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -359,7 +440,7 @@ export default function NewOrder() {
             )}
 
             {/* Order Lines */}
-            <section className="glass-card p-4 md:p-6">
+            <section ref={productsSectionRef} className="glass-card p-4 md:p-6">
               <div className="mb-3 flex items-center justify-between md:mb-4">
                 <h2 className="text-sm font-semibold md:text-base">Products</h2>
                 <Button variant="ghost" size="sm" onClick={addLine} className="h-9">
@@ -438,10 +519,19 @@ export default function NewOrder() {
                           </Button>
                         </div>
                       </div>
+                      {stockWarnings.has(line.id) && (
+                        <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <span>{stockWarnings.get(line.id)}</span>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
               </div>
+              {attemptedSave && errors.products && (
+                <p className="mt-2 text-xs text-destructive">Add at least one product with quantity greater than 0.</p>
+              )}
 
               <div className="mt-4 flex justify-end border-t border-border pt-3 md:mt-6 md:pt-4">
                 <div className="text-right">
@@ -455,10 +545,10 @@ export default function NewOrder() {
             <section className="glass-card p-4 md:p-6">
               <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Source Warehouse {(deliveryStatus === "dispatched" || deliveryStatus === "delivered") ? "*" : ""}</Label>
+                <div ref={warehouseFieldRef} className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Source Warehouse *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
-                    <SelectTrigger className="h-10 rounded-lg md:h-12">
+                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select warehouse" />
                     </SelectTrigger>
                     <SelectContent>
@@ -467,10 +557,21 @@ export default function NewOrder() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {attemptedSave && errors.warehouse && (
+                    <p className="text-xs text-destructive">Warehouse is required for every order.</p>
+                  )}
                 </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dispatch Date</Label>
-                  <Input type="date" value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} className="h-10 rounded-lg md:h-12" />
+                <div ref={dispatchDateFieldRef} className="space-y-1.5 md:space-y-2">
+                  <Label className="text-xs md:text-sm">Dispatch Date {dispatchDateRequired ? "*" : ""}</Label>
+                  <Input
+                    type="date"
+                    value={dispatchDate}
+                    onChange={(e) => setDispatchDate(e.target.value)}
+                    className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dispatchDate ? "border-destructive" : ""}`}
+                  />
+                  {attemptedSave && errors.dispatchDate && (
+                    <p className="text-xs text-destructive">Dispatch date is required when delivery is set to Dispatched or Delivered.</p>
+                  )}
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
