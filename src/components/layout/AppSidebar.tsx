@@ -70,6 +70,8 @@ export function AppSidebar() {
   const location = useLocation();
   const { companyIncomplete } = useOnboarding();
   const [activityOpen, setActivityOpen] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [markLoaded, setMarkLoaded] = useState(false);
 
   const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive = location.pathname.startsWith(item.url);
