@@ -623,7 +623,8 @@ export default function Stock() {
                           {!isAccountant && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
                               <PackagePlus className="h-4 w-4" />
-                              Add Stock
+                              <span className="hidden sm:inline">Add Product</span>
+                              <span className="sm:hidden">Add</span>
                             </Button>
                           )}
                         </div>
