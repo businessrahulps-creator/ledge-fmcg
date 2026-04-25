@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import {
   ClipboardList, UserRound, Package, UserCheck, Gift, RotateCcw,
-  FileText, Boxes, History,
+  FileText, Boxes, History, Warehouse,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,6 +23,7 @@ const ENTITY_ICONS: Record<string, React.ElementType> = {
   claim: RotateCcw,
   invoice: FileText,
   stock_item: Boxes,
+  warehouse: Warehouse,
 };
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -34,6 +35,7 @@ const ENTITY_LABELS: Record<string, string> = {
   claim: "Returns",
   invoice: "Invoices",
   stock_item: "Stock",
+  warehouse: "Warehouses",
 };
 
 interface ActivityEntry {
@@ -90,6 +92,24 @@ export function ActivityLog({ open, onOpenChange }: Props) {
   useEffect(() => {
     if (open) fetchEntries(null);
   }, [open, filter, companyId, fetchEntries]);
+
+  // Realtime: while sheet is open, prepend new activity rows live.
+  useEffect(() => {
+    if (!open || !companyId) return;
+    const channel = supabase
+      .channel(`activity_log:${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "activity_log", filter: `company_id=eq.${companyId}` },
+        (payload) => {
+          const row = payload.new as ActivityEntry;
+          if (filter !== "all" && row.entity_type !== filter) return;
+          setEntries(prev => prev.some(e => e.id === row.id) ? prev : [row, ...prev]);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [open, companyId, filter]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

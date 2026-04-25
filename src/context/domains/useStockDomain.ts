@@ -16,12 +16,13 @@ export function useStockDomain(deps: DomainDeps) {
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
     deps, "godowns", setLocations, "locations",
     l => ({ name: sanitizeInput(l.name), address: sanitizeInput(l.address), is_active: l.isActive }),
-    "stock_item", l => l.name,
+    "warehouse", l => l.name,
   ), [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   // Stock Items — custom upsert logic
   const addStockItem = useCallback(async (si: StockItem) => {
     if (!deps.companyId) return;
+    const summary = `Added ${si.quantity} ${si.unit || "units"} of ${si.productName} to ${si.godownName}`;
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
       setStockItems(prev => {
@@ -37,6 +38,7 @@ export function useStockDomain(deps: DomainDeps) {
           quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
         },
       });
+      deps.log("stock_item", tempId, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
@@ -51,8 +53,9 @@ export function useStockDomain(deps: DomainDeps) {
         if (exists) return prev.map(x => x.id === data.id ? { ...si, id: data.id } : x);
         return [...prev, { ...si, id: data.id }];
       });
+      deps.log("stock_item", data.id, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
     }
-  }, [deps.companyId, deps.persistEntityToCache]);
+  }, [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   const updateStockItem = useCallback(async (si: StockItem) => {
     if (!navigator.onLine) {
@@ -65,6 +68,7 @@ export function useStockDomain(deps: DomainDeps) {
         type: "update", table: "stock_items",
         payload: { id: si.id, quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate },
       });
+      deps.log("stock_item", si.id, "updated", `Updated ${si.productName} stock at ${si.godownName} to ${si.quantity}`, { productId: si.productId, godownId: si.godownId, quantity: si.quantity, threshold: si.threshold });
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
@@ -73,9 +77,12 @@ export function useStockDomain(deps: DomainDeps) {
     }).eq("id", si.id);
     if (error) { handleSupabaseError(error, { source: "crud:stock_items.update", title: "Failed to update stock item", context: { id: si.id } }); return; }
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
-  }, [deps.persistEntityToCache]);
+    deps.log("stock_item", si.id, "updated", `Updated ${si.productName} stock at ${si.godownName} to ${si.quantity}`, { productId: si.productId, godownId: si.godownId, quantity: si.quantity, threshold: si.threshold });
+  }, [deps.persistEntityToCache, deps.log]);
 
   const deleteStockItem = useCallback(async (id: string): Promise<boolean> => {
+    const existing = stockItems.find(x => x.id === id);
+    const summary = `Removed stock entry for ${existing?.productName ?? "product"} at ${existing?.godownName ?? "warehouse"}`;
     if (!navigator.onLine) {
       setStockItems(prev => {
         const updated = prev.filter(x => x.id !== id);
@@ -83,14 +90,16 @@ export function useStockDomain(deps: DomainDeps) {
         return updated;
       });
       await enqueueMutation({ type: "delete", table: "stock_items", payload: { id } });
+      deps.log("stock_item", id, "deleted", summary);
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return true;
     }
     const { error } = await supabase.from("stock_items").delete().eq("id", id);
     if (error) { handleSupabaseError(error, { source: "crud:stock_items.delete", title: "Failed to delete stock item", context: { id } }); return false; }
     setStockItems(prev => prev.filter(x => x.id !== id));
+    deps.log("stock_item", id, "deleted", summary);
     return true;
-  }, [deps.persistEntityToCache]);
+  }, [deps.persistEntityToCache, deps.log, stockItems]);
 
   const safeRefetchGodowns = useCallback(async () => {
     if (!deps.companyId) return;
