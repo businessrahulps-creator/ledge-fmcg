@@ -135,7 +135,7 @@ export default function NewOrder() {
   const addLine = () => {
     setLines((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
+      { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
     ]);
   };
 
@@ -144,16 +144,14 @@ export default function NewOrder() {
     setLines((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const updateLine = (id: string, field: keyof OrderLineState, value: string | number) => {
+  const updateLine = (id: string, field: keyof OrderLineState, value: string | number | null) => {
     setLines((prev) =>
       prev.map((l) => {
         if (l.id !== id) return l;
         if (field === "quantity") {
-          const raw = String(value).replace(/[^0-9]/g, "");
-          const num = raw === "" ? 0 : parseInt(raw, 10);
-          return { ...l, quantity: num, quantityStr: raw };
+          return { ...l, quantity: value as number | null };
         }
-        const updated = { ...l, [field]: value };
+        const updated = { ...l, [field]: value } as OrderLineState;
         if (field === "productId") {
           const product = products.find((p) => p.id === value);
           if (product) updated.unitPrice = product.basePrice;
@@ -163,17 +161,7 @@ export default function NewOrder() {
     );
   };
 
-  const handleQuantityBlur = (id: string) => {
-    setLines((prev) =>
-      prev.map((l) => {
-        if (l.id !== id) return l;
-        const qty = l.quantity || 0;
-        return { ...l, quantity: qty, quantityStr: String(qty) };
-      })
-    );
-  };
-
-  const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
+  const getLineTotal = (line: OrderLineState) => (line.quantity ?? 0) * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
