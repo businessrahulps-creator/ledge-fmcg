@@ -93,6 +93,24 @@ export function ActivityLog({ open, onOpenChange }: Props) {
     if (open) fetchEntries(null);
   }, [open, filter, companyId, fetchEntries]);
 
+  // Realtime: while sheet is open, prepend new activity rows live.
+  useEffect(() => {
+    if (!open || !companyId) return;
+    const channel = supabase
+      .channel(`activity_log:${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "activity_log", filter: `company_id=eq.${companyId}` },
+        (payload) => {
+          const row = payload.new as ActivityEntry;
+          if (filter !== "all" && row.entity_type !== filter) return;
+          setEntries(prev => prev.some(e => e.id === row.id) ? prev : [row, ...prev]);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [open, companyId, filter]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md flex flex-col gap-0 p-0">
