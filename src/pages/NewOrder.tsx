@@ -681,7 +681,7 @@ export default function NewOrder() {
                 </div>
                 <div className="flex items-center justify-between text-xs md:text-sm">
                   <span className="text-muted-foreground">Total Qty</span>
-                  <span>{lines.reduce((s, l) => s + l.quantity, 0)}</span>
+                  <span>{lines.reduce((s, l) => s + (l.quantity ?? 0), 0)}</span>
                 </div>
                 <div className="border-t border-border pt-2 md:pt-3">
                   <div className="flex items-center justify-between">
