@@ -179,14 +179,12 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Revenue Target (₹)</label>
-          <Input
-            type="text"
-            inputMode="decimal"
+          <NumberInput
+            allowDecimal
+            allowEmpty
+            min={0}
             value={revInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "" || /^\d*\.?\d*$/.test(v)) { setRevInput(v); setDirty(true); }
-            }}
+            onValueChange={(v) => { setRevInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 100000"
             className="h-8 text-xs rounded-lg"
