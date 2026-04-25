@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatIndianDate } from "@/utils/formatDate";
@@ -18,28 +19,35 @@ const PERIOD_LABELS: Record<TimePeriod, string> = {
 
 export function TimePeriodFilter({ value, onChange }: TimePeriodFilterProps) {
   return (
-    <TooltipProvider delayDuration={300}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="w-full sm:w-auto">
-            <Select value={value} onValueChange={(v) => onChange(v as TimePeriod)}>
-              <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">Today</SelectItem>
-                <SelectItem value="weekly">Last 7 days</SelectItem>
-                <SelectItem value="monthly">Last 30 days</SelectItem>
-                <SelectItem value="yearly">Last 365 days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-xs text-xs">
-          Time windows are rolling — "Last 7 days" means the last 7 days ending today, not the calendar week.
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="flex w-full items-center gap-2 sm:w-auto">
+      <Select value={value} onValueChange={(v) => onChange(v as TimePeriod)}>
+        <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="daily">Today</SelectItem>
+          <SelectItem value="weekly">Last 7 days</SelectItem>
+          <SelectItem value="monthly">Last 30 days</SelectItem>
+          <SelectItem value="yearly">Last 365 days</SelectItem>
+        </SelectContent>
+      </Select>
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label="About time periods"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="end" className="max-w-xs text-xs">
+            Time windows are rolling — "Last 7 days" means the last 7 days ending today, not the calendar week.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 }
 
