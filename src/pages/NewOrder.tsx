@@ -259,7 +259,7 @@ export default function NewOrder() {
 
     if (result.success) {
       trackFirstOrderCreated();
-      addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} has been placed.`);
+      addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
       toast.success(`Order #${result.orderNumber} created successfully!`);
 
       setTimeout(() => navigate("/orders"), 800);
