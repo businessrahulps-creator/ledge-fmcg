@@ -123,7 +123,7 @@ export function AppSidebar() {
               L
             </span>
           ) : (
-            <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-foreground">Ledge</span>
+            <span className="brand-gradient-text font-heading font-extrabold text-xl tracking-[-0.04em]">Ledge</span>
           )}
         </Link>
       </SidebarHeader>
