@@ -187,7 +187,7 @@ export default function OrderDetail() {
     }));
   };
 
-  const editTotal = editLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
+  const editTotal = editLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0);
 
   // Scheme auto-apply (centralized pricing engine)
   const pricing = useMemo(
@@ -204,7 +204,7 @@ export default function OrderDetail() {
       return;
     }
 
-    const validLines = editLines.filter(l => l.productId && l.quantity > 0);
+    const validLines = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0);
     if (validLines.length === 0) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
       return;
@@ -224,13 +224,16 @@ export default function OrderDetail() {
 
     setIsSaving(true);
 
-    const newLines: OrderLine[] = validLines.map(l => ({
-      productId: l.productId,
-      productName: l.productName || products.find(p => p.id === l.productId)?.name || "",
-      quantity: l.quantity,
-      unitPrice: l.unitPrice,
-      lineTotal: l.quantity * l.unitPrice,
-    }));
+    const newLines: OrderLine[] = validLines.map(l => {
+      const qty = l.quantity ?? 0;
+      return {
+        productId: l.productId,
+        productName: l.productName || products.find(p => p.id === l.productId)?.name || "",
+        quantity: qty,
+        unitPrice: l.unitPrice,
+        lineTotal: qty * l.unitPrice,
+      };
+    });
 
     const newTotal = newLines.reduce((sum, l) => sum + l.lineTotal, 0);
 
@@ -263,7 +266,7 @@ export default function OrderDetail() {
     const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
     if (willBeUnpaid) {
       const currentContribution = wasUnpaid ? order.total : 0;
-      const newTotal = editLines.filter(l => l.productId && l.quantity > 0).reduce((s, l) => s + l.quantity * l.unitPrice, 0);
+      const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s, l) => s + (l.quantity ?? 0) * l.unitPrice, 0);
       const projected = dealer.outstandingAmount - currentContribution + newTotal;
       if (projected > dealer.creditLimit) {
         if (userRole === "super_admin") {
