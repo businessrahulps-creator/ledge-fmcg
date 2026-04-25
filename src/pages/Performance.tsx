@@ -8,6 +8,7 @@ import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatCurrency } from "@/data/mock-data";
+import { NumberInput } from "@/components/ui/number-input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getChurnRisk, churnRiskConfig } from "@/utils/dealerScorecard";
@@ -543,13 +544,12 @@ export default function Performance() {
                     <span>Target</span>
                     <div className="flex items-center rounded-md border border-border bg-background px-2 py-1">
                       <span className="mr-0.5 text-muted-foreground">₹</span>
-                      <input
-                        type="number"
-                        value={dailyTarget}
-                        onChange={(e) => setDailyTarget(Number(e.target.value) || 0)}
-                        className="w-16 bg-transparent text-xs text-foreground outline-none"
+                      <NumberInput
+                        allowEmpty={false}
                         min={0}
-                        step={5000}
+                        value={dailyTarget}
+                        onValueChange={(v) => setDailyTarget(v ?? 0)}
+                        className="w-16 h-6 px-1 border-0 bg-transparent text-xs text-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     </div>
                   </div>

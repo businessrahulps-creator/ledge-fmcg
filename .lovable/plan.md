@@ -1,49 +1,109 @@
-# Fix: Irreversible self-demotion from Super Admin → Sales Manager / Accountant
+# Fix Number Input UX (Empty + Leading Zero + Mobile Keyboard)
 
-## Root cause (verified)
+## The Problem
 
-In `src/pages/Settings.tsx` (lines ~242–266), the team-member edit dialog lets a user change **their own** role to any value, including `sales_manager` or `accountant`.
+Across the app, almost every numeric field uses this pattern:
 
-The Supabase RLS policy `Super admins can manage same-company roles` on `user_roles` requires `has_role(auth.uid(), 'super_admin')` for **both UPDATE and DELETE**. The moment a Super Admin saves a self-demotion:
-- They lose `super_admin` privilege.
-- They can no longer update *any* row in `user_roles` — including their own.
-- If they are the only Super Admin in the workspace (the common case for a founder testing the app), **no one can restore the role**. It's a permanent lockout.
+```tsx
+<Input
+  type="number"
+  value={state.qty}              // a number
+  onChange={(e) => setState({ ...state, qty: parseInt(e.target.value) || 0 })}
+/>
+```
 
-This matches the user's report exactly: "changed his status from admin to sales manager; after that, he couldn't go back."
+This causes three real-world UX failures users keep hitting:
 
-## Fix scope (now)
+1. **Can't clear the field.** Backspace empties the input → `parseInt("")` is `NaN` → `|| 0` snaps state back to `0` → display shows `0` → user must manually highlight and overwrite.
+2. **Leading zero.** Field shows `0`, user types `5` → display becomes `05` (or `50` depending on cursor) instead of `5`.
+3. **Wrong mobile keyboard.** `type="number"` on iOS shows a keyboard with `,` and `-` and the wrong layout; on Android it varies. The numeric keypad (`inputMode="numeric"` / `decimal"`) is what users actually want.
 
-Pure UI-level **prevention guardrail** — no DB migration, no RLS change, no RBAC refactor. The next-month role-based feature pass will handle proper transfer-of-ownership flows; this fix just stops new users from falling into the trap.
+### Where this hurts (15+ inputs)
 
-### Changes — `src/pages/Settings.tsx` only
+- **Stock**: `basePrice`, warehouse `quantity`, `threshold`, `addStockQty` (`Stock.tsx` lines 687, 795, 805, 866)
+- **Schemes**: `discountPercent`, `buyQty`, `freeQty`, `flatAmount`, `minOrderValue`, `minQty` (`Schemes.tsx` lines 357–415)
+- **Targets**: monthly/yearly target values (`Targets.tsx` lines 182, 203)
+- **Performance**: `dailyTarget` (`Performance.tsx` line 549)
+- **NewOrder**: line `unitPrice` (line 527) — note that `quantity` already uses the correct pattern with a `quantityStr` shadow
+- **OrderDetail**: line `unitPrice` (line 476), claim `quantity` (line 848)
+- **Claims**: claim `quantity` (line 356)
+- **Distributors**: `creditLimit` (line 282)
+- **DealerDetail**: standing-order `quantity` (line 531)
+- **Billing**: editable `gstRate` (line 894)
 
-1. **Lock the role dropdown when editing yourself.**
-   In the edit dialog (lines ~610–622), detect `isSelf = editMember.userId === user?.id` (pull `user` from `useAuth()`, already imported elsewhere in the file or easily added).
-   - When `isSelf` is true: render the role `Select` as **disabled** with the current role still visible, and show a small helper line beneath it: *"You can't change your own role. Ask another Super Admin to do it for you."*
-   - When `isSelf` is false: behaves exactly as today.
+The `quantityStr` pattern in `NewOrder.tsx` (lines 42, 154, 166–171) is the proven shape of the fix — we just need to extract and reuse it.
 
-2. **Defense-in-depth in `saveMember`** (lines ~242–266).
-   Before calling the `user_roles` update, if `editMember.userId === user?.id && editMember.role !== originalRole`, short-circuit with `toast.error("You can't change your own role. Ask another Super Admin to do it for you.")` and return. This catches anyone who bypasses the disabled control (devtools, stale state).
-   - To know `originalRole`, capture it when opening the edit dialog (stash on `editMember` as `originalRole`, or look it up from the `team` array by `editMember.id`).
+## The Fix: One Reusable `NumberInput` Component
 
-3. **Also guard self-removal** (lines ~268–281, `confirmRemoveMember`).
-   Same pattern: if `deleteMember.userId === user?.id`, block with a toast. Removing yourself has the same lockout shape and is worth fixing in the same pass.
+Create `src/components/ui/number-input.tsx` that wraps the existing `<Input>` and handles the edge cases internally, so callers stay simple.
 
-4. **No changes** to:
-   - The role dropdown options (still shows all three roles for *other* members).
-   - RLS policies, DB functions, or migrations.
-   - Any other page (`AuthContext`, `NewOrder`, `Schemes`, `OrderDetail` only *read* roles — unaffected).
-   - The "Sole Super Admin" edge case (a workspace with one admin demoting *another* user is not the reported bug; addressing it requires DB-level "must keep ≥1 super_admin" checks, which belong in next month's RBAC pass).
+### Behavior (the "best-practice" UX)
 
-## Out of scope (deferred to next month's role-based feature pass)
+| Action | Result |
+|---|---|
+| Empty field | Stays empty (no snap to `0`); state value is `null` (or `0` if `allowEmpty=false`) |
+| Type `5` over `0` | Displays `5`, not `05` |
+| Type `0` then `5` | Displays `5` |
+| Type `1.2` (when `decimal`) | Allowed |
+| Type letters / extra dots | Silently rejected (input doesn't update) |
+| Blur with empty + `min` set | Snaps to `min` (or stays empty if `allowEmpty`) |
+| Blur with value below `min` / above `max` | Clamps to range |
+| Mobile keyboard | `inputMode="numeric"` (integer) or `inputMode="decimal"` |
+| Desktop spinners | Hidden (CSS) — they're cluttered and rarely used |
+| Increment buttons | Optional `showSteppers` prop renders large +/- buttons (useful for Qty fields, opt-in) |
 
-- Server-side trigger enforcing "every company must retain ≥1 super_admin" (proper fix for the sole-admin edge case).
-- "Transfer ownership" flow (promote another member, then demote self atomically).
-- Recovery RPC for already-locked-out users (one-off — the user asking is the only known case; can be unlocked manually via a migration if needed, ask before doing).
-- Any change to the `app_role` enum or RLS policy structure.
+### API
 
-## Result
+```tsx
+<NumberInput
+  value={state.qty}                 // number | null
+  onValueChange={(n) => setState({ ...state, qty: n })}
+  min={0}
+  max={28}
+  allowDecimal                      // false → integer-only
+  allowEmpty                        // default true; false forces a number always
+  placeholder="0"
+  className="h-10 rounded-lg"
+/>
+```
 
-- A Super Admin **cannot accidentally demote or remove themselves** from the Settings UI. The control is visibly disabled with a clear explanation, and the save handler refuses the operation as a backstop.
-- All other team-management flows (editing other members, changing their roles, removing them) are unchanged.
-- Zero risk to existing data, RLS, or permissions. Ships in one file.
+Internally:
+- Keep a local `string` state for what's typed (the `quantityStr` trick).
+- On every keystroke, validate against a regex (`/^\d*$/` or `/^\d*\.?\d*$/`), reject invalid input, and emit the parsed number (or `null` for empty) to the parent.
+- On blur, normalize: strip leading zeros (`"05"` → `"5"`), clamp to `min`/`max`, and re-sync the display string with the committed value.
+- Use `type="text"` under the hood (not `type="number"`) — this is the only reliable way to prevent browser auto-formatting and get consistent behavior across iOS/Android/desktop.
+
+### Files to add
+
+- **`src/components/ui/number-input.tsx`** — new component (~80 lines)
+- **`src/components/ui/__tests__/number-input.test.tsx`** — vitest coverage for: empty clearing, leading-zero stripping, decimal toggle, min/max clamping, paste handling
+
+### Files to migrate (replace `<Input type="number" ...>` + `parseInt || 0`)
+
+1. `src/pages/Stock.tsx` (4 inputs)
+2. `src/pages/Schemes.tsx` (6 inputs)
+3. `src/pages/NewOrder.tsx` (price field — keep existing qty pattern, optionally also swap it to `NumberInput` for consistency)
+4. `src/pages/OrderDetail.tsx` (2 inputs)
+5. `src/pages/Claims.tsx` (1 input)
+6. `src/pages/Targets.tsx` (2 inputs)
+7. `src/pages/Performance.tsx` (1 input — daily target)
+8. `src/pages/Distributors.tsx` (credit limit)
+9. `src/pages/DealerDetail.tsx` (standing-order qty)
+10. `src/pages/Billing.tsx` (GST rate)
+
+State types stay as `number` — the only call-site change is swapping the JSX and the `onChange` for `onValueChange`. For fields where `null` would break math (e.g. unitPrice in calculations), pass `allowEmpty={false}` so the value stays a number, while still avoiding the leading-zero bug during typing.
+
+### Memory update
+
+Add `mem://style/number-inputs` documenting the rule:
+> All numeric form fields use `<NumberInput>` from `@/components/ui/number-input`. Never use `<Input type="number">` + `parseInt(e.target.value) || 0` — it traps users in a `0` state and prevents clearing.
+
+## Out of Scope (intentionally)
+
+- Currency formatting with thousand separators while typing (₹1,23,456) — adds complexity, can come later if requested.
+- Long-press accelerating steppers — wait for real demand.
+- Touch this in the AI features sprint (next month) — this is a foundational UX fix that should land first so the new screens use the right pattern.
+
+## Risk
+
+Very low. The change is mechanical, the proven pattern already exists in `NewOrder.tsx`, and each migrated input remains visually identical — only the typing behavior improves. Tests + a manual pass on Stock + Schemes (the highest-frequency pages) will confirm.

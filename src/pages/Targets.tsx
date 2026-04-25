@@ -179,10 +179,13 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Revenue Target (₹)</label>
           <Input
-            type="number"
-            min={0}
+            type="text"
+            inputMode="decimal"
             value={revInput}
-            onChange={(e) => { setRevInput(e.target.value); setDirty(true); }}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "" || /^\d*\.?\d*$/.test(v)) { setRevInput(v); setDirty(true); }
+            }}
             onBlur={handleSave}
             placeholder="e.g. 100000"
             className="h-8 text-xs rounded-lg"
@@ -200,10 +203,13 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Orders Target</label>
           <Input
-            type="number"
-            min={0}
+            type="text"
+            inputMode="numeric"
             value={ordInput}
-            onChange={(e) => { setOrdInput(e.target.value); setDirty(true); }}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "" || /^\d*$/.test(v)) { setOrdInput(v); setDirty(true); }
+            }}
             onBlur={handleSave}
             placeholder="e.g. 20"
             className="h-8 text-xs rounded-lg"

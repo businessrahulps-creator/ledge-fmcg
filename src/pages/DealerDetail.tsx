@@ -20,6 +20,7 @@ import { buildScorecard, churnRiskConfig } from "@/utils/dealerScorecard";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
@@ -528,7 +529,7 @@ export default function DealerDetail() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs md:text-sm">Quantity *</Label>
-                <Input type="number" min={1} value={ssForm.quantity} onChange={(e) => setSsForm({ ...ssForm, quantity: parseInt(e.target.value) || 1 })} className="h-10 rounded-lg" />
+                <NumberInput allowEmpty={false} min={1} value={ssForm.quantity} onValueChange={(v) => setSsForm({ ...ssForm, quantity: v ?? 1 })} className="h-10 rounded-lg" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs md:text-sm">Date</Label>

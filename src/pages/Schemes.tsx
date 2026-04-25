@@ -7,6 +7,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -349,12 +350,13 @@ export default function Schemes() {
             {form.schemeType === "percentage" && (
               <div className="space-y-1.5">
                 <Label className="text-xs">Discount Percentage (%)</Label>
-                <Input
-                  type="number"
+                <NumberInput
+                  allowDecimal
+                  allowEmpty={false}
                   min={0}
                   max={100}
                   value={form.discountPercent}
-                  onChange={e => setForm(f => ({ ...f, discountPercent: parseFloat(e.target.value) || 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, discountPercent: v ?? 0 }))}
                 />
               </div>
             )}
@@ -363,20 +365,20 @@ export default function Schemes() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Buy Quantity</Label>
-                  <Input
-                    type="number"
+                  <NumberInput
+                    allowEmpty={false}
                     min={1}
                     value={form.buyQty}
-                    onChange={e => setForm(f => ({ ...f, buyQty: parseInt(e.target.value) || 0 }))}
+                    onValueChange={v => setForm(f => ({ ...f, buyQty: v ?? 1 }))}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Get Free Quantity</Label>
-                  <Input
-                    type="number"
+                  <NumberInput
+                    allowEmpty={false}
                     min={1}
                     value={form.freeQty}
-                    onChange={e => setForm(f => ({ ...f, freeQty: parseInt(e.target.value) || 0 }))}
+                    onValueChange={v => setForm(f => ({ ...f, freeQty: v ?? 1 }))}
                   />
                 </div>
               </div>
@@ -385,11 +387,12 @@ export default function Schemes() {
             {form.schemeType === "flat_discount" && (
               <div className="space-y-1.5">
                 <Label className="text-xs">Discount Amount (₹)</Label>
-                <Input
-                  type="number"
+                <NumberInput
+                  allowDecimal
+                  allowEmpty={false}
                   min={0}
                   value={form.flatAmount}
-                  onChange={e => setForm(f => ({ ...f, flatAmount: parseFloat(e.target.value) || 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, flatAmount: v ?? 0 }))}
                 />
               </div>
             )}
@@ -398,21 +401,22 @@ export default function Schemes() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Min Order Value (₹)</Label>
-                <Input
-                  type="number"
+                <NumberInput
+                  allowDecimal
+                  allowEmpty={false}
                   min={0}
                   value={form.minOrderValue}
-                  onChange={e => setForm(f => ({ ...f, minOrderValue: parseFloat(e.target.value) || 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, minOrderValue: v ?? 0 }))}
                   placeholder="0 = no minimum"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Min Product Qty</Label>
-                <Input
-                  type="number"
+                <NumberInput
+                  allowEmpty={false}
                   min={0}
                   value={form.minQty}
-                  onChange={e => setForm(f => ({ ...f, minQty: parseInt(e.target.value) || 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, minQty: v ?? 0 }))}
                   placeholder="0 = no minimum"
                 />
               </div>
