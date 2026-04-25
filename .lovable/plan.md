@@ -1,34 +1,49 @@
-## Root causes verified
+## Verified findings
 
-1. **Logo not rendering after upload** — The `company-logos` storage bucket is **private** (`public = false`). The upload code calls `getPublicUrl()` and saves that URL to `companies.logo_url`, but the public-object endpoint only works when the bucket itself is marked public. The existing "Public can read company logos" SELECT policies on `storage.objects` do **not** override the bucket-level privacy flag for the public URL endpoint. Result: URL is stored, but `<img>` requests return an error and the logo fails to display.
+Looked at `src/pages/Billing.tsx` and the dealer/data shape. Two precise gaps match what you reported:
 
-2. **Logo showing in top-left nav** — `src/components/layout/AppSidebar.tsx` (lines 150–164) renders `<img src={logoUrl}>` next to the "Ledge" wordmark in the `SidebarHeader` whenever a logo is set. The user wants this area to be branding-only.
+### 1. Buyer GSTIN / state code not populated from dealer
+In `handleSelectOrder` (around lines 156–183), when an order is selected we look up the linked dealer and set `buyerName`, `buyerAddress`, `vehicle`, `driverName` — but we never set `buyerGstin` or `buyerStateCode`. The dealer record already has both (`dealer.gstin`, `dealer.stateCode`, mapped from `distributors.gstin` / `distributors.state_code`), so users today have to retype them every time.
 
-## Changes
+### 2. Auto-injected "Converted from …" note
+In `handleConvertToGst` (line 347):
+```ts
+setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+```
+If the source estimate has no notes, we silently inject `"Converted from Estimate EST-…"` into the new proforma / credit note / GST invoice notes field. That's the text you want gone.
 
-### 1. Migration: make `company-logos` bucket public
-- `UPDATE storage.buckets SET public = true WHERE id = 'company-logos';`
-- Drop the redundant duplicate SELECT policy `Public can read company-logos objects` (the other one covers it).
-- Keep the existing folder-scoped INSERT/UPDATE/DELETE policies — only members of the matching company can write/replace/delete their own logo, so making the file readable is safe and consistent with logos appearing on invoices/PDFs.
+(Note: the existing `sourceOrderId` link is still preserved as a structured field on the invoice — removing the auto-note doesn't break the lineage badge in the list view, which uses `sourceOrderId`, not the notes string.)
 
-Why public is correct here: logos are non-sensitive brand assets already embedded in customer-facing PDFs (invoices, statements). Signed URLs would force every render path (sidebar, PDF generator, etc.) to refresh URLs and add complexity for zero security benefit.
+## Proposed changes — `src/pages/Billing.tsx` only
 
-### 2. `src/components/layout/AppSidebar.tsx` — remove logo from header
-- Remove the `logoUrl` state, the `useEffect` that fetches it, and the realtime channel subscription (no longer needed here).
-- Replace the `SidebarHeader` content so it always shows the "Ledge" wordmark only:
-  - Expanded: just the `Ledge` wordmark (no avatar/logo block).
-  - Collapsed: the existing "L" monogram tile (kept so the collapsed sidebar still has a visible brand mark).
-- Remove the `supabase` and `useAuth` imports if they're no longer used elsewhere in the file (verify before removing — `useAuth` is also used for `companyId` via `useOnboarding`, so keep what's still referenced).
+**A. Auto-fill buyer GSTIN + state code from the dealer**
+In `handleSelectOrder`, after the existing `dealer` lookup, also set:
+```ts
+setBuyerGstin(dealer?.gstin || "");
+setBuyerStateCode(dealer?.stateCode || "");
+```
+This fills the fields when the dealer has them on file, and leaves them blank (editable) when the dealer record is missing those values — so the user never has to retype, but can still override.
 
-### 3. `src/pages/Company.tsx` — no logic change needed
-After the bucket is public, the existing `getPublicUrl()` flow will work as-is. The "Company logo" card on this page already renders the logo correctly when `logoUrl` is set. Upload button text and other UI remain untouched.
+**B. Remove auto-insertion of the conversion note**
+Change the line in `handleConvertToGst` from:
+```ts
+setNotes(inv.notes || `Converted from ${docTypeLabels[inv.docType]} ${inv.invoiceNumber}`);
+```
+to:
+```ts
+setNotes(inv.notes || "");
+```
+Notes will only carry forward what the user actually typed on the source estimate; if the source had none, the field stays empty.
 
-## What is intentionally NOT changed
-- Upload button text, dialog copy, validation messages — untouched.
-- The Company page logo preview/upload/remove flow — untouched.
-- Any other header/topbar component — only the sidebar header had the logo.
+## Out of scope (intentionally unchanged)
+- Tax calculation (`calculated` memo), state-code consistency validation, GSTIN format validation.
+- PDF generation (`GstInvoicePdf`, `handleDownloadPdf`).
+- The structured `sourceOrderId` link between estimate and converted document.
+- Edit flow (`handleEdit`) — it already loads the saved GSTIN/state from the existing invoice, which is correct.
 
-## Verification after apply
-- Upload a logo on `/company` → it appears in the Company logo card immediately and persists on reload.
-- Sidebar top-left shows only the "Ledge" wordmark (expanded) or "L" tile (collapsed) — never the company logo.
-- PDFs/invoices that embed `logo_url` continue to render (same public URL, now actually serving).
+## Verification after the change
+- Pick an order whose dealer has a GSTIN on file → open "Create from order" → confirm GSTIN and state code are pre-filled and editable.
+- Pick an order whose dealer has no GSTIN → fields stay blank, no error.
+- Convert an estimate with empty notes to GST invoice → notes textarea is empty.
+- Convert an estimate that *does* have notes → those notes carry forward unchanged.
+- Run `tsc --noEmit` to confirm no type regressions.
