@@ -937,7 +937,7 @@ export default function Billing() {
                       </div>
                       <div className="col-span-1 sm:col-span-1 space-y-1">
                         {i === 0 && <Label className="text-[10px] text-muted-foreground">Qty</Label>}
-                        <Input type="number" value={line.quantity} readOnly className="h-9 text-xs bg-muted/30" />
+                        <Input type="text" value={String(line.quantity)} readOnly className="h-9 text-xs bg-muted/30" />
                       </div>
                       <div className="col-span-1 sm:col-span-1 space-y-1">
                         {i === 0 && <Label className="text-[10px] text-muted-foreground">Unit</Label>}
@@ -945,7 +945,7 @@ export default function Billing() {
                       </div>
                       <div className="col-span-1 sm:col-span-2 space-y-1">
                         {i === 0 && <Label className="text-[10px] text-muted-foreground">Rate (₹)</Label>}
-                        <Input type="number" value={line.unitPrice} readOnly className="h-9 text-xs bg-muted/30" />
+                        <Input type="text" value={String(line.unitPrice)} readOnly className="h-9 text-xs bg-muted/30" />
                       </div>
                       <div className="hidden sm:block sm:col-span-2 space-y-1 text-right">
                         {i === 0 && <Label className="text-[10px] text-muted-foreground">Total</Label>}

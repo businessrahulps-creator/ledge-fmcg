@@ -39,8 +39,7 @@ import {
 interface OrderLineState {
   id: string;
   productId: string;
-  quantity: number;
-  quantityStr: string;
+  quantity: number | null;
   unitPrice: number;
 }
 
@@ -88,7 +87,7 @@ export default function NewOrder() {
   const firstProductRef = useRef<HTMLButtonElement>(null);
 
   const [lines, setLines] = useState<OrderLineState[]>([
-    { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
+    { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
   const [paymentMode, setPaymentMode] = useState("cash");
   const [paymentStatus, setPaymentStatus] = useState("pending");
@@ -136,7 +135,7 @@ export default function NewOrder() {
   const addLine = () => {
     setLines((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), productId: "", quantity: 1, quantityStr: "1", unitPrice: 0 },
+      { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
     ]);
   };
 
@@ -145,16 +144,14 @@ export default function NewOrder() {
     setLines((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const updateLine = (id: string, field: keyof OrderLineState, value: string | number) => {
+  const updateLine = (id: string, field: keyof OrderLineState, value: string | number | null) => {
     setLines((prev) =>
       prev.map((l) => {
         if (l.id !== id) return l;
         if (field === "quantity") {
-          const raw = String(value).replace(/[^0-9]/g, "");
-          const num = raw === "" ? 0 : parseInt(raw, 10);
-          return { ...l, quantity: num, quantityStr: raw };
+          return { ...l, quantity: value as number | null };
         }
-        const updated = { ...l, [field]: value };
+        const updated = { ...l, [field]: value } as OrderLineState;
         if (field === "productId") {
           const product = products.find((p) => p.id === value);
           if (product) updated.unitPrice = product.basePrice;
@@ -164,17 +161,7 @@ export default function NewOrder() {
     );
   };
 
-  const handleQuantityBlur = (id: string) => {
-    setLines((prev) =>
-      prev.map((l) => {
-        if (l.id !== id) return l;
-        const qty = l.quantity || 0;
-        return { ...l, quantity: qty, quantityStr: String(qty) };
-      })
-    );
-  };
-
-  const getLineTotal = (line: OrderLineState) => line.quantity * line.unitPrice;
+  const getLineTotal = (line: OrderLineState) => (line.quantity ?? 0) * line.unitPrice;
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
@@ -196,7 +183,7 @@ export default function NewOrder() {
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
   // --- Derived validation state (used for inline errors) ---
-  const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+  const validLines = lines.filter((l) => l.productId && (l.quantity ?? 0) > 0);
   const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
   const errors = {
     dealer: !selectedDealer,
@@ -214,12 +201,13 @@ export default function NewOrder() {
     if (!selectedGodown) return new Map<string, string>();
     const warnings = new Map<string, string>();
     for (const line of lines) {
-      if (!line.productId || line.quantity <= 0) continue;
+      const qty = line.quantity ?? 0;
+      if (!line.productId || qty <= 0) continue;
       const stock = stockItems.find(
         s => s.productId === line.productId && s.godownId === selectedGodown,
       );
       const available = stock?.quantity ?? 0;
-      if (line.quantity > available) {
+      if (qty > available) {
         warnings.set(
           line.id,
           `Only ${available} ${stock?.unit || "units"} available at ${selectedGodownObj?.name ?? "this warehouse"}`,
@@ -300,15 +288,16 @@ export default function NewOrder() {
       salesperson: sp?.name || "",
       lines: validLines.map((l) => {
         const product = products.find((p) => p.id === l.productId);
+        const qty = l.quantity ?? 0;
         return {
           productId: l.productId,
           productName: product?.name || "",
-          quantity: l.quantity,
+          quantity: qty,
           unitPrice: l.unitPrice,
-          lineTotal: l.quantity * l.unitPrice,
+          lineTotal: qty * l.unitPrice,
         };
       }),
-      total: validLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0),
+      total: validLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0),
       paymentMode: paymentMode as "cash" | "bank_transfer" | "cheque" | "upi",
       paymentStatus: paymentStatus as "paid" | "partial" | "pending",
       dispatchDate: dispatchDate || null,
@@ -511,12 +500,11 @@ export default function NewOrder() {
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Qty</Label>
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              value={line.quantityStr}
-                              onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
-                              onBlur={() => handleQuantityBlur(line.id)}
+                            <NumberInput
+                              allowEmpty
+                              min={1}
+                              value={line.quantity}
+                              onValueChange={(v) => updateLine(line.id, "quantity", v)}
                               className="h-10 rounded-lg md:h-12"
                             />
                           </div>
@@ -693,7 +681,7 @@ export default function NewOrder() {
                 </div>
                 <div className="flex items-center justify-between text-xs md:text-sm">
                   <span className="text-muted-foreground">Total Qty</span>
-                  <span>{lines.reduce((s, l) => s + l.quantity, 0)}</span>
+                  <span>{lines.reduce((s, l) => s + (l.quantity ?? 0), 0)}</span>
                 </div>
                 <div className="border-t border-border pt-2 md:pt-3">
                   <div className="flex items-center justify-between">

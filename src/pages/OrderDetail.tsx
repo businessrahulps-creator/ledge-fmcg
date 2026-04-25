@@ -77,8 +77,7 @@ interface EditLineState {
   id: string;
   productId: string;
   productName: string;
-  quantity: number;
-  quantityStr: string;
+  quantity: number | null;
   unitPrice: number;
 }
 
@@ -152,7 +151,6 @@ export default function OrderDetail() {
         productId: l.productId,
         productName: l.productName,
         quantity: l.quantity,
-        quantityStr: String(l.quantity),
         unitPrice: l.unitPrice,
       })));
     }
@@ -163,7 +161,7 @@ export default function OrderDetail() {
 
   // Line editing helpers
   const addLine = () => {
-    setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, quantityStr: "1", unitPrice: 0 }]);
+    setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitPrice: 0 }]);
   };
 
   const removeLine = (lineId: string) => {
@@ -171,15 +169,13 @@ export default function OrderDetail() {
     setEditLines(prev => prev.filter(l => l.id !== lineId));
   };
 
-  const updateLine = (lineId: string, field: keyof EditLineState, value: string | number) => {
+  const updateLine = (lineId: string, field: keyof EditLineState, value: string | number | null) => {
     setEditLines(prev => prev.map(l => {
       if (l.id !== lineId) return l;
       if (field === "quantity") {
-        const raw = String(value).replace(/[^0-9]/g, "");
-        const num = raw === "" ? 0 : parseInt(raw, 10);
-        return { ...l, quantity: num, quantityStr: raw };
+        return { ...l, quantity: value as number | null };
       }
-      const updated = { ...l, [field]: value };
+      const updated = { ...l, [field]: value } as EditLineState;
       if (field === "productId") {
         const product = products.find(p => p.id === value);
         if (product) {
@@ -191,14 +187,7 @@ export default function OrderDetail() {
     }));
   };
 
-  const handleQuantityBlur = (lineId: string) => {
-    setEditLines(prev => prev.map(l => {
-      if (l.id !== lineId) return l;
-      return { ...l, quantityStr: String(l.quantity || 0) };
-    }));
-  };
-
-  const editTotal = editLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
+  const editTotal = editLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0);
 
   // Scheme auto-apply (centralized pricing engine)
   const pricing = useMemo(
@@ -215,7 +204,7 @@ export default function OrderDetail() {
       return;
     }
 
-    const validLines = editLines.filter(l => l.productId && l.quantity > 0);
+    const validLines = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0);
     if (validLines.length === 0) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
       return;
@@ -235,13 +224,16 @@ export default function OrderDetail() {
 
     setIsSaving(true);
 
-    const newLines: OrderLine[] = validLines.map(l => ({
-      productId: l.productId,
-      productName: l.productName || products.find(p => p.id === l.productId)?.name || "",
-      quantity: l.quantity,
-      unitPrice: l.unitPrice,
-      lineTotal: l.quantity * l.unitPrice,
-    }));
+    const newLines: OrderLine[] = validLines.map(l => {
+      const qty = l.quantity ?? 0;
+      return {
+        productId: l.productId,
+        productName: l.productName || products.find(p => p.id === l.productId)?.name || "",
+        quantity: qty,
+        unitPrice: l.unitPrice,
+        lineTotal: qty * l.unitPrice,
+      };
+    });
 
     const newTotal = newLines.reduce((sum, l) => sum + l.lineTotal, 0);
 
@@ -274,7 +266,7 @@ export default function OrderDetail() {
     const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
     if (willBeUnpaid) {
       const currentContribution = wasUnpaid ? order.total : 0;
-      const newTotal = editLines.filter(l => l.productId && l.quantity > 0).reduce((s, l) => s + l.quantity * l.unitPrice, 0);
+      const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s, l) => s + (l.quantity ?? 0) * l.unitPrice, 0);
       const projected = dealer.outstandingAmount - currentContribution + newTotal;
       if (projected > dealer.creditLimit) {
         if (userRole === "super_admin") {
@@ -460,12 +452,11 @@ export default function OrderDetail() {
                   </Select>
                 </div>
                 <div className="w-20">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={line.quantityStr}
-                    onChange={e => updateLine(line.id, "quantity", e.target.value)}
-                    onBlur={() => handleQuantityBlur(line.id)}
+                  <NumberInput
+                    allowEmpty
+                    min={1}
+                    value={line.quantity}
+                    onValueChange={v => updateLine(line.id, "quantity", v)}
                     placeholder="Qty"
                     className="h-9 text-xs text-right"
                   />
@@ -482,7 +473,7 @@ export default function OrderDetail() {
                   />
                 </div>
                 <div className="w-20 flex items-center justify-end gap-1">
-                  <span className="text-xs font-medium">{formatCurrency(line.quantity * line.unitPrice)}</span>
+                  <span className="text-xs font-medium">{formatCurrency((line.quantity ?? 0) * line.unitPrice)}</span>
                   {editLines.length > 1 && (
                     <button onClick={() => removeLine(line.id)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
                       <X className="h-3.5 w-3.5" />

@@ -6,6 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { formatCurrency } from "@/data/mock-data";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } from "lucide-react";
@@ -128,12 +129,12 @@ interface InlineTargetRowProps {
 }
 
 function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave }: InlineTargetRowProps) {
-  const [revInput, setRevInput] = useState(existingTarget?.targetRevenue?.toString() || "");
-  const [ordInput, setOrdInput] = useState(existingTarget?.targetOrders?.toString() || "");
+  const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
+  const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
 
-  const targetRev = Number(revInput) || 0;
-  const targetOrd = Number(ordInput) || 0;
+  const targetRev = revInput ?? 0;
+  const targetOrd = ordInput ?? 0;
   const revStatus = getStatus(actualRevenue, targetRev);
   const ordStatus = getStatus(actualOrders, targetOrd);
   const revPct = targetRev > 0 ? Math.min((actualRevenue / targetRev) * 100, 120) : 0;
@@ -178,14 +179,12 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Revenue Target (₹)</label>
-          <Input
-            type="text"
-            inputMode="decimal"
+          <NumberInput
+            allowDecimal
+            allowEmpty
+            min={0}
             value={revInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "" || /^\d*\.?\d*$/.test(v)) { setRevInput(v); setDirty(true); }
-            }}
+            onValueChange={(v) => { setRevInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 100000"
             className="h-8 text-xs rounded-lg"
@@ -202,14 +201,11 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Orders Target</label>
-          <Input
-            type="text"
-            inputMode="numeric"
+          <NumberInput
+            allowEmpty
+            min={0}
             value={ordInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "" || /^\d*$/.test(v)) { setOrdInput(v); setDirty(true); }
-            }}
+            onValueChange={(v) => { setOrdInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 20"
             className="h-8 text-xs rounded-lg"
