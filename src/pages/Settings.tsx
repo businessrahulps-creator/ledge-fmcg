@@ -627,7 +627,11 @@ export default function Settings() {
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Role</Label>
-                  <Select value={editMember.role} onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}>
+                  <Select
+                    value={editMember.role}
+                    onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}
+                    disabled={editMember.userId === user?.id}
+                  >
                     <SelectTrigger className="h-10 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
@@ -637,6 +641,11 @@ export default function Settings() {
                       <SelectItem value="accountant">Accountant</SelectItem>
                     </SelectContent>
                   </Select>
+                  {editMember.userId === user?.id && (
+                    <p className="text-[11px] text-muted-foreground">
+                      You can't change your own role. Ask another Super Admin to do it for you.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
