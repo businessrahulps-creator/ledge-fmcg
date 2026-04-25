@@ -92,6 +92,14 @@ export default function NewOrder() {
   const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
+  const [attemptedSave, setAttemptedSave] = useState(false);
+
+  // Refs for scroll-to-first-error
+  const dealerFieldRef = useRef<HTMLDivElement>(null);
+  const salespersonFieldRef = useRef<HTMLDivElement>(null);
+  const warehouseFieldRef = useRef<HTMLDivElement>(null);
+  const dispatchDateFieldRef = useRef<HTMLDivElement>(null);
+  const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
