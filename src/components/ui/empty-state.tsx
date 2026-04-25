@@ -35,7 +35,13 @@ export function EmptyState({
         className,
       )}
     >
-      <Icon className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+      <div className="relative">
+        <div
+          aria-hidden
+          className="brand-gradient-soft-bg pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full blur-xl"
+        />
+        <Icon className="relative h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
+      </div>
       <p className="mt-3 text-sm font-medium">{title}</p>
       {description && (
         <p className="mt-0.5 max-w-sm text-xs text-muted-foreground">{description}</p>
