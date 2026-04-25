@@ -124,9 +124,32 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
           {collapsed ? (
-            <img src={ledgeMark} alt="Ledge" className="h-7 w-7 object-contain shrink-0" />
+            <div className="relative h-7 w-7 shrink-0">
+              {!markLoaded && (
+                <Skeleton className="absolute inset-0 rounded-md bg-gradient-to-br from-primary/20 to-accent/20" />
+              )}
+              <img
+                src={ledgeMark}
+                alt="Ledge"
+                width={28}
+                height={28}
+                className={`h-7 w-7 object-contain transition-opacity duration-200 ${logoLoaded || markLoaded ? "opacity-100" : "opacity-0"}`}
+                onLoad={() => setMarkLoaded(true)}
+              />
+            </div>
           ) : (
-            <img src={ledgeLogo} alt="Ledge" className="h-7 w-auto object-contain" />
+            <div className="relative h-7 w-[96px]">
+              {!logoLoaded && (
+                <Skeleton className="absolute inset-0 rounded-md bg-gradient-to-r from-primary/20 to-accent/20" />
+              )}
+              <img
+                src={ledgeLogo}
+                alt="Ledge"
+                height={28}
+                className={`h-7 w-auto object-contain transition-opacity duration-200 ${logoLoaded ? "opacity-100" : "opacity-0"}`}
+                onLoad={() => setLogoLoaded(true)}
+              />
+            </div>
           )}
         </Link>
       </SidebarHeader>
