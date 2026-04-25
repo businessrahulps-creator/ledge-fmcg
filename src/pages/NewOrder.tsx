@@ -332,6 +332,17 @@ export default function NewOrder() {
   };
 
   const handleSave = () => {
+    setAttemptedSave(true);
+
+    // Run base validation first so missing fields are surfaced before the credit-limit gate
+    const hasBlockingError =
+      errors.dealer || errors.salesperson || errors.products ||
+      !!errors.invalidPriceLine || errors.warehouse || errors.dispatchDate;
+    if (hasBlockingError) {
+      executeSave();
+      return;
+    }
+
     if (exceedsCreditLimit) {
       if (isSuperAdmin) {
         setCreditOverrideOpen(true);
