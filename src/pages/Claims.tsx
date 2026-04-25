@@ -6,6 +6,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -347,15 +348,12 @@ function NewClaimDialog({
                           <td className="px-3 py-2 font-medium">{line.productName}</td>
                           <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
                           <td className="px-3 py-2 text-right">
-                            <Input
-                              type="number"
+                            <NumberInput
+                              allowEmpty={false}
                               min={0}
                               max={line.quantity}
                               value={quantities[i] ?? 0}
-                              onChange={e => {
-                                const val = Math.min(Math.max(0, Number(e.target.value) || 0), line.quantity);
-                                setQuantities(prev => ({ ...prev, [i]: val }));
-                              }}
+                              onValueChange={v => setQuantities(prev => ({ ...prev, [i]: v ?? 0 }))}
                               className="h-7 w-20 text-xs text-right ml-auto"
                             />
                           </td>

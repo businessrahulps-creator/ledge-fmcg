@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Search, MapPin, Plus, Pencil, Trash2, Download } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -279,7 +280,7 @@ export default function Distributors() {
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
-                      <Input type="number" inputMode="decimal" min={0} value={editItem.creditLimit || ""} onChange={(e) => setEditItem({ ...editItem, creditLimit: parseFloat(e.target.value) || 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                      <NumberInput allowDecimal allowEmpty={false} min={0} value={editItem.creditLimit} onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
                     </div>
                   </div>
                 </div>

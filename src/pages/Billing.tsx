@@ -7,6 +7,7 @@ import { pdf } from "@react-pdf/renderer";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -891,7 +892,7 @@ export default function Billing() {
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs">GST Rate (%)</Label>
-                      <Input type="number" inputMode="decimal" value={gstRate} onChange={e => setGstRate(Number(e.target.value))} className="max-w-[100px]" min={0} max={28} />
+                      <NumberInput allowDecimal allowEmpty={false} value={gstRate} onValueChange={v => setGstRate(v ?? 0)} className="max-w-[100px]" min={0} max={28} />
                     </div>
                   </div>
                 </div>

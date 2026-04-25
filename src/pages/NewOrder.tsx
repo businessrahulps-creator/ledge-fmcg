@@ -7,6 +7,7 @@ import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -521,10 +522,12 @@ export default function NewOrder() {
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Price (₹)</Label>
-                            <Input
-                              type="number"
+                            <NumberInput
+                              allowDecimal
+                              allowEmpty={false}
+                              min={0}
                               value={line.unitPrice}
-                              onChange={(e) => updateLine(line.id, "unitPrice", parseFloat(e.target.value) || 0)}
+                              onValueChange={(v) => updateLine(line.id, "unitPrice", v ?? 0)}
                               className="h-10 rounded-lg md:h-12"
                             />
                           </div>
