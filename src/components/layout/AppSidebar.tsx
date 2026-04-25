@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   House,
   ClipboardList,
