@@ -201,12 +201,13 @@ export default function NewOrder() {
     if (!selectedGodown) return new Map<string, string>();
     const warnings = new Map<string, string>();
     for (const line of lines) {
-      if (!line.productId || line.quantity <= 0) continue;
+      const qty = line.quantity ?? 0;
+      if (!line.productId || qty <= 0) continue;
       const stock = stockItems.find(
         s => s.productId === line.productId && s.godownId === selectedGodown,
       );
       const available = stock?.quantity ?? 0;
-      if (line.quantity > available) {
+      if (qty > available) {
         warnings.set(
           line.id,
           `Only ${available} ${stock?.unit || "units"} available at ${selectedGodownObj?.name ?? "this warehouse"}`,
@@ -287,15 +288,16 @@ export default function NewOrder() {
       salesperson: sp?.name || "",
       lines: validLines.map((l) => {
         const product = products.find((p) => p.id === l.productId);
+        const qty = l.quantity ?? 0;
         return {
           productId: l.productId,
           productName: product?.name || "",
-          quantity: l.quantity,
+          quantity: qty,
           unitPrice: l.unitPrice,
-          lineTotal: l.quantity * l.unitPrice,
+          lineTotal: qty * l.unitPrice,
         };
       }),
-      total: validLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0),
+      total: validLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0),
       paymentMode: paymentMode as "cash" | "bank_transfer" | "cheque" | "upi",
       paymentStatus: paymentStatus as "paid" | "partial" | "pending",
       dispatchDate: dispatchDate || null,
