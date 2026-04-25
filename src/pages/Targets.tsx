@@ -201,14 +201,11 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
         </div>
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-medium">Orders Target</label>
-          <Input
-            type="text"
-            inputMode="numeric"
+          <NumberInput
+            allowEmpty
+            min={0}
             value={ordInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "" || /^\d*$/.test(v)) { setOrdInput(v); setDirty(true); }
-            }}
+            onValueChange={(v) => { setOrdInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 20"
             className="h-8 text-xs rounded-lg"
