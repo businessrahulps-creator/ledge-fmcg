@@ -5,16 +5,22 @@ import { spring } from "@/lib/motion";
 import { BrowserFrame, PhoneFrame } from "../DeviceFrames";
 import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
 
-function CoolStage({ children }: { children: React.ReactNode }) {
+function PremiumStage({ children, accent = "violet" }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
+  const glows: Record<string, string> = {
+    violet: "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(108,92,231,0.30) 0%, transparent 60%)",
+    indigo: "radial-gradient(ellipse at 30% 30%, rgba(99,102,241,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(79,70,229,0.30) 0%, transparent 60%)",
+    blue: "radial-gradient(ellipse at 30% 30%, rgba(37,99,235,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(59,130,246,0.30) 0%, transparent 60%)",
+  };
   return (
-    <div
-      className="relative rounded-3xl p-5 md:p-8"
-      style={{
-        background:
-          "radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.10) 0%, transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(37,99,235,0.08) 0%, transparent 55%), linear-gradient(135deg, #F5F6F8 0%, #FFFFFF 100%)",
-      }}
-    >
-      {children}
+    <div className="relative">
+      <div
+        aria-hidden
+        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-50 pointer-events-none"
+        style={{ background: glows[accent] }}
+      />
+      <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
+        {children}
+      </div>
     </div>
   );
 }
@@ -23,48 +29,51 @@ const steps = [
   {
     badge: "01",
     icon: Smartphone,
+    accent: "violet" as const,
     title: "Field team places an order in 60 seconds.",
     description: "Pick dealer, add products, submit. Sequential order number, instantly.",
     mockup: () => (
-      <CoolStage>
+      <PremiumStage accent="violet">
         <PhoneFrame>
           <div className="p-3 bg-white">
             <OrderFormSvg />
           </div>
         </PhoneFrame>
-      </CoolStage>
+      </PremiumStage>
     ),
     reversed: false,
   },
   {
     badge: "02",
     icon: LayoutDashboard,
+    accent: "indigo" as const,
     title: "Your dashboard updates live.",
     description: "Revenue, dispatches, outstanding. Moving in real time. No evening summary call.",
     mockup: () => (
-      <CoolStage>
+      <PremiumStage accent="indigo">
         <BrowserFrame url="app.ledge.in/dashboard">
           <div className="p-4 bg-white">
             <DashboardMiniSvg />
           </div>
         </BrowserFrame>
-      </CoolStage>
+      </PremiumStage>
     ),
     reversed: true,
   },
   {
     badge: "03",
     icon: Truck,
+    accent: "blue" as const,
     title: "Dispatch → stock deducts → GST invoice generates.",
     description: "One tap. Accountant skips Tally. CGST/SGST/IGST calculated automatically.",
     mockup: () => (
-      <CoolStage>
+      <PremiumStage accent="blue">
         <BrowserFrame url="app.ledge.in/stock">
           <div className="p-4 bg-white">
             <InvoiceStockSvg />
           </div>
         </BrowserFrame>
-      </CoolStage>
+      </PremiumStage>
     ),
     reversed: false,
   },
@@ -72,14 +81,12 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-white py-28 md:py-36">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="how-it-works" className="relative bg-white py-24 md:py-32 overflow-hidden">
+      <div className="relative max-w-6xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-20 max-w-3xl mx-auto">
-            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] text-[#2563EB] uppercase mb-4">
-              How it works
-            </span>
-            <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] tracking-[-0.04em] leading-[1.05]">
+            <span className="lp-eyebrow mb-5">How it works</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
               Three things happen.
               <br />
               All in under 60 seconds.
@@ -87,21 +94,42 @@ export function HowItWorks() {
           </div>
         </AnimateIn>
 
-        <div className="space-y-24 md:space-y-28">
+        <div className="relative space-y-24 md:space-y-28">
+          {/* Vertical gradient connector — desktop only */}
+          <div
+            aria-hidden
+            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, rgba(124,58,237,0.25) 15%, rgba(79,70,229,0.25) 50%, rgba(37,99,235,0.25) 85%, transparent 100%)",
+            }}
+          />
+
           {steps.map((step, i) => {
             const MockupComponent = step.mockup;
             return (
-              <AnimateIn key={step.badge} delay={i * 0.1}>
+              <AnimateIn key={step.badge} delay={i * 0.08}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="inline-flex items-center gap-2 font-heading font-bold text-[14px] brand-gradient-cool-text mb-5 tracking-wider">
-                      <step.icon size={18} strokeWidth={1.75} className="text-[#7C3AED]" />
-                      STEP {step.badge}
+                    <span className="inline-flex items-center gap-2.5 mb-5">
+                      <span className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_-2px_rgba(124,58,237,0.25)]"
+                        style={{
+                          backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                          backgroundOrigin: "border-box",
+                          backgroundClip: "padding-box, border-box",
+                          border: "1px solid transparent",
+                        }}
+                      >
+                        <step.icon size={16} strokeWidth={2} className="text-[#6D28D9]" />
+                      </span>
+                      <span className="font-heading font-bold text-[12px] lp-gradient-text-cool tracking-[0.18em]">
+                        STEP {step.badge}
+                      </span>
                     </span>
-                    <h3 className="font-heading font-extrabold text-[26px] md:text-[36px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.1]">
+                    <h3 className="font-heading font-extrabold text-[24px] md:text-[30px] text-[#0A0F1C] tracking-[-0.03em] leading-[1.15]">
                       {step.title}
                     </h3>
-                    <p className="font-body text-[17px] text-[#64748B] leading-[1.55] mt-5 max-w-md">
+                    <p className="font-body text-[16px] text-[#64748B] leading-[1.55] mt-4 max-w-md">
                       {step.description}
                     </p>
                   </div>
@@ -109,7 +137,7 @@ export function HowItWorks() {
                     className={step.reversed ? "lg:order-1" : ""}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-80px" }}
+                    viewport={{ once: true, margin: "-120px" }}
                     transition={spring.gentle}
                   >
                     <MockupComponent />
