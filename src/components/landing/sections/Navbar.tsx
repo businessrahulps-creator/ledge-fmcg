@@ -38,41 +38,41 @@ export function Navbar() {
       transition={spring.default}
       className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
         scrolled
-          ? "bg-[#F8F7F5]/95 backdrop-blur-md border-b border-[#E8E5E0]"
+          ? "bg-white/90 backdrop-blur-md border-b border-[#E5E7EB]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <span className="font-heading font-extrabold text-xl tracking-[-0.04em] text-[#1A1A1A]">Ledge</span>
+        <Link to="/" className="flex items-center" aria-label="Ledge home">
+          <img src={ledgeLogo} alt="Ledge" className="h-7 w-auto" />
         </Link>
 
-        {/* Center links  -  desktop */}
+        {/* Center links - desktop */}
         <div className="hidden md:flex items-center gap-8">
           {desktopLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="font-body font-medium text-[15px] text-[#71717A] hover:text-[#1A1A1A] transition-colors duration-200"
+              className="font-body font-medium text-[15px] text-[#64748B] hover:text-[#0A0F1C] transition-colors duration-200"
             >
               {l.label}
             </a>
           ))}
         </div>
 
-        {/* CTA  -  desktop */}
+        {/* CTA - desktop */}
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login" className="font-body font-medium text-[15px] text-[#52525B] hover:text-[#1A1A1A] transition-colors duration-200">
+          <Link to="/login" className="font-body font-medium text-[15px] text-[#64748B] hover:text-[#0A0F1C] transition-colors duration-200">
             Sign in
           </Link>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={spring.snappy}>
             <Link
               to="/signup"
-              className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold hover:bg-[#1A1A1A] transition-colors duration-200 text-sm"
-              style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+              className="inline-flex items-center bg-[#0A0F1C] text-white px-7 py-3 rounded-full font-body font-semibold hover:bg-[#1F2937] transition-colors duration-200 text-sm"
+              style={{ boxShadow: "0 6px 16px -6px rgba(10,15,28,0.4)" }}
             >
-              Get Started Free
+              Start Free Trial
             </Link>
           </motion.div>
         </div>
