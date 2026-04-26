@@ -1,74 +1,61 @@
-# Subtle, accessible motion across landing sections
-
 ## Goal
-Add tasteful, performant motion to the landing page — parallax mesh, hover lift on cards, and a CTA shimmer — without changing copy, layout, or color. Everything respects `prefers-reduced-motion`, runs on the GPU (transform/opacity only), and avoids layout thrash.
+Bring the Navbar and Footer in line with the new premium primitives (`lp-btn-primary-dark`, `lp-shimmer`, `lp-eyebrow`, `lp-noise`, refined blur, consistent gutters) so they feel hand‑crafted on desktop and mobile. No copy or structural changes.
 
-## Design principles
-- **GPU-only**: animate `transform` and `opacity`. No `top/left/width/height/box-shadow` keyframes.
-- **Reduced motion**: every effect short-circuits via `@media (prefers-reduced-motion: reduce)` and Framer's `useReducedMotion()`.
-- **Cheap parallax**: Framer's `useScroll` + `useTransform` on a single mesh layer per section (translateY only, ±20–40px). No manual scroll listeners.
-- **No re-layout**: hover lifts use `transform: translateY(-3px)` + soft shadow swap (already in `.lp-card:hover`). New scale only on icon tiles.
-- **Shimmer = pure CSS**: a 1.2s linear gradient sweep on primary CTAs, triggered by hover. Single pseudo-element.
+## Navbar (`src/components/landing/sections/Navbar.tsx`)
 
-## Changes
+**Surface & blur**
+- Tighten the scrolled state: `bg-white/65 backdrop-blur-xl backdrop-saturate-[1.8]`, slimmer hairline `border-b border-[#0A0F1C]/[0.06]`, softer shadow `shadow-[0_1px_0_rgba(255,255,255,0.7)_inset,0_8px_24px_-16px_rgba(15,23,42,0.10)]`.
+- Add a near‑invisible `lp-noise` layer (opacity ~30%) behind the bar so it matches the page surface and never bands.
+- Reduce height from `h-16` → `h-[60px]` to feel lighter and more Linear‑like.
 
-### 1. `src/lib/motion.ts` — new helpers
-- `useParallaxY(targetRef, range = 30)`: wraps `useScroll({ target, offset: ["start end", "end start"] })` + `useTransform([0,1], [-range, range])`. Returns `0` (static MotionValue) when `useReducedMotion()` is true.
-- `hoverLiftSubtle = { whileHover: { y: -2 }, transition: spring.snappy }` for cards not already on `.lp-card`.
+**Gutters & rhythm**
+- Match landing container: `max-w-7xl mx-auto w-full px-6 md:px-8 lg:px-10`.
+- Desktop link gap `gap-8` → `gap-7`; link size `text-[15px]` → `text-[14px]` with `tracking-[-0.005em]` for tighter premium feel.
+- Sign‑in link gets the same treatment; CTA gap `gap-4` → `gap-5`.
 
-### 2. `src/index.css` — append three utilities near other `lp-*` classes
-- `.lp-shimmer` — relative + overflow-hidden; `::after` is a 110° gradient sweep that translates `-100% → 100%` over 1.2s on hover.
-  - Default sheen `rgba(255,255,255,0.18)` (works on dark CTA).
-  - `.lp-shimmer-dark` variant `rgba(15,23,42,0.10)` for light CTAs on dark backgrounds.
-- `.lp-icon-pop` — `transition: transform .4s cubic-bezier(.2,.8,.2,1)`. Parent `.lp-card:hover .lp-icon-pop { transform: translateY(-1px) scale(1.04); }`.
-- Reduced-motion guard:
-  ```css
-  @media (prefers-reduced-motion: reduce) {
-    .lp-shimmer::after, .lp-icon-pop, .lp-card { transition: none !important; animation: none !important; }
-    .lp-shimmer:hover::after { transform: translateX(-100%); }
-  }
-  ```
+**Desktop CTA**
+- Replace ad‑hoc classes with the shared primitive:
+  `className="lp-btn-primary-dark lp-shimmer inline-flex items-center text-white px-5 py-2 rounded-full font-body font-semibold text-[13.5px] transition-colors duration-200"`.
+- Drop redundant `motion.div` wrapper scale (shimmer + button shadow already convey lift); keep `whileTap` only.
 
-### 3. Parallax mesh — 4 sections
-Wrap the existing background layer in `motion.div` with `style={{ y, willChange: "transform" }}`:
-- **Hero**: parallax the `lp-grid-soft` dot layer, range `-30 → 20`. Mockup keeps its existing float.
-- **Problem**: parallax the `lp-noise` overlay, range `-15 → 15` (subtle texture drift).
-- **Outcome**: parallax the `lp-mesh-dark` background, range `-40 → 30`.
-- **FinalCTA**: parallax `lp-grid-soft-dark`, range `-30 → 20`.
-Mobile: skipped via `useReducedMotion()` OR a `useMediaQuery("(min-width: 768px)")` gate to keep mobile lightweight.
+**Mobile hamburger & sheet**
+- Hamburger button: turn into a 36×36 rounded‑full glass chip — `rounded-full bg-white/70 backdrop-blur-md border border-[#0A0F1C]/[0.06] w-9 h-9 flex items-center justify-center` with `Menu size={20}`.
+- Sheet panel: widen to `w-[88vw] sm:w-80`, change surface to `bg-white/95 backdrop-blur-xl border-r border-[#0A0F1C]/[0.06]`, padding `p-6` → `p-7`, add `lp-noise` overlay.
+- Mobile link rows: reduce vertical padding `py-3` → `py-2.5`, font `text-[17px]` → `text-[16px]`, hover surface `hover:bg-[#F4F4F5]` → `hover:bg-[#0A0F1C]/[0.04]`, icon stroke `1.5` → `1.75` for crisper feel.
+- Mobile CTAs:
+  - Primary "Get Started Free" → `lp-btn-primary-dark lp-shimmer text-white rounded-2xl py-3.5 font-semibold text-[15px]` (drops the `#27272A` one‑off).
+  - Secondary "Sign in" → `bg-[#0A0F1C]/[0.04] hover:bg-[#0A0F1C]/[0.07] text-[#0A0F1C] rounded-2xl py-3.5 font-semibold text-[15px] border border-[#0A0F1C]/[0.06]`.
+- Sheet close button: keep round chip but align border color to `#0A0F1C]/[0.08]` so it matches the new hamburger.
 
-### 4. Hover lift audit on card grids
-`.lp-card` already lifts on hover. For cards not on `.lp-card`:
-- **Pricing.tsx**: confirm tier cards use `.lp-card`; if not, wrap in `motion.div` with `hoverLiftSubtle`.
-- **Testimonials.tsx**: same audit on quote cards.
-- **WhyOrdra.tsx**: same audit on comparison tiles.
-- **Features.tsx** + **Problem.tsx**: already lift; add `lp-icon-pop` to icon containers for an extra micro-bounce.
+## Footer (`src/components/landing/sections/Footer.tsx`)
 
-### 5. CTA shimmer
-Apply only to the two primary trial CTAs:
-- **Hero.tsx** "Start 30-Day Free Trial" → add `lp-shimmer` to the `MotionLink`.
-- **FinalCTA.tsx** "Start 30-Day Free Trial" → add `lp-shimmer-dark` (dark sheen on light button).
-Secondary buttons (WhatsApp, "See How It Works") stay quiet.
+**Surface & rhythm**
+- Keep `bg-[#FAFAFC]` but layer a faint `lp-noise` div (opacity ~40%) and a soft top hairline gradient: `border-t border-[#0A0F1C]/[0.06]` + a 1px gradient line `bg-gradient-to-r from-transparent via-[#0A0F1C]/10 to-transparent` directly under it.
+- Container gutters: `px-6 md:px-8 lg:px-10` (already), bump max width to `max-w-7xl` to match navbar grid.
+- Column grid gap: `gap-8` → `gap-10 md:gap-12` for breathing room; vertical padding `py-20 md:py-24` → `py-24 md:py-28` to match other light sections.
 
-### 6. Files to edit
-- `src/lib/motion.ts` — add `useParallaxY` + `hoverLiftSubtle`
-- `src/index.css` — append `.lp-shimmer`, `.lp-shimmer-dark`, `.lp-icon-pop`, reduced-motion guard
-- `src/components/landing/sections/Hero.tsx` — parallax dot grid + shimmer on CTA
-- `src/components/landing/sections/Problem.tsx` — parallax noise + `lp-icon-pop` on icons
-- `src/components/landing/sections/Features.tsx` — `lp-icon-pop` on icons
-- `src/components/landing/sections/Outcome.tsx` — parallax mesh
-- `src/components/landing/sections/FinalCTA.tsx` — parallax grid + shimmer on CTA
-- `src/components/landing/sections/Pricing.tsx` — verify/add hover lift
-- `src/components/landing/sections/Testimonials.tsx` — verify/add hover lift
-- `src/components/landing/sections/WhyOrdra.tsx` — verify/add hover lift
+**Headers & links**
+- Column headers: replace bespoke caps with the shared `lp-eyebrow` chip (without the dot) for consistency — implement as `<span className="lp-eyebrow !py-1 !px-2.5 !text-[11px]">{col.title}</span>` or, simpler, restyle the `<h4>` to `text-[12px] font-semibold tracking-[0.08em] text-[#0A0F1C]/70 uppercase`.
+- Link size `text-[14px]` → `text-[13.5px]`, color `text-[#71717A]` → `text-[#52525B]`, hover transition unchanged.
+- Vertical link spacing `space-y-3` → `space-y-2.5`.
 
-## Out of scope
-- No copy, color, font, structural, or layout changes.
-- No new section reveal animations (`AnimateIn` already handles those).
-- No JS scroll listeners — Framer's `useScroll` only.
+**Status & infra column**
+- Wrap the status pill + AWS line in a subtle `lp-card`‑style chip cluster: a single `rounded-2xl border border-[#0A0F1C]/[0.06] bg-white/70 backdrop-blur-sm p-4 flex flex-col gap-3 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_8px_24px_-16px_rgba(15,23,42,0.06)]`.
+- Status pill stays animated; tighten typography to `text-[11.5px] text-[#3F3F46]`.
+- AWS line: bump logo to `h-3.5`, text `text-[12px] text-[#71717A]`, swap separator `·` for `•` to match the rest of the site.
 
-## Performance budget
-- 4 `useScroll` instances total (one per parallax section) — negligible.
-- All hover effects pure CSS — zero JS cost.
-- Shimmer is a single GPU-composited pseudo-element.
-- Reduced-motion users get a fully static page.
+**Bottom bar**
+- `mt-14 pt-10` → `mt-16 pt-8`; border `border-[#E8E5E0]` → `border-[#0A0F1C]/[0.06]`.
+- Wordmark + copy: keep wordmark, change copy color to `text-[#71717A] text-[13px]`.
+- Social icons: wrap each in a 32×32 rounded‑full chip — `w-8 h-8 rounded-full bg-white/70 border border-[#0A0F1C]/[0.06] flex items-center justify-center hover:bg-white transition-colors` with `size={16}` icon for proportion.
+
+## Accessibility & motion
+- All hover transitions remain ≤200ms; CTA shimmer is the existing `lp-shimmer` (already gated by `prefers-reduced-motion`).
+- Hamburger chip and social chips get `focus-visible:ring-2 focus-visible:ring-[#0A0F1C]/20 focus-visible:ring-offset-2`.
+- No new layout shifts — all changes are paint‑only.
+
+## Files touched
+- `src/components/landing/sections/Navbar.tsx`
+- `src/components/landing/sections/Footer.tsx`
+
+No copy, structural, color‑palette, or routing changes.
