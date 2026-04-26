@@ -12,13 +12,12 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
-      <div className="absolute inset-0 lp-noise pointer-events-none" />
+    <section id="features" className="relative lp-section-paper py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Features</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
               Everything your business needs.
               <br />
               Nothing it doesn't.
@@ -31,9 +30,9 @@ export function Features() {
             <StaggerItem key={feature.title}>
               <div className="lp-card p-8 h-full flex flex-col">
                 <div className="lp-icon-tile mb-6">
-                  <feature.icon size={20} strokeWidth={1.75} className="text-[#6D28D9]" />
+                  <feature.icon size={20} strokeWidth={1.75} className="text-[#1F2937]" />
                 </div>
-                <h3 className="font-heading font-bold text-[18px] text-[#0A0F1C] mb-2 tracking-tight">
+                <h3 className="font-heading font-semibold text-[18px] text-[#0A0F1C] mb-2 tracking-tight">
                   {feature.title}
                 </h3>
                 <p className="font-body text-[14.5px] text-[#64748B] leading-[1.55]">

@@ -5,18 +5,13 @@ import { spring } from "@/lib/motion";
 import { BrowserFrame, PhoneFrame } from "../DeviceFrames";
 import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
 
-function PremiumStage({ children, accent = "violet" }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
-  const glows: Record<string, string> = {
-    violet: "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(108,92,231,0.30) 0%, transparent 60%)",
-    indigo: "radial-gradient(ellipse at 30% 30%, rgba(99,102,241,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(79,70,229,0.30) 0%, transparent 60%)",
-    blue: "radial-gradient(ellipse at 30% 30%, rgba(37,99,235,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(59,130,246,0.30) 0%, transparent 60%)",
-  };
+function PremiumStage({ children }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
   return (
     <div className="relative">
       <div
         aria-hidden
-        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-50 pointer-events-none"
-        style={{ background: glows[accent] }}
+        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.16) 0%, transparent 65%)" }}
       />
       <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
         {children}
@@ -86,7 +81,7 @@ export function HowItWorks() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">How it works</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
               Three things happen.
               <br />
               All in under 60 seconds.
@@ -95,14 +90,10 @@ export function HowItWorks() {
         </AnimateIn>
 
         <div className="relative space-y-24 md:space-y-28">
-          {/* Vertical gradient connector — desktop only */}
+          {/* Vertical hairline connector — desktop only */}
           <div
             aria-hidden
-            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent 0%, rgba(124,58,237,0.25) 15%, rgba(79,70,229,0.25) 50%, rgba(37,99,235,0.25) 85%, transparent 100%)",
-            }}
+            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none bg-[#ECEEF2]"
           />
 
           {steps.map((step, i) => {
@@ -112,21 +103,14 @@ export function HowItWorks() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
                     <span className="inline-flex items-center gap-2.5 mb-5">
-                      <span className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_-2px_rgba(124,58,237,0.25)]"
-                        style={{
-                          backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-                          backgroundOrigin: "border-box",
-                          backgroundClip: "padding-box, border-box",
-                          border: "1px solid transparent",
-                        }}
-                      >
-                        <step.icon size={16} strokeWidth={2} className="text-[#6D28D9]" />
+                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#F4F4F8] border border-[#ECEEF2]">
+                        <step.icon size={16} strokeWidth={2} className="text-[#1F2937]" />
                       </span>
-                      <span className="font-heading font-bold text-[12px] lp-gradient-text-cool tracking-[0.18em]">
+                      <span className="font-heading font-semibold text-[12px] text-[#475569] tracking-[0.18em]">
                         STEP {step.badge}
                       </span>
                     </span>
-                    <h3 className="font-heading font-extrabold text-[24px] md:text-[30px] text-[#0A0F1C] tracking-[-0.03em] leading-[1.15]">
+                    <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.18]">
                       {step.title}
                     </h3>
                     <p className="font-body text-[16px] text-[#64748B] leading-[1.55] mt-4 max-w-md">

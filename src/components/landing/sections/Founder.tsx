@@ -14,21 +14,21 @@ export function Founder() {
           {/* Photo */}
           <AnimateIn className="lg:col-span-5">
             <div className="relative max-w-[400px] mx-auto lg:mx-0">
-              {/* Soft outer glow */}
+              {/* Soft neutral shadow */}
               <div
                 aria-hidden
-                className="absolute -inset-4 rounded-[2.5rem] blur-2xl opacity-35"
+                className="absolute -inset-4 rounded-[2.5rem] blur-2xl opacity-30"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.5) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(37,99,235,0.4) 0%, transparent 60%)",
+                    "radial-gradient(ellipse at 50% 60%, rgba(15,23,42,0.20) 0%, transparent 65%)",
                 }}
               />
               {/* Inner ring + image */}
               <div
-                className="relative rounded-[2rem] overflow-hidden bg-[#F5F6F8] aspect-[4/5]"
+                className="relative rounded-[2rem] overflow-hidden bg-[#F4F4F8] aspect-[4/5]"
                 style={{
                   boxShadow:
-                    "inset 0 0 0 1px rgba(124,58,237,0.18), 0 24px 60px -16px rgba(10,15,28,0.25), 0 0 0 1px rgba(255,255,255,0.6)",
+                    "inset 0 0 0 1px rgba(15,23,42,0.06), 0 24px 60px -16px rgba(15,23,42,0.18)",
                 }}
               >
                 {/* LQIP blur background — instant, sub-1KB */}
@@ -54,15 +54,6 @@ export function Founder() {
                   className={`relative w-full h-full object-cover transition-opacity duration-700 ease-out ${loaded ? "opacity-100" : "opacity-0"}`}
                 />
               </div>
-              {/* Corner accent dot */}
-              <div
-                aria-hidden
-                className="absolute -top-2 -right-2 w-4 h-4 rounded-full"
-                style={{
-                  background: "linear-gradient(135deg, #7C3AED, #2563EB)",
-                  boxShadow: "0 0 16px rgba(124,58,237,0.6)",
-                }}
-              />
             </div>
           </AnimateIn>
 
@@ -74,21 +65,18 @@ export function Founder() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
-              className="font-heading font-bold text-[22px] md:text-[28px] text-[#0A0F1C] leading-[1.35] tracking-[-0.02em] mt-6"
+              className="font-heading font-medium text-[20px] md:text-[24px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] mt-6"
             >
               "I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
               <br /><br />
               Your team is in the field right now. Your floor is running. Your business deserves a system that keeps up. Built in India. Designed for the way you actually work.
               <br /><br />
-              <span className="lp-gradient-text-cool">Start free. If it's not running your business in 30 days, walk away.</span>"
+              <span className="lp-gradient-text-cool font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
             </motion.p>
 
             <div className="mt-8">
-              <p className="font-heading font-bold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
-              <div
-                className="h-[2px] w-7 rounded-full mt-1"
-                style={{ background: "linear-gradient(90deg, #7C3AED, #2563EB)" }}
-              />
+              <p className="font-heading font-semibold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
+              <div className="h-px w-7 bg-[#0A0F1C] mt-1.5" />
               <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>
             </div>
           </AnimateIn>

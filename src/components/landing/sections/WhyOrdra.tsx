@@ -17,7 +17,7 @@ export function WhyOrdra() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Built different</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
               Powerful tools exist.
               <br />
               None were built for you.
@@ -31,22 +31,13 @@ export function WhyOrdra() {
             {legacy.map((name) => (
               <span
                 key={name}
-                className="font-body text-[13px] font-medium text-[#94A3B8] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-[#E2E8F0]"
+                className="font-body text-[13px] font-medium text-[#94A3B8] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-[#ECEEF2]"
               >
                 {name}
               </span>
             ))}
-            <span
-              className="relative font-heading font-extrabold text-[15px] text-[#6D28D9] px-4 py-1.5 rounded-full bg-white"
-              style={{
-                backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-                backgroundOrigin: "border-box",
-                backgroundClip: "padding-box, border-box",
-                border: "1.5px solid transparent",
-                boxShadow: "0 4px 16px -4px rgba(124,58,237,0.25)",
-              }}
-            >
-              <span className="lp-gradient-text-cool">Ledge</span>
+            <span className="font-heading font-semibold text-[14px] text-white px-4 py-1.5 rounded-full bg-[#0A0F1C]">
+              Ledge
             </span>
           </div>
         </AnimateIn>
@@ -56,13 +47,13 @@ export function WhyOrdra() {
             <StaggerItem key={block.title}>
               <div className="lp-card p-7 h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="font-heading font-extrabold text-[20px] lp-gradient-text-cool opacity-70">
+                  <span className="font-heading font-semibold text-[18px] text-[#94A3B8] tabular-nums">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="h-px flex-1 bg-gradient-to-r from-[#E2E8F0] to-transparent" />
+                  <span className="h-px flex-1 bg-[#ECEEF2]" />
                   <block.icon size={18} strokeWidth={1.75} className="text-[#0A0F1C]" />
                 </div>
-                <h3 className="font-heading font-bold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
+                <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
                   {block.title}
                 </h3>
                 <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">

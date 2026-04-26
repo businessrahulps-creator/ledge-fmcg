@@ -19,19 +19,18 @@ export function FinalCTA() {
 
   return (
     <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
-      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
-      <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
+      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
         <motion.span
-          className="lp-eyebrow-dark mb-6"
+          className="lp-eyebrow mb-6"
           {...fadeUp(0)}
         >
           Your business is ready
         </motion.span>
 
         <motion.h2
-          className="font-heading font-extrabold text-[34px] md:text-[52px] text-white leading-[1.04] tracking-[-0.04em] mt-6"
+          className="font-heading font-semibold text-[34px] md:text-[48px] text-[#0A0F1C] leading-[1.08] tracking-[-0.025em] mt-6"
           {...fadeUp(0.05)}
         >
           Ready to run your business
@@ -40,7 +39,7 @@ export function FinalCTA() {
         </motion.h2>
 
         <motion.p
-          className="font-body text-[17px] md:text-[19px] text-white/65 max-w-2xl mx-auto mt-7 leading-[1.55]"
+          className="font-body text-[17px] md:text-[19px] text-[#475569] max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
           Start your 30-day free trial today. No card. No commitment.
@@ -57,7 +56,7 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="lp-btn-primary-light lp-shimmer lp-shimmer-dark text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
+            className="lp-btn-primary-dark lp-shimmer text-white px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
           >
             Start 30-Day Free Trial
           </MotionLink>
@@ -68,7 +67,7 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="border border-white/15 bg-white/[0.04] backdrop-blur-md text-white px-9 py-3.5 rounded-full font-semibold hover:border-white/30 hover:bg-white/[0.08] transition-colors duration-200 inline-flex items-center justify-center gap-2 text-[15px]"
+            className="border border-[#ECEEF2] bg-white text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold hover:border-[#0A0F1C] transition-colors duration-200 inline-flex items-center justify-center gap-2 text-[15px]"
           >
             <MessageCircle size={17} />
             Chat on WhatsApp
@@ -76,7 +75,7 @@ export function FinalCTA() {
         </motion.div>
 
         <motion.p
-          className="font-body text-[13px] text-white/45 mt-8"
+          className="font-body text-[13px] text-[#64748B] mt-8"
           {...fadeUp(0.28)}
         >
           No card required · Cancel anytime · Built in India
