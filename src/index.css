@@ -968,15 +968,7 @@
     filter: drop-shadow(0 0 6px rgba(79, 70, 229, 0.55))
             drop-shadow(0 0 12px rgba(79, 70, 229, 0.35));
   }
-  @keyframes li-chip-float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-3px); }
-  }
-  .li-route-chip {
-    animation: li-chip-float 4.5s ease-in-out infinite;
-  }
-  .li-route-chip-2 { animation-delay: -1.5s; }
-  .li-route-chip-3 { animation-delay: -3s; }
+  /* (legacy floating chip animations removed — section now uses telemetry strip) */
 
   /* ── Device-frame mockup motion utilities ── */
   @keyframes lp-live-pulse {
