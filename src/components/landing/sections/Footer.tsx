@@ -26,8 +26,8 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-[#FAFAFC] py-16 border-t border-[#E5E7EB]/70">
-      <div className="max-w-6xl mx-auto px-6">
+    <footer className="bg-[#FAFAFC] py-20 md:py-24 border-t border-[#E5E7EB]/70">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-8"
           initial="hidden"
@@ -108,7 +108,7 @@ export function Footer() {
           </motion.div>
         </motion.div>
 
-        <div className="mt-12 pt-8 border-t border-[#E8E5E0] flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-14 pt-10 border-t border-[#E8E5E0] flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-[#1A1A1A]">Ledge</Link>
             <span className="font-body text-sm text-[#71717A]">

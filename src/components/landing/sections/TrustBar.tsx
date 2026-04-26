@@ -18,8 +18,8 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="py-14 md:py-16 bg-white border-y border-[#E5E7EB]/70">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="py-16 md:py-20 bg-white border-y border-[#E5E7EB]/70">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         {/* Logo Marquee — soft pill chips */}
         <div
           className="overflow-hidden group relative"
@@ -41,7 +41,7 @@ export function TrustBar() {
         </div>
 
         {/* Stat Row — with hairline dividers + gradient numbers */}
-        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-12 md:mt-14">
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
           {stats.map((stat, i) => (
             <StaggerItem key={stat.value}>
               <div

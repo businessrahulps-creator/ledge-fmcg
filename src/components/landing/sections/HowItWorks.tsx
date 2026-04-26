@@ -81,12 +81,12 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative bg-white py-24 md:py-32 overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6">
+    <section id="how-it-works" className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
+      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow mb-5">How it works</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
+          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+            <span className="lp-eyebrow">How it works</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
               Three things happen.
               <br />
               All in under 60 seconds.
@@ -109,7 +109,7 @@ export function HowItWorks() {
             const MockupComponent = step.mockup;
             return (
               <AnimateIn key={step.badge} delay={i * 0.08}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
                     <span className="inline-flex items-center gap-2.5 mb-5">
                       <span className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_-2px_rgba(124,58,237,0.25)]"

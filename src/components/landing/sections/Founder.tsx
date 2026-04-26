@@ -7,9 +7,9 @@ export function Founder() {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <section className="bg-white py-24 md:py-32">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+    <section className="bg-white py-24 md:py-32 lg:py-36">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           {/* Photo */}
           <AnimateIn className="lg:col-span-5">
             <div className="relative max-w-[400px] mx-auto lg:mx-0">
@@ -53,13 +53,13 @@ export function Founder() {
 
           {/* Note */}
           <AnimateIn delay={0.1} className="lg:col-span-7">
-            <span className="lp-eyebrow mb-5">From the founder</span>
+            <span className="lp-eyebrow">From the founder</span>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
-              className="font-heading font-bold text-[22px] md:text-[28px] text-[#0A0F1C] leading-[1.35] tracking-[-0.02em] mt-5"
+              className="font-heading font-bold text-[22px] md:text-[28px] text-[#0A0F1C] leading-[1.35] tracking-[-0.02em] mt-6"
             >
               "I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
               <br /><br />
