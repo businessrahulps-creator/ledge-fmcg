@@ -31,7 +31,7 @@ export function Features() {
             return (
               <StaggerItem key={feature.title}>
                 {isHero ? (
-                  <div className="lp-bento-hero p-7 h-full flex flex-col">
+                  <div className="lp-bento-hero lp-card-premium p-7 h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-5">
                       <span className="lp-live-dot" />
                       <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">Live now</span>
@@ -53,8 +53,8 @@ export function Features() {
                     </div>
                   </div>
                 ) : (
-                  <div className="lp-card p-7 h-full flex flex-col">
-                    <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
+                  <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
+                    <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 36, height: 36 }}>
                       <feature.icon size={17} strokeWidth={1.75} className="text-[#1F2937]" />
                     </div>
                     <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">

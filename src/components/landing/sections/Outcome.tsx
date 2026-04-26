@@ -66,9 +66,9 @@ export function Outcome() {
                 if (isHero) {
                   return (
                     <StaggerItem key={o.value} variant="scaleUp">
-                      <div className="lp-bento-hero h-full p-6 flex flex-col">
+                      <div className="lp-bento-hero lp-card-premium h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/80 border border-white text-[#4F46E5] shadow-sm">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/80 border border-white text-[#4F46E5] shadow-sm lp-icon-premium">
                             <Icon className="h-4 w-4" strokeWidth={2} />
                           </span>
                           <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">
@@ -96,9 +96,9 @@ export function Outcome() {
                 }
                 return (
                   <StaggerItem key={o.value} variant="scaleUp">
-                    <div className="group relative h-full rounded-[18px] border border-[#ECEEF2] bg-white p-6 transition-colors duration-300 hover:border-[#D4D8E0]">
+                    <div className="group lp-card-premium relative h-full rounded-[18px] border border-[#ECEEF2] bg-white p-6 hover:border-[#D4D8E0]">
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#F4F4F8] border border-[#ECEEF2] text-[#1F2937]">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#F4F4F8] border border-[#ECEEF2] text-[#1F2937] lp-icon-premium">
                           <Icon className="h-4 w-4" strokeWidth={2} />
                         </span>
                         <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#94A3B8] font-medium">

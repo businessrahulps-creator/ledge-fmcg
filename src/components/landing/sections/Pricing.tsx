@@ -120,7 +120,7 @@ export function Pricing() {
           {plans.map((plan) => (
             <StaggerItem key={plan.name}>
               <div
-                className={`relative ${plan.highlighted ? "lp-bento-hero" : "lp-card"} p-7 flex flex-col h-full`}
+                className={`relative ${plan.highlighted ? "lp-bento-hero" : "lp-card"} lp-card-premium p-7 flex flex-col h-full`}
                 style={plan.highlighted ? { overflow: "visible" } : undefined}
               >
                 {plan.highlighted && (
@@ -130,7 +130,7 @@ export function Pricing() {
                 )}
 
                 <div
-                  className={`lp-icon-tile mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
+                  className={`lp-icon-tile lp-icon-premium mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
                   style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}
                 >
                   <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-[#4F46E5]" : "text-[#1F2937]"} />
