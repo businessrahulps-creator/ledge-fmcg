@@ -49,7 +49,7 @@ export function TrustBar() {
                   i > 0 ? "md:border-l md:border-[#E2E8F0]/70" : ""
                 }`}
               >
-                <div className="font-heading font-extrabold text-[26px] md:text-[32px] lp-gradient-text-cool tracking-[-0.03em] leading-none">
+                <div className="font-heading font-semibold text-[26px] md:text-[32px] text-[#0A0F1C] tracking-[-0.025em] leading-none">
                   {stat.value}
                 </div>
                 <div className="font-body text-[12px] md:text-[13px] text-[#64748B] mt-2.5 tracking-tight">
