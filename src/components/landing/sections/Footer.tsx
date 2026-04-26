@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
 import awsLogo from "@/assets/aws-logo.png";
+import { Nilavilakku } from "@/components/landing/Nilavilakku";
 
 const linkMap: Record<string, string> = {
   "Features": "/#features",
