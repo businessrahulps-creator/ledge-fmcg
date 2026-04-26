@@ -2,6 +2,7 @@ import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
+import { MagneticWrapper } from "@/components/landing/MagneticWrapper";
 import awsLogo from "@/assets/aws-logo.png";
 import { Nilavilakku } from "@/components/landing/Nilavilakku";
 
@@ -22,12 +23,21 @@ const columns = [
 ];
 
 const socials = [
-  { icon: Linkedin, href: "https://www.linkedin.com/in/asha-ps-6b0673207/" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/asha-ps-6b0673207/", label: "LinkedIn" },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative bg-[#FAFAFC] py-24 md:py-28 border-t border-[#0A0F1C]/[0.06]">
+    <footer className="relative bg-[#FAFAFC] pt-24 md:pt-28 pb-12 border-t border-[#0A0F1C]/[0.06] overflow-hidden">
+      {/* Layered ambient wash */}
+      <div
+        aria-hidden
+        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] pointer-events-none opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 30%, rgba(79,70,229,0.08) 0%, rgba(245,158,11,0.04) 45%, transparent 75%)",
+        }}
+      />
       {/* Top hairline gradient */}
       <div
         aria-hidden
@@ -37,6 +47,32 @@ export function Footer() {
       <div className="lp-noise absolute inset-0 pointer-events-none opacity-40" aria-hidden />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-10">
+        {/* Brand block — top */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={spring.premium}
+          className="mb-14 md:mb-16 max-w-md"
+        >
+          <Link to="/" className="font-heading font-extrabold text-2xl tracking-[-0.04em] text-[#0A0F1C]">
+            Ledge
+          </Link>
+          <p className="font-body text-[14px] text-[#52525B] leading-[1.6] mt-3">
+            The order-to-dispatch system for Indian FMCG. Built by an owner, for owners.
+          </p>
+          {/* Live now pulse */}
+          <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#0A0F1C]/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.08)]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="font-body text-[12px] font-medium text-[#3F3F46]">
+              Live now · Owners onboarding this week
+            </span>
+          </div>
+        </motion.div>
+
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12"
           initial="hidden"
@@ -111,39 +147,38 @@ export function Footer() {
               <div className="flex items-center gap-1.5">
                 <img src={awsLogo} alt="AWS" className="h-3.5 w-auto grayscale opacity-50" />
                 <span className="font-body text-[12px] text-[#71717A]">
-                  Hosted on AWS • Asia Pacific (Mumbai)
+                  Hosted on AWS · Mumbai
                 </span>
               </div>
             </div>
           </motion.div>
         </motion.div>
 
-        <div className="mt-16 pt-8 border-t border-[#0A0F1C]/[0.06] flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-[#1A1A1A]">Ledge</Link>
-            <div className="flex flex-col gap-0.5">
-              <span className="font-body text-[12.5px] text-[#52525B] flex items-center gap-1.5 leading-tight">
-                <Nilavilakku />
-                <span>Built in God's Own Country · Kerala</span>
-              </span>
-              <span className="font-body text-[11.5px] text-[#A1A1AA] leading-tight">
-                © 2026 Ledge. All rights reserved.
-              </span>
-            </div>
+        {/* Bottom bar */}
+        <div className="mt-16 pt-8 border-t border-[#0A0F1C]/[0.06] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="flex flex-col gap-1.5">
+            <span className="font-body text-[12.5px] text-[#52525B] flex items-center gap-1.5 leading-tight">
+              <Nilavilakku />
+              <span>Crafted with intention in God's Own Country · Kerala</span>
+            </span>
+            <span className="font-body text-[11.5px] text-[#A1A1AA] leading-tight">
+              © 2026 Ledge. All rights reserved.
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {socials.map(({ icon: Icon, href }) => (
-              <a
-                key={href}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/70 border border-[#0A0F1C]/[0.06] flex items-center justify-center text-[#71717A] hover:text-[#0A0F1C] hover:bg-white transition-colors duration-200"
-                aria-label="LinkedIn"
-              >
-                <Icon size={16} />
-              </a>
+            {socials.map(({ icon: Icon, href, label }) => (
+              <MagneticWrapper key={href} strength={6} radius={60}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full bg-white/80 border border-[#0A0F1C]/[0.06] flex items-center justify-center text-[#71717A] hover:text-[#0A0F1C] hover:bg-white transition-colors duration-200 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.08)]"
+                  aria-label={label}
+                >
+                  <Icon size={16} />
+                </a>
+              </MagneticWrapper>
             ))}
           </div>
         </div>
