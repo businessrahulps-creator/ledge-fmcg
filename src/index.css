@@ -512,6 +512,199 @@
     z-index: 1;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     REFERENCE-INSPIRED PRIMITIVES — neumorphic capsule, content
+     frost, blue-gradient progress, bracketed numerals, bento hero.
+     One per section MAX. Earned, never wallpaper.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* 1. Neumorphic capsule CTA — pill-in-pill, depth from light */
+  .lp-capsule-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px;
+    padding-right: 56px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #ECEEF2 0%, #E2E5EB 100%);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.9),
+      inset 0 -1px 2px rgba(15,23,42,0.06),
+      0 1px 2px rgba(15,23,42,0.04);
+    transition: box-shadow 240ms cubic-bezier(0.22,1,0.36,1);
+    isolation: isolate;
+  }
+  .lp-capsule-cta__inner {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 26px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 100%);
+    color: #0A0F1C;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 2px rgba(15,23,42,0.10),
+      0 8px 18px -8px rgba(15,23,42,0.18);
+    transition: transform 280ms cubic-bezier(0.22,1,0.36,1),
+                box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
+  }
+  .lp-capsule-cta__arrow {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: calc(100% - 12px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0A0F1C;
+    border-radius: 9999px;
+    transition: color 240ms ease, transform 280ms cubic-bezier(0.22,1,0.36,1);
+    pointer-events: none;
+  }
+  .lp-capsule-cta:hover .lp-capsule-cta__inner {
+    transform: translateX(2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 2px rgba(15,23,42,0.12),
+      0 12px 24px -8px rgba(15,23,42,0.22);
+  }
+  .lp-capsule-cta:hover .lp-capsule-cta__arrow {
+    transform: translateY(-50%) translateX(3px);
+    color: #4F46E5;
+  }
+  .lp-capsule-cta:active .lp-capsule-cta__inner { transform: translateX(1px) scale(0.985); }
+
+  /* Dark variant — for contexts where white CTA would disappear */
+  .lp-capsule-cta--dark { background: linear-gradient(180deg, #1F2937 0%, #0A0F1C 100%); }
+  .lp-capsule-cta--dark .lp-capsule-cta__inner {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F4F6FA 100%);
+  }
+  .lp-capsule-cta--dark .lp-capsule-cta__arrow { color: #FFFFFF; }
+  .lp-capsule-cta--dark:hover .lp-capsule-cta__arrow { color: #C7D2FE; }
+
+  /* 2. Content-grade frost — lighter than hero glass, with blue bloom */
+  .lp-glass-frost {
+    position: relative;
+    border-radius: 1.25rem;
+    background: rgba(255,255,255,0.62);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 2px rgba(15,23,42,0.04),
+      0 18px 50px -22px rgba(79,118,255,0.22);
+  }
+  .lp-glass-frost::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 16px; right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.45) 30%, rgba(96,165,250,0.45) 70%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* 3. Blue-gradient progress / stat capsule */
+  .lp-progress-glass {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 9999px;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: -0.005em;
+    background: linear-gradient(95deg, #4F46E5 0%, #6366F1 45%, #60A5FA 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      inset 0 -1px 0 rgba(15,23,42,0.08),
+      0 14px 36px -14px rgba(79,118,255,0.55),
+      0 2px 6px -2px rgba(79,70,229,0.30);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .lp-progress-glass::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.30) 50%, transparent 70%);
+    transform: translateX(-100%);
+    animation: lp-shimmer 5.5s linear infinite;
+    pointer-events: none;
+  }
+
+  /* 4. Bracketed numerals — typographic anchor */
+  .lp-bento-numeral {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: #94A3B8;
+    font-variant-numeric: tabular-nums;
+  }
+  .lp-bento-numeral--lg {
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: #94A3B8;
+    font-weight: 500;
+  }
+
+  /* 5. Bento hero tile — ONE filled tile per multi-card section */
+  .lp-bento-hero {
+    position: relative;
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(ellipse 90% 70% at 30% 0%, rgba(238,243,255,0.95) 0%, transparent 65%),
+      linear-gradient(135deg, #F1F4FF 0%, #E5EBFF 60%, #DCE5FF 100%);
+    border: 1px solid #DDE3F8;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 1px 2px rgba(15,23,42,0.03),
+      0 24px 50px -24px rgba(79,118,255,0.30);
+    overflow: hidden;
+    transition: transform 280ms cubic-bezier(0.22,1,0.36,1),
+                box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
+  }
+  .lp-bento-hero:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      0 2px 4px rgba(15,23,42,0.04),
+      0 30px 60px -22px rgba(79,118,255,0.38);
+  }
+
+  /* Inner glass micro-card for use INSIDE bento-hero */
+  .lp-glass-micro {
+    position: relative;
+    border-radius: 0.875rem;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.95);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 8px 24px -10px rgba(15,23,42,0.12);
+  }
+
+  /* Live pulse dot — for the bento "Live" hero in Features */
+  @keyframes lp-live-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.92); }
+  }
+  .lp-live-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: #22C55E;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.18);
+    animation: lp-live-pulse 2.2s ease-in-out infinite;
+    display: inline-block;
+  }
+
   /* Reduced-motion guard for landing motion utilities */
   @media (prefers-reduced-motion: reduce) {
     .lp-card,
@@ -519,7 +712,12 @@
     .lp-shimmer::after,
     .lp-shimmer-line,
     .lp-pill-accent,
-    .lp-pill-accent::after {
+    .lp-pill-accent::after,
+    .lp-progress-glass::after,
+    .lp-live-dot,
+    .lp-capsule-cta__inner,
+    .lp-capsule-cta__arrow,
+    .lp-bento-hero {
       transition: none !important;
       animation: none !important;
     }

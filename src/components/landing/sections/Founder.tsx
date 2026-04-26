@@ -75,6 +75,7 @@ export function Founder() {
             </motion.p>
 
             <div className="mt-8">
+              <span className="lp-bento-numeral block mb-2">[ FOUNDER · 2026 ]</span>
               <p className="font-heading font-semibold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
               <div className="h-px w-7 bg-[#0A0F1C] mt-1.5" />
               <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>

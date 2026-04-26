@@ -8,12 +8,7 @@ import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustration
 function PremiumStage({ children }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
   return (
     <div className="relative">
-      <div
-        aria-hidden
-        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.16) 0%, transparent 65%)" }}
-      />
-      <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
+      <div className="relative lp-glass-frost p-4 md:p-6 rounded-[1.75rem]">
         {children}
       </div>
     </div>
@@ -102,6 +97,7 @@ export function HowItWorks() {
               <AnimateIn key={step.badge} delay={i * 0.08}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
+                    <span className="lp-bento-numeral--lg block mb-4">[ {step.badge} ]</span>
                     <span className="inline-flex items-center gap-2.5 mb-5">
                       <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#F4F4F8] border border-[#ECEEF2]">
                         <step.icon size={16} strokeWidth={2} className="text-[#1F2937]" />

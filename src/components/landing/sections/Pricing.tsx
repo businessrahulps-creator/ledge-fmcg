@@ -101,16 +101,7 @@ export function Pricing() {
             <StaggerItem key={plan.name}>
               <div className="relative h-full">
                 <div
-                  className={`relative lp-card p-7 flex flex-col h-full ${plan.highlighted ? "lp-card-highlight" : ""}`}
-                  style={
-                    plan.highlighted
-                      ? {
-                          border: "1.5px solid #4F46E5",
-                          boxShadow:
-                            "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(15,23,42,0.04), 0 16px 40px -16px rgba(79,70,229,0.18)",
-                        }
-                      : undefined
-                  }
+                  className={`relative ${plan.highlighted ? "lp-bento-hero" : "lp-card"} p-7 flex flex-col h-full`}
                 >
                   {plan.highlighted && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-[#0A0F1C]">
@@ -118,30 +109,38 @@ export function Pricing() {
                     </span>
                   )}
 
-                  <div className={`lp-icon-tile mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}>
+                  <div className={`lp-icon-tile mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`} style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}>
                     <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-[#4F46E5]" : "text-[#1F2937]"} />
                   </div>
 
                   <h3 className="font-heading font-semibold text-[19px] text-[#0A0F1C] tracking-tight">{plan.name}</h3>
-                  <p className="font-body text-[13.5px] text-[#64748B] mt-1">{plan.tagline}</p>
+                  <p className={`font-body text-[13.5px] mt-1 ${plan.highlighted ? "text-[#3B3F66]" : "text-[#64748B]"}`}>{plan.tagline}</p>
 
-                  <div className="mt-4 flex items-baseline">
-                    {plan.price === "Custom" ? (
-                      <span className="font-heading font-semibold text-[36px] text-[#0A0F1C] tracking-[-0.025em]">Custom</span>
-                    ) : (
-                      <>
-                        <span className="text-[#94A3B8] text-[15px] font-normal mr-0.5">{plan.priceLabel}</span>
-                        <span className="font-heading font-semibold text-[40px] text-[#0A0F1C] tracking-[-0.025em] leading-none">{plan.price}</span>
-                        <span className="text-[#94A3B8] text-[14px] font-normal ml-1">{plan.period}</span>
-                      </>
-                    )}
-                  </div>
+                  {plan.highlighted ? (
+                    <div className="lp-glass-micro mt-5 px-5 py-4 flex items-baseline">
+                      <span className="text-[#94A3B8] text-[15px] font-normal mr-0.5">{plan.priceLabel}</span>
+                      <span className="font-heading font-semibold text-[40px] text-[#0A0F1C] tracking-[-0.025em] leading-none">{plan.price}</span>
+                      <span className="text-[#94A3B8] text-[14px] font-normal ml-1">{plan.period}</span>
+                    </div>
+                  ) : (
+                    <div className="mt-4 flex items-baseline">
+                      {plan.price === "Custom" ? (
+                        <span className="font-heading font-semibold text-[36px] text-[#0A0F1C] tracking-[-0.025em]">Custom</span>
+                      ) : (
+                        <>
+                          <span className="text-[#94A3B8] text-[15px] font-normal mr-0.5">{plan.priceLabel}</span>
+                          <span className="font-heading font-semibold text-[40px] text-[#0A0F1C] tracking-[-0.025em] leading-none">{plan.price}</span>
+                          <span className="text-[#94A3B8] text-[14px] font-normal ml-1">{plan.period}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   <div className="mt-6 space-y-2.5 flex-1">
                     {plan.features.map((f) => (
                       <div key={f} className="flex items-start gap-2.5">
-                        <span className="shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center bg-[#F4F4F8] border border-[#ECEEF2]">
-                          <Check size={10} className="text-[#0A0F1C]" strokeWidth={3} />
+                        <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${plan.highlighted ? "bg-white border-white" : "bg-[#F4F4F8] border-[#ECEEF2]"}`}>
+                          <Check size={10} className={plan.highlighted ? "text-[#4F46E5]" : "text-[#0A0F1C]"} strokeWidth={3} />
                         </span>
                         <span className="font-body text-[13.5px] text-[#1F2937] leading-[1.45]">{f}</span>
                       </div>

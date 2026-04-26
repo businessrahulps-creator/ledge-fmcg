@@ -42,30 +42,30 @@ export function Testimonials() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-5xl mx-auto" staggerTime={0.06}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto" staggerTime={0.06}>
           {testimonials.map((t, i) => (
             <StaggerItem key={t.name} variant="scaleUp">
-              <div className="lp-card p-8 md:p-10 h-full flex flex-col overflow-hidden">
-                {/* Decorative quote glyph — neutral */}
-                <span
-                  aria-hidden
-                  className="absolute -top-2 -left-1 font-heading font-bold text-[120px] leading-none text-[#0A0F1C]/[0.05] select-none pointer-events-none"
-                >
-                  &ldquo;
-                </span>
-                <p className="relative font-heading font-medium text-[18px] md:text-[20px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] flex-1">
-                  "{t.quote}"
-                </p>
-                <div className="relative mt-7 pt-5 border-t border-[#ECEEF2] flex items-center gap-3.5">
-                  <span
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-heading font-semibold text-[13px] shrink-0"
-                    style={{ background: avatarShades[i % avatarShades.length] }}
-                  >
-                    {initials(t.name)}
-                  </span>
-                  <div>
-                    <p className="font-body font-semibold text-[14.5px] text-[#0A0F1C]">{t.name}</p>
-                    <p className="font-body text-[12.5px] text-[#64748B] mt-0.5">{t.role}</p>
+              <div className="relative h-full">
+                {/* Tilted depth layers */}
+                <div aria-hidden className="absolute inset-0 lp-card opacity-40 -rotate-2 translate-x-1.5 translate-y-1.5 pointer-events-none" />
+                <div aria-hidden className="absolute inset-0 lp-card opacity-70 rotate-1 -translate-x-1 translate-y-0.5 pointer-events-none" />
+                {/* Front frosted card */}
+                <div className="relative lp-glass-frost p-8 md:p-10 h-full flex flex-col">
+                  <span className="lp-bento-numeral absolute top-5 right-6">[ {String(i + 1).padStart(2, "0")} ]</span>
+                  <p className="relative font-heading font-medium text-[18px] md:text-[20px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] flex-1">
+                    "{t.quote}"
+                  </p>
+                  <div className="relative mt-7 pt-5 border-t border-[#ECEEF2] flex items-center gap-3.5">
+                    <span
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-heading font-semibold text-[13px] shrink-0"
+                      style={{ background: avatarShades[i % avatarShades.length] }}
+                    >
+                      {initials(t.name)}
+                    </span>
+                    <div>
+                      <p className="font-body font-semibold text-[14.5px] text-[#0A0F1C]">{t.name}</p>
+                      <p className="font-body text-[12.5px] text-[#64748B] mt-0.5">{t.role}</p>
+                    </div>
                   </div>
                 </div>
               </div>

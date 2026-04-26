@@ -46,11 +46,12 @@ export function Problem() {
         </AnimateIn>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto" staggerTime={0.05}>
-          {cards.map((card) => (
+          {cards.map((card, i) => (
             <StaggerItem key={card.title}>
-              <div className="lp-card p-7 h-full flex flex-col">
-                <div className="lp-icon-tile mb-5">
-                  <card.icon size={20} strokeWidth={1.75} className="text-[#1F2937]" />
+              <div className="lp-card p-7 h-full flex flex-col relative">
+                <span className="lp-bento-numeral absolute top-5 right-6">[ {String(i + 1).padStart(2, "0")} ]</span>
+                <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
+                  <card.icon size={17} strokeWidth={1.75} className="text-[#1F2937]" />
                 </div>
                 <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
                   {card.title}
