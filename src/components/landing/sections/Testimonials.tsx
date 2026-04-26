@@ -51,7 +51,7 @@ export function Testimonials() {
                 <div aria-hidden className="absolute inset-0 lp-card opacity-70 rotate-1 -translate-x-1 translate-y-0.5 pointer-events-none" />
                 {/* Front frosted card */}
                 <div className="relative lp-glass-frost p-8 md:p-10 h-full flex flex-col">
-                  <span className="lp-bento-numeral absolute top-5 right-6">[ {String(i + 1).padStart(2, "0")} ]</span>
+                  
                   <p className="relative font-heading font-medium text-[18px] md:text-[20px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] flex-1">
                     "{t.quote}"
                   </p>

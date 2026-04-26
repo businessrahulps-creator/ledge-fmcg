@@ -47,7 +47,7 @@ export function Hero() {
             Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
-          <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mt-10" {...fadeUp(0.24)}>
+          <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>
             <CapsuleCTA to="/signup">Start 30-Day Free Trial</CapsuleCTA>
             <motion.a
               href="#how-it-works"
@@ -105,8 +105,8 @@ export function Hero() {
                 transition={{ ...spring.gentle as object, delay: 0.6 }}
                 className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-10"
               >
-                <span className="lp-progress-glass">
-                  <span className="lp-live-dot" />
+                <span className="lp-proof-chip">
+                  <span className="lp-proof-chip__dot" />
                   ₹2.4Cr tracked this week
                 </span>
               </motion.div>

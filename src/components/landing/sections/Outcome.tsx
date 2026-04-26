@@ -52,22 +52,21 @@ export function Outcome() {
               <span className="lp-pill-accent font-semibold">
                 <span className="relative z-[2]">90 days</span>
               </span>
-              .
+              <span className="ml-[-2px]">.</span>
             </h2>
           </div>
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.05}>
-          <div className="rounded-[24px] border border-[#ECEEF2] bg-white p-3 md:p-4">
+          <div className="md:rounded-[24px] md:border md:border-[#ECEEF2] md:bg-white md:p-4">
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" staggerTime={0.06}>
               {outcomes.map((o, idx) => {
                 const Icon = o.icon;
-                const isHero = idx === 1; // "Revenue recovered"
+                const isHero = idx === 1;
                 if (isHero) {
                   return (
                     <StaggerItem key={o.value} variant="scaleUp">
-                      <div className="lp-bento-hero h-full p-6 flex flex-col relative overflow-hidden">
-                        <span className="lp-bento-numeral absolute top-5 right-5">[ 02 ]</span>
+                      <div className="lp-bento-hero h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
                           <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/80 border border-white text-[#4F46E5] shadow-sm">
                             <Icon className="h-4 w-4" strokeWidth={2} />
@@ -76,15 +75,19 @@ export function Outcome() {
                             {o.eyebrow}
                           </span>
                         </div>
-                        <div className="lp-glass-micro mt-6 p-5">
-                          <div className="font-heading font-semibold text-[34px] md:text-[36px] text-[#0A0F1C] tracking-[-0.022em] leading-[1] whitespace-nowrap">
+
+                        <div className="mt-6">
+                          <div className="font-heading font-semibold text-[26px] md:text-[28px] text-[#3730A3] tracking-[-0.022em] leading-[1.05]">
                             {o.value}
                           </div>
-                          <div className="font-body text-[13px] text-[#475569] mt-1.5">
+                          <div className="font-body text-[13.5px] text-[#475569] mt-1.5">
                             {o.unit}
                           </div>
                         </div>
-                        <p className="font-body text-[13.5px] leading-[1.5] text-[#3B3F66] mt-5">
+
+                        <div className="h-px bg-white/60 my-5" />
+
+                        <p className="font-body text-[13.5px] leading-[1.5] text-[#3B3F66]">
                           {o.label}
                         </p>
                       </div>
@@ -93,8 +96,7 @@ export function Outcome() {
                 }
                 return (
                   <StaggerItem key={o.value} variant="scaleUp">
-                    <div className="group relative h-full rounded-[18px] border border-[#ECEEF2] bg-white p-6 transition-colors duration-300 hover:border-[#D4D8E0] overflow-hidden">
-                      <span className="lp-bento-numeral absolute top-5 right-5">[ {String(idx + 1).padStart(2, "0")} ]</span>
+                    <div className="group relative h-full rounded-[18px] border border-[#ECEEF2] bg-white p-6 transition-colors duration-300 hover:border-[#D4D8E0]">
                       <div className="flex items-center gap-3">
                         <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#F4F4F8] border border-[#ECEEF2] text-[#1F2937]">
                           <Icon className="h-4 w-4" strokeWidth={2} />
@@ -105,7 +107,7 @@ export function Outcome() {
                       </div>
 
                       <div className="mt-6">
-                        <div className="font-heading font-semibold text-[30px] md:text-[32px] text-[#0A0F1C] tracking-[-0.022em] leading-[1] whitespace-nowrap">
+                        <div className="font-heading font-semibold text-[26px] md:text-[28px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.05]">
                           {o.value}
                         </div>
                         <div className="font-body text-[13.5px] text-[#64748B] mt-1.5">

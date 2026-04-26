@@ -71,11 +71,10 @@ export function Founder() {
               <br /><br />
               Your team is in the field right now. Your floor is running. Your business deserves a system that keeps up. Built in India. Designed for the way you actually work.
               <br /><br />
-              <span className="lp-gradient-text-cool font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
+              <span className="text-[#4F46E5] font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
             </motion.p>
 
             <div className="mt-8">
-              <span className="lp-bento-numeral block mb-2">[ FOUNDER · 2026 ]</span>
               <p className="font-heading font-semibold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
               <div className="h-px w-7 bg-[#0A0F1C] mt-1.5" />
               <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>

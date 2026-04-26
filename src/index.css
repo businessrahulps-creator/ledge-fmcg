@@ -531,8 +531,14 @@
       inset 0 1px 1px rgba(255,255,255,0.9),
       inset 0 -1px 2px rgba(15,23,42,0.06),
       0 1px 2px rgba(15,23,42,0.04);
-    transition: box-shadow 240ms cubic-bezier(0.22,1,0.36,1);
+    transition: box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
     isolation: isolate;
+  }
+  .lp-capsule-cta:hover {
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.9),
+      inset 0 -2px 3px rgba(15,23,42,0.08),
+      0 1px 2px rgba(15,23,42,0.04);
   }
   .lp-capsule-cta__inner {
     display: inline-flex;
@@ -548,8 +554,8 @@
       inset 0 1px 0 rgba(255,255,255,0.95),
       0 1px 2px rgba(15,23,42,0.10),
       0 8px 18px -8px rgba(15,23,42,0.18);
-    transition: transform 280ms cubic-bezier(0.22,1,0.36,1),
-                box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
+    transition: transform 320ms cubic-bezier(0.22,1,0.36,1),
+                box-shadow 320ms cubic-bezier(0.22,1,0.36,1);
   }
   .lp-capsule-cta__arrow {
     position: absolute;
@@ -563,21 +569,28 @@
     justify-content: center;
     color: #0A0F1C;
     border-radius: 9999px;
-    transition: color 240ms ease, transform 280ms cubic-bezier(0.22,1,0.36,1);
+    background: transparent;
+    transition: color 280ms ease,
+                background-color 280ms ease,
+                transform 320ms cubic-bezier(0.22,1,0.36,1);
     pointer-events: none;
   }
   .lp-capsule-cta:hover .lp-capsule-cta__inner {
-    transform: translateX(2px);
+    transform: translate(4px, -1px);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.95),
-      0 1px 2px rgba(15,23,42,0.12),
-      0 12px 24px -8px rgba(15,23,42,0.22);
+      0 2px 4px rgba(15,23,42,0.10),
+      0 16px 30px -10px rgba(15,23,42,0.26);
   }
   .lp-capsule-cta:hover .lp-capsule-cta__arrow {
-    transform: translateY(-50%) translateX(3px);
+    transform: translateY(-50%) translateX(6px);
     color: #4F46E5;
+    background-color: rgba(79,70,229,0.06);
   }
-  .lp-capsule-cta:active .lp-capsule-cta__inner { transform: translateX(1px) scale(0.985); }
+  .lp-capsule-cta:active .lp-capsule-cta__inner {
+    transform: translate(1px, 0) scale(0.99);
+    transition-duration: 120ms;
+  }
 
   /* Dark variant — for contexts where white CTA would disappear */
   .lp-capsule-cta--dark { background: linear-gradient(180deg, #1F2937 0%, #0A0F1C 100%); }
@@ -585,7 +598,10 @@
     background: linear-gradient(180deg, #FFFFFF 0%, #F4F6FA 100%);
   }
   .lp-capsule-cta--dark .lp-capsule-cta__arrow { color: #FFFFFF; }
-  .lp-capsule-cta--dark:hover .lp-capsule-cta__arrow { color: #C7D2FE; }
+  .lp-capsule-cta--dark:hover .lp-capsule-cta__arrow {
+    color: #C7D2FE;
+    background-color: rgba(199,210,254,0.10);
+  }
 
   /* 2. Content-grade frost — lighter than hero glass, with blue bloom */
   .lp-glass-frost {
@@ -648,11 +664,60 @@
     color: #94A3B8;
     font-variant-numeric: tabular-nums;
   }
-  .lp-bento-numeral--lg {
-    font-size: 22px;
-    letter-spacing: 0.08em;
-    color: #94A3B8;
+  /* New: neutral dark proof chip — replaces the saturated indigo gradient */
+  .lp-proof-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 18px;
+    border-radius: 9999px;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: -0.005em;
+    background: rgba(10, 15, 28, 0.92);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      0 12px 28px -12px rgba(15,23,42,0.40),
+      0 2px 6px -2px rgba(15,23,42,0.20);
+  }
+  .lp-proof-chip__dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129,140,248,0.22);
+    display: inline-block;
+  }
+
+  /* Pricing trust chip — subtle, scannable benefits row */
+  .lp-pricing-trust-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 18px;
+    border-radius: 9999px;
+    background: #F4F4F8;
+    border: 1px solid #ECEEF2;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .lp-pricing-trust-chip__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
     font-weight: 500;
+    color: #0A0F1C;
+    letter-spacing: -0.005em;
+  }
+  .lp-pricing-trust-chip__divider {
+    width: 1px;
+    height: 12px;
+    background: #D9DCE3;
   }
 
   /* 5. Bento hero tile — ONE filled tile per multi-card section */

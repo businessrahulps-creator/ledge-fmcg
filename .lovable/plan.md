@@ -1,154 +1,145 @@
 
-# Landing Page Audit + World-Class Enhancement Plan
+# Landing Page — Final Polish Pass
 
-I studied the three reference UIs you sent and held them next to every section currently on the page.
-
-**The references share a clear visual grammar:**
-1. **Soft neumorphic capsule CTA** (pill inside pill, two-tone elevation, single arrow) — premium, tactile, calm.
-2. **Frosted glass progress card** (blue-only gradient, thick blur, soft glow shadow, numeric headline)
-3. **Numbered bento grid** (`[ 01 ] [ 02 ] …`, one hero tile colored, the rest neutral frost, large numerals as the focal point per tile)
-
-Right now our page reads honest and clean (we earned that with the restraint pass) — but it's **flat**. Every card has the same weight, the same hairline border, the same icon-tile-then-text rhythm. The references win because they **stage one thing per viewport** and use **frost + soft blue glow** as a deliberate signature, not wallpaper.
-
-Below is the audit and the upgrade.
+A fresh chief-designer audit (desktop 1505w + mobile 375w) against your screenshots. Calling out everything broken in one pass.
 
 ---
 
-## Part 1 — Audit (chief-designer pass)
+## Audit findings
 
-### What's working
-- Restraint is real. Whitespace breathes. Tracking is calm. Indigo is no longer wallpaper.
-- Hero is now full-viewport and closes cleanly.
-- Outcome's animated `90 days` pill and framed grid give the section a hero moment.
-- Eyebrow chips are consistent and quiet.
+### What you flagged (confirmed)
+1. **`[ 01 ] [ 02 ] …` brackets are everywhere** — Outcome, Problem, Features, WhyOrdra, HowItWorks, Testimonials, Founder. Reads as decoration, not signal. Kill them globally.
+2. **Outcome cards still overflow.** `₹10L–₹1Cr` and `₹10K–₹20K` use `whitespace-nowrap` at 30–36px inside narrow columns — the second one breaks the box on the right of the screenshot. The hero tile's `lp-glass-micro` block also pushes the card taller than its siblings, ruining the row.
+3. **Features section is broken.** The bento layout (3/3/3/3/2/2/2 col-span on a 6-col grid) leaves cards 5 & 6 visibly cropped at the bottom of the screenshot. Hero "Live business dashboard" tile has competing weights (eyebrow + title + description + 3-up KPI mini-card) — too busy.
+4. **`Start free. … walk away.`** — current `lp-gradient-text-cool` (purple → indigo → blue) feels cheap and clashes with the now-restrained palette. Needs a flat, confident treatment.
+5. **`[ FOUNDER · 2026 ]`** — meta line adds no value, must go.
+6. **Pricing cards broken** — "Most Popular" badge sits on top of the card border (negative `-top-3`) and gets clipped because `lp-bento-hero` has `overflow: hidden`. The Free card's `₹` is misaligned (sub-baseline). The Growth card's price block in `lp-glass-micro` is much taller than the other three cards' price blocks → row never aligns.
+7. **`30-day free trial. No card. Cancel anytime.`** — currently buried inline in a paragraph. Needs a subtle, confident chip treatment.
+8. **CTA button animation is poor.** Currently just a 2px translateX on the inner pill. Reference shows a confident slide + arrow chamber transition. Needs proper choreography.
+9. **`₹2.4Cr tracked this week` chip** — current indigo→sky gradient is too saturated and visually competes with the dashboard mockup it floats below. Doesn't match the now-soft palette.
 
-### What's still flat (the real problems)
-1. **Every card is the same card.** Problem, Features, WhyOrdra, Pricing, Testimonials all use `lp-card` with the same shadow + border + padding. There is no hierarchy — nothing earns the eye first. The reference grid (image 3) solves this by making **one tile the hero** (filled blue gradient) and the rest neutral frost.
-2. **Icon tiles are repetitive.** Six identical graphite squares in Features, four in Problem, four in WhyOrdra. They've become decoration, not signal.
-3. **No tactile/neumorphic surface anywhere.** Reference 1 (the Get Started capsule) has *depth from light*, not shadow — pillow-soft inset highlight, sub-pill nested, single arrow. Our current `lp-btn-primary-dark` is a flat dark gradient.
-4. **No frosted-glass micro-cards in content.** Reference 2 (the 72% progress card) shows how a single glass element with a blue gradient bar can carry an entire section. We use glass only on the hero dashboard stage, never inside content sections.
-5. **HowItWorks alternates left/right but the device frames feel detached** — they float against the white with a graphite halo, not staged.
-6. **Pricing's "Most Popular" card is barely distinguishable.** Just a 1.5px indigo border. Reference 3 says: when one card is the hero, *fill it*. Don't outline it.
-7. **WhyOrdra's "01 / 02 / 03 / 04" treatment is small and decorative.** The reference uses huge bracketed numerals `[ 01 ]` as a primary visual anchor.
-8. **Testimonials have no depth language** — flat paper card with a faded quote glyph. Could be a frosted, tilted stack with a single cited card raised forward.
-9. **Final CTA is now fine but generic** — the soft lavender mesh works but the buttons don't sing. This is the single best place to deploy the neumorphic capsule from reference 1.
-10. **Hero CTA is good but missing the reference's signature** — one capsule with a clear arrow chamber. We have two pills side-by-side instead.
+### Additional issues found in audit
 
----
-
-## Part 2 — The Plan (world-class enhancements)
-
-### A. New shared primitives (`src/index.css`)
-
-**1. `.lp-capsule-cta` — neumorphic capsule (Reference 1)**
-Pill-in-pill construction. Outer track is light gray with subtle inset pressure. Inner pill is white with a soft outer highlight + tiny inset shadow. Trailing arrow sits in its own chamber. Hover slides the inner pill `+4px`, arrow chamber dims. This becomes the **signature CTA** at Hero + FinalCTA.
-
-**2. `.lp-glass-frost` — content-grade frost (Reference 2)**
-A lighter version of `lp-card-glass` for inline use:
-- `bg: rgba(255,255,255,0.55)`, `backdrop-blur: 16px saturate(140%)`
-- soft outer blue glow `0 24px 60px -20px rgba(59,130,246,0.18)`
-- single indigo→sky gradient highlight on top edge
-
-**3. `.lp-progress-glass` — blue gradient pill (Reference 2)**
-For one inline statistic in Hero or Outcome:
-- gradient `linear-gradient(90deg, #4F46E5 0%, #60A5FA 100%)`
-- inner highlight, outer blue bloom
-- value label inside
-
-**4. `.lp-bento-numeral` — bracketed numerals (Reference 3)**
-`[ 01 ]` style, font-mono-ish via tabular-nums, color `#94A3B8`, position absolute top-left of bento tiles. Single typographic detail that ties WhyOrdra and HowItWorks together.
-
-**5. `.lp-bento-hero` — the one filled tile per grid (Reference 3)**
-Filled with a soft sky→indigo gradient (`#EEF4FF` → `#DDE5FF`), white interior glass micro-card floating inside (e.g., showing a stat or chart). Used **once per multi-card section** to create hierarchy.
+10. **Hero CTA row** — `gap-4 sm:gap-6` between capsule and "See how it works →" is too tight on mobile; secondary link butts up against the capsule's arrow chamber.
+11. **WhyOrdra "Built different" eyebrow + h2** — works, but the giant `[ 02 ]` `lp-bento-numeral--lg` (22px) on the hero tile is louder than the headline of the card itself ("Works when the network doesn't"). Inverted hierarchy.
+12. **HowItWorks** — `[ 01 ] [ 02 ] [ 03 ]` is doubled with `STEP 01` text right below it. Redundant.
+13. **Mobile (375w)** — Outcome's 4-column grid stacks fine, but the outer `rounded-[24px] border` wrapper adds unnecessary visual weight on mobile (a frame around already-framed cards). Pricing's "Most Popular" badge clipping is worse on mobile.
+14. **FinalCTA proof chip** — `lp-glass-frost` with the indigo top-edge highlight reads OK, but `Used by FMCG teams across 12 Indian states` is unverifiable copy; consider softening.
+15. **Outcome's `90 days` pill** — fine, but the trailing `.` after the pill sits awkwardly far right because of the pill's padding.
 
 ---
 
-### B. Section-by-section enhancements
+## The fix plan
 
-#### **Hero**
-- Replace the two side-by-side pills with the **neumorphic capsule** as primary. Secondary becomes a quiet text link with arrow ("See how it works →"). Less competing weight.
-- Add a small `lp-progress-glass` chip beneath the dashboard mockup: *"₹2.4Cr tracked this week"* with a tiny bloom — proof + the reference signature in one beat.
-- Soften the dashboard halo further; rely on the new glass card for elevation instead of a graphite radial.
+### A. Global cleanup — remove bracketed numerals everywhere
 
-#### **Problem** — *unchanged structurally*
-This section is doing its job. Just downsize icon tiles to `w-8 h-8` and bracket the card numbers `[01] [02] [03] [04]` quietly above each title for typographic continuity.
+Strip `[ 01 ] [ 02 ] …` from:
+- `Outcome.tsx` (4 cards, hero tile)
+- `Problem.tsx` (4 cards)
+- `Features.tsx` (6 cards)
+- `WhyOrdra.tsx` (4 cards, replace giant numerals)
+- `HowItWorks.tsx` (3 steps — keep the `STEP 01` text label, kill the bracketed version)
+- `Testimonials.tsx` (4 cards)
+- `Founder.tsx` (`[ FOUNDER · 2026 ]` line)
 
-#### **HowItWorks** (the device-frame section)
-- Add `[ 01 ] [ 02 ] [ 03 ]` numerals **floating in the gutter** at the start of each text column (reference grammar).
-- Ground the device mockups in **`lp-glass-frost`** stages instead of the current dark-halo treatment — the frost reads as "screen captured under glass".
-- Keep the vertical hairline connector but add a tiny indigo dot at each step's row midpoint (subtle progress sense).
+CSS: keep `.lp-bento-numeral` defined for now (still referenced in some places we'll clean) but stop using it. Remove `.lp-bento-numeral--lg`.
 
-#### **Outcome** (the 4-stat grid)
-This is the right place to land the **bento hero pattern**. Keep four cards but:
-- Promote the **"Revenue recovered ₹10L–₹1Cr"** tile to `lp-bento-hero` — soft indigo wash, the value rendered inside a small `lp-glass-frost` micro-card-on-card so the number floats. This becomes the visual anchor of the entire page.
-- The other three stay neutral. Hierarchy through contrast, not equal weight.
+### B. Outcome — fix overflow + alignment
 
-#### **Features** (6-up grid)
-- Switch to **bento variable widths**: 2-col / 1-col / 1-col / 1-col / 2-col (or similar). One tile (Live business dashboard) gets `lp-bento-hero` treatment with a tiny live-pulse dot ("Live" — the reference 3 dashboard cue).
-- Replace the icon-tile-then-text pattern on the hero tile with a **mini glass card showing today's KPI snapshot** (3 stat lines). Other tiles keep the icon+text format but with bracketed numerals `[ 01 ] … [ 06 ]` aligned top-right.
+- Drop `whitespace-nowrap` on `value`. Reduce stat font from 30–36px to **`text-[26px] md:text-[28px]`** so `₹10L–₹1Cr` and `₹10K–₹20K` fit comfortably on one line in their column.
+- Hero tile (Revenue recovered): remove the inner `lp-glass-micro` wrapper around the value — it inflates height and breaks row alignment. Keep value/unit inline like the other 3 cards but add a subtle indigo accent (text color `#3730A3` on the value only).
+- Remove the outer `rounded-[24px] border bg-white p-3` frame on mobile (`md:` only) — frame-in-frame reads heavy on small screens.
+- Move the `.` after the `90 days` pill closer with negative margin (`ml-[-2px]`).
 
-#### **WhyOrdra** (the 4 differentiators)
-- Replace the small "01 / 02 / 03 / 04" header with **giant bracketed numerals** `[ 01 ]` at 22px tabular-nums — they become the primary anchor of each card.
-- Keep the icons but move them small to the bottom-right, like a watermark.
-- Promote one card ("Works when the network doesn't") to `lp-bento-hero` with a tiny offline → sync glass chip animation.
+### C. Features — full redesign
 
-#### **Pricing**
-- Stop outlining the "Most Popular" card. **Fill it** like reference 3's hero tile: soft indigo wash background `#F4F6FF`, white interior, the price floats in a contained white sub-card. Sits visibly forward in the row.
-- Keep other 3 cards neutral white. Now the eye actually finds Growth in one glance.
-- Replace check-circle bullets on the hero card only with a single indigo accent.
+This was the biggest call-out. Replacing the broken bento with a clean, confident **uniform 3-column grid** (which is how the reference image 2 actually reads — 6 equal-feeling tiles, one promoted).
 
-#### **Testimonials**
-- Stack two cards behind the front one with `-rotate-2 / +rotate-1` and lower opacity, like a tilted card deck — depth without busy.
-- Front card uses `lp-glass-frost` — the only frost in this section.
-- Remove the giant background quote glyph; it's been replaced by the depth itself.
+- Drop the variable `col-span` math. Use `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` with all tiles equal size. 6 tiles = 2 rows of 3. Clean.
+- Hero tile (`Live business dashboard`) keeps `lp-bento-hero` styling but **simplified contents**: live-dot + eyebrow + title + description + ONE inline KPI line (`₹4.2L revenue today · 28 orders · 12 dispatched`) — not a 3-column micro-card. Reduces visual noise dramatically.
+- Other 5 tiles: standard `lp-card` with icon-tile + title + description. No numerals.
+- Tighten card padding to `p-7` and ensure `auto-rows-fr` so all rows line up.
 
-#### **Founder** — *minimal change*
-- Photo is fine. Quote is fine. Just bracket the byline area: `[ Founder · 2026 ]` micro-meta line above the name for design-language continuity.
+### D. Founder — flat treatment + cleanup
 
-#### **FinalCTA**
-- This is the natural home for the **neumorphic capsule CTA**. One capsule, centered, oversized. The WhatsApp link demotes to a quiet text link below ("or message us on WhatsApp →").
-- Add a single `lp-glass-frost` quote card above the headline showing a tiny social-proof line ("Used by FMCG teams across 12 Indian states") — calm, earned closure.
+- Remove `[ FOUNDER · 2026 ]` line entirely.
+- Replace `lp-gradient-text-cool` on `Start free. If it's not running your business in 30 days, walk away.` with a **flat indigo** `text-[#4F46E5]` at the same font weight. Premium, confident, not generated.
+- Keep the rest of the founder block as-is.
 
-#### **Navbar / TrustBar / Footer** — *no change*
+### E. Pricing — fix the broken cards
 
----
+- "Most Popular" badge: change `lp-bento-hero` to allow badge to overflow. Either remove `overflow-hidden` on the highlighted variant, or restructure: place badge as a **pill INSIDE the top of the card** (top-right, normal flow) instead of `absolute -top-3`. Cleaner, no clipping.
+- Free card `₹0`: re-baseline the `₹` symbol (currently `text-[15px]` next to a 40px digit pushes it to subscript-feel). Wrap in a flex container with `items-baseline` and lift `₹` to `text-[24px]` so it sits properly.
+- Remove the `lp-glass-micro` wrapper around Growth's price. Use the same inline price pattern as the other 3 cards. This fixes row-alignment AND removes the "card-in-card" feel that screenshot 4 shows looks busy.
+- Subtle highlight for the "30-day free trial. No card. Cancel anytime." line: extract from the paragraph and render as **its own pill** below the headline:
+  ```
+  [ ✓ 30-day free trial   ✓ No card   ✓ Cancel anytime ]
+  ```
+  Single rounded chip, `bg-[#F4F4F8]`, hairline border, three checkmarks separated by hairline dividers. Subtle, confident, scannable.
 
-### C. Motion & micro-interactions
-- Capsule CTA: inner pill slides 4px on hover, arrow chamber gradient brightens (180ms `cubic-bezier(0.22,1,0.36,1)`).
-- Bento hero tiles: very gentle 4s breathing scale on the inner glass micro-card (`prefers-reduced-motion` guarded).
-- Bracketed numerals fade up on scroll-in with 30ms stagger across the grid.
-- Progress glass chip: subtle 8s shimmer along the gradient (already have the keyframe).
+### F. Capsule CTA — better animation
 
----
+Current motion is flat. Upgrade choreography (CSS-only, GPU):
+- **Outer track**: subtle press-in shadow on hover (deeper inset).
+- **Inner pill**: slides `translateX(4px)` (was 2px) AND lifts `translateY(-1px)` with a softer shadow lift — gives it a "released" feel.
+- **Arrow chamber**: arrow translates `translateX(6px)` AND the chamber background brightens to a faint indigo tint (`rgba(79,70,229,0.06)`).
+- Easing: switch from `cubic-bezier(0.22,1,0.36,1)` (already good) but lengthen to **320ms** for the inner pill so the slide reads instead of snaps.
+- Add `:active` press state — inner pill nudges back `translateX(1px) scale(0.99)`.
 
-### D. Memory updates
-- Update `mem://style/landing-palette.md` with the new primitives (`lp-capsule-cta`, `lp-glass-frost`, `lp-bento-hero`, `lp-bento-numeral`) and the **bento hero rule** ("one filled tile per multi-card section, never more").
-- Add a note: gradient/frost remains an *earned* signature — the neumorphic capsule is the only CTA shape, the bento hero is the only filled tile.
+### G. Hero proof chip — palette fix
+
+`₹2.4Cr tracked this week` — recolor from saturated indigo→sky gradient to match landing palette:
+- Replace `.lp-progress-glass` background with a **subtle frosted dark chip**: `bg-[#0A0F1C]/90` + `backdrop-blur-md`, white text, soft white inner highlight. Calm, premium, sits naturally against the soft white hero mesh instead of fighting it.
+- Keep the live dot but switch to a soft indigo `#818CF8` (not green — green reads "online status," not "money").
+- Remove the saturated outer blue glow shadow; replace with a soft neutral graphite drop shadow.
+
+### H. Hero CTA spacing
+
+- Increase mobile gap to `gap-5 sm:gap-7` between capsule and secondary link so the arrow chamber doesn't crowd "See how it works →".
+
+### I. WhyOrdra — fix inverted hierarchy
+
+Since we're killing all bracketed numerals, the `lp-bento-numeral--lg` issue disappears naturally. Hero tile keeps the offline-ready chip + indigo wash + watermark icon. Clean.
+
+### J. HowItWorks — single step indicator
+
+Already has a `STEP 01` text label below the (now-removed) bracketed numeral. Keep just the `STEP 01` label. Done.
+
+### K. Mobile polish
+
+- Outcome: drop outer frame on mobile (covered in B).
+- Hero CTA spacing (covered in H).
+- Pricing badge clipping (covered in E).
+- Features grid stacking already works once the bento math is removed.
 
 ---
 
 ## Files that will change
 
-**CSS primitives**
-- `src/index.css` — add `.lp-capsule-cta`, `.lp-glass-frost`, `.lp-progress-glass`, `.lp-bento-numeral`, `.lp-bento-hero`
+**Section components** (all in `src/components/landing/sections/`):
+- `Outcome.tsx` — strip numerals, fix font sizes, drop hero glass-micro, mobile frame off
+- `Problem.tsx` — strip numerals
+- `Features.tsx` — full redesign: uniform 3-col grid, simplified hero tile
+- `WhyOrdra.tsx` — strip giant numerals
+- `HowItWorks.tsx` — strip bracketed numerals (keep STEP labels)
+- `Testimonials.tsx` — strip numerals
+- `Founder.tsx` — remove `[ FOUNDER · 2026 ]`, flat indigo color on key line
+- `Pricing.tsx` — fix Most Popular badge clipping, fix `₹0` baseline, drop glass-micro on Growth price, add benefits chip
+- `Hero.tsx` — recolor proof chip, widen CTA gap
 
-**Sections**
-- `src/components/landing/sections/Hero.tsx` — capsule CTA, demote secondary, progress glass chip
-- `src/components/landing/sections/Problem.tsx` — bracketed numerals, tighter icon tiles
-- `src/components/landing/sections/HowItWorks.tsx` — gutter numerals, glass-frost device stages, dot connectors
-- `src/components/landing/sections/Outcome.tsx` — promote revenue tile to bento hero with inner glass micro-card
-- `src/components/landing/sections/Features.tsx` — bento variable layout, hero tile with live KPI mini-card
-- `src/components/landing/sections/WhyOrdra.tsx` — giant bracketed numerals, demoted icons, one bento hero tile
-- `src/components/landing/sections/Pricing.tsx` — fill the Growth card instead of outlining it, inner price sub-card
-- `src/components/landing/sections/Testimonials.tsx` — tilted card-deck depth, frost on front card
-- `src/components/landing/sections/Founder.tsx` — bracketed meta line above byline
-- `src/components/landing/sections/FinalCTA.tsx` — neumorphic capsule, demote WhatsApp, frost social-proof chip
+**CSS** (`src/index.css`):
+- Update `.lp-capsule-cta` hover/active choreography (longer ease, larger translate, arrow chamber tint, lift)
+- Update `.lp-progress-glass` to neutral dark frosted chip palette
+- Remove `.lp-bento-numeral--lg` (orphaned)
+- Add `.lp-pricing-trust-chip` for the new "30-day · No card · Cancel anytime" chip
 
-**Memory**
-- `.lovable/memory/style/landing-palette.md` — record the new primitives and the "one bento hero per section" rule
+**Memory**:
+- Update `.lovable/memory/style/landing-palette.md`: remove the bracketed-numeral guidance (rejected by user), note that the proof chip palette must remain neutral (not saturated indigo).
 
 ---
 
 ## Why this works
 
-The references win because they obey one rule: **per viewport, one element earns the eye, the rest hold the frame**. We've earned restraint; now we add hierarchy. Frost + soft blue glow becomes our signature flourish (used 4–5 times across the entire page, never more), the neumorphic capsule becomes our unmistakable CTA, and bracketed numerals become the typographic thread that ties the whole page together as *designed*, not generated.
+The bracketed numerals were a typographic crutch that read as "designed" but actually fragmented every section's hierarchy. Removing them lets the headlines and content do the talking. The Features redesign replaces broken bento math with a confident uniform grid (the reference's actual lesson: **rhythm > variety**). The capsule CTA finally moves with intent. And the proof chip stops fighting the page.
+
+Restraint, again — but applied correctly this time.
