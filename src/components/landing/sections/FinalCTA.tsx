@@ -45,19 +45,24 @@ export function FinalCTA() {
         </motion.p>
 
         <motion.div
-          className="flex flex-col items-center gap-5 mt-10"
+          className="flex flex-col items-center gap-4 mt-10"
           {...fadeUp(0.2)}
         >
-          <CapsuleCTA to="/signup" variant="dark">Start 30-Day Free Trial</CapsuleCTA>
-
-          <a
-            href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-body text-[14px] text-[#475569] hover:text-[#0A0F1C] transition-colors"
-          >
-            or message us on WhatsApp →
-          </a>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <CapsuleCTA to="/signup" variant="dark">Start 30-Day Free Trial</CapsuleCTA>
+            <a
+              href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white border border-[#0A0F1C]/[0.08] hover:border-[#0A0F1C]/[0.18] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.10)] transition-all"
+              aria-label="Chat with Ledge sales on WhatsApp"
+            >
+              <WhatsAppIcon className="w-4 h-4 text-[#128C7E]" />
+              <span className="font-body text-[14.5px] font-semibold text-[#0A0F1C]">
+                Chat on WhatsApp
+              </span>
+            </a>
+          </div>
         </motion.div>
 
         <motion.p
