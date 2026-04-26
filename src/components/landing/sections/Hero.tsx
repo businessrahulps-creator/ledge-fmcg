@@ -98,6 +98,18 @@ export function Hero() {
                   </div>
                 </BrowserFrame>
               </div>
+              {/* Floating proof chip — reference signature, used once */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...spring.gentle as object, delay: 0.6 }}
+                className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-10"
+              >
+                <span className="lp-progress-glass">
+                  <span className="lp-live-dot" />
+                  ₹2.4Cr tracked this week
+                </span>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>
