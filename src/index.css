@@ -1018,7 +1018,9 @@
     .lp-capsule-cta__arrow,
     .li-route-path,
     .li-route-chip,
-    .lp-bento-hero {
+    .lp-bento-hero,
+    .lp-live-dot-pulse,
+    .lp-btn-breathe {
       transition: none !important;
       animation: none !important;
     }
