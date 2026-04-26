@@ -18,11 +18,9 @@ export function Hero() {
   const gridY = useParallaxY(sectionRef, 30);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-light pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-soft-warm pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
-      {/* Film grain — kills banding */}
-      <div className="absolute inset-0 lp-noise pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
         {/* Left - Text */}
@@ -34,7 +32,7 @@ export function Hero() {
           </motion.div>
 
           <motion.h1
-            className="font-heading font-extrabold text-[40px] md:text-[60px] text-[#0A0F1C] leading-[1.02] tracking-[-0.04em] mt-7"
+            className="font-heading font-semibold text-[40px] md:text-[52px] text-[#0A0F1C] leading-[1.08] tracking-[-0.025em] mt-7"
             {...fadeUp(0.08)}
           >
             Run your factory and field
@@ -43,7 +41,7 @@ export function Hero() {
           </motion.h1>
 
           <motion.p
-            className="font-body text-[17px] md:text-[20px] text-[#475569] leading-[1.5] max-w-xl mt-7"
+            className="font-body text-[17px] md:text-[19px] text-[#475569] leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
             Orders, payments, stock, GST invoices, production. One mobile app.
