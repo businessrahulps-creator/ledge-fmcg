@@ -46,7 +46,7 @@ export function Hero() {
             className="font-body text-[18px] md:text-[22px] text-[#1F2937] leading-[1.45] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Orders, payments, stock, GST invoices, production — one mobile app.
+            Orders, payments, stock, GST invoices, production. One mobile app.
             Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 

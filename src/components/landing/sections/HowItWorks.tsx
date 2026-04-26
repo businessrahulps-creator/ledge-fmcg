@@ -40,7 +40,7 @@ const steps = [
     badge: "02",
     icon: LayoutDashboard,
     title: "Your dashboard updates live.",
-    description: "Revenue, dispatches, outstanding — moving in real time. No evening summary call.",
+    description: "Revenue, dispatches, outstanding. Moving in real time. No evening summary call.",
     mockup: () => (
       <CoolStage>
         <BrowserFrame url="app.ledge.in/dashboard">

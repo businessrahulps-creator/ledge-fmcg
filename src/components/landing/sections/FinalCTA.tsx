@@ -46,7 +46,7 @@ export function FinalCTA() {
         >
           Start your 30-day free trial today. No card. No commitment.
           <br />
-          Just clarity — from day one.
+          Just clarity. From day one.
         </motion.p>
 
         <motion.div
