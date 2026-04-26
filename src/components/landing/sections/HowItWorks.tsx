@@ -5,18 +5,13 @@ import { spring } from "@/lib/motion";
 import { BrowserFrame, PhoneFrame } from "../DeviceFrames";
 import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
 
-function PremiumStage({ children, accent = "violet" }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
-  const glows: Record<string, string> = {
-    violet: "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(108,92,231,0.30) 0%, transparent 60%)",
-    indigo: "radial-gradient(ellipse at 30% 30%, rgba(99,102,241,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(79,70,229,0.30) 0%, transparent 60%)",
-    blue: "radial-gradient(ellipse at 30% 30%, rgba(37,99,235,0.40) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(59,130,246,0.30) 0%, transparent 60%)",
-  };
+function PremiumStage({ children }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
   return (
     <div className="relative">
       <div
         aria-hidden
-        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-50 pointer-events-none"
-        style={{ background: glows[accent] }}
+        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.16) 0%, transparent 65%)" }}
       />
       <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
         {children}
