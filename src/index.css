@@ -831,7 +831,6 @@
   .lp-card-premium {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
     --mx: 50%;
     --my: 50%;
     transition:
