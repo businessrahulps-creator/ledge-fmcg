@@ -27,22 +27,16 @@ function initials(name: string) {
   return name.split(" ").map((p) => p[0]).slice(0, 2).join("");
 }
 
-const avatarGradients = [
-  "linear-gradient(135deg, #7C3AED, #4F46E5)",
-  "linear-gradient(135deg, #4F46E5, #2563EB)",
-  "linear-gradient(135deg, #6D28D9, #7C3AED)",
-  "linear-gradient(135deg, #2563EB, #7C3AED)",
-];
+const avatarShades = ["#1F2937", "#334155", "#0A0F1C", "#475569"];
 
 export function Testimonials() {
   return (
-    <section className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
-      <div className="absolute inset-0 lp-noise pointer-events-none" />
+    <section className="relative lp-section-paper py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">From the field</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
               Owners who stopped guessing.
             </h2>
           </div>
@@ -52,23 +46,20 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <StaggerItem key={t.name} variant="scaleUp">
               <div className="lp-card p-8 md:p-10 h-full flex flex-col overflow-hidden">
-                {/* Decorative quote glyph */}
+                {/* Decorative quote glyph — neutral */}
                 <span
                   aria-hidden
-                  className="absolute -top-2 -left-1 font-heading font-extrabold text-[120px] leading-none text-[#7C3AED]/10 select-none pointer-events-none"
+                  className="absolute -top-2 -left-1 font-heading font-bold text-[120px] leading-none text-[#0A0F1C]/[0.05] select-none pointer-events-none"
                 >
                   &ldquo;
                 </span>
-                <p className="relative font-heading font-bold text-[19px] md:text-[21px] text-[#0A0F1C] leading-[1.4] tracking-[-0.015em] flex-1">
+                <p className="relative font-heading font-medium text-[18px] md:text-[20px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] flex-1">
                   "{t.quote}"
                 </p>
-                <div className="relative mt-7 pt-5 border-t border-[#E2E8F0] flex items-center gap-3.5">
+                <div className="relative mt-7 pt-5 border-t border-[#ECEEF2] flex items-center gap-3.5">
                   <span
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-heading font-bold text-[13px] shrink-0"
-                    style={{
-                      background: avatarGradients[i % avatarGradients.length],
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 12px -2px rgba(124,58,237,0.30)",
-                    }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-heading font-semibold text-[13px] shrink-0"
+                    style={{ background: avatarShades[i % avatarShades.length] }}
                   >
                     {initials(t.name)}
                   </span>
