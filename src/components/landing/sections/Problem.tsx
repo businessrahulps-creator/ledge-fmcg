@@ -1,4 +1,7 @@
+import { useRef } from "react";
+import { motion } from "framer-motion";
 import { MessageCircle, Table, Compass, Laptop } from "lucide-react";
+import { useParallaxY } from "@/lib/motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const cards = [
@@ -25,9 +28,12 @@ const cards = [
 ];
 
 export function Problem() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const noiseY = useParallaxY(sectionRef, 15);
+
   return (
-    <section className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
-      <div className="absolute inset-0 lp-noise pointer-events-none" />
+    <section ref={sectionRef} className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
+      <motion.div style={{ y: noiseY, willChange: "transform" }} className="absolute inset-0 lp-noise pointer-events-none" />
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">

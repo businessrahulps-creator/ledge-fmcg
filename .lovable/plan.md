@@ -1,105 +1,74 @@
-# Landing Page Spacing & Rhythm Refinement
+# Subtle, accessible motion across landing sections
 
-Goal: take the current spacing from "templated" to "hand-crafted" by establishing a single, consistent vertical rhythm and container system across every section. **No copy, structure, colors, or component changes** — only padding, margins, gaps, and max-widths.
+## Goal
+Add tasteful, performant motion to the landing page — parallax mesh, hover lift on cards, and a CTA shimmer — without changing copy, layout, or color. Everything respects `prefers-reduced-motion`, runs on the GPU (transform/opacity only), and avoids layout thrash.
 
----
+## Design principles
+- **GPU-only**: animate `transform` and `opacity`. No `top/left/width/height/box-shadow` keyframes.
+- **Reduced motion**: every effect short-circuits via `@media (prefers-reduced-motion: reduce)` and Framer's `useReducedMotion()`.
+- **Cheap parallax**: Framer's `useScroll` + `useTransform` on a single mesh layer per section (translateY only, ±20–40px). No manual scroll listeners.
+- **No re-layout**: hover lifts use `transform: translateY(-3px)` + soft shadow swap (already in `.lp-card:hover`). New scale only on icon tiles.
+- **Shimmer = pure CSS**: a 1.2s linear gradient sweep on primary CTAs, triggered by hover. Single pseudo-element.
 
-## Audit findings (current inconsistencies)
+## Changes
 
-| Concern | Examples |
-|---|---|
-| Section padding varies | `py-24 md:py-32` (Problem, Features, Pricing, Testimonials, WhyOrdra, Founder, HowItWorks) vs `py-28 md:py-36` (Outcome, FinalCTA) vs `py-14 md:py-16` (TrustBar) vs `pt-32 pb-20 md:py-32` (Hero) |
-| Header → grid spacing varies | `mb-14 md:mb-16`, `mb-12`, `mb-14`, `mb-16 md:mb-20`, `mb-20`, `mt-14`, `mt-12` |
-| Eyebrow → H2 gap | Mostly `mt-5`, but inner padding inside chip varies; `mb-5` on eyebrow is unused since H2 uses `mt-5` (double-spacing risk) |
-| Card grids | All use `gap-5` — good, but should bump to `gap-6` on `lg` for premium breathing room |
-| Container widths | Mostly `max-w-6xl`, but TrustBar inner uses `max-w-5xl`, Testimonials grid uses `max-w-5xl`, FinalCTA `max-w-4xl`. Acceptable, but the horizontal gutter (`px-6`) should grow to `px-8 lg:px-10` for premium feel on wide screens |
-| Hero | Asymmetric `pt-32 pb-20` on mobile creates a visual "lean"; grid `gap-12 lg:gap-10` shrinks at the wrong breakpoint (should grow) |
-| Footer | `py-16` is too tight relative to surrounding `py-32` sections |
-| Outcome closing line | `mt-16 md:mt-20` from grid is fine, but grid itself only has `mt-0` — needs more separation from header (`mb-16` is okay; closing line gap is fine) |
+### 1. `src/lib/motion.ts` — new helpers
+- `useParallaxY(targetRef, range = 30)`: wraps `useScroll({ target, offset: ["start end", "end start"] })` + `useTransform([0,1], [-range, range])`. Returns `0` (static MotionValue) when `useReducedMotion()` is true.
+- `hoverLiftSubtle = { whileHover: { y: -2 }, transition: spring.snappy }` for cards not already on `.lp-card`.
 
----
+### 2. `src/index.css` — append three utilities near other `lp-*` classes
+- `.lp-shimmer` — relative + overflow-hidden; `::after` is a 110° gradient sweep that translates `-100% → 100%` over 1.2s on hover.
+  - Default sheen `rgba(255,255,255,0.18)` (works on dark CTA).
+  - `.lp-shimmer-dark` variant `rgba(15,23,42,0.10)` for light CTAs on dark backgrounds.
+- `.lp-icon-pop` — `transition: transform .4s cubic-bezier(.2,.8,.2,1)`. Parent `.lp-card:hover .lp-icon-pop { transform: translateY(-1px) scale(1.04); }`.
+- Reduced-motion guard:
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    .lp-shimmer::after, .lp-icon-pop, .lp-card { transition: none !important; animation: none !important; }
+    .lp-shimmer:hover::after { transform: translateX(-100%); }
+  }
+  ```
 
-## Design tokens (the new rhythm)
+### 3. Parallax mesh — 4 sections
+Wrap the existing background layer in `motion.div` with `style={{ y, willChange: "transform" }}`:
+- **Hero**: parallax the `lp-grid-soft` dot layer, range `-30 → 20`. Mockup keeps its existing float.
+- **Problem**: parallax the `lp-noise` overlay, range `-15 → 15` (subtle texture drift).
+- **Outcome**: parallax the `lp-mesh-dark` background, range `-40 → 30`.
+- **FinalCTA**: parallax `lp-grid-soft-dark`, range `-30 → 20`.
+Mobile: skipped via `useReducedMotion()` OR a `useMediaQuery("(min-width: 768px)")` gate to keep mobile lightweight.
 
-Establish a **single vertical scale** that every section follows:
+### 4. Hover lift audit on card grids
+`.lp-card` already lifts on hover. For cards not on `.lp-card`:
+- **Pricing.tsx**: confirm tier cards use `.lp-card`; if not, wrap in `motion.div` with `hoverLiftSubtle`.
+- **Testimonials.tsx**: same audit on quote cards.
+- **WhyOrdra.tsx**: same audit on comparison tiles.
+- **Features.tsx** + **Problem.tsx**: already lift; add `lp-icon-pop` to icon containers for an extra micro-bounce.
 
-- **Section padding**: `py-24 md:py-32 lg:py-36` (light) / `py-28 md:py-36 lg:py-40` (dark / hero / final CTA — slightly more presence)
-- **Horizontal gutter**: `px-6 md:px-8 lg:px-10`
-- **Container**: `max-w-6xl mx-auto` (default), `max-w-5xl` only for narrow text blocks (Testimonials, FinalCTA)
-- **Header → grid**: `mb-16 md:mb-20` (was a mix of 12/14/16/20)
-- **Eyebrow → H2**: remove `mb-5` from eyebrow (H2 already has `mt-5`); use `mt-6` on H2 for slightly more air
-- **H2 → subhead/grid**: `mt-6` for subhead, `mt-16 md:mt-20` for grids/CTAs
-- **Card grids**: `gap-5 lg:gap-6`
-- **Trailing CTA / closing line**: `mt-14 md:mt-16` (consistent everywhere)
+### 5. CTA shimmer
+Apply only to the two primary trial CTAs:
+- **Hero.tsx** "Start 30-Day Free Trial" → add `lp-shimmer` to the `MotionLink`.
+- **FinalCTA.tsx** "Start 30-Day Free Trial" → add `lp-shimmer-dark` (dark sheen on light button).
+Secondary buttons (WhatsApp, "See How It Works") stay quiet.
 
----
+### 6. Files to edit
+- `src/lib/motion.ts` — add `useParallaxY` + `hoverLiftSubtle`
+- `src/index.css` — append `.lp-shimmer`, `.lp-shimmer-dark`, `.lp-icon-pop`, reduced-motion guard
+- `src/components/landing/sections/Hero.tsx` — parallax dot grid + shimmer on CTA
+- `src/components/landing/sections/Problem.tsx` — parallax noise + `lp-icon-pop` on icons
+- `src/components/landing/sections/Features.tsx` — `lp-icon-pop` on icons
+- `src/components/landing/sections/Outcome.tsx` — parallax mesh
+- `src/components/landing/sections/FinalCTA.tsx` — parallax grid + shimmer on CTA
+- `src/components/landing/sections/Pricing.tsx` — verify/add hover lift
+- `src/components/landing/sections/Testimonials.tsx` — verify/add hover lift
+- `src/components/landing/sections/WhyOrdra.tsx` — verify/add hover lift
 
-## Per-section changes
+## Out of scope
+- No copy, color, font, structural, or layout changes.
+- No new section reveal animations (`AnimateIn` already handles those).
+- No JS scroll listeners — Framer's `useScroll` only.
 
-### `Hero.tsx`
-- Change `pt-32 pb-20 md:py-32` → `pt-28 md:pt-32 pb-24 md:pb-36` (balanced verticals)
-- Add `lg:px-10` to outer
-- Grid gap: `gap-12 lg:gap-16` (was `gap-12 lg:gap-10` — currently *shrinks* at lg)
-- Headline `mt-6` → `mt-7`; sub-headline `mt-6` → `mt-7`; CTAs `mt-9` → `mt-10`; trust line `mt-7` → `mt-8`
-
-### `TrustBar.tsx`
-- `py-14 md:py-16` → `py-16 md:py-20` (currently feels cramped between Hero and Problem)
-- Logos → stats spacing `mt-12 md:mt-14` → `mt-14 md:mt-16`
-- Add `lg:px-10` to outer
-
-### `Problem.tsx`, `Features.tsx`, `Testimonials.tsx`, `Pricing.tsx`, `WhyOrdra.tsx`, `Founder.tsx`, `HowItWorks.tsx`
-- Standardize section padding → `py-24 md:py-32 lg:py-36`
-- Header block bottom margin → `mb-16 md:mb-20` (currently 12/14/16/20)
-- Outer container → add `md:px-8 lg:px-10`
-- Card grids → `gap-5 lg:gap-6`
-- Remove `mb-5` from eyebrow chips (H2 has its own `mt-5/6`)
-- H2 `mt-5` → `mt-6` for slight extra air
-- Subhead under H2 `mt-6` → `mt-6` (kept) but ensure `max-w-2xl mx-auto` for centered sections that don't already have it
-
-### `Outcome.tsx` & `FinalCTA.tsx` (dark sections)
-- Padding → `py-28 md:py-36 lg:py-40`
-- Header block `mb-16 md:mb-20` (already good, keep)
-- Outcome closing line `mt-16 md:mt-20` → `mt-20 md:mt-24` (give it more weight)
-- Add `lg:px-10`
-- FinalCTA buttons `mt-11` → `mt-10` (align with Hero rhythm)
-
-### `Pricing.tsx`
-- Header `mb-4` is a bug — currently relies on grid `mt-14` to compensate. Change header `mb-4` → `mb-16 md:mb-20`, and grid `mt-14` → `mt-0` (cleaner mental model)
-- "Trial info" closing block `mt-12` → `mt-14 md:mt-16`
-
-### `HowItWorks.tsx`
-- Step row inner grid `gap-12` → `gap-12 lg:gap-16` (premium breathing on wide)
-- Header `mb-20` → `mb-16 md:mb-20` (parity with siblings)
-
-### `Footer.tsx`
-- `py-16` → `py-20 md:py-24` (matches the surrounding rhythm; footer currently feels squashed)
-- Bottom strip `mt-12 pt-8` → `mt-14 pt-10`
-- Add `lg:px-10`
-
-### `Founder.tsx`
-- Already on the new scale; just bump grid `gap-10 lg:gap-16` → `gap-12 lg:gap-20` (founder section deserves the most breathing room — it's the human moment)
-- Add `lg:px-10`
-
----
-
-## Files touched (spacing-only edits)
-
-- `src/components/landing/sections/Hero.tsx`
-- `src/components/landing/sections/TrustBar.tsx`
-- `src/components/landing/sections/Problem.tsx`
-- `src/components/landing/sections/HowItWorks.tsx`
-- `src/components/landing/sections/Outcome.tsx`
-- `src/components/landing/sections/Features.tsx`
-- `src/components/landing/sections/WhyOrdra.tsx`
-- `src/components/landing/sections/Testimonials.tsx`
-- `src/components/landing/sections/Founder.tsx`
-- `src/components/landing/sections/Pricing.tsx`
-- `src/components/landing/sections/FinalCTA.tsx`
-- `src/components/landing/sections/Footer.tsx`
-
-## Out of scope (explicit)
-
-- No copy changes
-- No new components, colors, gradients, or motion
-- No structural/section-order changes
-- No font-size changes (typography hierarchy stays as-is from the previous pass)
+## Performance budget
+- 4 `useScroll` instances total (one per parallax section) — negligible.
+- All hover effects pure CSS — zero JS cost.
+- Shimmer is a single GPU-composited pseudo-element.
+- Reduced-motion users get a fully static page.

@@ -1,4 +1,5 @@
-import type { Transition, Variants } from "framer-motion";
+import type { RefObject } from "react";
+import { useScroll, useTransform, useReducedMotion, type MotionValue, type Transition, type Variants } from "framer-motion";
 
 // ── Spring presets ──────────────────────────────────────────────
 export const spring = {
@@ -67,3 +68,26 @@ export const ctaHover = {
   whileHover: { scale: 1.02, transition: { type: "spring", damping: 20, stiffness: 300 } },
   whileTap: { scale: 0.97 },
 };
+
+export const hoverLiftSubtle = {
+  whileHover: { y: -2, transition: { type: "spring", damping: 20, stiffness: 300 } },
+};
+
+// ── Parallax helper ────────────────────────────────────────────
+/**
+ * Subtle scroll-driven Y translation for background layers.
+ * Returns a MotionValue<number> that animates from -range to +range
+ * as the section scrolls through the viewport. Returns a constant 0
+ * when the user prefers reduced motion.
+ */
+export function useParallaxY(
+  targetRef: RefObject<HTMLElement>,
+  range: number = 30
+): MotionValue<number> {
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start end", "end start"],
+  });
+  return useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-range, range]);
+}

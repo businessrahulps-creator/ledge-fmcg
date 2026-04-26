@@ -1,6 +1,7 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { spring } from "@/lib/motion";
+import { spring, useParallaxY } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { DashboardSvg } from "../illustrations/SvgIllustrations";
 
@@ -13,10 +14,13 @@ const fadeUp = (delay: number) => ({
 const MotionLink = motion.create(Link);
 
 export function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const gridY = useParallaxY(sectionRef, 30);
+
   return (
-    <section className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-light pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
-      {/* Soft dot grid, masked */}
-      <div className="absolute inset-0 lp-grid-soft pointer-events-none" />
+    <section ref={sectionRef} className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-light pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
+      {/* Soft dot grid, masked — subtle parallax */}
+      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
       {/* Film grain — kills banding */}
       <div className="absolute inset-0 lp-noise pointer-events-none" />
 
@@ -52,7 +56,7 @@ export function Hero() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               transition={spring.snappy}
-              className="lp-btn-primary-dark font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
+              className="lp-btn-primary-dark lp-shimmer font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
             >
               Start 30-Day Free Trial
             </MotionLink>

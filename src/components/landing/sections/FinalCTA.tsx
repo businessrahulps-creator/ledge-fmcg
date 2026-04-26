@@ -1,7 +1,8 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
-import { spring } from "@/lib/motion";
+import { spring, useParallaxY } from "@/lib/motion";
 
 const MotionLink = motion.create(Link);
 
@@ -13,9 +14,12 @@ const fadeUp = (delay: number) => ({
 });
 
 export function FinalCTA() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const gridY = useParallaxY(sectionRef, 30);
+
   return (
-    <section className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
-      <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
+    <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
+      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
       <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
@@ -53,7 +57,7 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="lp-btn-primary-light text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
+            className="lp-btn-primary-light lp-shimmer lp-shimmer-dark text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
           >
             Start 30-Day Free Trial
           </MotionLink>
