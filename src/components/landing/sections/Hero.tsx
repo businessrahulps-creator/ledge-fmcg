@@ -47,24 +47,16 @@ export function Hero() {
             Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
-          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10" {...fadeUp(0.24)}>
-            <MotionLink
-              to="/signup"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              transition={spring.snappy}
-              className="lp-btn-primary-dark lp-shimmer font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
-            >
-              Start 30-Day Free Trial
-            </MotionLink>
+          <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mt-10" {...fadeUp(0.24)}>
+            <CapsuleCTA to="/signup">Start 30-Day Free Trial</CapsuleCTA>
             <motion.a
               href="#how-it-works"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ x: 2 }}
               transition={spring.snappy}
-              className="font-body font-semibold text-[15px] text-[#0A0F1C] border border-[#E2E8F0] hover:border-[#0A0F1C] bg-white/60 backdrop-blur-sm w-full sm:w-auto px-8 py-3.5 rounded-full text-center transition-colors duration-200"
+              className="font-body font-semibold text-[14.5px] text-[#0A0F1C] inline-flex items-center gap-1.5 group"
             >
-              See How It Works
+              See how it works
+              <ArrowRight size={15} strokeWidth={2.2} className="text-[#475569] group-hover:text-[#4F46E5] transition-colors" />
             </motion.a>
           </motion.div>
 
