@@ -1,8 +1,9 @@
-import { Linkedin } from "lucide-react";
+import { Linkedin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
 import { MagneticWrapper } from "@/components/landing/MagneticWrapper";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import awsLogo from "@/assets/aws-logo.png";
 import { Nilavilakku } from "@/components/landing/Nilavilakku";
 
@@ -70,6 +71,32 @@ export function Footer() {
             <span className="font-body text-[12px] font-medium text-[#3F3F46]">
               Live now · Owners onboarding this week
             </span>
+          </div>
+
+          {/* Talk to Sales — Phone + WhatsApp dual CTA */}
+          <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
+            <a
+              href="tel:+918138084689"
+              className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#0A0F1C]/[0.08] hover:border-[#0A0F1C]/[0.18] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.10)] transition-all duration-200"
+              aria-label="Call Ledge sales"
+            >
+              <Phone size={13} className="text-[#0A0F1C]" strokeWidth={2.2} />
+              <span className="font-body text-[13px] font-medium text-[#0A0F1C] tracking-[-0.005em]">
+                +91 81380 84689
+              </span>
+            </a>
+            <a
+              href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/15 hover:border-[#25D366]/50 transition-all duration-200"
+              aria-label="Chat with Ledge on WhatsApp"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5 text-[#128C7E]" />
+              <span className="font-body text-[13px] font-medium text-[#0F5132] tracking-[-0.005em]">
+                WhatsApp Sales
+              </span>
+            </a>
           </div>
         </motion.div>
 

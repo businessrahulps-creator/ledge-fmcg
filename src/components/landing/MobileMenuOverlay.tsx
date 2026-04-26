@@ -30,12 +30,10 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
     };
     window.addEventListener("keydown", onKey);
 
-    // Push a history state so back button closes the menu
     window.history.pushState({ mobileMenu: true }, "");
     const onPop = () => onClose();
     window.addEventListener("popstate", onPop);
 
-    // Initial focus
     const t = window.setTimeout(() => firstFocusRef.current?.focus(), 60);
 
     return () => {
@@ -43,23 +41,29 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("popstate", onPop);
       window.clearTimeout(t);
-      // Pop our pushed state if still present
       if (window.history.state?.mobileMenu) {
         window.history.back();
       }
     };
   }, [onClose]);
 
-  const easing = [0.16, 1, 0.3, 1] as const;
+  const easeOut = [0.16, 1, 0.3, 1] as const;
+  const easeIn = [0.7, 0, 0.84, 0] as const;
 
+  // Symmetric choreography: enter (blur-up) ⇄ exit (blur-up-out, reverse stagger)
   const childVariants = {
     hidden: { opacity: 0, y: 24, filter: "blur(8px)" },
     visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: { opacity: 0, y: -16, filter: "blur(6px)" },
   };
 
-  const childTransition = reduce
+  const childEnter = reduce
     ? { duration: 0 }
     : { type: "spring" as const, stiffness: 200, damping: 24, mass: 0.7 };
+
+  const childExit = reduce
+    ? { duration: 0 }
+    : { duration: 0.28, ease: easeIn };
 
   return (
     <motion.div
@@ -70,33 +74,35 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: reduce ? 0 : 0.22, ease: easing }}
+      transition={{ duration: reduce ? 0 : 0.36, ease: easeOut }}
     >
-      {/* Background layers */}
+      {/* Background — expansive in, expansive out (subtle scale on exit) */}
       <motion.div
         className="absolute inset-0 lp-mobile-menu-bg"
         initial={{ scale: 1.02, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: reduce ? 0 : 0.28, ease: easing }}
+        exit={{ scale: 1.015, opacity: 0 }}
+        transition={{ duration: reduce ? 0 : 0.36, ease: reduce ? easeOut : easeIn }}
       />
       <div className="lp-noise absolute inset-0 pointer-events-none opacity-[0.35]" aria-hidden />
 
-      {/* Content stack */}
+      {/* Content stack — reverse-stagger on exit */}
       <motion.div
         className="relative h-full w-full flex flex-col px-7 pt-3 pb-7"
         initial="hidden"
         animate="visible"
-        exit={{ opacity: 0, transition: { duration: 0.16 } }}
+        exit="exit"
         variants={{
           visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
+          exit: { transition: { staggerChildren: 0.035, staggerDirection: -1 } },
         }}
       >
-        {/* Top bar — mirrors navbar height */}
+        {/* Top bar — height matched to navbar (60px) */}
         <motion.div
-          className="h-[54px] flex items-center justify-between"
+          className="h-[60px] flex items-center justify-between"
           variants={childVariants}
-          transition={childTransition}
+          transition={childEnter}
+          exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
           <Link to="/" onClick={onClose} aria-label="Ledge home">
             <img src={ledgeLogo} alt="Ledge" width={96} height={28} className="h-7 w-auto" />
@@ -113,8 +119,9 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
               href={l.href}
               onClick={onClose}
               variants={childVariants}
-              transition={childTransition}
-              className="lp-menu-link group block active:scale-[0.98] transition-transform"
+              transition={childEnter}
+              exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
+              className="lp-menu-link group block py-2 -my-2 active:scale-[0.98] transition-transform"
             >
               <span className="lp-menu-link-eyebrow block mb-1.5">{l.eyebrow}</span>
               <span className="font-heading font-semibold text-[40px] leading-[1.05] tracking-[-0.02em] text-[#0A0F1C]">
@@ -129,7 +136,8 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         <motion.div
           className="flex justify-center mb-5"
           variants={childVariants}
-          transition={childTransition}
+          transition={childEnter}
+          exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0A0F1C]/[0.04] border border-[#0A0F1C]/[0.06] text-[12px] text-[#52525B] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shadow-[0_0_0_3px_rgba(22,163,74,0.18)]" />
@@ -138,7 +146,12 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         </motion.div>
 
         {/* CTAs */}
-        <motion.div className="flex flex-col gap-3" variants={childVariants} transition={childTransition}>
+        <motion.div
+          className="flex flex-col gap-3"
+          variants={childVariants}
+          transition={childEnter}
+          exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
+        >
           <Link
             to="/signup"
             onClick={onClose}
@@ -159,7 +172,8 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         <motion.div
           className="pt-5 flex items-center justify-center gap-2 text-[11px] text-[#94A3B8]"
           variants={childVariants}
-          transition={childTransition}
+          transition={childEnter}
+          exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
           <Nilavilakku />
           <span>Built in God's Own Country · Kerala</span>
