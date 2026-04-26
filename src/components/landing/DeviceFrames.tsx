@@ -15,7 +15,7 @@ export function BrowserFrame({
       className={`rounded-3xl overflow-hidden bg-white border border-[#E8E5E0] ${className}`}
       style={{
         boxShadow:
-          "0 1px 3px rgba(0,0,0,0.04), 0 20px 60px -12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02)",
+          "0 1px 3px rgba(15,23,42,0.04), 0 30px 80px -16px rgba(15,23,42,0.10), 0 0 0 1px rgba(15,23,42,0.02), inset 0 1px 0 rgba(255,255,255,0.7)",
       }}
     >
       {/* Title bar */}
@@ -49,10 +49,10 @@ export function PhoneFrame({
       className={`relative mx-auto max-w-[320px] ${className}`}
       style={{
         boxShadow:
-          "0 4px 12px rgba(0,0,0,0.06), 0 25px 60px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.03)",
+          "0 4px 12px rgba(15,23,42,0.06), 0 35px 80px -10px rgba(15,23,42,0.14), 0 0 0 1px rgba(15,23,42,0.03), inset 0 1px 0 rgba(255,255,255,0.08)",
         borderRadius: "32px",
         padding: "12px 6px 14px",
-        background: "linear-gradient(145deg, #1A1A1A, #27272A)",
+        background: "linear-gradient(160deg, #18181B 0%, #27272A 50%, #2A2A2E 100%)",
       }}
     >
       {/* Notch */}
