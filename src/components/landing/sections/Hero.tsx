@@ -56,7 +56,7 @@ export function Hero() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               transition={spring.snappy}
-              className="lp-btn-primary-dark font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
+              className="lp-btn-primary-dark lp-shimmer font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
             >
               Start 30-Day Free Trial
             </MotionLink>

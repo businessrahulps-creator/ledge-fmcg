@@ -53,7 +53,7 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="lp-btn-primary-light text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
+            className="lp-btn-primary-light lp-shimmer lp-shimmer-dark text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
           >
             Start 30-Day Free Trial
           </MotionLink>
