@@ -6,9 +6,11 @@ import { Hero } from "@/components/landing/sections/Hero";
 import { TrustBar } from "@/components/landing/sections/TrustBar";
 import { Problem } from "@/components/landing/sections/Problem";
 import { HowItWorks } from "@/components/landing/sections/HowItWorks";
+import { Outcome } from "@/components/landing/sections/Outcome";
 import { Features } from "@/components/landing/sections/Features";
 import { WhyOrdra } from "@/components/landing/sections/WhyOrdra";
 import { Testimonials } from "@/components/landing/sections/Testimonials";
+import { Founder } from "@/components/landing/sections/Founder";
 import { Pricing } from "@/components/landing/sections/Pricing";
 import { FinalCTA } from "@/components/landing/sections/FinalCTA";
 import { Footer } from "@/components/landing/sections/Footer";
@@ -31,9 +33,11 @@ export default function Index() {
       <TrustBar />
       <Problem />
       <HowItWorks />
+      <Outcome />
       <Features />
       <WhyOrdra />
       <Testimonials />
+      <Founder />
       <Pricing />
       <FinalCTA />
       <Footer />

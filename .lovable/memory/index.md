@@ -14,6 +14,7 @@ Free trial is 30 days, NOT 14 — ignore any spec text saying otherwise.
 - [Color tokens](mem://style/design-system) — Semantic token system; Electric Blue primary, brand status colors, warm stone neutrals retained
 - [Brand moments](mem://style/brand-moments) — The 4 designated places where Gradient Purple/Coral may appear in-app
 - [Landing page](mem://style/landing-page) — Light-themed landing page aligned with dashboard
+- [Landing palette (cool)](mem://style/landing-palette) — Landing uses cool Navy/Purple/Electric Blue palette; coral excluded from landing only
 - [Branding assets](mem://style/branding-assets) — Colorful checkmark graphic for favicon and app icon
 - [Pricing tiers](mem://auth/pricing-tiers) — Four-tier pricing: Free, Growth, Scale, Enterprise
 - [Marketing positioning](mem://marketing/positioning) — Founder-to-Founder tone for Indian FMCG

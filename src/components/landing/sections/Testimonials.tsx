@@ -3,26 +3,22 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const testimonials = [
   {
-    quote:
-      "I used to run the whole operation from my head - who ordered what, who still owes me, which godown is low. Now it's all in Ledge. I check the dashboard before I start my day. That's it.",
+    quote: "I check the dashboard before I start my day. That's it. The whole operation used to live in my head.",
     name: "Arnav Sethi",
     role: "Owner, Aryan Beverages, Pune",
   },
   {
-    quote:
-      "My team was using three different WhatsApp groups and a shared Excel file to manage orders. I showed them Ledge on a Monday afternoon. By Wednesday, the Excel file hadn't been opened once. No instruction needed - they just used it.",
+    quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn't been opened once.",
     name: "Priya Anand",
     role: "Operations Head, Coastal Naturals, Kochi",
   },
   {
-    quote:
-      "The stock health view changed how I manage godowns. I caught a critical low on our top SKU four days before it would have been a problem. Moved inventory the same evening. Festival season went perfectly. That one call saved us.",
+    quote: "Caught a critical low on our top SKU four days early. Festival season went perfectly.",
     name: "Dev Sharma",
     role: "Warehouse Lead, Nova Retail Co., Chennai",
   },
   {
-    quote:
-      "Before Ledge I had to call the office twice before every dealer visit just to check outstanding and last order details. Now I open the dealer profile on my phone in the car. I walk in knowing everything. Dealers notice.",
+    quote: "I open the dealer profile in the car. I walk in knowing everything. Dealers notice.",
     name: "Rohan Nair",
     role: "Senior Sales Executive, Sterling FMCG, Bangalore",
   },
@@ -30,34 +26,35 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="bg-[#F8F7F5] py-28 md:py-36">
+    <section className="bg-[#F5F6F8] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
-          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 tracking-[-0.04em]">
-            From owners who stopped guessing.
-          </h2>
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] text-[#7C3AED] uppercase mb-4">
+              From the field
+            </span>
+            <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] tracking-[-0.04em] leading-[1.05]">
+              Owners who stopped guessing.
+            </h2>
+          </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {testimonials.map((t) => (
             <StaggerItem key={t.name} variant="scaleUp">
               <motion.div
-                className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-shadow duration-300"
-                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
-                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+                className="bg-white rounded-2xl p-8 md:p-10 border border-[#E5E7EB] h-full flex flex-col"
+                whileHover={{ y: -4, boxShadow: "0 12px 32px -8px rgba(10,15,28,0.10)" }}
                 transition={{ type: "spring", damping: 20, stiffness: 300 }}
               >
-                <span className="font-heading font-extrabold text-6xl text-[#D4D1CC] opacity-40 leading-none block mb-2">
-                  "
-                </span>
-                <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
-                  {t.quote}
+                <p className="font-heading font-bold text-[20px] md:text-[22px] text-[#0A0F1C] leading-[1.35] tracking-[-0.02em] flex-1">
+                  "{t.quote}"
                 </p>
-                <div className="mt-6 pt-6 border-t border-[#E8E5E0]">
-                  <p className="font-body font-bold text-base text-[#1A1A1A]">
+                <div className="mt-7 pt-5 border-t border-[#E5E7EB]">
+                  <p className="font-body font-semibold text-[15px] text-[#0A0F1C]">
                     {t.name}
                   </p>
-                  <p className="font-body text-sm text-[#71717A]">{t.role}</p>
+                  <p className="font-body text-[13px] text-[#64748B] mt-0.5">{t.role}</p>
                 </div>
               </motion.div>
             </StaggerItem>
