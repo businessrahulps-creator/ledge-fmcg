@@ -18,7 +18,7 @@ export function Hero() {
   const gridY = useParallaxY(sectionRef, 30);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-soft-warm pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-mesh-soft-warm pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
@@ -85,7 +85,7 @@ export function Hero() {
             transition={{ ...spring.gentle as object, delay: 0.2 }}
           >
             <motion.div
-              animate={{ y: [0, -4, 0] }}
+              animate={{ y: [0, -6, 0] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
@@ -112,8 +112,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Hairline section seam */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 lp-vignette-top pointer-events-none" />
     </section>
   );
 }
