@@ -473,12 +473,52 @@
     background: linear-gradient(110deg, transparent 30%, rgba(15,23,42,0.10) 50%, transparent 70%);
   }
 
+  /* Animated indigo pill — used for the ONE earned moment in Outcome ("90 days") */
+  @keyframes lp-pill-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.018); }
+  }
+  @keyframes lp-pill-shimmer {
+    0% { transform: translateX(-110%); }
+    60%, 100% { transform: translateX(210%); }
+  }
+  .lp-pill-accent {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    padding: 0.05em 0.42em;
+    border-radius: 0.55em;
+    background: linear-gradient(180deg, #F4F5FF 0%, #EEF0FF 100%);
+    border: 1px solid #D5DBFE;
+    color: #3730A3;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 1px 2px rgba(79,70,229,0.06);
+    animation: lp-pill-breathe 4.2s ease-in-out infinite;
+  }
+  .lp-pill-accent::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 35%;
+    background: linear-gradient(100deg, transparent 10%, rgba(99,102,241,0.22) 50%, transparent 90%);
+    transform: translateX(-110%);
+    animation: lp-pill-shimmer 5.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
   /* Reduced-motion guard for landing motion utilities */
   @media (prefers-reduced-motion: reduce) {
     .lp-card,
     .lp-icon-tile,
     .lp-shimmer::after,
-    .lp-shimmer-line {
+    .lp-shimmer-line,
+    .lp-pill-accent,
+    .lp-pill-accent::after {
       transition: none !important;
       animation: none !important;
     }
