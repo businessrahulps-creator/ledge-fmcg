@@ -17,16 +17,16 @@ const sections = [
     icon: Building2,
     title: "About Us",
     content: [
-      "Ledge is a cloud-based sales order management platform built for Indian FMCG companies.",
-      "We built Ledge because most field sales teams in India are still managing orders through WhatsApp messages, shared spreadsheets, and manual follow-ups — tools that were never designed for this job. The result is missed orders, payment gaps, and no real visibility into what is happening on the ground.",
-      "Ledge replaces that friction with a single, structured platform where sales teams can capture orders, track payments, manage dealers, and monitor stock — all in real time, from any device.",
+      "Ledge is a cloud-based platform for Indian businesses that run both a factory floor and a field sales team.",
+      "We built Ledge because most teams in India are still managing orders through WhatsApp messages, shared spreadsheets, and manual follow-ups — tools that were never designed for this job. The result is missed orders, payment gaps, and no real visibility into what is happening on the ground.",
+      "Ledge replaces that friction with a single, structured platform where teams can capture orders, track payments, manage dealers, and monitor stock — all in real time, from any device.",
     ],
   },
   {
     icon: Target,
     title: "What We Do",
     content: [
-      "Ledge gives FMCG businesses a clear view of their sales operations from order to payment. Sales managers see what their teams are doing. Accountants track outstanding payments without chasing anyone. Field reps place orders in seconds without paperwork.",
+      "Ledge gives business owners a clear view of their operations from order to payment. Sales managers see what their teams are doing. Accountants track outstanding payments without chasing anyone. Field reps place orders in seconds without paperwork.",
       "Every company on Ledge gets its own isolated workspace, with role-based access ensuring that each team member sees exactly what they need to do their job.",
     ],
   },
@@ -34,7 +34,7 @@ const sections = [
     icon: Users,
     title: "Who We Built This For",
     content: [
-      "Ledge is designed for Indian FMCG manufacturers, distributors, and brands with field sales teams operating across multiple regions. Whether you have a team of three or three hundred, Ledge scales with your operations.",
+      "Ledge is designed for Indian manufacturers, distributors, and brands with field sales teams operating across multiple regions. Strong fit for FMCG, building materials, agri-inputs, auto-parts, and consumer goods. Whether you have a team of three or three hundred, Ledge scales with your operations.",
     ],
   },
   {
@@ -70,7 +70,7 @@ export default function AboutUs() {
             animate="visible"
             custom={1}
           >
-            Built for Indian FMCG teams who are done with WhatsApp chaos.
+            Built for Indian business owners who run both factory and field.
           </motion.p>
         </div>
       </section>

@@ -80,7 +80,7 @@ export function AboutSection() {
           </div>
           <div>
             <h3 className="text-sm font-semibold md:text-base">Ledge</h3>
-            <p className="text-xs text-muted-foreground">Sales & Order Management</p>
+            <p className="text-xs text-muted-foreground">Factory + Field, one app</p>
           </div>
         </div>
 

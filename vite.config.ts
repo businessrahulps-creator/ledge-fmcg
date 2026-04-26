@@ -73,9 +73,9 @@ export default defineConfig(({ mode }) => {
         ],
       },
       manifest: {
-        name: "Ledge — Sales & Order Management",
+        name: "Ledge — Factory + Field on one app",
         short_name: "Ledge",
-        description: "Sales & Order Management for FMCG businesses. Manage distributors, orders, dispatch & payments.",
+        description: "Ledge runs your factory and your field on one mobile app. Orders, stock, payments, GST, production. Built for ambitious Indian business owners.",
         start_url: "/dashboard",
         display: "standalone",
         background_color: "#fafafa",
