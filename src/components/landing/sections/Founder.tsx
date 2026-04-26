@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { AnimateIn } from "../AnimateIn";
-import ashaPhoto from "@/assets/asha-ps-founder.jpg";
+import ashaPhoto from "@/assets/asha-ps-founder.webp";
+import ashaPhotoBlur from "@/assets/asha-ps-founder-blur.webp";
 
 export function Founder() {
   const [loaded, setLoaded] = useState(false);
@@ -30,13 +31,27 @@ export function Founder() {
                     "inset 0 0 0 1px rgba(124,58,237,0.18), 0 24px 60px -16px rgba(10,15,28,0.25), 0 0 0 1px rgba(255,255,255,0.6)",
                 }}
               >
-                {!loaded && <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-[#F5F6F8] to-[#E5E7EB]" />}
+                {/* LQIP blur background — instant, sub-1KB */}
+                <img
+                  src={ashaPhotoBlur}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{
+                    filter: "blur(20px) saturate(1.2)",
+                    transform: "scale(1.1)",
+                  }}
+                />
+                {/* Sharp image — crossfades in once decoded */}
                 <img
                   src={ashaPhoto}
                   alt="Asha Ps, Founder of Ledge"
+                  width={800}
+                  height={1200}
                   loading="lazy"
+                  decoding="async"
                   onLoad={() => setLoaded(true)}
-                  className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+                  className={`relative w-full h-full object-cover transition-opacity duration-700 ease-out ${loaded ? "opacity-100" : "opacity-0"}`}
                 />
               </div>
               {/* Corner accent dot */}
@@ -68,24 +83,13 @@ export function Founder() {
               <span className="lp-gradient-text-cool">Start free. If it's not running your business in 30 days, walk away.</span>"
             </motion.p>
 
-            <div className="mt-8 flex items-center gap-4">
-              <div>
-                <p className="font-heading font-bold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
-                <div
-                  className="h-[2px] w-7 rounded-full mt-1"
-                  style={{ background: "linear-gradient(90deg, #7C3AED, #2563EB)" }}
-                />
-                <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>
-              </div>
-              <span className="text-[#E5E7EB]">·</span>
-              <a
-                href="https://wa.me/918138084689"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-body text-[13.5px] text-[#0A0F1C] font-medium hover:text-[#6D28D9] transition-colors"
-              >
-                +91 81380 84689
-              </a>
+            <div className="mt-8">
+              <p className="font-heading font-bold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
+              <div
+                className="h-[2px] w-7 rounded-full mt-1"
+                style={{ background: "linear-gradient(90deg, #7C3AED, #2563EB)" }}
+              />
+              <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>
             </div>
           </AnimateIn>
         </div>

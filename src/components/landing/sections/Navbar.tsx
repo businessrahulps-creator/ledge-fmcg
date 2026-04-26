@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, LayoutDashboard, Layers, Route, IndianRupee } from "lucide-react";
 import { spring } from "@/lib/motion";
-import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.webp";
 import {
   Sheet,
   SheetContent,
@@ -48,7 +48,16 @@ export function Navbar() {
       <div className="relative max-w-7xl mx-auto w-full px-6 md:px-8 lg:px-10 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center" aria-label="Ledge home">
-          <img src={ledgeLogo} alt="Ledge" className="h-7 w-auto" />
+          <img
+            src={ledgeLogo}
+            alt="Ledge"
+            width={96}
+            height={28}
+            decoding="async"
+            // @ts-expect-error fetchpriority is valid HTML but not yet in React types
+            fetchpriority="high"
+            className="h-7 w-auto"
+          />
         </Link>
 
         {/* Center links - desktop */}
