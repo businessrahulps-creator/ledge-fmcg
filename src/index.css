@@ -978,6 +978,25 @@
   .li-route-chip-2 { animation-delay: -1.5s; }
   .li-route-chip-3 { animation-delay: -3s; }
 
+  /* ── Device-frame mockup motion utilities ── */
+  @keyframes lp-live-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); transform-origin: center; }
+    50% { opacity: 0.45; transform: scale(0.78); transform-origin: center; }
+  }
+  @keyframes lp-btn-breathe {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(79,70,229,0)); }
+    50% { filter: drop-shadow(0 0 6px rgba(79,70,229,0.35)); }
+  }
+  .lp-live-dot-pulse {
+    animation: lp-live-pulse 2s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .lp-btn-breathe {
+    animation: lp-btn-breathe 2.6s ease-in-out infinite;
+    animation-delay: 1.2s;
+  }
+
   /* Reduced-motion guard for landing motion utilities */
   @media (prefers-reduced-motion: reduce) {
     .lp-card,
