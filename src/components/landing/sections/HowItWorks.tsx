@@ -97,8 +97,8 @@ export function HowItWorks() {
               <AnimateIn key={step.badge} delay={i * 0.08}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="inline-flex items-center gap-2.5 mb-5">
-                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#F4F4F8] border border-[#ECEEF2]">
+                    <span className="inline-flex items-center gap-2.5 mb-5 group">
+                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#F4F4F8] border border-[#ECEEF2] lp-icon-premium">
                         <step.icon size={16} strokeWidth={2} className="text-[#1F2937]" />
                       </span>
                       <span className="font-heading font-semibold text-[12px] text-[#475569] tracking-[0.18em]">

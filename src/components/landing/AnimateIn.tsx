@@ -30,7 +30,7 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={variants}
-        transition={{ ...spring.default as object, delay }}
+        transition={{ ...spring.premium as object, delay }}
         className={className}
       >
         {children}
@@ -76,7 +76,7 @@ export function StaggerItem({ children, className, variant = "fadeUp" }: Stagger
   return (
     <motion.div
       variants={variants}
-      transition={spring.default}
+      transition={spring.premium}
       className={className}
     >
       {children}

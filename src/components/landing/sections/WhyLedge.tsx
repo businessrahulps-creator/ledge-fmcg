@@ -47,7 +47,7 @@ export function WhyLedge() {
             const isHero = i === 1; // "Works when the network doesn't"
             return (
               <StaggerItem key={block.title}>
-                <div className={`${isHero ? "lp-bento-hero" : "lp-card"} p-7 h-full flex flex-col relative`}>
+                <div className={`${isHero ? "lp-bento-hero" : "lp-card"} lp-card-premium p-7 h-full flex flex-col relative`}>
                   {isHero && (
                     <div className="flex justify-end mb-5">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#3730A3] bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
@@ -62,7 +62,7 @@ export function WhyLedge() {
                     {block.content}
                   </p>
                   <div className="mt-auto pt-6 flex justify-end">
-                    <block.icon size={16} strokeWidth={1.6} className={isHero ? "text-[#4F46E5]/70" : "text-[#94A3B8]"} />
+                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-[#4F46E5]/70" : "text-[#94A3B8]"}`} />
                   </div>
                 </div>
               </StaggerItem>

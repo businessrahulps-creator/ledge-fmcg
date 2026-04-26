@@ -483,6 +483,15 @@
     0% { transform: translateX(-110%); }
     60%, 100% { transform: translateX(210%); }
   }
+  /* Refined: single-pass settle (no infinite breathe), shimmer triggers ONCE on view */
+  @keyframes lp-pill-settle {
+    0% { transform: scale(0.96); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes lp-pill-sheen-once {
+    0% { transform: translateX(-110%); }
+    100% { transform: translateX(220%); }
+  }
   .lp-pill-accent {
     position: relative;
     display: inline-flex;
@@ -497,17 +506,17 @@
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.7),
       0 1px 2px rgba(79,70,229,0.06);
-    animation: lp-pill-breathe 4.2s ease-in-out infinite;
+    animation: lp-pill-settle 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .lp-pill-accent::after {
     content: "";
     position: absolute;
     top: 0; bottom: 0;
     left: 0;
-    width: 35%;
-    background: linear-gradient(100deg, transparent 10%, rgba(99,102,241,0.22) 50%, transparent 90%);
+    width: 40%;
+    background: linear-gradient(100deg, transparent 10%, rgba(99,102,241,0.28) 50%, transparent 90%);
     transform: translateX(-110%);
-    animation: lp-pill-shimmer 5.5s ease-in-out infinite;
+    animation: lp-pill-sheen-once 1400ms cubic-bezier(0.22, 1, 0.36, 1) 600ms 1 both;
     pointer-events: none;
     z-index: 1;
   }
@@ -518,7 +527,7 @@
      One per section MAX. Earned, never wallpaper.
      ═══════════════════════════════════════════════════════════════ */
 
-  /* 1. Neumorphic capsule CTA — pill-in-pill, depth from light */
+  /* 1. Neumorphic capsule CTA — pill-in-pill with cursor-aware bloom + ripple */
   .lp-capsule-cta {
     position: relative;
     display: inline-flex;
@@ -531,16 +540,19 @@
       inset 0 1px 1px rgba(255,255,255,0.9),
       inset 0 -1px 2px rgba(15,23,42,0.06),
       0 1px 2px rgba(15,23,42,0.04);
-    transition: box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
+    transition: box-shadow 320ms cubic-bezier(0.22,1,0.36,1) 60ms;
     isolation: isolate;
   }
   .lp-capsule-cta:hover {
     box-shadow:
       inset 0 1px 1px rgba(255,255,255,0.9),
       inset 0 -2px 3px rgba(15,23,42,0.08),
-      0 1px 2px rgba(15,23,42,0.04);
+      0 4px 10px -2px rgba(15,23,42,0.10),
+      0 18px 36px -12px rgba(79,70,229,0.28);
+    transition: box-shadow 360ms cubic-bezier(0.22,1,0.36,1);
   }
   .lp-capsule-cta__inner {
+    position: relative;
     display: inline-flex;
     align-items: center;
     padding: 12px 26px;
@@ -550,12 +562,50 @@
     font-weight: 600;
     font-size: 15px;
     letter-spacing: -0.005em;
+    overflow: hidden;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.95),
       0 1px 2px rgba(15,23,42,0.10),
       0 8px 18px -8px rgba(15,23,42,0.18);
-    transition: transform 320ms cubic-bezier(0.22,1,0.36,1),
-                box-shadow 320ms cubic-bezier(0.22,1,0.36,1);
+    transition: transform 420ms cubic-bezier(0.22,1,0.36,1),
+                box-shadow 420ms cubic-bezier(0.22,1,0.36,1);
+    --mx: 50%;
+    --my: 50%;
+  }
+  .lp-capsule-cta__inner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(160px circle at var(--mx) var(--my), rgba(79,70,229,0.14), transparent 60%);
+    opacity: 0;
+    transition: opacity 320ms ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .lp-capsule-cta:hover .lp-capsule-cta__inner::before {
+    opacity: 1;
+  }
+  .lp-capsule-cta__label {
+    position: relative;
+    z-index: 1;
+  }
+  .lp-capsule-cta__ripple {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    margin-top: -7px;
+    border-radius: 9999px;
+    background: rgba(79,70,229,0.28);
+    pointer-events: none;
+    transform: scale(0);
+    animation: lp-capsule-ripple 620ms cubic-bezier(0.22,1,0.36,1) forwards;
+    z-index: 0;
+  }
+  @keyframes lp-capsule-ripple {
+    0%   { transform: scale(0);   opacity: 0.55; }
+    60%  { opacity: 0.30; }
+    100% { transform: scale(18);  opacity: 0; }
   }
   .lp-capsule-cta__arrow {
     position: absolute;
@@ -570,17 +620,17 @@
     color: #0A0F1C;
     border-radius: 9999px;
     background: transparent;
-    transition: color 280ms ease,
-                background-color 280ms ease,
-                transform 320ms cubic-bezier(0.22,1,0.36,1);
+    transition: color 320ms ease,
+                background-color 320ms ease,
+                transform 480ms cubic-bezier(0.22,1,0.36,1) 80ms;
     pointer-events: none;
   }
   .lp-capsule-cta:hover .lp-capsule-cta__inner {
-    transform: translate(4px, -1px);
+    transform: translateY(-1.5px) scale(1.012);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.95),
       0 2px 4px rgba(15,23,42,0.10),
-      0 16px 30px -10px rgba(15,23,42,0.26);
+      0 18px 34px -12px rgba(15,23,42,0.30);
   }
   .lp-capsule-cta:hover .lp-capsule-cta__arrow {
     transform: translateY(-50%) translateX(6px);
@@ -588,11 +638,11 @@
     background-color: rgba(79,70,229,0.06);
   }
   .lp-capsule-cta:active .lp-capsule-cta__inner {
-    transform: translate(1px, 0) scale(0.99);
-    transition-duration: 120ms;
+    transform: translateY(0) scale(0.985);
+    transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Dark variant — for contexts where white CTA would disappear */
+  /* Dark variant */
   .lp-capsule-cta--dark { background: linear-gradient(180deg, #1F2937 0%, #0A0F1C 100%); }
   .lp-capsule-cta--dark .lp-capsule-cta__inner {
     background: linear-gradient(180deg, #FFFFFF 0%, #F4F6FA 100%);
@@ -770,10 +820,111 @@
     display: inline-block;
   }
 
+
+  /* ═══════════════════════════════════════════════════════════════
+     PREMIUM INTERACTION LAYER — cards, icons, buttons
+     Glass with depth, cursor-aware bloom, sheen-on-hover, springy lift.
+     Additive: layered ON TOP of existing .lp-card / .lp-bento-hero / .lp-icon-tile.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Premium card — wraps existing .lp-card / .lp-bento-hero with extras */
+  .lp-card-premium {
+    position: relative;
+    isolation: isolate;
+    --mx: 50%;
+    --my: 50%;
+    transition:
+      transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms ease;
+  }
+  /* Cursor-following inner spotlight */
+  .lp-card-premium::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(280px circle at var(--mx) var(--my), rgba(99,102,241,0.10), transparent 60%);
+    opacity: 0;
+    transition: opacity 360ms ease;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+  }
+  /* One-shot diagonal sheen sweep */
+  .lp-card-premium::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.55) 50%, transparent 62%);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+    mix-blend-mode: overlay;
+  }
+  .lp-card-premium:hover::before { opacity: 1; }
+  .lp-card-premium:hover::after {
+    opacity: 1;
+    transform: translateX(100%);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+  }
+  .lp-card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 2px rgba(15,23,42,0.04),
+      0 4px 10px -2px rgba(15,23,42,0.06),
+      0 14px 28px -10px rgba(15,23,42,0.10),
+      0 28px 56px -20px rgba(79,70,229,0.18);
+    border-color: rgba(99,102,241,0.22);
+  }
+  /* Children must sit above pseudo layers */
+  .lp-card-premium > * { position: relative; z-index: 1; }
+
+  /* Premium icon tile — overshoot lift, decoupled from card */
+  .lp-icon-premium {
+    transition:
+      transform 480ms cubic-bezier(0.34, 1.56, 0.64, 1) 80ms,
+      filter 380ms ease 80ms;
+    will-change: transform;
+  }
+  .lp-card-premium:hover .lp-icon-premium,
+  .lp-bento-hero:hover .lp-icon-premium,
+  .group:hover .lp-icon-premium {
+    transform: translateY(-1px) scale(1.06) rotate(-2deg);
+    filter: drop-shadow(0 2px 6px rgba(79,70,229,0.22));
+  }
+
+  /* Premium button class for shadcn buttons used on landing */
+  .btn-premium {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1) 60ms;
+  }
+  .btn-premium:hover {
+    transform: translateY(-1.5px);
+    box-shadow:
+      0 1px 2px rgba(15,23,42,0.08),
+      0 8px 20px -8px rgba(15,23,42,0.18),
+      0 16px 28px -12px rgba(79,70,229,0.22);
+  }
+  .btn-premium:active {
+    transform: translateY(0) scale(0.985);
+    transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* Reduced-motion guard for landing motion utilities */
   @media (prefers-reduced-motion: reduce) {
     .lp-card,
     .lp-icon-tile,
+    .lp-icon-premium,
+    .lp-card-premium,
+    .lp-card-premium::before,
+    .lp-card-premium::after,
+    .btn-premium,
     .lp-shimmer::after,
     .lp-shimmer-line,
     .lp-pill-accent,
@@ -781,13 +932,14 @@
     .lp-progress-glass::after,
     .lp-live-dot,
     .lp-capsule-cta__inner,
+    .lp-capsule-cta__inner::before,
+    .lp-capsule-cta__ripple,
     .lp-capsule-cta__arrow,
     .lp-bento-hero {
       transition: none !important;
       animation: none !important;
     }
-    .lp-shimmer:hover::after {
-      transform: translateX(-100%);
-    }
+    .lp-shimmer:hover::after { transform: translateX(-100%); }
+    .lp-card-premium:hover::after { transform: translateX(-100%); opacity: 0; }
   }
 }
