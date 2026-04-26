@@ -15,21 +15,14 @@ export function Outcome() {
   const meshY = useParallaxY(sectionRef, 40);
 
   return (
-    <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
-      {/* Dot grid — parallax */}
-      <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
-      {/* Top shimmer line */}
-      <div className="absolute top-0 left-0 right-0 h-px overflow-hidden pointer-events-none">
-        <div className="lp-shimmer-line" />
-      </div>
-      {/* Grain */}
-      <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
+    <section ref={sectionRef} className="relative lp-mesh-light py-28 md:py-36 lg:py-40 overflow-hidden">
+      <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow-dark">The Outcome</span>
-            <h2 className="font-heading font-extrabold text-[34px] md:text-[50px] text-white tracking-[-0.04em] leading-[1.05] mt-6">
+            <span className="lp-eyebrow">The Outcome</span>
+            <h2 className="font-heading font-semibold text-[34px] md:text-[44px] text-[#0A0F1C] tracking-[-0.025em] leading-[1.08] mt-6">
               What changes in
               <br />
               the first 90 days.
@@ -41,19 +34,10 @@ export function Outcome() {
           {outcomes.map((o) => (
             <StaggerItem key={o.value} variant="scaleUp">
               <div className="lp-card-dark p-7 md:p-8 h-full flex flex-col">
-                <div
-                  className="font-heading font-extrabold text-[42px] md:text-[56px] tracking-[-0.045em] leading-[0.95]"
-                  style={{
-                    backgroundImage: "linear-gradient(135deg, #C4B5FD 0%, #A78BFA 35%, #818CF8 65%, #60A5FA 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    filter: "drop-shadow(0 0 24px rgba(167,139,250,0.35))",
-                  }}
-                >
+                <div className="font-heading font-semibold text-[40px] md:text-[52px] text-[#0A0F1C] tracking-[-0.035em] leading-[0.98]">
                   {o.value}
                 </div>
-                <div className="font-body text-[14px] md:text-[15px] text-white/65 leading-[1.5] mt-4">
+                <div className="font-body text-[14px] md:text-[15px] text-[#64748B] leading-[1.5] mt-4">
                   {o.label}
                 </div>
               </div>
@@ -66,9 +50,9 @@ export function Outcome() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="font-heading text-[17px] md:text-[20px] text-white/75 text-center mt-20 md:mt-24 max-w-2xl mx-auto tracking-tight"
+          className="font-heading text-[17px] md:text-[19px] text-[#475569] text-center mt-20 md:mt-24 max-w-2xl mx-auto tracking-tight"
         >
-          Same factory. Same field. <span className="text-white font-semibold">More throughput. Better cash flow.</span>
+          Same factory. Same field. <span className="text-[#0A0F1C] font-semibold">More throughput. Better cash flow.</span>
         </motion.p>
       </div>
     </section>
