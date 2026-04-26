@@ -80,94 +80,110 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-[#F5F6F8] py-28 md:py-36">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="pricing" className="relative lp-mesh-light py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 lp-noise pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-4 max-w-3xl mx-auto">
-            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] text-[#2563EB] uppercase mb-4">
-              Pricing
-            </span>
-            <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] tracking-[-0.04em] leading-[1.05]">
+            <span className="lp-eyebrow mb-5">Pricing</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
               Start free. Pay when it's
               <br />
               running your business.
             </h2>
-            <p className="font-body text-[16px] md:text-[18px] text-[#64748B] mt-6">
+            <p className="font-body text-[15px] md:text-[17px] text-[#64748B] mt-6 leading-[1.55]">
               Competitors charge ₹5,000–₹15,000+ for less. <span className="text-[#0A0F1C] font-semibold">30-day free trial. No card. Cancel anytime.</span>
             </p>
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mt-14">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mt-14" staggerTime={0.05}>
           {plans.map((plan) => (
             <StaggerItem key={plan.name}>
-              <motion.div
-                className={`relative bg-white rounded-2xl p-8 flex flex-col h-full ${
-                  plan.highlighted
-                    ? "border-2 border-transparent"
-                    : "border border-[#E5E7EB]"
-                }`}
-                style={
-                  plan.highlighted
-                    ? {
-                        backgroundImage:
-                          "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-                        backgroundOrigin: "border-box",
-                        backgroundClip: "padding-box, border-box",
-                        boxShadow: "0 24px 60px -16px rgba(124,58,237,0.25)",
-                      }
-                    : { boxShadow: "0 1px 3px rgba(10,15,28,0.04)" }
-                }
-                whileHover={{ y: -4 }}
-                transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              >
+              <div className="relative h-full">
+                {/* Real gradient halo for highlighted plan */}
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 brand-gradient-cool-bg text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
-                    Most Popular
-                  </span>
+                  <div
+                    aria-hidden
+                    className="absolute -inset-1 rounded-[1.25rem] blur-md opacity-60 pointer-events-none"
+                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #2563EB 100%)" }}
+                  />
                 )}
-
-                <div className="w-11 h-11 rounded-xl bg-[#F5F6F8] flex items-center justify-center mb-5">
-                  <plan.icon size={22} strokeWidth={1.75} className={plan.highlighted ? "text-[#7C3AED]" : "text-[#0A0F1C]"} />
-                </div>
-
-                <h3 className="font-heading font-bold text-[20px] text-[#0A0F1C] tracking-tight">{plan.name}</h3>
-                <p className="font-body text-[14px] text-[#64748B] mt-1">{plan.tagline}</p>
-
-                <div className="mt-4">
-                  {plan.price === "Custom" ? (
-                    <span className="font-heading font-extrabold text-[36px] text-[#0A0F1C] tracking-[-0.03em]">Custom</span>
-                  ) : (
-                    <>
-                      <span className="text-[#64748B] text-base font-normal">{plan.priceLabel}</span>
-                      <span className="font-heading font-extrabold text-[40px] text-[#0A0F1C] tracking-[-0.03em]">{plan.price}</span>
-                      <span className="text-[#64748B] text-base font-normal">{plan.period}</span>
-                    </>
-                  )}
-                </div>
-
-                <div className="mt-6 space-y-2.5 flex-1">
-                  {plan.features.map((f) => (
-                    <div key={f} className="flex items-start gap-2.5">
-                      <Check size={16} className="text-[#06B6A4] shrink-0 mt-0.5" strokeWidth={2.5} />
-                      <span className="font-body text-[14px] text-[#1F2937]">{f}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <MotionLink
-                  to="/signup"
-                  whileTap={{ scale: 0.97 }}
-                  transition={spring.snappy}
-                  className={`mt-8 w-full py-3.5 rounded-full text-center font-semibold text-sm transition-colors duration-200 block ${
+                <div
+                  className={`relative lp-card p-7 flex flex-col h-full ${plan.highlighted ? "border-transparent" : ""}`}
+                  style={
                     plan.highlighted
-                      ? "bg-[#0A0F1C] text-white hover:bg-[#1F2937]"
-                      : "border border-[#E5E7EB] text-[#0A0F1C] hover:border-[#0A0F1C]"
-                  }`}
+                      ? {
+                          backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                          backgroundOrigin: "border-box",
+                          backgroundClip: "padding-box, border-box",
+                          border: "1.5px solid transparent",
+                        }
+                      : undefined
+                  }
                 >
-                  {plan.cta}
-                </MotionLink>
-              </motion.div>
+                  {plan.highlighted && (
+                    <span
+                      className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em]"
+                      style={{
+                        background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                        boxShadow: "0 6px 16px -4px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
+                      }}
+                    >
+                      Most Popular
+                    </span>
+                  )}
+
+                  <div className="lp-icon-tile mb-5">
+                    <plan.icon size={20} strokeWidth={1.75} className="text-[#6D28D9]" />
+                  </div>
+
+                  <h3 className="font-heading font-bold text-[19px] text-[#0A0F1C] tracking-tight">{plan.name}</h3>
+                  <p className="font-body text-[13.5px] text-[#64748B] mt-1">{plan.tagline}</p>
+
+                  <div className="mt-4 flex items-baseline">
+                    {plan.price === "Custom" ? (
+                      <span className="font-heading font-extrabold text-[32px] text-[#0A0F1C] tracking-[-0.03em]">Custom</span>
+                    ) : (
+                      <>
+                        <span className="text-[#94A3B8] text-[15px] font-normal mr-0.5">{plan.priceLabel}</span>
+                        <span className="font-heading font-extrabold text-[36px] text-[#0A0F1C] tracking-[-0.03em] leading-none">{plan.price}</span>
+                        <span className="text-[#94A3B8] text-[14px] font-normal ml-1">{plan.period}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="mt-6 space-y-2.5 flex-1">
+                    {plan.features.map((f) => (
+                      <div key={f} className="flex items-start gap-2.5">
+                        <span
+                          className="shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(37,99,235,0.10))",
+                            border: "1px solid rgba(124,58,237,0.18)",
+                          }}
+                        >
+                          <Check size={10} className="text-[#6D28D9]" strokeWidth={3} />
+                        </span>
+                        <span className="font-body text-[13.5px] text-[#1F2937] leading-[1.45]">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <MotionLink
+                    to="/signup"
+                    whileTap={{ scale: 0.97 }}
+                    transition={spring.snappy}
+                    className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block ${
+                      plan.highlighted
+                        ? "lp-btn-primary-dark text-white"
+                        : "border border-[#E2E8F0] text-[#0A0F1C] hover:border-[#0A0F1C] bg-white"
+                    }`}
+                  >
+                    {plan.cta}
+                  </MotionLink>
+                </div>
+              </div>
             </StaggerItem>
           ))}
         </StaggerContainer>
@@ -177,7 +193,7 @@ export function Pricing() {
             href="https://wa.me/918138084689?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-body text-[15px] text-[#0A0F1C] font-medium hover:text-[#7C3AED] transition-colors inline-block"
+            className="font-body text-[14px] text-[#0A0F1C] font-medium hover:text-[#6D28D9] transition-colors inline-block"
           >
             Need help deciding? Chat on WhatsApp →
           </a>
