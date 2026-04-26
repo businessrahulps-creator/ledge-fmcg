@@ -89,13 +89,13 @@ export function Hero() {
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
-              {/* Layer 1 — outer violet glow */}
+              {/* Layer 1 — neutral graphite ambient shadow */}
               <div
                 aria-hidden
-                className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-40 pointer-events-none"
+                className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.45) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(37,99,235,0.40) 0%, transparent 60%)",
+                    "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.18) 0%, transparent 65%)",
                 }}
               />
               {/* Layer 2 — glass stage */}
