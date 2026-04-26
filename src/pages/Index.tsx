@@ -7,6 +7,7 @@ import { TrustBar } from "@/components/landing/sections/TrustBar";
 import { Problem } from "@/components/landing/sections/Problem";
 import { HowItWorks } from "@/components/landing/sections/HowItWorks";
 import { Outcome } from "@/components/landing/sections/Outcome";
+import { LedgeIntelligence } from "@/components/landing/sections/LedgeIntelligence";
 import { Features } from "@/components/landing/sections/Features";
 import { WhyLedge } from "@/components/landing/sections/WhyLedge";
 import { Testimonials } from "@/components/landing/sections/Testimonials";
@@ -34,6 +35,7 @@ export default function Index() {
       <Problem />
       <HowItWorks />
       <Outcome />
+      <LedgeIntelligence />
       <Features />
       <WhyLedge />
       <Testimonials />
