@@ -331,6 +331,43 @@
     background: linear-gradient(to bottom, rgba(15,23,42,0.04) 0%, transparent 100%);
   }
 
+  /* Mobile menu — full-screen cinema overlay background */
+  .lp-mobile-menu-bg {
+    background-color: #FFFFFF;
+    background-image:
+      radial-gradient(60% 40% at 50% 0%, rgba(10,15,28,0.045), transparent 70%),
+      radial-gradient(50% 35% at 50% 100%, rgba(10,15,28,0.03), transparent 70%);
+  }
+
+  /* Mobile menu — editorial eyebrow above each link */
+  .lp-menu-link-eyebrow {
+    font-family: var(--font-body, inherit);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #94A3B8;
+  }
+
+  /* Mobile menu — spring underline indicator on press */
+  .lp-menu-link {
+    position: relative;
+    padding-bottom: 6px;
+  }
+  .lp-menu-link-underline {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 0;
+    background: #0A0F1C;
+    transition: width 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .lp-menu-link:active .lp-menu-link-underline,
+  .lp-menu-link:focus-visible .lp-menu-link-underline {
+    width: 64px;
+  }
+
   /* Premium card surface — neutral shadows, no purple tint */
   .lp-card {
     @apply relative bg-white rounded-2xl;
