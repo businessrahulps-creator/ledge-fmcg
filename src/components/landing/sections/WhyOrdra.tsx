@@ -43,25 +43,32 @@ export function WhyOrdra() {
         </AnimateIn>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" staggerTime={0.05}>
-          {blocks.map((block, i) => (
-            <StaggerItem key={block.title}>
-              <div className="lp-card p-7 h-full flex flex-col">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="font-heading font-semibold text-[18px] text-[#94A3B8] tabular-nums">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="h-px flex-1 bg-[#ECEEF2]" />
-                  <block.icon size={18} strokeWidth={1.75} className="text-[#0A0F1C]" />
+          {blocks.map((block, i) => {
+            const isHero = i === 1; // "Works when the network doesn't"
+            return (
+              <StaggerItem key={block.title}>
+                <div className={`${isHero ? "lp-bento-hero" : "lp-card"} p-7 h-full flex flex-col relative`}>
+                  <div className="flex items-start justify-between mb-7">
+                    <span className="lp-bento-numeral--lg">[ {String(i + 1).padStart(2, "0")} ]</span>
+                    {isHero && (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#3730A3] bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
+                        <span className="lp-live-dot" /> Offline-ready
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
+                    {block.title}
+                  </h3>
+                  <p className="font-body text-[14px] text-[#475569] leading-[1.55]">
+                    {block.content}
+                  </p>
+                  <div className="mt-auto pt-6 flex justify-end">
+                    <block.icon size={16} strokeWidth={1.6} className={isHero ? "text-[#4F46E5]/70" : "text-[#94A3B8]"} />
+                  </div>
                 </div>
-                <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
-                  {block.title}
-                </h3>
-                <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
-                  {block.content}
-                </p>
-              </div>
-            </StaggerItem>
-          ))}
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
       </div>
     </section>
