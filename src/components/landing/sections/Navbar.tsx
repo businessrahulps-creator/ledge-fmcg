@@ -38,7 +38,7 @@ export function Navbar() {
       transition={spring.default}
       className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 ${
         scrolled
-          ? "bg-white/90 backdrop-blur-md border-b border-[#E5E7EB]"
+          ? "bg-white/70 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#E5E7EB]/60 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_4px_20px_-8px_rgba(15,23,42,0.06)]"
           : "bg-transparent"
       }`}
     >
