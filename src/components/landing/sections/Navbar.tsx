@@ -84,9 +84,9 @@ export function Navbar() {
             </motion.div>
           </div>
 
-          {/* Mobile hamburger — sits above the overlay (overlay has its own close button) */}
-          <div className="md:hidden relative z-[70]">
-            <MorphHamburger open={open} onClick={() => setOpen((o) => !o)} />
+          {/* Mobile hamburger — hidden while overlay is open (overlay renders its own close button) */}
+          <div className={`md:hidden transition-opacity duration-150 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+            <MorphHamburger open={false} onClick={() => setOpen(true)} />
           </div>
         </div>
       </motion.nav>
