@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { spring, useParallaxY } from "@/lib/motion";
 import { CapsuleCTA } from "../CapsuleCTA";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
