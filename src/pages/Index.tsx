@@ -8,7 +8,7 @@ import { Problem } from "@/components/landing/sections/Problem";
 import { HowItWorks } from "@/components/landing/sections/HowItWorks";
 import { Outcome } from "@/components/landing/sections/Outcome";
 import { Features } from "@/components/landing/sections/Features";
-import { WhyOrdra } from "@/components/landing/sections/WhyOrdra";
+import { WhyLedge } from "@/components/landing/sections/WhyLedge";
 import { Testimonials } from "@/components/landing/sections/Testimonials";
 import { Founder } from "@/components/landing/sections/Founder";
 import { Pricing } from "@/components/landing/sections/Pricing";
@@ -35,7 +35,7 @@ export default function Index() {
       <HowItWorks />
       <Outcome />
       <Features />
-      <WhyOrdra />
+      <WhyLedge />
       <Testimonials />
       <Founder />
       <Pricing />

@@ -22,7 +22,7 @@ export function FinalCTA() {
         <motion.div className="inline-flex justify-center mb-7" {...fadeUp(0)}>
           <span className="lp-glass-frost px-5 py-2.5 inline-flex items-center gap-2.5 text-[13px] font-medium text-[#475569] rounded-full">
             <span className="lp-live-dot" />
-            Used by FMCG teams across 12 Indian states
+            Used by Indian businesses across 12 states
           </span>
         </motion.div>
 
