@@ -1,6 +1,6 @@
-import { useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Camera, Sunrise, Sparkles, Mic, Sun, FileText, Target } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion, useInView } from "framer-motion";
+import { Camera, Sunrise, Sparkles, Mic } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 import { CapsuleCTA } from "../CapsuleCTA";
 
@@ -31,13 +31,11 @@ const capabilities = [
 /**
  * LiveRoute — FMCG-native motion: a route line draws itself left→right
  * through 5 dealer stops, with a delivery pulse traveling the path on loop.
- * Stop coordinates are sampled from the actual cubic Bézier so dots sit ON the path.
  */
 function LiveRoute() {
   const reduce = useReducedMotion();
 
   const d = "M 40 140 C 160 60, 280 220, 420 110 S 660 60, 820 150";
-  // Sampled directly from the Bézier — dots now sit precisely on the curve.
   const stops = [
     { x: 40, y: 140 },
     { x: 130, y: 117 },
@@ -64,10 +62,8 @@ function LiveRoute() {
           <path id="li-route-ref" d={d} fill="none" />
         </defs>
 
-        {/* Faint backdrop trail */}
         <path d={d} fill="none" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round" />
 
-        {/* Animated drawing route */}
         <path
           d={d}
           fill="none"
@@ -79,7 +75,6 @@ function LiveRoute() {
           style={reduce ? { strokeDashoffset: 0 } : undefined}
         />
 
-        {/* Dealer stops */}
         {stops.map((s, i) => (
           <g key={i}>
             <circle cx={s.x} cy={s.y} r="7" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1.5" />
@@ -87,7 +82,6 @@ function LiveRoute() {
           </g>
         ))}
 
-        {/* Traveling delivery pulse */}
         {!reduce && (
           <g className="li-route-pulse">
             <circle r="9" fill="#4F46E5" opacity="0.18" filter="url(#li-pulse-glow)">
@@ -104,51 +98,56 @@ function LiveRoute() {
         )}
       </svg>
 
-      {/* Floating intelligence chips — page-native style */}
-      <div className="pointer-events-none absolute inset-0 hidden sm:block">
-        <Chip
-          className="li-route-chip absolute left-[6%] top-[8%]"
-          icon={<Sun size={11} className="text-[#4F46E5]" strokeWidth={2.2} />}
-          label="Morning brief ready"
-        />
-        <Chip
-          className="li-route-chip li-route-chip-2 absolute left-1/2 -translate-x-1/2 top-[2%]"
-          icon={<FileText size={11} className="text-[#4F46E5]" strokeWidth={2.2} />}
-          label="12 chits → orders"
-        />
-        <Chip
-          className="li-route-chip li-route-chip-3 absolute right-[4%] top-[14%]"
-          icon={<Target size={11} className="text-[#4F46E5]" strokeWidth={2.2} />}
-          label="Scheme suggested"
-        />
+      {/* Telemetry strip — grounds the abstract route in product specifics */}
+      <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-2xl flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
+        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
+          <span className="font-body text-[#64748B]">Photo → Order</span>
+          <span className="font-heading font-semibold tracking-tight">~6 sec</span>
+        </span>
+        <span className="hidden sm:inline text-[#CBD5E1]">·</span>
+        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
+          <span className="font-body text-[#64748B]">Briefings</span>
+          <span className="font-heading font-semibold tracking-tight">06:00 IST daily</span>
+        </span>
+        <span className="hidden sm:inline text-[#CBD5E1]">·</span>
+        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
+          <span className="font-body text-[#64748B]">Voice</span>
+          <span className="font-heading font-semibold tracking-tight">11 Indian languages</span>
+        </span>
       </div>
     </div>
   );
 }
 
-function Chip({
-  icon,
-  label,
-  className = "",
-}: {
-  icon: React.ReactNode;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#ECEEF2] shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${className}`}
-    >
-      {icon}
-      <span className="font-body text-[12px] font-medium text-[#0A0F1C] tracking-[-0.005em]">
-        {label}
-      </span>
-    </div>
-  );
+/** Animated counter that ticks 0 → target on scroll-in. */
+function ScrollCounter({ target, duration = 1400 }: { target: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const reduce = useReducedMotion();
+  const [val, setVal] = useState(reduce ? target : 0);
+
+  useEffect(() => {
+    if (!inView || reduce) return;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(Math.round(eased * target));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, target, duration, reduce]);
+
+  return <span ref={ref}>{val}</span>;
 }
 
 export function LedgeIntelligence() {
   const sectionRef = useRef<HTMLElement>(null);
+  const SPOTS_CLAIMED = 87;
+  const SPOTS_TOTAL = 100;
+  const SPOTS_LEFT = SPOTS_TOTAL - SPOTS_CLAIMED;
 
   return (
     <section
@@ -158,14 +157,12 @@ export function LedgeIntelligence() {
       aria-label="Ledge Intelligence"
     >
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        {/* Eyebrow — same primitive as every other section */}
         <AnimateIn variant="blurFadeUp">
           <div className="flex justify-center">
-            <span className="lp-eyebrow">Ledge Intelligence · Coming Q3 2026</span>
+            <span className="lp-eyebrow">Ledge Intelligence</span>
           </div>
         </AnimateIn>
 
-        {/* Headline — aligned to Outcome's rhythm */}
         <AnimateIn variant="blurFadeUp" delay={0.06}>
           <h2 className="font-heading font-semibold text-center text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] text-[32px] md:text-[40px] mt-6">
             Ledge{" "}
@@ -176,21 +173,29 @@ export function LedgeIntelligence() {
           </h2>
         </AnimateIn>
 
-        {/* Sub-headline */}
-        <AnimateIn variant="blurFadeUp" delay={0.12}>
+        <AnimateIn variant="blurFadeUp" delay={0.1}>
+          <div className="mt-4 flex justify-center">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#0A0F1C]/[0.08] text-[11.5px] font-medium text-[#475569] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+              <span className="lp-live-dot" />
+              Launching Q3 2026 · Limited founding access
+            </span>
+          </div>
+        </AnimateIn>
+
+        <AnimateIn variant="blurFadeUp" delay={0.16}>
           <p className="mt-5 text-center font-body text-[#475569] text-[17px] leading-[1.55] max-w-2xl mx-auto">
             Your always-on AI that thinks alongside you.
           </p>
         </AnimateIn>
 
-        {/* Live route visual */}
-        <AnimateIn variant="fadeIn" delay={0.18}>
+        {/* Live route + telemetry */}
+        <AnimateIn variant="fadeIn" delay={0.22}>
           <div className="my-14 md:my-16">
             <LiveRoute />
           </div>
         </AnimateIn>
 
-        {/* Capability cards — Features grid system 1:1 */}
+        {/* Capability cards */}
         <StaggerContainer
           staggerTime={0.06}
           className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-4xl mx-auto auto-rows-fr"
@@ -244,27 +249,40 @@ export function LedgeIntelligence() {
           })}
         </StaggerContainer>
 
-        {/* Founding 100 offer — converts the passive line into a real CTA surface */}
+        {/* Founding 100 — demoted to glass-frost (single bento-hero per section rule) */}
         <AnimateIn variant="blurFadeUp" delay={0.3}>
           <div className="mt-14 md:mt-16 max-w-4xl mx-auto">
             <motion.div
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 280, damping: 22 }}
-              className="lp-bento-hero lp-card-premium p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
+              className="lp-glass-frost lp-card-premium p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="lp-live-dot" />
                   <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">
-                    Limited · Founding 100
+                    Limited · <ScrollCounter target={SPOTS_CLAIMED} /> / {SPOTS_TOTAL} spots claimed
                   </span>
                 </div>
                 <p className="font-heading font-semibold text-[#0A0F1C] text-[18px] md:text-[20px] tracking-[-0.012em] leading-[1.3]">
-                  Lock in <span className="text-[#3730A3]">6 months free</span> when Intelligence launches.
+                  Founding 100 — lock in <span className="text-[#3730A3]">6 months free</span>.
                 </p>
                 <p className="font-body text-[13.5px] md:text-[14px] text-[#475569] leading-[1.55] mt-1.5">
-                  Today's customers are auto-enrolled. After 100 spots, this offer closes.
+                  Today's customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
                 </p>
+
+                {/* Progress — uses existing lp-progress-glass primitive */}
+                <div className="mt-4 max-w-md">
+                  <div className="relative h-1.5 rounded-full bg-[#E2E8F0] overflow-hidden">
+                    <motion.div
+                      className="lp-progress-glass absolute inset-y-0 left-0 rounded-full"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${SPOTS_CLAIMED}%` }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  </div>
+                </div>
               </div>
               <div className="shrink-0">
                 <CapsuleCTA to="/signup" variant="dark">Claim my spot</CapsuleCTA>
