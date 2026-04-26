@@ -1043,6 +1043,8 @@
     .lp-capsule-cta__inner::before,
     .lp-capsule-cta__ripple,
     .lp-capsule-cta__arrow,
+    .li-ai-glyph,
+    .li-ray,
     .lp-bento-hero {
       transition: none !important;
       animation: none !important;
