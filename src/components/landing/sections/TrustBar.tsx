@@ -10,20 +10,21 @@ const companies = [
 ];
 
 const stats = [
-  "₹0 setup cost",
-  "Access Control",
-  "Works offline",
+  { value: "2–3 hrs", label: "Gained daily, per salesperson" },
+  { value: "15–20 hrs", label: "Freed weekly for owners" },
+  { value: "80%", label: "Admin work eliminated" },
+  { value: "Zero", label: "Stockouts after Ledge" },
 ];
 
 export function TrustBar() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-16 md:py-20 bg-white border-y border-[#E5E7EB]">
       <div className="max-w-7xl mx-auto px-6">
         {/* Logo Marquee */}
         <div className="overflow-hidden group">
-          <div className="flex gap-12 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
+          <div className="flex gap-14 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
             {[...companies, ...companies].map((name, i) => (
-              <span key={i} className="text-lg font-semibold text-[#D4D1CC] whitespace-nowrap shrink-0">
+              <span key={i} className="text-base md:text-lg font-semibold text-[#94A3B8] whitespace-nowrap shrink-0 tracking-tight">
                 {name}
               </span>
             ))}
@@ -31,32 +32,20 @@ export function TrustBar() {
         </div>
 
         {/* Stat Row */}
-        <StaggerContainer className="grid grid-cols-3 max-w-3xl mx-auto text-center mt-12">
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mt-14">
           {stats.map((stat) => (
-            <StaggerItem key={stat}>
-              <div className="text-center px-1 md:px-4">
-                <div className="font-heading text-sm md:text-lg text-[#1A1A1A] mb-1 whitespace-nowrap font-semibold">
-                  {stat}
+            <StaggerItem key={stat.value}>
+              <div className="text-center">
+                <div className="font-heading font-extrabold text-[28px] md:text-[34px] text-[#0A0F1C] tracking-[-0.03em] leading-none">
+                  {stat.value}
+                </div>
+                <div className="font-body text-[13px] md:text-[14px] text-[#64748B] mt-2">
+                  {stat.label}
                 </div>
               </div>
             </StaggerItem>
           ))}
         </StaggerContainer>
-
-        {/* Pull Quote */}
-        <AnimateIn delay={0.15} variant="scaleUp" className="mt-12">
-          <div className="bg-white rounded-3xl p-10 max-w-2xl mx-auto relative border border-[#E8E5E0]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}>
-            <span className="absolute top-4 left-6 text-6xl font-serif text-[#D4D1CC] opacity-40 leading-none select-none">
-              "
-            </span>
-            <p className="font-body text-lg text-[#52525B] italic leading-[1.75] pl-8">
-              The first time I opened Ledge on a Friday evening and just… saw everything - every order, every payment, every dispatch for the week - I realized I'd been running blind for years.
-            </p>
-            <p className="font-body font-semibold text-[#1A1A1A] mt-4 pl-8">
-              Arnav Sethi · Founder, Aryan Beverages, Pune
-            </p>
-          </div>
-        </AnimateIn>
       </div>
     </section>
   );

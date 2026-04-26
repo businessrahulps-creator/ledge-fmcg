@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { MessageCircle } from "lucide-react";
 import { spring } from "@/lib/motion";
-import { AnimateIn } from "../AnimateIn";
 
 const MotionLink = motion.create(Link);
 
@@ -14,52 +14,74 @@ const fadeUp = (delay: number) => ({
 
 export function FinalCTA() {
   return (
-    <section className="bg-[#F8F7F5] py-28 md:py-36">
-      <div className="max-w-7xl mx-auto px-6 text-center">
-        <motion.h2
-          className="font-heading font-extrabold text-[24px] md:text-[36px] text-[#1A1A1A] max-w-3xl mx-auto leading-[1.1] tracking-[-0.04em]"
+    <section className="relative bg-[#0A0F1C] py-32 md:py-44 overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 30%, rgba(124,58,237,0.22) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(37,99,235,0.20) 0%, transparent 60%)",
+        }}
+      />
+
+      <div className="relative max-w-4xl mx-auto px-6 text-center">
+        <motion.span
+          className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] brand-gradient-cool-text uppercase mb-6"
           {...fadeUp(0)}
         >
-          Your team is in the field right now. Orders are moving. Are you watching?
+          Your business is ready
+        </motion.span>
+
+        <motion.h2
+          className="font-heading font-extrabold text-[36px] md:text-[64px] text-white leading-[1.04] tracking-[-0.045em]"
+          {...fadeUp(0.05)}
+        >
+          Ready to run your business
+          <br />
+          the way it deserves?
         </motion.h2>
 
         <motion.p
-          className="font-body text-[18px] text-[#52525B] max-w-xl mx-auto mt-8 leading-[1.6]"
-          {...fadeUp(0.1)}
+          className="font-body text-[18px] md:text-[22px] text-white/70 max-w-2xl mx-auto mt-8 leading-[1.5]"
+          {...fadeUp(0.12)}
         >
-          Set up Ledge in under 15 minutes. See your first live order before the hour is up.
+          Start your 30-day free trial today. No card. No commitment.
+          <br />
+          Just clarity — from day one.
         </motion.p>
 
         <motion.div
           className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-12"
-          {...fadeUp(0.18)}
+          {...fadeUp(0.2)}
         >
           <MotionLink
             to="/signup"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="bg-[#27272A] text-white px-10 py-4 rounded-full font-semibold hover:bg-[#1A1A1A] transition-colors duration-200 inline-flex items-center justify-center text-base"
-            style={{ boxShadow: "0 4px 14px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)" }}
+            className="bg-white text-[#0A0F1C] px-10 py-4 rounded-full font-semibold hover:bg-[#F5F6F8] transition-colors duration-200 inline-flex items-center justify-center text-base"
+            style={{ boxShadow: "0 8px 24px -8px rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)" }}
           >
-            Get Started Free
+            Start 30-Day Free Trial
           </MotionLink>
           <motion.a
-            href="/#features"
+            href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
+            target="_blank"
+            rel="noopener noreferrer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="border border-[#D4D1CC] text-[#1A1A1A] px-10 py-4 rounded-full font-semibold hover:border-[#A8A29E] transition-colors duration-200 inline-flex items-center justify-center text-base"
+            className="border border-white/25 text-white px-10 py-4 rounded-full font-semibold hover:border-white/60 hover:bg-white/5 transition-colors duration-200 inline-flex items-center justify-center gap-2 text-base"
           >
-            See How It Works
+            <MessageCircle size={18} />
+            Chat on WhatsApp
           </motion.a>
         </motion.div>
 
         <motion.p
-          className="font-body text-sm text-[#71717A] mt-6"
-          {...fadeUp(0.24)}
+          className="font-body text-sm text-white/50 mt-7"
+          {...fadeUp(0.28)}
         >
-          No credit card required · Setup in 15 minutes · Cancel anytime
+          No card required · Cancel anytime · Built in India
         </motion.p>
       </div>
     </section>

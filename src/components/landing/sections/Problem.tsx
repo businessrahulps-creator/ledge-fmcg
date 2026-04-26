@@ -6,56 +6,58 @@ import { hoverLift } from "@/lib/motion";
 const cards = [
   {
     icon: MessageCircle,
-    title: "The WhatsApp chain you have to decode every evening.",
-    description:
-      "Your salesperson sends a voice note. Your office manager transcribes it wrong. The dealer says a different number. By 9 PM you've made four calls and you still don't know what actually sold today. This isn't a communication problem. It's a missing system.",
+    title: "WhatsApp orders get lost",
+    description: "Voice notes, paper chits, four phone calls — and you still don't know what sold today.",
   },
   {
     icon: Table,
-    title: "The Excel file that's always one version behind.",
-    description:
-      "Orders in one sheet. Payments in another. Stock in a third. None of them talk to each other. None of them update in real time. And when your accountant goes on leave, everything stops - because the whole operation lives inside one person's laptop.",
+    title: "Excel is always one version behind",
+    description: "Orders, payments and stock live in three sheets that never talk to each other.",
   },
   {
     icon: Compass,
-    title: "You find out a godown ran out after the dealer already complained.",
-    description:
-      "No alert. No signal. By the time you know, the order is lost and the relationship is bruised. You're making restocking decisions based on what you remember from last week's call, not actual numbers. Gut feeling is expensive when you're managing multiple locations.",
+    title: "Stock-outs hit before you see them",
+    description: "You learn a godown is empty when the dealer calls to complain.",
   },
   {
     icon: Laptop,
-    title: "The enterprise software your team opened twice and abandoned.",
-    description:
-      "₹40,000 a year. Six-hour onboarding sessions. A system so complicated your field salesperson gave up after the second visit and went straight back to WhatsApp. The software wasn't wrong for everyone - just wrong for how distribution businesses in India actually run.",
+    title: "ERPs your team won't open",
+    description: "Tally, SAP — built for desktops. Your field team gave up by week two.",
   },
 ];
 
 export function Problem() {
   return (
-    <section className="bg-[#F8F7F5] py-28 md:py-36">
+    <section className="bg-[#F5F6F8] py-28 md:py-36">
       <div className="max-w-7xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
-          <h2 className="font-heading font-bold text-[24px] md:text-[34px] text-[#1A1A1A] text-center mb-16 leading-[1.08] tracking-[-0.04em] max-w-3xl mx-auto">
-            Distribution is complex enough. Your software shouldn't make it worse.
-          </h2>
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] text-[#7C3AED] uppercase mb-4">
+              The old way
+            </span>
+            <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] leading-[1.05] tracking-[-0.04em]">
+              Distribution is hard.
+              <br />
+              Your software shouldn't be.
+            </h2>
+          </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {cards.map((card) => (
             <StaggerItem key={card.title}>
               <motion.div
                 {...hoverLift}
-                className="bg-white rounded-3xl p-10 border border-[#E8E5E0] h-full flex flex-col transition-shadow duration-300"
-                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)" }}
-                whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)" }}
+                className="bg-white rounded-2xl p-7 border border-[#E5E7EB] h-full flex flex-col"
+                whileHover={{ y: -4, boxShadow: "0 12px 32px -8px rgba(10,15,28,0.10)" }}
               >
-                <div className="w-14 h-14 rounded-full bg-[#F4F4F5] flex items-center justify-center mb-5">
-                  <card.icon size={28} strokeWidth={1.5} className="text-[#27272A]" />
+                <div className="w-11 h-11 rounded-xl bg-[#F5F6F8] flex items-center justify-center mb-5">
+                  <card.icon size={22} strokeWidth={1.75} className="text-[#0A0F1C]" />
                 </div>
-                <h3 className="font-heading font-bold text-[18px] text-[#1A1A1A] mb-3">
+                <h3 className="font-heading font-bold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
                   {card.title}
                 </h3>
-                <p className="font-body text-[15px] text-[#52525B] leading-[1.7] flex-1">
+                <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
                   {card.description}
                 </p>
               </motion.div>
