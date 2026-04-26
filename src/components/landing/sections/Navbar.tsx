@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, LayoutDashboard, Layers, Route, IndianRupee } from "lucide-react";
 import { spring } from "@/lib/motion";
+import ledgeLogo from "@/assets/ledge-logo.png";
 import {
   Sheet,
   SheetContent,
