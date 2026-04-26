@@ -1,10 +1,7 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
 import { spring, useParallaxY } from "@/lib/motion";
-
-const MotionLink = motion.create(Link);
+import { CapsuleCTA } from "../CapsuleCTA";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
@@ -22,15 +19,15 @@ export function FinalCTA() {
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
-        <motion.span
-          className="lp-eyebrow mb-6"
-          {...fadeUp(0)}
-        >
-          Your business is ready
-        </motion.span>
+        <motion.div className="inline-flex justify-center mb-7" {...fadeUp(0)}>
+          <span className="lp-glass-frost px-5 py-2.5 inline-flex items-center gap-2.5 text-[13px] font-medium text-[#475569] rounded-full">
+            <span className="lp-live-dot" />
+            Used by FMCG teams across 12 Indian states
+          </span>
+        </motion.div>
 
         <motion.h2
-          className="font-heading font-semibold text-[34px] md:text-[48px] text-[#0A0F1C] leading-[1.08] tracking-[-0.025em] mt-6"
+          className="font-heading font-semibold text-[34px] md:text-[48px] text-[#0A0F1C] leading-[1.08] tracking-[-0.025em]"
           {...fadeUp(0.05)}
         >
           Ready to run your business
@@ -48,30 +45,19 @@ export function FinalCTA() {
         </motion.p>
 
         <motion.div
-          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-10"
+          className="flex flex-col items-center gap-5 mt-10"
           {...fadeUp(0.2)}
         >
-          <MotionLink
-            to="/signup"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            transition={spring.snappy}
-            className="lp-btn-primary-dark lp-shimmer text-white px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
-          >
-            Start 30-Day Free Trial
-          </MotionLink>
-          <motion.a
+          <CapsuleCTA to="/signup" variant="dark">Start 30-Day Free Trial</CapsuleCTA>
+
+          <a
             href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            transition={spring.snappy}
-            className="border border-[#ECEEF2] bg-white text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold hover:border-[#0A0F1C] transition-colors duration-200 inline-flex items-center justify-center gap-2 text-[15px]"
+            className="font-body text-[14px] text-[#475569] hover:text-[#0A0F1C] transition-colors"
           >
-            <MessageCircle size={17} />
-            Chat on WhatsApp
-          </motion.a>
+            or message us on WhatsApp →
+          </a>
         </motion.div>
 
         <motion.p
