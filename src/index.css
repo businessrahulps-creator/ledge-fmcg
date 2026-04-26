@@ -820,10 +820,112 @@
     display: inline-block;
   }
 
+
+  /* ═══════════════════════════════════════════════════════════════
+     PREMIUM INTERACTION LAYER — cards, icons, buttons
+     Glass with depth, cursor-aware bloom, sheen-on-hover, springy lift.
+     Additive: layered ON TOP of existing .lp-card / .lp-bento-hero / .lp-icon-tile.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Premium card — wraps existing .lp-card / .lp-bento-hero with extras */
+  .lp-card-premium {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    --mx: 50%;
+    --my: 50%;
+    transition:
+      transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms ease;
+  }
+  /* Cursor-following inner spotlight */
+  .lp-card-premium::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(280px circle at var(--mx) var(--my), rgba(99,102,241,0.10), transparent 60%);
+    opacity: 0;
+    transition: opacity 360ms ease;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+  }
+  /* One-shot diagonal sheen sweep */
+  .lp-card-premium::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.55) 50%, transparent 62%);
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+    mix-blend-mode: overlay;
+  }
+  .lp-card-premium:hover::before { opacity: 1; }
+  .lp-card-premium:hover::after {
+    opacity: 1;
+    transform: translateX(100%);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+  }
+  .lp-card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 2px rgba(15,23,42,0.04),
+      0 4px 10px -2px rgba(15,23,42,0.06),
+      0 14px 28px -10px rgba(15,23,42,0.10),
+      0 28px 56px -20px rgba(79,70,229,0.18);
+    border-color: rgba(99,102,241,0.22);
+  }
+  /* Children must sit above pseudo layers */
+  .lp-card-premium > * { position: relative; z-index: 1; }
+
+  /* Premium icon tile — overshoot lift, decoupled from card */
+  .lp-icon-premium {
+    transition:
+      transform 480ms cubic-bezier(0.34, 1.56, 0.64, 1) 80ms,
+      filter 380ms ease 80ms;
+    will-change: transform;
+  }
+  .lp-card-premium:hover .lp-icon-premium,
+  .lp-bento-hero:hover .lp-icon-premium,
+  .group:hover .lp-icon-premium {
+    transform: translateY(-1px) scale(1.06) rotate(-2deg);
+    filter: drop-shadow(0 2px 6px rgba(79,70,229,0.22));
+  }
+
+  /* Premium button class for shadcn buttons used on landing */
+  .btn-premium {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1) 60ms;
+  }
+  .btn-premium:hover {
+    transform: translateY(-1.5px);
+    box-shadow:
+      0 1px 2px rgba(15,23,42,0.08),
+      0 8px 20px -8px rgba(15,23,42,0.18),
+      0 16px 28px -12px rgba(79,70,229,0.22);
+  }
+  .btn-premium:active {
+    transform: translateY(0) scale(0.985);
+    transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* Reduced-motion guard for landing motion utilities */
   @media (prefers-reduced-motion: reduce) {
     .lp-card,
     .lp-icon-tile,
+    .lp-icon-premium,
+    .lp-card-premium,
+    .lp-card-premium::before,
+    .lp-card-premium::after,
+    .btn-premium,
     .lp-shimmer::after,
     .lp-shimmer-line,
     .lp-pill-accent,
@@ -831,13 +933,14 @@
     .lp-progress-glass::after,
     .lp-live-dot,
     .lp-capsule-cta__inner,
+    .lp-capsule-cta__inner::before,
+    .lp-capsule-cta__ripple,
     .lp-capsule-cta__arrow,
     .lp-bento-hero {
       transition: none !important;
       animation: none !important;
     }
-    .lp-shimmer:hover::after {
-      transform: translateX(-100%);
-    }
+    .lp-shimmer:hover::after { transform: translateX(-100%); }
+    .lp-card-premium:hover::after { transform: translateX(-100%); opacity: 0; }
   }
 }
