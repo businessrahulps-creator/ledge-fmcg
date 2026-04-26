@@ -1,116 +1,88 @@
-# World-Class Micro-Interaction Pass
+# Footer Premium Upgrade — Nilavilakku ✦ Kerala Pride
 
-**Scope guardrail:** Zero changes to copy, layout, palette, or visual hierarchy. Only interaction quality, motion physics, and the broken "90 days" animation. Everything additive — no existing class is removed.
+## Goal
+Replace the plain `© 2026 Ledge. All rights reserved.` line with an emotionally resonant, premium-feeling cultural signature — without disrupting the footer's clean, minimal balance.
 
----
+## New Footer Composition
 
-## 1. Buttons — Magnetic, Springy, Alive (`CapsuleCTA` + Button)
+The bottom strip (`Footer.tsx`, lines 120–126) becomes a **two-line stack** under the `Ledge` wordmark:
 
-**A. New `MagneticWrapper` primitive** — `src/components/landing/MagneticWrapper.tsx`
-- Tracks pointer within an 80px radius of the element's bounding box.
-- Translates child via Framer Motion `useMotionValue` + `useSpring` (`stiffness: 180, damping: 18, mass: 0.4`) — Apple-grade response curve.
-- Max pull: **8px** (subtle, expensive — never cartoonish). Disabled on touch devices and when `prefers-reduced-motion: reduce`.
-- Re-centers smoothly on `pointerleave`.
+- **Line 1 (cultural signature):** `🪔 Built in God's Own Country • Kerala`
+- **Line 2 (legal):** `© 2026 Ledge. All rights reserved.`
 
-**B. Wrap `CapsuleCTA`** in `MagneticWrapper`. Keep all existing classes intact.
+The 🪔 is **not** an emoji — it's a custom-drawn SVG `Nilavilakku` placed inline before the text, vertically aligned to the cap-height. Emoji renders inconsistently across OS/browsers; an SVG guarantees the premium feel.
 
-**C. Upgrade `.lp-capsule-cta` interaction layer in `src/index.css`:**
-- Replace current `transform: translate(4px,-1px)` jump with a layered motion:
-  - Inner: `translateY(-1.5px)` + slight `scale(1.012)` on hover, spring-eased.
-  - **Liquid morph:** add a `::before` radial gradient (`radial-gradient(circle at var(--mx) var(--my), rgba(79,70,229,0.10), transparent 60%)`) that follows the cursor via two CSS vars (`--mx`, `--my`) set by a tiny pointer listener inside `CapsuleCTA`. Creates the "light follows finger" Apple feel.
-  - **Shadow lift:** stack three shadows (contact 1px, mid 8px blur, ambient 28px blur indigo-tinted) — already partially there, refine the curve and add 60ms shadow delay on leave to feel weighty.
-  - Arrow: spring-driven `x: 6` with subtle 0.08s lag behind the inner pill (cascading motion).
-- **Ripple on click:** add `.lp-capsule-cta__ripple` span injected on `pointerdown` at click coords; 520ms scale 0→2.4 + opacity 0.35→0 with ease-out. Auto-removed.
-- Press: `scale(0.985)` with `cubic-bezier(0.34, 1.56, 0.64, 1)` (subtle overshoot rebound).
+## The Nilavilakku SVG (new component)
 
-**D. Shadcn `Button` (used in nav, secondary spots):** add a new `.btn-premium` utility (opt-in via className on landing usages) — soft spring hover lift, indigo focus ring bloom, identical ripple behavior. Apply only to landing-page buttons (Navbar CTA, Pricing CTAs, Final CTA fallback) — does not touch app/dashboard buttons.
+**File:** `src/components/landing/Nilavilakku.tsx` (new, ~60 lines)
 
----
+A hand-drawn brass lamp in a single inline SVG (~18×22px), composed of:
+- **Stem & base:** layered ellipses with warm brass gradient (`#C9A227` → `#8B6F1F` → `#5C4A14`)
+- **Oil bowl:** crescent shape at the top
+- **Wick + flame:** teardrop flame in warm amber → white-hot core (`#FFD27A` → `#FFF4D6`)
+- **Glow halo:** a soft radial blur behind the flame using SVG `<filter>` with `feGaussianBlur`
 
-## 2. Cards — Glass with Real Depth
+All stroke widths and gradients are tuned so the lamp reads clearly at 18px but stays elegant — not cartoonish.
 
-**New utility `.lp-card-premium`** added to `src/index.css` (applied to existing card containers in `Features`, `Outcome`, `WhyLedge`, `HowItWorks`, `Pricing` — no markup restructure, just className addition):
+## The Animation (premium, calm, permanent)
 
-- **Multi-layer shadow on hover** (4 stacked layers: contact, near, mid, ambient indigo bloom) transitioned over 420ms `cubic-bezier(0.22, 1, 0.36, 1)`.
-- **Spring lift** via Framer Motion `whileHover={{ y: -4 }}` with `{ type: "spring", stiffness: 260, damping: 22 }` — wrap card root with `motion.div` where currently a plain `div`. Replaces basic CSS scale. Retains existing visual styles entirely.
-- **Border light sweep:** `::after` overlay — a thin diagonal gradient sheen (`linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%)`) that translates `-100% → 100%` over 900ms on hover only (one-shot, not looping — looping = generic).
-- **Inner glow:** `::before` radial that follows cursor via `--mx/--my` CSS vars (same pattern as buttons). Soft indigo (8% opacity), 280px radius. Creates "spotlight on glass" effect.
-- **Border color shift:** `border-color` from `#ECEEF2` → `rgba(99,102,241,0.22)` over 280ms.
-- All effects gracefully no-op under `prefers-reduced-motion`.
+Two layered Framer Motion loops driven by `spring.gentle` + custom easing — both gated behind `useReducedMotion()`:
 
-**Bento-hero cards:** keep existing `.lp-bento-hero:hover`, but add the same cursor-follow inner glow and spring lift wrapper for consistency.
+1. **Flame flicker** (the flame `<path>`):
+   - `scaleY: [1, 1.06, 0.97, 1.04, 1]`
+   - `scaleX: [1, 0.98, 1.02, 0.99, 1]`
+   - `rotate: [0, 0.6, -0.4, 0.3, 0]` (origin at flame base)
+   - Duration: **3.4s**, `ease: [0.45, 0, 0.55, 1]`, `repeat: Infinity`
+   - Slow, organic, never aggressive.
 
----
+2. **Halo glow pulse** (the radial-blur circle behind the flame):
+   - `opacity: [0.55, 0.85, 0.6, 0.8, 0.55]`
+   - `scale: [1, 1.12, 1.02, 1.08, 1]`
+   - Duration: **3.4s** (synced to flicker), offset by 200ms for naturalism.
 
-## 3. Icons — Subtle Premium Motion
+3. **Reduced motion fallback:** static lamp with a faint static glow — still beautiful, zero animation.
 
-New `.lp-icon-premium` class on icon-tile containers in `Features`, `WhyLedge`, `HowItWorks` step badges:
-- On parent card hover: `scale(1.06)` + `translateY(-1px)` + `rotate(-2deg)` over 380ms `cubic-bezier(0.34, 1.56, 0.64, 1)` (gentle Apple overshoot).
-- Inner SVG stroke gets a 1px shadow bloom on hover (indigo, 4px blur).
-- Decoupled from card lift via independent transition — creates layered feel (card moves first, icon follows ~80ms later via `transition-delay`).
+The whole assembly uses `transform-origin: bottom center` on the flame group so the flicker pivots realistically off the wick.
 
----
+## Footer.tsx surgical edits
 
-## 4. Fix the "90 days" Pill (the user's specific complaint)
+Replace lines **120–126** with:
 
-`.lp-pill-accent` currently runs **two infinite animations** (`lp-pill-breathe` 4.2s scale + `lp-pill-shimmer` 5.5s sweep). Always-on motion = restless and cheap.
+```tsx
+<div className="mt-16 pt-8 border-t border-[#0A0F1C]/[0.06] flex flex-col sm:flex-row justify-between items-center gap-4">
+  <div className="flex items-center gap-3">
+    <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-[#1A1A1A]">Ledge</Link>
+    <div className="flex flex-col gap-0.5">
+      <span className="font-body text-[12.5px] text-[#52525B] flex items-center gap-1.5">
+        <Nilavilakku />
+        <span>Built in God's Own Country · Kerala</span>
+      </span>
+      <span className="font-body text-[12px] text-[#A1A1AA]">
+        © 2026 Ledge. All rights reserved.
+      </span>
+    </div>
+  </div>
+  {/* socials column unchanged */}
+</div>
+```
 
-**Fix:**
-- Remove `animation: lp-pill-breathe` and `lp-pill-shimmer` from the always-on state.
-- Trigger shimmer **once on scroll-into-view** only (via `whileInView` + Framer variants — single elegant pass, then static).
-- Replace breathe with a **subtle, single-cycle "settle"** on mount: scale 0.96 → 1 with spring (damping 22, stiffness 220), holding still afterward.
-- Keep the gradient + border styling untouched.
+Mobile: the stack remains aligned, lamp stays inline with the cultural line. On `sm+`, the socials column floats right as today.
 
----
+## Why this works (premium reasoning)
 
-## 5. Scroll Choreography — Apple/Framer-Grade
+- **Custom SVG over emoji** = consistent rendering, brand-grade craft.
+- **Two synced spring loops** = the flame and halo breathe together, mimicking real oil-lamp behavior — exactly the Apple/Framer-grade detail the user has been asking for.
+- **Warm brass + amber** introduces a single warm accent into an otherwise cool/neutral footer — adds emotional warmth without breaking the palette (warm tones live only inside the 18px lamp).
+- **Two-line stack** keeps visual weight balanced; the legal line recedes (`#A1A1AA`) so the cultural line leads.
+- **`prefers-reduced-motion` respected** — accessibility-first, matches existing motion system memory.
 
-**Refine `AnimateIn` (`src/components/landing/AnimateIn.tsx`):**
-- Replace current `useInView({ once: true })` reveal (which is already decent) with a richer **`blurFadeUp` enhancement**: y from 28px, blur from 8px, opacity 0, with a smoother spring (`stiffness: 140, damping: 22, mass: 0.6`) — Framer Motion site-grade.
-- Add staggered children **mass damping curve**: each subsequent item gets +30ms but also -2 stiffness, so trailing items feel heavier (Apple "natural settling" pattern).
-- Section headlines get a **letter-by-letter blur reveal** via a new opt-in `<TextReveal>` component — applied only to top-level H2s in `Hero`, `Outcome`, `Features`, `Pricing`, `FinalCTA` (5 places, surgical). Each word: blur 6px → 0, y 8px → 0, 40ms stagger, spring eased. No copy changes.
+## Suggestion (bonus, optional — included in same pass)
 
-**Section transition rhythm:** Add `useScroll` + `useTransform` opacity-and-y parallax (already partly used) to one decorative element per section so backgrounds breathe with scroll — already in place; expand to `Pricing` and `Features` mesh layers for consistency.
-
----
-
-## 6. Cursor-Aware Glow (subtle global polish)
-
-Tiny shared hook `useCursorVars(ref)` — sets `--mx` / `--my` CSS vars on the element from pointer move (throttled via `requestAnimationFrame`). Used by both `.lp-capsule-cta` and `.lp-card-premium`. ~30 lines, zero dependencies.
-
----
-
-## 7. Reduced-Motion Discipline
-
-Every new effect (magnetic pull, ripple, sheen, cursor glow, text reveal, spring lifts) is gated behind `useReducedMotion()` from Framer Motion or `@media (prefers-reduced-motion: reduce)`. Accessibility never compromised.
-
----
+Add a **micro-tooltip on hover** over the lamp: `"നിലവിളക്ക് · Nilavilakku"` (Malayalam + transliteration) using the existing shadcn `Tooltip`. This rewards curious users with a tiny moment of delight and authenticity — entirely optional, can be skipped if you'd rather keep it pure.
 
 ## Files Touched
 
-| File | Change |
-|---|---|
-| `src/index.css` | `.lp-capsule-cta` ripple/morph upgrade; new `.lp-card-premium`, `.lp-icon-premium`, `.btn-premium`; fix `.lp-pill-accent` (remove infinite animations) |
-| `src/components/landing/MagneticWrapper.tsx` | **NEW** — magnetic pointer wrapper |
-| `src/components/landing/TextReveal.tsx` | **NEW** — word-by-word blur reveal for H2s |
-| `src/components/landing/CapsuleCTA.tsx` | Wrap in `MagneticWrapper`, add cursor-vars + ripple injection |
-| `src/components/landing/AnimateIn.tsx` | Refined spring, richer `blurFadeUp` |
-| `src/lib/motion.ts` | Add `springs.premium`, `springs.overshoot`, refined `blurFadeUp` variant |
-| `src/hooks/use-cursor-vars.ts` | **NEW** — cursor-position CSS variables hook |
-| `src/components/landing/sections/*.tsx` | Add `.lp-card-premium` className to existing card containers; wrap H2s with `<TextReveal>` in 5 sections; remove the unnecessary `<motion.div>` already wrapping cards where it duplicates the new pattern (no markup change beyond className additions and 1-level wrapper swap) |
+- **Create:** `src/components/landing/Nilavilakku.tsx`
+- **Edit:** `src/components/landing/sections/Footer.tsx` (lines 120–126 only — surgical, no other changes)
 
-## What I am explicitly NOT changing
-- No copy edits.
-- No layout/grid changes.
-- No color, palette, font, or spacing changes.
-- No removal of `lp-glass-frost`, `lp-bento-hero`, `lp-proof-chip`, `lp-pricing-trust-chip`, etc.
-- No changes to dashboard / app pages — landing only.
-
-## Bonus suggestions (Apple/Framer-inspired) — included in this pass
-- **Cursor-following light bloom** on glass cards (Framer.com pattern).
-- **Cascading element motion** — arrow lags behind button by 80ms (Apple keynote pattern).
-- **Spring-easing with subtle overshoot** for icons (`cubic-bezier(0.34, 1.56, 0.64, 1)` — Apple's default for delight moments).
-- **One-shot sheen-on-reveal** instead of looping shimmer (premium > restless).
-- **Scroll-triggered text reveal** with per-word blur (Framer Motion site signature).
-
-Total net new dependencies: **0**. All built on Framer Motion + Tailwind already present.
+No CSS file changes, no palette changes, no layout shifts elsewhere. One clean pass.

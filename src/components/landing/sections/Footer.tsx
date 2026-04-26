@@ -120,9 +120,15 @@ export function Footer() {
         <div className="mt-16 pt-8 border-t border-[#0A0F1C]/[0.06] flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <Link to="/" className="font-heading font-extrabold text-lg tracking-[-0.04em] text-[#1A1A1A]">Ledge</Link>
-            <span className="font-body text-[13px] text-[#71717A]">
-              © 2026 Ledge. All rights reserved.
-            </span>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-body text-[12.5px] text-[#52525B] flex items-center gap-1.5 leading-tight">
+                <Nilavilakku />
+                <span>Built in God's Own Country · Kerala</span>
+              </span>
+              <span className="font-body text-[11.5px] text-[#A1A1AA] leading-tight">
+                © 2026 Ledge. All rights reserved.
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
