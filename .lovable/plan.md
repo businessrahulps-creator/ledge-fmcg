@@ -1,87 +1,52 @@
-## Audit — what's wrong with the current Outcome section
+## Diagnosis (what's "off" in your screenshot)
 
-Looking at your screenshot honestly:
+Looking at the hero in the screenshot, three things compound to make the bottom feel wrong:
 
-1. **Card numbers are oversized and inconsistent.** `text-[40-52px] tracking-[-0.035em]` works for "8–12%" but **breaks** on "₹10L–₹1Cr" and "₹10K–₹20K" — they wrap onto two lines, look cramped, and dwarf the actual labels. Hierarchy collapses: the number screams, the label whispers, nothing connects them.
-2. **The cards are decorative, not informative.** Four identical white rectangles, each holding one stat. No icon, no visual cue, no proof — they read like generated filler. There's nothing to *look at*.
-3. **The grid is too uniform and floats in white space.** No connective tissue between cards, no rhythm, no anchor. The eye has nothing to land on.
-4. **"the first 90 days" deserves emphasis.** Right now it sits flat in `#0A0F1C semibold`. The promise of the section lives in those three words and they're invisible.
+1. **A visible horizontal gray band** sits at the very bottom of the hero — that's the `lp-vignette-top` strip (a 48px dark-to-transparent gradient pinned to `bottom-0` of the hero). It reads as a hard seam, not a transition.
+2. **The hero is not actually full-viewport** — it's `min-h-[92vh]` with `pt-28 pb-36`. With `flex items-center`, the content lands visually above center and the area beneath the dashboard mockup is dead empty white space, so the eye says "this section ended early."
+3. **The top haze is one-sided** — `lp-mesh-soft-warm` paints a soft warm ellipse only at the top. The bottom half is flat white with no closure, so the hero feels like it's floating, not landing.
 
-## The fix — visualize the outcome, don't just list it
+A second, smaller issue: TrustBar has its own `border-y` divider directly underneath the hero's vignette, so we're double-printing a divider line.
 
-### A. Headline: animate "90 days" as the earned brand moment
+## Fix plan (surgical, hero only)
 
-Replace the flat `<h2>` with a structured composition:
+### 1. Remove the visible bottom seam in `Hero.tsx`
+- Delete the `<div className="absolute bottom-0 ... lp-vignette-top" />` element entirely. It's the gray band you're seeing.
+- The hero will end on clean white that meets TrustBar's white background — no seam needed.
 
+### 2. Make the hero a true full-viewport statement
+- Change `min-h-[92vh]` → `min-h-screen`.
+- Rebalance vertical padding: `pt-28 md:pt-32 pb-24 md:pb-36` → `pt-24 md:pt-28 pb-20 md:pb-24` so content sits optically centered (the 60px fixed navbar is already accounted for by `pt-24`).
+- Keep `flex items-center` so the grid stays vertically centered in the new full-height frame.
+
+### 3. Close the composition with a soft bottom haze
+In `src/index.css`, extend `.lp-mesh-soft-warm` so the warm haze gently returns at the bottom — this gives the section visual closure without a hard line:
+```css
+.lp-mesh-soft-warm {
+  background-color: #FFFFFF;
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(238,240,255,0.85) 0%, transparent 65%),
+    radial-gradient(ellipse 100% 40% at 50% 110%, rgba(245,245,250,0.7) 0%, transparent 70%);
+}
 ```
-What changes in
-the first  [ 90 days ]
-            ▲ animated chip
-```
+Both ellipses sit *outside* the visible area (at -10% and 110%), so they only tint the edges — no banding, no purple, no "wallpaper" feel.
 
-- "90 days" becomes a **pill-shaped inline chip** with a soft indigo border + faint indigo wash (`bg-[#EEF0FF] border-[#C7D2FE]`), `font-semibold`, slightly larger weight than surrounding text.
-- A **permanent, very subtle animation**: a slow indigo shimmer line sweeps across the chip every ~5s (reuses the existing `lp-shimmer-line` keyframe). Plus a gentle 1px breathing scale (`1.0 → 1.015 → 1.0`) on a 4s loop. Both respect `prefers-reduced-motion`.
-- This gives the section ONE permanent visual heartbeat without adding noise.
+### 4. Drop the duplicate divider on TrustBar
+In `TrustBar.tsx`, change `border-y border-[#E5E7EB]/70` → `border-b border-[#E5E7EB]/60`. Removes the top border that was stacking against the hero's old vignette and creating the doubled line.
 
-### B. Cards: redesign for hierarchy, not just size
+### 5. Tighten the dashboard mockup so it doesn't dominate the new full-height frame
+With the hero now taller, the floating mockup needs slightly more presence at the bottom edge — increase the float amplitude marginally (`y: [0, -4, 0]` → `y: [0, -6, 0]`, same 8s duration) so it breathes with the larger canvas. No layout change.
 
-New card anatomy (top → bottom):
+## Files to edit
+- `src/components/landing/sections/Hero.tsx` — remove vignette div, change min-height + padding, tweak float amplitude
+- `src/index.css` — extend `.lp-mesh-soft-warm` with a second bottom ellipse
+- `src/components/landing/sections/TrustBar.tsx` — `border-y` → `border-b`
 
-```
-┌──────────────────────────┐
-│  [icon]  ▎ THE METRIC    │  ← 28px icon tile (neutral graphite),
-│                          │     eyebrow caption
-│  80+                     │
-│  hours                   │  ← stat: number 44px, unit 18px, on
-│                          │     separate baselines (no wrapping)
-│  ─────────               │  ← 24px hairline divider
-│  Recovered every month   │
-│  across your team        │  ← label, 14px slate
-└──────────────────────────┘
-```
+## What stays untouched
+- Typography, colors, button styling, copy — unchanged
+- All other sections — unchanged
+- The 3-layer mockup treatment (shadow → glass stage → browser frame) — unchanged
+- Parallax dot grid — unchanged
 
-Key typographic moves:
-- **Split number + unit onto two lines** with deliberate sizing. So "₹10L–₹1Cr" becomes:
-  - Line 1: `₹10L–₹1Cr` at 38px (not 52)
-  - Line 2: `revenue/year` at 16px slate
-- This solves the wrapping problem AND creates Apple-style typographic hierarchy. Numbers no longer fight the labels — they lead them.
-- Drop the headline number from `text-[52px] tracking-[-0.035em]` → `text-[40px] tracking-[-0.022em] leading-[1]`. Restraint, not bombast.
-
-### C. Visual interest per card (the "designed" feeling)
-
-Each card gets ONE neutral graphite icon tile (32px, `bg-[#F4F4F8] border-[#ECEEF2]`, `#1F2937` icon) corresponding to its meaning:
-- 80+ hrs → `Clock` icon
-- ₹10L–₹1Cr → `TrendingUp` icon
-- 8–12% → `LineChart` icon (sales lift)
-- ₹10K–₹20K → `Wallet` icon
-
-Plus a subtle **directional accent** on each card: a 2px-tall indigo gradient line at the top-left (12px wide), only visible on hover or as a static brand mark. Tiny detail, big "designed" payoff.
-
-### D. Grid + composition
-
-- Keep 4-column on desktop, but reduce gap from `gap-5/6` → `gap-4`, tighten card padding from `p-7/8` → `p-6`. Cards become denser and more confident.
-- Add a faint hairline frame *around* the whole grid (1px `#ECEEF2` border, 24px rounded, 32px inner padding) so the four cards read as ONE composed unit, not four floating tiles.
-- Reduce section vertical padding `py-28/36/40` → `py-24/28` — currently the section feels stranded in white space.
-
-### E. The footer line
-
-Current: `Same factory. Same field. More throughput. Better cash flow.` is one of the strongest lines on the page. Treat it as a quiet payoff:
-- Move from `text-[19px] mt-24` to a contained pill: `inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-[#FAFAFB] border-[#ECEEF2]` with the same copy at 15px.
-- Add a tiny `Sparkles` or `ArrowRight` icon at the end. Premium, contained, intentional.
-
-## Files touched
-
-- `src/components/landing/sections/Outcome.tsx` — full restructure (headline composition, new card anatomy with split number/unit + icons + dividers, framed grid, contained footer pill).
-- `src/index.css` — add ONE new utility `.lp-pill-accent` for the animated "90 days" chip (indigo wash + shimmer + breathing keyframe). Reuses existing `lp-shimmer-line` infrastructure.
-
-## What stays the same
-
-- Indigo as single earned accent (used in chip + hover line only).
-- Light section background, no purple wallpaper.
-- `font-semibold` typography rule.
-- `StaggerContainer` + `AnimateIn` motion wrapping (just retuned for the new card scale).
-- All copy values — the four metrics and the closing line are unchanged.
-
-## Expected feel
-
-The section becomes the **proof moment** of the page: one quietly animated headline ("90 days" pulses softly, drawing the eye), four dense, informative cards with proper typographic hierarchy, framed as a single composed unit, closed by a contained payoff pill. No more wrapping numbers. No more decorative emptiness. Designed, not generated.
+## Outcome
+The hero becomes a confident full-viewport opening with a soft, edge-only haze that closes the composition. The hard gray seam disappears. The transition into TrustBar reads as a single quiet hairline, not a band.

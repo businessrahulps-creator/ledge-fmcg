@@ -294,7 +294,8 @@
   .lp-mesh-soft-warm {
     background-color: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(238,240,255,0.85) 0%, transparent 65%);
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(238,240,255,0.85) 0%, transparent 65%),
+      radial-gradient(ellipse 100% 40% at 50% 110%, rgba(245,245,250,0.7) 0%, transparent 70%);
   }
 
   /* Final CTA — calm light lavender close, not a nightclub */
