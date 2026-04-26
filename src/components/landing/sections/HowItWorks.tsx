@@ -8,12 +8,7 @@ import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustration
 function PremiumStage({ children }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
   return (
     <div className="relative">
-      <div
-        aria-hidden
-        className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.16) 0%, transparent 65%)" }}
-      />
-      <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
+      <div className="relative lp-glass-frost p-4 md:p-6 rounded-[1.75rem]">
         {children}
       </div>
     </div>
