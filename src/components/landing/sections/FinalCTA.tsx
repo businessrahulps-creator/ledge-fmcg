@@ -14,25 +14,20 @@ const fadeUp = (delay: number) => ({
 
 export function FinalCTA() {
   return (
-    <section className="relative bg-[#0A0F1C] py-32 md:py-44 overflow-hidden">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 30%, rgba(124,58,237,0.22) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(37,99,235,0.20) 0%, transparent 60%)",
-        }}
-      />
+    <section className="relative lp-mesh-dark py-28 md:py-36 overflow-hidden">
+      <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
+      <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
       <div className="relative max-w-4xl mx-auto px-6 text-center">
         <motion.span
-          className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] brand-gradient-cool-text uppercase mb-6"
+          className="lp-eyebrow-dark mb-6"
           {...fadeUp(0)}
         >
           Your business is ready
         </motion.span>
 
         <motion.h2
-          className="font-heading font-extrabold text-[36px] md:text-[64px] text-white leading-[1.04] tracking-[-0.045em]"
+          className="font-heading font-extrabold text-[34px] md:text-[52px] text-white leading-[1.04] tracking-[-0.04em] mt-6"
           {...fadeUp(0.05)}
         >
           Ready to run your business
@@ -41,7 +36,7 @@ export function FinalCTA() {
         </motion.h2>
 
         <motion.p
-          className="font-body text-[18px] md:text-[22px] text-white/70 max-w-2xl mx-auto mt-8 leading-[1.5]"
+          className="font-body text-[17px] md:text-[19px] text-white/65 max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
           Start your 30-day free trial today. No card. No commitment.
@@ -50,7 +45,7 @@ export function FinalCTA() {
         </motion.p>
 
         <motion.div
-          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-12"
+          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-11"
           {...fadeUp(0.2)}
         >
           <MotionLink
@@ -58,8 +53,7 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="bg-white text-[#0A0F1C] px-10 py-4 rounded-full font-semibold hover:bg-[#F5F6F8] transition-colors duration-200 inline-flex items-center justify-center text-base"
-            style={{ boxShadow: "0 8px 24px -8px rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)" }}
+            className="lp-btn-primary-light text-[#0A0F1C] px-9 py-3.5 rounded-full font-semibold transition-colors duration-200 inline-flex items-center justify-center text-[15px]"
           >
             Start 30-Day Free Trial
           </MotionLink>
@@ -70,15 +64,15 @@ export function FinalCTA() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={spring.snappy}
-            className="border border-white/25 text-white px-10 py-4 rounded-full font-semibold hover:border-white/60 hover:bg-white/5 transition-colors duration-200 inline-flex items-center justify-center gap-2 text-base"
+            className="border border-white/15 bg-white/[0.04] backdrop-blur-md text-white px-9 py-3.5 rounded-full font-semibold hover:border-white/30 hover:bg-white/[0.08] transition-colors duration-200 inline-flex items-center justify-center gap-2 text-[15px]"
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={17} />
             Chat on WhatsApp
           </motion.a>
         </motion.div>
 
         <motion.p
-          className="font-body text-sm text-white/50 mt-7"
+          className="font-body text-[13px] text-white/45 mt-7"
           {...fadeUp(0.28)}
         >
           No card required · Cancel anytime · Built in India

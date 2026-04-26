@@ -10,23 +10,21 @@ const outcomes = [
 
 export function Outcome() {
   return (
-    <section className="relative bg-[#0A0F1C] py-32 md:py-44 overflow-hidden">
-      {/* Cool gradient wash */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 20% 30%, rgba(124,58,237,0.20) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 80%, rgba(37,99,235,0.18) 0%, transparent 60%)",
-        }}
-      />
+    <section className="relative lp-mesh-dark py-28 md:py-36 overflow-hidden">
+      {/* Dot grid */}
+      <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
+      {/* Top shimmer line */}
+      <div className="absolute top-0 left-0 right-0 h-px overflow-hidden pointer-events-none">
+        <div className="lp-shimmer-line" />
+      </div>
+      {/* Grain */}
+      <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
-      <div className="relative max-w-7xl mx-auto px-6">
+      <div className="relative max-w-6xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-20 max-w-3xl mx-auto">
-            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] brand-gradient-cool-text uppercase mb-5">
-              The Outcome
-            </span>
-            <h2 className="font-heading font-extrabold text-[36px] md:text-[60px] text-white tracking-[-0.04em] leading-[1.05]">
+          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+            <span className="lp-eyebrow-dark mb-5">The Outcome</span>
+            <h2 className="font-heading font-extrabold text-[34px] md:text-[50px] text-white tracking-[-0.04em] leading-[1.05] mt-5">
               What changes in
               <br />
               the first 90 days.
@@ -34,14 +32,23 @@ export function Outcome() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-14 max-w-6xl mx-auto">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto" staggerTime={0.06}>
           {outcomes.map((o) => (
-            <StaggerItem key={o.value}>
-              <div className="text-center md:text-left">
-                <div className="font-heading font-extrabold text-[56px] md:text-[76px] brand-gradient-cool-text tracking-[-0.05em] leading-[0.95]">
+            <StaggerItem key={o.value} variant="scaleUp">
+              <div className="lp-card-dark p-7 md:p-8 h-full flex flex-col">
+                <div
+                  className="font-heading font-extrabold text-[42px] md:text-[56px] tracking-[-0.045em] leading-[0.95]"
+                  style={{
+                    backgroundImage: "linear-gradient(135deg, #C4B5FD 0%, #A78BFA 35%, #818CF8 65%, #60A5FA 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    filter: "drop-shadow(0 0 24px rgba(167,139,250,0.35))",
+                  }}
+                >
                   {o.value}
                 </div>
-                <div className="font-body text-[15px] md:text-[16px] text-white/70 leading-[1.45] mt-4 max-w-[220px] mx-auto md:mx-0">
+                <div className="font-body text-[14px] md:text-[15px] text-white/65 leading-[1.5] mt-4">
                   {o.label}
                 </div>
               </div>
@@ -54,7 +61,7 @@ export function Outcome() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="font-heading text-[18px] md:text-[22px] text-white/80 text-center mt-20 max-w-2xl mx-auto tracking-tight"
+          className="font-heading text-[17px] md:text-[20px] text-white/75 text-center mt-16 md:mt-20 max-w-2xl mx-auto tracking-tight"
         >
           Same factory. Same field. <span className="text-white font-semibold">More throughput. Better cash flow.</span>
         </motion.p>

@@ -26,7 +26,7 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-[#F8F7F5] py-16 border-t border-[#E8E5E0]">
+    <footer className="bg-[#FAFAFC] py-16 border-t border-[#E5E7EB]/70">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-8"

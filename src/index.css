@@ -264,4 +264,194 @@
   .brand-gradient-cool-soft-bg {
     background-image: linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(108,92,231,0.08) 50%, rgba(37,99,235,0.10) 100%);
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LANDING PAGE PREMIUM PRIMITIVES (lp-*)
+     Linear/Vercel-grade depth, mesh gradients, glass cards.
+     Used only inside src/components/landing/.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Premium 4-stop cool gradient (anti-banded) */
+  .lp-gradient-text-cool {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(100deg, #6D28D9 0%, #7C3AED 35%, #4F46E5 65%, #2563EB 100%);
+  }
+  .lp-gradient-bg-cool {
+    background-image: linear-gradient(100deg, #6D28D9 0%, #7C3AED 35%, #4F46E5 65%, #2563EB 100%);
+  }
+
+  /* Atmospheric light mesh — 4-stop, low opacity, premium depth */
+  .lp-mesh-light {
+    background-color: #FFFFFF;
+    background-image:
+      radial-gradient(ellipse 50% 40% at 12% 15%, rgba(124,58,237,0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 35% at 88% 25%, rgba(79,70,229,0.08) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 75% 90%, rgba(37,99,235,0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 30% at 20% 80%, rgba(108,92,231,0.06) 0%, transparent 65%);
+  }
+  .lp-mesh-light-warm {
+    background-color: #FAFAFC;
+    background-image:
+      radial-gradient(ellipse 60% 50% at 85% 15%, rgba(124,58,237,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 85%, rgba(37,99,235,0.06) 0%, transparent 60%);
+  }
+
+  /* Atmospheric dark mesh — rich, layered, expensive */
+  .lp-mesh-dark {
+    background-color: #0A0F1C;
+    background-image:
+      radial-gradient(ellipse 55% 45% at 18% 25%, rgba(124,58,237,0.28) 0%, transparent 60%),
+      radial-gradient(ellipse 45% 40% at 82% 75%, rgba(37,99,235,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 35% 30% at 50% 50%, rgba(79,70,229,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(13,18,35,0.6) 0%, transparent 70%);
+  }
+
+  /* Soft dot grid — masked to fade out */
+  .lp-grid-soft {
+    background-image: radial-gradient(circle, rgba(15,23,42,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
+  }
+  .lp-grid-soft-dark {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
+  }
+
+  /* Film grain — kills banding, ~1KB inline SVG */
+  .lp-noise {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  /* Hairline section seam */
+  .lp-vignette-top {
+    background: linear-gradient(to bottom, rgba(15,23,42,0.04) 0%, transparent 100%);
+  }
+
+  /* Premium card surface — layered shadows, inner highlight, soft border */
+  .lp-card {
+    @apply relative bg-white rounded-2xl;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 8px 24px -12px rgba(15, 23, 42, 0.08),
+      0 24px 48px -24px rgba(15, 23, 42, 0.10);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 280ms ease;
+  }
+  .lp-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(124, 58, 237, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 2px 4px rgba(15, 23, 42, 0.05),
+      0 16px 40px -12px rgba(15, 23, 42, 0.12),
+      0 32px 64px -24px rgba(124, 58, 237, 0.14);
+  }
+
+  /* Glass card — frosted variant for use over imagery / mesh */
+  .lp-card-glass {
+    @apply relative rounded-2xl;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 8px 32px -8px rgba(15, 23, 42, 0.10),
+      0 24px 60px -20px rgba(15, 23, 42, 0.14);
+  }
+
+  /* Dark glass card — for stat tiles inside dark sections */
+  .lp-card-dark {
+    @apply relative rounded-2xl;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 8px 32px -8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Eyebrow chip — replaces inline UPPERCASE label */
+  .lp-eyebrow {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
+    letter-spacing: 0.16em;
+    background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(37,99,235,0.06) 100%);
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    color: #6D28D9;
+  }
+  .lp-eyebrow::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+  }
+  .lp-eyebrow-dark {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
+    letter-spacing: 0.16em;
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #C4B5FD;
+  }
+  .lp-eyebrow-dark::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #A78BFA 0%, #60A5FA 100%);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.7);
+  }
+
+  /* Premium lit button — inner highlight + layered cast shadow */
+  .lp-btn-primary-dark {
+    background: linear-gradient(180deg, #1F2937 0%, #0A0F1C 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 1px 2px rgba(10, 15, 28, 0.18),
+      0 8px 20px -6px rgba(10, 15, 28, 0.40),
+      0 16px 36px -12px rgba(124, 58, 237, 0.28);
+  }
+  .lp-btn-primary-light {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F5F6F8 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 1px 2px rgba(10, 15, 28, 0.10),
+      0 8px 20px -6px rgba(255, 255, 255, 0.20),
+      0 16px 36px -12px rgba(124, 58, 237, 0.30);
+  }
+
+  /* Gradient icon tile — for feature/problem cards */
+  .lp-icon-tile {
+    @apply w-11 h-11 rounded-xl flex items-center justify-center;
+    background: linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(37,99,235,0.08) 100%);
+    border: 1px solid rgba(124, 58, 237, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lp-card:hover .lp-icon-tile {
+    transform: scale(1.06);
+  }
+
+  /* Shimmer (subtle, used in Outcome top edge) */
+  @keyframes lp-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .lp-shimmer-line {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: lp-shimmer 8s linear infinite;
+  }
 }

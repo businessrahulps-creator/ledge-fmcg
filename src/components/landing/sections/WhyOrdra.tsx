@@ -1,5 +1,4 @@
 import { Smartphone, WifiOff, ShieldCheck, FileText } from "lucide-react";
-import { motion } from "framer-motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
@@ -13,14 +12,12 @@ const legacy = ["Tally", "Zoho Books", "Vyapar", "SAP"];
 
 export function WhyOrdra() {
   return (
-    <section className="bg-white py-28 md:py-36">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="bg-white py-24 md:py-32">
+      <div className="max-w-6xl mx-auto px-6">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-12 max-w-3xl mx-auto">
-            <span className="inline-block font-body text-[12px] font-semibold tracking-[0.18em] text-[#2563EB] uppercase mb-4">
-              Built different
-            </span>
-            <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] tracking-[-0.04em] leading-[1.05]">
+            <span className="lp-eyebrow mb-5">Built different</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
               Powerful tools exist.
               <br />
               None were built for you.
@@ -28,33 +25,42 @@ export function WhyOrdra() {
           </div>
         </AnimateIn>
 
-        {/* Legacy comparison row */}
+        {/* Legacy comparison row — pill chips */}
         <AnimateIn delay={0.1}>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mb-16 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-16">
             {legacy.map((name) => (
-              <span key={name} className="font-body text-[15px] md:text-[17px] text-[#94A3B8] line-through decoration-[#94A3B8]/60">
+              <span
+                key={name}
+                className="font-body text-[13px] font-medium text-[#94A3B8] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-[#E2E8F0]"
+              >
                 {name}
               </span>
             ))}
-            <span className="font-heading font-extrabold text-[20px] md:text-[24px] brand-gradient-cool-text tracking-tight">
-              Ledge
+            <span
+              className="relative font-heading font-extrabold text-[15px] text-[#6D28D9] px-4 py-1.5 rounded-full bg-white"
+              style={{
+                backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                backgroundOrigin: "border-box",
+                backgroundClip: "padding-box, border-box",
+                border: "1.5px solid transparent",
+                boxShadow: "0 4px 16px -4px rgba(124,58,237,0.25)",
+              }}
+            >
+              <span className="lp-gradient-text-cool">Ledge</span>
             </span>
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" staggerTime={0.05}>
           {blocks.map((block, i) => (
             <StaggerItem key={block.title}>
-              <motion.div
-                className="bg-white rounded-2xl p-7 border border-[#E5E7EB] h-full flex flex-col"
-                whileHover={{ y: -4, boxShadow: "0 12px 32px -8px rgba(10,15,28,0.10)" }}
-                transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              >
+              <div className="lp-card p-7 h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="font-heading font-extrabold text-[14px] text-[#94A3B8]">
+                  <span className="font-heading font-extrabold text-[20px] lp-gradient-text-cool opacity-70">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <block.icon size={20} strokeWidth={1.75} className="text-[#0A0F1C]" />
+                  <span className="h-px flex-1 bg-gradient-to-r from-[#E2E8F0] to-transparent" />
+                  <block.icon size={18} strokeWidth={1.75} className="text-[#0A0F1C]" />
                 </div>
                 <h3 className="font-heading font-bold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
                   {block.title}
@@ -62,7 +68,7 @@ export function WhyOrdra() {
                 <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
                   {block.content}
                 </p>
-              </motion.div>
+              </div>
             </StaggerItem>
           ))}
         </StaggerContainer>

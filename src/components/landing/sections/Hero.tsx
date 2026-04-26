@@ -14,27 +14,23 @@ const MotionLink = motion.create(Link);
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center px-6 bg-white pt-32 pb-24 md:py-36 overflow-hidden">
-      {/* Ambient cool-gradient wash */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-60"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 80% 30%, rgba(124,58,237,0.10) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 80%, rgba(37,99,235,0.08) 0%, transparent 60%)",
-        }}
-      />
+    <section className="relative min-h-[92vh] flex items-center px-6 lp-mesh-light pt-32 pb-20 md:py-32 overflow-hidden">
+      {/* Soft dot grid, masked */}
+      <div className="absolute inset-0 lp-grid-soft pointer-events-none" />
+      {/* Film grain — kills banding */}
+      <div className="absolute inset-0 lp-noise pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+      <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center w-full">
         {/* Left - Text */}
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
-            <span className="inline-block font-body text-[12px] md:text-[13px] font-semibold tracking-[0.18em] brand-gradient-cool-text uppercase">
+            <span className="lp-eyebrow">
               The Operating System for Factory + Field
             </span>
           </motion.div>
 
           <motion.h1
-            className="font-heading font-extrabold text-[40px] md:text-[68px] text-[#0A0F1C] leading-[1.02] tracking-[-0.045em] mt-5"
+            className="font-heading font-extrabold text-[40px] md:text-[60px] text-[#0A0F1C] leading-[1.02] tracking-[-0.04em] mt-6"
             {...fadeUp(0.08)}
           >
             Run your factory and field
@@ -43,21 +39,20 @@ export function Hero() {
           </motion.h1>
 
           <motion.p
-            className="font-body text-[18px] md:text-[22px] text-[#1F2937] leading-[1.45] max-w-xl mt-7"
+            className="font-body text-[17px] md:text-[20px] text-[#475569] leading-[1.5] max-w-xl mt-6"
             {...fadeUp(0.16)}
           >
             Orders, payments, stock, GST invoices, production. One mobile app.
             Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
-          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10" {...fadeUp(0.24)}>
+          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-9" {...fadeUp(0.24)}>
             <MotionLink
               to="/signup"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               transition={spring.snappy}
-              className="font-body font-semibold text-white bg-[#0A0F1C] hover:bg-[#1F2937] w-full sm:w-auto text-base px-9 py-4 rounded-full text-center transition-colors duration-200"
-              style={{ boxShadow: "0 8px 24px -8px rgba(10,15,28,0.4), 0 2px 6px rgba(10,15,28,0.12)" }}
+              className="lp-btn-primary-dark font-body font-semibold text-white w-full sm:w-auto text-[15px] px-8 py-3.5 rounded-full text-center transition-colors duration-200"
             >
               Start 30-Day Free Trial
             </MotionLink>
@@ -66,38 +61,44 @@ export function Hero() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               transition={spring.snappy}
-              className="font-body font-semibold text-base text-[#0A0F1C] border border-[#E5E7EB] hover:border-[#0A0F1C] bg-white w-full sm:w-auto px-9 py-4 rounded-full text-center transition-colors duration-200"
+              className="font-body font-semibold text-[15px] text-[#0A0F1C] border border-[#E2E8F0] hover:border-[#0A0F1C] bg-white/60 backdrop-blur-sm w-full sm:w-auto px-8 py-3.5 rounded-full text-center transition-colors duration-200"
             >
               See How It Works
             </motion.a>
           </motion.div>
 
           <motion.p
-            className="font-body text-sm text-[#64748B] mt-7"
+            className="font-body text-[13px] text-[#64748B] mt-7"
             {...fadeUp(0.32)}
           >
             No card required · Setup in 15 minutes · Built in India
           </motion.p>
         </div>
 
-        {/* Right - Dashboard Mockup */}
-        <div className="lg:col-span-5 w-full" style={{ perspective: "1200px" }}>
+        {/* Right - Dashboard Mockup with 3-layer treatment */}
+        <div className="lg:col-span-5 w-full" style={{ perspective: "1400px" }}>
           <motion.div
-            initial={{ x: 40, opacity: 0, rotateY: 0, rotateX: 0 }}
-            animate={{ x: 0, opacity: 1, rotateY: -4, rotateX: 2 }}
-            transition={{ ...spring.gentle as object, delay: 0.15 }}
+            initial={{ x: 30, opacity: 0, rotateY: 0, rotateX: 0 }}
+            animate={{ x: 0, opacity: 1, rotateY: -5, rotateX: 3 }}
+            transition={{ ...spring.gentle as object, delay: 0.2 }}
           >
             <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
             >
+              {/* Layer 1 — outer violet glow */}
               <div
-                className="relative rounded-3xl p-5 md:p-8"
+                aria-hidden
+                className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-40 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.12) 0%, transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(37,99,235,0.10) 0%, transparent 55%), linear-gradient(135deg, #F5F6F8 0%, #FFFFFF 100%)",
+                    "radial-gradient(ellipse at 30% 30%, rgba(124,58,237,0.45) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(37,99,235,0.40) 0%, transparent 60%)",
                 }}
-              >
+              />
+              {/* Layer 2 — glass stage */}
+              <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
+                {/* Layer 3 — browser frame */}
                 <BrowserFrame url="app.ledge.in/dashboard">
                   <div className="p-4 bg-white">
                     <DashboardSvg />
@@ -108,6 +109,9 @@ export function Hero() {
           </motion.div>
         </div>
       </div>
+
+      {/* Hairline section seam */}
+      <div className="absolute bottom-0 left-0 right-0 h-12 lp-vignette-top pointer-events-none" />
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const companies = [
   "Aryan Beverages",
@@ -18,28 +18,41 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="py-16 md:py-20 bg-white border-y border-[#E5E7EB]">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Logo Marquee */}
-        <div className="overflow-hidden group">
-          <div className="flex gap-14 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
+    <section className="py-14 md:py-16 bg-white border-y border-[#E5E7EB]/70">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Logo Marquee — soft pill chips */}
+        <div
+          className="overflow-hidden group relative"
+          style={{
+            maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
+          }}
+        >
+          <div className="flex gap-3 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
             {[...companies, ...companies].map((name, i) => (
-              <span key={i} className="text-base md:text-lg font-semibold text-[#94A3B8] whitespace-nowrap shrink-0 tracking-tight">
+              <span
+                key={i}
+                className="font-body text-[13px] md:text-[14px] font-medium text-[#64748B] whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-white border border-[#E2E8F0]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(15,23,42,0.03)]"
+              >
                 {name}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Stat Row */}
-        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mt-14">
-          {stats.map((stat) => (
+        {/* Stat Row — with hairline dividers + gradient numbers */}
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-12 md:mt-14">
+          {stats.map((stat, i) => (
             <StaggerItem key={stat.value}>
-              <div className="text-center">
-                <div className="font-heading font-extrabold text-[28px] md:text-[34px] text-[#0A0F1C] tracking-[-0.03em] leading-none">
+              <div
+                className={`text-center px-4 ${
+                  i > 0 ? "md:border-l md:border-[#E2E8F0]/70" : ""
+                }`}
+              >
+                <div className="font-heading font-extrabold text-[26px] md:text-[32px] lp-gradient-text-cool tracking-[-0.03em] leading-none">
                   {stat.value}
                 </div>
-                <div className="font-body text-[13px] md:text-[14px] text-[#64748B] mt-2">
+                <div className="font-body text-[12px] md:text-[13px] text-[#64748B] mt-2.5 tracking-tight">
                   {stat.label}
                 </div>
               </div>
