@@ -12,13 +12,13 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="relative lp-mesh-light py-24 md:py-32 overflow-hidden">
+    <section id="features" className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="absolute inset-0 lp-noise pointer-events-none" />
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-            <span className="lp-eyebrow mb-5">Features</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
+          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+            <span className="lp-eyebrow">Features</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
               Everything your business needs.
               <br />
               Nothing it doesn't.
@@ -26,7 +26,7 @@ export function Features() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6" staggerTime={0.05}>
           {features.map((feature) => (
             <StaggerItem key={feature.title}>
               <div className="lp-card p-8 h-full flex flex-col">

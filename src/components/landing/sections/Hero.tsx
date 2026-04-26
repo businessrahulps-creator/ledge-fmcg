@@ -14,13 +14,13 @@ const MotionLink = motion.create(Link);
 
 export function Hero() {
   return (
-    <section className="relative min-h-[92vh] flex items-center px-6 lp-mesh-light pt-32 pb-20 md:py-32 overflow-hidden">
+    <section className="relative min-h-[92vh] flex items-center px-6 md:px-8 lg:px-10 lp-mesh-light pt-28 md:pt-32 pb-24 md:pb-36 overflow-hidden">
       {/* Soft dot grid, masked */}
       <div className="absolute inset-0 lp-grid-soft pointer-events-none" />
       {/* Film grain — kills banding */}
       <div className="absolute inset-0 lp-noise pointer-events-none" />
 
-      <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center w-full">
+      <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
         {/* Left - Text */}
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
@@ -30,7 +30,7 @@ export function Hero() {
           </motion.div>
 
           <motion.h1
-            className="font-heading font-extrabold text-[40px] md:text-[60px] text-[#0A0F1C] leading-[1.02] tracking-[-0.04em] mt-6"
+            className="font-heading font-extrabold text-[40px] md:text-[60px] text-[#0A0F1C] leading-[1.02] tracking-[-0.04em] mt-7"
             {...fadeUp(0.08)}
           >
             Run your factory and field
@@ -39,14 +39,14 @@ export function Hero() {
           </motion.h1>
 
           <motion.p
-            className="font-body text-[17px] md:text-[20px] text-[#475569] leading-[1.5] max-w-xl mt-6"
+            className="font-body text-[17px] md:text-[20px] text-[#475569] leading-[1.5] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
             Orders, payments, stock, GST invoices, production. One mobile app.
             Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
-          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-9" {...fadeUp(0.24)}>
+          <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10" {...fadeUp(0.24)}>
             <MotionLink
               to="/signup"
               whileHover={{ scale: 1.02 }}
@@ -68,7 +68,7 @@ export function Hero() {
           </motion.div>
 
           <motion.p
-            className="font-body text-[13px] text-[#64748B] mt-7"
+            className="font-body text-[13px] text-[#64748B] mt-8"
             {...fadeUp(0.32)}
           >
             No card required · Setup in 15 minutes · Built in India

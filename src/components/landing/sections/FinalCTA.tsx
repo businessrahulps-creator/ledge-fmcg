@@ -14,11 +14,11 @@ const fadeUp = (delay: number) => ({
 
 export function FinalCTA() {
   return (
-    <section className="relative lp-mesh-dark py-28 md:py-36 overflow-hidden">
+    <section className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
       <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
       <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
-      <div className="relative max-w-4xl mx-auto px-6 text-center">
+      <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
         <motion.span
           className="lp-eyebrow-dark mb-6"
           {...fadeUp(0)}
@@ -45,7 +45,7 @@ export function FinalCTA() {
         </motion.p>
 
         <motion.div
-          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-11"
+          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-10"
           {...fadeUp(0.2)}
         >
           <MotionLink
@@ -72,7 +72,7 @@ export function FinalCTA() {
         </motion.div>
 
         <motion.p
-          className="font-body text-[13px] text-white/45 mt-7"
+          className="font-body text-[13px] text-white/45 mt-8"
           {...fadeUp(0.28)}
         >
           No card required · Cancel anytime · Built in India

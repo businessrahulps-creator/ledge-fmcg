@@ -12,12 +12,12 @@ const legacy = ["Tally", "Zoho Books", "Vyapar", "SAP"];
 
 export function WhyOrdra() {
   return (
-    <section className="bg-white py-24 md:py-32">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="bg-white py-24 md:py-32 lg:py-36">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-12 max-w-3xl mx-auto">
-            <span className="lp-eyebrow mb-5">Built different</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
+          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+            <span className="lp-eyebrow">Built different</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
               Powerful tools exist.
               <br />
               None were built for you.
@@ -27,7 +27,7 @@ export function WhyOrdra() {
 
         {/* Legacy comparison row — pill chips */}
         <AnimateIn delay={0.1}>
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-16">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-14 md:mb-16">
             {legacy.map((name) => (
               <span
                 key={name}
@@ -51,7 +51,7 @@ export function WhyOrdra() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" staggerTime={0.05}>
           {blocks.map((block, i) => (
             <StaggerItem key={block.title}>
               <div className="lp-card p-7 h-full flex flex-col">

@@ -80,13 +80,13 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="relative lp-mesh-light py-24 md:py-32 overflow-hidden">
+    <section id="pricing" className="relative lp-mesh-light py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="absolute inset-0 lp-noise pointer-events-none" />
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-4 max-w-3xl mx-auto">
-            <span className="lp-eyebrow mb-5">Pricing</span>
-            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-5">
+          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+            <span className="lp-eyebrow">Pricing</span>
+            <h2 className="font-heading font-extrabold text-[30px] md:text-[44px] text-[#0A0F1C] tracking-[-0.035em] leading-[1.05] mt-6">
               Start free. Pay when it's
               <br />
               running your business.
@@ -97,7 +97,7 @@ export function Pricing() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto mt-14" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto" staggerTime={0.05}>
           {plans.map((plan) => (
             <StaggerItem key={plan.name}>
               <div className="relative h-full">
@@ -188,7 +188,7 @@ export function Pricing() {
           ))}
         </StaggerContainer>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-14 md:mt-16">
           <a
             href="https://wa.me/918138084689?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing"
             target="_blank"

@@ -10,7 +10,7 @@ const outcomes = [
 
 export function Outcome() {
   return (
-    <section className="relative lp-mesh-dark py-28 md:py-36 overflow-hidden">
+    <section className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
       {/* Dot grid */}
       <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
       {/* Top shimmer line */}
@@ -20,11 +20,11 @@ export function Outcome() {
       {/* Grain */}
       <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow-dark mb-5">The Outcome</span>
-            <h2 className="font-heading font-extrabold text-[34px] md:text-[50px] text-white tracking-[-0.04em] leading-[1.05] mt-5">
+            <span className="lp-eyebrow-dark">The Outcome</span>
+            <h2 className="font-heading font-extrabold text-[34px] md:text-[50px] text-white tracking-[-0.04em] leading-[1.05] mt-6">
               What changes in
               <br />
               the first 90 days.
@@ -32,7 +32,7 @@ export function Outcome() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto" staggerTime={0.06}>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto" staggerTime={0.06}>
           {outcomes.map((o) => (
             <StaggerItem key={o.value} variant="scaleUp">
               <div className="lp-card-dark p-7 md:p-8 h-full flex flex-col">
@@ -61,7 +61,7 @@ export function Outcome() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="font-heading text-[17px] md:text-[20px] text-white/75 text-center mt-16 md:mt-20 max-w-2xl mx-auto tracking-tight"
+          className="font-heading text-[17px] md:text-[20px] text-white/75 text-center mt-20 md:mt-24 max-w-2xl mx-auto tracking-tight"
         >
           Same factory. Same field. <span className="text-white font-semibold">More throughput. Better cash flow.</span>
         </motion.p>
