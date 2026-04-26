@@ -1,17 +1,16 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { spring, useParallaxY } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { DashboardSvg } from "../illustrations/SvgIllustrations";
+import { CapsuleCTA } from "../CapsuleCTA";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
   transition: { ...spring.default as object, delay },
 });
-
-const MotionLink = motion.create(Link);
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
