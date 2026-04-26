@@ -10,7 +10,7 @@ const companies = [
 ];
 
 const stats = [
-  { value: "2–3 hrs", label: "Gained daily, per salesperson" },
+  { value: "2–3 hrs", label: "Gained daily, per field rep" },
   { value: "15–20 hrs", label: "Freed weekly for owners" },
   { value: "80%", label: "Admin work eliminated" },
   { value: "Zero", label: "Stockouts after Ledge" },

@@ -36,7 +36,7 @@ export function Problem() {
               The old way
             </span>
             <h2 className="font-heading font-extrabold text-[32px] md:text-[52px] text-[#0A0F1C] leading-[1.05] tracking-[-0.04em]">
-              Distribution is hard.
+              Running both sides is hard.
               <br />
               Your software shouldn't be.
             </h2>

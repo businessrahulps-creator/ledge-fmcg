@@ -29,7 +29,7 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="inline-block font-body text-[12px] md:text-[13px] font-semibold tracking-[0.18em] brand-gradient-cool-text uppercase">
-              The Operating System for Indian FMCG
+              The Operating System for Factory + Field
             </span>
           </motion.div>
 
@@ -37,17 +37,17 @@ export function Hero() {
             className="font-heading font-extrabold text-[40px] md:text-[68px] text-[#0A0F1C] leading-[1.02] tracking-[-0.045em] mt-5"
             {...fadeUp(0.08)}
           >
-            Run your distribution
+            Run your factory and field
             <br />
-            the way it deserves.
+            the way they deserve.
           </motion.h1>
 
           <motion.p
             className="font-body text-[18px] md:text-[22px] text-[#1F2937] leading-[1.45] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Orders, payments, stock, GST invoices — one mobile app.
-            Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year</span>.
+            Orders, payments, stock, GST invoices, production — one mobile app.
+            Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10" {...fadeUp(0.24)}>
