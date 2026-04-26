@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { MorphHamburger } from "./MorphHamburger";
-import { Nilavilakku } from "./Nilavilakku";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 
 interface MobileMenuOverlayProps {
@@ -16,58 +15,27 @@ const navLinks = [
   { eyebrow: "Plans", label: "Pricing", href: "/#pricing" },
 ];
 
+/**
+ * Stable mobile menu overlay.
+ * Intentionally minimal lifecycle: NO history mutation, NO body scroll-lock
+ * mutation. Only Esc-to-close + a pointer-events guard during exit so the
+ * fading overlay can never block the page.
+ */
 export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
   const reduce = useReducedMotion();
   const firstFocusRef = useRef<HTMLAnchorElement>(null);
-  const closingRef = useRef(false);
-  const poppedByBackRef = useRef(false);
 
-  // Idempotent close — guarantees onClose fires exactly once even if
-  // popstate + click + Esc all race.
-  const safeClose = useCallback(() => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    // If user is closing via X / link / Esc, pop the history entry we pushed
-    // on mount so back-button history stays clean. If they triggered close via
-    // back-gesture (popstate), the entry is already gone — skip.
-    if (!poppedByBackRef.current && typeof window !== "undefined") {
-      if (window.history.state?.mobileMenu) {
-        // Use replaceState to remove the marker without navigating.
-        window.history.back();
-      }
-    }
-    onClose();
-  }, [onClose]);
-
-  // Mount: lock scroll, listen for Esc, push history entry for back-gesture.
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") safeClose();
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-
-    window.history.pushState({ mobileMenu: true }, "");
-    const onPop = () => {
-      poppedByBackRef.current = true;
-      safeClose();
-    };
-    window.addEventListener("popstate", onPop);
-
     const t = window.setTimeout(() => firstFocusRef.current?.focus(), 60);
-
-    // Cleanup: ALWAYS restore scroll. Use empty string so the inline style
-    // is removed entirely — never restore to a stale captured value.
     return () => {
-      document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("popstate", onPop);
       window.clearTimeout(t);
     };
-    // safeClose is stable via useCallback; intentionally exclude to avoid re-mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onClose]);
 
   const easeOut = [0.16, 1, 0.3, 1] as const;
   const easeIn = [0.7, 0, 0.84, 0] as const;
@@ -92,17 +60,15 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
       className="md:hidden fixed inset-0 z-[60] overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      // Drop pointer events the instant exit starts — prevents the fading
-      // overlay from intercepting clicks during the 360ms exit animation.
       exit={{ opacity: 0, pointerEvents: "none" }}
-      transition={{ duration: reduce ? 0 : 0.36, ease: easeOut }}
+      transition={{ duration: reduce ? 0 : 0.32, ease: easeOut }}
     >
       <motion.div
         className="absolute inset-0 lp-mobile-menu-bg"
         initial={{ scale: 1.02, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 1.015, opacity: 0 }}
-        transition={{ duration: reduce ? 0 : 0.36, ease: reduce ? easeOut : easeIn }}
+        transition={{ duration: reduce ? 0 : 0.32, ease: reduce ? easeOut : easeIn }}
       />
       <div className="lp-noise absolute inset-0 pointer-events-none opacity-[0.35]" aria-hidden />
 
@@ -122,10 +88,10 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           transition={childEnter}
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
-          <Link to="/" onClick={safeClose} aria-label="Ledge home">
+          <Link to="/" onClick={onClose} aria-label="Ledge home">
             <img src={ledgeLogo} alt="Ledge" width={96} height={28} className="h-7 w-auto" />
           </Link>
-          <MorphHamburger open={true} onClick={safeClose} />
+          <MorphHamburger open={true} onClick={onClose} />
         </motion.div>
 
         <nav className="flex-1 flex flex-col justify-center gap-7 -mt-4">
@@ -134,7 +100,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
               key={l.href}
               ref={i === 0 ? firstFocusRef : undefined}
               href={l.href}
-              onClick={safeClose}
+              onClick={onClose}
               variants={childVariants}
               transition={childEnter}
               exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
@@ -169,14 +135,14 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         >
           <Link
             to="/signup"
-            onClick={safeClose}
+            onClick={onClose}
             className="lp-btn-primary-dark lp-shimmer flex items-center justify-center text-white rounded-2xl py-4 font-body font-semibold text-[15px]"
           >
             Get Started Free
           </Link>
           <Link
             to="/login"
-            onClick={safeClose}
+            onClick={onClose}
             className="flex items-center justify-center bg-[#0A0F1C]/[0.04] hover:bg-[#0A0F1C]/[0.07] text-[#0A0F1C] border border-[#0A0F1C]/[0.06] rounded-2xl py-4 font-body font-semibold text-[15px] transition-colors"
           >
             Sign in
@@ -184,12 +150,12 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         </motion.div>
 
         <motion.div
-          className="pt-5 flex items-center justify-center gap-2 text-[11px] text-[#94A3B8]"
+          className="pt-5 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]"
           variants={childVariants}
           transition={childEnter}
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
-          <Nilavilakku />
+          <span aria-hidden>🪔</span>
           <span>Built in God's Own Country · Kerala</span>
         </motion.div>
       </motion.div>

@@ -15,8 +15,6 @@ import { Founder } from "@/components/landing/sections/Founder";
 import { Pricing } from "@/components/landing/sections/Pricing";
 import { FinalCTA } from "@/components/landing/sections/FinalCTA";
 import { Footer } from "@/components/landing/sections/Footer";
-import { MobileWhatsAppFab } from "@/components/landing/MobileWhatsAppFab";
-import { MobileStickyCtaBar } from "@/components/landing/MobileStickyCtaBar";
 
 export default function Index() {
   const { user, loading, authReady } = useAuth();
@@ -45,8 +43,6 @@ export default function Index() {
       <Pricing />
       <FinalCTA />
       <Footer />
-      <MobileStickyCtaBar />
-      <MobileWhatsAppFab />
     </div>
   );
 }
