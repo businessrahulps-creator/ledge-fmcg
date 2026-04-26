@@ -30,7 +30,7 @@ const plans = [
       "Unlimited orders",
       "Multi-warehouse stock alerts",
       "Full dealer profiles",
-      "Payment tracking — all modes",
+      "Payment tracking, all modes",
       "Schemes & targets",
       "GST invoices, PDFs",
       "CSV reports",

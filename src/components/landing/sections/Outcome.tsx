@@ -4,7 +4,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 const outcomes = [
   { value: "80+ hrs", label: "Recovered every month across your team" },
   { value: "₹10L–₹1Cr", label: "Revenue leak recovered every year" },
-  { value: "8–12%", label: "Sales lift — same team, same dealers" },
+  { value: "8–12%", label: "Sales lift. Same team, same dealers." },
   { value: "₹10K–₹20K", label: "Saved monthly on accountant outsourcing" },
 ];
 

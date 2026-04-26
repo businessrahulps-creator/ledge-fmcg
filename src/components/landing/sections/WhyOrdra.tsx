@@ -5,7 +5,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 const blocks = [
   { icon: Smartphone, title: "Installs from a link in 90 seconds.", content: "PWA. No app store. No IT team. No training day." },
   { icon: WifiOff, title: "Works when the network doesn't.", content: "Offline orders queue and sync the moment signal returns." },
-  { icon: ShieldCheck, title: "Four roles. One system.", content: "Owner, manager, accountant, salesperson — each sees what they should." },
+  { icon: ShieldCheck, title: "Four roles. One system.", content: "Owner, manager, accountant, salesperson. Each sees what they should." },
   { icon: FileText, title: "GST invoices that build themselves.", content: "CGST, SGST, IGST auto-calculated. PDF in one click." },
 ];
 

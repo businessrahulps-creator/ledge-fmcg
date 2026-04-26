@@ -7,7 +7,7 @@ const cards = [
   {
     icon: MessageCircle,
     title: "WhatsApp orders get lost",
-    description: "Voice notes, paper chits, four phone calls — and you still don't know what sold today.",
+    description: "Voice notes, paper chits, four phone calls. You still don't know what sold today.",
   },
   {
     icon: Table,
@@ -22,7 +22,7 @@ const cards = [
   {
     icon: Laptop,
     title: "ERPs your team won't open",
-    description: "Tally, SAP — built for desktops. Your field team gave up by week two.",
+    description: "Tally and SAP were built for desktops. Your field team gave up by week two.",
   },
 ];
 

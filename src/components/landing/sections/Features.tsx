@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const features = [
-  { icon: LayoutDashboard, title: "Live business dashboard", desc: "Today's revenue, orders, dispatches — the moment you log in." },
+  { icon: LayoutDashboard, title: "Live business dashboard", desc: "Today's revenue, orders, dispatches. The moment you log in." },
   { icon: Route, title: "Order lifecycle, tracked", desc: "Pending → Dispatched → Delivered. Every step logged." },
-  { icon: Contact, title: "Dealer intelligence", desc: "Lifetime value, outstanding, full history — one profile." },
-  { icon: Warehouse, title: "Stock health alerts", desc: "Green, amber, red — per SKU, per godown. Never face a stockout." },
-  { icon: IndianRupee, title: "Payments tracked properly", desc: "Cash, UPI, cheque, bank — all reconciled in one place." },
+  { icon: Contact, title: "Dealer intelligence", desc: "Lifetime value, outstanding, full history. One profile." },
+  { icon: Warehouse, title: "Stock health alerts", desc: "Green, amber, red. Per SKU, per godown. Never face a stockout." },
+  { icon: IndianRupee, title: "Payments tracked properly", desc: "Cash, UPI, cheque, bank. All reconciled in one place." },
   { icon: Layers, title: "Schemes, targets, claims", desc: "The whole ops layer. Not just orders." },
 ];
 
