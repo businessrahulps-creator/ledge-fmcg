@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { motion } from "framer-motion";
+import { useParallaxY } from "@/lib/motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const outcomes = [
@@ -9,10 +11,13 @@ const outcomes = [
 ];
 
 export function Outcome() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const meshY = useParallaxY(sectionRef, 40);
+
   return (
-    <section className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
-      {/* Dot grid */}
-      <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
+    <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
+      {/* Dot grid — parallax */}
+      <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
       {/* Top shimmer line */}
       <div className="absolute top-0 left-0 right-0 h-px overflow-hidden pointer-events-none">
         <div className="lp-shimmer-line" />

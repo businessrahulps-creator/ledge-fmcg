@@ -1,7 +1,8 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
-import { spring } from "@/lib/motion";
+import { spring, useParallaxY } from "@/lib/motion";
 
 const MotionLink = motion.create(Link);
 
@@ -13,9 +14,12 @@ const fadeUp = (delay: number) => ({
 });
 
 export function FinalCTA() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const gridY = useParallaxY(sectionRef, 30);
+
   return (
-    <section className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
-      <div className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
+    <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
+      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft-dark pointer-events-none" />
       <div className="absolute inset-0 lp-noise pointer-events-none opacity-30" />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
