@@ -48,14 +48,13 @@ export function WhyOrdra() {
             return (
               <StaggerItem key={block.title}>
                 <div className={`${isHero ? "lp-bento-hero" : "lp-card"} p-7 h-full flex flex-col relative`}>
-                  <div className="flex items-start justify-between mb-7">
-                    <span className="lp-bento-numeral--lg">[ {String(i + 1).padStart(2, "0")} ]</span>
-                    {isHero && (
+                  {isHero && (
+                    <div className="flex justify-end mb-5">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#3730A3] bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
                         <span className="lp-live-dot" /> Offline-ready
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
                     {block.title}
                   </h3>
