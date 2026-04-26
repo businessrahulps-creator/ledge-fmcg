@@ -105,8 +105,8 @@ export function Hero() {
                 transition={{ ...spring.gentle as object, delay: 0.6 }}
                 className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-10"
               >
-                <span className="lp-progress-glass">
-                  <span className="lp-live-dot" />
+                <span className="lp-proof-chip">
+                  <span className="lp-proof-chip__dot" />
                   ₹2.4Cr tracked this week
                 </span>
               </motion.div>
