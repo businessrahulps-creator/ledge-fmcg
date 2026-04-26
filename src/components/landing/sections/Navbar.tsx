@@ -69,8 +69,7 @@ export function Navbar() {
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={spring.snappy}>
             <Link
               to="/signup"
-              className="inline-flex items-center bg-[#0A0F1C] text-white px-7 py-3 rounded-full font-body font-semibold hover:bg-[#1F2937] transition-colors duration-200 text-sm"
-              style={{ boxShadow: "0 6px 16px -6px rgba(10,15,28,0.4)" }}
+              className="lp-btn-primary-dark inline-flex items-center text-white px-6 py-2.5 rounded-full font-body font-semibold transition-colors duration-200 text-[13.5px]"
             >
               Start Free Trial
             </Link>
