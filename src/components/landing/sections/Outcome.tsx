@@ -56,7 +56,7 @@ export function Outcome() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="font-heading text-[18px] md:text-[22px] text-white/80 text-center mt-20 max-w-2xl mx-auto tracking-tight"
         >
-          Same team. Same geography. <span className="text-white font-semibold">More throughput. Better cash flow.</span>
+          Same factory. Same field. <span className="text-white font-semibold">More throughput. Better cash flow.</span>
         </motion.p>
       </div>
     </section>
