@@ -1,32 +1,21 @@
-Emergency plan to get the landing page launch-safe with minimal risk and no extra polish scope.
+## Update app icon to new Ledge icon (purple/coral L)
 
-Root cause found in the current code:
-- The mobile menu is still manipulating browser history with `pushState` and `history.back()` just to close the overlay. That can trigger `popstate` races and leave the page in a broken/frozen state.
-- The menu also locks `document.body.style.overflow`, relying on animation cleanup to restore it. If the close/unmount sequence races, the page can remain non-interactive.
-- The mobile WhatsApp FAB and sticky CTA add extra fixed layers/animations on top of the page. Since you reported “right side WhatsApp button” and mobile issues affecting desktop, the safest launch move is to remove these two floating mobile layers entirely.
-- Console also shows ref warnings from Framer/Radix interactions around the menu/footer icon. These are not the main freeze cause, but I’ll remove the risky animated/footer tooltip usage inside the mobile overlay path.
+The current favicon and PWA icons are stale. I'll replace all of them with the new icon you uploaded.
 
-Implementation in one pass:
-1. Replace `MobileMenuOverlay` lifecycle with a simple, stable overlay:
-   - No `window.history.pushState`.
-   - No `window.history.back()`.
-   - No body scroll lock mutation.
-   - Keep Escape-to-close.
-   - Keep premium enter/exit animation, but make it purely visual.
-   - Add `onAnimationStart`/exit pointer-events guard if needed so closing overlay cannot block the page.
+### Steps
 
-2. Remove risky mobile floating conversion layers:
-   - Temporarily unmount `MobileWhatsAppFab` and `MobileStickyCtaBar` from `Index.tsx`.
-   - Keep footer phone/WhatsApp CTAs and normal section CTAs intact, so lead generation remains available without fixed overlay risk.
+1. **Copy** `user-uploads://Ledge_App_Icon.png` to `src/assets/ledge-app-icon.png` (source of truth, kept at full resolution).
+2. **Generate sized PNGs** from the new icon using ImageMagick and write them to `public/`:
+   - `public/favicon.png` — 256×256
+   - `public/favicon.ico` — multi-size ICO (16, 32, 48)
+   - `public/pwa-192.png` — 192×192
+   - `public/pwa-512.png` — 512×512
+   - `public/pwa-maskable-512.png` — 512×512 with safe-zone padding (icon scaled to ~80% on the dark background) so Android adaptive masks don't crop the L
+3. **Bump cache-busters** in `index.html` for `apple-touch-icon` and `manifest` link (e.g. `?v=2`) so iOS / installed PWAs pick up the new icon instead of using the cached one.
+4. **Verify** by listing the generated files and confirming sizes.
 
-3. Remove mobile-overlay warning source:
-   - Replace `Nilavilakku` inside the mobile menu footer with a simple non-tooltip inline text/icon or plain text.
-   - This avoids Radix/Framer ref warnings in the mobile menu close path.
+### Notes
 
-4. Run a quick build/type check after changes.
-
-Expected result:
-- Opening and closing the mobile menu will no longer freeze the page.
-- Desktop will no longer be affected by mobile fixed overlays or history mutations.
-- WhatsApp lead capture remains through visible page CTAs/footer, but the risky right-side floating WhatsApp button is removed for launch stability.
-- This is intentionally conservative: stability over extra animation/polish because launch is today and credits are low.
+- Manifest icon paths in `vite.config.ts` already point to `pwa-192.png` / `pwa-512.png` / `pwa-maskable-512.png` — no config change needed, just regenerate the files.
+- iOS home-screen icons are aggressively cached; the `?v=2` query string forces a refresh. Users who already installed the PWA may need to remove and reinstall to see the new icon (this is an iOS limitation, not something we can fix in code).
+- The new icon's dark background already matches the maskable safe-zone aesthetic, so padding will look natural.
