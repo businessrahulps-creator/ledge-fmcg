@@ -806,6 +806,18 @@
     height: 12px;
     background: #D9DCE3;
   }
+  @media (max-width: 480px) {
+    .lp-pricing-trust-chip {
+      gap: 8px 12px;
+      padding: 8px 14px;
+    }
+    .lp-pricing-trust-chip__divider {
+      display: none;
+    }
+    .lp-pricing-trust-chip__item {
+      font-size: 12px;
+    }
+  }
 
   /* 5. Bento hero tile — ONE filled tile per multi-card section */
   .lp-bento-hero {
