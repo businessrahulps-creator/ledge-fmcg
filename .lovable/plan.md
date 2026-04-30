@@ -1,17 +1,13 @@
-## Fix Pricing trust chip wrapping on mobile
+## Fix Footer Status card overflowing on mobile
 
-**Problem:** On mobile the "30-day free trial · No card · Cancel anytime" chip wraps awkwardly — the vertical divider lines stay attached to the items above the wrap break, leaving a dangling `|` after "No card" and "Cancel anytime" on a second line with no leading divider (visible in your screenshot).
+**Problem:** The "All systems operational" pill is wider than its parent card and bleeds outside the rounded border on narrow screens (visible in your screenshot). Cause: the pill uses `whitespace-nowrap` + `w-fit` and the card sits in a 1-column footer grid that becomes very narrow on mobile.
 
-**Root cause:** `.lp-pricing-trust-chip` uses `flex-wrap: wrap` with the dividers as separate flex children. When items wrap, the dividers don't visually align with the new line.
+### Fix (Footer.tsx, status card block)
 
-### Fix
+1. **Pill (line 155)**: add `max-w-full` so it can't exceed the card width. Keep `whitespace-nowrap` removed isn't necessary — instead change the text wrapper to allow wrapping at narrow widths: drop `whitespace-nowrap` from the inner span (line 168) and add `leading-tight` so a 2-line wrap looks clean. The text "All systems operational" is short enough to stay on one line at typical mobile widths but will gracefully wrap on extreme narrow viewports instead of clipping.
+2. **AWS line (line 174)**: add `flex-wrap` so the logo + text don't push out of the card; the existing 12px text already fits.
+3. **Card padding**: reduce mobile padding from `p-4` to `p-3.5` so the pill has more room (`p-3.5 sm:p-4`).
 
-In `src/index.css`, add a mobile (`max-width: 480px`) override to `.lp-pricing-trust-chip` that:
+These three small changes keep the desktop look identical and stop the overflow on mobile.
 
-1. Hides the `__divider` elements entirely on mobile (cleaner stacked look).
-2. Slightly tightens row/column gap (`gap: 8px 12px`) and padding (`padding: 8px 14px`).
-3. Drops item font size from 12.5px → 12px so all three items fit on two clean lines.
-
-Result on mobile: the three checkmark items wrap as `30-day free trial · No card` on line 1 and `Cancel anytime` centered on line 2, with no orphan divider lines. Desktop appearance is unchanged.
-
-No component changes — pure CSS edit, ~14 lines added to `src/index.css` around line 808.
+No new components, ~3 className tweaks in `src/components/landing/sections/Footer.tsx` (lines 153, 155, 168, 174).

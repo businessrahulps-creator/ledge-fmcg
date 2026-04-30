@@ -150,9 +150,9 @@ export function Footer() {
               Status
             </h4>
 
-            <div className="rounded-2xl border border-[#0A0F1C]/[0.06] bg-white/70 backdrop-blur-sm p-4 flex flex-col gap-3 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_8px_24px_-16px_rgba(15,23,42,0.06)]">
+            <div className="rounded-2xl border border-[#0A0F1C]/[0.06] bg-white/70 backdrop-blur-sm p-3.5 sm:p-4 flex flex-col gap-3 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_8px_24px_-16px_rgba(15,23,42,0.06)] min-w-0">
               {/* Animated status badge */}
-              <div className="relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-[#E8E5E0] shadow-sm w-fit overflow-hidden">
+              <div className="relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-[#E8E5E0] shadow-sm w-fit max-w-full overflow-hidden">
                 <div
                   className="absolute inset-0 rounded-full pointer-events-none"
                   style={{
@@ -161,18 +161,18 @@ export function Footer() {
                     animation: "shimmer 3s linear infinite",
                   }}
                 />
-                <span className="relative flex h-1.5 w-1.5">
+                <span className="relative flex h-1.5 w-1.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                 </span>
-                <span className="font-body text-[11.5px] font-medium text-[#3F3F46] relative whitespace-nowrap">
+                <span className="font-body text-[11.5px] font-medium text-[#3F3F46] relative leading-tight min-w-0">
                   All systems operational
                 </span>
               </div>
 
               {/* AWS infrastructure line */}
-              <div className="flex items-center gap-1.5">
-                <img src={awsLogo} alt="AWS" className="h-3.5 w-auto grayscale opacity-50" />
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <img src={awsLogo} alt="AWS" className="h-3.5 w-auto grayscale opacity-50 shrink-0" />
                 <span className="font-body text-[12px] text-[#71717A]">
                   Hosted on AWS · Mumbai
                 </span>
