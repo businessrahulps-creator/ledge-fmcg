@@ -1,13 +1,29 @@
-## Fix Footer Status card overflowing on mobile
+## Problem
 
-**Problem:** The "All systems operational" pill is wider than its parent card and bleeds outside the rounded border on narrow screens (visible in your screenshot). Cause: the pill uses `whitespace-nowrap` + `w-fit` and the card sits in a 1-column footer grid that becomes very narrow on mobile.
+On mobile (≤390px), the Hero eyebrow pill "THE OPERATING SYSTEM FOR FACTORY + FIELD" wraps to two lines. Because the dot (`::before`) is vertically centered against the full pill height, it ends up floating next to the first line while the second line ("FIELD") sits unaligned underneath — looks broken.
 
-### Fix (Footer.tsx, status card block)
+## Fix
 
-1. **Pill (line 155)**: add `max-w-full` so it can't exceed the card width. Keep `whitespace-nowrap` removed isn't necessary — instead change the text wrapper to allow wrapping at narrow widths: drop `whitespace-nowrap` from the inner span (line 168) and add `leading-tight` so a 2-line wrap looks clean. The text "All systems operational" is short enough to stay on one line at typical mobile widths but will gracefully wrap on extreme narrow viewports instead of clipping.
-2. **AWS line (line 174)**: add `flex-wrap` so the logo + text don't push out of the card; the existing 12px text already fits.
-3. **Card padding**: reduce mobile padding from `p-4` to `p-3.5` so the pill has more room (`p-3.5 sm:p-4`).
+Two small changes, scoped to mobile only so desktop stays untouched:
 
-These three small changes keep the desktop look identical and stop the overflow on mobile.
+### 1. `src/index.css` — tighten `.lp-eyebrow` on small screens
+Add a `@media (max-width: 480px)` rule that:
+- Drops font-size to `10px` and letter-spacing to `0.14em` so the phrase fits on one line in most mobile widths.
+- Sets `align-items: flex-start` and adds a tiny `margin-top` to the `::before` dot so if it ever does wrap, the dot aligns with the first line instead of floating mid-pill.
+- Allows `text-align: left` and `line-height: 1.35` for clean wrapping as a fallback.
 
-No new components, ~3 className tweaks in `src/components/landing/sections/Footer.tsx` (lines 153, 155, 168, 174).
+### 2. `src/components/landing/sections/Hero.tsx` — shorten copy on mobile (optional safety net)
+Keep the existing full text on `sm:` and up. On the smallest screens, render a tighter variant so it never needs to wrap:
+
+- Mobile (`<sm`): "OS FOR FACTORY + FIELD"
+- Desktop (`sm+`): "THE OPERATING SYSTEM FOR FACTORY + FIELD"
+
+Implemented with two spans toggled by Tailwind's `sm:hidden` / `hidden sm:inline`.
+
+## Result
+
+Eyebrow pill renders as a single clean line on 390px-wide viewports and below, with the indigo dot properly aligned. Desktop appearance is unchanged.
+
+## Files touched
+- `src/index.css` — add mobile media query for `.lp-eyebrow`
+- `src/components/landing/sections/Hero.tsx` — responsive eyebrow text
