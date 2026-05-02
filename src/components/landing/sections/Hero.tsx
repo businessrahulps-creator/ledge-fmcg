@@ -26,7 +26,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              The Operating System for Factory + Field
+              <span className="hidden sm:inline">The Operating System for Factory + Field</span>
+              <span className="sm:hidden">OS for Factory + Field</span>
             </span>
           </motion.div>
 
