@@ -442,6 +442,20 @@
     background: #4F46E5;
   }
 
+  @media (max-width: 480px) {
+    .lp-eyebrow, .lp-eyebrow-dark {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      line-height: 1.35;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .lp-eyebrow::before, .lp-eyebrow-dark::before {
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+  }
+
   /* Premium lit button — neutral shadows */
   .lp-btn-primary-dark {
     background: linear-gradient(180deg, #1F2937 0%, #0A0F1C 100%);
