@@ -52,9 +52,9 @@ const docTypeLabels: Record<DocType, string> = {
 
 const docTypeBadgeColors: Record<DocType, string> = {
   gst_invoice: "bg-primary/10 text-primary",
-  estimate: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
-  proforma: "bg-purple-50/80 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
-  credit_note: "bg-red-50/80 text-red-700 dark:bg-red-500/20 dark:text-red-300",
+  estimate: "bg-warning/10 text-warning",
+  proforma: "bg-accent/10 text-accent",
+  credit_note: "bg-destructive/10 text-destructive",
 };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -478,7 +478,7 @@ export default function Billing() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Billing</h1>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Billing</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Generate invoices, estimates, and credit notes from orders
             </p>
@@ -584,11 +584,11 @@ export default function Billing() {
                           <TableCell className="text-right font-mono text-sm tabular-nums">{formatCurrency(inv.grandTotal)}</TableCell>
                           <TableCell>
                             {inv.status === "final" && isDraftType(inv.docType) ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
                                 <Lock className="h-2.5 w-2.5" /> Final
                               </span>
                             ) : inv.status === "draft" ? (
-                              <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                              <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
                                 Draft
                               </span>
                             ) : (
@@ -602,7 +602,7 @@ export default function Billing() {
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" onClick={() => shareInvoiceOnWhatsApp(inv)} title="Share on WhatsApp">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)} title="Share on WhatsApp">
                                 <WhatsAppIcon className="h-3.5 w-3.5" />
                               </Button>
                               {isEditable(inv) && (
@@ -637,17 +637,17 @@ export default function Billing() {
               {/* Mobile cards */}
               <div className="space-y-3 p-3 md:hidden">
                 {paginatedList.map(inv => (
-                  <div key={inv.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-2">
+                  <div key={inv.id} className="rounded-md border border-border/60 bg-card p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
                         {docTypeLabels[inv.docType] || inv.docType}
                       </span>
                       {inv.status === "final" && isDraftType(inv.docType) ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
                           <Lock className="h-2.5 w-2.5" /> Final
                         </span>
                       ) : inv.status === "draft" ? (
-                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                        <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
                           Draft
                         </span>
                       ) : null}
@@ -661,7 +661,7 @@ export default function Billing() {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)}>
                         <Download className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" onClick={() => shareInvoiceOnWhatsApp(inv)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)}>
                         <WhatsAppIcon className="h-3.5 w-3.5" />
                       </Button>
                       {isEditable(inv) && (
@@ -696,7 +696,7 @@ export default function Billing() {
 
       {/* Create / Edit Document Dialog */}
       <Dialog open={showCreate} onOpenChange={(open) => { if (!open) { setShowCreate(false); resetForm(); } else { setShowCreate(true); } }}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-md">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>{dialogDesc}</DialogDescription>

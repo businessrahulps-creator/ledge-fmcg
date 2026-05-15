@@ -319,21 +319,21 @@ export default function Performance() {
       label: "Revenue",
       value: formatCurrency(totalRevenue),
       icon: IndianRupee,
-      accent: "border-l-emerald-500",
+      accent: "border-l-success",
       change: period !== "custom" ? pctChange(totalRevenue, prevRevenue) : null,
     },
     {
       label: "Orders",
       value: totalOrderCount.toString(),
       icon: ShoppingCart,
-      accent: "border-l-blue-500",
+      accent: "border-l-primary",
       change: period !== "custom" ? pctChange(totalOrderCount, prevOrderCount) : null,
     },
     {
       label: "Avg Order",
       value: formatCurrency(avgOrderValue),
       icon: TrendingUp,
-      accent: "border-l-amber-500",
+      accent: "border-l-warning",
       change: period !== "custom" ? pctChange(avgOrderValue, prevAvg) : null,
     },
     {
@@ -492,7 +492,7 @@ export default function Performance() {
           {kpis.map((kpi) => (
             <div
               key={kpi.label}
-              className={`glass-card rounded-xl border-l-[3px] p-4 ${kpi.accent}`}
+              className={`glass-card rounded-md border-l-[3px] p-4 ${kpi.accent}`}
             >
               <div className="flex items-center gap-2 text-muted-foreground">
                 <kpi.icon className="h-4 w-4" />
@@ -504,9 +504,9 @@ export default function Performance() {
               {kpi.change !== null && (
                 <div className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${
                   kpi.change > 0
-                    ? "text-emerald-600 dark:text-emerald-400"
+                    ? "text-success"
                     : kpi.change < 0
-                    ? "text-red-500 dark:text-red-400"
+                    ? "text-destructive"
                     : "text-muted-foreground"
                 }`}>
                   {kpi.change > 0 ? (
@@ -537,7 +537,7 @@ export default function Performance() {
           <TabsContent value="overview" className="space-y-4 mt-4">
             {/* Revenue Trend + Payment Split */}
             <div className="grid gap-4 md:grid-cols-5">
-              <div className="glass-card rounded-xl p-4 md:col-span-3">
+              <div className="glass-card rounded-md p-4 md:col-span-3">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-foreground">Revenue Trend</h3>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -578,7 +578,7 @@ export default function Performance() {
                 )}
               </div>
 
-              <div className="glass-card rounded-xl p-4 md:col-span-2">
+              <div className="glass-card rounded-md p-4 md:col-span-2">
                 <h3 className="mb-3 text-sm font-semibold text-foreground">Payment Split</h3>
                 {paymentSplit.length > 0 ? (
                   <div className="flex flex-col items-center">
@@ -622,17 +622,17 @@ export default function Performance() {
               if (activeSchemes.length === 0 && totalSavings === 0) return null;
               const topSchemes = Array.from(schemeHits.values()).sort((a, b) => b.savings - a.savings).slice(0, 3);
               return (
-                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-emerald-500">
+                <div className="glass-card rounded-md p-4 border-l-[3px] border-l-success">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10">
-                      <Gift className="h-4 w-4 text-emerald-500" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-success/10">
+                      <Gift className="h-4 w-4 text-success" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Scheme Performance</p>
+                      <p className="text-xs font-semibold text-success">Scheme Performance</p>
                       <p className="text-[11px] text-muted-foreground">{activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}</p>
                     </div>
                     {totalSavings > 0 && (
-                      <span className="ml-auto text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalSavings)}</span>
+                      <span className="ml-auto text-lg font-bold text-success">{formatCurrency(totalSavings)}</span>
                     )}
                   </div>
                   {totalSavings > 0 && (
@@ -645,7 +645,7 @@ export default function Performance() {
                           <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
-                            <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(ts.savings)}</span>
+                            <span className="font-medium text-success">{formatCurrency(ts.savings)}</span>
                           </div>
                         </div>
                       ))}
@@ -672,10 +672,10 @@ export default function Performance() {
                 .slice(0, 5);
               if (dealerData.length === 0) return null;
               return (
-                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-blue-500">
+                <div className="glass-card rounded-md p-4 border-l-[3px] border-l-primary">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10">
-                      <Users className="h-4 w-4 text-blue-500" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                      <Users className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold">Top Dealers Performance</p>
@@ -704,7 +704,7 @@ export default function Performance() {
             })()}
 
             {/* Top Dealers by Revenue bar chart */}
-            <div className="glass-card rounded-xl p-4">
+            <div className="glass-card rounded-md p-4">
               <h3 className="mb-3 text-sm font-semibold text-foreground">Top Dealers by Revenue</h3>
               {topDealers.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
@@ -736,7 +736,7 @@ export default function Performance() {
                 .slice(0, 3);
               if (spData.length === 0) return null;
               return (
-                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-violet-500">
+                <div className="glass-card rounded-md p-4 border-l-[3px] border-l-primary">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
                       <UserCheck className="h-4 w-4 text-violet-500" />
@@ -768,7 +768,7 @@ export default function Performance() {
             })()}
 
             {/* Sales Team Ranking */}
-            <div className="glass-card rounded-xl p-4">
+            <div className="glass-card rounded-md p-4">
               <h3 className="mb-3 text-sm font-semibold text-foreground">Sales Team Ranking</h3>
               {salesRanking.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
@@ -789,7 +789,7 @@ export default function Performance() {
           {/* ── Products Tab ── */}
           <TabsContent value="products" className="space-y-4 mt-4">
             {/* Product Velocity */}
-            <div className="glass-card rounded-xl p-4">
+            <div className="glass-card rounded-md p-4">
               <h3 className="mb-3 text-sm font-semibold text-foreground">Product Velocity (Units Sold)</h3>
               {productVelocity.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
@@ -824,10 +824,10 @@ export default function Performance() {
               periodSS.forEach(s => { const name = s.retailerName || "Unknown"; retMap.set(name, (retMap.get(name) || 0) + s.quantity); });
               const topRetailers = Array.from(retMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
               return (
-                <div className="glass-card rounded-xl p-4 border-l-[3px] border-l-orange-500">
+                <div className="glass-card rounded-md p-4 border-l-[3px] border-l-accent">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10">
-                      <Store className="h-4 w-4 text-orange-500" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10">
+                      <Store className="h-4 w-4 text-accent" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold">Secondary Sales</p>
@@ -857,15 +857,15 @@ export default function Performance() {
               const atRisk = dealers.filter(d => (d.creditLimit || 0) > 0 && (d.outstandingAmount || 0) >= (d.creditLimit || 0));
               if (atRisk.length === 0) return null;
               return (
-                <div className="glass-card rounded-xl p-4 flex items-center gap-3 border-l-[3px] border-l-red-500 cursor-pointer card-hover" onClick={() => navigate("/distributors")}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
-                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                <div className="glass-card rounded-md p-4 flex items-center gap-3 border-l-[3px] border-l-destructive cursor-pointer card-hover" onClick={() => navigate("/distributors")}>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
+                    <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
                   </div>
-                  <span className="text-lg font-bold text-red-600 dark:text-red-400">{atRisk.length}</span>
+                  <span className="text-lg font-bold text-destructive">{atRisk.length}</span>
                 </div>
               );
             })()}
@@ -902,7 +902,7 @@ export default function Performance() {
               const topPerformers = withProgress.filter(t => t.pct >= 70).slice(0, 3);
               const behindTarget = withProgress.filter(t => t.pct < 40).slice(0, 3);
               return (
-                <div className="glass-card rounded-xl p-4">
+                <div className="glass-card rounded-md p-4">
                   <h3 className="mb-3 text-sm font-semibold text-foreground flex items-center gap-2">
                     <Target className="h-4 w-4 text-primary" />
                     Targets Overview
@@ -910,15 +910,15 @@ export default function Performance() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     {topPerformers.length > 0 && (
                       <div>
-                        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">⭐ Top Performers</p>
+                        <p className="text-xs font-medium text-success mb-2">⭐ Top Performers</p>
                         <div className="space-y-2">
                           {topPerformers.map(t => (
-                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2">
+                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-success/30 bg-success/5 px-3 py-2">
                               <div>
                                 <p className="text-xs font-semibold">{t.entityName}</p>
                                 <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                               </div>
-                              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t.pct}%</span>
+                              <span className="text-sm font-bold text-success">{t.pct}%</span>
                             </div>
                           ))}
                         </div>
@@ -926,15 +926,15 @@ export default function Performance() {
                     )}
                     {behindTarget.length > 0 && (
                       <div>
-                        <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">⚠️ Needs Attention</p>
+                        <p className="text-xs font-medium text-destructive mb-2">⚠️ Needs Attention</p>
                         <div className="space-y-2">
                           {behindTarget.map(t => (
-                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 px-3 py-2">
+                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
                               <div>
                                 <p className="text-xs font-semibold">{t.entityName}</p>
                                 <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                               </div>
-                              <span className="text-sm font-bold text-red-600 dark:text-red-400">{t.pct}%</span>
+                              <span className="text-sm font-bold text-destructive">{t.pct}%</span>
                             </div>
                           ))}
                         </div>
@@ -949,7 +949,7 @@ export default function Performance() {
             {insights.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTriangle className="h-4 w-4 text-warning" />
                   Actionable Insights
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -958,8 +958,8 @@ export default function Performance() {
                       key={i}
                       className={`rounded-lg border px-3 py-2.5 text-xs leading-relaxed ${
                         insight.type === "danger"
-                          ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
-                          : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
+                          ? "border-destructive/30 bg-destructive/5 text-destructive"
+                          : "border-warning/30 bg-warning/5 text-warning"
                       }`}
                     >
                       {insight.message}
@@ -975,8 +975,8 @@ export default function Performance() {
               if (atRisk.length === 0 && insights.length === 0) {
                 return (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mb-3">
-                      <Target className="h-5 w-5 text-emerald-500" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 mb-3">
+                      <Target className="h-5 w-5 text-success" />
                     </div>
                     <p className="text-sm font-medium text-foreground">All clear!</p>
                     <p className="text-xs text-muted-foreground mt-1">No alerts or risks detected for this period.</p>
