@@ -1,122 +1,122 @@
-# Find Bugs → Push to Linear (read-only, won't touch the app)
+# Ledge V2 — In-App Rebrand Plan
 
-Goal: audit Ledge for real bugs without modifying a single line of source code, then file each finding as a Linear issue in a new **Ledge** workspace.
-
----
-
-## Guardrail: zero-risk audit
-
-Everything in this plan is **read-only on the codebase**. No file edits, no migrations, no deploys, no dependency changes. The only writes happen in Linear (creating issues). If you don't like a finding, you delete the ticket — the app is untouched.
+**Goal:** Stop looking like a generic SaaS. Look like enterprise software a CFO would trust.
+**Strategy:** Your brand identity wins (logo, colors, fonts from the board). Fluent 2 contributes the *system mechanics* — token architecture, elevation/depth scale, motion curves, density, component anatomy, accessibility floors.
+**Scope:** `/app/*` only. Landing page (`/`, marketing pages) is a separate plan.
+**Risk control:** Hard cutover, but split across 9 small PRs. Each PR is independently shippable and reversible.
 
 ---
 
-## Step 1 — Connect Linear
+## The North Star
 
-I'll trigger the Linear connector. You click once to authorize. This gives me API access to create issues, labels, and (if needed) the team.
+| Token | Value | Role |
+|---|---|---|
+| Midnight `#0F1F3A` | Primary | Buttons, links, sidebar, active states |
+| Forest `#0E2A22` | Success / positive | Money in, on-time, completed |
+| Terracotta `#A0522D` | Accent / warning | Highlights, attention, pending |
+| Bone `#F5EFE6` | Background | Page bg, surfaces |
+| Neutrals `#0B0B0C → #F2F2F3` | 8-step scale | Text, borders, surfaces |
+| Playfair Display | Display | H1/H2 only, page titles, empty states |
+| Inter | System | Everything else: body, labels, data, buttons |
+| Striped-square mark | Logo | Sidebar, splash, favicon, PWA icons |
 
-## Step 2 — Set up the "Ledge" destination in Linear
+**Fluent 2 we adopt** (mechanics, not visuals):
+- 4-tier elevation scale (`shadow-2/4/8/16`) replacing current ad-hoc shadows
+- Density tokens: control height 32px (compact) / 40px (default)
+- Motion: 100/200/300ms with `cubic-bezier(0.33, 0, 0.67, 1)` (Fluent's standard ease)
+- Focus ring: 2px outer, 1px inner, 4.5:1 contrast minimum
+- Border radius scale: 4 / 6 / 8 / 12 (no more `rounded-2xl` everywhere)
 
-Quick clarification on Linear's model:
-- **Workspace** = your whole Linear account (already exists)
-- **Team** = a top-level container with its own issue prefix (e.g. `LED-1`, `LED-2`). This is what most people mean by "create a new one for Ledge."
-- **Project** = a body of work inside a team (e.g. "V1 Launch", "Bug Bash")
-
-I'll do this:
-1. Check if a team named **Ledge** already exists in your workspace
-2. If not, create one with key `LED` via the Linear API (`teamCreate` mutation)
-3. Create a project inside it called **Bug Bash — Initial Audit** so all the tickets from this pass are grouped and easy to triage/close in bulk
-4. Create labels: `bug`, `severity:critical`, `severity:high`, `severity:medium`, `severity:low`, `area:orders`, `area:billing`, `area:stock`, `area:auth`, `area:ui`, `area:perf`, `area:a11y`, `area:security`
-
-If the API can't create a team for permissions reasons, I'll stop and ask you to create it in Linear UI, then resume.
-
----
-
-## Step 3 — The audit (read-only, 4 passes)
-
-I run all four in parallel/sequence, collect findings, **show them to you for approval before pushing anything to Linear**.
-
-### Pass A — Static code audit
-- TypeScript: `tsc --noEmit` → list every type error
-- ESLint: full repo lint → list errors and warnings
-- Custom Ledge convention scan:
-  - Raw `supabase` calls in pages (should use `useApi()`)
-  - Raw `<input type="number">` (should use `<NumberInput>`)
-  - Hex colors / non-semantic Tailwind colors in components
-  - Pricing math outside `src/lib/order-pricing.ts`
-  - Missing `key` props, missing `aria-*`, missing alt text
-  - Unhandled promise rejections, `await` inside `.map`, missing `try/catch` around Supabase calls
-  - Stale `useEffect` deps, missing cleanup functions
-
-### Pass B — Test suite
-- Run `bunx vitest run` (already passing — 114/114, will recheck)
-- Run `bunx playwright test` if it executes in this sandbox; otherwise note it as a finding for you to run locally
-
-### Pass C — Runtime smoke test (browser tool)
-Click through the published URL on a fresh session:
-1. Login → Dashboard
-2. New Order → add lines → save (watch celebration)
-3. Edit Order → change qty → save
-4. Stock page → add product, add warehouse
-5. Dealers → create dealer → open detail
-6. Reports → each tab
-7. Billing → create invoice
-8. Settings → company info
-9. Sign out
-
-For each step I capture: console errors, failed network requests, broken layouts at mobile width (375px) and desktop (1280px). Each becomes a finding.
-
-### Pass D — Backend security scan
-- Run `supabase--linter` (RLS, policies, function search_path)
-- Run `security--run_security_scan` (full Lovable security check)
-- Check for tables without RLS, overly permissive policies, leaked anon-readable PII
+**Fluent 2 we reject:** Segoe UI, Fluent blue, "acrylic" backdrop blur, Microsoft iconography.
 
 ---
 
-## Step 4 — Triage & approval
+## Phases (each is one PR)
 
-I produce one consolidated table:
+### PR 1 — Foundation: tokens + fonts (no visible page rewrites)
+*~30 min · Touches `index.css`, `tailwind.config.ts`, `index.html`*
 
-| # | Title | Area | Severity | Where | Suggested fix | File ticket? |
-|---|-------|------|----------|-------|---------------|---|
-| 1 | Stock value rounds incorrectly for >9999 units | stock | High | src/utils/formatCurrency.ts:42 | … | yes/no |
+- Rewrite `:root` HSL tokens in `src/index.css` to Midnight / Forest / Terracotta / Bone + 8 neutrals
+- Add Fluent-style depth tokens: `--shadow-2/4/8/16`, motion easings, density vars
+- Add Playfair Display + Inter via Google Fonts in `index.html`
+- Update `tailwind.config.ts` font families (`heading: Playfair`, `body/sans: Inter`)
+- Delete unused landing tokens from `:root` (move to a `.lp-scope` block so landing keeps working untouched)
+- Delete dark-mode block (move to `_archive.css` so it can be revived later)
+- Retire brand-purple/coral gradient utilities (keep CSS but unused)
 
-You reply with which rows to file (or "all"). Default is "file everything except `low` unless you say otherwise."
+**Visible effect:** Whole app shifts color/font instantly. Layouts unchanged. Some pages will look slightly off — that's fixed in PRs 3-9.
+
+**Guardrail:** Run `bunx vitest run` + visual smoke through 7 main pages before merge.
+
+### PR 2 — Logo, favicon, PWA icons
+*~20 min · Touches `src/assets/`, `public/`, `AppSidebar.tsx`*
+
+- Generate new striped-square `Ledge` mark (full lockup + collapsed mark) matching brand board, transparent PNG
+- Replace `src/assets/ledge-logo.png` and `ledge-mark.png`
+- Replace `public/favicon.png` + PWA `icon-192.png` / `icon-512.png` / `apple-touch-icon.png`
+- Update `SplashScreen.tsx` halo to new palette (Bone bg, Midnight mark, soft Terracotta glow)
+
+### PR 3 — Primitives refit
+*~45 min · Touches `src/components/ui/*`*
+
+Fluent 2 anatomy applied to: `button`, `input`, `select`, `dropdown-menu`, `dialog`, `badge`, `status-badge`, `tabs`, `card`, `table`. Specifically:
+- Button: 3 variants matching board (Primary Midnight, Secondary outline, Tertiary ghost), 32/40px heights, right-arrow icon affordance
+- Input/Select: 1px border, 6px radius, focus ring per Fluent 2 spec
+- Status pills: Active (Forest wash), Pending (Terracotta wash), Completed (neutral), Neutral (zinc) — exactly the chips on the board
+- Card: white surface on Bone bg, `--shadow-2`, no glass effect
+- Table: dense 40px rows, hover `bg-neutral-50`, header `text-xs uppercase tracking-wide`
+
+### PR 4 — Layout shell
+*~30 min · Touches `AppLayout`, `AppSidebar`, `NotificationCenter`*
+
+- Sidebar: Bone surface, 1px right border, no gradient L mark — replaced with new logo lockup
+- Top nav: tighten to 56px (was 72px), Inter 14px labels
+- Replace glassmorphic surfaces with flat Bone + 1px borders
+
+### PR 5 — Dashboard
+### PR 6 — Orders + New Order + Order Detail
+### PR 7 — Stock + Dealers + Salespersons + Schemes
+### PR 8 — Reports + Billing + Targets
+### PR 9 — Settings + Auth pages (Login/Signup/Reset) + Onboarding + PDFs
+
+Each page-PR does only:
+1. Swap remaining hardcoded colors → tokens (also resolves Linear ticket LED-007)
+2. Replace serif/heading usage to Playfair only on H1/H2
+3. Reduce visual noise to match brand board's quiet density
+4. Visual QA at 1280px and 375px before merge
 
 ---
 
-## Step 5 — Push to Linear
+## Memory cleanup (PR 1)
 
-For each approved finding, I call Linear's `issueCreate` GraphQL mutation via the connector gateway with:
-
-- **Title** — short, action-oriented ("Fix stock value rounding for high quantities")
-- **Description** — markdown body with: symptom, repro steps, file:line refs, suggested approach, screenshots if from runtime pass
-- **Team** — Ledge
-- **Project** — Bug Bash — Initial Audit
-- **Labels** — `bug`, `severity:*`, `area:*`
-- **Priority** — Urgent (critical) / High / Medium / Low based on severity
-- **Estimate** — rough t-shirt (1/2/3/5)
-
-I'll batch them with a small delay to respect rate limits and report back: *"Filed 27 issues. 3 critical, 8 high, 14 medium, 2 low. View in Linear: <link>."*
+Wipe and rewrite:
+- `mem://style/design-system` → new palette
+- `mem://style/brand-moments` → DELETE (no more rationing — Midnight/Terracotta usable everywhere semantically)
+- `mem://style/branding-assets` → new mark
+- `mem://style/aesthetic`, `mem://style/dashboard`, `mem://style/landing-palette` → updated descriptions
+- Add: `mem://style/fluent2-methodology` (depth/motion/density rules)
+- Add: `mem://style/typography-v2` (Playfair H1/H2 only rule)
 
 ---
 
-## What I need from you to start
-
-Approve this plan and I'll:
-1. Trigger the Linear OAuth connection (one click from you)
-2. Create the **Ledge** team + **Bug Bash** project + labels
-3. Run all 4 audit passes
-4. Show the triage table for your approval
-5. File the approved tickets
-
-Estimated time: ~5 minutes of audit + your triage time + ~1 minute to push tickets.
+## What we explicitly will NOT touch
+- `src/integrations/supabase/*` (auto-generated)
+- Landing page (`src/components/landing/*`, `src/pages/Index.tsx`, About/Contact/Pricing/Help/Policies) — separate plan
+- Business logic, domain hooks, pricing engine, RLS, edge functions
+- PDF *content* (PR 9 only adjusts colors/header treatment, not layout/data)
+- Dark mode (archived for V2)
 
 ---
 
-## What I will NOT do
+## Technical details
 
-- Edit any source files in this loop
-- Run migrations or deploy anything
-- Auto-fix bugs (that's the next loop, in Cursor or Lovable, ticket-by-ticket)
-- File duplicate or speculative tickets without your approval
-- Touch existing Linear teams/projects you already have
+**File budget per PR:** PRs 1, 2, 4 < 10 files. PRs 3, 5–9 ~10–25 files each.
+**Verification per PR:** `bunx vitest run` (114 tests must stay green) + manual click-through of touched routes at 1280×875 and 375×812.
+**Rollback:** Each PR is atomic. Reverting PR N restores PR N-1 cleanly because tokens are additive, not destructive.
+**Estimated total time:** ~6 hours across 9 PRs.
+
+---
+
+## Open question for after PR 1
+
+The brand board shows a **diagonal-stripe pattern** (panel 08) as a brand motif. Want me to use it as a subtle background texture on empty states / splash / login left-panel, or skip it for V1? (I'll default to skip unless you say otherwise — easier to add later than remove.)
