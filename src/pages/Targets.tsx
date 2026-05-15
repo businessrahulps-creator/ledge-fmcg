@@ -98,19 +98,19 @@ function getStatus(actual: number, target: number): StatusKey {
 }
 
 const STATUS_CONFIG: Record<StatusKey, { label: string; color: string; bg: string; dot: string }> = {
-  exceeded: { label: "Exceeded", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30", dot: "bg-emerald-500" },
-  on_track: { label: "On Track", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/30", dot: "bg-blue-500" },
-  behind: { label: "Behind Target", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30", dot: "bg-amber-500" },
-  needs_attention: { label: "Needs Attention", color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-950/30", dot: "bg-red-500" },
+  exceeded: { label: "Exceeded", color: "text-success", bg: "bg-success/5", dot: "bg-success" },
+  on_track: { label: "On Track", color: "text-primary", bg: "bg-primary/5", dot: "bg-primary" },
+  behind: { label: "Behind Target", color: "text-warning", bg: "bg-warning/5", dot: "bg-warning" },
+  needs_attention: { label: "Needs Attention", color: "text-destructive", bg: "bg-destructive/5", dot: "bg-destructive" },
   no_target: { label: "No Target Set", color: "text-muted-foreground", bg: "bg-muted/30", dot: "bg-muted-foreground" },
 };
 
 function getProgressColor(status: StatusKey) {
   switch (status) {
-    case "exceeded": return "[&>div]:bg-emerald-500";
-    case "on_track": return "[&>div]:bg-blue-500";
-    case "behind": return "[&>div]:bg-amber-500";
-    case "needs_attention": return "[&>div]:bg-red-500";
+    case "exceeded": return "[&>div]:bg-success";
+    case "on_track": return "[&>div]:bg-primary";
+    case "behind": return "[&>div]:bg-warning";
+    case "needs_attention": return "[&>div]:bg-destructive";
     default: return "";
   }
 }
@@ -311,7 +311,7 @@ export default function Targets() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl flex items-center gap-2">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
               Targets & Achievements
             </h1>
@@ -373,8 +373,8 @@ export default function Targets() {
                 <span className="text-[10px] text-muted-foreground md:text-xs">Overall Progress</span>
                 <div className="mt-0.5 flex items-center gap-2">
                   <p className={`text-sm font-semibold md:text-base ${STATUS_CONFIG[overallStatus].color}`}>{overallPct}%</p>
-                  {overallStatus === "exceeded" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-                  {overallStatus === "needs_attention" && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                  {overallStatus === "exceeded" && <CheckCircle2 className="h-4 w-4 text-success" />}
+                  {overallStatus === "needs_attention" && <AlertTriangle className="h-4 w-4 text-destructive" />}
                 </div>
               </div>
               <div className="glass-card p-3 md:p-4">

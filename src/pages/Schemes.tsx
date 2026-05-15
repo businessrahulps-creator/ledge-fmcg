@@ -229,7 +229,7 @@ export default function Schemes() {
 
           {/* Empty state */}
           {schemes.length === 0 && (
-            <div className="glass-card rounded-xl p-8 text-center">
+            <div className="glass-card rounded-md p-8 text-center">
               <Gift className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
               <h3 className="text-sm font-semibold">No schemes yet</h3>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -294,7 +294,7 @@ export default function Schemes() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingScheme ? "Edit Scheme" : "New Scheme"}</DialogTitle>
             <DialogDescription className="sr-only">{editingScheme ? "Edit scheme details" : "Create a new scheme"}</DialogDescription>
@@ -492,7 +492,7 @@ export default function Schemes() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Scheme</AlertDialogTitle>
             <AlertDialogDescription>
@@ -539,14 +539,14 @@ function SchemeCard({
 
   return (
     <div className={cn(
-      "glass-card rounded-xl p-4 transition-all",
+      "glass-card rounded-md p-4 transition-all",
       !s.isActive && "opacity-60",
     )}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
           <div className={cn(
             "flex h-9 w-9 items-center justify-center rounded-lg",
-            s.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"
+            s.isActive ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
           )}>
             <Icon className="h-4 w-4" />
           </div>

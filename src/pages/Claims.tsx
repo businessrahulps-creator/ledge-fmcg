@@ -25,14 +25,14 @@ import type { Claim, ClaimLine } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
-  return: { label: "Goods Returned", icon: RotateCcw, color: "bg-blue-50/80 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300" },
-  damage: { label: "Damaged / Claim Only", icon: PackageX, color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" },
+  return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
+  damage: { label: "Damaged / Claim Only", icon: PackageX, color: "bg-warning/10 text-warning" },
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
-  open: { label: "Open", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300", icon: PackageX },
-  resolved: { label: "Resolved", color: "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300", icon: CheckCircle2 },
-  rejected: { label: "Rejected", color: "bg-red-50/80 text-red-700 dark:bg-red-500/20 dark:text-red-300", icon: XCircle },
+  open: { label: "Open", color: "bg-warning/10 text-warning", icon: PackageX },
+  resolved: { label: "Resolved", color: "bg-success/10 text-success", icon: CheckCircle2 },
+  rejected: { label: "Rejected", color: "bg-destructive/10 text-destructive", icon: XCircle },
 };
 
 function ClaimCard({
@@ -113,7 +113,7 @@ function ClaimCard({
 
           <div className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground">Stock impact:</span>
-            <span className={`font-medium ${claim.restoreStock ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+            <span className={`font-medium ${claim.restoreStock ? "text-success" : "text-muted-foreground"}`}>
               {claim.restoreStock ? "✓ Stock was restored to warehouse" : "No stock change (damage claim only)"}
             </span>
           </div>
@@ -435,9 +435,9 @@ export default function Claims() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">Returns & Claims</h1>
+              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Returns & Claims</h1>
               {openCount > 0 && (
-                <Badge variant="secondary" className="bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                <Badge variant="secondary" className="bg-warning/10 text-warning">
                   {openCount} open
                 </Badge>
               )}
