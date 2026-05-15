@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { MorphHamburger } from "./MorphHamburger";
-import ledgeLogo from "@/assets/ledge-logo.webp";
+import ledgeLogo from "@/assets/ledge-logo.png";
 
 interface MobileMenuOverlayProps {
   onClose: () => void;
