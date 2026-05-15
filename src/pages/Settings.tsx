@@ -516,7 +516,7 @@ export default function Settings() {
                             </td>
                             <td className="p-2 align-middle md:p-3">
                               {retryStatus[m.id] === "success" ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-medium text-success">
                                   <CheckCircle2 className="h-3 w-3" /> Synced
                                 </span>
                               ) : retryStatus[m.id] === "failed" ? (
