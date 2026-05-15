@@ -35,7 +35,7 @@ import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { ActivityLog } from "@/components/layout/ActivityLog";
 import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
-import ledgeLogo from "@/assets/ledge-logo.webp";
+import ledgeLogo from "@/assets/ledge-logo.png";
 import ledgeMark from "@/assets/ledge-mark.png";
 
 const overviewNav = [
