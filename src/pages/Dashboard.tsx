@@ -172,7 +172,7 @@ export default function Dashboard() {
           <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="text-xl font-bold tracking-tight mt-1 md:text-2xl">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight mt-1 md:text-[28px] leading-tight">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
           <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
             Updated {timeAgo}
             <span className="text-muted-foreground/30">·</span>
@@ -327,16 +327,16 @@ export default function Dashboard() {
         {dealersAtRisk.length > 0 && (
           <Link to="/distributors" className="block">
             <div className="glass-card p-4 flex items-center gap-3 card-hover">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-500/10">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold text-red-600 dark:text-red-400">Credit at Risk</p>
+                <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} at or over credit limit
                 </p>
               </div>
-              <span className="text-lg font-bold text-red-600 dark:text-red-400">{dealersAtRisk.length}</span>
+              <span className="text-lg font-bold text-destructive">{dealersAtRisk.length}</span>
             </div>
           </Link>
         )}
