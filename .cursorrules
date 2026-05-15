@@ -1,0 +1,87 @@
+# Ledge — Cursor Rules
+
+Ledge is a mobile-first PWA for Indian FMCG distribution. Built in Lovable, edited in Cursor for logic/bugs/refactors. Both tools share the same GitHub repo — respect existing patterns, do not reinvent.
+
+## Stack
+- React 18 + Vite 5 + TypeScript 5 (strict)
+- Tailwind v3 + shadcn/ui
+- Lovable Cloud (Supabase under the hood) — auto-managed
+- Bun for installs and scripts
+- Vitest for unit tests, Playwright for e2e
+
+## Hard rules — never violate
+
+1. **Never edit auto-generated files**:
+   - `src/integrations/supabase/client.ts`
+   - `src/integrations/supabase/types.ts`
+   - `src/integrations/lovable/index.ts`
+   - `.env`
+   - `supabase/config.toml` project-level keys
+
+2. **Never call `supabase` directly from pages or components**. Always go through `useApi()` from `src/services/api.ts`, which wraps `DataContext`. New domain logic goes in `src/context/domains/use*Domain.ts`.
+
+3. **Pricing math is centralized**. All scheme/discount/total calculations MUST go through `src/lib/order-pricing.ts → computeOrderPricing()`. Never inline pricing logic in pages, PDFs, or components. If you need a new calculation, extend the engine and add a Vitest case in `src/lib/__tests__/order-pricing.test.ts`.
+
+4. **Number inputs**: always use `<NumberInput>` from `src/components/ui/number-input.tsx`. Never use raw `<input type="number">` + `parseInt(value) || 0`.
+
+5. **Colors**: only semantic tokens from `src/index.css` and `tailwind.config.ts`. No hex literals, no `text-white`/`bg-black` utility classes in components. All color values in tokens are HSL.
+
+6. **Brand gradient (Purple #7C3AED → Coral #FF8A3D)** is rationed — only use in: splash screen, empty states, order celebration, sidebar wordmark. Never on buttons, badges, links, rows, cards.
+
+7. **Status colors** are semantic: `success` = teal, `warning` = amber, `destructive` = coral pink. Use `status-badge` component.
+
+8. **Trial period is 30 days**, not 14. Ignore any spec that says otherwise.
+
+9. **No Google OAuth** on login/signup — user removed it intentionally.
+
+10. **Auth/RLS**: roles live in a separate `user_roles` table with `has_role()` security-definer function. Never store roles on `profiles`.
+
+## Architecture conventions
+
+- **State**: `DataContext` is the single source for orders, dealers, products, schemes, stock, claims, invoices, targets. Domain hooks (`useOrdersDomain`, `useDealersDomain`, etc.) handle CRUD per slice.
+- **Routing**: pages in `src/pages/`, layout in `src/components/layout/AppLayout.tsx`, sidebar in `AppSidebar.tsx`.
+- **Modals vs pages**: simple CRUD → modal/dialog. Complex entities (Order, Dealer, Salesperson detail) → full page with route.
+- **Tests**: live next to source in `__tests__/` folders. Run with `bunx vitest run`. E2E in `e2e/` via `bunx playwright test`.
+- **Forms**: react-hook-form + zod resolvers; show errors inline; use `useUnsavedChangesGuard` on pages with form state.
+- **Toasts**: `sonner` only — never the legacy `useToast` from `src/hooks/use-toast.ts` for new code.
+
+## Styling
+
+- Glassmorphic cards via `.card-hover`, `.row-hover` interaction utilities
+- Mobile-first: 72px top nav, bottom-safe-area padding, liquid glass aesthetic
+- Use `frosted-glass`, `glass-card` utility classes already defined in `index.css`
+- Animations via `framer-motion` (already installed) — keep subtle, Apple-like
+
+## When fixing bugs
+
+1. Reproduce with a Vitest case first when the bug is in `src/lib/`, `src/utils/`, or `src/context/domains/`.
+2. Check `console` and `network` logs in the browser before guessing.
+3. Prefer the smallest possible diff. Don't refactor unrelated files.
+4. If the fix touches the pricing engine, add a regression test.
+
+## When adding logic
+
+- Pure helpers go in `src/utils/` (with co-located `*.test.ts`).
+- Domain mutations go in `src/context/domains/use*Domain.ts`.
+- Never duplicate Supabase queries — extend the domain hook.
+
+## Commit / PR conventions
+
+- Branch name: `<author>/<linear-id>-<slug>` e.g. `mahesh/led-42-fix-pricing-rounding`
+- Include the Linear issue ID (e.g. `LED-42`) in PR title so Linear auto-transitions status.
+- Keep PRs scoped to one Linear issue.
+
+## Lovable coexistence
+
+- Lovable owns: new pages, design system, Cloud schema/migrations, edge functions, big visual work.
+- Cursor owns: bug fixes, logic in `src/lib/` and `src/utils/`, multi-file refactors, tests, RLS policy tightening.
+- Don't edit the same file in both tools at once. Use Linear to coordinate ownership.
+- After a Lovable session, `git pull` before starting Cursor work.
+
+## Don'ts
+
+- Don't add new state libraries (no Zustand, Redux, Jotai) — DataContext is enough.
+- Don't add new UI kits — extend shadcn variants.
+- Don't add CHECK constraints with `now()` in migrations — use validation triggers.
+- Don't modify `auth`, `storage`, `realtime`, `vault`, `supabase_functions` schemas.
+- Don't enable Supabase email auto-confirm unless explicitly asked.
