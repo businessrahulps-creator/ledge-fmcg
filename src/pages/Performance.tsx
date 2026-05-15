@@ -738,8 +738,8 @@ export default function Performance() {
               return (
                 <div className="glass-card rounded-md p-4 border-l-[3px] border-l-primary">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/10">
-                      <UserCheck className="h-4 w-4 text-violet-500" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                      <UserCheck className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold">Top Sales Team</p>
