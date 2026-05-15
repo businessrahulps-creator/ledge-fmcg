@@ -2,8 +2,20 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Fluent 2 card anatomy
+ * - 6px radius, hairline border on Bone background
+ * - depth-2 rest (subtle elevation off page)
+ */
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-md border border-border/70 bg-card text-card-foreground shadow-depth-2 transition-[box-shadow,border-color] duration-normal ease-fluent",
+      className,
+    )}
+    {...props}
+  />
 ));
 Card.displayName = "Card";
 
