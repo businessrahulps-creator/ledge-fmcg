@@ -2,20 +2,21 @@ import { cn } from "@/lib/utils";
 
 type StatusType = "paid" | "partial" | "pending" | "dispatched" | "delivered";
 
+// V2: status colors mapped to semantic tokens (Forest/Terracotta/Destructive/Midnight).
 const statusStyles: Record<StatusType, string> = {
-  paid: "bg-emerald-50/60 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
-  partial: "bg-amber-50/60 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  pending: "bg-red-50/60 text-red-700 dark:bg-red-500/15 dark:text-red-300",
-  dispatched: "bg-blue-50/60 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  delivered: "bg-emerald-50/60 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  paid: "bg-success/10 text-success",
+  partial: "bg-warning/10 text-warning",
+  pending: "bg-destructive/10 text-destructive",
+  dispatched: "bg-primary/10 text-primary",
+  delivered: "bg-success/10 text-success",
 };
 
 const dotColors: Record<StatusType, string> = {
-  paid: "bg-emerald-500",
-  partial: "bg-amber-500",
-  pending: "bg-red-500",
-  dispatched: "bg-blue-500",
-  delivered: "bg-emerald-500",
+  paid: "bg-success",
+  partial: "bg-warning",
+  pending: "bg-destructive",
+  dispatched: "bg-primary",
+  delivered: "bg-success",
 };
 
 const statusLabels: Record<StatusType, string> = {
@@ -37,7 +38,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
         statusStyles[status],
-        className
+        className,
       )}
     >
       <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[status])} />

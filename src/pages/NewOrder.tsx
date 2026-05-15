@@ -63,11 +63,11 @@ const deliveryStatuses = [
 ];
 
 const statusColors: Record<string, string> = {
-  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
-  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
-  pending: "border-red-500 bg-red-500/10 text-red-600",
-  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
-  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  paid: "border-success/40 bg-success/10 text-success",
+  partial: "border-warning/40 bg-warning/10 text-warning",
+  pending: "border-destructive/40 bg-destructive/10 text-destructive",
+  dispatched: "border-primary/30 bg-primary/10 text-primary",
+  delivered: "border-success/40 bg-success/10 text-success",
 };
 
 export default function NewOrder() {
@@ -387,7 +387,7 @@ export default function NewOrder() {
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <div className="flex-1">
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">New Order</h1>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">New Order</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Create a new sales order
             </p>
@@ -446,7 +446,7 @@ export default function NewOrder() {
 
             {/* Credit Limit Warning */}
             {selectedDealer && exceedsCreditLimit && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">Credit limit will be exceeded</p>
@@ -540,7 +540,7 @@ export default function NewOrder() {
                         </div>
                       </div>
                       {stockWarnings.has(line.id) && (
-                        <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                        <div className="mt-2 flex items-start gap-1.5 text-xs text-warning">
                           <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                           <span>{stockWarnings.get(line.id)}</span>
                         </div>
@@ -695,10 +695,10 @@ export default function NewOrder() {
 
             {/* Schemes Applied */}
             {appliedSchemes.length > 0 && (
-              <section className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20 md:p-5">
+              <section className="rounded-md border border-success/30 bg-success/5 p-4 md:p-5">
                 <div className="flex items-center gap-2 mb-2.5">
-                  <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <h2 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  <Gift className="h-4 w-4 text-success" />
+                  <h2 className="text-sm font-semibold text-success">
                     Schemes Applied
                   </h2>
                 </div>
@@ -706,25 +706,25 @@ export default function NewOrder() {
                   {appliedSchemes.map(({ scheme, savings, label }) => (
                     <div key={scheme.id} className="flex items-center justify-between text-xs">
                       <div className="min-w-0">
-                        <p className="font-medium text-emerald-700 dark:text-emerald-300 truncate">{scheme.name}</p>
-                        <p className="text-emerald-600/70 dark:text-emerald-400/70">{label}</p>
+                        <p className="font-medium text-success truncate">{scheme.name}</p>
+                        <p className="text-success/70">{label}</p>
                       </div>
-                      <span className="font-semibold text-emerald-700 dark:text-emerald-300 shrink-0 ml-2">
+                      <span className="font-semibold text-success shrink-0 ml-2">
                         -{formatCurrency(savings)}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-2.5 border-t border-emerald-200 dark:border-emerald-800 pt-2">
+                <div className="mt-2.5 border-t border-success/20 pt-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
-                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                    <span className="text-xs font-medium text-success">Total Savings</span>
+                    <span className="text-sm font-bold text-success">
                       -{formatCurrency(totalSchemeSavings)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Effective Total</span>
-                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                    <span className="text-xs text-success/70">Effective Total</span>
+                    <span className="text-sm font-bold text-success">
                       {formatCurrency(Math.max(0, orderTotal - totalSchemeSavings))}
                     </span>
                   </div>

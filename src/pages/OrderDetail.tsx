@@ -47,11 +47,11 @@ import { toast } from "sonner";
 import { formatIndianDate } from "@/utils/formatDate";
 
 const statusColors: Record<string, string> = {
-  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
-  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
-  pending: "border-red-500 bg-red-500/10 text-red-600",
-  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
-  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  paid: "border-success/40 bg-success/10 text-success",
+  partial: "border-warning/40 bg-warning/10 text-warning",
+  pending: "border-destructive/40 bg-destructive/10 text-destructive",
+  dispatched: "border-primary/30 bg-primary/10 text-primary",
+  delivered: "border-success/40 bg-success/10 text-success",
 };
 
 const paymentModes = [
@@ -373,7 +373,7 @@ export default function OrderDetail() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{order.orderNumber}</h1>
+              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">{order.orderNumber}</h1>
               <p className="text-xs text-muted-foreground md:text-sm">{formatIndianDate(order.date)}</p>
             </div>
           </div>
@@ -491,26 +491,26 @@ export default function OrderDetail() {
 
         {/* Schemes Applied */}
         {appliedSchemes.length > 0 && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+          <div className="rounded-md border border-success/30 bg-success/5 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Schemes Applied</span>
+              <Gift className="h-4 w-4 text-success" />
+              <span className="text-sm font-semibold text-success">Schemes Applied</span>
             </div>
             <div className="space-y-1.5">
               {appliedSchemes.map((a, i) => (
                 <div key={i} className="flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-medium text-emerald-700 dark:text-emerald-300">{a.scheme.name}</span>
-                    {a.label && <span className="text-emerald-600/70 dark:text-emerald-400/70 ml-1">({a.label})</span>}
+                    <span className="font-medium text-success">{a.scheme.name}</span>
+                    {a.label && <span className="text-success/70 ml-1">({a.label})</span>}
                   </div>
-                  <span className="font-semibold text-emerald-700 dark:text-emerald-300">-{formatCurrency(a.savings)}</span>
+                  <span className="font-semibold text-success">-{formatCurrency(a.savings)}</span>
                 </div>
               ))}
             </div>
             {totalSchemeSavings > 0 && (
-              <div className="mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs">
-                <span className="font-medium text-emerald-700 dark:text-emerald-300">Total Savings</span>
-                <span className="font-bold text-emerald-700 dark:text-emerald-300">-{formatCurrency(totalSchemeSavings)}</span>
+              <div className="mt-2 pt-2 border-t border-success/20 flex items-center justify-between text-xs">
+                <span className="font-medium text-success">Total Savings</span>
+                <span className="font-bold text-success">-{formatCurrency(totalSchemeSavings)}</span>
               </div>
             )}
           </div>
@@ -549,7 +549,7 @@ export default function OrderDetail() {
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          doc.status === "final" ? "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+                          doc.status === "final" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
                         }`}>{doc.status}</span>
                       </td>
                     </tr>
