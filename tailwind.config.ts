@@ -14,9 +14,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
-        heading: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        heading: ['"Playfair Display"', "Georgia", "serif"],
         body: ["Inter", "system-ui", "sans-serif"],
+        // Legacy aliases kept so landing page keeps rendering until its own rebrand PR
+        geist: ["Geist", "system-ui", "sans-serif"],
+        jakarta: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
       },
       fontSize: {
         xs: ["12px", { lineHeight: "16px" }],
