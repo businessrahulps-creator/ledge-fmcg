@@ -884,7 +884,7 @@ export default function Stock() {
                   <div
                     className={`rounded-lg border px-3 py-2.5 text-xs ${
                       adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty
-                        ? "border-red-500/40 bg-destructive/5 text-destructive"
+                        ? "border-destructive/40 bg-destructive/5 text-destructive"
                         : "border-border bg-muted/30 text-foreground"
                     }`}
                   >
