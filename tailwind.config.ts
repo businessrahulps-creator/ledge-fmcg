@@ -115,6 +115,23 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         pill: "9999px",
       },
+      boxShadow: {
+        "depth-2": "var(--shadow-2)",
+        "depth-4": "var(--shadow-4)",
+        "depth-8": "var(--shadow-8)",
+        "depth-16": "var(--shadow-16)",
+        "depth-28": "var(--shadow-28)",
+      },
+      transitionTimingFunction: {
+        fluent: "cubic-bezier(0.33, 0, 0.67, 1)",
+        "fluent-decel": "cubic-bezier(0.1, 0.9, 0.2, 1)",
+        "fluent-accel": "cubic-bezier(0.7, 0, 1, 0.5)",
+      },
+      transitionDuration: {
+        fast: "100ms",
+        normal: "200ms",
+        slow: "300ms",
+      },
       spacing: {
         "18": "4.5rem",
         "22": "5.5rem",
