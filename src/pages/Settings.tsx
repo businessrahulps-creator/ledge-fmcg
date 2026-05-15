@@ -69,7 +69,7 @@ function InstallAppCard() {
   return (
     <div className="glass-card p-4 md:p-6 max-w-2xl md:hidden">
       <div className="flex items-start gap-3">
-        <img src="/pwa-192.png" alt="Ledge" className="h-12 w-12 shrink-0 rounded-xl shadow-sm" />
+        <img src="/pwa-192.png" alt="Ledge" className="h-12 w-12 shrink-0 rounded-md shadow-sm" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold">Install Ledge App</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -315,7 +315,7 @@ export default function Settings() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Settings</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Settings</h1>
           <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Manage your workspace and team
           </p>
@@ -399,7 +399,7 @@ export default function Settings() {
           {/* Subscription Tab */}
           <TabsContent value="subscription">
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="max-w-2xl space-y-4 md:space-y-6">
-              <div className={`rounded-xl border p-4 md:p-6 ${trialExpired ? "border-destructive/30 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
+              <div className={`rounded-md border p-4 md:p-6 ${trialExpired ? "border-destructive/30 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
                 <div className="flex items-center gap-3">
                   {trialExpired ? (
                     <AlertTriangle className="h-5 w-5 text-destructive md:h-6 md:w-6" strokeWidth={1.5} />
@@ -500,8 +500,8 @@ export default function Settings() {
                           <tr key={m.id} className="border-b last:border-b-0 row-hover">
                             <td className="p-2 align-middle md:p-3">
                               <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                m.type === "insert" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" :
-                                m.type === "update" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" :
+                                m.type === "insert" ? "bg-success/15 text-success" :
+                                m.type === "update" ? "bg-warning/15 text-warning" :
                                 "bg-destructive/15 text-destructive"
                               }`}>
                                 {m.type}
@@ -516,7 +516,7 @@ export default function Settings() {
                             </td>
                             <td className="p-2 align-middle md:p-3">
                               {retryStatus[m.id] === "success" ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-medium text-success">
                                   <CheckCircle2 className="h-3 w-3" /> Synced
                                 </span>
                               ) : retryStatus[m.id] === "failed" ? (
@@ -594,7 +594,7 @@ export default function Settings() {
 
         {/* Add/Edit Member Dialog */}
         <Dialog open={!!editMember} onOpenChange={() => setEditMember(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewMember ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewMember ? "Add a new team member" : "Edit team member details"}</DialogDescription>
@@ -698,7 +698,7 @@ export default function Settings() {
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!deleteMember} onOpenChange={(open) => !open && setDeleteMember(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm">
@@ -715,7 +715,7 @@ export default function Settings() {
         </AlertDialog>
 
         <AlertDialog open={showClearQueueConfirm} onOpenChange={setShowClearQueueConfirm}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">Clear Sync Queue</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm">
@@ -741,7 +741,7 @@ export default function Settings() {
 
         {/* Logout Confirmation Dialog */}
         <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">Log Out</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm">

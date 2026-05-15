@@ -259,7 +259,7 @@ export default function Company() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Company</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Company</h1>
           <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Manage your company profile, tax details, and bank information
           </p>
@@ -275,7 +275,7 @@ export default function Company() {
               onChange={handleLogoUpload}
             />
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 md:h-16 md:w-16 overflow-hidden">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 md:h-16 md:w-16 overflow-hidden">
                 {logoUrl ? (
                   <img src={logoUrl} alt="Company logo" className="h-full w-full object-cover" />
                 ) : (
@@ -404,7 +404,7 @@ export default function Company() {
 
         {/* Prefix Change Confirmation Dialog */}
         <AlertDialog open={showPrefixConfirm} onOpenChange={setShowPrefixConfirm}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">⚠️ Change Order Prefix</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm space-y-2">

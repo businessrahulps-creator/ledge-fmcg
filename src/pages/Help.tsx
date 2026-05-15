@@ -27,7 +27,7 @@ export default function Help() {
           </p>
         </div>
 
-        <div className="glass-card rounded-xl border p-4 sm:p-6 space-y-4">
+        <div className="glass-card rounded-md border p-4 sm:p-6 space-y-4">
           <p className="text-sm text-muted-foreground/80 leading-relaxed">
             Welcome! Pick a topic below to learn how Ledge works. Each section has step-by-step instructions written in plain English.
           </p>
