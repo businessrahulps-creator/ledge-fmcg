@@ -90,7 +90,7 @@ export default function Login() {
         </div>
 
         {/* Form */}
-        <div className="rounded-xl border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm">
+        <div className="rounded-md border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
