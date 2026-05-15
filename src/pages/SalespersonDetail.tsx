@@ -53,7 +53,7 @@ export default function SalespersonDetail() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{person.name}</h1>
+              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">{person.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{person.region}</span>
                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{person.phone}</span>
@@ -123,7 +123,7 @@ export default function SalespersonDetail() {
               <div className="mt-0.5 flex items-center gap-1.5">
                 <p className="text-sm font-semibold md:text-base">{sc.orders30d}</p>
                 {trend30 !== 0 && (
-                  <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${trend30 > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                  <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${trend30 > 0 ? "text-success" : "text-destructive"}`}>
                     {trend30 > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                     {Math.abs(Math.round(trend30))}%
                   </span>
@@ -188,8 +188,8 @@ export default function SalespersonDetail() {
           const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
           const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
           const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
-          const statusColor = mainPct > 100 ? "text-emerald-600 dark:text-emerald-400" : mainPct >= 70 ? "text-blue-600 dark:text-blue-400" : mainPct >= 40 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400";
-          const barColor = mainPct > 100 ? "[&>div]:bg-emerald-500" : mainPct >= 70 ? "[&>div]:bg-blue-500" : mainPct >= 40 ? "[&>div]:bg-amber-500" : "[&>div]:bg-red-500";
+          const statusColor = mainPct > 100 ? "text-success" : mainPct >= 70 ? "text-primary" : mainPct >= 40 ? "text-warning" : "text-destructive";
+          const barColor = mainPct > 100 ? "[&>div]:bg-success" : mainPct >= 70 ? "[&>div]:bg-primary" : mainPct >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive";
           return (
             <div className="space-y-2">
               <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">

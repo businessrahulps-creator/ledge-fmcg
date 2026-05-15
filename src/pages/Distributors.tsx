@@ -127,7 +127,7 @@ export default function Distributors() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Dealers</h1>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Dealers</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage your dealer network
             </p>
@@ -208,7 +208,7 @@ export default function Distributors() {
                   const outstanding = d.outstandingAmount || 0;
                   if (limit === 0 && outstanding === 0) return null;
                   const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-                  const dotColor = limit === 0 ? "bg-muted-foreground" : pct >= 100 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-emerald-500";
+                  const dotColor = limit === 0 ? "bg-muted-foreground" : pct >= 100 ? "bg-destructive" : pct >= 70 ? "bg-warning" : "bg-success";
                   return (
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1.5">
@@ -250,7 +250,7 @@ export default function Distributors() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={!!editItem} onOpenChange={() => setEditItem(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-lg">
+          <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-md sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
               <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
@@ -352,7 +352,7 @@ export default function Distributors() {
 
         {/* Delete Confirmation */}
         <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Remove Dealer</AlertDialogTitle>
               <AlertDialogDescription>

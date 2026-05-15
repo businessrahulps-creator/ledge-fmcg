@@ -86,7 +86,7 @@ export default function DealerDetail() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{dealer.name}</h1>
+              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">{dealer.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{dealer.location}</span>
                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dealer.contact}</span>
@@ -162,7 +162,7 @@ export default function DealerDetail() {
                 const outstanding = dealer.outstandingAmount || 0;
                 const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
                 const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-red-500" : pct >= 70 ? "border-amber-500" : "border-emerald-500";
-                const textColor = limit === 0 ? "" : pct >= 100 ? "text-red-600 dark:text-red-400" : pct >= 70 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400";
+                const textColor = limit === 0 ? "" : pct >= 100 ? "text-destructive" : pct >= 70 ? "text-warning" : "text-success";
                 return (
                   <div className={`col-span-2 glass-card ${borderColor} p-3 md:p-4`}>
                     <span className="text-xs text-muted-foreground">Outstanding / Credit Limit</span>
@@ -195,8 +195,8 @@ export default function DealerDetail() {
                 <span className="text-[10px] text-muted-foreground">Orders (30d)</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-sm font-semibold">{sc.orders30d}</span>
-                  {trend === "up" && <TrendingUp className="h-3 w-3 text-emerald-500" />}
-                  {trend === "down" && <TrendingDown className="h-3 w-3 text-red-500" />}
+                  {trend === "up" && <TrendingUp className="h-3 w-3 text-success" />}
+                  {trend === "down" && <TrendingDown className="h-3 w-3 text-destructive" />}
                   {trend === "flat" && <Minus className="h-3 w-3 text-muted-foreground" />}
                   <span className="text-[10px] text-muted-foreground">vs {sc.ordersPrev30d} prev</span>
                 </div>
@@ -219,7 +219,7 @@ export default function DealerDetail() {
             <div className="glass-card p-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] text-muted-foreground">Payment Timeliness (On-time %)</span>
-                <span className={`text-xs font-semibold ${sc.paymentTimeliness >= 60 ? "text-emerald-600 dark:text-emerald-400" : sc.paymentTimeliness >= 30 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                <span className={`text-xs font-semibold ${sc.paymentTimeliness >= 60 ? "text-success" : sc.paymentTimeliness >= 30 ? "text-warning" : "text-destructive"}`}>
                   {sc.paymentTimeliness.toFixed(0)}%
                 </span>
               </div>
@@ -249,8 +249,8 @@ export default function DealerDetail() {
               const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
               const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
               const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
-              const statusColor = mainPct > 100 ? "text-emerald-600 dark:text-emerald-400" : mainPct >= 70 ? "text-blue-600 dark:text-blue-400" : mainPct >= 40 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400";
-              const barColor = mainPct > 100 ? "[&>div]:bg-emerald-500" : mainPct >= 70 ? "[&>div]:bg-blue-500" : mainPct >= 40 ? "[&>div]:bg-amber-500" : "[&>div]:bg-red-500";
+              const statusColor = mainPct > 100 ? "text-success" : mainPct >= 70 ? "text-primary" : mainPct >= 40 ? "text-warning" : "text-destructive";
+              const barColor = mainPct > 100 ? "[&>div]:bg-success" : mainPct >= 70 ? "[&>div]:bg-primary" : mainPct >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive";
               return (
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
@@ -387,7 +387,7 @@ export default function DealerDetail() {
                             <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(e.date)}</td>
                             <td className="px-4 py-3 font-medium">{e.particulars}</td>
                             <td className="px-4 py-3 text-right font-medium">{e.debit > 0 ? formatCurrency(e.debit) : "—"}</td>
-                            <td className="px-4 py-3 text-right font-medium text-emerald-600 dark:text-emerald-400">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
+                            <td className="px-4 py-3 text-right font-medium text-success">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
                             <td className="px-4 py-3 text-right font-semibold">{formatCurrency(e.balance)}</td>
                           </tr>
                         ))}
@@ -396,7 +396,7 @@ export default function DealerDetail() {
                         <tr className="border-t border-border bg-muted/30">
                           <td className="px-4 py-2.5" colSpan={2}><span className="text-xs font-semibold">Totals</span></td>
                           <td className="px-4 py-2.5 text-right text-xs font-semibold">{formatCurrency(totalDebit)}</td>
-                          <td className="px-4 py-2.5 text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalCredit)}</td>
+                          <td className="px-4 py-2.5 text-right text-xs font-semibold text-success">{formatCurrency(totalCredit)}</td>
                           <td className="px-4 py-2.5 text-right text-xs font-bold">{formatCurrency(closing)}</td>
                         </tr>
                       </tfoot>
@@ -421,7 +421,7 @@ export default function DealerDetail() {
                             {e.debit > 0 ? (
                               <span className="text-xs font-medium">+{formatCurrency(e.debit)}</span>
                             ) : (
-                              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">−{formatCurrency(e.credit)}</span>
+                              <span className="text-xs font-medium text-success">−{formatCurrency(e.credit)}</span>
                             )}
                           </div>
                           <div className="mt-0.5 flex items-center justify-between">
@@ -501,7 +501,7 @@ export default function DealerDetail() {
 
       {/* Secondary Sale Modal */}
       <Dialog open={ssOpen} onOpenChange={setSsOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base md:text-lg">Record Secondary Sale</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -567,7 +567,7 @@ export default function DealerDetail() {
       </Dialog>
 
       <AlertDialog open={!!deleteSecondarySaleId} onOpenChange={() => setDeleteSecondarySaleId(null)}>
-        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Secondary Sale</AlertDialogTitle>
             <AlertDialogDescription>

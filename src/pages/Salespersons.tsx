@@ -104,7 +104,7 @@ export default function Salespersons() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight md:text-2xl">Sales Team</h1>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Sales Team</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">Manage your sales team</p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
@@ -183,7 +183,7 @@ export default function Salespersons() {
         {/* Add/Edit Dialog */}
         {editItem && (
           <Dialog open onOpenChange={() => setEditItem(null)}>
-            <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
                 <DialogDescription className="sr-only">{isNew ? "Add a new team member" : "Edit team member details"}</DialogDescription>
@@ -221,7 +221,7 @@ export default function Salespersons() {
         {/* Delete Confirmation */}
         {deleteId && (
           <AlertDialog open onOpenChange={() => setDeleteId(null)}>
-            <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+            <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
               <AlertDialogHeader>
                 <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
                 <AlertDialogDescription>

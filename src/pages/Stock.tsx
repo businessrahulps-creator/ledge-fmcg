@@ -46,9 +46,9 @@ import { toast } from "sonner";
 
 function HealthBadge({ health }: { health: string }) {
   const dotColor: Record<string, string> = {
-    healthy: "bg-emerald-500",
-    low: "bg-amber-500",
-    critical: "bg-red-500",
+    healthy: "bg-success",
+    low: "bg-warning",
+    critical: "bg-destructive",
   };
   const labels: Record<string, string> = { healthy: "Healthy", low: "Low", critical: "Critical" };
   return (
@@ -343,7 +343,7 @@ export default function Stock() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">Stock</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Stock</h1>
           <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Manage your products and warehouse inventory
           </p>
@@ -542,7 +542,7 @@ export default function Stock() {
                       </div>
                       {stats.lowStockCount > 0 && (
                         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground md:text-xs">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-warning" />
                           {stats.lowStockCount} low stock item{stats.lowStockCount !== 1 ? "s" : ""}
                         </div>
                       )}
@@ -650,7 +650,7 @@ export default function Stock() {
                                 <tr key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${isAccountant ? "" : "cursor-pointer"}`}>
                                   <td className="px-6 py-4 font-medium">{si.productName}</td>
                                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{si.sku}</td>
-                                  <td className={`px-6 py-4 text-right font-semibold ${health === "critical" ? "text-red-500" : health === "low" ? "text-amber-600" : ""}`}>
+                                  <td className={`px-6 py-4 text-right font-semibold ${health === "critical" ? "text-destructive" : health === "low" ? "text-warning" : ""}`}>
                                     {formatNumber(si.quantity)}
                                   </td>
                                   <td className="px-6 py-4 text-right text-muted-foreground">{si.threshold}</td>
@@ -675,7 +675,7 @@ export default function Stock() {
                               </div>
                               <div className="mt-1 flex items-center justify-between">
                                 <span className="text-[10px] text-muted-foreground font-mono">{si.sku}</span>
-                                <span className={`text-xs font-semibold ${health === "critical" ? "text-red-500" : health === "low" ? "text-amber-600" : ""}`}>
+                                <span className={`text-xs font-semibold ${health === "critical" ? "text-destructive" : health === "low" ? "text-warning" : ""}`}>
                                   {formatNumber(si.quantity)} {si.unit}s
                                 </span>
                               </div>
@@ -702,7 +702,7 @@ export default function Stock() {
         {!isAccountant && (<>
         {/* Add/Edit Product Dialog */}
         <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewProduct ? "Add Product" : "Edit Product"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewProduct ? "Add a new product" : "Edit product details"}</DialogDescription>
@@ -746,7 +746,7 @@ export default function Stock() {
 
         {/* Delete Product */}
         <AlertDialog open={!!deleteProductId} onOpenChange={() => setDeleteProductId(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Product</AlertDialogTitle>
               <AlertDialogDescription>
@@ -762,7 +762,7 @@ export default function Stock() {
 
         {/* Add/Edit Warehouse */}
         <Dialog open={!!editWarehouse} onOpenChange={() => setEditWarehouse(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewWarehouse ? "Add Warehouse" : "Edit Warehouse"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewWarehouse ? "Add a new warehouse" : "Edit warehouse details"}</DialogDescription>
@@ -790,7 +790,7 @@ export default function Stock() {
 
         {/* Delete Warehouse */}
         <AlertDialog open={!!deleteWarehouseLoc} onOpenChange={() => { setDeleteWarehouseLoc(null); setDeleteConfirmText(""); }}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
               <AlertDialogDescription className="space-y-3">
@@ -819,7 +819,7 @@ export default function Stock() {
 
         {/* Edit Stock Item */}
         <Dialog open={!!editStockItem} onOpenChange={() => setEditStockItem(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
               <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
@@ -884,7 +884,7 @@ export default function Stock() {
                   <div
                     className={`rounded-lg border px-3 py-2.5 text-xs ${
                       adjustIntent === "remove" && (adjustDelta ?? 0) > editOriginalQty
-                        ? "border-red-500/40 bg-red-500/5 text-red-600 dark:text-red-400"
+                        ? "border-destructive/40 bg-destructive/5 text-destructive"
                         : "border-border bg-muted/30 text-foreground"
                     }`}
                   >
@@ -921,7 +921,7 @@ export default function Stock() {
                 <Button type="button" variant="destructive" onClick={() => setConfirmDeleteStockItem(true)} className="w-full">
                   Remove from Warehouse
                 </Button>
-                <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+                <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Remove Inventory Item</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -946,7 +946,7 @@ export default function Stock() {
         {/* Add New Product to Warehouse — only lists products NOT already stocked here.
             For products already in this warehouse, users adjust via the row's Edit dialog. */}
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">Add Product to Warehouse</DialogTitle>
               <DialogDescription className="text-xs">
