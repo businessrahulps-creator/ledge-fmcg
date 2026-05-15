@@ -47,11 +47,11 @@ import { toast } from "sonner";
 import { formatIndianDate } from "@/utils/formatDate";
 
 const statusColors: Record<string, string> = {
-  paid: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
-  partial: "border-amber-500 bg-amber-500/10 text-amber-600",
-  pending: "border-red-500 bg-red-500/10 text-red-600",
-  dispatched: "border-blue-500 bg-blue-500/10 text-blue-600",
-  delivered: "border-emerald-500 bg-emerald-500/10 text-emerald-600",
+  paid: "border-success/40 bg-success/10 text-success",
+  partial: "border-warning/40 bg-warning/10 text-warning",
+  pending: "border-destructive/40 bg-destructive/10 text-destructive",
+  dispatched: "border-primary/30 bg-primary/10 text-primary",
+  delivered: "border-success/40 bg-success/10 text-success",
 };
 
 const paymentModes = [
