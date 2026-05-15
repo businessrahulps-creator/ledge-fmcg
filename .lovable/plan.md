@@ -1,132 +1,122 @@
-# Sync Linear + Cursor + Lovable
+# Find Bugs → Push to Linear (read-only, won't touch the app)
 
-Goal: one queue (Linear), two builders (Lovable for features/UI/backend, Cursor for logic/bugs/refactors), one repo (GitHub) that keeps everything in sync automatically.
-
----
-
-## Step 1 — Connect GitHub to Lovable (the backbone)
-
-Everything syncs through GitHub. This is non-negotiable — without it, Cursor and Lovable can't share code.
-
-1. In Lovable: chat input → **+** menu (bottom left) → **GitHub** → **Connect project**
-2. Authorize the Lovable GitHub App, pick your org, click **Create Repository**
-3. Sync is bidirectional and real-time: Lovable pushes commits as it works, Cursor pushes commits when you save — both pull automatically
-
-After this, the Ledge codebase lives in GitHub. Lovable and Cursor are just two editors looking at the same repo.
+Goal: audit Ledge for real bugs without modifying a single line of source code, then file each finding as a Linear issue in a new **Ledge** workspace.
 
 ---
 
-## Step 2 — Clone the repo locally for Cursor
+## Guardrail: zero-risk audit
 
-In your terminal:
-```
-git clone <your-new-github-repo-url> ledge
-cd ledge
-bun install
-bun run dev
-```
-
-Open the `ledge` folder in Cursor. You now have the full project locally.
+Everything in this plan is **read-only on the codebase**. No file edits, no migrations, no deploys, no dependency changes. The only writes happen in Linear (creating issues). If you don't like a finding, you delete the ticket — the app is untouched.
 
 ---
 
-## Step 3 — Connect Linear to Cursor (issue → branch → PR)
+## Step 1 — Connect Linear
 
-Cursor has native Linear support via MCP.
+I'll trigger the Linear connector. You click once to authorize. This gives me API access to create issues, labels, and (if needed) the team.
 
-1. In Cursor: **Settings** → **Tools & Integrations** → **MCP**
-2. Add Linear (one-click OAuth, no API key needed)
-3. Now in Cursor's chat, type `@Linear` and you can:
-   - Pull issue details into context: *"Fix LED-42"* → Cursor reads the full issue
-   - Auto-create branches named `mahesh/led-42-fix-pricing-bug`
-   - Update issue status when you commit/push
+## Step 2 — Set up the "Ledge" destination in Linear
 
-This is the killer flow: **Linear issue → Cursor reads it → Cursor fixes it → PR opens → issue auto-moves to "In Review"**.
+Quick clarification on Linear's model:
+- **Workspace** = your whole Linear account (already exists)
+- **Team** = a top-level container with its own issue prefix (e.g. `LED-1`, `LED-2`). This is what most people mean by "create a new one for Ledge."
+- **Project** = a body of work inside a team (e.g. "V1 Launch", "Bug Bash")
 
----
+I'll do this:
+1. Check if a team named **Ledge** already exists in your workspace
+2. If not, create one with key `LED` via the Linear API (`teamCreate` mutation)
+3. Create a project inside it called **Bug Bash — Initial Audit** so all the tickets from this pass are grouped and easy to triage/close in bulk
+4. Create labels: `bug`, `severity:critical`, `severity:high`, `severity:medium`, `severity:low`, `area:orders`, `area:billing`, `area:stock`, `area:auth`, `area:ui`, `area:perf`, `area:a11y`, `area:security`
 
-## Step 4 — Connect Linear to GitHub (auto status updates)
-
-So Linear knows when issues ship.
-
-1. In Linear: **Settings** → **Integrations** → **GitHub** → Connect
-2. Pick your Ledge repo
-3. Configure auto-transitions:
-   - PR opened with "LED-42" in title/branch → issue moves to **In Progress**
-   - PR merged → issue moves to **Done**
-
-Now Linear is always accurate without you touching it.
+If the API can't create a team for permissions reasons, I'll stop and ask you to create it in Linear UI, then resume.
 
 ---
 
-## Step 5 — Connect Linear to Lovable (so I can read issues too)
+## Step 3 — The audit (read-only, 4 passes)
 
-Linear has an MCP server. Lovable can connect to it via the **mcp_knowledge** connector.
+I run all four in parallel/sequence, collect findings, **show them to you for approval before pushing anything to Linear**.
 
-When you want me to work on a Linear ticket, I'll prompt you to authorize Linear MCP. Once connected, you can say *"Lovable, pick up LED-42"* and I'll read the issue, build the feature, push to GitHub. Linear status updates automatically via Step 4.
+### Pass A — Static code audit
+- TypeScript: `tsc --noEmit` → list every type error
+- ESLint: full repo lint → list errors and warnings
+- Custom Ledge convention scan:
+  - Raw `supabase` calls in pages (should use `useApi()`)
+  - Raw `<input type="number">` (should use `<NumberInput>`)
+  - Hex colors / non-semantic Tailwind colors in components
+  - Pricing math outside `src/lib/order-pricing.ts`
+  - Missing `key` props, missing `aria-*`, missing alt text
+  - Unhandled promise rejections, `await` inside `.map`, missing `try/catch` around Supabase calls
+  - Stale `useEffect` deps, missing cleanup functions
 
-I'll trigger this connection on-demand the first time you ask me to read a Linear ticket — no setup needed now.
+### Pass B — Test suite
+- Run `bunx vitest run` (already passing — 114/114, will recheck)
+- Run `bunx playwright test` if it executes in this sandbox; otherwise note it as a finding for you to run locally
 
----
+### Pass C — Runtime smoke test (browser tool)
+Click through the published URL on a fresh session:
+1. Login → Dashboard
+2. New Order → add lines → save (watch celebration)
+3. Edit Order → change qty → save
+4. Stock page → add product, add warehouse
+5. Dealers → create dealer → open detail
+6. Reports → each tab
+7. Billing → create invoice
+8. Settings → company info
+9. Sign out
 
-## Step 6 — The daily workflow
+For each step I capture: console errors, failed network requests, broken layouts at mobile width (375px) and desktop (1280px). Each becomes a finding.
 
-```text
-                    ┌─────────────┐
-                    │   Linear    │  ← single source of truth
-                    │  (backlog)  │     you triage here every morning
-                    └──────┬──────┘
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-        Logic / bug /              Feature / UI /
-        refactor / test            Cloud / design
-              │                         │
-              ▼                         ▼
-       ┌──────────┐              ┌──────────┐
-       │  Cursor  │              │ Lovable  │
-       │ (local)  │              │ (cloud)  │
-       └────┬─────┘              └────┬─────┘
-            │                         │
-            └────────────┬────────────┘
-                         ▼
-                   ┌──────────┐
-                   │  GitHub  │  ← single source of code
-                   └────┬─────┘
-                        │ auto-sync
-                        ▼
-                   Linear updates status
-```
-
-**Rule of thumb (already established last turn):**
-- **Cursor** → bug fix, logic in `src/lib/`, tests in `__tests__/`, multi-file refactors, anything with a stack trace
-- **Lovable** → new pages, design system tweaks, Cloud schema/edge functions, "make it look better"
-- **Both can run at the same time** — just don't edit the same file in both. Use Linear to coordinate which tool owns which ticket.
+### Pass D — Backend security scan
+- Run `supabase--linter` (RLS, policies, function search_path)
+- Run `security--run_security_scan` (full Lovable security check)
+- Check for tables without RLS, overly permissive policies, leaked anon-readable PII
 
 ---
 
-## Step 7 — Two small files I'll add to the repo (when you approve build)
+## Step 4 — Triage & approval
 
-These make Cursor respect Ledge's conventions instead of fighting them:
+I produce one consolidated table:
 
-1. **`.cursorrules`** at repo root — tells Cursor: use `useApi()` from `src/services/api.ts`, never raw `supabase` calls in pages; use `NumberInput` not `type=number`; use semantic tokens not hex colors; pricing math always goes through `src/lib/order-pricing.ts`; tests live next to source in `__tests__/`.
-2. **`.cursor/mcp.json`** — pre-registers Linear MCP so anyone cloning the repo gets the same Cursor setup.
+| # | Title | Area | Severity | Where | Suggested fix | File ticket? |
+|---|-------|------|----------|-------|---------------|---|
+| 1 | Stock value rounds incorrectly for >9999 units | stock | High | src/utils/formatCurrency.ts:42 | … | yes/no |
 
----
-
-## Acceptance check (you'll know it's working when…)
-
-- You create issue **LED-99** in Linear → Cursor `@Linear LED-99` pulls it in → Cursor commits with `LED-99` in branch name → PR opens → Linear shows "In Review" → merge → Linear shows "Done" → Lovable preview rebuilds with the fix
-- You ask Lovable to "build the WhatsApp settings page from LED-50" → I read the ticket via MCP → push commits → Linear auto-updates → you pull in Cursor and see the new files
+You reply with which rows to file (or "all"). Default is "file everything except `low` unless you say otherwise."
 
 ---
 
-## What I need from you to proceed
+## Step 5 — Push to Linear
 
-Switch to **Build mode** and confirm which of these you want me to do now:
+For each approved finding, I call Linear's `issueCreate` GraphQL mutation via the connector gateway with:
 
-- **(A)** Just add `.cursorrules` + `.cursor/mcp.json` to the repo (5 min, unlocks Cursor immediately)
-- **(B)** Also trigger the Lovable→Linear MCP connection so I can read tickets (1 OAuth click from you)
-- **(C)** Both
+- **Title** — short, action-oriented ("Fix stock value rounding for high quantities")
+- **Description** — markdown body with: symptom, repro steps, file:line refs, suggested approach, screenshots if from runtime pass
+- **Team** — Ledge
+- **Project** — Bug Bash — Initial Audit
+- **Labels** — `bug`, `severity:*`, `area:*`
+- **Priority** — Urgent (critical) / High / Medium / Low based on severity
+- **Estimate** — rough t-shirt (1/2/3/5)
 
-Steps 1–4 (GitHub connect, clone, Cursor↔Linear, Linear↔GitHub) are things only you can do in those external apps — I'll wait for your "done" before adding the repo files in Step 7.
+I'll batch them with a small delay to respect rate limits and report back: *"Filed 27 issues. 3 critical, 8 high, 14 medium, 2 low. View in Linear: <link>."*
+
+---
+
+## What I need from you to start
+
+Approve this plan and I'll:
+1. Trigger the Linear OAuth connection (one click from you)
+2. Create the **Ledge** team + **Bug Bash** project + labels
+3. Run all 4 audit passes
+4. Show the triage table for your approval
+5. File the approved tickets
+
+Estimated time: ~5 minutes of audit + your triage time + ~1 minute to push tickets.
+
+---
+
+## What I will NOT do
+
+- Edit any source files in this loop
+- Run migrations or deploy anything
+- Auto-fix bugs (that's the next loop, in Cursor or Lovable, ticket-by-ticket)
+- File duplicate or speculative tickets without your approval
+- Touch existing Linear teams/projects you already have
