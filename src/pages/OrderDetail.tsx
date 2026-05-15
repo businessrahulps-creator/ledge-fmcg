@@ -373,7 +373,7 @@ export default function OrderDetail() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{order.orderNumber}</h1>
+              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">{order.orderNumber}</h1>
               <p className="text-xs text-muted-foreground md:text-sm">{formatIndianDate(order.date)}</p>
             </div>
           </div>

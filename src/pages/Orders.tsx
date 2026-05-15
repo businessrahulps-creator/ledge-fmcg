@@ -94,13 +94,13 @@ export default function Orders() {
     const docs = invoicesByOrderId.get(orderId);
     if (!docs || docs.length === 0) return null;
     const gstFinal = docs.find(d => d.docType === "gst_invoice" && d.status === "final");
-    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-emerald-50/80 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" };
+    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-success/10 text-success" };
     const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
-    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" };
+    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-warning/10 text-warning" };
     const proforma = docs.find(d => d.docType === "proforma");
-    if (proforma) return { label: "Proforma", color: "bg-purple-50/80 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300" };
+    if (proforma) return { label: "Proforma", color: "bg-accent/10 text-accent" };
     const estimate = docs.find(d => d.docType === "estimate");
-    if (estimate) return { label: "Estimate", color: "bg-amber-50/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" };
+    if (estimate) return { label: "Estimate", color: "bg-warning/10 text-warning" };
     return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
   }, [invoicesByOrderId]);
 
