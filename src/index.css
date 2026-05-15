@@ -28,61 +28,94 @@
     --accent-indigo: #4F46E5;
     --accent-wash: #EEF2FF;
 
-    --background: 40 20% 95%;
-    --foreground: 30 10% 12%;
+    /* ═══════════════════════════════════════════════════════════════
+       LEDGE V2 — Brand identity wins, Fluent 2 = methodology only
+       Palette: Midnight / Forest / Terracotta / Bone + neutrals
+       Type: Playfair Display (H1/H2 only) + Inter (everything else)
+       ═══════════════════════════════════════════════════════════════ */
 
-    --card: 40 25% 99%;
-    --card-foreground: 30 10% 12%;
+    /* Brand anchors (raw HSL for reference) */
+    --ledge-midnight: 218 60% 14%;   /* #0F1F3A */
+    --ledge-forest:   165 50% 11%;   /* #0E2A22 */
+    --ledge-terracotta: 19 56% 40%;  /* #A0522D */
+    --ledge-bone:     34 47% 93%;    /* #F5EFE6 */
 
-    --popover: 40 25% 99%;
-    --popover-foreground: 30 10% 14%;
+    /* Surfaces */
+    --background: 34 47% 93%;        /* Bone */
+    --foreground: 220 22% 8%;        /* Near-black, slight cool */
 
-    --primary: 222 84% 56%;
-    --primary-foreground: 0 0% 100%;
+    --card: 0 0% 100%;               /* Pure white card on Bone */
+    --card-foreground: 220 22% 8%;
 
-    --secondary: 35 15% 93%;
-    --secondary-foreground: 30 8% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 22% 8%;
 
-    --muted: 35 15% 91%;
-    --muted-foreground: 30 8% 45%;
+    /* Primary = Midnight */
+    --primary: 218 60% 14%;
+    --primary-foreground: 34 47% 96%;
 
-    --accent: 35 15% 93%;
-    --accent-foreground: 30 10% 14%;
+    --secondary: 34 25% 88%;         /* Warm bone tint */
+    --secondary-foreground: 220 22% 14%;
 
-    --destructive: 0 100% 71%;
+    --muted: 34 20% 90%;
+    --muted-foreground: 220 10% 38%;
+
+    --accent: 19 56% 40%;            /* Terracotta */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 42%;        /* Deep red, enterprise-grade */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 172 93% 37%;
+    --success: 165 50% 22%;          /* Forest, lifted for legibility */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 100% 50%;
-    --warning-foreground: 30 10% 10%;
+    --warning: 19 56% 40%;           /* Terracotta doubles as warning */
+    --warning-foreground: 0 0% 100%;
 
-    --border: 35 10% 87%;
-    --input: 35 10% 87%;
-    --ring: 222 84% 56%;
+    --border: 30 8% 84%;             /* Quiet warm gray */
+    --input: 30 8% 84%;
+    --ring: 218 60% 14%;             /* Focus = Midnight */
 
-    --radius: 0.75rem;
+    --radius: 0.375rem;              /* 6px — Fluent 2 default */
 
-    --sidebar-background: 40 25% 99%;
-    --sidebar-foreground: 30 10% 20%;
-    --sidebar-primary: 30 10% 12%;
+    --sidebar-background: 34 47% 93%;
+    --sidebar-foreground: 220 22% 14%;
+    --sidebar-primary: 218 60% 14%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 35 15% 93%;
-    --sidebar-accent-foreground: 30 10% 20%;
-    --sidebar-border: 35 10% 90%;
-    --sidebar-ring: 222 84% 56%;
+    --sidebar-accent: 34 30% 87%;
+    --sidebar-accent-foreground: 218 60% 14%;
+    --sidebar-border: 30 8% 82%;
+    --sidebar-ring: 218 60% 14%;
 
-    /* Ledge brand moments — used only in 4 designated places: splash, empty states, order celebration, sidebar wordmark. Never in buttons/badges/links. */
-    --brand-purple: 262 83% 58%;
-    --brand-coral: 22 100% 62%;
-    --brand-gradient: linear-gradient(90deg, hsl(262 83% 58%) 0%, hsl(22 100% 62%) 100%);
-    --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 58% / 0.10) 0%, hsl(22 100% 62% / 0.10) 100%);
+    --surface: 0 0% 100%;
+    --surface-border: 30 8% 86%;
 
-    --surface: 40 25% 99%;
-    --surface-border: 35 10% 91%;
+    /* Brand "moments" tokens kept for backward compat with existing utilities,
+       but rationing is RETIRED — Midnight/Terracotta now used semantically everywhere. */
+    --brand-purple: 218 60% 14%;
+    --brand-coral: 19 56% 40%;
+    --brand-gradient: linear-gradient(90deg, hsl(218 60% 14%) 0%, hsl(19 56% 40%) 100%);
+    --brand-gradient-soft: linear-gradient(90deg, hsl(218 60% 14% / 0.08) 0%, hsl(19 56% 40% / 0.08) 100%);
 
-    --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+    /* ── Fluent 2 methodology: depth, motion, density ── */
+    --shadow-2:  0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-4:  0 2px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-8:  0 4px 8px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-16: 0 8px 16px rgba(15, 23, 42, 0.10), 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-28: 0 14px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+
+    --motion-fast:    100ms;
+    --motion-normal:  200ms;
+    --motion-slow:    300ms;
+    --motion-ease:    cubic-bezier(0.33, 0, 0.67, 1);  /* Fluent standard */
+    --motion-decel:   cubic-bezier(0.1, 0.9, 0.2, 1);
+    --motion-accel:   cubic-bezier(0.7, 0, 1, 0.5);
+
+    --control-h-compact: 32px;
+    --control-h-default: 40px;
+
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Playfair Display', Georgia, serif;
   }
 
   .dark {
