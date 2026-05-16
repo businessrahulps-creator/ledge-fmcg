@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 /**
  * Hard guard that prevents users from using the app without a company.
@@ -43,13 +44,17 @@ export function NoCompanyGuard({ children }: { children: ReactNode }) {
         p_company_name: companyName.trim(),
         p_full_name: fullName.trim(),
       });
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, { source: "rpc:setup_new_company", title: "Couldn't create your workspace" });
+        setSubmitting(false);
+        return;
+      }
       await refreshProfile();
       toast.success("Workspace ready!", { description: "You're all set." });
       // Reload so DataContext picks up the new companyId cleanly
       setTimeout(() => window.location.reload(), 400);
     } catch (err: any) {
-      toast.error("Setup failed", { description: err.message });
+      handleSupabaseError(err, { source: "rpc:setup_new_company", title: "Couldn't create your workspace" });
       setSubmitting(false);
     }
   };
