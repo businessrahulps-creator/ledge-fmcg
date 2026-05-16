@@ -22,10 +22,13 @@ function DealerPreview() {
       {rows.map((r) => (
         <div
           key={r.name}
-          className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white/85 backdrop-blur-sm"
-          style={{ boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)" }}
+          className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white/90 backdrop-blur-sm"
+          style={{
+            color: "hsl(var(--foreground))",
+            boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)",
+          }}
         >
-          <span className="font-body text-[13px] font-medium text-foreground truncate">{r.name}</span>
+          <span className="font-body text-[13px] font-medium truncate" style={{ color: "hsl(var(--foreground))" }}>{r.name}</span>
           <span className={`lp-pill lp-pill--${r.variant}`} style={{ padding: "4px 9px 4px 4px", boxShadow: "none" }}>
             <span className="lp-pill__tile" style={{ width: 18, height: 18, borderRadius: 6 }}>
               <r.icon size={10} strokeWidth={2.5} />
