@@ -165,6 +165,12 @@ export default function Dashboard() {
 
   // Credit at Risk
   const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
+  const dealersApproaching = distributors.filter(d => {
+    if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
+    const pct = d.outstandingAmount / d.creditLimit;
+    return pct >= 0.8;
+  });
+  const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
