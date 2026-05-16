@@ -1,46 +1,110 @@
-# Fix: page keeps "snapping back" / feels unstable
+# How to make Ledge feel like a billion-dollar Microsoft product
 
-## What's actually happening
+This isn't one PR — it's a posture. Microsoft-grade products (Teams, Loop, Fabric, Copilot, Office) share a small set of traits that, more than visual polish, define the "expensive" feeling. Below is a candid audit of where Ledge already is, where it falls short, and a concrete pillar-by-pillar plan to close the gap. We'll then ship in small focused PRs — this document is the map, not the build.
 
-You're not being navigated to `/dashboard` by code — no page does that on its own except `/` (the landing page) when you're logged in. What you're seeing is a **loading flash** that looks like a refresh:
+## The five pillars of "billion-dollar feel"
 
-1. Every time the tab regains focus, `AuthContext`'s `visibilitychange` handler unconditionally calls `supabase.auth.getSession()`, then `setSession`, `setUser`, and `fetchProfile(user.id)` — even when the session hasn't changed.
-2. Supabase also fires `onAuthStateChange` (`TOKEN_REFRESHED`) periodically. The current handler reacts by setting `profileLoaded = false` and re-running `fetchProfile`, again even when nothing changed.
-3. `fetchProfile` always calls `setProfile(...)` with a new object reference. `AuthContext`'s value object is rebuilt every render (no `useMemo`), so every consumer (`AppLayout`, `DataProvider`, `NoCompanyGuard`, sidebar, topbar, all pages) re-renders.
-4. While `profileLoaded` momentarily flips to `false`, downstream UI shows skeletons / spinners for ~200–800ms. The visual effect feels like "the page reset and went back to dashboard".
+1. **Trust** — nothing surprises you, nothing is lost, every state is explainable.
+2. **Speed perception** — the product *feels* instant even when the network isn't.
+3. **Composition** — every screen is built from the same small set of primitives, applied with discipline.
+4. **Intelligence** — the product anticipates, summarizes, and reduces clicks.
+5. **Craft** — micro-details (motion, typography, focus, empty states, errors) are deliberate, not default.
 
-There is also an auto-recovery `setup_new_company` RPC that re-runs inside every `fetchProfile` if `company_id` is missing — extra network noise that compounds the flicker.
+---
 
-## Fix plan (frontend only, AuthContext)
+## 1. Trust — the foundation
 
-**File: `src/context/AuthContext.tsx`**
+What we have: RLS, multi-tenancy, error boundaries, activity log, validators.
 
-1. **Make `setSession` / `setUser` idempotent.** Wrap the state setters so they only update when the session's `access_token` or user `id` actually changed. This stops `TOKEN_REFRESHED` and visibility re-checks from forcing every consumer to re-render.
-2. **Stop resetting `profileLoaded` on token refresh.** In `onAuthStateChange`, only call `setProfileLoaded(false)` + `fetchProfile` when:
-   - the event is `SIGNED_IN` AND the user id changed from the previous session, or
-   - the event is `SIGNED_OUT`.
-   Ignore `TOKEN_REFRESHED`, `USER_UPDATED`, `INITIAL_SESSION` for profile refetch purposes — they don't change who the user is.
-3. **Throttle the `visibilitychange` re-check.** Only call `getSession()` if it's been more than ~60s since the last check, and only call `fetchProfile` if the returned user id differs from the one already in state. Never set `profileLoaded` to `false` here.
-4. **Skip the `setProfile` write when the new row is equivalent.** Compare `id`, `company_id`, `full_name`, `email`, `phone`; if all match, keep the existing object reference. This avoids re-rendering every consumer on a no-op refresh.
-5. **Gate the `setup_new_company` auto-recovery.** Only attempt the RPC once per session (track with a `useRef`), not on every visibility tick.
-6. **Memoize the context value** with `useMemo` so consumers don't re-render just because `AuthProvider` re-rendered.
+What's missing — and we'll fix:
 
-## Expected result
+- **Optimistic UI with rollback toasts.** Today, most mutations wait for the server. Microsoft products mutate locally first and reconcile silently. We'll wrap `useOrdersDomain` / `useDealersDomain` / `useStockDomain` in an optimistic pattern with a single `useMutation` helper that handles rollback + a discreet "Couldn't save — retry" toast with one-tap retry.
+- **Autosave with explicit state.** Forms (NewOrder, Company, Settings) should show "Saved · 2s ago" / "Saving…" / "Offline — will sync" the way Word does. Add a small `<SaveIndicator/>` primitive driven by a `useAutosave` hook.
+- **Undo for destructive actions.** Replace confirm dialogs for soft-deletes (orders, dealers, claims) with a 6-second "Deleted — Undo" toast (Gmail pattern). Keeps flow fast, preserves safety.
+- **Conflict-aware writes.** Use `updated_at` as an optimistic concurrency token on update RPCs. If a write races, show "This was changed by Rajesh 12s ago — keep yours or theirs?" instead of silently overwriting.
+- **Audit trail surface.** Activity log already exists; expose a "Recent changes" drawer on every detail page (Order, Dealer, Salesperson) — who changed what, when. Pure read, RLS-scoped.
+- **Session continuity.** Persist last-visited route, scroll position, and filter state in `sessionStorage` per tab so a hard refresh lands you exactly where you were.
 
-- Switching tabs / coming back from background no longer flashes skeletons or loaders.
-- Token refresh (every ~50 min) becomes invisible to the UI.
-- DataContext stops being nudged into recomputing memos when profile content is unchanged.
-- No functional change to sign-in, sign-out, or workspace setup.
+## 2. Speed perception — the felt experience
 
-## Out of scope
+What we have: cache-first DataContext, route prefetching, lazy chunks, route skeletons.
 
-- No router/redirect logic is being changed (none is misbehaving).
-- No DataContext refactor — its effects already key on `companyId` (a stable string), so once `AuthContext` is calmed down, downstream churn disappears.
-- Service worker / offline mode (still paused).
+What's missing:
 
-## Verification
+- **Per-route skeletons that match the real layout.** Generic `<RouteSkeleton/>` is fine as a fallback but creates a "loading flash" feel. Build dedicated skeletons for Dashboard, Orders, Dealers, Stock that mirror the actual grid/table — Loop/Fluent UI do this religiously.
+- **Stale-while-revalidate, visible.** When showing cached data, render a 2px top progress bar (Linear/Vercel pattern) instead of replacing the page. Promote `isRefreshing` to a global `<TopProgress/>`.
+- **Predictive prefetch on hover/focus.** Already partially done in `route-prefetch.ts`. Extend to: hover on an order row prefetches `/orders/:id` chunk + warms its data query. 150ms intent delay so we don't waste cycles on cursor flyovers.
+- **Virtualize long lists.** Orders, Stock, Claims, Invoices can hit thousands of rows. Adopt `@tanstack/react-virtual` for any table over ~80 rows. Keeps scroll buttery and DOM under 1500 nodes.
+- **Image / asset budget.** Audit all PNGs in `src/assets`. Convert hero/avatar/illustration to AVIF + WebP fallback via `vite-imagetools`. Preload only the LCP image. Defer everything else.
+- **Defer the heavy chrome.** Already done for toasters. Push `framer-motion` out of the entry chunk by using `motion/react` lazy variants where Motion is only used below the fold.
 
-- Open `/orders`, switch to another tab for 30s, come back → page should stay on `/orders` with no skeleton flash.
-- Leave tab idle for 60+ min so the Supabase access token refreshes → no visible reload.
-- Sign out / sign in → still works, lands on `/dashboard` once.
-- `NoCompanyGuard` still triggers correctly for a fresh user with no company.
+## 3. Composition — design system discipline
+
+What we have: Fluent 2 tokens, Playfair + Inter, semantic colors, `SignalCard` / `KpiStrip` / `InsightLine` / `StatusBadge`.
+
+What's missing:
+
+- **Page header primitive.** Every page reinvents its title row. Ship `<PageHeader title subtitle actions breadcrumbs/>` and migrate all 18 inner pages. Consistency at the title row is 60% of "feels Microsoft".
+- **Section primitive.** `<Section title description aside>` with consistent vertical rhythm (32/24/16). Stops every page from picking its own spacing.
+- **Table v2.** Current table is good; promote it to a `<DataTable columns rows sortable filterable density empty error loading/>` primitive with built-in sticky header, zebra option, density toggle, column visibility menu, and CSV export. One table component, every page.
+- **Form primitive.** A `<Form schema onSubmit>` wrapper over react-hook-form + zod that owns layout, inline validation, autosave, dirty guard, and submit state. Removes 400+ lines of ad-hoc form code.
+- **Empty / error / no-permission states.** Every list view needs the trio. Already have `<EmptyState/>` — extend with illustrations (the striped square mark used kindly) and a contextual primary action. Build matching `<ErrorState/>` and `<NoAccessState/>`.
+- **Density toggle.** Persistent user setting: Comfortable (current) / Compact / Spacious — affects table row height, padding, and font scale. Power users will love it.
+- **Keyboard map.** Document and implement: `g d` go to dashboard, `g o` orders, `n` new order, `/` focus search, `?` show shortcuts overlay. Ship a `<KeyboardShortcuts/>` modal.
+
+## 4. Intelligence — the Copilot layer
+
+What we have: AI roadmap memo (`mem://roadmap/ai-features-q-next`).
+
+What's missing — start with three high-leverage wins:
+
+- **Universal search palette (`Cmd/Ctrl+K`).** Searches orders, dealers, salespersons, products, settings; recent items; quick actions ("New order for Acme", "Mark INV-0123 paid"). Microsoft's command bar is the single biggest perceived-intelligence move.
+- **Dashboard "Today" digest.** Top of dashboard: a 2-sentence English summary generated by Gemini (already on Lovable AI). "Yesterday you shipped 12 orders worth ₹2.4L. 3 dealers are overdue. Stock for SKU X dropped below reorder point." Cached server-side, refreshed daily.
+- **Inline explain-anything.** Small `✦` icon next to any KPI tile or chart. Click → Gemini explains the number in plain Hindi/English ("Outstanding is up 18% because Acme & Modi haven't paid INV-118/119"). Reads from already-loaded context, no extra fetch.
+
+These three alone make the product feel like it's *thinking with you*.
+
+## 5. Craft — the micro-details
+
+- **Motion vocabulary.** Lock to Fluent decel (200/160ms) for everything. No bounces, no overshoots in /app. Currently mixed.
+- **Focus rings.** Audit every interactive element for a visible 2px Midnight/4% offset focus ring. Required for enterprise procurement checklists.
+- **Hover affordance discipline.** Rows lift 1px + shadow depth-8; cards lift 2px + depth-16; buttons get depth-2 → depth-4. One scale, everywhere.
+- **Number formatting.** Use Indian grouping (`1,00,000` not `100,000`) consistently — already mostly there, audit edge cases.
+- **Currency in tabular figures.** Apply `font-variant-numeric: tabular-nums` to every `.num` so columns align perfectly.
+- **Smart timestamps.** "2 min ago" → "just now" → "Today 3:42 PM" → "Yesterday" → "Tue 12 May" → "12 May 2024". One `<SmartTime/>` component.
+- **Sound (optional, opt-in).** A single 80ms "saved" tone on successful mutations. Off by default; toggle in Settings. Adds delight when on.
+- **Print stylesheets.** Most distributors print invoices, statements, reports. Audit every PDF page + add `@media print` for the in-app statement view as a fallback.
+
+---
+
+## What we're not chasing
+
+- Marketing-site razzle-dazzle inside `/app`. The landing page can dance; the app must be calm.
+- Glassmorphism, gradients, neon — already excluded by Fluent 2 methodology.
+- A full design-system documentation site. Internal Storybook is enough.
+- Multi-language UI until India distribution proves it's needed (Hindi-first is on the roadmap).
+
+---
+
+## Suggested shipping order (small PRs, each independently valuable)
+
+1. **PageHeader primitive + migrate 5 most-visited pages** (Dashboard, Orders, Dealers, Stock, Billing).
+2. **Top progress bar + stale-while-revalidate visible state.**
+3. **Optimistic mutations + Undo toasts for soft-deletes.**
+4. **Universal `Cmd/Ctrl+K` command palette.**
+5. **Per-route skeletons (Dashboard, Orders, Dealers, Stock).**
+6. **DataTable v2 with sticky header, density toggle, column visibility.**
+7. **Autosave + SaveIndicator on NewOrder, Company, Settings.**
+8. **Smart prefetch on row hover; virtualize Orders + Stock tables.**
+9. **Dashboard "Today" AI digest (Gemini).**
+10. **Inline "explain this number" affordance on KPI tiles.**
+11. **Keyboard shortcut overlay + `g`-prefix navigation.**
+12. **Polish pass: focus rings, smart timestamps, tabular nums, motion lockdown.**
+
+Each is 1–3 hours of focused work. Twelve PRs and Ledge will read like a Microsoft product to anyone who sits down with it.
+
+---
+
+## What I need from you before we start building
+
+Pick the **first three PRs** you want me to ship (recommended: 1, 2, 4 — they yield the biggest perceived-quality jump for the least code). I'll then come back with a tight implementation plan for each.

@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History, Loader2 } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
@@ -11,6 +11,8 @@ import { LiveClock } from "./LiveClock";
 import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
+import { TopProgress } from "@/components/ui/top-progress";
+import { CommandPalette } from "@/components/CommandPalette";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -148,6 +150,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider>
+      <TopProgress active={isRefreshing && online} />
+      <CommandPalette />
       <div className="flex h-dvh w-full overflow-hidden bg-background">
         <div className="hidden md:block">
           <AppSidebar />
@@ -161,20 +165,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <PageTitle />
             <div className="ml-auto flex items-center gap-3">
-              <AnimatePresence>
-                {isRefreshing && online && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 4 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 4 }}
-                    transition={{ duration: 0.2 }}
-                    className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
-                  >
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Syncing…
-                  </motion.div>
-                )}
-              </AnimatePresence>
               <LiveClock />
               {userRole && (
                 <>
