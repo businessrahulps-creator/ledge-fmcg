@@ -195,6 +195,10 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11", "cv02";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Disable text selection on UI chrome only — content stays selectable */
