@@ -289,18 +289,18 @@ export default function Dashboard() {
                         aria-label={fullLabel}
                         aria-pressed={isSelected}
                         className={cn(
-                          "relative flex flex-col items-center justify-center w-11 h-12 rounded-xl text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          "relative flex flex-col items-center justify-center w-11 h-11 rounded-md text-xs font-semibold transition-all active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                           isSelected
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                            ? "bg-primary text-primary-foreground shadow-depth-4"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted/80"
                         )}
                       >
-                        <span className={cn("text-[9px] font-medium leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-70")}>
+                        <span className={cn("text-[9px] font-semibold tracking-wider uppercase leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-65")}>
                           {weekdayLabel}
                         </span>
-                        <span className="text-sm font-bold tabular-nums leading-none">{d.getDate()}</span>
+                        <span className="text-sm font-semibold num leading-none">{d.getDate()}</span>
                         {isToday && !isSelected && (
-                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                          <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-primary" />
                         )}
                       </button>
                     );
