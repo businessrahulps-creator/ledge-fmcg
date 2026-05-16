@@ -284,7 +284,7 @@ export default function Performance() {
         name: o.salesperson,
         revenue: 0,
       };
-      existing.revenue += o.total;
+      existing.revenue += netTotal(o);
       map.set(o.salespersonId, existing);
     });
     return Array.from(map.values())
