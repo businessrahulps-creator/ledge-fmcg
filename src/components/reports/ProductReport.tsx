@@ -68,7 +68,7 @@ export function ProductReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{formatNumber(totalQty)} units sold</span>
-          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
         <div className="sm:ml-auto">
           <Button
