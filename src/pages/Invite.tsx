@@ -78,7 +78,8 @@ export default function Invite() {
       }
 
       // Friendly error mapping
-      const msg = result.message.toLowerCase();
+      const rawMessage = result.message;
+      const msg = rawMessage.toLowerCase();
       if (msg.includes("another workspace")) {
         // Resolve the user's current workspace name to show the friendly message
         let currentCompanyName = "another workspace";
