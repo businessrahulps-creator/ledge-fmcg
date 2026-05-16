@@ -161,7 +161,9 @@ export default function Performance() {
   const filteredOrders = useMemo(
     () =>
       orders.filter((o) => {
-        const d = new Date(o.date + "T00:00:00");
+        if (!orderInScope(o, revenueMode)) return false;
+        const dateKey = orderDateForMode(o, revenueMode);
+        const d = new Date(dateKey + "T00:00:00");
         if (period === "custom") {
           if (customFrom && d < customFrom) return false;
           if (customTo) {
@@ -173,7 +175,7 @@ export default function Performance() {
         }
         return d >= cutoff;
       }),
-    [orders, cutoff, period, customFrom, customTo]
+    [orders, cutoff, period, customFrom, customTo, revenueMode]
   );
 
   // Previous period for comparison
@@ -184,14 +186,16 @@ export default function Performance() {
       period === "custom"
         ? []
         : orders.filter((o) => {
-            const d = new Date(o.date + "T00:00:00");
+            if (!orderInScope(o, revenueMode)) return false;
+            const dateKey = orderDateForMode(o, revenueMode);
+            const d = new Date(dateKey + "T00:00:00");
             return d >= prevCutoff && d < cutoff;
           }),
-    [orders, prevCutoff, cutoff, period]
+    [orders, prevCutoff, cutoff, period, revenueMode]
   );
 
   // KPIs
-  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total, 0);
+  const totalRevenue = filteredOrders.reduce((s, o) => s + netTotal(o), 0);
   const totalOrderCount = filteredOrders.length;
   const avgOrderValue = totalOrderCount > 0 ? totalRevenue / totalOrderCount : 0;
   const paidOrders = filteredOrders.filter((o) => o.paymentStatus === "paid");
@@ -199,18 +203,18 @@ export default function Performance() {
     totalOrderCount > 0 ? (paidOrders.length / totalOrderCount) * 100 : 0;
 
   // Previous KPIs
-  const prevRevenue = prevOrders.reduce((s, o) => s + o.total, 0);
+  const prevRevenue = prevOrders.reduce((s, o) => s + netTotal(o), 0);
   const prevOrderCount = prevOrders.length;
   const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
   const prevPaid = prevOrders.filter((o) => o.paymentStatus === "paid");
   const prevCollection = prevOrderCount > 0 ? (prevPaid.length / prevOrderCount) * 100 : 0;
 
-  // Revenue trend — group by date
+  // Revenue trend — group by mode-aware date
   const revenueTrend = useMemo(() => {
     const map = new Map<string, number>();
     filteredOrders.forEach((o) => {
-      const key = o.date;
-      map.set(key, (map.get(key) || 0) + o.total);
+      const key = orderDateForMode(o, revenueMode);
+      map.set(key, (map.get(key) || 0) + netTotal(o));
     });
     return Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
@@ -221,7 +225,7 @@ export default function Performance() {
         }),
         revenue,
       }));
-  }, [filteredOrders]);
+  }, [filteredOrders, revenueMode]);
 
   // Payment split
   const paymentSplit = useMemo(() => {
