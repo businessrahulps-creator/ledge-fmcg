@@ -227,24 +227,60 @@ export default function Dashboard() {
                 </button>
               </p>
             </div>
-            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase md:text-right">
+            <span className="timeframe-pill md:self-end">
               This Month · {monthLabel}
-            </p>
+            </span>
           </div>
 
           {/* This Month strip — hairline-separated stat cells, no card border */}
           <div className="mt-5 grid grid-cols-2 md:grid-cols-4 border-y border-border/60 divide-x divide-border/60">
-            {[
-              { label: "Revenue", value: formatCurrency(monthRevenue) },
-              { label: "Orders", value: monthOrderCount.toString() },
-              { label: "Outstanding", value: formatCurrency(monthOutstanding) },
-              { label: "Delivered", value: `${monthDeliveredPct}%` },
-            ].map((s, i) => (
-              <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
-                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
-                <p className="font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</p>
-              </div>
-            ))}
+            {(() => {
+              const renderDelta = (delta: number | null, suffix = "%") => {
+                if (delta === null) {
+                  return <span className="insight-line insight-flat">— no {prevMonthLabel} data</span>;
+                }
+                if (delta === 0) {
+                  return <span className="insight-line insight-flat"><Minus className="icon-inline" />Flat vs {prevMonthLabel}</span>;
+                }
+                const up = delta > 0;
+                return (
+                  <span className={cn("insight-line", up ? "insight-up" : "insight-down")}>
+                    {up ? <TrendingUp className="icon-inline" /> : <TrendingDown className="icon-inline" />}
+                    {up ? "+" : ""}{delta}{suffix} vs {prevMonthLabel}
+                  </span>
+                );
+              };
+              const cells = [
+                { label: "Revenue", value: formatCurrency(monthRevenue), zero: monthRevenue === 0, insight: renderDelta(revenueDelta) },
+                { label: "Orders", value: monthOrderCount.toString(), zero: monthOrderCount === 0, insight: renderDelta(ordersDelta) },
+                {
+                  label: "Outstanding",
+                  value: formatCurrency(monthOutstanding),
+                  zero: monthOutstanding === 0,
+                  insight: outstandingOrders.length > 0
+                    ? <span className="insight-line insight-flat">Avg {avgOutstandingDays}d outstanding</span>
+                    : <span className="insight-line insight-up"><TrendingUp className="icon-inline" />All settled</span>,
+                },
+                {
+                  label: "Delivered",
+                  value: `${monthDeliveredPct}%`,
+                  zero: monthOrderCount === 0,
+                  insight: monthOrderCount === 0
+                    ? <span className="insight-line insight-flat">— no orders yet</span>
+                    : renderDelta(deliveredDelta === 0 ? 0 : deliveredDelta, "pp"),
+                },
+              ];
+              return cells.map((s, i) => (
+                <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
+                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
+                  <p className={cn(
+                    "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                    s.zero && "text-muted-foreground/35"
+                  )}>{s.value}</p>
+                  {s.insight}
+                </div>
+              ));
+            })()}
           </div>
 
           {/* 7-day revenue sparkline — full width band directly under strip */}
