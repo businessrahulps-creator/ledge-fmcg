@@ -4,6 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
+import { InsightLine } from "@/components/ui/insight-line";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 
@@ -487,42 +490,37 @@ export default function Performance() {
           </div>
         </div>
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {kpis.map((kpi) => (
-            <div
-              key={kpi.label}
-              className={`glass-card rounded-md border-l-[3px] p-4 ${kpi.accent}`}
-            >
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <kpi.icon className="h-4 w-4" />
-                <span className="text-xs font-medium">{kpi.label}</span>
-              </div>
-              <p className="mt-1.5 text-xl font-semibold tracking-tight text-foreground">
-                {kpi.value}
-              </p>
-              {kpi.change !== null && (
-                <div className={`mt-1 flex items-center gap-1 text-[11px] font-medium ${
-                  kpi.change > 0
-                    ? "text-success"
-                    : kpi.change < 0
-                    ? "text-destructive"
-                    : "text-muted-foreground"
-                }`}>
-                  {kpi.change > 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : kpi.change < 0 ? (
-                    <TrendingDown className="h-3 w-3" />
-                  ) : null}
-                  <span>
-                    {kpi.change > 0 ? "+" : ""}
-                    {kpi.change.toFixed(0)}% vs prev
-                  </span>
-                </div>
+        {/* Hero signal + KPI strip */}
+        {(() => {
+          const revChange = kpis[0].change;
+          const heroTier: "success" | "warning" | "destructive" | null =
+            revChange === null ? null : revChange >= 5 ? "success" : revChange <= -5 ? "destructive" : revChange < 0 ? "warning" : null;
+          return (
+            <div className="space-y-4">
+              {heroTier && (
+                <SignalCard
+                  tier={heroTier}
+                  icon={heroTier === "success" ? TrendingUp : heroTier === "destructive" ? TrendingDown : AlertTriangle}
+                  label={heroTier === "success" ? "REVENUE UP" : heroTier === "destructive" ? "REVENUE DOWN" : "REVENUE SLIPPING"}
+                  caption={`${formatCurrency(totalRevenue)} this period`}
+                  subCaption={`Previous period: ${formatCurrency(prevRevenue)}`}
+                  value={`${revChange! > 0 ? "+" : ""}${revChange!.toFixed(0)}%`}
+                  valueSuffix="VS PREV"
+                />
               )}
+              <KpiStrip
+                cells={kpis.map(k => ({
+                  label: k.label,
+                  value: k.value,
+                  zero: k.value === "0" || k.value === "₹0",
+                  insight: k.change !== null ? (
+                    <InsightLine delta={Number(k.change.toFixed(0))} comparator="prev" goodWhen="up" />
+                  ) : undefined,
+                }))}
+              />
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         {/* Tabbed sections */}
         <Tabs defaultValue="overview" className="w-full">
