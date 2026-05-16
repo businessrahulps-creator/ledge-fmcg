@@ -1,4 +1,4 @@
-import { Check, Gift, TrendingUp, Layers, Building2 } from "lucide-react";
+import { Check, Gift, TrendingUp, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
