@@ -450,23 +450,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteMember} onOpenChange={(open) => !open && setDeleteMember(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
-              <AlertDialogDescription className="text-xs md:text-sm">
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This will remove the member and all their role assignments. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="gap-2 sm:gap-0">
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         <AlertDialog open={showClearQueueConfirm} onOpenChange={setShowClearQueueConfirm}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
