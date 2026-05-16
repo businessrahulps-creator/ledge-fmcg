@@ -27,44 +27,23 @@ export function Features() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 auto-rows-fr" staggerTime={0.05}>
           {features.map((feature, i) => {
-            const isHero = i === 0;
+            const tint =
+              i === 0 ? "lp-card-tinted lp-card-forest" :       // Dealer Intelligence → growth
+              i === 5 ? "lp-card-tinted lp-card-terracotta" :   // Returns & Claims → recovery
+              "lp-card lp-card-premium";
             return (
               <StaggerItem key={feature.title}>
-                {isHero ? (
-                  <div className="lp-bento-hero lp-card-premium p-7 h-full flex flex-col">
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="lp-live-dot" />
-                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">Live now</span>
-                    </div>
-                    <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
-                      {feature.title}
-                    </h3>
-                    <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
-                      {feature.desc}
-                    </p>
-                    <div className="mt-auto pt-6">
-                      <p className="font-body text-[12.5px] text-muted-foreground tracking-tight">
-                        <span className="font-heading font-semibold text-foreground">Lifetime value</span>
-                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">Credit days</span>
-                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">Full history</span>
-                      </p>
-                    </div>
+                <div className={`${tint} p-7 h-full flex flex-col`}>
+                  <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 40, height: 40 }}>
+                    <feature.icon size={20} strokeWidth={2} className="text-foreground icon-signal" />
                   </div>
-                ) : (
-                  <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
-                    <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 40, height: 40 }}>
-                      <feature.icon size={20} strokeWidth={2} className="text-foreground icon-signal" />
-                    </div>
-                    <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
-                      {feature.title}
-                    </h3>
-                    <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
-                      {feature.desc}
-                    </p>
-                  </div>
-                )}
+                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
+                    {feature.desc}
+                  </p>
+                </div>
               </StaggerItem>
             );
           })}
