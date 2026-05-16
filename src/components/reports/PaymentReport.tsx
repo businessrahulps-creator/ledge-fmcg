@@ -19,13 +19,15 @@ export function PaymentReport() {
   const orders = api.orders.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
+  const [scope, setScope] = useState<"delivered" | "all">("delivered");
   const [selected, setSelected] = useState<Order | null>(null);
 
   // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
-  const netTotal = (o: Order) => o.total - (o.schemeSavings || 0);
+  const netTotal = (o: Order) => Math.max(0, o.total - (o.schemeSavings || 0));
 
   const periodFiltered = filterByTimePeriod(orders, period);
-  const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.paymentStatus === filter);
+  const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
+  const filtered = filter === "all" ? scoped : scoped.filter((o) => o.paymentStatus === filter);
   const [pdfOpen, setPdfOpen] = useState(false);
   const rptSections: PdfSection[] = [
     { id: "company", label: "Company header" },
