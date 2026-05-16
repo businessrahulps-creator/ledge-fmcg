@@ -61,12 +61,23 @@ export function Hero() {
             </motion.a>
           </motion.div>
 
-          <motion.p
-            className="font-body text-[13px] text-muted-foreground mt-8"
+          <motion.div
+            className="flex flex-wrap items-center gap-2 mt-8"
             {...fadeUp(0.32)}
           >
-            No card needed · 30-minute onboarding · Works on any phone · Built in Kerala
-          </motion.p>
+            <span className="lp-pill lp-pill--success">
+              <span className="lp-pill__tile"><WifiOff size={12} strokeWidth={2.5} /></span>
+              <span className="lp-pill__label">Offline-ready</span>
+            </span>
+            <span className="lp-pill lp-pill--info">
+              <span className="lp-pill__tile"><FileCheck2 size={12} strokeWidth={2.5} /></span>
+              <span className="lp-pill__label">GST-ready</span>
+            </span>
+            <span className="lp-pill lp-pill--warn">
+              <span className="lp-pill__tile"><MapPin size={12} strokeWidth={2.5} /></span>
+              <span className="lp-pill__label">Built in Kerala</span>
+            </span>
+          </motion.div>
         </div>
 
         {/* Right - Dashboard Mockup with 3-layer treatment */}
