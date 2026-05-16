@@ -271,7 +271,7 @@ export default function Targets() {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
       const cur = map.get(o.salespersonId) || { revenue: 0, orders: 0 };
-      cur.revenue += Math.max(0, o.total - (o.schemeSavings || 0));
+      cur.revenue += netTotal(o);
       cur.orders += 1;
       map.set(o.salespersonId, cur);
     });
