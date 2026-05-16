@@ -9,7 +9,7 @@ const FILL_BG = "rgba(15,31,58,0.025)";
 const FILL_ACCENT = "rgba(15,31,58,0.06)";
 const ZEBRA = "#F5EFE6";          // Bone
 const SURFACE = "#FFFFFF";        // card surface (kept literal — paper)
-const HAIRLINE = "#E8E1D4";       // Bone-tinted hairline (replaces #E5E7EB)
+const HAIRLINE = "#E8E1D4";       // Bone-tinted hairline (replaces #E8E1D4)
 const INDIGO = "#A0522D";         // Terracotta accent
 const INDIGO_SOFT = "rgba(160,82,45,0.08)";
 const EMERALD = "#0E2A22";        // Forest
@@ -134,7 +134,7 @@ export function DashboardSvg() {
         <g key={`kpi-${i}`}>
           <motion.rect
             x={card.x} y={16} width={card.w} height={56} rx={6}
-            fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+            fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
             {...fadeRect(inView, 0.1 + i * 0.1)}
           />
           <motion.text
@@ -165,7 +165,7 @@ export function DashboardSvg() {
       {/* Bar chart area */}
       <motion.rect
         x={16} y={88} width={408} height={120} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.3)}
       />
       <motion.text
@@ -176,7 +176,7 @@ export function DashboardSvg() {
         This Week
       </motion.text>
       {/* baseline */}
-      <line x1={chartLeft - 8} y1={chartBaseline + 0.5} x2={408} y2={chartBaseline + 0.5} stroke="#E5E7EB" strokeWidth={0.5} />
+      <line x1={chartLeft - 8} y1={chartBaseline + 0.5} x2={408} y2={chartBaseline + 0.5} stroke="#E8E1D4" strokeWidth={0.5} />
 
       {/* Vertical bars */}
       {days.map((d, i) => {
@@ -186,7 +186,7 @@ export function DashboardSvg() {
           <g key={`bar-${i}`}>
             <motion.rect
               x={x} y={chartBaseline - d.h} width={barW} height={d.h} rx={3}
-              fill={isToday ? INDIGO : "#E5E7EB"}
+              fill={isToday ? INDIGO : "#E8E1D4"}
               style={{ transformOrigin: `${x + barW / 2}px ${chartBaseline}px` }}
               {...growBar(inView, 0.4 + i * 0.06)}
             />
@@ -206,7 +206,7 @@ export function DashboardSvg() {
       {/* Order rows area */}
       <motion.rect
         x={16} y={224} width={408} height={124} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.6)}
       />
       {/* Header */}
@@ -233,7 +233,7 @@ export function DashboardSvg() {
         Live
       </motion.text>
 
-      <line x1={28} y1={250} x2={412} y2={250} stroke="#E5E7EB" strokeWidth={0.5} />
+      <line x1={28} y1={250} x2={412} y2={250} stroke="#E8E1D4" strokeWidth={0.5} />
 
       {/* Rows */}
       {orders.map((order, i) => {
@@ -341,7 +341,7 @@ export function OrderFormSvg() {
       {/* Dropdown */}
       <motion.rect
         x={20} y={20} width={220} height={36} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.1)}
       />
       <motion.text
@@ -354,7 +354,7 @@ export function OrderFormSvg() {
       <motion.path d="M218 34 L224 40 L230 34" stroke={C_MUTED} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" fill="none" {...drawLine(inView, 0.25)} />
 
       {/* Divider */}
-      <motion.line x1={20} y1={72} x2={240} y2={72} stroke="#E5E7EB" strokeWidth={0.5} {...drawLine(inView, 0.3)} />
+      <motion.line x1={20} y1={72} x2={240} y2={72} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.3)} />
 
       {/* Product lines */}
       {products.map((prod, i) => {
@@ -377,7 +377,7 @@ export function OrderFormSvg() {
             {/* Qty box — real number */}
             <motion.rect
               x={155} y={y + 8} width={28} height={18} rx={4}
-              fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={0.75}
+              fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={0.75}
               {...fadeRect(inView, 0.4 + i * 0.12)}
             />
             <motion.text
@@ -400,7 +400,7 @@ export function OrderFormSvg() {
       })}
 
       {/* Divider */}
-      <motion.line x1={20} y1={270} x2={240} y2={270} stroke="#E5E7EB" strokeWidth={0.5} {...drawLine(inView, 0.6)} />
+      <motion.line x1={20} y1={270} x2={240} y2={270} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.6)} />
 
       {/* Subtotal */}
       <motion.text
@@ -418,7 +418,7 @@ export function OrderFormSvg() {
         ₹2,340
       </motion.text>
 
-      {/* Scheme tag pill — indigo accent */}
+      {/* Scheme tag pill — terracotta accent */}
       <motion.rect
         x={20} y={300} width={90} height={22} rx={11}
         fill={INDIGO_PILL_BG} stroke={INDIGO_PILL_BORDER} strokeWidth={STROKE_W}
@@ -458,9 +458,9 @@ export function OrderFormSvg() {
       ))}
 
       {/* Divider */}
-      <motion.line x1={20} y1={375} x2={240} y2={375} stroke="#E5E7EB" strokeWidth={0.5} {...drawLine(inView, 0.8)} />
+      <motion.line x1={20} y1={375} x2={240} y2={375} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.8)} />
 
-      {/* Submit button — solid indigo, breathes */}
+      {/* Submit button — solid terracotta, breathes */}
       <motion.rect
         x={50} y={390} width={160} height={36} rx={8}
         fill={INDIGO}
@@ -526,7 +526,7 @@ export function DashboardMiniSvg() {
         <g key={`kpi-${i}`}>
           <motion.rect
             x={card.x} y={16} width={card.w} height={56} rx={6}
-            fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+            fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
             {...fadeRect(inView, 0.1 + i * 0.12)}
           />
           <motion.text
@@ -568,7 +568,7 @@ export function DashboardMiniSvg() {
       {/* Orders list */}
       <motion.rect
         x={16} y={88} width={388} height={180} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.4)}
       />
       {/* Header */}
@@ -594,7 +594,7 @@ export function DashboardMiniSvg() {
         Live
       </motion.text>
 
-      <line x1={28} y1={118} x2={388} y2={118} stroke="#E5E7EB" strokeWidth={0.5} />
+      <line x1={28} y1={118} x2={388} y2={118} stroke="#E8E1D4" strokeWidth={0.5} />
 
       {/* Column headers */}
       {[{ x: 28, t: "Order" }, { x: 100, t: "Dealer" }, { x: 248, t: "Amount" }, { x: 336, t: "Status" }].map((col, i) => (
@@ -731,7 +731,7 @@ export function InvoiceStockSvg() {
       {/* Table area */}
       <motion.rect
         x={16} y={30} width={388} height={170} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.1)}
       />
       {/* Header band */}
@@ -751,7 +751,7 @@ export function InvoiceStockSvg() {
           {h.label}
         </motion.text>
       ))}
-      <line x1={16} y1={58} x2={404} y2={58} stroke="#E5E7EB" strokeWidth={0.5} />
+      <line x1={16} y1={58} x2={404} y2={58} stroke="#E8E1D4" strokeWidth={0.5} />
 
       {/* 5 data rows — zebra striped */}
       {rows.map((row, i) => {
@@ -783,12 +783,12 @@ export function InvoiceStockSvg() {
       })}
 
       {/* Divider between table and GST */}
-      <line x1={16} y1={206} x2={404} y2={206} stroke="#E5E7EB" strokeWidth={0.5} />
+      <line x1={16} y1={206} x2={404} y2={206} stroke="#E8E1D4" strokeWidth={0.5} />
 
       {/* GST breakdown area */}
       <motion.rect
         x={16} y={214} width={388} height={72} rx={6}
-        fill="#FFFFFF" stroke="#E5E7EB" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.6)}
       />
       {/* GST rows */}
