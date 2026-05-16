@@ -28,14 +28,17 @@ export const duration = {
   micro: 0.18, short: 0.28, medium: 0.42, long: 0.72, hero: 1.0,
 };
 
-/** Three motion ranks. Pick one per element; mixing is forbidden. */
+/** Four motion ranks. Pick one per element; mixing is forbidden.
+ *  Motion v3 — distances tightened, staggers shortened. Stillness is the default; movement is rationed. */
 export const rank = {
-  /** Hero headlines, primary CTAs, marquee imagery. */
-  lead:    { y: 36, blur: 12, scale: 0.96, duration: duration.long,   ease: ease.emphasized, stagger: 0.08 },
-  /** Section headings, body cards, supporting copy. */
-  support: { y: 16, blur: 4,  scale: 0.98, duration: duration.medium, ease: ease.decelerate, stagger: 0.05 },
+  /** Hero-only scene reveal — the page's biggest single moment. Use once per viewport. */
+  scene:   { y: 44, blur: 14, scale: 0.955, duration: duration.hero,   ease: ease.emphasized, stagger: 0.04 },
+  /** Section headings, primary CTAs. */
+  lead:    { y: 28, blur: 10, scale: 0.97,  duration: duration.long,   ease: ease.emphasized, stagger: 0.04 },
+  /** Body cards, supporting copy. Used sparingly — most body content stays still. */
+  support: { y: 12, blur: 3,  scale: 0.99,  duration: duration.medium, ease: ease.decelerate, stagger: 0.03 },
   /** Pills, chips, micro-decorations. */
-  ambient: { y: 6,  blur: 0,  scale: 1,    duration: duration.short,  ease: ease.decelerate, stagger: 0.03 },
+  ambient: { y: 4,  blur: 0,  scale: 1,     duration: duration.short,  ease: ease.decelerate, stagger: 0.02 },
 } as const;
 
 export type Rank = keyof typeof rank;
@@ -125,6 +128,13 @@ export const ctaHover = {
 
 export const hoverLiftSubtle = {
   whileHover: { y: -2, transition: { type: "spring", damping: 20, stiffness: 300 } },
+};
+
+/** Motion v3 — the only hover style cards should use. 120ms standard ease, 1px lift + 1% scale.
+ *  Cubic-bezier (not spring) so multiple cards across a grid land in unison. */
+export const hoverIntent = {
+  whileHover: { y: -1, scale: 1.005, transition: { duration: 0.12, ease: ease.standard } },
+  whileTap:   { scale: 0.985, transition: { duration: 0.08, ease: ease.standard } },
 };
 
 // ── Parallax helper ────────────────────────────────────────────

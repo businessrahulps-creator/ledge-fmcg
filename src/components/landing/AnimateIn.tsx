@@ -34,9 +34,9 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
     const variants = variantMap[variant];
     const r = rank[variantRank[variant]];
 
-    // Reduced motion: collapse to a 200ms opacity-only fade.
+    // Motion v3 — reduced motion collapses to 120ms opacity-only.
     const transition = reduce
-      ? { duration: 0.2, ease: ease.decelerate, delay }
+      ? { duration: 0.12, ease: ease.standard, delay }
       : { duration: r.duration, ease: r.ease, delay };
 
     return (
