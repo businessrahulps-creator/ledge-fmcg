@@ -40,6 +40,9 @@ vi.mock("@/integrations/supabase/client", () => {
 
 import { batchIn } from "../data-utils";
 
+// Helper: which [from,to] ranges were actually requested
+const calledRanges = () => new Set(rangeCalls.map(c => `${c.from}-${c.to}`));
+
 describe("batchIn pagination", () => {
   beforeEach(() => {
     rangeCalls.length = 0;
@@ -60,17 +63,20 @@ describe("batchIn pagination", () => {
     expect(rangeCalls[0]).toMatchObject({ from: 0, to: 999 });
   });
 
-  it("paginates past the 1000-row Supabase cap and stops on a short page", async () => {
-    // 2350 rows for the same id -> requires pages 0-999, 1000-1999, 2000-2999 (short)
+  it("paginates past the 1000-row Supabase cap and preserves ordering", async () => {
+    // 2350 rows for the same id -> needs pages 0, 1, 2 (short). Parallel wave
+    // may overshoot but all rows must be returned in order.
     mockRows = Array.from({ length: 2350 }, (_, i) => ({ order_id: "o1", idx: i }));
     const result = await batchIn("order_lines", "order_id", ["o1"]);
     expect(result).toHaveLength(2350);
-    expect(rangeCalls.map(c => [c.from, c.to])).toEqual([
-      [0, 999],
-      [1000, 1999],
-      [2000, 2999],
-    ]);
-    // ordering preserved across pages
+
+    // Required pages were all requested
+    const ranges = calledRanges();
+    expect(ranges.has("0-999")).toBe(true);
+    expect(ranges.has("1000-1999")).toBe(true);
+    expect(ranges.has("2000-2999")).toBe(true);
+
+    // Ordering preserved across pages
     expect(result[0].idx).toBe(0);
     expect(result[1500].idx).toBe(1500);
     expect(result[2349].idx).toBe(2349);
@@ -80,12 +86,11 @@ describe("batchIn pagination", () => {
     mockRows = Array.from({ length: 2000 }, (_, i) => ({ order_id: "o1", idx: i }));
     const result = await batchIn("order_lines", "order_id", ["o1"]);
     expect(result).toHaveLength(2000);
-    // Must request a 3rd page to detect end (returns 0 rows -> short page -> break)
-    expect(rangeCalls.map(c => [c.from, c.to])).toEqual([
-      [0, 999],
-      [1000, 1999],
-      [2000, 2999],
-    ]);
+    // Must probe at least one page past the end to detect end-of-results
+    const ranges = calledRanges();
+    expect(ranges.has("0-999")).toBe(true);
+    expect(ranges.has("1000-1999")).toBe(true);
+    expect(ranges.has("2000-2999")).toBe(true);
   });
 
   it("chunks id list into batches of 500", async () => {
@@ -94,12 +99,13 @@ describe("batchIn pagination", () => {
     mockRows = ids.map(id => ({ order_id: id }));
     const result = await batchIn("order_lines", "order_id", ids);
     expect(result).toHaveLength(1200);
-    // 3 chunks (500 + 500 + 200), each one page
-    expect(rangeCalls).toHaveLength(3);
-    expect(rangeCalls[0].ids).toHaveLength(500);
-    expect(rangeCalls[1].ids).toHaveLength(500);
-    expect(rangeCalls[2].ids).toHaveLength(200);
-    expect(rangeCalls.every(c => c.from === 0 && c.to === 999)).toBe(true);
+    // 3 chunks (500 + 500 + 200), each chunk only needs one page
+    // (parallel wave may overshoot — the important invariant is that exactly
+    // 3 distinct id-chunks were requested at offset 0)
+    const firstPageCalls = rangeCalls.filter(c => c.from === 0);
+    expect(firstPageCalls).toHaveLength(3);
+    const chunkSizes = firstPageCalls.map(c => c.ids.length).sort((a, b) => a - b);
+    expect(chunkSizes).toEqual([200, 500, 500]);
   });
 
   it("paginates per id-chunk independently", async () => {
@@ -113,14 +119,15 @@ describe("batchIn pagination", () => {
     const result = await batchIn("order_lines", "order_id", ids);
     expect(result).toHaveLength(1700);
 
-    // chunk 1 -> 2 pages (1000 + 500 short), chunk 2 -> 1 page (short)
-    expect(rangeCalls).toHaveLength(3);
-    expect(rangeCalls[0]).toMatchObject({ from: 0, to: 999 });
-    expect(rangeCalls[0].ids).toHaveLength(500);
-    expect(rangeCalls[1]).toMatchObject({ from: 1000, to: 1999 });
-    expect(rangeCalls[1].ids).toHaveLength(500);
-    expect(rangeCalls[2]).toMatchObject({ from: 0, to: 999 });
-    expect(rangeCalls[2].ids).toHaveLength(100);
+    // Chunk 1 must have probed pages 0-999 and 1000-1999 for a 500-id chunk
+    const chunk1Calls = rangeCalls.filter(c => c.ids.length === 500);
+    const chunk1Ranges = new Set(chunk1Calls.map(c => `${c.from}-${c.to}`));
+    expect(chunk1Ranges.has("0-999")).toBe(true);
+    expect(chunk1Ranges.has("1000-1999")).toBe(true);
+
+    // Chunk 2 only needs page 0
+    const chunk2Calls = rangeCalls.filter(c => c.ids.length === 100);
+    expect(chunk2Calls.some(c => c.from === 0 && c.to === 999)).toBe(true);
   });
 
   it("propagates supabase errors", async () => {
