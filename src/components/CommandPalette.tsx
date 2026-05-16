@@ -64,8 +64,13 @@ export function CommandPalette() {
         setOpen(true);
       }
     };
+    const openEvt = () => setOpen(true);
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("ledge:open-command-palette", openEvt as EventListener);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("ledge:open-command-palette", openEvt as EventListener);
+    };
   }, [open]);
 
   // Only fetch lists once the palette is opened — keeps the closed-state
