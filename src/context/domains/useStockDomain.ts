@@ -4,7 +4,7 @@ import type { GodownLocation, StockItem } from "@/data/godown-data";
 import type { OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem } from "@/context/data-utils";
+import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { toast } from "sonner";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
