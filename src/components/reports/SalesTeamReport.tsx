@@ -26,7 +26,7 @@ export function SalesTeamReport() {
     .map((s) => {
       const sOrders = filteredOrders.filter((o) => o.salespersonId === s.id);
       // Net revenue = invoiced amount after trade discounts (matches Dashboard / Billing)
-      const revenue = sOrders.reduce((sum, o) => sum + o.total - (o.schemeSavings || 0), 0);
+      const revenue = sOrders.reduce((sum, o) => sum + netTotal(o), 0);
       return { ...s, orderCount: sOrders.length, revenue };
     })
     .filter((s) => s.orderCount > 0)
