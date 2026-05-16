@@ -1,108 +1,51 @@
 
-# Landing Copy Refresh — Aligned to Pitch Deck
+# Copy Tweaks — Positioning Adjustments
 
-The deck has tighter, more confident framing than the current landing copy. This pass adopts the deck's voice across the page. **Copy only — no layout, color, component, or asset changes.**
+Four small, surgical copy changes across the landing page.
 
-## Hero
-- **Eyebrow:** `The Operating System for Kerala's FMCG Businesses`
-  (current: "The Operating System for Factory + Field")
-- **Headline (H1):** `Orders. Payments. Stock. Invoices. Reports. One mobile app.`
-  *Alt option A:* `One mobile app for orders, payments, stock and reports.`
-  *Alt option B (more emotive, deck-aligned):* `Run your distribution business with total clarity.`
-- **Subhead:** `Built for distributors and FMCG owners in Kerala. Mobile-first. Works offline. Recover the 5–10% revenue that quietly leaks between your factory and your field — every year.`
-- **Primary CTA:** `Start Free for 30 Days` · **Secondary:** `See how it works`
-- **Trust line:** `No card needed · 30-minute onboarding · Works on any phone · Built in India`
+## 1. "Distribution" → "FMCG"
+Anywhere we say "distribution business" or "distributors", swap to "FMCG business" / "FMCG super-stockists".
 
-> Recommendation: ship option **A** as H1 (it mirrors the deck's product-line drumbeat and is the strongest scroll-stopper). Keep "Run your factory…" retired.
+- **Footer brand line:** `Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.`
+- **Hero subhead:** `Built for super-stockists and FMCG owners across India. Mobile-first. Works offline. Recover the 5–10% that quietly leaks every year between your factory and your field.`
 
-## Problem section
-- **H2:** `The Old Way Is Bleeding You Dry`
-- **Sub:** `You're running on yesterday's data. Your competitors aren't.`
-- **4 cards** (titles + one-liners from deck):
-  - Lost Orders — *WhatsApp chits. Half get lost.*
-  - Payment Chaos — *Cash, UPI, cheque. No single truth.*
-  - Blind Stock — *Empty shelf? You find out last.*
-  - Excel Nights — *Two days to build one report.*
+## 2. Audience → "Super-stockist"
+Lead the audience framing with super-stockists (the deck's actual ICP).
 
-## Stakes strip (TrustBar / numbers band)
-Use the deck's "silent leak" stats:
-- `2–3 hrs` — Wasted daily per salesperson, on paperwork instead of selling
-- `5–10%` — Revenue lost to missed orders, wrong schemes, late collections
-- `₹10L–₹1Cr` — Quietly gone every year. Silent. Invisible. Until it's too late.
+- Hero subhead (above) leads with "super-stockists and FMCG owners".
+- SEO `<meta description>`: `Orders, payments, stock, invoices and reports — one mobile app for India's FMCG super-stockists. Mobile-first, works offline. Start free for 30 days.`
 
-## Why Ledge (comparison)
-- **H2:** `Every tool exists. None built for you.`
-- Crossed-out chips: `Tally`, `Zoho Books`, `Vyapar / Khatabook`
-- Ledge column bullets:
-  - Mobile-first. Offline-ready. Any phone.
-  - Basics in 30 minutes. No trainer.
-  - Schemes, warehouses, credit control — built in.
-  - No desktop. No IT. No excuses.
+## 3. "Kerala" → "India" (positioning)
+Broaden geographic claim from Kerala to India in headlines/eyebrows.
 
-## Features ("Simple Tools. Extraordinary Results.")
-Rename cards + one-liners to deck wording:
-- **Dealer Intelligence** — Full history, credit & behaviour, instant.
-- **Stock Health** — Green, amber, red — before problems hit.
-- **Schemes & Targets** — Auto-tracked. Always accurate.
-- **Team Performance** — Every rep's orders and targets, live.
-- **GST Automation** — Invoices, estimates, credit notes — one tap.
-- **Returns & Claims** — Handled cleanly. No arguments.
+- **Hero eyebrow:** `The Operating System for India's FMCG Businesses` (mobile: `OS for India's FMCG`).
+- **SEO `<title>`:** `Ledge — The Operating System for India's FMCG Businesses`.
+- **OG/Twitter title:** same as above.
+- **Footer tagline:** drop "Kerala", replace with "India's FMCG super-stockists" (covered in #1).
+- **Ledge Co-Pilot:** keep "English or Malayalam" only on the *Photo-to-Order / Voice / NLQ* cards? → switch to **"English, Hindi or Malayalam"** so we don't shrink the audience but still nod to home turf.
 
-## Outcome ("Before & After Ledge")
-- **H2:** `Before & After Ledge`
-- Before column: 2–3 days per report · Call 5 people to check stock · Chase payments on WhatsApp · No idea who's performing.
-- With Ledge column: Live dashboard for orders, revenue, payments · 5 reports ready instantly · Any report in 60 seconds · Full visibility, zero chasing.
-- Outcome chips: `80+ hrs recovered/month` · `80% admin eliminated` · `8–12% sales uplift`
+## 4. "Built in Kerala" tagline
+Use "Built in Kerala" as the heritage line (instead of "Built in India").
 
-## Ledge Intelligence (AI)
-- **Eyebrow:** `AI · Launching in 3 months · Founding members get early access free`
-- **H2:** `Ledge Co-Pilot`
-- **Sub:** `Ledge thinks. You lead.`
-- 4 capability cards:
-  - **Natural Language Queries** — Ask in English or Malayalam. Get instant answers.
-  - **Voice Order Entry** — Speak the order. Done in 20 seconds.
-  - **Photo-to-Order** — Photograph a chit. Ledge fills it instantly.
-  - **Smart Scheme Suggestions** — AI tells you who'll buy, before you pitch.
-
-## Pricing
-- **H2:** `The offer that makes saying no feel irrational.`
-- Price line: `₹2,500 / month` · sub: `Competitors charge ₹5,000–₹15,000+. Ledge delivers more for 50–80% less.`
-- Annual nudge: `Commit 1 year → pay only 10 months. Two months free.`
-- Value bullets ("What ₹2,500 actually buys you"):
-  - 80+ hrs saved/month → ₹40,000+ recovered labour cost
-  - ₹10L–₹1Cr/year recovered from silent leaks
-  - ₹10K–₹20K/month saved on accountant outsourcing (auto GST)
-  - AI Co-Pilot — free early access for founding members
-
-## Final CTA
-- **H2:** `One app. Every role. Total clarity.`
-- **Sub:** `Start free for 30 days. No card needed. Setup in 30 minutes.`
-- Primary: `Start Free Trial` · Secondary: `Talk to founder · +91 81380 84689`
-
-## Footer tagline
-`Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience.`
+- **Hero trust line:** `No card needed · 30-minute onboarding · Works on any phone · Built in Kerala`
+- **FinalCTA trust line:** `No card required · Cancel anytime · Built in Kerala`
 
 ---
 
 ## Files to edit (copy only)
-- `src/components/landing/sections/Hero.tsx`
-- `src/components/landing/sections/Problem.tsx`
-- `src/components/landing/sections/TrustBar.tsx`
-- `src/components/landing/sections/WhyLedge.tsx`
-- `src/components/landing/sections/Features.tsx`
-- `src/components/landing/sections/Outcome.tsx`
-- `src/components/landing/sections/LedgeIntelligence.tsx`
-- `src/components/landing/sections/Pricing.tsx`
-- `src/components/landing/sections/FinalCTA.tsx`
-- `src/components/landing/sections/Footer.tsx`
-- Update SEO `<title>` / meta description in `index.html` to match Hero.
+- `index.html` — `<title>`, `<meta name="description">`, og:title, twitter:title, og:description, twitter:description
+- `src/components/landing/sections/Hero.tsx` — eyebrow, subhead, trust line
+- `src/components/landing/sections/FinalCTA.tsx` — trust line
+- `src/components/landing/sections/Footer.tsx` — brand line
+- `src/components/landing/sections/LedgeIntelligence.tsx` — Voice / NLQ language phrasing
 
 ## Out of scope
-- No new sections, components, images, colors, or layout edits.
-- No changes to app pages or backend.
-- Founder section and Testimonials text stay as-is unless you want them refreshed too.
+- No layout, color, component, or asset changes.
+- No edits to app pages.
+- "Kerala's FMCG" already removed from H1; H1 stays: `Orders. Payments. Stock. Invoices. Reports. One mobile app.`
 
-## Open questions before I implement
-1. **H1 pick:** option A (`Orders. Payments. Stock. Invoices. Reports. One mobile app.`) or option B (`Run your distribution business with total clarity.`)? My recommendation: **A**.
-2. **Geographic framing:** keep deck's "Kerala's FMCG businesses" in the eyebrow, or broaden to "India's FMCG distributors"? Deck says Kerala — I'll keep Kerala unless you say otherwise.
-3. **AI language pair:** deck says "English or Hindi" — for Kerala framing, should it be **English or Malayalam**? I've drafted it as Malayalam.
+## Confirm before I implement
+1. **Audience phrasing** — use `super-stockists and FMCG owners` (my proposal) or just `FMCG super-stockists`?
+2. **Co-Pilot languages** — keep just `English or Hindi` (deck wording), or `English, Hindi or Malayalam`? My recommendation: **English or Hindi** to stay aligned with the deck and pan-India positioning.
+
+If you reply with no objections, I'll ship as-drafted with **English or Hindi** for Co-Pilot.

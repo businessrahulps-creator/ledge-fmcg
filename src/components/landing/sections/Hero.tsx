@@ -26,8 +26,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              <span className="hidden sm:inline">The Operating System for Kerala's FMCG Businesses</span>
-              <span className="sm:hidden">OS for Kerala's FMCG</span>
+              <span className="hidden sm:inline">The Operating System for India's FMCG Businesses</span>
+              <span className="sm:hidden">OS for India's FMCG</span>
             </span>
           </motion.div>
 
