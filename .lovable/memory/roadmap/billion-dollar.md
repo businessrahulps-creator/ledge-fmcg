@@ -22,6 +22,7 @@ Source: `.lovable/plan.md`.
 - PR12a Polish: `<SmartTime>` component (`src/components/ui/smart-time.tsx`) — just now → N min ago → today HH:MM → Yesterday → Tue 12 May → 12 May 2024. Self-updates every 60s. Tabular-nums + focus rings already covered in index.css.
 - PR12b ExplainButton rolled into Dashboard Daily Breakdown KPIs + Performance KpiStrip via new optional `explain` prop on `KpiCell` (`src/components/ui/kpi-strip.tsx`). Hidden on zero values; ✦ icon next to label.
 - PR12c SmartTime rolled into activity timestamps: `NotificationCenter`, `EntityHistory`, `ActivityLog`. Replaces ad-hoc `formatDistanceToNow` calls; self-updates every 60s with full `<time datetime>` semantics + hover tooltip.
+- PR12d Discoverable Cmd+K search pill in desktop topbar (`AppLayout.tsx`). Dispatches `ledge:open-command-palette` window event; `CommandPalette` listens. Makes the palette discoverable to users who don't know the shortcut — the MS/Linear/Vercel pattern.
 
 ## Next / Not yet wired
 - Wire `useAutosave` — Settings has no single preferences form; revisit when a settings preferences surface is added
