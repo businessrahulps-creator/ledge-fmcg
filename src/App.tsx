@@ -1,11 +1,7 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { InstallPrompt } from "@/components/InstallPrompt";
-import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { NotificationProvider } from "@/hooks/use-notifications";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
@@ -16,14 +12,19 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import { isPreviewEnv } from "@/lib/preview-env";
 import { LedgeLoader } from "@/components/ui/ledge-loader";
-import { routeImporters, prefetchAllRoutes } from "@/lib/route-prefetch";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
+import { DelayedSuspense } from "@/components/ui/delayed-suspense";
+import { routeImporters, prefetchLikelyNext } from "@/lib/route-prefetch";
 
-// Eager: entry/auth routes (small + needed immediately)
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+// Eager: only the tiny 404. Everything else is lazy so the entry stays small.
 import NotFound from "./pages/NotFound";
-import ResetPassword from "./pages/ResetPassword";
+
+// Entry / auth — lazy. Logged-in users land on /dashboard and never need
+// the landing-page bundle (which pulls in framer-motion + every section).
+const Index = lazy(() => import("./pages/Index"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Lazy: authenticated app pages — importers live in route-prefetch so
 // the prefetcher and Suspense boundaries share the exact same chunks.
@@ -47,12 +48,19 @@ const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
 const AdminErrors = lazy(() => import("./pages/AdminErrors"));
 
-// Marketing/legal pages — kept lazy but not prefetched
+// Marketing/legal — lazy
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Contact = lazy(() => import("./pages/Contact"));
+
+// Non-critical UI loaded after first paint — keeps the entry chunk lean
+// and stops these from blocking interactive readiness.
+const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
+const InstallPrompt = lazy(() => import("@/components/InstallPrompt").then(m => ({ default: m.InstallPrompt })));
+const UpdatePrompt = lazy(() => import("@/components/UpdatePrompt").then(m => ({ default: m.UpdatePrompt })));
 
 const queryClient = new QueryClient();
 
@@ -61,32 +69,59 @@ function OnlineStatusWatcher() {
   return null;
 }
 
-function RoutePrefetcher() {
+/**
+ * Mounts non-critical UI (toasters, prompts) only after the browser is
+ * idle, so they never block first paint or first interaction.
+ */
+function DeferredChrome() {
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    // Warm every authenticated route chunk on idle so subsequent navigations
-    // are instant — the chunk is already in the browser cache.
-    prefetchAllRoutes();
+    const ric =
+      (window as any).requestIdleCallback ||
+      ((cb: () => void) => window.setTimeout(cb, 200));
+    const id = ric(() => setReady(true));
+    return () => {
+      const cancel =
+        (window as any).cancelIdleCallback ||
+        ((handle: number) => window.clearTimeout(handle));
+      cancel(id);
+    };
   }, []);
+  if (!ready) return null;
+  return (
+    <DelayedSuspense delayMs={400} fallback={null}>
+      <Toaster />
+      <Sonner />
+      <InstallPrompt />
+      {!isPreviewEnv && <UpdatePrompt />}
+    </DelayedSuspense>
+  );
+}
+
+/**
+ * Single, route-aware prefetcher. Mounted once at the app shell level
+ * (not inside ProtectedRoute, which remounts on every nav). On every
+ * route change it warms only the 1–2 most likely next destinations.
+ */
+function RoutePrefetcher() {
+  const location = useLocation();
+  useEffect(() => {
+    prefetchLikelyNext(location.pathname);
+  }, [location.pathname]);
   return null;
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, authReady } = useAuth();
-  // Don't redirect until auth is fully restored
-  if (loading || !authReady) {
-    return <SplashScreen />;
-  }
+  if (loading || !authReady) return <SplashScreen />;
   if (!user) return <Navigate to="/login" replace />;
-  return (
-    <NoCompanyGuard>
-      <RoutePrefetcher />
-      {children}
-    </NoCompanyGuard>
-  );
+  return <NoCompanyGuard>{children}</NoCompanyGuard>;
 }
 
-// Single shared fallback — branded, delayed, calm.
-const Loader = <LedgeLoader />;
+// Layout-preserving skeleton for authenticated routes; full splash for
+// the very first paint (Index/Login) where there's no shell yet.
+const RouteFallback = <RouteSkeleton />;
+const ShellFallback = <LedgeLoader />;
 
 const App = () => (
   <ErrorBoundary>
@@ -95,41 +130,39 @@ const App = () => (
         <AuthProvider>
           <DataProvider>
             <NotificationProvider>
-              <Toaster />
-              <Sonner />
-              <InstallPrompt />
-              {!isPreviewEnv && <UpdatePrompt />}
+              <DeferredChrome />
               <OnlineStatusWatcher />
               <BrowserRouter>
+                <RoutePrefetcher />
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/privacy-policy" element={<Suspense fallback={Loader}><PrivacyPolicy /></Suspense>} />
-                  <Route path="/terms-of-service" element={<Suspense fallback={Loader}><TermsOfService /></Suspense>} />
-                  <Route path="/refund-policy" element={<Suspense fallback={Loader}><RefundPolicy /></Suspense>} />
-                  <Route path="/about-us" element={<Suspense fallback={Loader}><AboutUs /></Suspense>} />
-                  <Route path="/contact" element={<Suspense fallback={Loader}><Contact /></Suspense>} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Dashboard /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Orders /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><NewOrder /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><OrderDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><DealerDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Distributors /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Stock /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><SalespersonDetail /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Salespersons /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Schemes /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Targets /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Claims /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Billing /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Company /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Reports /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Settings /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Help /></Suspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><AdminErrors /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/" element={<DelayedSuspense fallback={ShellFallback}><Index /></DelayedSuspense>} />
+                  <Route path="/privacy-policy" element={<DelayedSuspense fallback={ShellFallback}><PrivacyPolicy /></DelayedSuspense>} />
+                  <Route path="/terms-of-service" element={<DelayedSuspense fallback={ShellFallback}><TermsOfService /></DelayedSuspense>} />
+                  <Route path="/refund-policy" element={<DelayedSuspense fallback={ShellFallback}><RefundPolicy /></DelayedSuspense>} />
+                  <Route path="/about-us" element={<DelayedSuspense fallback={ShellFallback}><AboutUs /></DelayedSuspense>} />
+                  <Route path="/contact" element={<DelayedSuspense fallback={ShellFallback}><Contact /></DelayedSuspense>} />
+                  <Route path="/login" element={<DelayedSuspense fallback={ShellFallback}><Login /></DelayedSuspense>} />
+                  <Route path="/signup" element={<DelayedSuspense fallback={ShellFallback}><Signup /></DelayedSuspense>} />
+                  <Route path="/reset-password" element={<DelayedSuspense fallback={ShellFallback}><ResetPassword /></DelayedSuspense>} />
+                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OrderDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><DealerDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Distributors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Stock /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><SalespersonDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Schemes /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Reports /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />

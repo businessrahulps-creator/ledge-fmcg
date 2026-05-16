@@ -1,81 +1,63 @@
+# Make the live app fast and remove navigation glitches
 
-## What's happening on getledge.in
+## What's actually happening (measured on getledge.in)
 
-I loaded https://getledge.in in a real browser. The site is blank because of a hard JavaScript error during boot:
+- The whole app ships as **one entry file: `/assets/index-CPpd_a9e.js` = 890 KB raw / 272 KB gzipped**. That's heavy for first paint on mobile India.
+- Right after login, `<RoutePrefetcher />` calls `prefetchAllRoutes()`, which downloads **all 18 route chunks** in the background. On a slow connection this saturates bandwidth exactly while the user is trying to navigate → screens stall, Suspense fallback flashes, taps feel unresponsive. That is the "glitch."
+- `<RoutePrefetcher />` is placed *inside* `<ProtectedRoute>`, so it remounts on every navigation. The dedupe `Set` makes subsequent calls no-ops, but the placement is fragile and triggers an extra idle-callback chain each time.
+- `manualChunks` is intentionally disabled (recharts TDZ bug), so heavy libs (recharts, d3, framer-motion, lucide icons) end up either in the entry or duplicated across route chunks.
+- Every `<Suspense>` falls back to a **full-screen `<LedgeLoader />`**. That replaces the current page with a loader on every navigation → looks like a flicker/glitch even when the chunk loads in 100 ms.
+- `prefetchRoute` lookup for `/orders/new` strips the last segment and looks up `/orders/:id` — wrong chunk, harmless but wasteful.
 
-```
-Uncaught ReferenceError: Cannot access 'S' before initialization
-  at https://getledge.in/assets/charts-DTlgJYNp.js:9:16763
-```
+## Plan
 
-Plus a secondary, non-fatal:
-```
-GET /manifest.json?v=3 → 404
-```
+### 1. Stop the prefetch flood (biggest perceived-speed win)
 
-(The `apple-mobile-web-app-capable` warning is cosmetic, ignore.)
+- Replace blanket `prefetchAllRoutes()` with **smart, link-hover/visible prefetching** only:
+  - Prefetch a route chunk when the user hovers/touches a sidebar link, or when the link scrolls into view (IntersectionObserver).
+  - Keep the warmed `Set` to dedupe.
+- Move `<RoutePrefetcher />` out of `<ProtectedRoute>` and into the authenticated layout (mounts once).
+- Prefetch only the **likely-next 2 routes from the current page** on idle (e.g. from Dashboard → Orders, Distributors), not all 18.
+- Fix `prefetchRoute` path normalisation (don't collapse `/orders/new` to `/orders/:id`).
 
-The TDZ error nukes the whole React tree before it can render → `<div id="root"></div>` stays empty → bone-coloured blank screen.
+### 2. Shrink the entry bundle
 
-## Why this is happening
+- Re-enable safe code splitting via **dynamic `import()` at usage sites** instead of `manualChunks` (which is what triggered the recharts TDZ bug):
+  - Lazy-load `recharts` inside the chart wrapper components used by Dashboard / Reports / Performance only. Wrap each chart in its own `<Suspense>` with a small skeleton (not the full-screen loader).
+  - Lazy-load `framer-motion` for non-critical animations (splash/celebration), keep static UI without it.
+  - Lazy-load `sonner`/`Toaster` only after first render (`requestIdleCallback`) — they don't need to block first paint.
+- Audit `lucide-react` imports — use named imports only (already tree-shakeable, just confirm no `import * as Icons`).
+- Verify the result: target entry **≤ ~140 KB gzipped** (down from 272 KB).
 
-This is the classic Vite/Rollup `manualChunks` Temporal Dead Zone bug. In `vite.config.ts` we split vendor code into many named chunks:
+### 3. Smooth out navigation (kill the flicker)
 
-```ts
-if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
-if (id.includes("/@radix-ui/")) return "radix-vendor";
-if (id.includes("/@supabase/") || id.includes("/@tanstack/")) return "supabase-vendor";
-if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
-...
-```
+- Replace the full-screen `<LedgeLoader />` Suspense fallback on authenticated routes with a **layout-preserving skeleton** (sidebar/topbar stay, only the content area shows a subtle skeleton).
+- Add a **150 ms delay** before showing any fallback — most chunks load faster than that, so the user never sees a loader for cached/fast routes.
+- Add `<link rel="modulepreload">` for the chunk of the route the user is hovering, so the click → render gap is near-zero.
 
-`recharts` and the `d3-*` constellation depend on each other and on shared utilities. When the splitter puts them in different chunks (or splits internal d3 helpers across chunks), the load order becomes non-deterministic. One chunk dereferences an exported binding from another chunk that hasn't run its module init yet → `ReferenceError: Cannot access 'X' before initialization`.
+### 4. Lighten startup work
 
-Two important notes:
-1. **This bug is in the published build only** (timestamp `1778910002833`), because that's when these chunks were last produced. We haven't republished since.
-2. **The current source already has the offline-mode fixes from the last turn**, which includes the new static `public/manifest.json`. That will resolve the 404 the moment we publish — but only after we also fix the TDZ bug, otherwise we'd re-publish another broken build.
+- Defer non-critical providers/effects until after first paint:
+  - `<InstallPrompt />`, `<UpdatePrompt />`, `<OnlineStatusWatcher />` mount inside a `requestIdleCallback`.
+- Confirm `DataContext` doesn't do heavy synchronous work on mount; if it does, defer the non-essential parts.
 
-## The fix
+### 5. Verify
 
-### 1. Stop splitting `charts` (the actual TDZ culprit)
+- Re-measure: published entry size, Lighthouse mobile score, manual nav between Dashboard → Orders → Distributors on throttled 4G.
+- Confirm no recharts TDZ regression (the reason `manualChunks` was removed) — chart lazy-loading at component level avoids that bug because each chart owns its own dynamic import.
 
-Remove the `recharts`/`d3-*` rule from `manualChunks` in `vite.config.ts`. Let recharts + its d3 deps land in the default Rollup-decided vendor chunk where the bundler can keep their dependency graph intact.
+## Files likely to change
 
-That's a one-line removal:
+- `src/App.tsx` — move RoutePrefetcher, layout-preserving Suspense, idle-mounted prompts.
+- `src/lib/route-prefetch.ts` — hover/visible prefetch API, path-normalisation fix, "next likely routes" map.
+- `src/components/layout/AppSidebar.tsx` (and any nav link components) — wire hover/visible prefetch.
+- New `src/components/ui/route-skeleton.tsx` — small content-area skeleton.
+- New `src/components/charts/LazyChart.tsx` (and friends) — dynamic-import wrappers around recharts.
+- `src/pages/Dashboard.tsx`, `src/pages/Reports.tsx`, `src/pages/Performance.tsx` — swap direct recharts imports for the lazy wrappers.
+- `vite.config.ts` — no `manualChunks` change (keep current safe config).
 
-```ts
-// DELETE this line:
-if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
-```
+## Out of scope
 
-We keep the safer splits (`react-vendor`, `radix-vendor`, `supabase-vendor`, `icons`, `motion`, `xlsx`, `date-fns`) — none of those have inter-chunk init dependencies the same way recharts ↔ d3 does.
-
-Bundle-size impact: recharts is ~150 KB gzipped; lazy-loaded routes that don't import it won't pay the cost because Rollup will keep it in a route-level chunk by default. We won't lose meaningful caching.
-
-### 2. Confirm `public/manifest.json` exists (it does)
-
-Last turn I added `public/manifest.json` so the `<link rel="manifest" href="/manifest.json?v=3">` in `index.html` stops 404'ing. Nothing else to do here — just need to publish.
-
-### 3. Re-publish
-
-The frontend update only goes live after the user clicks **Publish → Update** in the Lovable publish dialog. I'll surface that action at the end of the chat.
-
-## What I am NOT changing
-
-- The offline-mode pause work from the previous turn stays exactly as-is (kill-switch `sw.js`, flag-gated offline store).
-- No source-code changes outside `vite.config.ts`.
-- No package upgrades. The TDZ is purely a chunking artifact, not a recharts bug.
-
-## Files touched
-
-**Edited (one line removed):**
-- `vite.config.ts`
-
-**Not touched:**
-- everything else
-
-## Risk
-
-Very low. We're removing a chunk-split rule, not changing app code. The worst case is one slightly larger vendor chunk on routes that use recharts (Dashboard, Reports, Performance). In return we get the published site loading at all.
-
-After publish, I'll re-load getledge.in in the browser to confirm the blank screen is gone and console is clean.
+- Reviving the PWA / offline mode (still paused per memory).
+- Backend / DataContext refactors beyond deferring obvious startup cost.
+- Visual redesign of pages.
