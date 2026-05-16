@@ -64,7 +64,7 @@ export function PaymentReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
-          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
         <div className="sm:ml-auto">
           <Button
