@@ -229,6 +229,28 @@ export default function Schemes() {
             </div>
           )}
 
+          {/* Expiring soon signal */}
+          {(() => {
+            const today = new Date().toISOString().split("T")[0];
+            const in7 = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+            const expiring = activeSchemes.filter(s => s.validUntil && s.validUntil >= today && s.validUntil <= in7);
+            if (expiring.length === 0) return null;
+            return (
+              <SignalCard
+                tier="warning"
+                icon={AlertTriangle}
+                label="EXPIRING SOON"
+                caption={
+                  expiring.length === 1
+                    ? `${expiring[0].name} expires on ${expiring[0].validUntil}`
+                    : `${expiring.slice(0, 3).map(s => s.name).join(", ")}${expiring.length > 3 ? ` +${expiring.length - 3} more` : ""} expire within 7 days`
+                }
+                value={expiring.length}
+                valueSuffix={expiring.length === 1 ? "SCHEME" : "SCHEMES"}
+              />
+            );
+          })()}
+
           {/* Empty state */}
           {schemes.length === 0 && (
             <div className="glass-card rounded-md p-8 text-center">
