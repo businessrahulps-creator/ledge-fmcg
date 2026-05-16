@@ -31,23 +31,18 @@ export function useOrdersDomain(deps: OrdersDeps) {
       refetchTimer.current = setTimeout(async () => {
         refetchTimer.current = null;
         try {
-          const ordersData = await fetchAllChunked<any>(() =>
-            supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+          const ordersData = await fetchAllChunked<any>(
+            () => supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }),
+            1000, 200, "orders",
           );
           if (!ordersData) { resolve(); return; }
           const orderIds = ordersData.map(o => o.id);
-          const allLines: any[] = [];
-          const allOrderSchemes: any[] = [];
-          const CHUNK = 500;
-          for (let i = 0; i < orderIds.length; i += CHUNK) {
-            const chunk = orderIds.slice(i, i + CHUNK);
-            const [linesRes, osRes] = await Promise.all([
-              fetchAllChunked<any>(() => supabase.from("order_lines").select("*").in("order_id", chunk)),
-              fetchAllChunked<any>(() => supabase.from("order_schemes").select("*").in("order_id", chunk)),
-            ]);
-            allLines.push(...linesRes);
-            allOrderSchemes.push(...osRes);
-          }
+          // batchIn handles both id-chunking (500) and page-pagination internally,
+          // and runs both in parallel — keeps the silent-row-limit bug from sneaking back in.
+          const [allLines, allOrderSchemes] = await Promise.all([
+            batchIn("order_lines", "order_id", orderIds),
+            batchIn("order_schemes", "order_id", orderIds),
+          ]);
           const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
           setOrders(mapped);
           if (deps.companyId) cacheData(deps.companyId, "orders", mapped);
