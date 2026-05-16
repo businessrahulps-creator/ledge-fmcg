@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, ShieldCheck, FileText, Sparkles, ArrowRight } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, FileText, Sparkles, ArrowRight, Check, Download, Warehouse, CreditCard, Tag } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
@@ -9,6 +9,80 @@ const blocks = [
 ];
 
 const legacy = ["Tally", "Zoho Books", "Vyapar", "Khatabook"];
+
+const insetCardStyle = {
+  boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)",
+} as const;
+
+function InstallPreview() {
+  return (
+    <div className="mt-auto pt-6">
+      <div className="px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+        <div className="flex items-center gap-2.5 mb-2">
+          <span className="w-7 h-7 rounded-md bg-foreground/[0.06] flex items-center justify-center shrink-0">
+            <Download size={13} strokeWidth={2} className="text-foreground" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="font-body text-[12.5px] font-semibold text-foreground truncate">Install Ledge</div>
+            <div className="font-body text-[10.5px] text-muted-foreground num-tabular">12 MB · ~90 sec</div>
+          </div>
+        </div>
+        <div className="h-1 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-foreground/85" style={{ width: "78%" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModulesPreview() {
+  const modules = [
+    { icon: Tag, label: "Schemes" },
+    { icon: Warehouse, label: "Warehouses" },
+    { icon: CreditCard, label: "Credit limits" },
+  ];
+  return (
+    <div className="mt-auto pt-6 space-y-1.5">
+      {modules.map((m) => (
+        <div key={m.label} className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-card" style={insetCardStyle}>
+          <span className="w-6 h-6 rounded-md bg-foreground/[0.06] flex items-center justify-center shrink-0">
+            <m.icon size={11} strokeWidth={2} className="text-foreground" />
+          </span>
+          <span className="font-body text-[12.5px] font-medium text-foreground flex-1">{m.label}</span>
+          <Check size={12} strokeWidth={2.5} className="text-success shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function OnboardPreview() {
+  const steps = [
+    { label: "Sign up", time: "2 min" },
+    { label: "Add your team", time: "8 min" },
+    { label: "First order", time: "by lunch" },
+  ];
+  return (
+    <div className="mt-auto pt-6">
+      <div className="px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+        <div className="relative">
+          <span className="absolute left-[5px] top-2 bottom-2 w-px bg-border" aria-hidden />
+          <div className="space-y-2.5">
+            {steps.map((s) => (
+              <div key={s.label} className="flex items-center gap-3 relative">
+                <span className="w-[11px] h-[11px] rounded-full bg-foreground/85 ring-2 ring-card shrink-0 relative z-10" aria-hidden />
+                <span className="font-body text-[12.5px] font-medium text-foreground flex-1">{s.label}</span>
+                <span className="font-body text-[11px] num-tabular text-muted-foreground">{s.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const blockPreviews: Array<(() => JSX.Element) | null> = [InstallPreview, null, ModulesPreview, OnboardPreview];
 
 export function WhyLedge() {
   return (
