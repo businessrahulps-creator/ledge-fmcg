@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -8,27 +7,10 @@ import { TeamRoster } from "@/components/settings/team/TeamRoster";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AboutSection } from "@/components/settings/AboutSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,8 +22,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { useNotifications } from "@/hooks/use-notifications";
-import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
