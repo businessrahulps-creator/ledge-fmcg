@@ -1387,6 +1387,45 @@ export type Database = {
           },
         ]
       }
+      team_invites: {
+        Row: {
+          accepted_at: string | null
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Relationships: []
+      }
       user_capability_overrides: {
         Row: {
           capability: Database["public"]["Enums"]["capability_key"]
@@ -1528,6 +1567,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_team_invite: { Args: { p_token: string }; Returns: Json }
       aging_bucket_rank: { Args: { b: string }; Returns: number }
       check_aging_transitions: { Args: never; Returns: Json }
       delete_member_atomic: {
@@ -1548,6 +1588,17 @@ export type Database = {
       }
       get_company_id: { Args: never; Returns: string }
       get_cron_secret: { Args: never; Returns: string }
+      get_invite_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          company_name: string
+          email: string
+          expires_at: string
+          inviter_name: string
+          role: Database["public"]["Enums"]["app_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+        }[]
+      }
       get_next_invoice_number: {
         Args: { target_company_id: string }
         Returns: {
@@ -1612,9 +1663,17 @@ export type Database = {
           will_go_negative: boolean
         }[]
       }
+      resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
       reverse_dispatch_for_order: {
         Args: { p_order_id: string }
         Returns: Json
+      }
+      send_team_invite: {
+        Args: {
+          p_email: string
+          p_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
       }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
@@ -1639,6 +1698,7 @@ export type Database = {
         | "view_error_logs"
         | "see_own_performance_only"
       delivery_status: "pending" | "dispatched" | "delivered"
+      invite_status: "pending" | "accepted" | "expired"
       payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
       payment_status: "paid" | "partial" | "pending"
     }
@@ -1787,6 +1847,7 @@ export const Constants = {
         "see_own_performance_only",
       ],
       delivery_status: ["pending", "dispatched", "delivered"],
+      invite_status: ["pending", "accepted", "expired"],
       payment_mode: ["cash", "bank_transfer", "cheque", "upi"],
       payment_status: ["paid", "partial", "pending"],
     },
