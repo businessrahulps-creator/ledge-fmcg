@@ -263,6 +263,25 @@
            focus-visible:outline-none focus-visible:text-foreground;
   }
 
+  /* ── Icon weight hierarchy ── */
+  .icon-nav { width: 16px; height: 16px; stroke-width: 1.5; }
+  .icon-inline { width: 14px; height: 14px; stroke-width: 1.75; }
+  .icon-signal { width: 20px; height: 20px; stroke-width: 2; }
+
+  /* Insight line under a KPI — small delta or context */
+  .insight-line {
+    @apply text-[11px] mt-1.5 flex items-center gap-1 tabular-nums;
+  }
+  .insight-up { @apply text-success; }
+  .insight-down { @apply text-destructive; }
+  .insight-flat { @apply text-muted-foreground/70; }
+
+  /* Timeframe pill — small filter chip distinct from section titles */
+  .timeframe-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-0.5
+           text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80;
+  }
+
   /* Hairline gradient divider */
   .section-divider {
     height: 1px;

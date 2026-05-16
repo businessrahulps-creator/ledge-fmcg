@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
-import { ShoppingCart, Plus, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -103,6 +103,35 @@ export default function Dashboard() {
     : 0;
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
+  // Previous month aggregates for insight deltas
+  const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+  const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
+  const prevMonthlyOrders = orders.filter((o) => {
+    const d = new Date(o.date + "T00:00:00");
+    return d >= prevMonthStart && d <= prevMonthEnd;
+  });
+  const prevMonthRevenue = prevMonthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+  const prevMonthOrderCount = prevMonthlyOrders.length;
+  const prevMonthDeliveredPct = prevMonthOrderCount > 0
+    ? Math.round((prevMonthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / prevMonthOrderCount) * 100)
+    : 0;
+  const pctDelta = (curr: number, prev: number): number | null => {
+    if (prev === 0) return null;
+    return Math.round(((curr - prev) / prev) * 100);
+  };
+  const revenueDelta = pctDelta(monthRevenue, prevMonthRevenue);
+  const ordersDelta = pctDelta(monthOrderCount, prevMonthOrderCount);
+  const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
+  // DSO proxy: avg days since order for outstanding orders
+  const outstandingOrders = monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial");
+  const avgOutstandingDays = outstandingOrders.length > 0
+    ? Math.round(outstandingOrders.reduce((s, o) => {
+        const days = Math.max(0, Math.floor((today.getTime() - new Date(o.date + "T00:00:00").getTime()) / 86400000));
+        return s + days;
+      }, 0) / outstandingOrders.length)
+    : 0;
+
   // 7-day revenue sparkline data
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
@@ -136,6 +165,12 @@ export default function Dashboard() {
 
   // Credit at Risk
   const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
+  const dealersApproaching = distributors.filter(d => {
+    if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
+    const pct = d.outstandingAmount / d.creditLimit;
+    return pct >= 0.8;
+  });
+  const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
 
   const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
   const maxDistVal = topDistributors[0]?.totalValue || 1;
@@ -198,24 +233,60 @@ export default function Dashboard() {
                 </button>
               </p>
             </div>
-            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase md:text-right">
+            <span className="timeframe-pill md:self-end">
               This Month · {monthLabel}
-            </p>
+            </span>
           </div>
 
           {/* This Month strip — hairline-separated stat cells, no card border */}
           <div className="mt-5 grid grid-cols-2 md:grid-cols-4 border-y border-border/60 divide-x divide-border/60">
-            {[
-              { label: "Revenue", value: formatCurrency(monthRevenue) },
-              { label: "Orders", value: monthOrderCount.toString() },
-              { label: "Outstanding", value: formatCurrency(monthOutstanding) },
-              { label: "Delivered", value: `${monthDeliveredPct}%` },
-            ].map((s, i) => (
-              <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
-                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
-                <p className="font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</p>
-              </div>
-            ))}
+            {(() => {
+              const renderDelta = (delta: number | null, suffix = "%") => {
+                if (delta === null) {
+                  return <span className="insight-line insight-flat">— no {prevMonthLabel} data</span>;
+                }
+                if (delta === 0) {
+                  return <span className="insight-line insight-flat"><Minus className="icon-inline" />Flat vs {prevMonthLabel}</span>;
+                }
+                const up = delta > 0;
+                return (
+                  <span className={cn("insight-line", up ? "insight-up" : "insight-down")}>
+                    {up ? <TrendingUp className="icon-inline" /> : <TrendingDown className="icon-inline" />}
+                    {up ? "+" : ""}{delta}{suffix} vs {prevMonthLabel}
+                  </span>
+                );
+              };
+              const cells = [
+                { label: "Revenue", value: formatCurrency(monthRevenue), zero: monthRevenue === 0, insight: renderDelta(revenueDelta) },
+                { label: "Orders", value: monthOrderCount.toString(), zero: monthOrderCount === 0, insight: renderDelta(ordersDelta) },
+                {
+                  label: "Outstanding",
+                  value: formatCurrency(monthOutstanding),
+                  zero: monthOutstanding === 0,
+                  insight: outstandingOrders.length > 0
+                    ? <span className="insight-line insight-flat">Avg {avgOutstandingDays}d outstanding</span>
+                    : <span className="insight-line insight-up"><TrendingUp className="icon-inline" />All settled</span>,
+                },
+                {
+                  label: "Delivered",
+                  value: `${monthDeliveredPct}%`,
+                  zero: monthOrderCount === 0,
+                  insight: monthOrderCount === 0
+                    ? <span className="insight-line insight-flat">— no orders yet</span>
+                    : renderDelta(deliveredDelta === 0 ? 0 : deliveredDelta, "pp"),
+                },
+              ];
+              return cells.map((s, i) => (
+                <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
+                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
+                  <p className={cn(
+                    "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                    s.zero && "text-muted-foreground/35"
+                  )}>{s.value}</p>
+                  {s.insight}
+                </div>
+              ));
+            })()}
           </div>
 
           {/* 7-day revenue sparkline — full width band directly under strip */}
@@ -321,29 +392,63 @@ export default function Dashboard() {
 
           {/* Compact KPI row */}
           <div className="glass-card grid grid-cols-2 md:grid-cols-4 divide-x divide-border/60">
-            {kpis.map((kpi) => (
-              <div key={kpi.label} className="px-4 py-4 min-w-0">
-                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
-                <p className="font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
-              </div>
-            ))}
+            {kpis.map((kpi) => {
+              const isZero = kpi.value === "0" || kpi.value === "₹0";
+              return (
+                <div key={kpi.label} className="px-4 py-4 min-w-0">
+                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
+                  <p className={cn(
+                    "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                    isZero && "text-muted-foreground/35"
+                  )}>{kpi.value}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* Credit at Risk */}
+        {/* Credit attention tier — amber, only shown when approaching but not over */}
+        {dealersApproaching.length > 0 && dealersAtRisk.length === 0 && (
+          <Link to="/distributors" className="block group">
+            <div className="flex items-stretch gap-3 border-l-[3px] border-warning bg-warning/[0.04] hover:bg-warning/[0.08] transition-colors rounded-r-md px-4 py-3">
+              <div className="flex items-center">
+                <AlertTriangle className="icon-signal text-warning" fill="hsl(var(--warning) / 0.15)" />
+              </div>
+              <div className="flex-1 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-warning/90">Approaching limit</p>
+                  <p className="text-sm text-foreground mt-0.5">
+                    {dealersApproaching.length} dealer{dealersApproaching.length > 1 ? "s" : ""} above 80% of credit limit
+                  </p>
+                </div>
+                <span className="font-heading text-[28px] num text-warning leading-none">{dealersApproaching.length}</span>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Credit at Risk — promoted to a real risk surface */}
         {dealersAtRisk.length > 0 && (
-          <Link to="/distributors" className="block">
-            <div className="glass-card p-4 flex items-center gap-3 card-hover">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-4 w-4 text-destructive" />
+          <Link to="/distributors" className="block group">
+            <div className="flex items-stretch gap-3 border-l-[3px] border-destructive bg-destructive/[0.03] hover:bg-destructive/[0.07] transition-colors rounded-r-md px-4 py-4">
+              <div className="flex items-center">
+                <AlertTriangle className="icon-signal text-destructive" fill="hsl(var(--destructive) / 0.15)" />
               </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} at or over credit limit
-                </p>
+              <div className="flex-1 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-destructive/90">At Risk</p>
+                  <p className="text-sm text-foreground mt-0.5">
+                    {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} over their credit limit
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 num">
+                    {formatCurrency(atRiskAmount)} outstanding
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-heading text-[32px] num text-destructive leading-none">{dealersAtRisk.length}</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-destructive/70 mt-1.5">Dealers</p>
+                </div>
               </div>
-              <span className="text-lg font-bold text-destructive">{dealersAtRisk.length}</span>
             </div>
           </Link>
         )}

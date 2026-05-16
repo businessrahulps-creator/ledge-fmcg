@@ -5,8 +5,8 @@ type StatusType = "paid" | "partial" | "pending" | "dispatched" | "delivered";
 // V2: status colors mapped to semantic tokens (Forest/Terracotta/Destructive/Midnight).
 const statusStyles: Record<StatusType, string> = {
   paid: "bg-success/10 text-success",
-  partial: "bg-warning/10 text-warning",
-  pending: "bg-destructive/10 text-destructive",
+  partial: "bg-warning/10 text-warning border-l-2 border-warning rounded-l-[2px]",
+  pending: "bg-destructive/10 text-destructive border-l-2 border-destructive rounded-l-[2px]",
   dispatched: "bg-primary/10 text-primary",
   delivered: "bg-success/10 text-success",
 };
