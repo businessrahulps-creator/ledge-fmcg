@@ -45,6 +45,7 @@ const Billing = lazy(routeImporters["/billing"] as any);
 const Help = lazy(routeImporters["/help"] as any);
 const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
+const AdminErrors = lazy(() => import("./pages/AdminErrors"));
 
 // Marketing/legal pages — kept lazy but not prefetched
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -128,6 +129,7 @@ const App = () => (
                   <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Settings /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Help /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><AdminErrors /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />

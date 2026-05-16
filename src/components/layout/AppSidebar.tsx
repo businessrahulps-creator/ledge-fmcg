@@ -17,6 +17,7 @@ import {
   Landmark,
   BookOpen,
   History,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
+import { useAuth } from "@/context/AuthContext";
 import { ActivityLog } from "@/components/layout/ActivityLog";
 import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
 import ledgeLogo from "@/assets/ledge-logo.webp";
@@ -69,9 +71,14 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { companyIncomplete } = useOnboarding();
+  const { userRole } = useAuth();
   const [activityOpen, setActivityOpen] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
+
+  const effectiveBottomNav = userRole === "super_admin"
+    ? [{ title: "Errors", url: "/admin/errors", icon: AlertTriangle }, ...bottomNav]
+    : bottomNav;
 
   const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive = location.pathname.startsWith(item.url);
@@ -218,7 +225,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {bottomNav.map((item) => {
+          {effectiveBottomNav.map((item) => {
             const isActive = location.pathname.startsWith(item.url);
             if (collapsed) {
               return (
