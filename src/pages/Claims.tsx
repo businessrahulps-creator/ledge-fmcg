@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search } from "lucide-react";
+import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
+import { SignalCard } from "@/components/ui/signal-card";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -408,6 +409,8 @@ export default function Claims() {
   }, [claims, tab, search]);
 
   const openCount = claims.filter(c => c.status === "open").length;
+  const openValue = claims.filter(c => c.status === "open").reduce((s, c) => s + (c.totalClaimValue || 0), 0);
+
 
   const handleResolve = async (id: string) => {
     setResolvingId(id);
@@ -434,14 +437,7 @@ export default function Claims() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="h1-display">Returns & Claims</h1>
-              {openCount > 0 && (
-                <Badge variant="secondary" className="bg-warning/10 text-warning">
-                  {openCount} open
-                </Badge>
-              )}
-            </div>
+            <h1 className="h1-display">Returns & Claims</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Track returned goods and damage claims against orders
             </p>
@@ -450,6 +446,20 @@ export default function Claims() {
             <Plus className="h-4 w-4 mr-1" /> New Claim
           </Button>
         </div>
+
+        {/* Open claims — promoted warning surface (attention tier) */}
+        {openCount > 0 && (
+          <SignalCard
+            tier="warning"
+            icon={AlertTriangle}
+            label="Open claims"
+            caption={`${openCount} claim${openCount > 1 ? "s" : ""} awaiting your decision`}
+            subCaption={openValue > 0 ? `${formatCurrency(openValue)} in claim value at stake` : undefined}
+            value={openCount}
+            valueSuffix={openCount > 1 ? "Open" : "Open"}
+          />
+        )}
+
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
