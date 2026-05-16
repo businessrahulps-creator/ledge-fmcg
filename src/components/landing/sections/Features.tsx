@@ -198,6 +198,8 @@ function GstPreview() {
     </div>
   );
 }
+
+export function Features() {
   return (
     <section id="features" className="relative lp-section-paper py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
