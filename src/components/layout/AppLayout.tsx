@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
+import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -152,6 +153,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <TopProgress active={isRefreshing && online} />
       <CommandPalette />
+      <KeyboardShortcuts />
       <div className="flex h-dvh w-full overflow-hidden bg-background">
         <div className="hidden md:block">
           <AppSidebar />
