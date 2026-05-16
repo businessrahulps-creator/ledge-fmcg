@@ -12,7 +12,7 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+// ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 import { computeDealerAging, sortByRisk } from "@/lib/aging";
 
 export function PaymentReport() {
@@ -241,8 +241,9 @@ export function PaymentReport() {
         onOpenChange={setPdfOpen}
         sections={rptSections}
         title="Export Payment Report PDF"
-        onGenerate={(sel) => {
+        onGenerate={async (sel) => {
           const totalAmount = filtered.reduce((s, o) => s + netTotal(o), 0);
+          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
           downloadPdf(
             pdfFilename("payment-report"),
             <ReportPdf

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Phone, Mail, MapPin, FileText, TrendingUp, TrendingDown, Activity, Zap, Target } from "lucide-react";
 import { EntityHistory } from "@/components/layout/EntityHistory";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
-import { SalespersonStatementPdf } from "@/components/pdf/SalespersonStatementPdf";
+// SalespersonStatementPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 import { buildSalespersonScorecard, getPerformanceHealth, getPerformanceInsight, performanceHealthConfig } from "@/utils/salespersonScorecard";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,8 @@ export default function SalespersonDetail() {
             variant="outline"
             size="sm"
             className="h-9 gap-1.5 ml-13 sm:ml-0"
-            onClick={() => {
+            onClick={async () => {
+              const { SalespersonStatementPdf } = await import("@/components/pdf/SalespersonStatementPdf");
               downloadPdf(
                 pdfFilename("salesperson-statement", person.name.replace(/\s+/g, "-")),
                 SalespersonStatementPdf({

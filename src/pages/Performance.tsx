@@ -57,7 +57,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { PerformanceReportPdf } from "@/components/pdf/PerformanceReportPdf";
+// PerformanceReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 
 type TimePeriod = "today" | "7d" | "30d" | "90d" | "6m" | "ytd" | "custom";
@@ -1049,6 +1049,7 @@ export default function Performance() {
 
           const { companyInfo } = api;
 
+          const { PerformanceReportPdf } = await import("@/components/pdf/PerformanceReportPdf");
           const doc = React.createElement(PerformanceReportPdf, {
             title: "Performance Report",
             subtitle: periodLabel,

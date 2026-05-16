@@ -11,7 +11,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+// ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
 export function SalesTeamReport() {
   const api = useApi();
@@ -186,7 +186,8 @@ export function SalesTeamReport() {
         onOpenChange={setPdfOpen}
         sections={rptSections}
         title="Export Sales Team Report PDF"
-        onGenerate={(sel) => {
+        onGenerate={async (sel) => {
+          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
           downloadPdf(
             pdfFilename("sales-team-report"),
             <ReportPdf
