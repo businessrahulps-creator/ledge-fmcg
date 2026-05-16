@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { spring, useParallaxY } from "@/lib/motion";
 import { CapsuleCTA } from "../CapsuleCTA";
+import { CursorAura } from "../CursorAura";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 const fadeUp = (delay: number) => ({
@@ -18,6 +19,8 @@ export function FinalCTA() {
   return (
     <section ref={sectionRef} className="relative lp-mesh-dark py-20 md:py-28 overflow-hidden">
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
+      {/* Motion v3 — the one ambient pointer layer outside the hero. */}
+      <CursorAura tint="hsl(var(--accent) / 0.12)" size={560} />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
         <motion.div className="inline-flex justify-center mb-7" {...fadeUp(0)}>
