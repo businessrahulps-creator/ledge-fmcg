@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { sanitizeInput } from "@/utils/sanitize";
-import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
+import { normalizeIndianPhone } from "@/utils/validators";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Building2, Loader2, Upload, X } from "lucide-react";
@@ -26,43 +28,54 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { companySchema, type CompanyFormValues } from "./Company.schema";
+
+const upper = (re: RegExp, max: number) => (v: string) =>
+  v.toUpperCase().replace(re, "").slice(0, max);
 
 export default function Company() {
-  
   const api = useApi();
   const { companyId } = useAuth();
   const { updateCompanyInfo } = api;
-
-  const [companyName, setCompanyName] = useState("");
   const savedPrefix = api.orders.prefix();
-  const [orderPrefix, setOrderPrefix] = useState(savedPrefix);
-  const [companyAddress, setCompanyAddress] = useState("");
-  const [companyGstin, setCompanyGstin] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [companyPan, setCompanyPan] = useState("");
-  const [companyStateCode, setCompanyStateCode] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [bankAccountName, setBankAccountName] = useState("");
-  const [bankAccount, setBankAccount] = useState("");
-  const [bankIfsc, setBankIfsc] = useState("");
-  const [invoicePrefix, setInvoicePrefix] = useState("INV");
+
   const [logoUrl, setLogoUrl] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedSnapshot, setSavedSnapshot] = useState<string>("");
 
-  // Build a stable string of all editable fields for dirty-detection.
-  const currentSnapshot = JSON.stringify({
-    companyName, orderPrefix, companyAddress, companyGstin, companyPhone,
-    companyEmail, companyPan, companyStateCode, bankName, bankAccountName,
-    bankAccount, bankIfsc, invoicePrefix, logoUrl,
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    watch,
+    formState: { errors, isSubmitting, isValid, isDirty },
+  } = useForm<CompanyFormValues>({
+    resolver: zodResolver(companySchema),
+    mode: "onChange",
+    defaultValues: {
+      companyName: "",
+      orderPrefix: savedPrefix,
+      invoicePrefix: "INV",
+      companyAddress: "",
+      companyGstin: "",
+      companyPhone: "",
+      companyEmail: "",
+      companyPan: "",
+      companyStateCode: "",
+      bankName: "",
+      bankAccountName: "",
+      bankAccount: "",
+      bankIfsc: "",
+    },
   });
-  const isDirty = savedSnapshot !== "" && currentSnapshot !== savedSnapshot;
-  useUnsavedChangesGuard(isDirty && !isSaving);
 
+  const orderPrefix = watch("orderPrefix");
+  const invoicePrefix = watch("invoicePrefix");
+
+  useUnsavedChangesGuard(isDirty && !isSubmitting);
 
   useEffect(() => {
     if (!companyId) return;
@@ -73,23 +86,11 @@ export default function Company() {
       .single()
       .then(({ data }) => {
         if (data) {
-          setCompanyName(data.name || "");
-          setCompanyAddress(data.address || "");
-          setCompanyGstin(data.gstin || "");
           setLogoUrl(data.logo_url || "");
-          setCompanyPhone((data as any).phone || "");
-          setCompanyEmail((data as any).email || "");
-          setCompanyPan((data as any).pan || "");
-          setCompanyStateCode((data as any).state_code || "");
-          setBankName((data as any).bank_name || "");
-          setBankAccountName((data as any).bank_account_name || "");
-          setBankAccount((data as any).bank_account || "");
-          setBankIfsc((data as any).bank_ifsc || "");
-          setInvoicePrefix((data as any).invoice_prefix || "INV");
-          // Seed dirty-tracking baseline once initial values are populated.
-          setSavedSnapshot(JSON.stringify({
+          reset({
             companyName: data.name || "",
             orderPrefix: savedPrefix,
+            invoicePrefix: (data as any).invoice_prefix || "INV",
             companyAddress: data.address || "",
             companyGstin: data.gstin || "",
             companyPhone: (data as any).phone || "",
@@ -100,12 +101,10 @@ export default function Company() {
             bankAccountName: (data as any).bank_account_name || "",
             bankAccount: (data as any).bank_account || "",
             bankIfsc: (data as any).bank_ifsc || "",
-            invoicePrefix: (data as any).invoice_prefix || "INV",
-            logoUrl: data.logo_url || "",
-          }));
+          });
         }
       });
-  }, [companyId]);
+  }, [companyId, savedPrefix, reset]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,15 +176,15 @@ export default function Company() {
     setLogoUploading(false);
   };
 
-  const handleSaveClick = () => {
-    if (orderPrefix !== savedPrefix) {
+  const handleSaveClick = handleSubmit((values) => {
+    if (values.orderPrefix !== savedPrefix) {
       setShowPrefixConfirm(true);
       return;
     }
-    saveCompany();
-  };
+    return saveCompany(values);
+  });
 
-  const saveCompany = async () => {
+  const saveCompany = async (values: CompanyFormValues) => {
     if (!companyId) {
       toast.error("Workspace not set up", {
         description: "Please complete workspace setup before saving company details.",
@@ -193,71 +192,48 @@ export default function Company() {
       logError({ source: "crud:companies.update", error: "Workspace not set up (companyId missing)", severity: "warning" });
       return;
     }
-    if (!isValidGstin(companyGstin)) {
-      toast.error("Invalid GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
+    if (values.orderPrefix !== savedPrefix) {
+      api.orders.setPrefix(sanitizeInput(values.orderPrefix));
+    }
+    const payload = {
+      name: sanitizeInput(values.companyName),
+      address: sanitizeInput(values.companyAddress || ""),
+      gstin: sanitizeInput(values.companyGstin),
+      phone: normalizeIndianPhone(values.companyPhone) || sanitizeInput(values.companyPhone),
+      email: sanitizeInput(values.companyEmail),
+      pan: sanitizeInput(values.companyPan),
+      state_code: sanitizeInput(values.companyStateCode),
+      bank_name: sanitizeInput(values.bankName || ""),
+      bank_account_name: sanitizeInput(values.bankAccountName || ""),
+      bank_account: sanitizeInput(values.bankAccount),
+      bank_ifsc: sanitizeInput(values.bankIfsc),
+      invoice_prefix: sanitizeInput(values.invoicePrefix),
+    };
+    const { error } = await supabase.from("companies").update(payload as any).eq("id", companyId);
+    if (error) {
+      handleSupabaseError(error, { source: "crud:companies.update", title: "Couldn't save company details", context: { companyId } });
       return;
-    }
-    if (!isValidPan(companyPan)) {
-      toast.error("Invalid PAN", { description: "PAN must be 10 characters (e.g. AAAAA0000A)." });
-      return;
-    }
-    if (!isValidIndianPhone(companyPhone)) {
-      toast.error("Invalid phone", { description: "Enter a valid 10-digit Indian mobile number." });
-      return;
-    }
-    if (!isValidIfsc(bankIfsc)) {
-      toast.error("Invalid IFSC", { description: "IFSC must be 11 characters (e.g. HDFC0001234)." });
-      return;
-    }
-    setIsSaving(true);
-    try {
-    if (orderPrefix !== savedPrefix) {
-      api.orders.setPrefix(sanitizeInput(orderPrefix));
-    }
-    {
-      const { error } = await supabase
-        .from("companies")
-        .update({
-          name: sanitizeInput(companyName),
-          address: sanitizeInput(companyAddress),
-          gstin: sanitizeInput(companyGstin),
-          phone: normalizeIndianPhone(companyPhone) || sanitizeInput(companyPhone),
-          email: sanitizeInput(companyEmail),
-          pan: sanitizeInput(companyPan),
-          state_code: sanitizeInput(companyStateCode),
-          bank_name: sanitizeInput(bankName),
-          bank_account_name: sanitizeInput(bankAccountName),
-          bank_account: sanitizeInput(bankAccount),
-          bank_ifsc: sanitizeInput(bankIfsc),
-          invoice_prefix: sanitizeInput(invoicePrefix),
-        } as any)
-        .eq("id", companyId);
-      if (error) {
-        handleSupabaseError(error, { source: "crud:companies.update", title: "Couldn't save company details", context: { companyId } });
-        return;
-      }
     }
     updateCompanyInfo({
-      name: sanitizeInput(companyName),
-      address: sanitizeInput(companyAddress),
-      gstin: sanitizeInput(companyGstin),
-      phone: normalizeIndianPhone(companyPhone) || sanitizeInput(companyPhone),
-      email: sanitizeInput(companyEmail),
-      pan: sanitizeInput(companyPan),
-      stateCode: sanitizeInput(companyStateCode),
-      bankName: sanitizeInput(bankName),
-      bankAccountName: sanitizeInput(bankAccountName),
-      bankAccount: sanitizeInput(bankAccount),
-      bankIfsc: sanitizeInput(bankIfsc),
-      invoicePrefix: sanitizeInput(invoicePrefix),
+      name: payload.name,
+      address: payload.address,
+      gstin: payload.gstin,
+      phone: payload.phone,
+      email: payload.email,
+      pan: payload.pan,
+      stateCode: payload.state_code,
+      bankName: payload.bank_name,
+      bankAccountName: payload.bank_account_name,
+      bankAccount: payload.bank_account,
+      bankIfsc: payload.bank_ifsc,
+      invoicePrefix: payload.invoice_prefix,
     });
-    // Refresh dirty-tracking baseline so the form is no longer "dirty".
-    setSavedSnapshot(currentSnapshot);
+    // Reset RHF baseline so isDirty becomes false.
+    reset(values);
     toast.success("Settings saved", { description: "Company profile has been updated." });
-    } finally {
-      setIsSaving(false);
-    }
   };
+
+  const errMsg = (k: keyof CompanyFormValues) => errors[k]?.message as string | undefined;
 
   return (
     <AppLayout>
@@ -302,48 +278,91 @@ export default function Company() {
 
             <div className="space-y-1.5 md:space-y-2">
               <Label className="text-xs md:text-sm">Company Name</Label>
-              <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="h-10 rounded-lg" />
+              <Input {...register("companyName")} className="h-10 rounded-lg" aria-invalid={!!errors.companyName} />
+              {errMsg("companyName") && <p className="text-xs text-destructive">{errMsg("companyName")}</p>}
             </div>
 
             <div className="space-y-1.5 md:space-y-2">
               <Label className="text-xs md:text-sm">Address</Label>
-              <Textarea value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} className="min-h-[100px] rounded-lg" />
+              <Textarea {...register("companyAddress")} className="min-h-[100px] rounded-lg" aria-invalid={!!errors.companyAddress} />
+              {errMsg("companyAddress") && <p className="text-xs text-destructive">{errMsg("companyAddress")}</p>}
             </div>
 
             <div className="space-y-1.5 md:space-y-2">
               <Label className="text-xs md:text-sm">GSTIN</Label>
-              <Input
-                value={companyGstin}
-                onChange={(e) => setCompanyGstin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15))}
-                maxLength={15}
-                className="h-10 rounded-lg max-w-[300px] font-mono"
-                placeholder="22AAAAA0000A1Z5"
+              <Controller
+                control={control}
+                name="companyGstin"
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    onChange={(e) => field.onChange(upper(/[^A-Z0-9]/g, 15)(e.target.value))}
+                    onBlur={field.onBlur}
+                    maxLength={15}
+                    className="h-10 rounded-lg max-w-[300px] font-mono"
+                    placeholder="22AAAAA0000A1Z5"
+                    aria-invalid={!!errors.companyGstin}
+                  />
+                )}
               />
-              <p className="text-[10px] text-muted-foreground md:text-xs">
-                15-digit GST Identification Number
-              </p>
+              {errMsg("companyGstin")
+                ? <p className="text-xs text-destructive">{errMsg("companyGstin")}</p>
+                : <p className="text-[10px] text-muted-foreground md:text-xs">15-digit GST Identification Number</p>}
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Phone</Label>
-                <Input type="tel" inputMode="tel" autoComplete="tel" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} className="h-10 rounded-lg" placeholder="+91 98100 12345" />
+                <Input type="tel" inputMode="tel" autoComplete="tel" {...register("companyPhone")} className="h-10 rounded-lg" placeholder="+91 98100 12345" aria-invalid={!!errors.companyPhone} />
+                {errMsg("companyPhone") && <p className="text-xs text-destructive">{errMsg("companyPhone")}</p>}
               </div>
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">Email</Label>
-                <Input type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} className="h-10 rounded-lg" placeholder="company@example.com" />
+                <Input type="email" {...register("companyEmail")} className="h-10 rounded-lg" placeholder="company@example.com" aria-invalid={!!errors.companyEmail} />
+                {errMsg("companyEmail") && <p className="text-xs text-destructive">{errMsg("companyEmail")}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">PAN</Label>
-                <Input value={companyPan} onChange={(e) => setCompanyPan(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))} maxLength={10} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="ABCDE1234F" />
+                <Controller
+                  control={control}
+                  name="companyPan"
+                  render={({ field }) => (
+                    <Input
+                      value={field.value}
+                      onChange={(e) => field.onChange(upper(/[^A-Z0-9]/g, 10)(e.target.value))}
+                      onBlur={field.onBlur}
+                      maxLength={10}
+                      className="h-10 rounded-lg max-w-[200px] font-mono"
+                      placeholder="ABCDE1234F"
+                      aria-invalid={!!errors.companyPan}
+                    />
+                  )}
+                />
+                {errMsg("companyPan") && <p className="text-xs text-destructive">{errMsg("companyPan")}</p>}
               </div>
               <div className="space-y-1.5 md:space-y-2">
                 <Label className="text-xs md:text-sm">State Code</Label>
-                <Input value={companyStateCode} onChange={(e) => setCompanyStateCode(e.target.value.replace(/\D/g, "").slice(0, 2))} maxLength={2} className="h-10 rounded-lg max-w-[100px] font-mono" placeholder="27" />
-                <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>
+                <Controller
+                  control={control}
+                  name="companyStateCode"
+                  render={({ field }) => (
+                    <Input
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                      onBlur={field.onBlur}
+                      maxLength={2}
+                      className="h-10 rounded-lg max-w-[100px] font-mono"
+                      placeholder="27"
+                      aria-invalid={!!errors.companyStateCode}
+                    />
+                  )}
+                />
+                {errMsg("companyStateCode")
+                  ? <p className="text-xs text-destructive">{errMsg("companyStateCode")}</p>
+                  : <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>}
               </div>
             </div>
 
@@ -352,20 +371,51 @@ export default function Company() {
               <div className="space-y-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Bank Name</Label>
-                    <Input value={bankName} onChange={(e) => setBankName(e.target.value)} className="h-10 rounded-lg" placeholder="State Bank of India" />
+                    <Input {...register("bankName")} className="h-10 rounded-lg" placeholder="State Bank of India" aria-invalid={!!errors.bankName} />
+                    {errMsg("bankName") && <p className="text-xs text-destructive">{errMsg("bankName")}</p>}
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Account Holder Name</Label>
-                    <Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className="h-10 rounded-lg" placeholder="Your Company Pvt Ltd" />
+                    <Input {...register("bankAccountName")} className="h-10 rounded-lg" placeholder="Your Company Pvt Ltd" aria-invalid={!!errors.bankAccountName} />
+                    {errMsg("bankAccountName") && <p className="text-xs text-destructive">{errMsg("bankAccountName")}</p>}
                   </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Account Number</Label>
-                    <Input value={bankAccount} onChange={(e) => setBankAccount(e.target.value.replace(/\D/g, ""))} className="h-10 rounded-lg font-mono" placeholder="1234567890" />
+                    <Controller
+                      control={control}
+                      name="bankAccount"
+                      render={({ field }) => (
+                        <Input
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ""))}
+                          onBlur={field.onBlur}
+                          className="h-10 rounded-lg font-mono"
+                          placeholder="1234567890"
+                          aria-invalid={!!errors.bankAccount}
+                        />
+                      )}
+                    />
+                    {errMsg("bankAccount") && <p className="text-xs text-destructive">{errMsg("bankAccount")}</p>}
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">IFSC Code</Label>
-                    <Input value={bankIfsc} onChange={(e) => setBankIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11))} maxLength={11} className="h-10 rounded-lg max-w-[200px] font-mono" placeholder="SBIN0001234" />
+                    <Controller
+                      control={control}
+                      name="bankIfsc"
+                      render={({ field }) => (
+                        <Input
+                          value={field.value}
+                          onChange={(e) => field.onChange(upper(/[^A-Z0-9]/g, 11)(e.target.value))}
+                          onBlur={field.onBlur}
+                          maxLength={11}
+                          className="h-10 rounded-lg max-w-[200px] font-mono"
+                          placeholder="SBIN0001234"
+                          aria-invalid={!!errors.bankIfsc}
+                        />
+                      )}
+                    />
+                    {errMsg("bankIfsc") && <p className="text-xs text-destructive">{errMsg("bankIfsc")}</p>}
                   </div>
                 </div>
               </div>
@@ -373,34 +423,54 @@ export default function Company() {
 
             <div className="space-y-1.5 md:space-y-2">
               <Label className="text-xs md:text-sm">Order Prefix</Label>
-              <Input
-                value={orderPrefix}
-                onChange={(e) => setOrderPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
-                maxLength={10}
-                className="h-10 rounded-lg max-w-[200px] font-mono"
-                placeholder="ORD"
+              <Controller
+                control={control}
+                name="orderPrefix"
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    onChange={(e) => field.onChange(upper(/[^A-Z0-9]/g, 10)(e.target.value))}
+                    onBlur={field.onBlur}
+                    maxLength={10}
+                    className="h-10 rounded-lg max-w-[200px] font-mono"
+                    placeholder="ORD"
+                    aria-invalid={!!errors.orderPrefix}
+                  />
+                )}
               />
-              <p className="text-[10px] text-muted-foreground md:text-xs">
-                This will be used in all future order numbers (e.g. {orderPrefix || "ORD"}-2026-0042)
-              </p>
+              {errMsg("orderPrefix")
+                ? <p className="text-xs text-destructive">{errMsg("orderPrefix")}</p>
+                : <p className="text-[10px] text-muted-foreground md:text-xs">
+                    This will be used in all future order numbers (e.g. {orderPrefix || "ORD"}-2026-0042)
+                  </p>}
             </div>
 
             <div className="space-y-1.5 md:space-y-2">
               <Label className="text-xs md:text-sm">Invoice Prefix</Label>
-              <Input
-                value={invoicePrefix}
-                onChange={(e) => setInvoicePrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
-                maxLength={10}
-                className="h-10 rounded-lg max-w-[200px] font-mono"
-                placeholder="INV"
+              <Controller
+                control={control}
+                name="invoicePrefix"
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    onChange={(e) => field.onChange(upper(/[^A-Z0-9]/g, 10)(e.target.value))}
+                    onBlur={field.onBlur}
+                    maxLength={10}
+                    className="h-10 rounded-lg max-w-[200px] font-mono"
+                    placeholder="INV"
+                    aria-invalid={!!errors.invoicePrefix}
+                  />
+                )}
               />
-              <p className="text-[10px] text-muted-foreground md:text-xs">
-                Used for invoice numbers (e.g. {invoicePrefix || "INV"}-2026-0001)
-              </p>
+              {errMsg("invoicePrefix")
+                ? <p className="text-xs text-destructive">{errMsg("invoicePrefix")}</p>
+                : <p className="text-[10px] text-muted-foreground md:text-xs">
+                    Used for invoice numbers (e.g. {invoicePrefix || "INV"}-2026-0001)
+                  </p>}
             </div>
 
-            <Button onClick={handleSaveClick} disabled={isSaving}>
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleSaveClick} disabled={isSubmitting || !isValid}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>
           </div>
@@ -424,7 +494,7 @@ export default function Company() {
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => { saveCompany(); setShowPrefixConfirm(false); }}>
+              <AlertDialogAction onClick={() => { saveCompany(getValues()); setShowPrefixConfirm(false); }}>
                 Yes, Change Prefix
               </AlertDialogAction>
             </AlertDialogFooter>

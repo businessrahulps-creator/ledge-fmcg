@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,28 +13,31 @@ import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 
+const signupSchema = z.object({
+  companyName: z.string().trim().min(2, "Company name is required").max(120, "Company name is too long"),
+  fullName: z.string().trim().min(2, "Your name is required").max(80, "Name is too long"),
+  email: z.string().trim().email("Enter a valid email").max(255, "Email is too long"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password is too long"),
+});
+
+type SignupValues = z.infer<typeof signupSchema>;
+
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { refreshProfile } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!companyName || !fullName || !email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<SignupValues>({
+    resolver: zodResolver(signupSchema),
+    mode: "onChange",
+    defaultValues: { companyName: "", fullName: "", email: "", password: "" },
+  });
 
-    setLoading(true);
+  const onSubmit = async ({ companyName, fullName, email, password }: SignupValues) => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -81,8 +87,6 @@ export default function Signup() {
     } catch (err: any) {
       toast.error("Signup failed", { description: err.message });
       logError({ source: "auth:signup", error: err, context: { hasCompanyName: !!companyName } });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -102,23 +106,26 @@ export default function Signup() {
 
         {/* Form */}
         <div className="rounded-md border border-border bg-card/80 p-8 shadow-sm backdrop-blur-sm">
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className="space-y-2">
               <Label htmlFor="company" className="text-sm font-medium">Company name</Label>
               <Input id="company" placeholder="Acme FMCG Pvt. Ltd." className="h-12 rounded-lg"
-                value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                aria-invalid={!!errors.companyName} {...register("companyName")} />
+              {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">Your name</Label>
               <Input id="name" placeholder="Rajesh Kumar" className="h-12 rounded-lg"
-                value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                aria-invalid={!!errors.fullName} {...register("fullName")} />
+              {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Work email</Label>
               <Input id="email" type="email" placeholder="rajesh@acmefmcg.in" className="h-12 rounded-lg"
-                autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                autoComplete="email" aria-invalid={!!errors.email} {...register("email")} />
+              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -130,8 +137,8 @@ export default function Signup() {
                   placeholder="Min. 8 characters"
                   className="h-12 rounded-lg pr-10"
                   autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={!!errors.password}
+                  {...register("password")}
                 />
                 <button
                   type="button"
@@ -141,10 +148,11 @@ export default function Signup() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
 
-            <Button className="w-full mt-2 bg-[#27272A] hover:bg-[#1A1A1A] text-white rounded-full" size="lg" type="submit" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            <Button className="w-full mt-2 bg-[#27272A] hover:bg-[#1A1A1A] text-white rounded-full" size="lg" type="submit" disabled={isSubmitting || !isValid}>
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Start free trial
             </Button>
           </form>
