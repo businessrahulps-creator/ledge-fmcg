@@ -167,6 +167,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <PageTitle />
             <div className="ml-auto flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette"))}
+                aria-label="Search (Cmd+K)"
+                className="hidden md:inline-flex items-center gap-2 h-8 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors px-2.5 text-xs text-muted-foreground min-w-[200px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              >
+                <Search className="h-3.5 w-3.5 opacity-70" />
+                <span className="flex-1 text-left">Search orders, dealers, products…</span>
+                <kbd className="ml-2 inline-flex items-center gap-0.5 rounded border border-border/70 bg-background/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/80 num">
+                  ⌘K
+                </kbd>
+              </button>
               <LiveClock />
               {userRole && (
                 <>
