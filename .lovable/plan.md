@@ -1,74 +1,106 @@
-## QA & bug sweep → Linear
 
-**Blocker:** Linear isn't connected yet. Connect it first (button above), then I'll run the sweep and file every finding.
+## Goal
 
-### Sweep scope (full)
+Stop offline mode from hurting real devices **right now**, without deleting any of the offline-mode code we've built. In ~2 months we flip one flag and it's back.
 
-1. **Static checks**
-   - TypeScript / build errors from dev-server logs
-   - `rg` for raw color classes, `parseInt||0`, `console.error`, `TODO`/`FIXME`, dead imports
-   - Supabase linter + security scan (RLS gaps, exposed columns)
-   - Recent `error_log` table rows
+There are two separate things tangled together under "offline mode":
 
-2. **Landing site** (`/`) — desktop 1440 + mobile 390
-   - Render, console errors, broken images / 404s
-   - Hover states (verify sheen removed cleanly)
-   - CTA links, pricing buttons, founder note, testimonials
-   - Lighthouse-style spot check: LCP image, font flash
+1. **Service Worker / PWA caching** (`vite-plugin-pwa` → emits `sw.js`)
+   This is what actually causes the stale-render / "takes time to load" pain on installed devices. Once an SW is registered, it keeps serving the old shell until it's explicitly unregistered.
 
-3. **Auth** (`/auth`)
-   - Signup, login, validation errors, password reset link
-   - Confirm Google OAuth is fully gone (per memory)
+2. **Offline data layer** (`src/lib/offline-store.ts` + queue replay + `useOnlineStatus` toasts)
+   Wired into `DataContext`, every domain hook (`useOrdersDomain`, `useDealersDomain`, …), `Settings` page (pending queue UI), and `AppLayout` (sync banner). Cached reads + queued writes when offline.
 
-4. **`/app` pages — every one**
-   Dashboard, Orders, NewOrder, OrderDetail, Distributors, Salespersons, Stock (Products + Warehouses), Billing, Claims, Schemes, Targets, Reports (all 5 sub-reports), Performance, Company, Settings, Help, Notifications.
-   Per page: render, console, empty state, primary CRUD action, mobile layout (390px), keyboard focus, design-token drift.
+We disable both, but **keep all source files**.
 
-5. **Cross-cutting**
-   - PWA install + offline shell
-   - Notification bell
-   - PDF/invoice generation
-   - RBAC behavior (accountant restrictions on stock/products)
+---
 
-### Linear ticket format (kept simple)
+## Approach — feature flag + kill-switch
 
-One issue per bug. Title = plain-English symptom, no jargon.
+### A. Kill the Service Worker (the real fix for stale devices)
 
-```
-Title:      [Area] What's broken in one line
-Priority:   Urgent | High | Medium | Low
-Labels:     qa-sweep-2026-05, <area>, <type:bug|polish|a11y|perf|security>
-Description:
-  **What's wrong**   1–2 sentences, no code
-  **Where**          Page / route / component
-  **Steps**          1. … 2. … 3. …
-  **Expected**       …
-  **Actual**         …
-  **Evidence**       screenshot link or file:line
-  **Fix hint**       (optional, 1 line)
-```
+1. **Remove `VitePWA(...)` plugin** from `vite.config.ts` so new builds stop emitting a caching SW. Leave the import commented with a `// re-enable: see plan` note.
+2. **Ship a kill-switch `public/sw.js`** at the exact same path the old SW lived. On install it claims clients, deletes every cache, navigates open windows once, then `unregister()`s itself. Devices that already installed the PWA will silently clean themselves on next visit.
+3. **Keep a static `public/manifest.json`** (same icons, `display: standalone`, `start_url: /dashboard`) so "Add to Home Screen" still works — installability without a caching SW.
+4. **Strip SW registration from the app**: delete the `registerSW(...)` call in `src/components/UpdatePrompt.tsx` (or short-circuit the file to render nothing). Remove `vite-plugin-pwa/client` from `vite-env.d.ts`. Drop `vite-plugin-pwa` from devDependencies (optional — can leave for easy revival).
+5. Add `link rel="manifest"` directly in `index.html` (currently injected by the plugin).
 
-Areas: `Landing`, `Auth`, `Dashboard`, `Orders`, `Stock`, `Billing`, `Claims`, `Schemes`, `Targets`, `Reports`, `Settings`, `Backend`, `Design-system`, `PWA`.
+### B. Neutralize the offline data layer (without ripping it out)
 
-Priorities:
-- **Urgent** — crash, data loss, security, auth broken
-- **High** — core flow broken (can't place order, can't view invoice)
-- **Medium** — secondary flow broken or visible bug
-- **Low** — polish, copy, minor a11y, design drift
+Add a single flag `OFFLINE_MODE_ENABLED = false` in `src/lib/offline-store.ts`. When `false`:
 
-If 20+ findings land in one area, I'll create a parent issue and link the rest as sub-issues so the board stays readable.
+- `cacheData()` → no-op
+- `getCachedData()` → returns `null` (callers already handle "no cache" by hitting the network)
+- `enqueueMutation()` → throws / returns `{ queued: false }` so writes fail loudly instead of being silently queued
+- `getQueue()` → returns `[]`
+- `replaySingleMutation()` → no-op success
 
-### Deliverable
+Plus two small UI tweaks (kept narrow so the rest of the code is untouched):
 
-After the sweep:
-- Created Linear issues (count by priority + area)
-- A short summary posted back in chat with the top 5 must-fix items
-- No code changes in this loop — pure QA + filing
+- **`AppLayout.tsx`** — hide the "sync pending" banner when flag is off.
+- **`Settings.tsx`** — hide the "Pending offline changes" card when flag is off (or show a small "Offline mode is paused" note). All other Settings work stays intact.
+- **`useOnlineStatus`** — keep the hook returning `navigator.onLine` but skip the flush + toast spam when flag is off.
 
-### Open questions
+Everything else (`DataContext`, domain hooks, tests, mocks) keeps importing from `offline-store` exactly as today — the functions just become no-ops. Zero refactor risk.
 
-Once Linear is connected, I'll need to know:
-- **Team** — which Linear team to file under (I'll list options after connecting)
-- **Project** — existing project or create a new "QA Sweep — May 2026"?
+### C. Document the revival path
 
-I'll ask those two right after the connection succeeds.
+- Add a top-of-file comment in `offline-store.ts` and `vite.config.ts` pointing at `mem://features/offline-mode-paused` describing exactly what to flip.
+- Save a memory file `mem://features/offline-mode-paused` with the 4-step revival recipe (un-comment VitePWA, delete kill-switch sw.js, flip flag to true, re-add `registerSW` in UpdatePrompt).
+
+---
+
+## Why not just delete it?
+
+We considered three options:
+
+| Option | Effort | Risk of losing work | Stale-device fix |
+|---|---|---|---|
+| Delete offline code + PWA | High | High | Yes |
+| Feature flag + kill-switch SW *(picked)* | Low | None | Yes |
+| Just unregister SW, leave offline layer running | Lowest | None | Yes, but offline queue keeps silently swallowing writes if a user goes offline → data loss risk |
+
+The middle option gives us the device-side fix immediately and keeps the offline data layer dormant but visibly off (writes fail clearly when offline, instead of disappearing into a queue no one is watching).
+
+---
+
+## Files touched
+
+**Edited (small)**
+- `vite.config.ts` — remove `VitePWA(...)` from plugins array
+- `src/main.tsx` — drop the preview-iframe SW unregister block (kill-switch handles it everywhere now) or keep as-is, harmless
+- `src/components/UpdatePrompt.tsx` — return `null`, stop calling `registerSW`
+- `src/vite-env.d.ts` — drop the `vite-plugin-pwa/client` reference
+- `src/lib/offline-store.ts` — add `OFFLINE_MODE_ENABLED = false` flag + early returns
+- `src/components/layout/AppLayout.tsx` — gate sync banner on flag
+- `src/pages/Settings.tsx` — gate pending-queue card on flag
+- `src/hooks/use-online-status.tsx` — skip flush + toasts when flag off
+- `index.html` — add static `<link rel="manifest" href="/manifest.json">` + iOS meta tags
+
+**Created**
+- `public/sw.js` — kill-switch service worker
+- `public/manifest.json` — static manifest (installability only)
+- `mem://features/offline-mode-paused` — revival recipe
+
+**Deleted**
+- nothing
+
+---
+
+## What stays exactly as-is
+
+- All `offline-store.ts` storage logic (IndexedDB schema, queue serialization, replay logic)
+- All `cacheData`/`enqueueMutation` call sites across `DataContext` and domain hooks
+- All tests under `src/context/domains/__tests__/*` — they mock `offline-store` anyway
+- PWA icons under `public/`
+- Pending-queue UI components in `Settings.tsx`
+
+In ~2 months: flip `OFFLINE_MODE_ENABLED = true`, remove `public/sw.js` (and keep the kill-switch live for one release first), un-comment `VitePWA(...)`, restore `registerSW` in `UpdatePrompt.tsx`. ~15-minute job.
+
+---
+
+## Caveats
+
+- **Installed PWAs on iOS keep `start_url` from install time** — devices that installed the old version will still launch the app, just without the caching SW. Cleanup is silent.
+- **One release with the kill-switch is required** before deleting `public/sw.js` entirely; otherwise devices that haven't visited yet stay on the old cached shell forever.
+- "Add to Home Screen" continues to work via the static manifest — no regression for users who want installability.

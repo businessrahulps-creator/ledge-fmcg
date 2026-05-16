@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { getQueue, replaySingleMutation } from "@/lib/offline-store";
+import { getQueue, replaySingleMutation, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 
 /**
  * Walks the offline mutation queue and replays each entry against the
@@ -32,6 +32,19 @@ export function useOnlineStatus() {
   const flushingRef = useRef(false);
 
   useEffect(() => {
+    // Offline mode paused: keep tracking online/offline state for UI, but
+    // skip queue flushing + the connectivity toasts entirely.
+    if (!OFFLINE_MODE_ENABLED) {
+      const on = () => setOnline(true);
+      const off = () => setOnline(false);
+      window.addEventListener("online", on);
+      window.addEventListener("offline", off);
+      return () => {
+        window.removeEventListener("online", on);
+        window.removeEventListener("offline", off);
+      };
+    }
+
     const goOnline = async () => {
       setOnline(true);
       toast.success("You're back online", { duration: 3000 });

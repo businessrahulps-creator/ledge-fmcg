@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
-import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation } from "@/lib/offline-store";
+import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -326,15 +326,17 @@ export default function Settings() {
             <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
               <TabsTrigger value="team" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Team</TabsTrigger>
               <TabsTrigger value="subscription" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Subscription</TabsTrigger>
-              <TabsTrigger value="sync" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm flex items-center gap-1.5">
-                <Database className="h-3 w-3" />
-                Sync Queue
-                {queuedMutations.length > 0 && (
-                  <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                    {queuedMutations.length}
-                  </span>
-                )}
-              </TabsTrigger>
+              {OFFLINE_MODE_ENABLED && (
+                <TabsTrigger value="sync" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm flex items-center gap-1.5">
+                  <Database className="h-3 w-3" />
+                  Sync Queue
+                  {queuedMutations.length > 0 && (
+                    <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                      {queuedMutations.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="about" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">About</TabsTrigger>
             </TabsList>
           </div>

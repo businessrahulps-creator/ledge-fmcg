@@ -14,7 +14,7 @@ import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 
 
 import { RotateCcw, Target } from "lucide-react";
-import { getQueue } from "@/lib/offline-store";
+import { getQueue, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
 import { Download, Share, Plus } from "lucide-react";
@@ -232,7 +232,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </header>
 
           <AnimatePresence>
-            {(!online || syncing) && (
+            {OFFLINE_MODE_ENABLED && (!online || syncing) && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
