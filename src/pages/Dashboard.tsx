@@ -221,16 +221,16 @@ export default function Dashboard() {
             </div>
 
             {/* 7-day revenue sparkline */}
-            <div className="mt-4">
-              <p className="text-[10px] text-muted-foreground/50 font-medium mb-2">Last 7 days</p>
+            <div className="mt-5">
+              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-2">Last 7 days</p>
               {allZero ? (
                 <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
               ) : (
                 <div>
-                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
+                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
+                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.12" />
                         <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
                       </linearGradient>
                     </defs>
@@ -245,7 +245,7 @@ export default function Dashboard() {
                     <polyline
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       points={last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ")}
@@ -255,15 +255,15 @@ export default function Dashboard() {
                         key={i}
                         cx={i * 30}
                         cy={44 - (d.value / sparkMax) * 40}
-                        r={i === 6 ? 3 : 2}
+                        r={i === 6 ? 2.5 : 1.5}
                         fill="currentColor"
-                        opacity={i === 6 ? 1 : 0.6}
+                        opacity={i === 6 ? 1 : 0.45}
                       />
                     ))}
                   </svg>
-                  <div className="flex justify-between mt-1">
+                  <div className="flex justify-between mt-1.5">
                     {last7Days.map((d, i) => (
-                      <span key={i} className={cn("text-[9px] tabular-nums", i === 6 ? "text-foreground font-medium" : "text-muted-foreground/50")}>{d.label}</span>
+                      <span key={i} className={cn("text-[9px] uppercase tracking-wider num", i === 6 ? "text-foreground font-semibold" : "text-muted-foreground/50")}>{d.label}</span>
                     ))}
                   </div>
                 </div>
