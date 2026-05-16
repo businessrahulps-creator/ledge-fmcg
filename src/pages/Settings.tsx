@@ -75,10 +75,7 @@ function InstallAppCard() {
 }
 
 export default function Settings() {
-  
-  const { addNotification } = useNotifications();
   const navigate = useNavigate();
-  const api = useApi();
   const { signOut, companyId, user } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
