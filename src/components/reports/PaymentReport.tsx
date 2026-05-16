@@ -50,6 +50,15 @@ export function PaymentReport() {
             <SelectItem value="pending">Pending</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={scope} onValueChange={(v) => setScope(v as "delivered" | "all")}>
+          <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="delivered">Delivered Only</SelectItem>
+            <SelectItem value="all">All Orders</SelectItem>
+          </SelectContent>
+        </Select>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
           <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
