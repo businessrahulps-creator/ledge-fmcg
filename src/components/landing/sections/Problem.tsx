@@ -38,10 +38,11 @@ export function Problem() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">The old way</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em] mt-6">
-              Running both sides is hard.
-              <br />
-              Your software shouldn't be.
+              The old way is bleeding you dry.
             </h2>
+            <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
+              You're running on yesterday's data. Your competitors aren't.
+            </p>
           </div>
         </AnimateIn>
 
