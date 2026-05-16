@@ -1,6 +1,6 @@
 import { forwardRef, useState, useEffect, useRef, ReactNode } from "react";
-import { motion, useInView, Variants } from "framer-motion";
-import { spring, fadeUp, scaleUp, blurFadeUp, fadeIn, staggerContainer } from "@/lib/motion";
+import { motion, useInView, useReducedMotion, Variants } from "framer-motion";
+import { fadeUp, scaleUp, blurFadeUp, fadeIn, staggerContainer, ease, duration, rank } from "@/lib/motion";
 
 type AnimateVariant = "fadeUp" | "scaleUp" | "blurFadeUp" | "fadeIn";
 
@@ -9,6 +9,14 @@ const variantMap: Record<AnimateVariant, Variants> = {
   scaleUp,
   blurFadeUp,
   fadeIn,
+};
+
+/** Motion v2 rank mapping — every variant resolves to a ranked entrance. */
+const variantRank: Record<AnimateVariant, keyof typeof rank> = {
+  blurFadeUp: "lead",     // hero / section headings
+  scaleUp:    "support",  // cards
+  fadeUp:     "support",  // default body content
+  fadeIn:     "ambient",  // pills, chips, decoration
 };
 
 interface AnimateInProps {
@@ -22,15 +30,22 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
   function AnimateIn({ children, className, delay = 0, variant = "fadeUp" }, _ref) {
     const innerRef = useRef(null);
     const isInView = useInView(innerRef, { once: true, margin: "-80px" });
+    const reduce = useReducedMotion();
     const variants = variantMap[variant];
+    const r = rank[variantRank[variant]];
+
+    // Reduced motion: collapse to a 200ms opacity-only fade.
+    const transition = reduce
+      ? { duration: 0.2, ease: ease.decelerate, delay }
+      : { duration: r.duration, ease: r.ease, delay };
 
     return (
       <motion.div
         ref={innerRef}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
-        variants={variants}
-        transition={{ ...spring.premium as object, delay }}
+        variants={reduce ? { hidden: { opacity: 0 }, visible: { opacity: 1 } } : variants}
+        transition={transition}
         className={className}
       >
         {children}
@@ -38,6 +53,7 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
     );
   }
 );
+
 
 // ── Stagger Container ──────────────────────────────────────────
 interface StaggerContainerProps {
