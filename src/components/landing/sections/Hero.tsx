@@ -1,25 +1,44 @@
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useTransform, useReducedMotion, useMotionTemplate } from "framer-motion";
 import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
-import { spring, useParallaxY } from "@/lib/motion";
+import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
 import heroDashboard from "@/assets/landing/hero-dashboard.png";
 
+/** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 20, filter: "blur(4px)" },
+  initial: { opacity: 0, y: 16, filter: "blur(4px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  transition: { ...spring.default as object, delay },
+  transition: { duration: duration.medium, ease: ease.decelerate, delay },
 });
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
   const gridY = useParallaxY(sectionRef, 30);
+  /** Scroll-scrubbed progress through the hero — drives device lift + ambient light drift. */
+  const scrub = useScrollScrub(sectionRef, ["start start", "end start"]);
+  const deviceY = useTransform(scrub, [0, 1], reduce ? [0, 0] : [0, -64]);
+  const deviceScale = useTransform(scrub, [0, 1], reduce ? [1, 1] : [1, 0.96]);
+  const lightX = useTransform(scrub, [0, 1], reduce ? [50, 50] : [45, 58]);
+  const lightY = useTransform(scrub, [0, 1], reduce ? [50, 50] : [42, 62]);
+  const lightOpacity = useTransform(scrub, [0, 1], reduce ? [0.4, 0.4] : [0.7, 0.2]);
+  const lightBg = useMotionTemplate`radial-gradient(ellipse 800px 600px at ${lightX}% ${lightY}%, hsl(var(--primary) / 0.10) 0%, transparent 60%)`;
+
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-mesh-soft-warm pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
+
+      {/* Ambient drifting light — the page's signature ambient motion. Drifts with scroll. */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: lightBg, opacity: lightOpacity, willChange: "opacity, background" }}
+      />
+
 
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
         {/* Left - Text */}
@@ -80,18 +99,22 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Right - Dashboard Mockup with 3-layer treatment */}
-        <div className="lg:col-span-5 w-full" style={{ perspective: "1400px" }}>
+        {/* Right - Dashboard Mockup with 3-layer treatment + scroll-scrubbed lift */}
+        <motion.div
+          className="lg:col-span-5 w-full"
+          style={{ perspective: "1400px", y: deviceY, scale: deviceScale, willChange: "transform" }}
+        >
           <motion.div
             initial={{ x: 30, opacity: 0, rotateY: 0, rotateX: 0 }}
             animate={{ x: 0, opacity: 1, rotateY: -5, rotateX: 3 }}
-            transition={{ ...spring.gentle as object, delay: 0.2 }}
+            transition={{ duration: duration.long, ease: ease.emphasized, delay: 0.2 }}
           >
             <motion.div
-              animate={{ y: [0, -6, 0] }}
+              animate={reduce ? undefined : { y: [0, -6, 0] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
+
               {/* Layer 1 — neutral graphite ambient shadow */}
               <div
                 aria-hidden
@@ -130,7 +153,7 @@ export function Hero() {
               </div>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
     </section>

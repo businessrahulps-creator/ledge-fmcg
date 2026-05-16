@@ -1,5 +1,19 @@
+import { useRef, type ReactNode } from "react";
 import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw, CheckCircle2, AlertCircle, Clock, ArrowUpRight, BadgeCheck, Wallet } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { useTilt } from "@/lib/hooks/useTilt";
+
+/** Tilts a tinted feature card 3D on pointer move. */
+function TiltCard({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useTilt(ref, { max: 5, scale: 1.01 });
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
+}
+
 
 const features = [
   { icon: Contact, title: "Dealer Intelligence", desc: "Full history, credit and behaviour — instant. One profile per dealer." },
@@ -93,25 +107,34 @@ export function Features() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 auto-rows-fr" staggerTime={0.05}>
           {features.map((feature, i) => {
+            const isTinted = i === 0 || i === 5;
             const tint =
               i === 0 ? "lp-card-tinted lp-card-forest" :       // Dealer Intelligence → growth
               i === 5 ? "lp-card-tinted lp-card-terracotta" :   // Returns & Claims → recovery
               "lp-card lp-card-premium";
+            const cardClass = `${tint} p-7 h-full flex flex-col`;
+            const inner = (
+              <>
+                <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 40, height: 40 }}>
+                  <feature.icon size={20} strokeWidth={2} className="text-foreground icon-signal" />
+                </div>
+                <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
+                  {feature.desc}
+                </p>
+                {i === 0 && <DealerPreview />}
+                {i === 5 && <ClaimPreview />}
+              </>
+            );
             return (
               <StaggerItem key={feature.title}>
-                <div className={`${tint} p-7 h-full flex flex-col`}>
-                  <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 40, height: 40 }}>
-                    <feature.icon size={20} strokeWidth={2} className="text-foreground icon-signal" />
-                  </div>
-                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
-                    {feature.desc}
-                  </p>
-                  {i === 0 && <DealerPreview />}
-                  {i === 5 && <ClaimPreview />}
-                </div>
+                {isTinted ? (
+                  <TiltCard className={cardClass}>{inner}</TiltCard>
+                ) : (
+                  <div className={cardClass}>{inner}</div>
+                )}
               </StaggerItem>
             );
           })}

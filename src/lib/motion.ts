@@ -1,6 +1,56 @@
 import type { RefObject } from "react";
 import { useScroll, useTransform, useReducedMotion, type MotionValue, type Transition, type Variants } from "framer-motion";
 
+/* ════════════════════════════════════════════════════════════════════
+   Motion System v2 — "Choreographed Calm"
+   A Fluent 2 + Material 3 Expressive hybrid.
+
+     • Easings are brand assets. Use named curves, never `ease-out`.
+     • Distance scales with rank. Lead > Support > Ambient.
+     • Springs ONLY for direct manipulation (drag, tap, magnetic).
+     • prefers-reduced-motion collapses everything to a 200ms fade.
+   ════════════════════════════════════════════════════════════════════ */
+
+/** Named cubic-bezier easings (Fluent 2 + M3 Expressive). */
+export const ease = {
+  /** Entrances — content arriving from off-stage. */
+  decelerate:  [0.1, 0.9, 0.2, 1] as [number, number, number, number],
+  /** Swaps / layout shifts — both arrival and departure. */
+  standard:    [0.8, 0, 0.2, 1] as [number, number, number, number],
+  /** Exits — content leaving. */
+  accelerate:  [0.7, 0, 1, 0.5] as [number, number, number, number],
+  /** Hero moments — M3 Expressive "emphasized". */
+  emphasized:  [0.05, 0.7, 0.1, 1] as [number, number, number, number],
+};
+
+/** Duration scale (seconds). */
+export const duration = {
+  micro: 0.18, short: 0.28, medium: 0.42, long: 0.72, hero: 1.0,
+};
+
+/** Three motion ranks. Pick one per element; mixing is forbidden. */
+export const rank = {
+  /** Hero headlines, primary CTAs, marquee imagery. */
+  lead:    { y: 36, blur: 12, scale: 0.96, duration: duration.long,   ease: ease.emphasized, stagger: 0.08 },
+  /** Section headings, body cards, supporting copy. */
+  support: { y: 16, blur: 4,  scale: 0.98, duration: duration.medium, ease: ease.decelerate, stagger: 0.05 },
+  /** Pills, chips, micro-decorations. */
+  ambient: { y: 6,  blur: 0,  scale: 1,    duration: duration.short,  ease: ease.decelerate, stagger: 0.03 },
+} as const;
+
+export type Rank = keyof typeof rank;
+
+/** Springs ONLY for direct manipulation. Never use for entrances. */
+export const physics = {
+  /** Magnetic pull toward cursor. */
+  magnetic: { type: "spring", stiffness: 260, damping: 24, mass: 0.4 } as Transition,
+  /** Drag / swipe inertia. */
+  drag:     { type: "spring", stiffness: 180, damping: 22, mass: 0.6 } as Transition,
+  /** Tap press-down. */
+  tap:      { type: "spring", stiffness: 400, damping: 30, mass: 0.3 } as Transition,
+};
+
+
 // ── Spring presets ──────────────────────────────────────────────
 export const spring = {
   /** Default — responsive, no overshoot, Apple-like */
@@ -95,3 +145,23 @@ export function useParallaxY(
   });
   return useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-range, range]);
 }
+
+/**
+ * Scroll-scrubbed progress through a section.
+ * Returns `scrollYProgress` (0→1) over the requested offset window.
+ * Use with `useTransform` to build hero parallax / blur-decay / scale-decay.
+ * Returns a constant MotionValue(0) for reduced-motion users.
+ */
+export function useScrollScrub(
+  targetRef: RefObject<HTMLElement>,
+  offset: [string, string] = ["start end", "end start"]
+): MotionValue<number> {
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    // @ts-expect-error offset accepts string tuples
+    offset,
+  });
+  return useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [0, 1]);
+}
+
