@@ -86,12 +86,14 @@ export function Pricing() {
           <div className="text-center mb-12 md:mb-14 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Pricing</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Start free. Pay when it's
+              The offer that makes saying no
               <br />
-              running your business.
+              feel irrational.
             </h2>
             <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-6 leading-[1.55]">
-              Competitors charge ₹5,000–₹15,000+ for less.
+              Competitors charge ₹5,000–₹15,000+. Ledge delivers more for 50–80% less.
+              <br className="hidden md:inline" />
+              <span className="text-foreground font-medium"> Commit 1 year → pay only 10 months. Two months free.</span>
             </p>
 
             {/* Subtle benefits chip */}
