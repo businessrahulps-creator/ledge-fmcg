@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
