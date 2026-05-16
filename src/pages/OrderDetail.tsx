@@ -309,7 +309,7 @@ export default function OrderDetail() {
           return;
         }
         toast.error("Credit limit exceeded", {
-          description: `${dealer.name}'s outstanding would exceed their credit limit. Contact a Super Admin.`,
+          description: `${dealer.name}'s outstanding would exceed their credit limit. Ask someone with override permission.`,
         });
         return;
       }
