@@ -21,12 +21,13 @@ export function useSalespersonsDomain(deps: DomainDeps) {
   const safeRefetch = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const { data } = await supabase.from("salespersons").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999);
-      if (data) {
-        const mapped = data.map(mapSalesperson);
-        setSalespersons(mapped);
-        cacheData(deps.companyId, "salespersons", mapped);
-      }
+      const data = await fetchAllChunked<any>(
+        () => supabase.from("salespersons").select("*").eq("company_id", deps.companyId).order("name"),
+        1000, 200, "salespersons",
+      );
+      const mapped = data.map(mapSalesperson);
+      setSalespersons(mapped);
+      cacheData(deps.companyId, "salespersons", mapped);
     } catch { /* ignore */ }
   }, [deps.companyId]);
 
