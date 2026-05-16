@@ -172,9 +172,9 @@ export function AppSidebar() {
   };
 
   const renderGroup = (label: string, items: NavItem[], showDivider: boolean) => (
-    <SidebarGroup className={showDivider ? "border-t border-border/40 mt-2 pt-2" : ""}>
+    <SidebarGroup className={showDivider ? "border-t border-border/40 mt-1 pt-1" : ""}>
       {!collapsed && (
-        <SidebarGroupLabel className="px-3 mt-1 mb-1 text-[11px] font-medium tracking-normal normal-case text-muted-foreground/70">
+        <SidebarGroupLabel className="px-3 mt-0.5 mb-0.5 text-[11px] font-medium tracking-normal normal-case text-muted-foreground/70">
           {label}
         </SidebarGroupLabel>
       )}
@@ -183,6 +183,23 @@ export function AppSidebar() {
       </SidebarGroupContent>
     </SidebarGroup>
   );
+
+  // Track scroll edges so we can render fade affordances ("there's more here").
+  const { ref: scrollRef, showTopFade, showBottomFade } = useScrollEdges<HTMLDivElement>([collapsed, userRole]);
+
+  // Auto-scroll the active row into view on route change so users never land
+  // on a page whose nav item is hidden below the fold.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Defer one frame so the new active class has been applied.
+    const id = requestAnimationFrame(() => {
+      const active = el.querySelector<HTMLElement>('[data-active="true"]');
+      if (active) active.scrollIntoView({ block: "nearest" });
+    });
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <TooltipProvider>
