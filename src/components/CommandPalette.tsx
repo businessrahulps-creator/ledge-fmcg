@@ -10,6 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { getRecent, type RecentItem } from "@/lib/recent-items";
 import { useApi } from "@/services/api";
 import {
   House,
