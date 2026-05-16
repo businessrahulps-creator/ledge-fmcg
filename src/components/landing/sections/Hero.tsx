@@ -44,7 +44,7 @@ export function Hero() {
             className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Built for distributors and FMCG owners in Kerala. Mobile-first. Works offline.
+            Built for super-stockists and FMCG owners across India. Mobile-first. Works offline.
             Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks every year between your factory and your field</span>.
           </motion.p>
 
