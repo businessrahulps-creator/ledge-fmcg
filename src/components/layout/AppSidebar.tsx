@@ -250,8 +250,6 @@ export function AppSidebar() {
         <SidebarFooter className="px-2 pb-3 border-t border-border/40 pt-1">
           <SidebarMenu>{effectiveFooter.map(renderItem)}</SidebarMenu>
         </SidebarFooter>
-
-        <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
       </Sidebar>
     </TooltipProvider>
   );
