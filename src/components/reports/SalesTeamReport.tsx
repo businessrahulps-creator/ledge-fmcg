@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
+import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
