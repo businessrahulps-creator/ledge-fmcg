@@ -14,6 +14,7 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
+import { ExplainButton } from "@/components/ui/explain-button";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
