@@ -1,63 +1,73 @@
-# Make the live app fast and remove navigation glitches
+## The Ledge Toaster — Editorial Serif edition
 
-## What's actually happening (measured on getledge.in)
+A single, global Sonner restyle that becomes the most refined notification surface in the app. White card, Midnight ink, Playfair title + Inter body, semantic left bar, and a Terracotta progress thread that drains as the toast lives. Slide + soft scale in with Fluent decel, fade + accel out.
 
-- The whole app ships as **one entry file: `/assets/index-CPpd_a9e.js` = 890 KB raw / 272 KB gzipped**. That's heavy for first paint on mobile India.
-- Right after login, `<RoutePrefetcher />` calls `prefetchAllRoutes()`, which downloads **all 18 route chunks** in the background. On a slow connection this saturates bandwidth exactly while the user is trying to navigate → screens stall, Suspense fallback flashes, taps feel unresponsive. That is the "glitch."
-- `<RoutePrefetcher />` is placed *inside* `<ProtectedRoute>`, so it remounts on every navigation. The dedupe `Set` makes subsequent calls no-ops, but the placement is fragile and triggers an extra idle-callback chain each time.
-- `manualChunks` is intentionally disabled (recharts TDZ bug), so heavy libs (recharts, d3, framer-motion, lucide icons) end up either in the entry or duplicated across route chunks.
-- Every `<Suspense>` falls back to a **full-screen `<LedgeLoader />`**. That replaces the current page with a loader on every navigation → looks like a flicker/glitch even when the chunk loads in 100 ms.
-- `prefetchRoute` lookup for `/orders/new` strips the last segment and looks up `/orders/:id` — wrong chunk, harmless but wasteful.
+### Anatomy
 
-## Plan
+```text
+┌─┬───────────────────────────────────────────┐
+│ │  ◐  Order saved                       ✕   │   ← Playfair title (16/22, Midnight)
+│▌│      Invoice #1042 sent to Ramesh & Sons. │   ← Inter description (13/18, muted)
+│ │      ────────────  Undo                   │   ← optional action (Terracotta link)
+└─┴───────────────────────────────────────────┘
+   ━━━━━━━━━━━━━━━━━━━━━━━━━░░░░░░░░░░░  ← Terracotta progress, drains over duration
+```
 
-### 1. Stop the prefetch flood (biggest perceived-speed win)
+- 4px colored **left bar** (Forest / Terracotta / Destructive / Midnight for default)
+- 18px lucide icon, weight 1.75, color-matched to the bar
+- White card (`bg-card`), 1px `surface-border`, `rounded-md` (6px), `shadow-depth-16`
+- 1px hairline divider between body and progress
+- 360px wide desktop, full-width minus 16px on mobile
+- Stack: bottom-right desktop, top-center mobile (already in sonner.tsx)
 
-- Replace blanket `prefetchAllRoutes()` with **smart, link-hover/visible prefetching** only:
-  - Prefetch a route chunk when the user hovers/touches a sidebar link, or when the link scrolls into view (IntersectionObserver).
-  - Keep the warmed `Set` to dedupe.
-- Move `<RoutePrefetcher />` out of `<ProtectedRoute>` and into the authenticated layout (mounts once).
-- Prefetch only the **likely-next 2 routes from the current page** on idle (e.g. from Dashboard → Orders, Distributors), not all 18.
-- Fix `prefetchRoute` path normalisation (don't collapse `/orders/new` to `/orders/:id`).
+### Motion
 
-### 2. Shrink the entry bundle
+- **Enter**: `translateX(16px) scale(0.98) opacity:0 → 0 1 1`, 220ms `ease-fluent-decel`
+- **Sit**: hover deepens to `shadow-depth-28` and **pauses** the progress thread
+- **Exit**: `translateX(24px) opacity:0`, 160ms `ease-fluent-accel`
+- **Progress**: CSS `@keyframes drain` from `scaleX(1)` → `scaleX(0)` over `--toast-duration` (default 4000ms), `transform-origin:left`, paused via `animation-play-state` on hover/focus-within
+- Stack stagger: each subsequent toast offsets 6px and dims 4% (Sonner native, kept)
 
-- Re-enable safe code splitting via **dynamic `import()` at usage sites** instead of `manualChunks` (which is what triggered the recharts TDZ bug):
-  - Lazy-load `recharts` inside the chart wrapper components used by Dashboard / Reports / Performance only. Wrap each chart in its own `<Suspense>` with a small skeleton (not the full-screen loader).
-  - Lazy-load `framer-motion` for non-critical animations (splash/celebration), keep static UI without it.
-  - Lazy-load `sonner`/`Toaster` only after first render (`requestIdleCallback`) — they don't need to block first paint.
-- Audit `lucide-react` imports — use named imports only (already tree-shakeable, just confirm no `import * as Icons`).
-- Verify the result: target entry **≤ ~140 KB gzipped** (down from 272 KB).
+### Variants (semantic)
 
-### 3. Smooth out navigation (kill the flicker)
+| Variant     | Bar / Icon color           | Icon            |
+| ----------- | -------------------------- | --------------- |
+| default     | `--primary` (Midnight)     | `Info`          |
+| success     | `--success` (Forest)       | `CheckCircle2`  |
+| warning     | `--warning` (Terracotta)   | `AlertTriangle` |
+| error       | `--destructive`            | `XCircle`       |
+| loading     | Midnight + spinner         | `Loader2` spin  |
 
-- Replace the full-screen `<LedgeLoader />` Suspense fallback on authenticated routes with a **layout-preserving skeleton** (sidebar/topbar stay, only the content area shows a subtle skeleton).
-- Add a **150 ms delay** before showing any fallback — most chunks load faster than that, so the user never sees a loader for cached/fast routes.
-- Add `<link rel="modulepreload">` for the chunk of the route the user is hovering, so the click → render gap is near-zero.
+All colors via semantic tokens — no raw hex.
 
-### 4. Lighten startup work
+### Files to change
 
-- Defer non-critical providers/effects until after first paint:
-  - `<InstallPrompt />`, `<UpdatePrompt />`, `<OnlineStatusWatcher />` mount inside a `requestIdleCallback`.
-- Confirm `DataContext` doesn't do heavy synchronous work on mount; if it does, defer the non-essential parts.
+1. **`src/components/ui/sonner.tsx`** — rewrite `toastOptions.classNames` to apply the new layout, left bar (`before:` pseudo with semantic color), Playfair title (`font-heading`), Inter body, hairline divider, and the progress wrapper. Pass `icons={{ success, error, warning, info, loading }}` from lucide-react so every toast gets the right glyph. Set `duration: 4000`, `closeButton: true`, `gap: 10`.
+2. **`src/index.css`** — add a small block:
+   - `@keyframes ledge-toast-drain { from { transform: scaleX(1) } to { transform: scaleX(0) } }`
+   - `.ledge-toast-progress { animation: ledge-toast-drain var(--toast-duration,4000ms) linear forwards; transform-origin:left }`
+   - `[data-sonner-toast]:hover .ledge-toast-progress { animation-play-state: paused }`
+   - Optional `[data-sonner-toast][data-styled="true"]` overrides to reset Sonner's default padding so our layout owns spacing.
+3. **No changes** to `toast.tsx` / `toaster.tsx` (legacy Radix) — per scope, Sonner only. Existing `toast.success/error/...` callers across the app keep working unchanged.
 
-### 5. Verify
+### Accessibility & polish
 
-- Re-measure: published entry size, Lighthouse mobile score, manual nav between Dashboard → Orders → Distributors on throttled 4G.
-- Confirm no recharts TDZ regression (the reason `manualChunks` was removed) — chart lazy-loading at component level avoids that bug because each chart owns its own dynamic import.
+- `role="status"` for default/success, `role="alert"` for error/warning (Sonner default, preserved)
+- Focus ring on close + action uses `--ring` (Midnight) via `shadow-focus`
+- Respect `prefers-reduced-motion`: disable drain animation and enter scale, keep opacity fade only
+- Tap target: close = 32×32 (matches `--control-h-compact`)
+- Max 3 visible toasts (Sonner `visibleToasts={3}`), rest queue
 
-## Files likely to change
+### Out of scope
 
-- `src/App.tsx` — move RoutePrefetcher, layout-preserving Suspense, idle-mounted prompts.
-- `src/lib/route-prefetch.ts` — hover/visible prefetch API, path-normalisation fix, "next likely routes" map.
-- `src/components/layout/AppSidebar.tsx` (and any nav link components) — wire hover/visible prefetch.
-- New `src/components/ui/route-skeleton.tsx` — small content-area skeleton.
-- New `src/components/charts/LazyChart.tsx` (and friends) — dynamic-import wrappers around recharts.
-- `src/pages/Dashboard.tsx`, `src/pages/Reports.tsx`, `src/pages/Performance.tsx` — swap direct recharts imports for the lazy wrappers.
-- `vite.config.ts` — no `manualChunks` change (keep current safe config).
+- Legacy `useToast` / Radix toast (kept as-is; nothing in the app currently uses it for new code)
+- Landing-page-only toast variants — global Sonner already covers the landing
+- New `toast.promise()` styling beyond inheriting loading variant
+- Memory file update — will append a short note to `mem://style/toast-notifications` after implementation lands
 
-## Out of scope
+### Verification
 
-- Reviving the PWA / offline mode (still paused per memory).
-- Backend / DataContext refactors beyond deferring obvious startup cost.
-- Visual redesign of pages.
+- Trigger one of each variant from `AdminErrors` or `Settings` dev hook → screenshot at 1202×875 and 390×844
+- Confirm progress drains, pauses on hover, resumes on leave
+- Confirm `prefers-reduced-motion: reduce` collapses to a quiet fade
+- Build passes, no console warnings from Sonner about unknown classNames keys
