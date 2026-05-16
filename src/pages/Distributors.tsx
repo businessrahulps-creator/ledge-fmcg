@@ -36,6 +36,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useUndoableAction } from "@/lib/use-undoable-action";
 
 export default function Distributors() {
   const api = useApi();
@@ -48,6 +49,8 @@ export default function Distributors() {
   const [editItem, setEditItem] = useState<Distributor | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const undoableAction = useUndoableAction();
   
 
   const isLoading = usePageLoading(api.loading);
@@ -55,9 +58,11 @@ export default function Distributors() {
 
   const filtered = useMemo(() => items.filter(
     (d) =>
-      d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      d.location.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ), [items, debouncedSearch]);
+      !hiddenIds.has(d.id) && (
+        d.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        d.location.toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
+  ), [items, debouncedSearch, hiddenIds]);
 
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedDealers = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
@@ -135,10 +140,17 @@ export default function Distributors() {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-    const d = items.find((i) => i.id === deleteId);
-    const ok = await deleteDistributor(deleteId);
-    if (ok) toast.success("Dealer removed", { description: `${d?.name} has been removed.` });
+    const id = deleteId;
+    const d = items.find((i) => i.id === id);
     setDeleteId(null);
+    undoableAction({
+      label: "Dealer removed",
+      description: d?.name ? `${d.name} — tap Undo to keep` : undefined,
+      onOptimistic: () => setHiddenIds((s) => new Set(s).add(id)),
+      onUndo: () => setHiddenIds((s) => { const n = new Set(s); n.delete(id); return n; }),
+      commit: async () => { await deleteDistributor(id); },
+      onError: () => setHiddenIds((s) => { const n = new Set(s); n.delete(id); return n; }),
+    });
   };
 
   // Blocking page skeleton removed — empty-state handles first-paint.
