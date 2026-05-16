@@ -185,10 +185,6 @@ function warnPaginationOnce(key: string, detail: string) {
   if (paginationWarnedKeys.has(key)) return;
   paginationWarnedKeys.add(key);
   console.warn(`[pagination] ${key}: ${detail}`);
-  toast.message("Large dataset paginated", {
-    description: `${key} — ${detail}. Loading may take longer than usual.`,
-    duration: 6000,
-  });
   logError({
     source: `pagination:${key}`,
     error: `Pagination needed: ${detail}`,

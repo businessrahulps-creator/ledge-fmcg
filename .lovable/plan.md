@@ -1,28 +1,20 @@
-## Navigation cleanup
+## What the toast is
 
-### 1. Remove version chip in sidebar footer
-`AppSidebar.tsx` — drop the "App version — open Settings" button (around line 266) and the `PRETTY_VERSION` / `SHORT_VERSION` import. Footer keeps only the user/profile row, giving the Insights group more breathing room and fewer competing elements.
+Source: `src/context/data-utils.ts` → `warnPaginationOnce()` (line 184), fired from `batchIn()` whenever a Supabase `IN (...)` query needs more than one 500-id chunk or more than one 1000-row page.
 
-### 2. Remove Help and Errors from navigation
-- `AppSidebar.tsx`: remove `Help` from `footerNav` (line 72) and the admin-only `Errors` injection (line 94). Drop now-unused `BookOpen` / `AlertTriangle` icon imports.
-- `AppLayout.tsx`: remove `Help` from mobile `moreGroups` (line 74). The /help and /admin/errors routes stay registered in the router — only the nav entries disappear, so the features remain reachable by URL and from Settings.
+Your account has 550 `order_id`s → 2 chunks → toast fires on every full data load. It's a **developer diagnostic**, not something the user can act on. The truncation warning right below it (data actually dropped) is a real user concern and should stay.
 
-### 3. Move Activity to the top bar (yes, good call)
-Activity is a transient, cross-cutting log — it behaves more like Notifications than a destination page, so it belongs next to the bell, not in a primary nav group. Plan:
+## Fix
 
-- **Desktop**: Add an `Activity` icon-button (`History` icon) in the header's right cluster in `AppLayout.tsx`, sitting just left of `NotificationCenter`. Clicking opens the existing `ActivityLog` drawer (lift the `activityOpen` state that already lives in `AppLayout`). Tooltip "Recent activity".
-- **Sidebar Insights group** shrinks to just `Reports`. Since that's now a single item, collapse the "Insights" group label and render Reports as a top-level item under Catalog/Relationships — or keep the label for structure. Recommend: **keep the label** for now to preserve the four-section rhythm; we can fold it later if it feels thin.
-- **Mobile**: Remove the Activity tile from the Menu sheet's Insights row. Add the same Activity icon-button to the mobile header (between PageTitle area and NotificationCenter). Same drawer.
-- The mobile bottom-bar "Insights" tab keeps pointing at Reports (rename label to "Reports" for clarity, icon stays `BarChart3`).
+In `src/context/data-utils.ts`, inside `warnPaginationOnce`:
 
-### 4. Cleanup
-- Remove `History` import from `AppSidebar.tsx` if no longer used there; add it to `AppLayout.tsx` if not already imported.
-- Remove `Activity` from `ROUTE_TITLES` mapping in `AppLayout.tsx` (it's not a real route).
-- No router or feature deletion. No backend changes.
+- Remove the `toast.message(...)` call.
+- Keep `console.warn` and `logError` so we still see it in logs / admin errors.
 
-### Files touched
-- `src/components/layout/AppSidebar.tsx`
-- `src/components/layout/AppLayout.tsx`
+The `warnTruncationOnce` toast stays untouched — that one signals incomplete data and is worth surfacing.
 
-### Why this works
-Top bar already hosts ephemeral, global affordances (Search, Notifications, Refresh, Install). Activity is the same shape: it's a log you peek at, not a page you navigate to. Moving it there reduces sidebar noise, frees a row in Insights, and makes the action discoverable from every screen without a click into the sidebar.
+## Files
+
+- `src/context/data-utils.ts` — drop ~4 lines (the `toast.message` block).
+
+No behavior change, no data change — just stops the recurring info toast on accounts with >500 orders.
