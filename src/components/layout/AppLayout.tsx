@@ -153,6 +153,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <TopProgress active={isRefreshing && online} />
       <CommandPalette />
+      <KeyboardShortcuts />
       <div className="flex h-dvh w-full overflow-hidden bg-background">
         <div className="hidden md:block">
           <AppSidebar />
