@@ -16,7 +16,7 @@ export function FinalCTA() {
   const gridY = useParallaxY(sectionRef, 30);
 
   return (
-    <section ref={sectionRef} className="relative lp-mesh-dark py-28 md:py-36 lg:py-40 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-mesh-dark py-20 md:py-28 overflow-hidden">
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">

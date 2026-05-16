@@ -17,7 +17,7 @@ export function Founder() {
   const auraY = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-30, 30]);
 
   return (
-    <section ref={sectionRef} className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
+    <section ref={sectionRef} className="relative bg-white py-20 md:py-28 overflow-hidden">
       {/* Soft section ambient wash */}
       <motion.div
         aria-hidden

@@ -120,7 +120,7 @@ export function Pricing() {
           {plans.map((plan) => (
             <StaggerItem key={plan.name}>
               <div
-                className={`relative ${plan.highlighted ? "lp-bento-hero" : "lp-card"} lp-card-premium p-7 flex flex-col h-full`}
+                className={`relative ${plan.highlighted ? "lp-bento-hero border border-primary/40 shadow-depth-8" : "lp-card"} lp-card-premium p-7 flex flex-col h-full`}
                 style={plan.highlighted ? { overflow: "visible" } : undefined}
               >
                 {plan.highlighted && (
@@ -168,7 +168,7 @@ export function Pricing() {
                   to="/signup"
                   whileTap={{ scale: 0.97 }}
                   transition={spring.snappy}
-                  className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block ${
+                  className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                     plan.highlighted
                       ? "lp-btn-primary-dark"
                       : "border border-border text-foreground hover:border-primary bg-card"
