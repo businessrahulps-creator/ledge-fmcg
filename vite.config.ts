@@ -30,27 +30,8 @@ export default defineConfig(({ mode }) => {
     // VitePWA(...) intentionally removed while offline mode is paused.
     // See mem://features/offline-mode-paused for the full config + revival recipe.
   ].filter(Boolean),
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (!id.includes("node_modules")) return undefined;
-          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/react-router-dom/") || id.includes("/scheduler/")) return "react-vendor";
-          if (id.includes("/@radix-ui/")) return "radix-vendor";
-          if (id.includes("/@supabase/") || id.includes("/@tanstack/")) return "supabase-vendor";
-          // recharts + d3 intentionally NOT split — splitting them caused a TDZ
-          // ReferenceError ("Cannot access 'S' before initialization") on the
-          // published build that left the site blank. Let Rollup keep their
-          // dep graph intact inside the default vendor chunk.
-          if (id.includes("/xlsx")) return "xlsx";
-          if (id.includes("/lucide-react/")) return "icons";
-          if (id.includes("/framer-motion/") || id.includes("/motion")) return "motion";
-          if (id.includes("/date-fns/")) return "date-fns";
-          return undefined;
-        },
-      },
-    },
-  },
+  // Avoid manual vendor chunking in production. Recharts/d3 hit a Rollup
+  // inter-chunk initialization bug that can blank the published app.
   esbuild: mode === "production" ? { drop: ["console", "debugger"] } : {},
   resolve: {
     alias: {
