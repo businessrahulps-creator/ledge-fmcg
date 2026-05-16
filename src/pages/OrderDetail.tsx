@@ -20,7 +20,7 @@ import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
-import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import type { Claim, ClaimLine } from "@/context/DataContext";
 import {
   Select,
@@ -91,7 +91,8 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
-  const { userRole } = useAuth();
+  const canManageStock = useCan("manage_stock");
+  const canOverrideCredit = useCan("override_credit_limit");
   const { companyInfo } = api;
 
   const orders = api.orders.list();
@@ -270,7 +271,7 @@ export default function OrderDetail() {
   const proceedAfterDispatchCheck = () => {
     if (!order) return;
     const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
-    if (movingToDispatched && editGodown && userRole !== "accountant") {
+    if (movingToDispatched && editGodown && canManageStock) {
       setDispatchPreview({ open: true, rows: [], loading: true });
       supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
         if (error) {
@@ -303,7 +304,7 @@ export default function OrderDetail() {
       const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s, l) => s + (l.quantity ?? 0) * l.unitPrice, 0);
       const projected = dealer.outstandingAmount - currentContribution + newTotal;
       if (projected > dealer.creditLimit) {
-        if (userRole === "super_admin") {
+        if (canOverrideCredit) {
           setCreditOverrideOpen(true);
           return;
         }
