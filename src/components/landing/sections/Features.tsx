@@ -44,11 +44,11 @@ export function Features() {
                     </p>
                     <div className="mt-auto pt-6">
                       <p className="font-body text-[12.5px] text-muted-foreground tracking-tight">
-                        <span className="font-heading font-semibold text-foreground">₹4.2L</span> revenue today
+                        <span className="font-heading font-semibold text-foreground">Lifetime value</span>
                         <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">28</span> orders
+                        <span className="font-heading font-semibold text-foreground">Credit days</span>
                         <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">12</span> dispatched
+                        <span className="font-heading font-semibold text-foreground">Full history</span>
                       </p>
                     </div>
                   </div>
