@@ -256,8 +256,13 @@ export default function Targets() {
 
   const periodEnd = getPeriodEnd(periodType, period);
 
+  // Achievement is calculated on DELIVERED revenue, windowed by delivered_at
   const periodOrders = useMemo(() =>
-    orders.filter(o => o.date >= period && o.date <= periodEnd),
+    orders.filter(o => {
+      if (o.deliveryStatus !== "delivered") return false;
+      const key = (o.deliveredAt || "").slice(0, 10);
+      return key >= period && key <= periodEnd;
+    }),
     [orders, period, periodEnd]
   );
 
@@ -265,7 +270,7 @@ export default function Targets() {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
       const cur = map.get(o.salespersonId) || { revenue: 0, orders: 0 };
-      cur.revenue += o.total - (o.schemeSavings || 0);
+      cur.revenue += Math.max(0, o.total - (o.schemeSavings || 0));
       cur.orders += 1;
       map.set(o.salespersonId, cur);
     });
@@ -276,7 +281,7 @@ export default function Targets() {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
       const cur = map.get(o.distributorId) || { revenue: 0, orders: 0 };
-      cur.revenue += o.total - (o.schemeSavings || 0);
+      cur.revenue += Math.max(0, o.total - (o.schemeSavings || 0));
       cur.orders += 1;
       map.set(o.distributorId, cur);
     });
