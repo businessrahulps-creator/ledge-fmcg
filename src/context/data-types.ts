@@ -189,6 +189,77 @@ export interface DataContextType {
   refreshAll: () => Promise<void>;
 }
 
+/**
+ * Catalog slice: read-heavy, rarely mutated reference data.
+ * Distributed via CatalogContext for future narrow-subscription consumers.
+ */
+export interface CatalogContextType {
+  products: Product[];
+  schemes: Scheme[];
+  distributors: Distributor[];
+
+  addDistributor: DataContextType["addDistributor"];
+  updateDistributor: DataContextType["updateDistributor"];
+  deleteDistributor: DataContextType["deleteDistributor"];
+
+  addProduct: DataContextType["addProduct"];
+  updateProduct: DataContextType["updateProduct"];
+  deleteProduct: DataContextType["deleteProduct"];
+
+  addScheme: DataContextType["addScheme"];
+  updateScheme: DataContextType["updateScheme"];
+  deleteScheme: DataContextType["deleteScheme"];
+}
+
+/**
+ * Transactional slice: mutated often (orders/billing/stock/targets).
+ * Distributed via TransactionalContext for future narrow-subscription consumers.
+ */
+export interface TransactionalContextType {
+  orders: Order[];
+  invoices: Invoice[];
+  claims: Claim[];
+  locations: GodownLocation[];
+  stockItems: StockItem[];
+  secondarySales: SecondarySale[];
+  targets: Target[];
+  salespersons: Salesperson[];
+
+  addOrder: DataContextType["addOrder"];
+  updateOrder: DataContextType["updateOrder"];
+  deleteOrder: DataContextType["deleteOrder"];
+
+  addSalesperson: DataContextType["addSalesperson"];
+  updateSalesperson: DataContextType["updateSalesperson"];
+  deleteSalesperson: DataContextType["deleteSalesperson"];
+
+  addLocation: DataContextType["addLocation"];
+  updateLocation: DataContextType["updateLocation"];
+  deleteLocation: DataContextType["deleteLocation"];
+
+  addStockItem: DataContextType["addStockItem"];
+  updateStockItem: DataContextType["updateStockItem"];
+  deleteStockItem: DataContextType["deleteStockItem"];
+  setStockItems: DataContextType["setStockItems"];
+
+  addSecondarySale: DataContextType["addSecondarySale"];
+  deleteSecondarySale: DataContextType["deleteSecondarySale"];
+
+  addTarget: DataContextType["addTarget"];
+  updateTarget: DataContextType["updateTarget"];
+  deleteTarget: DataContextType["deleteTarget"];
+
+  addClaim: DataContextType["addClaim"];
+  updateClaim: DataContextType["updateClaim"];
+
+  addInvoice: DataContextType["addInvoice"];
+  updateInvoice: DataContextType["updateInvoice"];
+  deleteInvoice: DataContextType["deleteInvoice"];
+
+  nextOrderNumber: DataContextType["nextOrderNumber"];
+  previewOrderNumber: DataContextType["previewOrderNumber"];
+}
+
 /** Shared deps passed to domain hooks */
 export interface DomainDeps {
   companyId: string | null;

@@ -18,7 +18,10 @@ import {
 import type {
   DataContextType, CompanyInfo, DomainDeps,
   AddOrderResult, Invoice, SecondarySale, Target, Claim, ClaimLine, InvoiceLine,
+  CatalogContextType, TransactionalContextType,
 } from "./data-types";
+import { CatalogProvider } from "./CatalogContext";
+import { TransactionalProvider } from "./TransactionalContext";
 
 // Domain hooks
 import { useDealersDomain } from "./domains/useDealersDomain";
@@ -443,43 +446,76 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Memoize the context value so consumers don't re-render on every parent tick.
-  // Keyed on the underlying state references that actually change.
-  const value = useMemo<DataContextType>(() => ({
-    orders: orders.orders, distributors: computedDistributors, salespersons: computedSalespersons,
-    products: computedProducts, locations: stock.locations, stockItems: stock.stockItems,
-    schemes: catalog.schemes, loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
-    orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
-    addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
+  // Split into catalog + transactional slices so future narrow consumers
+  // (useCatalog/useTransactional) only subscribe to the data they need.
+  const catalogValue = useMemo<CatalogContextType>(() => ({
+    products: computedProducts,
+    schemes: catalog.schemes,
+    distributors: computedDistributors,
     addDistributor: dealers.add, updateDistributor: dealers.update, deleteDistributor: dealers.remove,
-    addSalesperson: salespersons.add, updateSalesperson: salespersons.update, deleteSalesperson: salespersons.remove,
     addProduct: catalog.addProduct, updateProduct: catalog.updateProduct, deleteProduct: catalog.deleteProduct,
+    addScheme: catalog.addScheme, updateScheme: catalog.updateScheme, deleteScheme: catalog.deleteScheme,
+  }), [
+    computedProducts, catalog.schemes, computedDistributors,
+    dealers.add, dealers.update, dealers.remove,
+    catalog.addProduct, catalog.updateProduct, catalog.deleteProduct,
+    catalog.addScheme, catalog.updateScheme, catalog.deleteScheme,
+  ]);
+
+  const transactionalValue = useMemo<TransactionalContextType>(() => ({
+    orders: orders.orders,
+    invoices: billing.invoices,
+    claims: billing.claims,
+    locations: stock.locations,
+    stockItems: stock.stockItems,
+    secondarySales: targets.secondarySales,
+    targets: targets.targets,
+    salespersons: computedSalespersons,
+    addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
+    addSalesperson: salespersons.add, updateSalesperson: salespersons.update, deleteSalesperson: salespersons.remove,
     addLocation: stock.addLocation, updateLocation: stock.updateLocation, deleteLocation: stock.deleteLocation,
     addStockItem: stock.addStockItem, updateStockItem: stock.updateStockItem, deleteStockItem: stock.deleteStockItem,
     setStockItems: stock.setStockItems,
-    addScheme: catalog.addScheme, updateScheme: catalog.updateScheme, deleteScheme: catalog.deleteScheme,
-    secondarySales: targets.secondarySales, addSecondarySale: targets.addSecondarySale, deleteSecondarySale: targets.deleteSecondarySale,
-    targets: targets.targets, addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
-    claims: billing.claims, addClaim: billing.addClaim, updateClaim: billing.updateClaim,
-    invoices: billing.invoices, addInvoice: billing.addInvoice, updateInvoice: billing.updateInvoice, deleteInvoice: billing.deleteInvoice,
-    nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber, refreshAll,
+    addSecondarySale: targets.addSecondarySale, deleteSecondarySale: targets.deleteSecondarySale,
+    addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
+    addClaim: billing.addClaim, updateClaim: billing.updateClaim,
+    addInvoice: billing.addInvoice, updateInvoice: billing.updateInvoice, deleteInvoice: billing.deleteInvoice,
+    nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber,
   }), [
-    orders.orders, computedDistributors, computedSalespersons, computedProducts,
-    stock.locations, stock.stockItems, catalog.schemes,
-    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
-    orders.orderPrefix, orders.orderSequence, orders.setOrderPrefix,
+    orders.orders, billing.invoices, billing.claims,
+    stock.locations, stock.stockItems,
+    targets.secondarySales, targets.targets, computedSalespersons,
     orders.addOrder, orders.updateOrder, orders.deleteOrder,
-    dealers.add, dealers.update, dealers.remove,
     salespersons.add, salespersons.update, salespersons.remove,
-    catalog.addProduct, catalog.updateProduct, catalog.deleteProduct,
     stock.addLocation, stock.updateLocation, stock.deleteLocation,
     stock.addStockItem, stock.updateStockItem, stock.deleteStockItem, stock.setStockItems,
-    catalog.addScheme, catalog.updateScheme, catalog.deleteScheme,
-    targets.secondarySales, targets.addSecondarySale, targets.deleteSecondarySale,
-    targets.targets, targets.addTarget, targets.updateTarget, targets.deleteTarget,
-    billing.claims, billing.addClaim, billing.updateClaim,
-    billing.invoices, billing.addInvoice, billing.updateInvoice, billing.deleteInvoice,
-    orders.nextOrderNumber, orders.previewOrderNumber, refreshAll,
+    targets.addSecondarySale, targets.deleteSecondarySale,
+    targets.addTarget, targets.updateTarget, targets.deleteTarget,
+    billing.addClaim, billing.updateClaim,
+    billing.addInvoice, billing.updateInvoice, billing.deleteInvoice,
+    orders.nextOrderNumber, orders.previewOrderNumber,
   ]);
 
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+  const value = useMemo<DataContextType>(() => ({
+    ...catalogValue,
+    ...transactionalValue,
+    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
+    refreshAll,
+  }), [
+    catalogValue, transactionalValue,
+    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    orders.orderPrefix, orders.orderSequence, orders.setOrderPrefix,
+    refreshAll,
+  ]);
+
+  return (
+    <DataContext.Provider value={value}>
+      <CatalogProvider value={catalogValue}>
+        <TransactionalProvider value={transactionalValue}>
+          {children}
+        </TransactionalProvider>
+      </CatalogProvider>
+    </DataContext.Provider>
+  );
 }
