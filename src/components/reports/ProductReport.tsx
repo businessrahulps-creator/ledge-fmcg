@@ -17,7 +17,8 @@ export function ProductReport() {
   const orders = api.orders.list();
   const products = api.products.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
-  const filteredOrders = filterByTimePeriod(orders, period);
+  const [scope, setScope] = useState<RevenueScope>("delivered");
+  const filteredOrders = applyRevenueScope(filterByTimePeriod(orders, period), scope);
 
   const data = products
     .map((p) => {
