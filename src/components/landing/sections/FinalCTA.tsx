@@ -31,18 +31,18 @@ export function FinalCTA() {
           className="font-heading font-semibold text-[34px] md:text-[48px] text-foreground leading-[1.08] tracking-[-0.025em]"
           {...fadeUp(0.05)}
         >
-          Ready to run your business
+          One app. Every role.
           <br />
-          the way it deserves?
+          Total clarity.
         </motion.h2>
 
         <motion.p
           className="font-body text-[17px] md:text-[19px] text-muted-foreground max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
-          Start your 30-day free trial today. No card. No commitment.
+          Start free for 30 days. No card needed. Setup in 30 minutes.
           <br />
-          Just clarity. From day one.
+          Owner, manager, accountant, salesperson — one screen, one truth.
         </motion.p>
 
         <motion.div
