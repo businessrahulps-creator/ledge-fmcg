@@ -1,13 +1,13 @@
-import { LayoutDashboard, Route, Contact, Warehouse, IndianRupee, Layers } from "lucide-react";
+import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const features = [
-  { icon: LayoutDashboard, title: "Live business dashboard", desc: "Today's revenue, orders, dispatches. The moment you log in." },
-  { icon: Route, title: "Order lifecycle, tracked", desc: "Pending → Dispatched → Delivered. Every step logged." },
-  { icon: Contact, title: "Dealer intelligence", desc: "Lifetime value, outstanding, full history. One profile." },
-  { icon: Warehouse, title: "Stock health alerts", desc: "Green, amber, red. Per SKU, per godown. Never face a stockout." },
-  { icon: IndianRupee, title: "Payments tracked properly", desc: "Cash, UPI, cheque, bank. All reconciled in one place." },
-  { icon: Layers, title: "Schemes, targets, claims", desc: "The whole ops layer. Not just orders." },
+  { icon: Contact, title: "Dealer Intelligence", desc: "Full history, credit and behaviour — instant. One profile per dealer." },
+  { icon: HeartPulse, title: "Stock Health", desc: "Green, amber, red — per SKU, per godown. Before problems hit." },
+  { icon: Gift, title: "Schemes & Targets", desc: "Auto-tracked. Always accurate. No more end-of-month surprises." },
+  { icon: Users, title: "Team Performance", desc: "Every rep's orders and targets, live. Know who's performing — and why." },
+  { icon: IndianRupee, title: "GST Automation", desc: "Invoices, estimates, credit notes — one tap. CGST, SGST, IGST done." },
+  { icon: RotateCcw, title: "Returns & Claims", desc: "Handled cleanly. No arguments. Full paper trail, every time." },
 ];
 
 export function Features() {
