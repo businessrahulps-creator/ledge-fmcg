@@ -27,7 +27,7 @@ export const MorphHamburger = forwardRef<HTMLButtonElement, MorphHamburgerProps>
         transition={{ type: "spring", stiffness: 400, damping: 22 }}
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
-        className={`md:hidden relative rounded-full bg-white/70 backdrop-blur-md border border-[#0A0F1C]/[0.08] w-9 h-9 flex items-center justify-center text-[#0A0F1C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A0F1C]/20 focus-visible:ring-offset-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_2px_8px_-4px_rgba(15,23,42,0.12)] ${className}`}
+        className={`md:hidden relative rounded-full bg-white/70 backdrop-blur-md border border-[#0A0F1C]/[0.08] w-9 h-9 flex items-center justify-center text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A0F1C]/20 focus-visible:ring-offset-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_2px_8px_-4px_rgba(15,23,42,0.12)] ${className}`}
       >
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
           <motion.line

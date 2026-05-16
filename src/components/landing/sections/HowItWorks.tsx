@@ -76,7 +76,7 @@ export function HowItWorks() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">How it works</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Three things happen.
               <br />
               All in under 60 seconds.
@@ -98,17 +98,17 @@ export function HowItWorks() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                   <div className={step.reversed ? "lg:order-2" : ""}>
                     <span className="inline-flex items-center gap-2.5 mb-5 group">
-                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#F4F4F8] border border-[#ECEEF2] lp-icon-premium">
-                        <step.icon size={16} strokeWidth={2} className="text-[#1F2937]" />
+                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(34_30%_90%)] border border-border lp-icon-premium">
+                        <step.icon size={16} strokeWidth={2} className="text-foreground" />
                       </span>
-                      <span className="font-heading font-semibold text-[12px] text-[#475569] tracking-[0.18em]">
+                      <span className="font-heading font-semibold text-[12px] text-muted-foreground tracking-[0.18em]">
                         STEP {step.badge}
                       </span>
                     </span>
-                    <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.18]">
+                    <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-foreground tracking-[-0.022em] leading-[1.18]">
                       {step.title}
                     </h3>
-                    <p className="font-body text-[16px] text-[#64748B] leading-[1.55] mt-4 max-w-md">
+                    <p className="font-body text-[16px] text-muted-foreground leading-[1.55] mt-4 max-w-md">
                       {step.description}
                     </p>
                   </div>

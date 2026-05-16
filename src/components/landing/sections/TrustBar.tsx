@@ -32,7 +32,7 @@ export function TrustBar() {
             {[...companies, ...companies].map((name, i) => (
               <span
                 key={i}
-                className="font-body text-[13px] md:text-[14px] font-medium text-[#64748B] whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-white border border-[#E2E8F0]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(15,23,42,0.03)]"
+                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-white border border-[#E2E8F0]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(15,23,42,0.03)]"
               >
                 {name}
               </span>
@@ -49,10 +49,10 @@ export function TrustBar() {
                   i > 0 ? "md:border-l md:border-[#E2E8F0]/70" : ""
                 }`}
               >
-                <div className="font-heading font-semibold text-[26px] md:text-[32px] text-[#0A0F1C] tracking-[-0.025em] leading-none">
+                <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">
                   {stat.value}
                 </div>
-                <div className="font-body text-[12px] md:text-[13px] text-[#64748B] mt-2.5 tracking-tight">
+                <div className="font-body text-[12px] md:text-[13px] text-muted-foreground mt-2.5 tracking-tight">
                   {stat.label}
                 </div>
               </div>

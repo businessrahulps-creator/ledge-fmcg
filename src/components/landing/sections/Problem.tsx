@@ -37,7 +37,7 @@ export function Problem() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">The old way</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] leading-[1.1] tracking-[-0.022em] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em] mt-6">
               Running both sides is hard.
               <br />
               Your software shouldn't be.
@@ -50,12 +50,12 @@ export function Problem() {
             <StaggerItem key={card.title}>
               <div className="lp-card p-7 h-full flex flex-col">
                 <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
-                  <card.icon size={17} strokeWidth={1.75} className="text-[#1F2937]" />
+                  <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
                 </div>
-                <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
+                <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                   {card.title}
                 </h3>
-                <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
+                <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                   {card.description}
                 </p>
               </div>

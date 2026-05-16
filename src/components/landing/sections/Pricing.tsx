@@ -85,12 +85,12 @@ export function Pricing() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-12 md:mb-14 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Pricing</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Start free. Pay when it's
               <br />
               running your business.
             </h2>
-            <p className="font-body text-[15px] md:text-[17px] text-[#64748B] mt-6 leading-[1.55]">
+            <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-6 leading-[1.55]">
               Competitors charge ₹5,000–₹15,000+ for less.
             </p>
 
@@ -98,17 +98,17 @@ export function Pricing() {
             <div className="flex justify-center mt-6">
               <span className="lp-pricing-trust-chip">
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-[#4F46E5]" />
+                  <Check size={12} strokeWidth={3} className="text-accent" />
                   30-day free trial
                 </span>
                 <span className="lp-pricing-trust-chip__divider" />
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-[#4F46E5]" />
+                  <Check size={12} strokeWidth={3} className="text-accent" />
                   No card
                 </span>
                 <span className="lp-pricing-trust-chip__divider" />
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-[#4F46E5]" />
+                  <Check size={12} strokeWidth={3} className="text-accent" />
                   Cancel anytime
                 </span>
               </span>
@@ -133,22 +133,22 @@ export function Pricing() {
                   className={`lp-icon-tile lp-icon-premium mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
                   style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}
                 >
-                  <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-[#4F46E5]" : "text-[#1F2937]"} />
+                  <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-accent" : "text-foreground"} />
                 </div>
 
-                <h3 className="font-heading font-semibold text-[19px] text-[#0A0F1C] tracking-tight">{plan.name}</h3>
-                <p className={`font-body text-[13.5px] mt-1 ${plan.highlighted ? "text-[#3B3F66]" : "text-[#64748B]"}`}>{plan.tagline}</p>
+                <h3 className="font-heading font-semibold text-[19px] text-foreground tracking-tight">{plan.name}</h3>
+                <p className={`font-body text-[13.5px] mt-1 ${plan.highlighted ? "text-muted-foreground" : "text-muted-foreground"}`}>{plan.tagline}</p>
 
                 <div className="mt-5 flex items-baseline">
                   {plan.price === "Custom" ? (
-                    <span className="font-heading font-semibold text-[36px] text-[#0A0F1C] tracking-[-0.025em] leading-none">Custom</span>
+                    <span className="font-heading font-semibold text-[36px] text-foreground tracking-[-0.025em] leading-none">Custom</span>
                   ) : (
                     <>
                       {plan.priceLabel && (
-                        <span className="font-heading font-semibold text-[22px] text-[#0A0F1C] mr-0.5 leading-none">{plan.priceLabel}</span>
+                        <span className="font-heading font-semibold text-[22px] text-foreground mr-0.5 leading-none">{plan.priceLabel}</span>
                       )}
-                      <span className="font-heading font-semibold text-[40px] text-[#0A0F1C] tracking-[-0.025em] leading-none">{plan.price}</span>
-                      <span className="text-[#94A3B8] text-[14px] font-normal ml-1">{plan.period}</span>
+                      <span className="font-heading font-semibold text-[40px] text-foreground tracking-[-0.025em] leading-none">{plan.price}</span>
+                      <span className="text-[hsl(var(--muted-foreground)/0.7)] text-[14px] font-normal ml-1">{plan.period}</span>
                     </>
                   )}
                 </div>
@@ -156,10 +156,10 @@ export function Pricing() {
                 <div className="mt-6 space-y-2.5 flex-1">
                   {plan.features.map((f) => (
                     <div key={f} className="flex items-start gap-2.5">
-                      <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${plan.highlighted ? "bg-white border-white" : "bg-[#F4F4F8] border-[#ECEEF2]"}`}>
-                        <Check size={10} className={plan.highlighted ? "text-[#4F46E5]" : "text-[#0A0F1C]"} strokeWidth={3} />
+                      <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${plan.highlighted ? "bg-white border-white" : "bg-[hsl(34_30%_90%)] border-border"}`}>
+                        <Check size={10} className={plan.highlighted ? "text-accent" : "text-foreground"} strokeWidth={3} />
                       </span>
-                      <span className="font-body text-[13.5px] text-[#1F2937] leading-[1.45]">{f}</span>
+                      <span className="font-body text-[13.5px] text-foreground leading-[1.45]">{f}</span>
                     </div>
                   ))}
                 </div>
@@ -171,7 +171,7 @@ export function Pricing() {
                   className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block ${
                     plan.highlighted
                       ? "lp-btn-primary-dark text-white"
-                      : "border border-[#ECEEF2] text-[#0A0F1C] hover:border-[#0A0F1C] bg-white"
+                      : "border border-border text-foreground hover:border-[#0A0F1C] bg-white"
                   }`}
                 >
                   {plan.cta}
@@ -186,7 +186,7 @@ export function Pricing() {
             href="https://wa.me/918138084689?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-body text-[14px] text-[#0A0F1C] font-medium hover:text-[#4F46E5] transition-colors inline-block"
+            className="font-body text-[14px] text-foreground font-medium hover:text-accent transition-colors inline-block"
           >
             Need help deciding? Chat on WhatsApp →
           </a>

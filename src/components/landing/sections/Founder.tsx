@@ -28,7 +28,7 @@ export function Founder() {
           className="w-full h-full"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(245,158,11,0.10) 0%, rgba(79,70,229,0.06) 40%, transparent 70%)",
+              "radial-gradient(ellipse at center, rgba(245,158,11,0.10) 0%, hsl(var(--accent) / 0.06) 40%, transparent 70%)",
           }}
         />
       </motion.div>
@@ -47,7 +47,7 @@ export function Founder() {
                 className="absolute -inset-10 rounded-[3rem] blur-3xl pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 40% 50%, rgba(245,158,11,0.28) 0%, rgba(79,70,229,0.14) 45%, transparent 75%)",
+                    "radial-gradient(ellipse at 40% 50%, rgba(245,158,11,0.28) 0%, hsl(var(--accent) / 0.14) 45%, transparent 75%)",
                 }}
                 animate={reduce ? undefined : { opacity: [0.55, 0.85, 0.55], scale: [1, 1.04, 1] }}
                 transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
@@ -72,7 +72,7 @@ export function Founder() {
               >
                 {/* Inner ring + image */}
                 <div
-                  className="relative rounded-[1.5rem] overflow-hidden bg-[#F4F4F8] aspect-[4/5]"
+                  className="relative rounded-[1.5rem] overflow-hidden bg-[hsl(34_30%_90%)] aspect-[4/5]"
                   style={{ boxShadow: "inset 0 0 0 1px rgba(15,23,42,0.06)" }}
                 >
                   {/* LQIP blur */}
@@ -119,19 +119,19 @@ export function Founder() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
-              className="font-heading font-medium text-[20px] md:text-[24px] text-[#0A0F1C] leading-[1.5] tracking-[-0.01em] mt-6"
+              className="font-heading font-medium text-[20px] md:text-[24px] text-foreground leading-[1.5] tracking-[-0.01em] mt-6"
             >
               "I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
               <br /><br />
               Your team is in the field right now. Your floor is running. Your business deserves a system that keeps up. Built in India. Designed for the way you actually work.
               <br /><br />
-              <span className="text-[#4F46E5] font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
+              <span className="text-accent font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
             </motion.p>
 
             <div className="mt-8">
-              <p className="font-heading font-semibold text-[15.5px] text-[#0A0F1C]">Asha Ps</p>
+              <p className="font-heading font-semibold text-[15.5px] text-foreground">Asha Ps</p>
               <div className="h-px w-7 bg-[#0A0F1C] mt-1.5" />
-              <p className="font-body text-[13px] text-[#64748B] mt-1.5">Founder, Ledge</p>
+              <p className="font-body text-[13px] text-muted-foreground mt-1.5">Founder, Ledge</p>
             </div>
           </AnimateIn>
         </div>

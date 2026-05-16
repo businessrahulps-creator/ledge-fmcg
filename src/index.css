@@ -799,8 +799,8 @@
   }
   .lp-capsule-cta:hover .lp-capsule-cta__arrow {
     transform: translateY(-50%) translateX(6px);
-    color: #4F46E5;
-    background-color: rgba(79,70,229,0.06);
+    color: hsl(var(--accent));
+    background-color: hsl(var(--accent) / 0.08);
   }
   .lp-capsule-cta:active .lp-capsule-cta__inner {
     transform: translateY(0) scale(0.985);

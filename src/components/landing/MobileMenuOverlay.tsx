@@ -107,7 +107,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
               className="lp-menu-link group block py-2 -my-2 active:scale-[0.98] transition-transform"
             >
               <span className="lp-menu-link-eyebrow block mb-1.5">{l.eyebrow}</span>
-              <span className="font-heading font-semibold text-[40px] leading-[1.05] tracking-[-0.02em] text-[#0A0F1C]">
+              <span className="font-heading font-semibold text-[40px] leading-[1.05] tracking-[-0.02em] text-foreground">
                 {l.label}
               </span>
               <span className="lp-menu-link-underline" />
@@ -143,14 +143,14 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           <Link
             to="/login"
             onClick={onClose}
-            className="flex items-center justify-center bg-[#0A0F1C]/[0.04] hover:bg-[#0A0F1C]/[0.07] text-[#0A0F1C] border border-[#0A0F1C]/[0.06] rounded-2xl py-4 font-body font-semibold text-[15px] transition-colors"
+            className="flex items-center justify-center bg-[#0A0F1C]/[0.04] hover:bg-[#0A0F1C]/[0.07] text-foreground border border-[#0A0F1C]/[0.06] rounded-2xl py-4 font-body font-semibold text-[15px] transition-colors"
           >
             Sign in
           </Link>
         </motion.div>
 
         <motion.div
-          className="pt-5 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]"
+          className="pt-5 flex items-center justify-center gap-1.5 text-[11px] text-[hsl(var(--muted-foreground)/0.7)]"
           variants={childVariants}
           transition={childEnter}
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}

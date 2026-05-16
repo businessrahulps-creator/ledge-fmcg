@@ -62,7 +62,7 @@ export function Navbar() {
               <a
                 key={l.href}
                 href={l.href}
-                className="font-body font-medium text-[14px] tracking-[-0.005em] text-[#64748B] hover:text-[#0A0F1C] transition-colors duration-200"
+                className="font-body font-medium text-[14px] tracking-[-0.005em] text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 {l.label}
               </a>
@@ -71,7 +71,7 @@ export function Navbar() {
 
           {/* CTA - desktop */}
           <div className="hidden md:flex items-center gap-5">
-            <Link to="/login" className="font-body font-medium text-[14px] tracking-[-0.005em] text-[#64748B] hover:text-[#0A0F1C] transition-colors duration-200">
+            <Link to="/login" className="font-body font-medium text-[14px] tracking-[-0.005em] text-muted-foreground hover:text-foreground transition-colors duration-200">
               Sign in
             </Link>
             <motion.div whileTap={{ scale: 0.97 }} transition={spring.snappy}>
