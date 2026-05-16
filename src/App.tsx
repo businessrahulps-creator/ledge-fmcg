@@ -95,7 +95,6 @@ function DeferredChrome() {
   if (!ready) return null;
   return (
     <DelayedSuspense delayMs={400} fallback={null}>
-      <Toaster />
       <Sonner />
       <InstallPrompt />
       {!isPreviewEnv && <UpdatePrompt />}
