@@ -149,9 +149,10 @@ export function WhyLedge() {
                       </span>
                     </div>
                   ) : (
-                    <div className="mt-auto pt-6 flex justify-end">
-                      <block.icon size={16} strokeWidth={1.6} className="lp-icon-premium text-[hsl(var(--muted-foreground)/0.7)]" />
-                    </div>
+                    (() => {
+                      const Preview = blockPreviews[i];
+                      return Preview ? <Preview /> : null;
+                    })()
                   )}
                 </div>
               </StaggerItem>
