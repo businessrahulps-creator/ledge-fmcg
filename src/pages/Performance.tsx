@@ -924,7 +924,7 @@ export default function Performance() {
                 const pStart = t.periodStart;
                 const pEnd = t.periodType === "daily" ? pStart : t.periodType === "weekly" ? weekEnd : monthEnd;
                 const entityOrders = orders.filter(o => o.date >= pStart && o.date <= pEnd && (t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId));
-                const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const actualRev = entityOrders.reduce((s, o) => s + netTotal(o), 0);
                 const actualOrd = entityOrders.length;
                 const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
                 const periodLabel = t.periodType === "daily" ? "Today" : t.periodType === "weekly" ? "This Week" : "This Month";
