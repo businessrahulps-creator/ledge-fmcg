@@ -758,7 +758,7 @@ export default function Performance() {
               const spData = salespersons.map(sp => {
                 const spOrders = filteredOrders.filter(o => o.salespersonId === sp.id);
                 const allSpOrders = orders.filter(o => o.salespersonId === sp.id);
-                const revenue = spOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const revenue = spOrders.reduce((s, o) => s + netTotal(o), 0);
                 const health = getPerformanceHealth(allSpOrders);
                 return { id: sp.id, name: sp.name, revenue, orderCount: spOrders.length, health };
               })
