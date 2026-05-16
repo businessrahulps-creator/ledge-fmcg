@@ -88,11 +88,12 @@ interface StaggerItemProps {
 
 export function StaggerItem({ children, className, variant = "fadeUp" }: StaggerItemProps) {
   const variants = variantMap[variant];
+  const r = rank[variantRank[variant]];
 
   return (
     <motion.div
       variants={variants}
-      transition={spring.premium}
+      transition={{ duration: r.duration, ease: r.ease }}
       className={className}
     >
       {children}
