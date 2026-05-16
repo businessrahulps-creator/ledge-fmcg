@@ -157,7 +157,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         {/* Overview section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 px-3 mt-3 mb-1">Home</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/55 px-3 mt-3 mb-1">Home</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {overviewNav.map(renderNavItem)}
@@ -167,7 +167,7 @@ export function AppSidebar() {
 
         {/* Manage section */}
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 px-3 mt-3 mb-1">Manage</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/55 px-3 mt-3 mb-1">Manage</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {manageNav.map(renderNavItem)}
@@ -180,7 +180,7 @@ export function AppSidebar() {
 
 
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 px-3 mt-3 mb-1">Analyze</SidebarGroupLabel>}
+          {!collapsed && <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/55 px-3 mt-3 mb-1">Analyze</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {analyzeNav.map(renderNavItem)}
