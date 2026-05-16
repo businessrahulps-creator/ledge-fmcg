@@ -11,6 +11,7 @@ No Google OAuth — user explicitly removed it.
 Free trial is 30 days, NOT 14 — ignore any spec text saying otherwise.
 
 ## Memories
+- [PR13 Stock/NewOrder](mem://style/pr13-stock-neworder) — Stock hero SignalCard+KpiStrip, NewOrder credit-limit promoted to SignalCard
 - [Color tokens](mem://style/design-system) — Semantic token system; Electric Blue primary, brand status colors, warm stone neutrals retained
 - [Brand moments](mem://style/brand-moments) — The 4 designated places where Gradient Purple/Coral may appear in-app
 - [Landing page](mem://style/landing-page) — Light-themed landing page aligned with dashboard
