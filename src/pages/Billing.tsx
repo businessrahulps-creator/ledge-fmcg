@@ -1,6 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft, Truck, CalendarDays } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRightLeft, Pencil, ArrowLeft, Truck, CalendarDays, AlertTriangle } from "lucide-react";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
+import { InsightLine } from "@/components/ui/insight-line";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 import { pdf } from "@react-pdf/renderer";
