@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
-import { ShoppingCart, Plus, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
