@@ -366,6 +366,41 @@ export default function Stock() {
 
         <Tabs defaultValue="products" className="space-y-4 md:space-y-6">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
+      <div className="space-y-4 md:space-y-6">
+        <div>
+          <h1 className="h1-display">Stock</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
+            Manage your products and warehouse inventory
+          </p>
+        </div>
+
+        {(stockSummary.criticalCount > 0 || stockSummary.lowCount > 0) && (
+          <SignalCard
+            tier={stockSummary.criticalCount > 0 ? "destructive" : "warning"}
+            icon={AlertTriangle}
+            label={stockSummary.criticalCount > 0 ? "OUT OF STOCK" : "LOW STOCK"}
+            caption={
+              stockSummary.criticalCount > 0
+                ? `${stockSummary.criticalCount} SKU${stockSummary.criticalCount !== 1 ? "s" : ""} below reorder threshold — refill before next dispatch`
+                : `${stockSummary.lowCount} SKU${stockSummary.lowCount !== 1 ? "s" : ""} approaching reorder point`
+            }
+            subCaption={stockSummary.atRiskValue > 0 ? `≈ ${formatCurrency(stockSummary.atRiskValue)} revenue at risk` : undefined}
+            value={stockSummary.criticalCount > 0 ? stockSummary.criticalCount : stockSummary.lowCount}
+            valueSuffix="SKUs"
+          />
+        )}
+
+        <KpiStrip
+          cells={[
+            { label: "Total SKUs", value: formatNumber(products.length), zero: products.length === 0 },
+            ...(isAccountant ? [] : [{ label: "Stock value", value: formatCurrency(stockSummary.totalValue), zero: stockSummary.totalValue === 0 }]),
+            { label: "Low stock", value: formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: stockSummary.lowCount + stockSummary.criticalCount === 0 },
+            { label: "Warehouses", value: formatNumber(activeLocations.length), zero: activeLocations.length === 0 },
+          ]}
+        />
+
+        <Tabs defaultValue="products" className="space-y-4 md:space-y-6">
+          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
               <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
               <TabsTrigger value="warehouses" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Warehouses</TabsTrigger>
