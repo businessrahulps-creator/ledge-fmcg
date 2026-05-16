@@ -45,7 +45,8 @@ interface Props {
 export function TeamRoster({ companyId }: Props) {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
-  const { members, defaults, loading, refresh } = useTeamRoster(companyId);
+  const { members, pendingInvites, defaults, loading, refresh } = useTeamRoster(companyId);
+  const { resendInvite, cancelInvite } = useInvite();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [overrideFor, setOverrideFor] = useState<RosterMember | null>(null);
@@ -53,6 +54,39 @@ export function TeamRoster({ companyId }: Props) {
   const [selectedRole, setSelectedRole] = useState<AppRole>("salesperson");
   const [removeFor, setRemoveFor] = useState<RosterMember | null>(null);
   const [saving, setSaving] = useState(false);
+  const [companyName, setCompanyName] = useState<string>("");
+
+  useEffect(() => {
+    if (!companyId) return;
+    let alive = true;
+    supabase
+      .from("companies")
+      .select("name")
+      .eq("id", companyId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (alive && data?.name) setCompanyName(data.name);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [companyId]);
+
+  const handleResendInvite = async (inviteId: string) => {
+    const token = await resendInvite(inviteId);
+    if (token) {
+      toast.success("Invite refreshed", { description: "A new 72-hour link is ready to share." });
+      await refresh();
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    const ok = await cancelInvite(inviteId);
+    if (ok) {
+      toast.success("Invite cancelled");
+      await refresh();
+    }
+  };
 
   const ownerCount = useMemo(
     () => members.filter((m) => m.role === "super_admin").length,
