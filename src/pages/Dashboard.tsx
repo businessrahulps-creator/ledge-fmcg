@@ -164,174 +164,171 @@ export default function Dashboard() {
             }}
           />
         </div>
-      <div className="space-y-8 md:space-y-10">
+      <div className="space-y-7 md:space-y-8">
         {/* Onboarding checklist */}
         <SetupChecklist />
-        {/* Header */}
-        <div>
-          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase">
-            {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
-          </p>
-          <div className="relative inline-block mt-1.5">
-            <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
-            <motion.span
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: "left" }}
-              className="absolute -bottom-1 left-0 h-px w-full bg-foreground/30"
-              aria-hidden
-            />
-          </div>
-          <p className="text-[12px] text-muted-foreground mt-2 flex items-center gap-1.5">
-            Updated {timeAgo}
-            <span className="text-muted-foreground/30">·</span>
-            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("text-link", isLoading && "opacity-50 pointer-events-none")}>
-              {isLoading ? "Refreshing…" : "Refresh"}
-            </button>
-          </p>
 
-          {/* This Month summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", damping: 26, stiffness: 200 }}
-            className="glass-card p-5 mt-6"
-          >
-            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-4">
+        {/* Hero: greeting + This Month + sparkline as ONE composed block */}
+        <motion.section
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", damping: 26, stiffness: 200 }}
+        >
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+            <div>
+              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">
+                {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
+              </p>
+              <div className="relative inline-block mt-1.5">
+                <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformOrigin: "left" }}
+                  className="absolute -bottom-1 left-0 h-px w-full bg-foreground/25"
+                  aria-hidden
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1.5">
+                Updated {timeAgo}
+                <span className="text-muted-foreground/30">·</span>
+                <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("text-link", isLoading && "opacity-50 pointer-events-none")}>
+                  {isLoading ? "Refreshing…" : "Refresh"}
+                </button>
+              </p>
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase md:text-right">
               This Month · {monthLabel}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium">Revenue</p>
-                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthRevenue)}</p>
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium">Orders</p>
-                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthOrderCount}</p>
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium">Outstanding</p>
-                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthOutstanding)}</p>
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium">Delivered</p>
-                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthDeliveredPct}%</p>
-              </div>
-            </div>
+          </div>
 
-            {/* 7-day revenue sparkline */}
-            <div className="mt-5">
-              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-2">Last 7 days</p>
-              {allZero ? (
-                <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
-              ) : (
-                <div>
-                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.12" />
-                        <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <polyline
-                      fill="url(#sparkFill)"
-                      stroke="none"
-                      points={
-                        last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ") +
-                        ` 180,44 0,44`
-                      }
+          {/* This Month strip — hairline-separated stat cells, no card border */}
+          <div className="mt-5 grid grid-cols-2 md:grid-cols-4 border-y border-border/60 divide-x divide-border/60">
+            {[
+              { label: "Revenue", value: formatCurrency(monthRevenue) },
+              { label: "Orders", value: monthOrderCount.toString() },
+              { label: "Outstanding", value: formatCurrency(monthOutstanding) },
+              { label: "Delivered", value: `${monthDeliveredPct}%` },
+            ].map((s, i) => (
+              <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
+                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
+                <p className="font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* 7-day revenue sparkline — full width band directly under strip */}
+          <div className="mt-4">
+            {allZero ? (
+              <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
+            ) : (
+              <div>
+                <svg viewBox="0 0 186 48" className="w-full h-14 text-primary" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="currentColor" stopOpacity="0.14" />
+                      <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <polyline
+                    fill="url(#sparkFill)"
+                    stroke="none"
+                    points={
+                      last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ") +
+                      ` 180,44 0,44`
+                    }
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ")}
+                  />
+                  {last7Days.map((d, i) => (
+                    <circle
+                      key={i}
+                      cx={i * 30}
+                      cy={44 - (d.value / sparkMax) * 40}
+                      r={i === 6 ? 2.5 : 1.5}
+                      fill="currentColor"
+                      opacity={i === 6 ? 1 : 0.45}
                     />
-                    <polyline
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ")}
-                    />
-                    {last7Days.map((d, i) => (
-                      <circle
-                        key={i}
-                        cx={i * 30}
-                        cy={44 - (d.value / sparkMax) * 40}
-                        r={i === 6 ? 2.5 : 1.5}
-                        fill="currentColor"
-                        opacity={i === 6 ? 1 : 0.45}
-                      />
-                    ))}
-                  </svg>
-                  <div className="flex justify-between mt-1.5">
-                    {last7Days.map((d, i) => (
-                      <span key={i} className={cn("text-[9px] uppercase tracking-wider num", i === 6 ? "text-foreground font-semibold" : "text-muted-foreground/50")}>{d.label}</span>
-                    ))}
+                  ))}
+                </svg>
+                <div className="flex justify-between mt-1.5">
+                  {last7Days.map((d, i) => (
+                    <span key={i} className={cn("text-[9px] uppercase tracking-wider num", i === 6 ? "text-foreground font-semibold" : "text-muted-foreground/50")}>{d.label}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.section>
+
+        {/* Daily breakdown — anchored label + day rail + compact KPI row (NOT 4 separate cards) */}
+        <section>
+          <div className="flex items-end justify-between mb-3 gap-3 flex-wrap">
+            <div>
+              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">Daily breakdown</p>
+              <p className="text-[13px] text-foreground/80 mt-1">
+                {selectedDateObj.toLocaleDateString("en-IN", { weekday: "long" })}, {formatIndianDate(selectedDate)}
+              </p>
+            </div>
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex gap-1.5">
+                    {last7Dates.map((d) => {
+                      const iso = toIsoDate(d);
+                      const isToday = iso === todayIso;
+                      const isSelected = iso === selectedDate;
+                      const weekdayLabel = isToday ? "Today" : DAY_SHORT[d.getDay()];
+                      const fullLabel = d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
+                      return (
+                        <button
+                          key={iso}
+                          onClick={() => setSelectedDate(iso)}
+                          aria-label={fullLabel}
+                          aria-pressed={isSelected}
+                          className={cn(
+                            "relative flex flex-col items-center justify-center w-10 h-10 rounded-md text-xs font-semibold transition-all active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                            isSelected
+                              ? "bg-primary text-primary-foreground shadow-depth-4"
+                              : "bg-muted/40 text-muted-foreground hover:bg-muted/70"
+                          )}
+                        >
+                          <span className={cn("text-[8px] font-semibold tracking-wider uppercase leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-65")}>
+                            {weekdayLabel}
+                          </span>
+                          <span className="text-[13px] font-semibold num leading-none">{d.getDate()}</span>
+                          {isToday && !isSelected && (
+                            <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-primary" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs text-xs">
+                  Showing the last 7 days. Tap any date to see orders for that day.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
-          {/* Last 7 days date picker */}
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex gap-2 mt-5">
-                  {last7Dates.map((d, i) => {
-                    const iso = toIsoDate(d);
-                    const isToday = iso === todayIso;
-                    const isSelected = iso === selectedDate;
-                    const weekdayLabel = isToday ? "Today" : DAY_SHORT[d.getDay()];
-                    const fullLabel = d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
-                    return (
-                      <button
-                        key={iso}
-                        onClick={() => setSelectedDate(iso)}
-                        aria-label={fullLabel}
-                        aria-pressed={isSelected}
-                        className={cn(
-                          "relative flex flex-col items-center justify-center w-11 h-11 rounded-md text-xs font-semibold transition-all active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                          isSelected
-                            ? "bg-primary text-primary-foreground shadow-depth-4"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted/80"
-                        )}
-                      >
-                        <span className={cn("text-[9px] font-semibold tracking-wider uppercase leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-65")}>
-                          {weekdayLabel}
-                        </span>
-                        <span className="text-sm font-semibold num leading-none">{d.getDate()}</span>
-                        {isToday && !isSelected && (
-                          <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-primary" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs text-xs">
-                Showing the last 7 days. Tap any date to see orders for that day.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <p className="text-[11px] text-muted-foreground/70 mt-2">
-            Showing orders for {selectedDateObj.toLocaleDateString("en-IN", { weekday: "short" })}, {formatIndianDate(selectedDate)}
-          </p>
-        </div>
-
-        {/* KPI Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {kpis.map((kpi, i) => (
-            <motion.div
-              key={kpi.label}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
-              className="glass-card card-hover p-5 md:p-6 min-w-0"
-            >
-              <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase mb-2">{kpi.label}</p>
-              <p className="font-heading text-[26px] md:text-[30px] font-medium tracking-[-0.015em] leading-[1.05] num whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
-            </motion.div>
-          ))}
-        </div>
+          {/* Compact KPI row */}
+          <div className="glass-card grid grid-cols-2 md:grid-cols-4 divide-x divide-border/60">
+            {kpis.map((kpi) => (
+              <div key={kpi.label} className="px-4 py-4 min-w-0">
+                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
+                <p className="font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Credit at Risk */}
         {dealersAtRisk.length > 0 && (
