@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from "react";
-import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw, CheckCircle2, AlertCircle, Clock, ArrowUpRight, BadgeCheck, Wallet } from "lucide-react";
+import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw, CheckCircle2, AlertCircle, Clock, ArrowUpRight, BadgeCheck, Wallet, TrendingUp } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 import { useTilt } from "@/lib/hooks/useTilt";
 
@@ -90,6 +90,115 @@ function ClaimPreview() {
   );
 }
 
+/* Shared inset-card style for all mini-previews */
+const insetCardStyle = {
+  boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)",
+} as const;
+
+/** Mini SKU stock list — green/amber/red status */
+function StockHealthPreview() {
+  const rows = [
+    { sku: "Surf Excel 1kg", count: "48", label: "in stock", variant: "success" as const },
+    { sku: "Maggi 70g", count: "12", label: "reorder", variant: "warn" as const },
+    { sku: "Dabur Honey 250g", count: "0", label: "out", variant: "neutral" as const },
+  ];
+  const dotColor = { success: "hsl(var(--success))", warn: "hsl(var(--accent))", neutral: "hsl(var(--muted-foreground))" };
+  return (
+    <div className="mt-5 space-y-1.5">
+      {rows.map((r) => (
+        <div key={r.sku} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-card" style={insetCardStyle}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: dotColor[r.variant] }} aria-hidden />
+            <span className="font-body text-[13px] font-medium text-foreground truncate">{r.sku}</span>
+          </div>
+          <span className="font-body text-[11.5px] text-muted-foreground shrink-0">
+            <span className="num-tabular font-semibold text-foreground">{r.count}</span> {r.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Mini scheme tracker — title, progress bar, %/time */
+function SchemePreview() {
+  const pct = 62;
+  return (
+    <div className="mt-5 px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="font-heading font-semibold text-[13px] text-foreground">Monsoon Scheme</span>
+        <span className="font-body text-[11px] text-muted-foreground">Jul</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+        <div className="h-full rounded-full bg-foreground/85" style={{ width: `${pct}%` }} />
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="font-body text-[11.5px] text-muted-foreground">
+          <span className="num-tabular font-semibold text-foreground">₹1.24L</span> / ₹2.00L
+        </span>
+        <span className="font-body text-[11.5px] num-tabular text-muted-foreground">{pct}% · 8d left</span>
+      </div>
+    </div>
+  );
+}
+
+/** Top reps leaderboard — 3 rows with rank + orders */
+function TeamPreview() {
+  const reps = [
+    { rank: 1, name: "Anjali R.", orders: 42, status: "On target", variant: "success" as const, icon: TrendingUp },
+    { rank: 2, name: "Vikram S.", orders: 38, status: "On target", variant: "success" as const, icon: TrendingUp },
+    { rank: 3, name: "Meera K.", orders: 24, status: "Catching up", variant: "warn" as const, icon: Clock },
+  ];
+  return (
+    <div className="mt-5 space-y-1.5">
+      {reps.map((r) => (
+        <div key={r.rank} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-card" style={insetCardStyle}>
+          <span className="font-heading font-semibold text-[14px] text-muted-foreground w-3 shrink-0 num-tabular">{r.rank}</span>
+          <span className="font-body text-[13px] font-medium text-foreground flex-1 truncate">{r.name}</span>
+          <span className="font-body text-[11.5px] num-tabular text-muted-foreground shrink-0">
+            <span className="font-semibold text-foreground">{r.orders}</span> orders
+          </span>
+          <span className={`lp-pill lp-pill--${r.variant} shrink-0`} style={{ padding: "3px 8px 3px 3px", boxShadow: "none" }}>
+            <span className="lp-pill__tile" style={{ width: 16, height: 16, borderRadius: 5 }}>
+              <r.icon size={9} strokeWidth={2.5} />
+            </span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Mini GST invoice receipt */
+function GstPreview() {
+  return (
+    <div className="mt-5 px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+      <div className="flex items-baseline justify-between mb-2 pb-2 border-b border-dashed border-border">
+        <span className="font-heading font-semibold text-[12px] text-foreground tracking-tight">INV-2641</span>
+        <span className="font-body text-[11px] text-muted-foreground">Aryan Beverages</span>
+      </div>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between font-body text-[11.5px]">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="num-tabular text-foreground">₹42,500</span>
+        </div>
+        <div className="flex items-center justify-between font-body text-[11.5px]">
+          <span className="text-muted-foreground">CGST 9%</span>
+          <span className="num-tabular text-foreground">₹3,825</span>
+        </div>
+        <div className="flex items-center justify-between font-body text-[11.5px]">
+          <span className="text-muted-foreground">SGST 9%</span>
+          <span className="num-tabular text-foreground">₹3,825</span>
+        </div>
+      </div>
+      <div className="mt-2 pt-2 border-t border-dashed border-border flex items-baseline justify-between">
+        <span className="font-heading font-semibold text-[12px] text-foreground">Total</span>
+        <span className="font-heading font-semibold text-[14px] num-tabular text-foreground">₹50,150</span>
+      </div>
+    </div>
+  );
+}
+
 export function Features() {
   return (
     <section id="features" className="relative lp-section-paper py-24 md:py-32 lg:py-36 overflow-hidden">
@@ -125,6 +234,10 @@ export function Features() {
                   {feature.desc}
                 </p>
                 {i === 0 && <DealerPreview />}
+                {i === 1 && <StockHealthPreview />}
+                {i === 2 && <SchemePreview />}
+                {i === 3 && <TeamPreview />}
+                {i === 4 && <GstPreview />}
                 {i === 5 && <ClaimPreview />}
               </>
             );
