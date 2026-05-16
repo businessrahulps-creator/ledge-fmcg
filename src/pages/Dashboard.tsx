@@ -11,12 +11,13 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
-import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus, CheckCircle2, Clock } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { ExplainButton } from "@/components/ui/explain-button";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
