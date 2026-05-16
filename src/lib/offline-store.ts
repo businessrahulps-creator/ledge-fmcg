@@ -1,5 +1,13 @@
 import { get, set, del, keys } from "idb-keyval";
 
+// ============================================================================
+// Offline mode is PAUSED. Flip this to `true` to re-enable cache + sync queue.
+// See mem://features/offline-mode-paused for the full revival recipe.
+// While disabled: cacheData / getCachedData are no-ops, enqueueMutation throws
+// so writes fail loudly instead of silently queueing, and the queue stays empty.
+// ============================================================================
+export const OFFLINE_MODE_ENABLED = false;
+
 // --- Data Cache ---
 
 function cacheKey(companyId: string, entity: string) {
@@ -14,6 +22,7 @@ const ENTITIES = [
 export type CacheableEntity = (typeof ENTITIES)[number];
 
 export async function cacheData(companyId: string, entity: CacheableEntity, data: any) {
+  if (!OFFLINE_MODE_ENABLED) return;
   try {
     await set(cacheKey(companyId, entity), data);
   } catch (e) {
@@ -22,6 +31,7 @@ export async function cacheData(companyId: string, entity: CacheableEntity, data
 }
 
 export async function getCachedData<T = any>(companyId: string, entity: CacheableEntity): Promise<T | undefined> {
+  if (!OFFLINE_MODE_ENABLED) return undefined;
   try {
     return await get<T>(cacheKey(companyId, entity));
   } catch (e) {
@@ -107,6 +117,11 @@ async function markIdempotent(mutationId: string) {
 }
 
 export async function enqueueMutation(mutation: Omit<QueuedMutation, "id" | "timestamp" | "attempts">) {
+  if (!OFFLINE_MODE_ENABLED) {
+    // Surface the failure to the caller instead of silently queueing into a
+    // queue nothing will ever drain.
+    throw new Error("You're offline. Offline mode is currently disabled — reconnect and try again.");
+  }
   const queue = await getQueue();
   queue.push({
     ...mutation,
@@ -118,6 +133,7 @@ export async function enqueueMutation(mutation: Omit<QueuedMutation, "id" | "tim
 }
 
 export async function getQueue(): Promise<QueuedMutation[]> {
+  if (!OFFLINE_MODE_ENABLED) return [];
   try {
     return (await get<QueuedMutation[]>(QUEUE_KEY)) || [];
   } catch {
