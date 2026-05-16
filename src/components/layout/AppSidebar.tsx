@@ -71,9 +71,14 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { companyIncomplete } = useOnboarding();
+  const { userRole } = useAuth();
   const [activityOpen, setActivityOpen] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
+
+  const effectiveBottomNav = userRole === "super_admin"
+    ? [{ title: "Errors", url: "/admin/errors", icon: AlertTriangle }, ...bottomNav]
+    : bottomNav;
 
   const renderNavItem = (item: { title: string; url: string; icon: React.ElementType }) => {
     const isActive = location.pathname.startsWith(item.url);
