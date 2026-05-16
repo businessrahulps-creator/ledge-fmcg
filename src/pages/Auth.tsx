@@ -67,12 +67,22 @@ export default function Auth() {
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusFirstField(stage === "email", panelRef, [mode]);
 
-  // Already signed in? Skip to dashboard or welcome.
+  // Already signed in? Honour an invite/redirect target first, otherwise
+  // skip to dashboard (existing company) or /welcome (no company yet).
   useEffect(() => {
     if (!authReady || !profileLoaded) return;
     if (!user) return;
+    let redirect = params.get("redirect");
+    if (!redirect) {
+      try { redirect = sessionStorage.getItem("ledge:postAuthRedirect"); } catch { /* ignore */ }
+    }
+    if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+      try { sessionStorage.removeItem("ledge:postAuthRedirect"); } catch { /* ignore */ }
+      navigate(redirect, { replace: true });
+      return;
+    }
     navigate(companyId ? "/dashboard" : "/welcome", { replace: true });
-  }, [user, companyId, authReady, profileLoaded, navigate]);
+  }, [user, companyId, authReady, profileLoaded, navigate, params]);
 
   // ── Signup form ──────────────────────────────────────────────────────────
   const signupForm = useForm<SignupValues>({

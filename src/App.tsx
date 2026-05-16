@@ -31,6 +31,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Invite = lazy(() => import("./pages/Invite"));
 
 // Lazy: authenticated app pages — importers live in route-prefetch so
 // the prefetcher and Suspense boundaries share the exact same chunks.
@@ -160,6 +161,7 @@ const App = () => (
                   <Route path="/signup" element={<Navigate to="/auth?mode=signup" replace />} />
                   <Route path="/welcome" element={<DelayedSuspense fallback={ShellFallback}><Welcome /></DelayedSuspense>} />
                   <Route path="/reset-password" element={<DelayedSuspense fallback={ShellFallback}><ResetPassword /></DelayedSuspense>} />
+                  <Route path="/invite/:token" element={<DelayedSuspense fallback={ShellFallback}><Invite /></DelayedSuspense>} />
                   <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
