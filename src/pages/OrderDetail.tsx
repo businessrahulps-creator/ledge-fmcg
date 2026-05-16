@@ -275,7 +275,7 @@ export default function OrderDetail() {
       supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
         if (error) {
           setDispatchPreview({ open: false, rows: [], loading: false });
-          toast.error("Could not load stock preview", { description: error.message });
+          handleSupabaseError(error, { source: "rpc:preview_dispatch_impact", title: "Couldn't load stock preview", context: { orderId: order.id } });
           return;
         }
         setDispatchPreview({ open: true, rows: (data as DispatchImpactRow[]) || [], loading: false });
