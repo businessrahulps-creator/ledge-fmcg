@@ -102,7 +102,7 @@ function PageTitle() {
   const match = Object.keys(ROUTE_TITLES).find((p) => location.pathname.startsWith(p));
   if (!match) return null;
   return (
-    <span className="hidden md:inline-flex items-center text-sm font-medium text-foreground/85 tracking-[-0.005em]">
+    <span className="inline-flex items-center text-sm font-medium text-foreground/85 tracking-[-0.005em] truncate">
       {ROUTE_TITLES[match]}
     </span>
   );
