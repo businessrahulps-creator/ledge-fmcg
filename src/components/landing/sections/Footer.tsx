@@ -7,7 +7,7 @@ import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
 import ledgeLogo from "@/assets/ledge-logo.png";
-import { Nilavilakku } from "@/components/landing/Nilavilakku";
+
 
 const linkMap: Record<string, string> = {
   "Features": "/#features",
@@ -59,7 +59,7 @@ export function Footer() {
           className="mb-14 md:mb-16 max-w-md"
         >
           <Link to="/" aria-label="Ledge home" className="inline-flex items-center">
-            <img src={ledgeLogo} alt="Ledge" className="h-8 w-auto" decoding="async" loading="lazy" />
+            <img src={ledgeLogo} alt="Ledge" className="h-16 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
             Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.
@@ -179,9 +179,8 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="flex flex-col gap-1.5">
-            <span className="font-body text-[12.5px] text-muted-foreground flex items-center gap-1.5 leading-tight">
-              <Nilavilakku />
-              <span>Crafted with intention in God's Own Country · Kerala</span>
+            <span className="font-body text-[12.5px] text-muted-foreground leading-tight">
+              Designed and engineered in Kerala, India.
             </span>
             <span className="font-body text-[11.5px] text-muted-foreground/70 leading-tight">
               © 2026 Ledge. All rights reserved.
