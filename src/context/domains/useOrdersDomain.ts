@@ -127,8 +127,19 @@ export function useOrdersDomain(deps: OrdersDeps) {
         );
       }
 
-      if (order.godownId && (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered")) {
-        await deps.deductStockForOrder(inserted.id, order.lines, order.godownId, deps.companyId);
+      if (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") {
+        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+          p_order_id: inserted.id,
+          p_dispatch_date: order.dispatchDate || null,
+          p_vehicle: order.vehicle || null,
+          p_driver_name: order.driverName || null,
+          p_dispatch_remarks: order.dispatchRemarks || null,
+        });
+        if (dispErr) {
+          handleSupabaseError(dispErr, { source: "rpc:dispatch_order_atomic", title: "Order created but stock not deducted", context: { orderId: inserted.id } });
+        } else {
+          await deps.safeRefetchStockItems();
+        }
       }
 
       const newOrder: Order = { ...order, id: inserted.id, orderNumber };
