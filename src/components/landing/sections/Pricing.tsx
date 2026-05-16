@@ -1,7 +1,8 @@
 import { Check, Gift, TrendingUp, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { motion, useReducedMotion } from "framer-motion";
+import { AnimateIn } from "../AnimateIn";
+import { PressableCard } from "../PressableCard";
 import { spring } from "@/lib/motion";
 
 const MotionLink = motion.create(Link);
@@ -61,6 +62,7 @@ const plans = [
 ];
 
 export function Pricing() {
+  const reduce = useReducedMotion();
   return (
     <section id="pricing" className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
@@ -100,7 +102,9 @@ export function Pricing() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4" staggerTime={0.05}>
+        {/* Motion v3 — cards are still on entrance; presence over performance.
+            Hover/tap = unified 120ms intent. Highlighted card gets the only ambient delight on the page. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4">
           {plans.map((plan, i) => {
             const tintMidnight = i === 2;     // Scale → Midnight authority
             const cardClass = plan.highlighted
@@ -109,15 +113,27 @@ export function Pricing() {
               ? "lp-card-tinted lp-card-midnight"
               : "lp-card lp-card-premium";
             return (
-              <StaggerItem key={plan.name}>
+              <PressableCard key={plan.name} className="relative h-full">
                 <div
                   className={`relative ${cardClass} p-7 flex flex-col h-full`}
                   style={plan.highlighted ? { overflow: "visible" } : undefined}
                 >
                   {plan.highlighted && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-primary-foreground text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-primary shadow-depth-4 z-10">
-                      Most Popular
-                    </span>
+                    <>
+                      {/* Slow breathing glow — the one "delight" moment on the page. */}
+                      <motion.span
+                        aria-hidden
+                        className="pointer-events-none absolute -inset-px rounded-[inherit]"
+                        style={{
+                          boxShadow: "0 0 0 1px hsl(var(--primary) / 0.35), 0 30px 80px -30px hsl(var(--primary) / 0.45)",
+                        }}
+                        animate={reduce ? undefined : { opacity: [0.55, 1, 0.55] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-primary-foreground text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-primary shadow-depth-4 z-10">
+                        Most Popular
+                      </span>
+                    </>
                   )}
 
                   <div
@@ -174,10 +190,10 @@ export function Pricing() {
                     {plan.cta}
                   </MotionLink>
                 </div>
-              </StaggerItem>
+              </PressableCard>
             );
           })}
-        </StaggerContainer>
+        </div>
 
         <div className="text-center mt-14 md:mt-16">
           <a
