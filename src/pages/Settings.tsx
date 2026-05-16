@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { sanitizeInput } from "@/utils/sanitize";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
