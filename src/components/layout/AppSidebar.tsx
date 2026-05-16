@@ -64,7 +64,6 @@ const relationshipsNav: NavItem[] = [
 ];
 
 const footerNav: NavItem[] = [
-  { title: "Help", url: "/help", icon: BookOpen },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
