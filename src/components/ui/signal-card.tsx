@@ -54,7 +54,7 @@ export interface SignalCardProps extends React.HTMLAttributes<HTMLDivElement> {
  * Promoted "risk surface" — left rule + signal icon + 32px Playfair number.
  * Mirrors Dashboard's "Credit at Risk" pattern. Use sparingly: max 1–2 per page.
  */
-export const SignalCard = React.forwardRef<HTMLDivElement, SignalCardProps>(
+const SignalCardImpl = React.forwardRef<HTMLDivElement, SignalCardProps>(
   (
     { tier, icon: Icon = AlertTriangle, label, caption, subCaption, value, valueSuffix, interactive = false, className, ...props },
     ref,
@@ -92,4 +92,6 @@ export const SignalCard = React.forwardRef<HTMLDivElement, SignalCardProps>(
     );
   },
 );
-SignalCard.displayName = "SignalCard";
+SignalCardImpl.displayName = "SignalCard";
+
+export const SignalCard = React.memo(SignalCardImpl);
