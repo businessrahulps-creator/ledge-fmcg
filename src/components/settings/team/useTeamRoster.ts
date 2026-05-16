@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "./jobs";
+import type { PendingInvite } from "./PendingInviteCard";
 
 export interface RosterMember {
   id: string;
@@ -27,21 +28,32 @@ export function rolesDefaultCaps(defaults: DefaultsMap, role: AppRole): Set<stri
 
 export function useTeamRoster(companyId: string | null) {
   const [members, setMembers] = useState<RosterMember[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [defaults, setDefaults] = useState<DefaultsMap>(new Map());
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     if (!companyId) {
       setMembers([]);
+      setPendingInvites([]);
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, user_id, full_name, email, phone, updated_at")
-        .eq("company_id", companyId);
+      const [{ data: profiles }, { data: invites }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, user_id, full_name, email, phone, updated_at")
+          .eq("company_id", companyId),
+        supabase
+          .from("team_invites")
+          .select("id, email, role, token, created_at, expires_at, status")
+          .eq("company_id", companyId)
+          .eq("status", "pending")
+          .gt("expires_at", new Date().toISOString())
+          .order("created_at", { ascending: false }),
+      ]);
 
       if (!profiles || profiles.length === 0) {
         setMembers([]);
@@ -76,6 +88,17 @@ export function useTeamRoster(companyId: string | null) {
         setMembers(list);
       }
 
+      setPendingInvites(
+        (invites || []).map((i) => ({
+          id: i.id,
+          email: i.email,
+          role: i.role as AppRole,
+          token: i.token,
+          created_at: i.created_at,
+          expires_at: i.expires_at,
+        })),
+      );
+
       const { data: defaultRows } = await supabase
         .from("role_capabilities_default")
         .select("role, capability");
@@ -96,5 +119,5 @@ export function useTeamRoster(companyId: string | null) {
     load();
   }, [load]);
 
-  return { members, defaults, loading, refresh: load };
+  return { members, pendingInvites, defaults, loading, refresh: load };
 }
