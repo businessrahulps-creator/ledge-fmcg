@@ -69,8 +69,8 @@ function ClaimPreview() {
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between px-1">
-        <span className="font-body text-[12px] text-muted-foreground">Claim #4821</span>
-        <span className="font-body text-[13px] font-semibold text-foreground num-tabular">₹38,400</span>
+        <span className="font-body text-[12px]" style={{ color: "hsl(var(--accent-foreground) / 0.78)" }}>Claim #4821</span>
+        <span className="font-body text-[13px] font-semibold num-tabular" style={{ color: "hsl(var(--accent-foreground))" }}>₹38,400</span>
       </div>
     </div>
   );
