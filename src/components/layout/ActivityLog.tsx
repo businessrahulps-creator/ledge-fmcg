@@ -12,7 +12,7 @@ import {
   ClipboardList, UserRound, Package, UserCheck, Gift, RotateCcw,
   FileText, Boxes, History, Warehouse,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { SmartTime } from "@/components/ui/smart-time";
 
 const ENTITY_ICONS: Record<string, React.ElementType> = {
   order: ClipboardList,
