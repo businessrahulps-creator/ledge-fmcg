@@ -1828,5 +1828,29 @@
     animation: none !important;
     transform: scaleX(0);
   }
-}
+  }
 
+  /* Thin, hover-revealed scrollbar — used in nav surfaces so users notice overflow. */
+  .scrollbar-thin-hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 200ms ease;
+  }
+  .scrollbar-thin-hover:hover,
+  .scrollbar-thin-hover:focus-within {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  }
+  .scrollbar-thin-hover::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin-hover::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin-hover::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+    transition: background 200ms ease;
+  }
+  .scrollbar-thin-hover:hover::-webkit-scrollbar-thumb,
+  .scrollbar-thin-hover:focus-within::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
