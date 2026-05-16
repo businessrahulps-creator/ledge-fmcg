@@ -18,7 +18,10 @@ import {
 import type {
   DataContextType, CompanyInfo, DomainDeps,
   AddOrderResult, Invoice, SecondarySale, Target, Claim, ClaimLine, InvoiceLine,
+  CatalogContextType, TransactionalContextType,
 } from "./data-types";
+import { CatalogProvider } from "./CatalogContext";
+import { TransactionalProvider } from "./TransactionalContext";
 
 // Domain hooks
 import { useDealersDomain } from "./domains/useDealersDomain";
