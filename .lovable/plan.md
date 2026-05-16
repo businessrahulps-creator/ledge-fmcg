@@ -1,51 +1,74 @@
-## Plan: End-to-end PRD for Ledge (Markdown artifact)
+## QA & bug sweep → Linear
+
+**Blocker:** Linear isn't connected yet. Connect it first (button above), then I'll run the sweep and file every finding.
+
+### Sweep scope (full)
+
+1. **Static checks**
+   - TypeScript / build errors from dev-server logs
+   - `rg` for raw color classes, `parseInt||0`, `console.error`, `TODO`/`FIXME`, dead imports
+   - Supabase linter + security scan (RLS gaps, exposed columns)
+   - Recent `error_log` table rows
+
+2. **Landing site** (`/`) — desktop 1440 + mobile 390
+   - Render, console errors, broken images / 404s
+   - Hover states (verify sheen removed cleanly)
+   - CTA links, pricing buttons, founder note, testimonials
+   - Lighthouse-style spot check: LCP image, font flash
+
+3. **Auth** (`/auth`)
+   - Signup, login, validation errors, password reset link
+   - Confirm Google OAuth is fully gone (per memory)
+
+4. **`/app` pages — every one**
+   Dashboard, Orders, NewOrder, OrderDetail, Distributors, Salespersons, Stock (Products + Warehouses), Billing, Claims, Schemes, Targets, Reports (all 5 sub-reports), Performance, Company, Settings, Help, Notifications.
+   Per page: render, console, empty state, primary CRUD action, mobile layout (390px), keyboard focus, design-token drift.
+
+5. **Cross-cutting**
+   - PWA install + offline shell
+   - Notification bell
+   - PDF/invoice generation
+   - RBAC behavior (accountant restrictions on stock/products)
+
+### Linear ticket format (kept simple)
+
+One issue per bug. Title = plain-English symptom, no jargon.
+
+```
+Title:      [Area] What's broken in one line
+Priority:   Urgent | High | Medium | Low
+Labels:     qa-sweep-2026-05, <area>, <type:bug|polish|a11y|perf|security>
+Description:
+  **What's wrong**   1–2 sentences, no code
+  **Where**          Page / route / component
+  **Steps**          1. … 2. … 3. …
+  **Expected**       …
+  **Actual**         …
+  **Evidence**       screenshot link or file:line
+  **Fix hint**       (optional, 1 line)
+```
+
+Areas: `Landing`, `Auth`, `Dashboard`, `Orders`, `Stock`, `Billing`, `Claims`, `Schemes`, `Targets`, `Reports`, `Settings`, `Backend`, `Design-system`, `PWA`.
+
+Priorities:
+- **Urgent** — crash, data loss, security, auth broken
+- **High** — core flow broken (can't place order, can't view invoice)
+- **Medium** — secondary flow broken or visible bug
+- **Low** — polish, copy, minor a11y, design drift
+
+If 20+ findings land in one area, I'll create a parent issue and link the rest as sub-issues so the board stays readable.
 
 ### Deliverable
-A single comprehensive PRD document saved to `/mnt/documents/Ledge-PRD.md`, ready for brainstorming. No code changes to the app.
 
-### How I’ll build it
-1. **Deep codebase sweep** — read every page in `src/pages` (Dashboard, Orders, NewOrder, OrderDetail, Distributors, DealerDetail, Salespersons, SalespersonDetail, Stock, Billing, Claims, Schemes, Targets, Reports, Performance, Company, Settings, Help, auth pages, marketing pages), the seven domain hooks in `src/context/domains/*`, the landing sections, the PDF/report components, the notification + offline + PWA layers, and the security/data utilities.
-2. **Backend sweep** — inspect all 22 Lovable Cloud tables (companies, profiles, user_roles, distributors, salespersons, products, godowns, stock_items, stock_deductions, orders, order_lines, order_schemes, schemes, invoices, invoice_lines, claims, claim_lines, targets, secondary_sales, notifications, activity_log, error_log), their RLS policies, and any edge functions. Capture multi-tenancy, RBAC, and data lineage.
-3. **Marketing + positioning** — pull tone, pricing tiers, target persona, and value props from landing sections and memory.
-4. **Roadmap** — fold in the approved AI features roadmap and any deferred items (e.g. auto stock deduction).
+After the sweep:
+- Created Linear issues (count by priority + area)
+- A short summary posted back in chat with the top 5 must-fix items
+- No code changes in this loop — pure QA + filing
 
-### PRD sections (in order)
-1. **Executive Summary** — what Ledge is, who it’s for, the wedge.
-2. **Vision & Problem Statement** — the 5–10% leak between factory and field; why existing tools (Tally + Excel + WhatsApp) fail Indian FMCG super-stockists.
-3. **Target Users & Personas** — Owner, Operations Head, Accountant, Sales Executive, Warehouse Lead.
-4. **Jobs-to-be-Done** — per persona, mapped to product surfaces.
-5. **Product Principles** — mobile-first, offline-ready, GST-native, plain English, Fluent 2 visual system.
-6. **Information Architecture** — sitemap of `/app` (Dashboard, Orders, Distributors, Salespersons, Stock, Billing, Claims, Schemes, Targets, Reports, Performance, Company, Settings, Help) + marketing site.
-7. **Feature Modules (deep dive per module)** — each contains: purpose, key flows, primary screens, data entities, business rules, edge cases, RBAC, current state vs gaps.
-   - Auth & Onboarding (signup, login, reset, company creation, splash, PWA install)
-   - Multi-tenancy & RBAC (companies, profiles, user_roles, has_role)
-   - Dashboard (KPIs, sparkline, recent activity, notifications)
-   - Orders (NewOrder capture, OrderDetail, status lifecycle, celebration flow, schemes attach)
-   - Dealers/Distributors (CRUD, enriched profile, credit at risk, secondary sales)
-   - Salespersons (CRUD, performance, targets)
-   - Stock (products + godowns, stock health calc, deductions, accountant-only valuation)
-   - Billing & Invoices (GST CGST/SGST/IGST, invoice lines, PDF generation, paid/pending/partial)
-   - Claims (claim + claim lines, approval flow)
-   - Schemes (definition, attach to orders)
-   - Targets (per-salesperson, period, achievement)
-   - Reports (Dealer, Product, Payment, Dispatch, Sales Team) + export
-   - Performance analytics
-   - Notifications (bell center, realtime)
-   - Activity & Error log (audit)
-   - Settings (company profile, branding, badge)
-   - Help & Support
-8. **Data Model** — table-by-table summary, key columns, relationships, RLS posture.
-9. **Permissions Matrix** — role × module × action.
-10. **Non-functional Requirements** — performance budget, offline behavior (idb-keyval, PWA, NetworkFirst HTML), accessibility, security (RLS-only roles, no client-side admin checks), reliability, observability (error_log, activity_log).
-11. **Design System** — V2 tokens (Midnight, Forest, Terracotta, Bone), Playfair + Inter, Fluent 2 depth/motion, landing tinted cards, Motion v3.
-12. **Pricing & Packaging** — Free, Growth, Scale, enterprise via WhatsApp.
-13. **Marketing Surfaces** — landing IA, founder note, testimonials, pricing, contact.
-14. **Roadmap** — Now / Next / Later including the approved 10-feature Gemini AI roadmap and deferred items like auto stock deduction.
-15. **Open Questions & Risks** — multi-tenant edge cases, GSTIN validation, dispatch automation, Tally interop, regional language, WhatsApp ordering.
-16. **Glossary** — FMCG distribution terms (super-stockist, godown, secondary sales, scheme, claim, dispatch, GSTIN).
-17. **Appendix** — file/route map, env/config, tech stack.
+### Open questions
 
-### Output
-- File path: `/mnt/documents/Ledge-PRD.md`
-- Format: long-form Markdown (target ~3,000–5,000 words, structured with H2/H3, tables where helpful).
-- After generation, surface it as a downloadable artifact.
+Once Linear is connected, I'll need to know:
+- **Team** — which Linear team to file under (I'll list options after connecting)
+- **Project** — existing project or create a new "QA Sweep — May 2026"?
+
+I'll ask those two right after the connection succeeds.
