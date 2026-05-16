@@ -23,8 +23,7 @@ export function PaymentReport() {
   const [scope, setScope] = useState<"delivered" | "all">("delivered");
   const [selected, setSelected] = useState<Order | null>(null);
 
-  // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
-  const netTotal = (o: Order) => Math.max(0, o.total - (o.schemeSavings || 0));
+  // netTotal imported from @/lib/revenue (single source of truth)
 
   const periodFiltered = filterByTimePeriod(orders, period);
   const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
