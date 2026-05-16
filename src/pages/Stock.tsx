@@ -62,7 +62,7 @@ function HealthBadge({ health }: { health: string }) {
 }
 
 export default function Stock() {
-  const { isAccountant } = useAuth();
+  const canManageStock = useCan("manage_stock");
   const api = useApi();
   const { companyInfo } = api;
   const products = api.products.list();
