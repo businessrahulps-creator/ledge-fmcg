@@ -47,6 +47,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
