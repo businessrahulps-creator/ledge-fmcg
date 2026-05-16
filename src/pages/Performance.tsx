@@ -4,6 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
+import { InsightLine } from "@/components/ui/insight-line";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 
