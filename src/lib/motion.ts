@@ -145,3 +145,23 @@ export function useParallaxY(
   });
   return useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-range, range]);
 }
+
+/**
+ * Scroll-scrubbed progress through a section.
+ * Returns `scrollYProgress` (0→1) over the requested offset window.
+ * Use with `useTransform` to build hero parallax / blur-decay / scale-decay.
+ * Returns a constant MotionValue(0) for reduced-motion users.
+ */
+export function useScrollScrub(
+  targetRef: RefObject<HTMLElement>,
+  offset: [string, string] = ["start end", "end start"]
+): MotionValue<number> {
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    // @ts-expect-error offset accepts string tuples
+    offset,
+  });
+  return useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [0, 1]);
+}
+
