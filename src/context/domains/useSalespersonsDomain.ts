@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Salesperson } from "@/data/mock-data";
 import { cacheData } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapSalesperson } from "@/context/data-utils";
+import { makeOfflineCrud, mapSalesperson, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 
 export function useSalespersonsDomain(deps: DomainDeps) {
