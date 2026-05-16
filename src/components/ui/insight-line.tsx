@@ -22,7 +22,7 @@ export interface InsightLineProps {
  * Small 11px insight line under a KPI. Adds an arrow + comparator with auto-color.
  * Suppresses noise when delta is exactly 0 ("Flat") or null (renders fallback).
  */
-export function InsightLine({ delta, suffix = "%", comparator, goodWhen = "up", fallback, tone, className }: InsightLineProps) {
+function InsightLineImpl({ delta, suffix = "%", comparator, goodWhen = "up", fallback, tone, className }: InsightLineProps) {
   if (tone) {
     const cls = tone === "up" ? "insight-up" : tone === "down" ? "insight-down" : "insight-flat";
     const Icon = tone === "up" ? TrendingUp : tone === "down" ? TrendingDown : Minus;
@@ -61,3 +61,5 @@ export function InsightLine({ delta, suffix = "%", comparator, goodWhen = "up", 
     </span>
   );
 }
+
+export const InsightLine = React.memo(InsightLineImpl);
