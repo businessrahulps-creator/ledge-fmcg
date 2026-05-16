@@ -119,68 +119,85 @@ export function Pricing() {
         </AnimateIn>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto pt-4" staggerTime={0.05}>
-          {plans.map((plan) => (
-            <StaggerItem key={plan.name}>
-              <div
-                className={`relative ${plan.highlighted ? "lp-bento-hero border border-primary/40 shadow-depth-8" : "lp-card"} lp-card-premium p-7 flex flex-col h-full`}
-                style={plan.highlighted ? { overflow: "visible" } : undefined}
-              >
-                {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-primary-foreground text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-primary shadow-depth-4 z-10">
-                    Most Popular
-                  </span>
-                )}
-
+          {plans.map((plan, i) => {
+            const tintMidnight = i === 2;     // Scale → Midnight authority
+            const tintBone = i === 3;          // Enterprise → Bone calm
+            const cardClass = plan.highlighted
+              ? "lp-bento-hero border border-primary/40 shadow-depth-8 lp-card-premium"
+              : tintMidnight
+              ? "lp-card-tinted lp-card-midnight"
+              : tintBone
+              ? "lp-card-tinted lp-card-bone"
+              : "lp-card lp-card-premium";
+            return (
+              <StaggerItem key={plan.name}>
                 <div
-                  className={`lp-icon-tile lp-icon-premium mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
-                  style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}
+                  className={`relative ${cardClass} p-7 flex flex-col h-full`}
+                  style={plan.highlighted ? { overflow: "visible" } : undefined}
                 >
-                  <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-accent" : "text-foreground"} />
-                </div>
-
-                <h3 className="font-heading font-semibold text-[19px] text-foreground tracking-tight">{plan.name}</h3>
-                <p className={`font-body text-[13.5px] mt-1 ${plan.highlighted ? "text-muted-foreground" : "text-muted-foreground"}`}>{plan.tagline}</p>
-
-                <div className="mt-5 flex items-baseline">
-                  {plan.price === "Custom" ? (
-                    <span className="font-heading font-semibold text-[36px] text-foreground tracking-[-0.025em] leading-none">Custom</span>
-                  ) : (
-                    <>
-                      {plan.priceLabel && (
-                        <span className="font-heading font-semibold text-[22px] text-foreground mr-0.5 leading-none">{plan.priceLabel}</span>
-                      )}
-                      <span className="font-heading font-semibold text-[40px] text-foreground tracking-[-0.025em] leading-none">{plan.price}</span>
-                      <span className="text-[hsl(var(--muted-foreground)/0.7)] text-[14px] font-normal ml-1">{plan.period}</span>
-                    </>
+                  {plan.highlighted && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-primary-foreground text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-primary shadow-depth-4 z-10">
+                      Most Popular
+                    </span>
                   )}
-                </div>
 
-                <div className="mt-6 space-y-2.5 flex-1">
-                  {plan.features.map((f) => (
-                    <div key={f} className="flex items-start gap-2.5">
-                      <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${plan.highlighted ? "bg-white border-white" : "bg-[hsl(34_30%_90%)] border-border"}`}>
-                        <Check size={10} className={plan.highlighted ? "text-accent" : "text-foreground"} strokeWidth={3} />
-                      </span>
-                      <span className="font-body text-[13.5px] text-foreground leading-[1.45]">{f}</span>
-                    </div>
-                  ))}
-                </div>
+                  <div
+                    className={`lp-icon-tile lp-icon-premium mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
+                    style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}
+                  >
+                    <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-accent" : "text-foreground"} />
+                  </div>
 
-                <MotionLink
-                  to="/signup"
-                  whileTap={{ scale: 0.97 }}
-                  transition={spring.snappy}
-                  className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    plan.highlighted
-                      ? "lp-btn-primary-dark"
-                      : "border border-border text-foreground hover:border-primary bg-card"
-                  }`}
-                >
-                  {plan.cta}
-                </MotionLink>
-              </div>
-            </StaggerItem>
-          ))}
+                  <h3 className="font-heading font-semibold text-[19px] text-foreground tracking-tight">{plan.name}</h3>
+                  <p className="font-body text-[13.5px] mt-1 text-muted-foreground">{plan.tagline}</p>
+
+                  <div className="mt-5 flex items-baseline">
+                    {plan.price === "Custom" ? (
+                      <span className="font-heading font-semibold text-[36px] text-foreground tracking-[-0.025em] leading-none">Custom</span>
+                    ) : (
+                      <>
+                        {plan.priceLabel && (
+                          <span className="font-heading font-semibold text-[22px] text-foreground mr-0.5 leading-none">{plan.priceLabel}</span>
+                        )}
+                        <span className="font-heading font-semibold text-[40px] text-foreground tracking-[-0.025em] leading-none">{plan.price}</span>
+                        <span className="text-muted-foreground text-[14px] font-normal ml-1">{plan.period}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="mt-6 space-y-2.5 flex-1">
+                    {plan.features.map((f) => (
+                      <div key={f} className="flex items-start gap-2.5">
+                        <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${
+                          plan.highlighted ? "bg-white border-white" :
+                          tintMidnight ? "bg-white/15 border-white/25" :
+                          "bg-[hsl(34_30%_90%)] border-border"
+                        }`}>
+                          <Check size={10} className={plan.highlighted ? "text-accent" : tintMidnight ? "text-primary-foreground" : "text-foreground"} strokeWidth={3} />
+                        </span>
+                        <span className="font-body text-[13.5px] text-foreground leading-[1.45]">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <MotionLink
+                    to="/signup"
+                    whileTap={{ scale: 0.97 }}
+                    transition={spring.snappy}
+                    className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      plan.highlighted
+                        ? "lp-btn-primary-dark"
+                        : tintMidnight
+                        ? "bg-white text-primary hover:bg-white/90"
+                        : "border border-border text-foreground hover:border-primary bg-card"
+                    }`}
+                  >
+                    {plan.cta}
+                  </MotionLink>
+                </div>
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
 
         <div className="text-center mt-14 md:mt-16">
