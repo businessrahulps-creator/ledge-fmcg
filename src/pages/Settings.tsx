@@ -409,70 +409,7 @@ export default function Settings() {
           </TabsContent>
         </Tabs>
 
-        {/* Add/Edit Member Dialog */}
-        <Dialog open={!!editMember} onOpenChange={() => setEditMember(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">{isNewMember ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
-              <DialogDescription className="sr-only">{isNewMember ? "Add a new team member" : "Edit team member details"}</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveMember(); }}>
-            {editMember && (
-              <div className="space-y-3 md:space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Full Name</Label>
-                  <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Email</Label>
-                  <Input
-                    value={editMember.email}
-                    onChange={(e) => setEditMember({ ...editMember, email: e.target.value })}
-                    className="h-10 rounded-lg"
-                    disabled={!isNewMember}
-                  />
-                  {!isNewMember && <p className="text-[10px] text-muted-foreground">Email cannot be changed after creation</p>}
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Phone</Label>
-                  <Input
-                    value={editMember.phone}
-                    onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })}
-                    className="h-10 rounded-lg"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Role</Label>
-                  <Select
-                    value={editMember.role}
-                    onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}
-                    disabled={editMember.userId === user?.id}
-                  >
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="sales_manager">Sales Manager</SelectItem>
-                      <SelectItem value="accountant">Accountant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {editMember.userId === user?.id && (
-                    <p className="text-[11px] text-muted-foreground">
-                      You can't change your own role. Ask another Super Admin to do it for you.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            <DialogFooter className="gap-2 sm:gap-0 mt-4">
-              <Button type="button" variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
-              <Button type="submit" disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
-            </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {/* Team edit/invite/remove flows live inside <TeamRoster /> */}
         {/* Install App Card — mobile only, shown when not installed */}
         <InstallAppCard />
 
