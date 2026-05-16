@@ -232,8 +232,7 @@ export default function Company() {
         } as any)
         .eq("id", companyId);
       if (error) {
-        toast.error("Error saving", { description: error.message });
-        logError({ source: "crud:companies.update", error, context: { companyId } });
+        handleSupabaseError(error, { source: "crud:companies.update", title: "Couldn't save company details", context: { companyId } });
         return;
       }
     }
