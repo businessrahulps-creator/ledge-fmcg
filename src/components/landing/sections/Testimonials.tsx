@@ -1,10 +1,10 @@
 import { AnimateIn } from "../AnimateIn";
 import { PressableCard } from "../PressableCard";
 import { useReducedMotion } from "framer-motion";
-import arnav from "@/assets/landing/testimonial-arnav.jpg";
-import priya from "@/assets/landing/testimonial-priya.jpg";
-import dev from "@/assets/landing/testimonial-dev.jpg";
-import rohan from "@/assets/landing/testimonial-rohan.jpg";
+import arnav from "@/assets/landing/testimonial-arnav.webp";
+import priya from "@/assets/landing/testimonial-priya.webp";
+import dev from "@/assets/landing/testimonial-dev.webp";
+import rohan from "@/assets/landing/testimonial-rohan.webp";
 
 const testimonials = [
   {
