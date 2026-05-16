@@ -12,7 +12,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
 import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus, CheckCircle2, Clock } from "lucide-react";
-import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
+import { FirstWeek } from "@/components/onboarding/FirstWeek";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { ExplainButton } from "@/components/ui/explain-button";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
@@ -249,8 +249,8 @@ export default function Dashboard() {
           />
         </div>
       <div className="space-y-7 md:space-y-8">
-        {/* Onboarding checklist */}
-        <SetupChecklist />
+        {/* Your First Week — reimagined onboarding momentum card */}
+        <FirstWeek />
 
         {/* AI "Today" briefing — 2-sentence Gemini digest, cached per-day */}
         {(monthOrderCount > 0 || monthOutstanding > 0 || agingRows.length > 0) && (

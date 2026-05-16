@@ -28,8 +28,8 @@ import NotFound from "./pages/NotFound";
 // Entry / auth — lazy. Logged-in users land on /dashboard and never need
 // the landing-page bundle (which pulls in framer-motion + every section).
 const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Lazy: authenticated app pages — importers live in route-prefetch so
@@ -155,8 +155,10 @@ const App = () => (
                   <Route path="/refund-policy" element={<DelayedSuspense fallback={ShellFallback}><RefundPolicy /></DelayedSuspense>} />
                   <Route path="/about-us" element={<DelayedSuspense fallback={ShellFallback}><AboutUs /></DelayedSuspense>} />
                   <Route path="/contact" element={<DelayedSuspense fallback={ShellFallback}><Contact /></DelayedSuspense>} />
-                  <Route path="/login" element={<DelayedSuspense fallback={ShellFallback}><Login /></DelayedSuspense>} />
-                  <Route path="/signup" element={<DelayedSuspense fallback={ShellFallback}><Signup /></DelayedSuspense>} />
+                  <Route path="/auth" element={<DelayedSuspense fallback={ShellFallback}><Auth /></DelayedSuspense>} />
+                  <Route path="/login" element={<Navigate to="/auth?mode=signin" replace />} />
+                  <Route path="/signup" element={<Navigate to="/auth?mode=signup" replace />} />
+                  <Route path="/welcome" element={<DelayedSuspense fallback={ShellFallback}><Welcome /></DelayedSuspense>} />
                   <Route path="/reset-password" element={<DelayedSuspense fallback={ShellFallback}><ResetPassword /></DelayedSuspense>} />
                   <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />

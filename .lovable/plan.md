@@ -1,97 +1,111 @@
-## Goal
 
-Split the value emitted by `DataProvider` across two inner contexts (`CatalogContext`, `TransactionalContext`) without changing any consumer, any Supabase query, or any domain hook file. `useData()` keeps returning the exact same merged shape.
+# The Ledge First-Run — Approved Build Plan
 
-This is a **distribution-only split**: the outer `DataProvider` retains all orchestration (auth wiring, `fetchAll`, `loadFromCache`, sync queue, realtime channel, `loading`/`isRefreshing`/`isOfflineData`/`companyInfo`/`refreshAll`/`orderPrefix`/`orderSequence`). The two new contexts are pure value-distribution layers — they receive already-loaded slices via props from `DataProvider` and expose them to future narrow consumers (`useCatalog()`, `useTransactional()`).
+Vision approved. Decisions locked in:
 
-No file moves, no rename, no logic change. Zero risk to existing pages.
+1. **Google OAuth** = hero path (Lovable managed). Email/password collapses behind "Continue with email".
+2. **3-step `/welcome` flow** = company name → role + team size → logo (skippable). The 15s is worth smarter defaults.
+3. **"Your First Week"** = top of `/dashboard`, replaces existing `<SetupChecklist />` slot. Momentum stays visible.
+4. **New: synchronized celebration.** When a chapter completes, the card flips *and* the top progress ribbon advances in the same beat — same easing, same duration, same Terracotta pulse. The ledger visibly fills.
 
-## File-by-file changes
+Mobile-first. `prefers-reduced-motion` respected everywhere (opacity-only fallbacks). Zero new dependencies — only `framer-motion`, `zod`, `react-hook-form`, `sonner` (all installed).
 
-### 1. New: `src/context/CatalogContext.tsx`
+---
 
-- Defines `CatalogContextType` (subset of `DataContextType`): `products`, `schemes`, `distributors`, plus their CRUD actions (`addDistributor`, `updateDistributor`, `deleteDistributor`, `addProduct`, `updateProduct`, `deleteProduct`, `addScheme`, `updateScheme`, `deleteScheme`).
-- Exports `CatalogContext` (default `null`), `CatalogProvider` (thin wrapper: `<CatalogContext.Provider value={value}>{children}</...>`), and `useCatalog()` hook (throws if no provider, mirrors `useData`'s no-provider stub policy with a small catalog-only `NOOP_CATALOG_STUB`).
-- Note: dealers are placed in Catalog per the brief ("read-heavy, rarely mutated"). Confirmed acceptable because dealers domain hook has no cross-context dependency.
+## Build sequence (single sequenced pass)
 
-### 2. New: `src/context/TransactionalContext.tsx`
+### PR-1 · Foundation: Auth shell + motion primitives
+- `src/components/auth/AuthShell.tsx` — persistent Bone panel, breathing Ledge mark, Terracotta progress ribbon (acts 2→4), cursor aura background.
+- `src/components/auth/ActTransition.tsx` — `AnimatePresence` page-turn wrapper (24px slide + cross-fade, `ease-fluent`).
+- `src/components/auth/useFocusFirstField.ts` — focus management across act transitions for a11y.
+- `src/components/auth/useReducedMotion.ts` (or reuse framer's `useReducedMotion`) — gate every animation.
 
-- Defines `TransactionalContextType` (subset): `orders`, `invoices`, `claims`, `locations`, `stockItems`, `secondarySales`, `targets`, `salespersons` (salespersons stays here — they're tied to orders/targets activity), plus all their CRUD actions and helpers (`addOrder`, `updateOrder`, `deleteOrder`, `addInvoice`, …, `addTarget`, `setStockItems`, `nextOrderNumber`, `previewOrderNumber`).
-- Exports `TransactionalContext`, `TransactionalProvider`, `useTransactional()` with the same stub policy.
+### PR-2 · `/auth` — Identity (Act 2)
+- New `src/pages/Auth.tsx` with morphing tabs (sign in ↔ sign up — not swap, morph via shared layoutId).
+- Google CTA full-width, primary, magnetic. Email form collapses behind "Continue with email" link.
+- Reuse existing zod schemas. No validation changes.
+- Email-verified return → `/auth?verified=1` triggers Act 3 recognition state.
+- `/login` and `/signup` routes redirect to `/auth` (keep old URLs alive).
 
-> Note: I'll flag the salespersons placement in the PR description — the brief lists "products, schemes, dealers" for Catalog and "orders, invoices, claims, stock, targets" for Transactional, but doesn't say where salespersons go. Putting them in Transactional keeps the catalog purely "things you sell" and the transactional context "things that move." If you'd rather they live in Catalog, that's a one-line move.
+### PR-3 · Google OAuth wiring
+- `supabase--configure_social_auth` providers: `["google"]`.
+- Use `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })`.
+- Update `mem://constraints/no-google-oauth` → archived; add `mem://auth/google-oauth-enabled` with the rationale.
 
-### 3. Modified: `src/context/DataContext.tsx`
+### PR-4 · `/welcome` — Foundation (Act 4)
+- New `src/pages/Welcome.tsx` — 3-step guided flow inside the same `AuthShell` (progress ribbon continues).
+  - Step a: **Company name** with live "ledger cover" preview (Playfair name embossed on the striped-square mark).
+  - Step b: **Role + team size** (segmented controls; persisted to `profiles` — needs a small migration to add `role_self_selected text`, `team_size text`).
+  - Step c: **Logo upload** with a confident "Skip for now" (Forest checkmark on skip, no shame).
+- Calls `setup_new_company` RPC on step a save (so the guard releases immediately); steps b+c patch the profile.
+- Replace `NoCompanyGuard`'s blocking modal with `<Navigate to="/welcome" replace />`. Add lighter `WelcomeGuard` (auth required, no company required) around `/welcome`.
 
-- Keeps every effect, callback, domain-hook call, and state variable exactly as today.
-- The final `useMemo` value object is split into two pre-memoized slices:
+### PR-5 · `FirstWeek` momentum card (Act 5)
+- `src/components/onboarding/FirstWeek.tsx` — replaces `SetupChecklist` mount on Dashboard.
+- Chapter card stack: one **active** chapter highlighted, others dimmed but visible.
+- Founder-voice "why this matters" line per chapter.
+- **Synchronized celebration on completion:**
+  - Card 3D flips (`rotateY` 180°) revealing Forest seal + next chapter slides in from right.
+  - **Top progress ribbon advances in the same animation frame** — shared `useAnimationControls` orchestrates both. Terracotta pulse on both surfaces, same 600ms `ease-fluent`.
+- Time-to-value ticker ("You're 4 min in · ~11 min to first invoice") computed from chapter completion timestamps.
+- Smart deep-links: chapter click → target page with relevant drawer pre-opened and first field focused.
+- 100% state: full-screen page-turn → "Your ledger is open." Terracotta seal. Click-anywhere dismiss. Persisted via `localStorage` key `ledge_first_week_sealed`.
+- Reuses `useOnboarding` data unchanged — only presentation differs.
 
-  ```ts
-  const catalogValue = useMemo<CatalogContextType>(() => ({
-    products: computedProducts, schemes: catalog.schemes, distributors: computedDistributors,
-    addDistributor: dealers.add, updateDistributor: dealers.update, deleteDistributor: dealers.remove,
-    addProduct: catalog.addProduct, updateProduct: catalog.updateProduct, deleteProduct: catalog.deleteProduct,
-    addScheme: catalog.addScheme, updateScheme: catalog.updateScheme, deleteScheme: catalog.deleteScheme,
-  }), [/* only catalog deps */]);
+### PR-6 · Motion polish + reduced-motion pass
+- Audit every transition for `prefers-reduced-motion`. Replace transforms with opacity-only or instant state.
+- Tune all easings to `ease-fluent` token. No springs that overshoot.
+- Verify focus rings remain visible through transitions.
 
-  const transactionalValue = useMemo<TransactionalContextType>(() => ({
-    orders: orders.orders, invoices: billing.invoices, claims: billing.claims,
-    locations: stock.locations, stockItems: stock.stockItems,
-    secondarySales: targets.secondarySales, targets: targets.targets,
-    salespersons: computedSalespersons,
-    /* ...all transactional CRUD... */
-  }), [/* only transactional deps */]);
+### PR-7 · Mobile pass (<640px)
+- Page-turn collapses to vertical card-stack.
+- Welcome 3 steps become a vertical scroll with sticky progress ribbon at top.
+- FirstWeek chapter stack becomes single full-width card with horizontal swipe (no scroll-jank).
+- Touch targets ≥44px. Tested at 360×800 and 414×896.
 
-  const value = useMemo<DataContextType>(() => ({
-    ...catalogValue, ...transactionalValue,
-    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
-    orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence,
-    setOrderPrefix: orders.setOrderPrefix, refreshAll,
-  }), [catalogValue, transactionalValue, loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo, orders.orderPrefix, orders.orderSequence, orders.setOrderPrefix, refreshAll]);
-  ```
+### PR-8 · Cleanup
+- Delete `NoCompanyGuard`'s modal body (keep file, simplify to redirect).
+- Delete `SetupChecklist.tsx` after `FirstWeek` is live (verify no other consumers).
+- Update `mem://style/aesthetic` and add `mem://style/auth-onboarding-experience` documenting the new motion language.
 
-- Render tree at the bottom of `DataProvider`:
+---
 
-  ```tsx
-  return (
-    <DataContext.Provider value={value}>
-      <CatalogProvider value={catalogValue}>
-        <TransactionalProvider value={transactionalValue}>
-          {children}
-        </TransactionalProvider>
-      </CatalogProvider>
-    </DataContext.Provider>
-  );
-  ```
+## Files touched (preview)
 
-- `useData()` body is **unchanged**. It still reads `DataContext`. Same merged shape, same stub policy, same throw behaviour.
+```text
+New
+  src/pages/Auth.tsx
+  src/pages/Welcome.tsx
+  src/components/auth/AuthShell.tsx
+  src/components/auth/ActTransition.tsx
+  src/components/auth/useFocusFirstField.ts
+  src/components/onboarding/FirstWeek.tsx
+  src/components/onboarding/ChapterCard.tsx
+  src/components/onboarding/ProgressRibbon.tsx
+  src/components/onboarding/LedgeSealMoment.tsx
 
-### 4. No change to `AppLayout.tsx` / `App.tsx`
+Edited
+  src/App.tsx            (routes: /auth, /welcome; redirect /login + /signup)
+  src/components/onboarding/NoCompanyGuard.tsx  (modal → redirect)
+  src/pages/Dashboard.tsx (SetupChecklist → FirstWeek)
+  supabase migration: profiles.role_self_selected, profiles.team_size
 
-The brief asks for `<CatalogContext> > <TransactionalContext> > {children}` nesting at the app root, but since `DataProvider` is already mounted at the root and now renders both inner providers inside itself, nesting at `App.tsx` would create a double-provider bug. Mounting them inside `DataProvider` is the only correct shape given the shared orchestration. **I'll flag this deviation in the PR.**
+Deleted (PR-8)
+  src/pages/Login.tsx
+  src/pages/Signup.tsx
+  src/components/onboarding/SetupChecklist.tsx
+```
 
-### 5. No changes to any domain hook, `data-utils.ts`, `data-types.ts`, or any consumer
+---
 
-`data-types.ts` gets two new exported types (`CatalogContextType`, `TransactionalContextType`) alongside the existing `DataContextType`. No existing exports change.
+## Non-negotiables
 
-## What this gives us (and what it doesn't)
+- `AuthContext` untouched. Plumbing stays.
+- Existing `setup_new_company` RPC + auto-recovery untouched.
+- Existing zod schemas reused as-is.
+- No new dependencies.
+- Reduced-motion = opacity only. Always.
+- Mobile-first; desktop is the enhancement.
+- Card + ribbon celebrate together — one orchestrator, one easing, one beat.
 
-- ✅ Zero consumer changes. `useData()` shape and behaviour identical.
-- ✅ Future-ready: new code can `useCatalog()` or `useTransactional()` for narrower subscriptions.
-- ✅ No risk to fetchAll ordering, realtime channel, sync queue, or cross-domain wiring (orders↔stock, billing↔orders) — all unchanged.
-- ⚠️ **No immediate re-render reduction.** Every current consumer calls `useData()`, which subscribes to the merged `DataContext` — so any mutation still re-renders them exactly as today. The split only pays off as consumers migrate to the narrower hooks in follow-up PRs.
-
-## Verification checklist (post-implementation)
-
-1. `useData()` return type literally equals current `DataContextType` (TS compile check).
-2. Grep: no consumer file changed.
-3. Manual smoke: load `/orders`, create order, dispatch, edit dealer, edit scheme — all behave identically.
-4. React DevTools: confirm three providers nested (Data → Catalog → Transactional).
-5. Confirm `NOOP_DATA_STUB` still serves transient sign-out (no regression on logout from `/orders`).
-
-## Out of scope (explicitly)
-
-- Migrating any consumer to `useCatalog`/`useTransactional`.
-- Splitting `fetchAll` or the realtime channel.
-- Moving domain-hook files.
-- Touching `data-utils.ts` query logic.
+Hit **Implement plan** and I'll build PR-1 through PR-8 in that order, pausing only if a step uncovers something the plan didn't anticipate.
