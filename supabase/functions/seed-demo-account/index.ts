@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -243,6 +243,15 @@ async function batchInsert(client: any, table: string, rows: any[], batchSize = 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Operator-only guard: require shared SEED_SECRET bearer.
+  const SEED_SECRET = Deno.env.get("SEED_SECRET");
+  if (!SEED_SECRET || req.headers.get("Authorization") !== `Bearer ${SEED_SECRET}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 401,
+    });
   }
 
   // Auth guard: caller must be a logged-in super_admin.
