@@ -8,23 +8,23 @@ const capabilities = [
   {
     icon: Camera,
     title: "Photo-to-Order",
-    desc: "Snap a handwritten chit. Get a clean digital order in seconds.",
+    desc: "Photograph a handwritten chit. Ledge fills the order instantly.",
     hero: true,
   },
   {
-    icon: Sunrise,
-    title: "Daily AI Briefings",
-    desc: "Every morning, your team wakes up to dealer priorities, ranked.",
+    icon: Mic,
+    title: "Voice Order Entry",
+    desc: "Speak the order in English or Malayalam. Done in 20 seconds.",
   },
   {
     icon: Sparkles,
     title: "Smart Scheme Suggestions",
-    desc: "The right scheme for the right dealer. Recommended, not guessed.",
+    desc: "AI tells you who'll buy — before you pitch. The right scheme, every time.",
   },
   {
-    icon: Mic,
-    title: "Dealer 360° + Voice Orders",
-    desc: "Full dealer health at a glance. Speak orders the way you talk.",
+    icon: Sunrise,
+    title: "Natural Language Queries",
+    desc: "Ask in English or Malayalam. Get instant answers — no reports needed.",
   },
 ];
 
