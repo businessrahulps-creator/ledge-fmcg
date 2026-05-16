@@ -23,6 +23,7 @@ Source: `.lovable/plan.md`.
 - PR12b ExplainButton rolled into Dashboard Daily Breakdown KPIs + Performance KpiStrip via new optional `explain` prop on `KpiCell` (`src/components/ui/kpi-strip.tsx`). Hidden on zero values; ✦ icon next to label.
 - PR12c SmartTime rolled into activity timestamps: `NotificationCenter`, `EntityHistory`, `ActivityLog`. Replaces ad-hoc `formatDistanceToNow` calls; self-updates every 60s with full `<time datetime>` semantics + hover tooltip.
 - PR12d Discoverable Cmd+K search pill in desktop topbar (`AppLayout.tsx`). Dispatches `ledge:open-command-palette` window event; `CommandPalette` listens. Makes the palette discoverable to users who don't know the shortcut — the MS/Linear/Vercel pattern.
+- PR12e Recent items in Cmd+K — `src/lib/recent-items.ts` LRU (max 12, localStorage). AppLayout records top-level page visits on route change. CommandPalette shows top 5 under "Recent" when query is empty.
 
 ## Next / Not yet wired
 - Wire `useAutosave` — Settings has no single preferences form; revisit when a settings preferences surface is added

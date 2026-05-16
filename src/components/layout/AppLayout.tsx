@@ -110,6 +110,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
     el.addEventListener("scroll", handler, { passive: true });
     return () => el.removeEventListener("scroll", handler);
   }, []);
+
+  // Record route visits for the Cmd+K "Recent" section.
+  useEffect(() => {
+    const path = location.pathname;
+    // Only record known top-level pages — skip detail screens (they'll be recorded by their own pages on demand later).
+    const match = Object.keys(ROUTE_TITLES).find((p) => path === p || path.startsWith(p + "/"));
+    if (!match || path !== match) return;
+    import("@/lib/recent-items").then(({ recordRecent }) => {
+      recordRecent({ kind: "page", label: ROUTE_TITLES[match], to: match });
+    });
+  }, [location.pathname]);
   const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
