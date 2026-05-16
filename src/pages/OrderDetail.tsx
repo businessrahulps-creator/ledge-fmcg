@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X, AlertTriangle } from "lucide-react";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
@@ -413,20 +415,44 @@ export default function OrderDetail() {
           </div>
         </div>
 
-        {/* Total & Payment Mode summary */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">{totalSchemeSavings > 0 ? "Effective Total" : "Total"}</span>
-            {totalSchemeSavings > 0 && (
-              <p className="mt-0.5 text-[10px] text-muted-foreground line-through">{formatCurrency(editTotal)}</p>
-            )}
-            <p className="text-sm font-semibold md:text-base">{formatCurrency(editTotal - totalSchemeSavings)}</p>
-          </div>
-          <div className="glass-card p-3 md:p-4">
-            <span className="text-xs text-muted-foreground">Payment Mode</span>
-            <p className="mt-0.5 text-sm font-medium md:text-base capitalize">{editPaymentMode.replace("_", " ")}</p>
-          </div>
-        </div>
+        {/* Awaiting payment — promoted surface when balance is owed */}
+        {(order.paymentStatus === "pending" || order.paymentStatus === "partial") && (
+          <SignalCard
+            tier={order.paymentStatus === "pending" ? "destructive" : "warning"}
+            icon={AlertTriangle}
+            label={order.paymentStatus === "pending" ? "Awaiting payment" : "Part-paid"}
+            caption={order.paymentStatus === "pending"
+              ? "Full balance is still due against this order"
+              : "Order has a partial payment recorded — balance pending"}
+            subCaption={`${editPaymentMode.replace("_", " ")} · ${formatIndianDate(order.date)}`}
+            value={formatCurrency(editTotal - totalSchemeSavings)}
+          />
+        )}
+
+        {/* Totals strip — hairline-divided */}
+        <KpiStrip
+          cells={[
+            {
+              label: totalSchemeSavings > 0 ? "Effective total" : "Total",
+              value: formatCurrency(editTotal - totalSchemeSavings),
+              insight: totalSchemeSavings > 0
+                ? <span className="insight-line insight-up">Saved {formatCurrency(totalSchemeSavings)} via schemes</span>
+                : undefined,
+            },
+            {
+              label: "Payment mode",
+              value: <span className="capitalize">{editPaymentMode.replace("_", " ")}</span>,
+            },
+            {
+              label: "Items",
+              value: editLines.length,
+            },
+            {
+              label: "Date",
+              value: <span className="text-[16px] font-medium">{formatIndianDate(order.date)}</span>,
+            },
+          ]}
+        />
 
         {/* Editable Items */}
         <div className="glass-card overflow-hidden">

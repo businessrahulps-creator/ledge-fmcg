@@ -26,6 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatIndianDate } from "@/utils/formatDate";
+import { KpiStrip } from "@/components/ui/kpi-strip";
+import { InsightLine } from "@/components/ui/insight-line";
+import { SignalCard } from "@/components/ui/signal-card";
+import { AlertTriangle } from "lucide-react";
 
 export default function Orders() {
   const api = useApi();
@@ -117,6 +121,47 @@ export default function Orders() {
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
+  // ── Period insights (no new business logic — derived from existing orders)
+  const insights = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const net = (o: typeof orders[number]) => (o.total ?? 0) - (o.schemeSavings || 0);
+
+    let mtdCount = 0, mtdRevenue = 0, prevCount = 0, prevRevenue = 0;
+    let pendingPayment = 0, pendingPaymentValue = 0;
+    let overdueDispatch = 0, overdueDispatchValue = 0;
+    let todaysCount = 0;
+
+    for (const o of orders) {
+      const t = new Date(o.date).getTime();
+      if (t >= startOfMonth) { mtdCount++; mtdRevenue += net(o); }
+      else if (t >= startOfPrevMonth) { prevCount++; prevRevenue += net(o); }
+      if (o.date?.slice(0, 10) === todayIso) todaysCount++;
+      if (o.paymentStatus === "pending" || o.paymentStatus === "partial") {
+        pendingPayment++; pendingPaymentValue += net(o);
+      }
+      if (o.deliveryStatus === "pending" && o.dispatchDate && new Date(o.dispatchDate) < now) {
+        overdueDispatch++; overdueDispatchValue += net(o);
+      }
+    }
+    const pct = (cur: number, prev: number) =>
+      prev === 0 ? null : Math.round(((cur - prev) / prev) * 100);
+    return {
+      mtdCount, mtdRevenue, todaysCount, pendingPayment, pendingPaymentValue,
+      overdueDispatch, overdueDispatchValue,
+      revenueDelta: pct(mtdRevenue, prevRevenue),
+      countDelta: pct(mtdCount, prevCount),
+    };
+  }, [orders]);
+
+  const prevMonthLabel = useMemo(() => {
+    const d = new Date(); d.setMonth(d.getMonth() - 1);
+    return d.toLocaleString("en-IN", { month: "short" });
+  }, []);
+
+
   // Show skeleton on first paint when we're loading and no orders are cached yet.
   if (isLoading && orders.length === 0) {
     return (
@@ -202,6 +247,56 @@ export default function Orders() {
             </Link>
           </div>
         </div>
+
+        {/* This month — hairline KPI strip */}
+        <KpiStrip
+          cells={[
+            {
+              label: "Today",
+              value: insights.todaysCount,
+              zero: insights.todaysCount === 0,
+              insight: <InsightLine tone="flat" fallback={insights.todaysCount === 0 ? "No orders yet today" : `${insights.todaysCount} placed today`} />,
+            },
+            {
+              label: "This month",
+              value: insights.mtdCount,
+              zero: insights.mtdCount === 0,
+              insight: <InsightLine delta={insights.countDelta} comparator={prevMonthLabel} />,
+            },
+            {
+              label: "Revenue (MTD)",
+              value: formatCurrency(insights.mtdRevenue),
+              zero: insights.mtdRevenue === 0,
+              insight: <InsightLine delta={insights.revenueDelta} comparator={prevMonthLabel} />,
+            },
+            {
+              label: "Awaiting payment",
+              value: insights.pendingPayment,
+              zero: insights.pendingPayment === 0,
+              insight: insights.pendingPaymentValue > 0
+                ? <InsightLine tone="down" fallback={`${formatCurrency(insights.pendingPaymentValue)} outstanding`} />
+                : <InsightLine tone="up" fallback="All settled" />,
+            },
+          ]}
+        />
+
+        {/* Overdue dispatch — promoted destructive surface */}
+        {insights.overdueDispatch > 0 && (
+          <SignalCard
+            tier="destructive"
+            icon={AlertTriangle}
+            label="Overdue dispatch"
+            caption={`${insights.overdueDispatch} order${insights.overdueDispatch > 1 ? "s" : ""} past their dispatch date`}
+            subCaption={`${formatCurrency(insights.overdueDispatchValue)} pending delivery`}
+            value={insights.overdueDispatch}
+            valueSuffix="Orders"
+            interactive
+            onClick={() => setDeliveryFilter("pending")}
+            role="button"
+            tabIndex={0}
+            className="cursor-pointer"
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
