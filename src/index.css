@@ -1491,7 +1491,7 @@
       animation: none !important;
     }
     .lp-shimmer:hover::after { transform: translateX(-100%); }
-    .lp-card-premium:hover::after { transform: translateX(-100%); opacity: 0; }
+    
   }
 
   /* ============================================================
