@@ -58,6 +58,13 @@ export default function DealerDetail() {
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
 
   if (!dealer) {
+    if (api.loading || items.length === 0) {
+      return (
+        <AppLayout>
+          <RouteSkeleton />
+        </AppLayout>
+      );
+    }
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">
