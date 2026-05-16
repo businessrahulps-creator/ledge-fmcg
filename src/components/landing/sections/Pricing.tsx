@@ -181,12 +181,12 @@ export function Pricing() {
 
         <div className="text-center mt-14 md:mt-16">
           <a
-            href="https://wa.me/918138084689?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing"
+            href="https://wa.me/918138084689?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20Ledge%20plan%20for%20my%20business."
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-[14px] text-foreground font-medium hover:text-accent transition-colors inline-block"
           >
-            Need help deciding? Chat on WhatsApp →
+            Need something custom — Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
           </a>
         </div>
       </div>
