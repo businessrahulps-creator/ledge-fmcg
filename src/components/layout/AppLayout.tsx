@@ -29,35 +29,47 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+import { ChevronRight } from "lucide-react";
+
 const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Performance", url: "/performance", icon: TrendingUp },
+  { title: "Insights", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
 const moreGroups = [
   {
-    label: "Manage",
+    label: "Work",
     items: [
-      { title: "Dealers", url: "/distributors", icon: UserRound },
-      { title: "Team", url: "/salespersons", icon: UserCheck },
-      { title: "Company", url: "/company", icon: Landmark },
-      { title: "Schemes", url: "/schemes", icon: Gift },
-      { title: "Targets", url: "/targets", icon: Target },
-    ],
-  },
-  {
-    label: "Analyze",
-    items: [
-      { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
-      { title: "Activity", url: "/activity", icon: History },
       { title: "Billing", url: "/billing", icon: FileText },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
   {
-    label: "Settings",
+    label: "Catalog",
+    items: [
+      { title: "Schemes", url: "/schemes", icon: Gift },
+      { title: "Targets", url: "/targets", icon: Target },
+    ],
+  },
+  {
+    label: "Relationships",
+    items: [
+      { title: "Dealers", url: "/distributors", icon: UserRound },
+      { title: "Sales Team", url: "/salespersons", icon: UserCheck },
+      { title: "Company", url: "/company", icon: Landmark },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { title: "Performance", url: "/performance", icon: TrendingUp },
+      { title: "Activity", url: "/activity", icon: History },
+    ],
+  },
+  {
+    label: "Account",
     items: [
       { title: "Help", url: "/help", icon: BookOpen },
       { title: "Settings", url: "/settings", icon: Settings },
@@ -90,7 +102,7 @@ function PageTitle() {
   const match = Object.keys(ROUTE_TITLES).find((p) => location.pathname.startsWith(p));
   if (!match) return null;
   return (
-    <span className="hidden md:inline-flex items-center text-sm font-medium text-foreground/85 tracking-[-0.005em]">
+    <span className="inline-flex items-center text-sm font-medium text-foreground/85 tracking-[-0.005em] truncate">
       {ROUTE_TITLES[match]}
     </span>
   );
@@ -173,8 +185,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <header className={`sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6 transition-shadow duration-200 ${scrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "shadow-none"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
             <SidebarTrigger className="mr-3 hidden md:flex" />
-            <div className="flex items-center md:hidden">
+            <div className="flex items-center mr-2 md:hidden">
               <img src={ledgeLogoAsset} alt="Ledge" className="h-6 w-auto" decoding="async" />
+              <span className="mx-2 h-3.5 w-px bg-border/60" aria-hidden />
             </div>
             <PageTitle />
             <div className="ml-auto flex items-center gap-3">
@@ -279,7 +292,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
           </AnimatePresence>
 
-          <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-28 md:p-6 md:pb-6">
+          <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-20 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -296,12 +309,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </main>
 
-          {/* Bottom Nav — mobile only — 5 items max */}
+          {/* Bottom Nav — mobile only — edge-to-edge, flat, 5 slots */}
           <nav
-            className="fixed bottom-3 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-border/30 bg-background/60 shadow-[0_-4px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:border-border/20 dark:bg-background/40 md:hidden"
-            style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+            className="sticky bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl md:hidden"
+            style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))" }}
+            aria-label="Primary"
           >
-            <div className="flex w-full items-center justify-around">
+            <div className="flex w-full items-stretch justify-around">
               {primaryMobileNav.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
                 return (
@@ -309,109 +323,116 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     key={item.title}
                     to={item.url}
                     aria-current={isActive ? "page" : undefined}
-className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-[0.97]"
+                    className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-transform active:scale-[0.97]"
                   >
                     {isActive && (
-                      <motion.div
-                        layoutId="nav-pill"
-                        className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        style={{ willChange: "transform" }}
-                      />
+                      <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full bg-primary" aria-hidden />
                     )}
                     <item.icon
-                      className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
-                      strokeWidth={isActive ? 1.8 : 1.5}
+                      className={`h-[22px] w-[22px] transition-colors ${isActive ? "text-primary" : "text-muted-foreground/70"}`}
+                      strokeWidth={isActive ? 2 : 1.6}
                     />
-                    <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
+                    <span className={`text-[10.5px] transition-colors whitespace-nowrap ${isActive ? "text-primary font-semibold" : "text-muted-foreground/80 font-medium"}`}>
                       {item.title}
                     </span>
                   </Link>
                 );
               })}
 
-              {/* More menu — Sheet drawer */}
+              {/* Menu drawer trigger */}
               <button
+                type="button"
                 onClick={() => setMoreOpen(true)}
-className="relative flex flex-col items-center gap-0.5 px-3 py-3 transition-transform active:scale-[0.97]"
-                aria-label="More navigation options"
+                className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-transform active:scale-[0.97]"
+                aria-label="Open menu"
               >
                 {isMoreActive && (
-                  <motion.div
-                    layoutId="nav-pill"
-                    className="absolute inset-1 rounded-xl bg-foreground/10 dark:bg-white/15 backdrop-blur-md shadow-[0_0_12px_rgba(0,0,0,0.06)]"
-                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                    style={{ willChange: "transform" }}
-                  />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full bg-primary" aria-hidden />
                 )}
                 <MoreHorizontal
-                  className={`relative z-10 h-[22px] w-[22px] transition-all duration-200 ${isMoreActive ? "text-foreground scale-105" : "text-muted-foreground/70"}`}
-                  strokeWidth={isMoreActive ? 1.8 : 1.5}
+                  className={`h-[22px] w-[22px] transition-colors ${isMoreActive ? "text-primary" : "text-muted-foreground/70"}`}
+                  strokeWidth={isMoreActive ? 2 : 1.6}
                 />
-                <span className={`relative z-10 text-[11px] transition-all duration-200 whitespace-nowrap ${isMoreActive ? "text-foreground font-bold" : "text-muted-foreground/70 font-semibold"}`}>
-                  More
+                <span className={`text-[10.5px] transition-colors whitespace-nowrap ${isMoreActive ? "text-primary font-semibold" : "text-muted-foreground/80 font-medium"}`}>
+                  Menu
                 </span>
               </button>
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-                <SheetContent side="bottom" className="rounded-t-[24px] px-6 pt-3 pb-12 max-h-[85vh]">
+                <SheetContent side="bottom" className="rounded-t-[20px] px-0 pt-2 pb-0 h-[88vh] flex flex-col">
                   {/* Drag handle */}
-                  <div className="w-10 h-1 rounded-full bg-muted-foreground/20 mx-auto mb-4" />
-                  <SheetHeader className="pb-3">
-                    <SheetTitle className="text-base font-semibold">More</SheetTitle>
+                  <div className="w-10 h-1 rounded-full bg-muted-foreground/25 mx-auto mb-2 shrink-0" />
+                  <SheetHeader className="px-5 pb-2 shrink-0">
+                    <SheetTitle className="text-left text-lg font-semibold tracking-[-0.01em]">Menu</SheetTitle>
                   </SheetHeader>
-                  <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-100px)]">
-                    {moreGroups.map((group) => (
-                      <div key={group.label}>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-3 px-1">
-                          {group.label}
-                        </p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {group.items.map((item, i) => {
-                            const active = location.pathname.startsWith(item.url);
-                            return (
-                              <motion.div
-                                key={item.title}
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ type: "spring", damping: 26, stiffness: 200, delay: i * 0.04 }}
-                              >
-                                {item.url === "/activity" ? (
-                                  <button
-                                    onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
-                                    className={`flex w-full flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 text-muted-foreground hover:bg-muted/50`}
-                                  >
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/40">
-                                      <item.icon className="h-6 w-6" strokeWidth={1.5} />
-                                    </div>
-                                    <span className="text-xs font-medium">{item.title}</span>
-                                  </button>
-                                ) : (
-                                  <Link
-                                    to={item.url}
-                                    onClick={() => setMoreOpen(false)}
-                                    className={`flex flex-col items-center gap-2 rounded-2xl px-2 py-3 transition-colors active:scale-95 ${
-                                      active
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted/50"
-                                    }`}
-                                  >
-                                    <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
-                                      active ? "bg-primary/10" : "bg-muted/40"
-                                    }`}>
-                                      <item.icon className="h-6 w-6" strokeWidth={active ? 2 : 1.5} />
-                                    </div>
-                                    <span className={`text-xs ${active ? "font-bold" : "font-medium"}`}>
-                                      {item.title}
-                                    </span>
-                                  </Link>
-                                )}
-                              </motion.div>
-                            );
-                          })}
+
+                  {/* Search button — opens command palette */}
+                  <div className="px-5 pb-3 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        // Small delay so sheet close animation doesn't fight focus.
+                        setTimeout(() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette")), 120);
+                      }}
+                      className="flex w-full items-center gap-2 h-10 rounded-md border border-border/60 bg-muted/40 hover:bg-muted/60 transition-colors px-3 text-sm text-muted-foreground"
+                    >
+                      <Search className="h-4 w-4 opacity-70" />
+                      <span className="flex-1 text-left">Search orders, dealers, products…</span>
+                    </button>
+                  </div>
+
+                  {/* Scrollable sectioned list */}
+                  <div className="relative flex-1 min-h-0">
+                    <div className="absolute inset-0 overflow-y-auto px-5 pb-8">
+                      {moreGroups.map((group, gIdx) => (
+                        <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
+                          <p className="text-[11px] font-medium normal-case tracking-normal text-muted-foreground/70 mb-1 px-1">
+                            {group.label}
+                          </p>
+                          <div className="rounded-lg border border-border/50 bg-card overflow-hidden divide-y divide-border/40">
+                            {group.items.map((item) => {
+                              const active = location.pathname.startsWith(item.url);
+                              const rowCls = `flex w-full items-center gap-3 px-3.5 h-12 text-left transition-colors ${active ? "bg-primary/[0.06]" : "active:bg-muted/60"}`;
+                              const Icon = item.icon;
+                              const inner = (
+                                <>
+                                  <span className={`flex h-8 w-8 items-center justify-center rounded-md ${active ? "bg-primary/10 text-primary" : "bg-muted/50 text-foreground/70"}`}>
+                                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.7} />
+                                  </span>
+                                  <span className={`flex-1 text-[15px] tracking-[-0.005em] ${active ? "font-semibold text-primary" : "font-medium text-foreground/90"}`}>
+                                    {item.title}
+                                  </span>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                                </>
+                              );
+                              return item.url === "/activity" ? (
+                                <button
+                                  key={item.title}
+                                  type="button"
+                                  onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
+                                  className={rowCls}
+                                >
+                                  {inner}
+                                </button>
+                              ) : (
+                                <Link
+                                  key={item.title}
+                                  to={item.url}
+                                  onClick={() => setMoreOpen(false)}
+                                  className={rowCls}
+                                >
+                                  {inner}
+                                </Link>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                      <div className="h-6" style={{ height: "calc(env(safe-area-inset-bottom) + 1.5rem)" }} />
+                    </div>
+                    {/* Bottom fade — affordance that there is more below */}
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" aria-hidden />
                   </div>
                 </SheetContent>
               </Sheet>
