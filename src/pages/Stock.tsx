@@ -343,7 +343,7 @@ export default function Stock() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Stock</h1>
+          <h1 className="h1-display">Stock</h1>
           <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
             Manage your products and warehouse inventory
           </p>

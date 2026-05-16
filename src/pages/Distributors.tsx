@@ -127,7 +127,7 @@ export default function Distributors() {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Dealers</h1>
+            <h1 className="h1-display">Dealers</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Manage your dealer network
             </p>
