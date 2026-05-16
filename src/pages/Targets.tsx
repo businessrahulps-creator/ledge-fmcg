@@ -363,7 +363,7 @@ export default function Targets() {
           const spTargets = periodTargets.filter(t => t.entityType === "salesperson");
           const dlTargets = periodTargets.filter(t => t.entityType === "dealer");
           const totalTargetRev = periodTargets.reduce((s, t) => s + t.targetRevenue, 0);
-          const totalActualRev = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+          const totalActualRev = periodOrders.reduce((s, o) => s + netTotal(o), 0);
           const overallPct = totalTargetRev > 0 ? Math.round((totalActualRev / totalTargetRev) * 100) : 0;
           const overallStatus = getStatus(totalActualRev, totalTargetRev);
 
