@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ExplainButton } from "@/components/ui/explain-button";
 
 export interface KpiCell {
   label: string;
@@ -10,6 +11,8 @@ export interface KpiCell {
   zero?: boolean;
   /** Optional click handler — wraps the cell in a button. */
   onClick?: () => void;
+  /** Optional AI "explain this number" hookup. Renders a ✦ next to the label. */
+  explain?: { value: string; context: string[] };
 }
 
 export interface KpiStripProps {
