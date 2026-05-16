@@ -77,43 +77,40 @@ export function HowItWorks() {
           {/* Vertical hairline connector — desktop only */}
           <div
             aria-hidden
-            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none bg-[#ECEEF2]"
+            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none bg-border"
           />
 
-          {steps.map((step, i) => {
-            const MockupComponent = step.mockup;
-            return (
-              <AnimateIn key={step.badge} delay={i * 0.08}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                  <div className={step.reversed ? "lg:order-2" : ""}>
-                    <span className="inline-flex items-center gap-2.5 mb-5 group">
-                      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(34_30%_90%)] border border-border lp-icon-premium">
-                        <step.icon size={16} strokeWidth={2} className="text-foreground" />
-                      </span>
-                      <span className="font-heading font-semibold text-[12px] text-muted-foreground tracking-[0.18em]">
-                        STEP {step.badge}
-                      </span>
+          {steps.map((step, i) => (
+            <AnimateIn key={step.badge} delay={i * 0.08}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div className={step.reversed ? "lg:order-2" : ""}>
+                  <span className="inline-flex items-center gap-2.5 mb-5 group">
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(34_30%_90%)] border border-border lp-icon-premium">
+                      <step.icon size={16} strokeWidth={2} className="text-foreground" />
                     </span>
-                    <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-foreground tracking-[-0.022em] leading-[1.18]">
-                      {step.title}
-                    </h3>
-                    <p className="font-body text-[16px] text-muted-foreground leading-[1.55] mt-4 max-w-md">
-                      {step.description}
-                    </p>
-                  </div>
-                  <motion.div
-                    className={step.reversed ? "lg:order-1" : ""}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-120px" }}
-                    transition={spring.gentle}
-                  >
-                    <MockupComponent />
-                  </motion.div>
+                    <span className="font-heading font-semibold text-[12px] text-muted-foreground tracking-[0.18em]">
+                      STEP {step.badge}
+                    </span>
+                  </span>
+                  <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-foreground tracking-[-0.022em] leading-[1.18]">
+                    {step.title}
+                  </h3>
+                  <p className="font-body text-[16px] text-muted-foreground leading-[1.55] mt-4 max-w-md">
+                    {step.description}
+                  </p>
                 </div>
-              </AnimateIn>
-            );
-          })}
+                <motion.div
+                  className={step.reversed ? "lg:order-1" : ""}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-120px" }}
+                  transition={spring.gentle}
+                >
+                  <ProductShot src={step.image} alt={step.alt} />
+                </motion.div>
+              </div>
+            </AnimateIn>
+          ))}
         </div>
       </div>
     </section>
