@@ -69,9 +69,9 @@ export function Outcome() {
                 if (isHero) {
                   return (
                     <StaggerItem key={o.value} variant="scaleUp">
-                      <div className="lp-bento-hero lp-card-premium h-full p-6 flex flex-col">
+                      <div className="lp-card-tinted lp-card-forest h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/80 border border-white text-accent shadow-sm lp-icon-premium">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/12 border border-white/20 text-foreground shadow-sm">
                             <Icon className="h-4 w-4" strokeWidth={2} />
                           </span>
                           <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
@@ -80,7 +80,7 @@ export function Outcome() {
                         </div>
 
                         <div className="mt-6">
-                          <div className="font-heading font-semibold text-[26px] md:text-[28px] text-accent tracking-[-0.022em] leading-[1.05]">
+                          <div className="font-heading font-semibold text-[26px] md:text-[28px] text-foreground tracking-[-0.022em] leading-[1.05]">
                             {o.value}
                           </div>
                           <div className="font-body text-[13.5px] text-muted-foreground mt-1.5">
@@ -88,7 +88,7 @@ export function Outcome() {
                           </div>
                         </div>
 
-                        <div className="h-px bg-white/60 my-5" />
+                        <div className="h-px bg-white/15 my-5" />
 
                         <p className="font-body text-[13.5px] leading-[1.5] text-muted-foreground">
                           {o.label}
