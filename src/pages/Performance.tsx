@@ -133,6 +133,7 @@ export default function Performance() {
   const navigate = useNavigate();
   const isLoading = usePageLoading(api.loading);
   const [period, setPeriod] = useState<TimePeriod>("30d");
+  const [revenueMode, setRevenueMode] = useState<RevenueMode>("delivered");
   const [dailyTarget, setDailyTarget] = useState<number>(30000);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
