@@ -7,23 +7,23 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 const cards = [
   {
     icon: MessageCircle,
-    title: "WhatsApp orders get lost",
-    description: "Voice notes, paper chits, four phone calls. You still don't know what sold today.",
+    title: "Lost Orders",
+    description: "WhatsApp chits. Half get lost. You still don't know what sold today.",
   },
   {
     icon: Table,
-    title: "Excel is always one version behind",
-    description: "Orders, payments and stock live in three sheets that never talk to each other.",
+    title: "Payment Chaos",
+    description: "Cash, UPI, cheque. No single source of truth. Always one version behind.",
   },
   {
     icon: Compass,
-    title: "Stock-outs hit before you see them",
-    description: "You learn a godown is empty when the dealer calls to complain.",
+    title: "Blind Stock",
+    description: "Empty shelf? You find out last — when the dealer calls to complain.",
   },
   {
     icon: Laptop,
-    title: "ERPs your team won't open",
-    description: "Tally and SAP were built for desktops. Your field team gave up by week two.",
+    title: "Excel Nights",
+    description: "Two days to build one report. Every week. Your weekends are gone.",
   },
 ];
 
