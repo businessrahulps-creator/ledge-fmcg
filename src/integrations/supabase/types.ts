@@ -946,6 +946,8 @@ export type Database = {
           full_name: string
           id: string
           phone: string
+          role_self_selected: string | null
+          team_size: string | null
           updated_at: string
           user_id: string
         }
@@ -956,6 +958,8 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+          role_self_selected?: string | null
+          team_size?: string | null
           updated_at?: string
           user_id: string
         }
@@ -966,6 +970,8 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+          role_self_selected?: string | null
+          team_size?: string | null
           updated_at?: string
           user_id?: string
         }
