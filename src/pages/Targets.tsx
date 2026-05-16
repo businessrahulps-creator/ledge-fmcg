@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { useApi } from "@/services/api";
+import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatCurrency } from "@/data/mock-data";
