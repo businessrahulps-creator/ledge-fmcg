@@ -65,7 +65,7 @@ export function Hero() {
             className="font-body text-[13px] text-muted-foreground mt-8"
             {...fadeUp(0.32)}
           >
-            No card needed · 30-minute onboarding · Works on any phone · Built in India
+            No card needed · 30-minute onboarding · Works on any phone · Built in Kerala
           </motion.p>
         </div>
 

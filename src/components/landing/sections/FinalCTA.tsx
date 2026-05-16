@@ -70,7 +70,7 @@ export function FinalCTA() {
           className="font-body text-[13px] text-muted-foreground mt-8"
           {...fadeUp(0.28)}
         >
-          No card required · Cancel anytime · Built in India
+          No card required · Cancel anytime · Built in Kerala
         </motion.p>
       </div>
     </section>
