@@ -6,6 +6,7 @@ import { MagneticWrapper } from "@/components/landing/MagneticWrapper";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.png";
 import { Nilavilakku } from "@/components/landing/Nilavilakku";
 
 const linkMap: Record<string, string> = {
@@ -57,8 +58,8 @@ export function Footer() {
           transition={spring.premium}
           className="mb-14 md:mb-16 max-w-md"
         >
-          <Link to="/" className="font-heading font-semibold text-2xl tracking-[-0.04em] text-foreground">
-            Ledge
+          <Link to="/" aria-label="Ledge home" className="inline-flex items-center">
+            <img src={ledgeLogo} alt="Ledge" className="h-8 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
             Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.
