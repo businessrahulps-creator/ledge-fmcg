@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { spring } from "@/lib/motion";
-import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.webp";
 import { MorphHamburger } from "@/components/landing/MorphHamburger";
 import { MobileMenuOverlay } from "@/components/landing/MobileMenuOverlay";
 import { NavCommandPalette } from "@/components/landing/NavCommandPalette";

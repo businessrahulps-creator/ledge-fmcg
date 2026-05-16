@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
-import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.webp";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);

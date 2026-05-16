@@ -10,7 +10,7 @@ import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
 import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
-import ledgeLogoAsset from "@/assets/ledge-logo.png";
+import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 
 
 import { RotateCcw, Target } from "lucide-react";

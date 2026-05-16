@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import ledgeMark from "@/assets/ledge-mark.png";
+import ledgeMark from "@/assets/ledge-mark.webp";
 import { useDelayedShow } from "@/hooks/use-delayed-show";
 
 /**
