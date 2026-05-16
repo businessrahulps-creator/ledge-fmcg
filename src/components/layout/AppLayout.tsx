@@ -185,8 +185,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <header className={`sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6 transition-shadow duration-200 ${scrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "shadow-none"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
             <SidebarTrigger className="mr-3 hidden md:flex" />
-            <div className="flex items-center md:hidden">
+            <div className="flex items-center mr-2 md:hidden">
               <img src={ledgeLogoAsset} alt="Ledge" className="h-6 w-auto" decoding="async" />
+              <span className="mx-2 h-3.5 w-px bg-border/60" aria-hidden />
             </div>
             <PageTitle />
             <div className="ml-auto flex items-center gap-3">
