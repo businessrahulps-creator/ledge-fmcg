@@ -137,9 +137,10 @@ export function useStockDomain(deps: DomainDeps) {
     const today = new Date().toISOString().split("T")[0];
     let hasNegative = false;
 
-    const { data: freshStockData } = await supabase
-      .from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId);
-    const freshStock = freshStockData || [];
+    const freshStock = await fetchAllChunked<any>(
+      () => supabase.from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId),
+      1000, 200, `stock_items(godown=${godownId})`,
+    );
 
     for (const line of lines) {
       await supabase.from("stock_deductions").insert({
