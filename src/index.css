@@ -422,7 +422,7 @@
 
   /* Hairline section seam */
   .lp-vignette-top {
-    background: linear-gradient(to bottom, rgba(15,23,42,0.04) 0%, transparent 100%);
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.04) 0%, transparent 100%);
   }
 
   /* Mobile menu — full-screen cinema overlay background (Bone) */
@@ -619,7 +619,7 @@
     transition: transform 1.2s ease;
   }
   .lp-shimmer-dark::after {
-    background: linear-gradient(110deg, transparent 30%, rgba(15,23,42,0.10) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, hsl(var(--accent) / 0.18) 50%, transparent 70%);
   }
 
   /* Animated indigo pill — used for the ONE earned moment in Outcome ("90 days") */
@@ -859,7 +859,7 @@
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.18em;
-    color: #94A3B8;
+    color: hsl(var(--muted-foreground));
     font-variant-numeric: tabular-nums;
   }
   /* Proof chip — Midnight pill with Terracotta dot */
@@ -1003,7 +1003,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(280px circle at var(--mx) var(--my), rgba(99,102,241,0.10), transparent 60%);
+    background: radial-gradient(280px circle at var(--mx) var(--my), hsl(var(--accent) / 0.10), transparent 60%);
     opacity: 0;
     transition: opacity 360ms ease;
     pointer-events: none;
@@ -1032,11 +1032,11 @@
   .lp-card-premium:hover {
     transform: translateY(-4px);
     box-shadow:
-      0 1px 2px rgba(15,23,42,0.04),
-      0 4px 10px -2px rgba(15,23,42,0.06),
-      0 14px 28px -10px rgba(15,23,42,0.10),
+      0 1px 2px hsl(var(--primary) / 0.04),
+      0 4px 10px -2px hsl(var(--primary) / 0.06),
+      0 14px 28px -10px hsl(var(--primary) / 0.10),
       0 28px 56px -20px hsl(var(--accent) / 0.18);
-    border-color: rgba(99,102,241,0.22);
+    border-color: hsl(var(--accent) / 0.22);
   }
   /* Children must sit above pseudo layers */
   .lp-card-premium > * { position: relative; z-index: 1; }
@@ -1067,8 +1067,8 @@
   .btn-premium:hover {
     transform: translateY(-1.5px);
     box-shadow:
-      0 1px 2px rgba(15,23,42,0.08),
-      0 8px 20px -8px rgba(15,23,42,0.18),
+      0 1px 2px hsl(var(--primary) / 0.08),
+      0 8px 20px -8px hsl(var(--primary) / 0.18),
       0 16px 28px -12px hsl(var(--accent) / 0.22);
   }
   .btn-premium:active {
@@ -1088,8 +1088,8 @@
     to { stroke-dashoffset: 0; }
   }
   .li-route-pulse {
-    filter: drop-shadow(0 0 6px rgba(79, 70, 229, 0.55))
-            drop-shadow(0 0 12px rgba(79, 70, 229, 0.35));
+    filter: drop-shadow(0 0 6px hsl(var(--accent) / 0.55))
+            drop-shadow(0 0 12px hsl(var(--accent) / 0.35));
   }
   /* (legacy floating chip animations removed — section now uses telemetry strip) */
 
