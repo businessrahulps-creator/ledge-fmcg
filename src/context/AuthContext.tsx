@@ -18,7 +18,6 @@ interface AuthContextType {
   profile: Profile | null;
   companyId: string | null;
   userRole: string | null;
-  isAccountant: boolean;
   loading: boolean;
   authReady: boolean;
   profileLoaded: boolean;
@@ -262,16 +261,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const companyId = profile?.company_id ?? null;
-  const isAccountant = userRole === "accountant";
 
   const value = useMemo<AuthContextType>(() => ({
     user, session, profile,
     companyId,
     userRole,
-    isAccountant,
     loading, authReady, profileLoaded,
     signOut, refreshProfile,
-  }), [user, session, profile, companyId, userRole, isAccountant, loading, authReady, profileLoaded, signOut, refreshProfile]);
+  }), [user, session, profile, companyId, userRole, loading, authReady, profileLoaded, signOut, refreshProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
+import { useIsFetching } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,9 @@ const SEVERITY_TONE: Record<string, string> = {
 };
 
 export default function AdminErrors() {
-  const { userRole, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const canViewLogs = useCan("view_error_logs");
+  const capPending = useIsFetching({ queryKey: ["capability", user?.id ?? null, "view_error_logs"] }) > 0;
   const [rows, setRows] = useState<ErrorRow[] | null>(null);
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -54,11 +58,11 @@ export default function AdminErrors() {
   }, [filter]);
 
   useEffect(() => {
-    if (userRole === "super_admin") load();
-  }, [userRole, load]);
+    if (canViewLogs) load();
+  }, [canViewLogs, load]);
 
-  if (loading) return <AppLayout><Skeleton className="h-40 w-full" /></AppLayout>;
-  if (userRole !== "super_admin") return <Navigate to="/dashboard" replace />;
+  if (loading || capPending) return <AppLayout><Skeleton className="h-40 w-full" /></AppLayout>;
+  if (!canViewLogs) return <Navigate to="/dashboard" replace />;
 
   const resolve = async (id: string) => {
     const { error } = await supabase

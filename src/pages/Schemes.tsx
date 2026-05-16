@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { useApi } from "@/services/api";
-import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
@@ -101,9 +101,8 @@ const emptyScheme: Omit<Scheme, "id"> = {
 
 export default function Schemes() {
   const api = useApi();
-  const { userRole } = useAuth();
+  const canManageSchemes = useCan("manage_schemes");
   const isLoading = usePageLoading(api.loading);
-  const isSuperAdmin = userRole === "super_admin";
 
   const schemes = api.schemes.list();
   const products = api.products.list();
@@ -208,7 +207,7 @@ export default function Schemes() {
                 Create offers and discounts that automatically apply to orders
               </p>
             </div>
-            {isSuperAdmin && (
+            {canManageSchemes && (
               <Button onClick={openAdd} className="gap-1.5">
                 <Plus className="h-4 w-4" />
                 New Scheme
@@ -259,7 +258,7 @@ export default function Schemes() {
               <p className="mt-1 text-xs text-muted-foreground">
                 Create your first scheme to automatically apply discounts to orders
               </p>
-              {isSuperAdmin && (
+              {canManageSchemes && (
                 <Button onClick={openAdd} variant="outline" className="mt-4 gap-1.5" size="sm">
                   <Plus className="h-3.5 w-3.5" />
                   Create Scheme
@@ -281,7 +280,7 @@ export default function Schemes() {
                     scheme={s}
                     products={products}
                     dealers={dealers}
-                    isSuperAdmin={isSuperAdmin}
+                    canManageSchemes={canManageSchemes}
                     onEdit={() => openEdit(s)}
                     onToggle={() => handleToggle(s)}
                     onDelete={() => setDeleteId(s.id)}
@@ -304,7 +303,7 @@ export default function Schemes() {
                     scheme={s}
                     products={products}
                     dealers={dealers}
-                    isSuperAdmin={isSuperAdmin}
+                    canManageSchemes={canManageSchemes}
                     onEdit={() => openEdit(s)}
                     onToggle={() => handleToggle(s)}
                     onDelete={() => setDeleteId(s.id)}
@@ -540,7 +539,7 @@ function SchemeCard({
   scheme: s,
   products,
   dealers,
-  isSuperAdmin,
+  canManageSchemes,
   onEdit,
   onToggle,
   onDelete,
@@ -548,7 +547,7 @@ function SchemeCard({
   scheme: Scheme;
   products: { id: string; name: string }[];
   dealers: { id: string; name: string }[];
-  isSuperAdmin: boolean;
+  canManageSchemes: boolean;
   onEdit: () => void;
   onToggle: () => void;
   onDelete: () => void;
@@ -579,7 +578,7 @@ function SchemeCard({
             <p className="text-xs text-muted-foreground">{getSchemeLabel(s)}</p>
           </div>
         </div>
-        {isSuperAdmin && (
+        {canManageSchemes && (
           <Switch checked={s.isActive} onCheckedChange={onToggle} />
         )}
       </div>
@@ -609,7 +608,7 @@ function SchemeCard({
         <span>
           {s.validFrom}{s.validUntil ? ` → ${s.validUntil}` : " onwards"}
         </span>
-        {isSuperAdmin && (
+        {canManageSchemes && (
           <div className="flex gap-1">
             <button onClick={onEdit} className="rounded p-1 hover:bg-muted transition-colors">
               <Pencil className="h-3 w-3" />
