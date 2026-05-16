@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
