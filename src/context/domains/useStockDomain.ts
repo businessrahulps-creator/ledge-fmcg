@@ -4,7 +4,7 @@ import type { GodownLocation, StockItem } from "@/data/godown-data";
 import type { OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem } from "@/context/data-utils";
+import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { toast } from "sonner";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
@@ -104,31 +104,30 @@ export function useStockDomain(deps: DomainDeps) {
   const safeRefetchGodowns = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const { data } = await supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999);
-      if (data) {
-        const mapped = data.map(mapGodown);
-        setLocations(mapped);
-        cacheData(deps.companyId, "locations", mapped);
-      }
+      const data = await fetchAllChunked<any>(
+        () => supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name"),
+        1000, 200, "godowns",
+      );
+      const mapped = data.map(mapGodown);
+      setLocations(mapped);
+      cacheData(deps.companyId, "locations", mapped);
     } catch { /* ignore */ }
   }, [deps.companyId]);
 
   const safeRefetchStockItems = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const [siRes, prodRes, gdRes] = await Promise.all([
-        supabase.from("stock_items").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999),
-        supabase.from("products").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
-        supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
+      const [siData, prodData, gdData] = await Promise.all([
+        fetchAllChunked<any>(() => supabase.from("stock_items").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
+        fetchAllChunked<any>(() => supabase.from("products").select("*").eq("company_id", deps.companyId).order("name"), 1000, 200, "products"),
+        fetchAllChunked<any>(() => supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name"), 1000, 200, "godowns"),
       ]);
-      if (siRes.data) {
-        // Use the canonical mapStockItem helper for consistency with other refetch paths.
-        const freshProducts = (prodRes.data || []).map(mapProduct);
-        const freshGodowns = (gdRes.data || []).map(mapGodown);
-        const mapped = siRes.data.map(si => mapStockItem(si, freshProducts, freshGodowns));
-        setStockItems(mapped);
-        cacheData(deps.companyId, "stockItems", mapped);
-      }
+      // Use the canonical mapStockItem helper for consistency with other refetch paths.
+      const freshProducts = prodData.map(mapProduct);
+      const freshGodowns = gdData.map(mapGodown);
+      const mapped = siData.map(si => mapStockItem(si, freshProducts, freshGodowns));
+      setStockItems(mapped);
+      cacheData(deps.companyId, "stockItems", mapped);
     } catch { /* ignore */ }
   }, [deps.companyId]);
 
@@ -138,9 +137,10 @@ export function useStockDomain(deps: DomainDeps) {
     const today = new Date().toISOString().split("T")[0];
     let hasNegative = false;
 
-    const { data: freshStockData } = await supabase
-      .from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId);
-    const freshStock = freshStockData || [];
+    const freshStock = await fetchAllChunked<any>(
+      () => supabase.from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId),
+      1000, 200, `stock_items(godown=${godownId})`,
+    );
 
     for (const line of lines) {
       await supabase.from("stock_deductions").insert({
