@@ -1126,6 +1126,29 @@
     line-height: 1.15;
   }
 
+/* ════════════════════════════════════════════════════════════════════
+   Motion System v2 tokens (consumed by Tailwind arbitrary values).
+   Match `src/lib/motion.ts` — keep in sync.
+   ════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Easings — brand-named cubic-beziers */
+  --ease-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --ease-standard:   cubic-bezier(0.8, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.7, 0, 1, 0.5);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+  /* Durations (ms) */
+  --duration-micro:  180ms;
+  --duration-short:  280ms;
+  --duration-medium: 420ms;
+  --duration-long:   720ms;
+  --duration-hero:  1000ms;
+
+  /* Depth/blur tiers — chips=1, cards=2, navbar=3 */
+  --blur-1:  8px;
+  --blur-2: 16px;
+  --blur-3: 24px;
+}
 
   /* ═══════════════════════════════════════════════════════════════
      PREMIUM INTERACTION LAYER — cards, icons, buttons
