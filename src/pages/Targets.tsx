@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 
@@ -359,28 +361,42 @@ export default function Targets() {
           const overallPct = totalTargetRev > 0 ? Math.round((totalActualRev / totalTargetRev) * 100) : 0;
           const overallStatus = getStatus(totalActualRev, totalTargetRev);
 
+          // Behind-target lists (named, so the signal surface is actionable)
+          const spBehind = spTargets
+            .map(t => {
+              const sp = salespersons.find(s => s.id === t.entityId);
+              const actual = spActuals.get(t.entityId)?.revenue || 0;
+              return { name: sp?.name || "Unknown", pct: t.targetRevenue > 0 ? (actual / t.targetRevenue) * 100 : 0 };
+            })
+            .filter(x => x.pct < 60)
+            .sort((a, b) => a.pct - b.pct);
+          const signalTier = overallStatus === "needs_attention" ? "destructive" : overallStatus === "behind" ? "warning" : null;
+
           return (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div className="glass-card p-3 md:p-4">
-                <span className="text-[10px] text-muted-foreground md:text-xs">{PERIOD_TYPE_LABELS[periodType]} Target</span>
-                <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(totalTargetRev)}</p>
-              </div>
-              <div className="glass-card p-3 md:p-4">
-                <span className="text-[10px] text-muted-foreground md:text-xs">Actual Revenue</span>
-                <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(totalActualRev)}</p>
-              </div>
-              <div className="glass-card p-3 md:p-4">
-                <span className="text-[10px] text-muted-foreground md:text-xs">Overall Progress</span>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <p className={`text-sm font-semibold md:text-base ${STATUS_CONFIG[overallStatus].color}`}>{overallPct}%</p>
-                  {overallStatus === "exceeded" && <CheckCircle2 className="h-4 w-4 text-success" />}
-                  {overallStatus === "needs_attention" && <AlertTriangle className="h-4 w-4 text-destructive" />}
-                </div>
-              </div>
-              <div className="glass-card p-3 md:p-4">
-                <span className="text-[10px] text-muted-foreground md:text-xs">Targets Set</span>
-                <p className="mt-0.5 text-sm font-semibold md:text-base">{spTargets.length + dlTargets.length} / {salespersons.length + dealers.length}</p>
-              </div>
+            <div className="space-y-4">
+              {signalTier && (
+                <SignalCard
+                  tier={signalTier}
+                  icon={AlertTriangle}
+                  label={signalTier === "destructive" ? "NEEDS ATTENTION" : "BEHIND TARGET"}
+                  caption={
+                    spBehind.length > 0
+                      ? `${spBehind.slice(0, 3).map(s => s.name).join(", ")}${spBehind.length > 3 ? ` +${spBehind.length - 3} more` : ""} are below 60% pace`
+                      : `Period revenue tracking ${overallPct}% of ${PERIOD_TYPE_LABELS[periodType].toLowerCase()} target`
+                  }
+                  subCaption={`${formatCurrency(totalActualRev)} of ${formatCurrency(totalTargetRev)}`}
+                  value={`${overallPct}%`}
+                  valueSuffix="ACHIEVED"
+                />
+              )}
+              <KpiStrip
+                cells={[
+                  { label: `${PERIOD_TYPE_LABELS[periodType]} target`, value: formatCurrency(totalTargetRev), zero: totalTargetRev === 0 },
+                  { label: "Actual revenue", value: formatCurrency(totalActualRev), zero: totalActualRev === 0 },
+                  { label: "Overall progress", value: `${overallPct}%`, zero: overallPct === 0 },
+                  { label: "Targets set", value: `${spTargets.length + dlTargets.length}/${salespersons.length + dealers.length}`, zero: spTargets.length + dlTargets.length === 0 },
+                ]}
+              />
             </div>
           );
         })()}

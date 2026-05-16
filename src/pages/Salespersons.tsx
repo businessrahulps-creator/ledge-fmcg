@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
@@ -130,6 +131,22 @@ export default function Salespersons() {
             </Button>
           </div>
         </div>
+
+        {(() => {
+          const totalRevenue = items.reduce((s, m) => s + (m.totalValue || 0), 0);
+          const totalOrders = items.reduce((s, m) => s + (m.totalOrders || 0), 0);
+          const top = items.length > 0 ? items.reduce((a, b) => (b.totalValue || 0) > (a.totalValue || 0) ? b : a) : null;
+          return (
+            <KpiStrip
+              cells={[
+                { label: "Team size", value: items.length, zero: items.length === 0 },
+                { label: "Total revenue", value: formatCurrency(totalRevenue), zero: totalRevenue === 0 },
+                { label: "Total orders", value: totalOrders, zero: totalOrders === 0 },
+                { label: "Top performer", value: top?.name || "—", zero: !top },
+              ]}
+            />
+          );
+        })()}
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

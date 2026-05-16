@@ -6,13 +6,15 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, MapPin, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
@@ -62,6 +64,25 @@ export default function Distributors() {
   const deleteDealer = deleteId ? items.find((d) => d.id === deleteId) : null;
   const allOrders = api.orders.list();
   const deleteDealerOrderCount = deleteId ? allOrders.filter(o => o.distributorId === deleteId).length : 0;
+
+  // Portfolio health aggregations for hero strip + signal surface.
+  const portfolio = useMemo(() => {
+    let totalOutstanding = 0;
+    let overLimit = 0;
+    let overLimitValue = 0;
+    let approaching = 0;
+    for (const d of items) {
+      const limit = d.creditLimit || 0;
+      const out = d.outstandingAmount || 0;
+      totalOutstanding += out;
+      if (limit > 0) {
+        const pct = (out / limit) * 100;
+        if (pct >= 100) { overLimit += 1; overLimitValue += out - limit; }
+        else if (pct >= 70) { approaching += 1; }
+      }
+    }
+    return { totalOutstanding, overLimit, overLimitValue, approaching };
+  }, [items]);
 
   const openNew = () => {
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
@@ -161,6 +182,31 @@ export default function Distributors() {
             </Button>
           </div>
         </div>
+
+        {(portfolio.overLimit > 0 || portfolio.approaching > 0) && (
+          <SignalCard
+            tier={portfolio.overLimit > 0 ? "destructive" : "warning"}
+            icon={AlertTriangle}
+            label={portfolio.overLimit > 0 ? "OVER CREDIT LIMIT" : "APPROACHING LIMIT"}
+            caption={
+              portfolio.overLimit > 0
+                ? `${portfolio.overLimit} dealer${portfolio.overLimit !== 1 ? "s" : ""} past credit limit — pause unpaid orders`
+                : `${portfolio.approaching} dealer${portfolio.approaching !== 1 ? "s" : ""} at 70%+ of credit limit`
+            }
+            subCaption={portfolio.overLimitValue > 0 ? `${formatCurrency(portfolio.overLimitValue)} over limit in total` : undefined}
+            value={portfolio.overLimit > 0 ? portfolio.overLimit : portfolio.approaching}
+            valueSuffix="DEALERS"
+          />
+        )}
+
+        <KpiStrip
+          cells={[
+            { label: "Active dealers", value: items.length, zero: items.length === 0 },
+            { label: "Total outstanding", value: formatCurrency(portfolio.totalOutstanding), zero: portfolio.totalOutstanding === 0 },
+            { label: "Approaching limit", value: portfolio.approaching, zero: portfolio.approaching === 0 },
+            { label: "Over limit", value: portfolio.overLimit, zero: portfolio.overLimit === 0 },
+          ]}
+        />
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
