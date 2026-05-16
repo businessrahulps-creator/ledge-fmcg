@@ -32,6 +32,14 @@ export function Hero() {
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
+      {/* Ambient drifting light — the page's signature ambient motion. Drifts with scroll. */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: lightBg, opacity: lightOpacity, willChange: "opacity, background" }}
+      />
+
+
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
         {/* Left - Text */}
         <div className="lg:col-span-7">
