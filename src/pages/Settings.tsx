@@ -46,22 +46,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
 
-interface TeamMember {
-  id: string;
-  userId: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: "super_admin" | "sales_manager" | "accountant";
-  roleId: string;
-}
-
-const roleLabels: Record<string, string> = {
-  super_admin: "Super Admin",
-  sales_manager: "Sales Manager",
-  accountant: "Accountant",
-};
-
 function InstallAppCard() {
   const { canInstall, isIOS, isStandalone, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
 
