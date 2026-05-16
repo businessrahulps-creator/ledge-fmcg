@@ -381,7 +381,7 @@ export default function Performance() {
               Performance
             </h1>
             <p className="text-sm text-muted-foreground">
-              Real-time business intelligence
+              Real-time business intelligence · <span className="text-foreground/80">{revenueMode === "delivered" ? "Delivered Revenue" : "Booked Revenue"}</span>
             </p>
           </div>
 
