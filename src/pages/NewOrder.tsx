@@ -5,7 +5,7 @@ import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-re
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
@@ -82,7 +82,7 @@ export default function NewOrder() {
   const addOrder = api.orders.create;
   const existingOrders = api.orders.list();
   const { addNotification } = useNotifications();
-  const { userRole } = useAuth();
+  const canOverrideCredit = useCan("override_credit_limit");
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
   const firstProductRef = useRef<HTMLButtonElement>(null);
@@ -167,7 +167,7 @@ export default function NewOrder() {
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
   const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
-  const isSuperAdmin = userRole === "super_admin";
+  // (credit override capability resolved via useCan above)
 
   // --- Scheme auto-apply (centralized pricing engine) ---
   const pricing = useMemo(
@@ -364,12 +364,12 @@ export default function NewOrder() {
     }
 
     if (exceedsCreditLimit) {
-      if (isSuperAdmin) {
+      if (canOverrideCredit) {
         setCreditOverrideOpen(true);
         return;
       }
       toast.error("Credit limit exceeded", {
-        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Contact a Super Admin to override.`,
+        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Ask someone with override permission.`,
       });
       return;
     }
@@ -452,7 +452,7 @@ export default function NewOrder() {
                 icon={AlertTriangle}
                 label="CREDIT LIMIT BREACH"
                 caption={`${selectedDealerObj?.name} will exceed credit limit if this order ships unpaid`}
-                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Limit ${formatCurrency(creditLimit)}${isSuperAdmin ? " — Super Admin can override" : ""}`}
+                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Limit ${formatCurrency(creditLimit)}${canOverrideCredit ? " — you can override" : ""}`}
                 value={formatCurrency(projectedOutstanding - creditLimit)}
                 valueSuffix="OVER LIMIT"
               />
