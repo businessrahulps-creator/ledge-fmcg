@@ -46,7 +46,7 @@ export function TrustBar() {
             <StaggerItem key={stat.value}>
               <div
                 className={`text-center px-4 ${
-                  i > 0 ? "md:border-l md:border-[#E2E8F0]/70" : ""
+                  i > 0 ? "md:border-l md:border-border" : ""
                 }`}
               >
                 <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">

@@ -622,7 +622,7 @@
     background: linear-gradient(110deg, transparent 30%, hsl(var(--accent) / 0.18) 50%, transparent 70%);
   }
 
-  /* Animated indigo pill — used for the ONE earned moment in Outcome ("90 days") */
+  /* Animated accent pill — used for the ONE earned moment in Outcome ("90 days") */
   @keyframes lp-pill-breathe {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.018); }

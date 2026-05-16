@@ -273,7 +273,7 @@ export function LedgeIntelligence() {
 
                 {/* Progress — uses existing lp-progress-glass primitive */}
                 <div className="mt-4 max-w-md">
-                  <div className="relative h-1.5 rounded-full bg-[#E2E8F0] overflow-hidden">
+                  <div className="relative h-1.5 rounded-full bg-border overflow-hidden">
                     <motion.div
                       className="lp-progress-glass absolute inset-y-0 left-0 rounded-full"
                       initial={{ width: 0 }}
