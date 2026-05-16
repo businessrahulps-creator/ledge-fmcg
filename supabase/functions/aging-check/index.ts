@@ -18,14 +18,9 @@ function jsonRes(body: unknown, status = 200) {
 let cachedSecret: string | null = null;
 async function getCronSecret(supabase: ReturnType<typeof createClient>): Promise<string | null> {
   if (cachedSecret) return cachedSecret;
-  const { data, error } = await supabase
-    .schema("vault")
-    .from("decrypted_secrets")
-    .select("decrypted_secret")
-    .eq("name", "cron_secret")
-    .maybeSingle();
-  if (error || !data?.decrypted_secret) return null;
-  cachedSecret = data.decrypted_secret as string;
+  const { data, error } = await supabase.rpc("get_cron_secret");
+  if (error || !data) return null;
+  cachedSecret = data as string;
   return cachedSecret;
 }
 
