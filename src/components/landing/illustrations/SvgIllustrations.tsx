@@ -1,14 +1,16 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-// V2 brand: Midnight / Terracotta / Forest / Bone
-const C = "#0F1F3A";              // Midnight
-const C_MUTED = "#475569";
-const C_FAINT = "#94A3B8";
+// V2 brand: Midnight / Terracotta / Forest / Bone — Midnight-tinted neutrals.
+const C = "#0F1F3A";              // Midnight (foreground)
+const C_MUTED = "#5B6478";        // Midnight-tinted muted
+const C_FAINT = "#A3A8B3";        // Midnight-tinted faint
 const FILL_BG = "rgba(15,31,58,0.025)";
 const FILL_ACCENT = "rgba(15,31,58,0.06)";
-const ZEBRA = "#F5EFE6";
-const INDIGO = "#A0522D";         // Terracotta (was Indigo)
+const ZEBRA = "#F5EFE6";          // Bone
+const SURFACE = "#FFFFFF";        // card surface (kept literal — paper)
+const HAIRLINE = "#E8E1D4";       // Bone-tinted hairline (replaces #E5E7EB)
+const INDIGO = "#A0522D";         // Terracotta accent
 const INDIGO_SOFT = "rgba(160,82,45,0.08)";
 const EMERALD = "#0E2A22";        // Forest
 const EMERALD_SOFT = "#E6EDE9";
