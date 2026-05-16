@@ -101,9 +101,8 @@ const emptyScheme: Omit<Scheme, "id"> = {
 
 export default function Schemes() {
   const api = useApi();
-  const { userRole } = useAuth();
+  const canManageSchemes = useCan("manage_schemes");
   const isLoading = usePageLoading(api.loading);
-  const canManageSchemes = userRole === "super_admin";
 
   const schemes = api.schemes.list();
   const products = api.products.list();
