@@ -6,13 +6,15 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, MapPin, Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
