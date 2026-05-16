@@ -8,6 +8,7 @@ import { buildSalespersonScorecard, getPerformanceHealth, getPerformanceInsight,
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
@@ -25,6 +26,13 @@ export default function SalespersonDetail() {
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
 
   if (!person) {
+    if (api.loading || items.length === 0) {
+      return (
+        <AppLayout>
+          <RouteSkeleton />
+        </AppLayout>
+      );
+    }
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">

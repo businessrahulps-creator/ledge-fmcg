@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
@@ -58,6 +59,13 @@ export default function DealerDetail() {
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
 
   if (!dealer) {
+    if (api.loading || items.length === 0) {
+      return (
+        <AppLayout>
+          <RouteSkeleton />
+        </AppLayout>
+      );
+    }
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">

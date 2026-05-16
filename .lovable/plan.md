@@ -1,69 +1,57 @@
-## Problem
+# Fix the empty-state flash on detail pages
 
-Order `ABD-2026-0545` shows **Items: 0**, **Subtotal ₹0**, and **Total ₹0** in the UI even though the database has 1 line item and `orders.total = 18,00,000`. This is not specific to this order — it affects every order whose `order_lines` rows fell past row 1000 of the company's combined fetch.
+## The glitch
 
-## Root cause
+On `/orders/:id` (and the same pattern exists on `/dealers/:id` and `/salespersons/:id`), the page briefly renders the "Order not found" empty state and then snaps back to the real order. That's what you just saw.
 
-In `src/context/data-utils.ts`, the `batchIn` helper:
+## Why it happens
 
-```ts
-const { data } = await supabase.from(table).select("*").in(column, chunk);
-```
-
-issues a single SELECT per 500-id chunk and trusts Supabase to return everything. Supabase silently caps any single SELECT at **1000 rows**. The current company has **1,913 `order_lines` rows** — so ~900 line rows are dropped on every page load. Affected orders display zero items and a zero total even though the order header loaded correctly.
-
-The same bug applies to `claim_lines`, `invoice_lines`, and `order_schemes` — all four child-table fetches in `DataContext.tsx` go through `batchIn`.
-
-Note: `useOrdersDomain.safeRefetch` already uses `fetchAllChunked` correctly, so realtime refetches are unaffected — only the initial app load and full `refreshAll` hit the bug.
-
-## Fix
-
-Make `batchIn` paginate each chunk the same way `fetchAllChunked` does (using `.range(from, to)` until a short page is returned). One narrow change, no call-site changes needed.
-
-### `src/context/data-utils.ts`
+`OrderDetail.tsx` resolves the order with:
 
 ```ts
-export async function batchIn(table: string, column: string, ids: string[]) {
-  if (ids.length === 0) return [];
-  const ID_CHUNK = 500;
-  const PAGE = 1000;
-  const MAX_PAGES = 200; // 200k rows/chunk safety cap
-  const results: any[] = [];
-  for (let i = 0; i < ids.length; i += ID_CHUNK) {
-    const chunk = ids.slice(i, i + ID_CHUNK);
-    for (let page = 0; page < MAX_PAGES; page++) {
-      const from = page * PAGE;
-      const to = from + PAGE - 1;
-      const { data, error } = await supabase
-        .from(table as any)
-        .select("*")
-        .in(column, chunk)
-        .range(from, to) as any;
-      if (error) throw error;
-      const rows = (data || []) as any[];
-      results.push(...rows);
-      if (rows.length < PAGE) break;
-    }
-  }
-  return results;
-}
+const order = orders.find(o => o.id === id);
+...
+if (!order) return <EmptyState>Order not found</EmptyState>;
 ```
 
-This mirrors the pattern already used by `fetchAllChunked` and `useOrdersDomain.safeRefetch`, so it's the same safe shape the codebase already trusts.
+`orders` is read from `DataContext` and it can legitimately be `[]` for one or more renders in these cases:
+
+1. **Cold start without IndexedDB cache.** `DataContext` runs a two-phase fetch. Phase 1 (companies, dealers, products…) flips `loading` to `false` as soon as it lands, but `orders` is only populated when Phase 2 finishes a few hundred ms later. During that window, `orders.find(...)` returns `undefined` → empty state flashes.
+2. **Transient `NOOP_DATA_STUB`.** If `useData()` runs while the provider is briefly unmounted (sign-out edge cases, error boundary reset), the stub returns `orders: []` for one render.
+3. **Realtime / refresh races.** `safeRefetch` itself replaces atomically and is safe, but any code path that resets a domain to `[]` (e.g. the "no companyId" effect that runs if `companyId` momentarily becomes `null` during a profile reload) wipes orders for one render before they're repopulated.
+
+The detail page never checks `loading` — it jumps straight to "not found" the instant the array is empty.
+
+`DealerDetail.tsx` and `SalespersonDetail.tsx` have the exact same shape and the exact same bug.
+
+## The fix
+
+Frontend-only. Gate the "not found" branch on the data actually being ready.
+
+### 1. `src/pages/OrderDetail.tsx`
+
+- Pull `loading` from `useApi()` (already exposed as `api.loading`).
+- Replace the current `if (!order)` block with:
+  - If `loading` **or** `orders.length === 0` → render `<AppLayout><RouteSkeleton /></AppLayout>` (already used elsewhere). No "not found" copy.
+  - Only if `!loading && orders.length > 0 && !order` → render the real "Order not found" empty state with the Back button.
+
+### 2. `src/pages/DealerDetail.tsx`
+
+Same treatment for the `Dealer not found` branch, gated on `loading` / `distributors.length`.
+
+### 3. `src/pages/SalespersonDetail.tsx`
+
+Same treatment for the `Team member not found` branch, gated on `loading` / `salespersons.length`.
+
+### Why not also touch DataContext?
+
+The two-phase fetch is intentional (it unblocks first paint for pages that don't need orders). Forcing `loading` to stay `true` until Phase 2 finishes would regress that optimisation across the whole app. Gating the empty state on the consumer side is the smaller, safer fix and matches how `Orders.tsx` already behaves (it shows skeletons, not "no orders", while data is loading).
 
 ## QA after the fix
 
-1. Hard refresh the app, open `/orders/aa36bc04-43a5-4fb8-90ff-503a7398f668` → Items section should show the line, Total should read ₹18,00,000, Subtotal should match.
-2. Spot-check `/orders` list: a few more orders that previously had blank totals should now show their real totals.
-3. QA the dispatch flow (the feature the user asked about) on a fresh pending order:
-   - Open a pending order, change Delivery Status → Dispatched → Save.
-   - "Confirm dispatch & deduct stock" modal should open, list each line with `Need / Available / After`, highlighting any negative rows.
-   - Confirm → toast success, status flips to Dispatched, Stock page reflects the reduction, `stock_deductions` gets `source = 'auto_dispatch'` rows.
-   - Flip the same order back to Pending → toast success, stock restored, a `return_reversal` audit row appears.
-4. Confirm no console errors and no regressions in Billing (claim_lines) or Invoices (invoice_lines), since both use `batchIn`.
+- Hard refresh `/orders/aa36bc04-43a5-4fb8-90ff-503a7398f668` with IndexedDB cleared → expect skeleton, then the order. No "Order not found" flash.
+- Same for `/dealers/:id` and `/salespersons/:id`.
+- Visit a genuinely bad id like `/orders/does-not-exist` → after data loads, the real "Order not found" empty state still shows (with the Back to Orders button).
+- Navigate between `/orders` → `/orders/:id` repeatedly to confirm no regression on the happy path.
 
-## Out of scope
-
-- No schema changes.
-- No UI changes.
-- Dispatch RPCs from the previous turn stay as-is; only the data-loading helper changes.
+No backend, schema, or domain-logic changes.
