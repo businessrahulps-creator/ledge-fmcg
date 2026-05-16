@@ -18,7 +18,8 @@ export function SalesTeamReport() {
   const orders = api.orders.list();
   const salespersons = api.salespersons.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
-  const filteredOrders = filterByTimePeriod(orders, period);
+  const [scope, setScope] = useState<RevenueScope>("delivered");
+  const filteredOrders = applyRevenueScope(filterByTimePeriod(orders, period), scope);
 
   const data = salespersons
     .map((s) => {
