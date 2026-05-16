@@ -69,17 +69,17 @@ function ClaimPreview() {
         style={{ boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)" }}
       >
         {steps.map((s, idx) => (
-          <>
-            <span key={s.label} className={`lp-pill lp-pill--${s.variant} shrink-0`} style={{ padding: "3px 8px 3px 3px", boxShadow: "none" }}>
+          <Fragment key={s.label}>
+            <span className={`lp-pill lp-pill--${s.variant} shrink-0`} style={{ padding: "3px 8px 3px 3px", boxShadow: "none" }}>
               <span className="lp-pill__tile" style={{ width: 16, height: 16, borderRadius: 5 }}>
                 <s.icon size={9} strokeWidth={2.5} />
               </span>
               <span className="lp-pill__label" style={{ fontSize: 11 }}>{s.label}</span>
             </span>
             {idx < steps.length - 1 && (
-              <span key={`sep-${idx}`} className="flex-1 h-px bg-border min-w-[6px]" aria-hidden />
+              <span className="flex-1 h-px bg-border min-w-[6px]" aria-hidden />
             )}
-          </>
+          </Fragment>
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between px-1">
