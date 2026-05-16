@@ -44,13 +44,13 @@ export function WhyLedge() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" staggerTime={0.05}>
           {blocks.map((block, i) => {
-            const isHero = i === 1; // "Works when the network doesn't"
+            const isHero = i === 1; // "Works when the network doesn't" → Midnight
             return (
               <StaggerItem key={block.title}>
-                <div className={`${isHero ? "lp-bento-hero" : "lp-card"} lp-card-premium p-7 h-full flex flex-col relative`}>
+                <div className={`${isHero ? "lp-card-tinted lp-card-midnight" : "lp-card lp-card-premium"} p-7 h-full flex flex-col relative`}>
                   {isHero && (
                     <div className="flex justify-end mb-5">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
                         <span className="lp-live-dot" /> Offline-ready
                       </span>
                     </div>
@@ -62,7 +62,7 @@ export function WhyLedge() {
                     {block.content}
                   </p>
                   <div className="mt-auto pt-6 flex justify-end">
-                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-accent/70" : "text-[hsl(var(--muted-foreground)/0.7)]"}`} />
+                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-accent/80" : "text-[hsl(var(--muted-foreground)/0.7)]"}`} />
                   </div>
                 </div>
               </StaggerItem>
