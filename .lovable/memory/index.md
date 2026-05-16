@@ -11,6 +11,7 @@ No Google OAuth — user explicitly removed it.
 Free trial is 30 days, NOT 14 — ignore any spec text saying otherwise.
 
 ## Memories
+- [Route prefetch + LedgeLoader](mem://style/route-prefetch-loader) — Idle prefetch all authed routes, hover-prefetch NavLink, dynamic xlsx, vendor chunking, branded delayed Suspense loader
 - [PR15 Performance/Schemes](mem://style/pr15-performance-schemes) — Performance KPI grid → SignalCard+KpiStrip with InsightLine; Schemes expiring-soon SignalCard
 - [PR14 Dealers/Salespersons/Targets](mem://style/pr14-dealers-salespersons-targets) — Credit-risk SignalCard on Dealers, KpiStrip on Salespersons, named behind-target list on Targets
 - [PR13 Stock/NewOrder](mem://style/pr13-stock-neworder) — Stock hero SignalCard+KpiStrip, NewOrder credit-limit promoted to SignalCard

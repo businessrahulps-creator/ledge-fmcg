@@ -1,5 +1,5 @@
-import * as XLSX from "xlsx";
 import { toast } from "sonner";
+import type * as XLSXType from "xlsx";
 
 const CURRENCY_KEYWORDS = ["₹", "amount", "value", "price", "revenue", "total", "outstanding", "limit", "savings"];
 const DATE_KEYWORDS = ["date"];
@@ -15,9 +15,10 @@ function isDateCol(header: string): boolean {
 }
 
 /**
- * Build a formatted worksheet from headers + rows.
+ * Build a formatted worksheet from headers + rows. Takes XLSX as a parameter
+ * so callers can share a dynamically-loaded module instance.
  */
-export function buildWorksheet(headers: string[], rows: string[][]): XLSX.WorkSheet {
+export function buildWorksheet(XLSX: typeof XLSXType, headers: string[], rows: string[][]): XLSXType.WorkSheet {
   const aoa = [headers, ...rows];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
 
@@ -39,15 +40,17 @@ export function buildWorksheet(headers: string[], rows: string[][]): XLSX.WorkSh
 
 /**
  * Generate and download an Excel file from headers + rows.
- * Drop-in replacement for the old CSV export — same signature.
+ * xlsx (~430KB) is dynamically imported so it's only fetched when users
+ * actually click an Export button — not on every page load.
  */
-export function exportCsv(filename: string, headers: string[], rows: string[][]) {
+export async function exportCsv(filename: string, headers: string[], rows: string[][]) {
   if (rows.length === 0) {
     toast.error("Nothing to export", { description: "No data matches the current filters." });
     return;
   }
 
-  const ws = buildWorksheet(headers, rows);
+  const XLSX = await import("xlsx");
+  const ws = buildWorksheet(XLSX, headers, rows);
   const wb = XLSX.utils.book_new();
 
   // Derive sheet name from filename (strip extension & date suffix)

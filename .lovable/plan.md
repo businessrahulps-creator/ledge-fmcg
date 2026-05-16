@@ -1,87 +1,128 @@
-# PR12–15 — Platform-wide Pattern Break
+# Fix slow page loads + add a delightful loading moment
 
-PR11 promoted Credit at Risk from flat KPI to a real risk surface with insight lines, icon tiers, and a 3-color semantic system. The same flatness exists across every inner page: rows of identical neutral KPI cards, undifferentiated alerts, generic outline icons, no MoM/peer deltas, no zero-state taming. This audit applies the same treatment platform-wide.
+## Part A — Why pages feel slow (4–7s on first visit)
 
-## Operating principles (carried from PR11)
+Every authenticated page in `src/App.tsx` is `React.lazy(() => import(...))`. On a first visit:
 
-1. **One hero per page.** Find the single most action-worthy number/state and promote it (32px Playfair, left rule, signal icon, insight line). Demote everything else to a hairline strip.
-2. **Three semantic tiers, always.** Success/Forest for on-track, Warning/Terracotta for "approaching", Destructive for breach. No page should be monochrome neutral.
-3. **Icon weight = signal strength.** `.icon-nav` for chrome, `.icon-inline` for body, `.icon-signal` (20px filled tint) for alerts and hero metrics only.
-4. **Every KPI gets an insight line** (`▲ 12% vs last month`, "Avg 14d", "On track") or it gets demoted to a label, never a bare number.
-5. **Tame zeros and empty states.** Dim to `text-muted-foreground/35`, or collapse to a single sentence.
-6. **Status surfaces beat status pills.** When a state needs action (overdue, low stock, lapsed dealer), add the left-bar treatment, not just a colored dot.
+1. The browser must download that route's JS chunk over the network.
+2. Plus any shared chunks it depends on (Radix, recharts, `xlsx`, date-fns…) that no earlier route already pulled in.
+3. Once cached, the second visit is instant — which matches the reported symptom exactly.
 
-## Per-page opportunities
+Data fetching is **not** the bottleneck: `DataContext.fetchAll` runs once when `companyId` becomes available, not per route. The slowness is **chunk download time**, made worse by:
 
-### PR12 — Money pages (highest leverage)
-The pages where wrong-looking numbers cost real money.
+- No `manualChunks` in `vite.config.ts` → one large shared chunk is pulled on the first lazy nav.
+- `xlsx` (~430 KB) is **statically** imported from `src/utils/exportCsv.ts` and `exportBackup.ts` (used by 6+ pages).
+- No prefetching — chunks are only requested the moment the user clicks.
 
-- **`Billing.tsx`** (1055 lines): Outstanding total, Overdue >60d, Collected this month → hero card with Overdue as the promoted destructive surface (left rule, dealer count, ₹ amount, "X invoices past due"). Insight line under each tile (`▲ ₹X vs Apr`, "Avg DSO 18d"). Invoice rows: pending/overdue get left-bar StatusBadge (already shipped) plus row-level `border-l-2 border-destructive/40` when >60d overdue.
-- **`OrderDetail.tsx`** (868 lines): Promote "Balance due" when non-zero with the destructive surface treatment; demote "Subtotal/Tax/Discount" to hairline-divided strip. Payment status header → signal icon + 32px num. Add insight chip "Paid in 4 days" / "Overdue 12 days".
-- **`Claims.tsx`** (509): Pending claim value gets promoted to warning surface (Terracotta, since "approaching" not "breach"). Approved/rejected demoted.
+## Part B — Performance fixes (biggest win first)
 
-### PR13 — Inventory & operations
-- **`Stock.tsx`** (1004): Low-stock count → promoted destructive surface ("X SKUs below reorder point — ₹Y revenue at risk if dealer orders today"). Out-of-stock items get a row-level left-bar. "Healthy" stock gets a calm success dot, not a colored pill. Warehouse cards: utilization % gets the 3-tier color (≤70 success, 70–90 warning, >90 destructive).
-- **`Orders.tsx`** (400): Hero strip: "Pending dispatch" (warning), "Overdue delivery" (destructive), "Delivered this week" (success delta). Today's orders count → 32px num with `▲ vs yesterday`.
-- **`NewOrder.tsx`** (779): Credit-check inline result becomes a signal surface — when dealer is over limit, show the same red-left-bar block from Dashboard's Credit at Risk inline above the cart total (not a toast).
+### 1. Prefetch route chunks after login
 
-### PR14 — People & performance
-- **`Dealers (Distributors).tsx`** (377): Lapsed dealers count → promoted warning surface ("12 dealers no order in 30+ days"). Top-revenue dealer chip → success surface with "▲ ₹X vs last month".
-- **`DealerDetail.tsx`** (585): Outstanding balance vs credit limit → promoted bar surface using 3-tier color based on utilization. "Last order 45 days ago" → warning insight chip in header, not buried in metadata.
-- **`Salespersons.tsx` + `SalespersonDetail.tsx`**: Target achievement % → 3-tier color hero (red <60, amber 60–90, success ≥90) with `▲ vs last month`. Promote "below target" reps as a warning row.
-- **`Performance.tsx`** (1054): This page is mostly KPI cards — heaviest refit. Convert top row to one hero (top mover / biggest drop) + hairline-divided supporting strip. Add MoM deltas everywhere. Add peak callouts to existing charts.
-- **`Targets.tsx`** (492): Behind-target reps/products → promoted warning/destructive surface with named list, not a generic count.
+Create `src/lib/route-prefetch.ts` as the single source of truth:
 
-### PR15 — Detail/settings polish + global components
-- **`Schemes.tsx`** (601): Expiring schemes (next 7 days) → promoted warning surface. Active schemes count demoted.
-- **`Reports.tsx`, `Settings.tsx`, `Company.tsx`**: No KPIs but plenty of generic outline icons — apply `.icon-nav` vs `.icon-inline` distinction; promote unfinished setup steps in Settings (warning surface) similar to SetupChecklist.
-- **Global components**:
-  - `EntityHistory.tsx` / `ActivityLog.tsx`: critical events (payment failed, credit breach) get left-bar; routine events stay quiet.
-  - `NotificationCenter.tsx`: 3-tier semantic on notification type icons (currently all neutral).
-  - `EmptyState.tsx`: a calmer variant (`text-muted-foreground/40` headline, no big icon) for "no activity yet" cases to use across tables.
-- **New shared primitives** in `src/components/ui/`:
-  - `<SignalCard>` — the promoted surface used by Credit at Risk; props: `tier: 'success'|'warning'|'destructive'`, `icon`, `label`, `value`, `caption`, `insightLine`.
-  - `<KpiStrip>` — hairline-divided horizontal strip with insight-line slot per cell.
-  - `<InsightLine>` — `▲/▼/—` with delta + comparator + auto-color.
+```text
+{ "/orders": () => import("@/pages/Orders"), ... }
+```
 
-Building these three first (start of PR12) lets every subsequent page swap in 5–10 lines instead of bespoke markup.
+`App.tsx` consumes the same map for its `lazy()` calls. A small `<RoutePrefetcher />` mounted inside `ProtectedRoute` walks the map on `requestIdleCallback` after the dashboard is interactive, warming every chunk in the background.
 
-## Sequencing & sizing
+Also add **hover/touchstart prefetch** to `src/components/NavLink.tsx` so a sidebar hover starts the download before the click.
 
-| PR | Pages | Effort | Why first |
-|----|-------|--------|-----------|
-| 12 | Shared primitives + Billing, OrderDetail, Claims | M | Money pages = highest user impact; primitives unblock the rest |
-| 13 | Stock, Orders, NewOrder | M | Operational daily-use surfaces |
-| 14 | Dealers, Salespersons, Performance, Targets, detail pages | L | Most KPI-heavy; biggest visual transformation |
-| 15 | Schemes, Reports, Settings, global components | S | Polish + consistency sweep |
+### 2. Lazy-load heavy libraries used only for actions
 
-Each PR ends with a Playwright/manual screenshot pass and a memory note (`mem://style/pr12-…`).
+- `src/utils/exportCsv.ts` and `src/utils/exportBackup.ts` → switch to `const XLSX = await import("xlsx")` inside the export function. Pulls ~430 KB out of the shared chunk; the cost is paid only when the user actually clicks "Export".
 
-## What this is NOT
+### 3. Vendor chunking for cache efficiency
 
-- Not a redesign — same layout, same routes, same data.
-- No new business logic. MoM deltas use existing data already in `DataContext`; where unavailable, the insight line is suppressed.
-- Landing/auth/dark mode untouched (already archived).
-- No mobile-specific redesign — desktop-first; mobile inherits via existing responsive utilities.
+Add `build.rollupOptions.output.manualChunks` to `vite.config.ts`:
 
-## Out of scope / explicit non-goals
+```text
+react-vendor → react, react-dom, react-router-dom
+radix-vendor → @radix-ui/*
+supabase     → @supabase/supabase-js, @tanstack/react-query
+charts       → recharts (Performance only)
+xlsx         → xlsx (export-only)
+icons        → lucide-react
+```
 
-- Charts library swap (Recharts stays).
-- New empty-state illustrations.
-- Reordering nav/IA.
-- Any change to PDF templates.
+Vendor code is downloaded once, reused across every route, and stays cached across deploys when app code changes.
 
-## Risks
+### Files touched
 
-- **Color overuse.** If every page promotes something, nothing stands out. Rule: max **one** promoted surface per page above the fold, max **two** total per page.
-- **Insight-line noise.** Suppress when sample size <2 months or value is 0. Better no line than `▲ 0%`.
-- **Primitive churn.** Build `SignalCard` / `KpiStrip` / `InsightLine` once at start of PR12, freeze API, then propagate.
+- `vite.config.ts` — manualChunks.
+- `src/lib/route-prefetch.ts` — **new**, lazy map + idle prefetcher hook.
+- `src/App.tsx` — import lazy components from the map.
+- `src/components/layout/AppLayout.tsx` — mount `<RoutePrefetcher />`.
+- `src/components/NavLink.tsx` — hover/touchstart prefetch.
+- `src/utils/exportCsv.ts`, `src/utils/exportBackup.ts` — dynamic `import("xlsx")`.
 
-## Deliverable per PR
+## Part C — The "Ledge is thinking" loading moment
 
-- Working pages
-- Before/after screenshots at 1280×800
-- Memory file `mem://style/prNN-…`
-- Updated `mem://index.md`
+When a chunk **does** need a second or two (slow 3G, first visit before prefetch lands), the user should feel a calm, branded moment — not a stale skeleton. Apple-style: minimal, confident, almost silent, with subtle motion that carries personality.
 
-Ready to start with PR12 (shared primitives + money pages) when you approve.
+### The concept — "Ledge"
+
+A single brand mark (the striped-square Ledge logo) sits centered. Three things happen at once, gently:
+
+1. **Breathing logo** — the mark scales 1.00 → 1.04 → 1.00 on a 1.6 s ease-in-out loop. Feels alive, not spinning.
+2. **Stripe sweep** — the stripes inside the mark shift one notch every 0.8 s, like a heartbeat moving through them. This is the Ledge personality — our logo is literally made of stripes, so we animate what we already own instead of bolting on a generic spinner.
+3. **Rotating one-liners** in Playfair italic underneath, fading through every ~1.8 s. Tone is founder-to-founder, dry, warm — not corporate. Examples:
+   - "Stacking the ledger…"
+   - "Counting cartons…"
+   - "Checking the godown…"
+   - "Reading the day…"
+   - "Tying up loose ends…"
+   - "Almost there."
+
+Lines are pulled from a small array, shuffled per session so the same user doesn't see the same line every time.
+
+### When it shows (and when it doesn't)
+
+- **0 – 250 ms**: show **nothing**. Most prefetched navigations land here; a flash of any loader is worse than no loader.
+- **250 ms – ∞**: fade in the Ledge moment over 200 ms. This is the React Suspense fallback for lazy routes.
+- After the chunk resolves, fade out over 150 ms and the page fades in (the existing `animate-fade-in` works).
+
+We keep the **structural skeletons** (`ListPageSkeleton`, `DashboardPageSkeleton`) for the brief window between "chunk arrived, data still loading" — those represent real content shape. The Ledge moment only owns the chunk-download window.
+
+### Implementation
+
+New component `src/components/ui/ledge-loader.tsx`:
+
+- Container: full-card centered flex, `bg-bone`, no border, no shadow.
+- Logo: existing Ledge mark SVG, ~64 px, `animate-[ledge-breathe_1.6s_ease-in-out_infinite]`.
+- Stripes: implemented as `<rect>`s inside the SVG with a `clipPath` that shifts via `transform: translateX(...)` on a 0.8 s loop.
+- Caption: Playfair italic, `text-muted-foreground`, ~14 px, key'd on the active line so React re-mounts and the fade-in animation replays.
+- Delay gate: a `useDelayedShow(250)` hook returns `false` for the first 250 ms; component returns `null` until then.
+
+New keyframes in `tailwind.config.ts`:
+
+```text
+ledge-breathe : 0% scale(1) → 50% scale(1.04) → 100% scale(1)
+ledge-stripe  : 0% translateX(0) → 100% translateX(6px)
+caption-in    : opacity 0 + translateY(4px) → opacity 1 + translateY(0)
+```
+
+All easings use the existing `ease-fluent` token to stay on-brand.
+
+Wire it into `src/App.tsx` by swapping the existing `Suspense` fallback (`<DashboardPageSkeleton/>` / `<ListPageSkeleton/>`) for `<LedgeLoader/>` on the route-level Suspense boundaries. Skeletons remain in use **inside** pages for data-loading states.
+
+### Files touched (Part C)
+
+- `src/components/ui/ledge-loader.tsx` — **new**.
+- `src/hooks/use-delayed-show.ts` — **new**, tiny 250 ms gate.
+- `tailwind.config.ts` — three keyframes + animation names.
+- `src/App.tsx` — replace Suspense fallbacks on lazy routes with `<LedgeLoader/>`.
+
+## Validation
+
+1. Build and inspect chunk names: expect `xlsx`, `charts`, `radix-vendor`, `react-vendor` as separate chunks.
+2. DevTools → Network, throttle to "Fast 3G", login, wait 3 s, then click Orders / Stock / Performance — each should load in <500 ms (chunk already prefetched).
+3. To verify the Ledge moment, disable the prefetcher temporarily and throttle to "Slow 3G"; confirm: <250 ms nothing → fade in → breathing logo + rotating caption → fade out into the page.
+4. Confirm Export CSV/XLSX still works on Stock, Distributors, Reports.
+5. Confirm Performance page still renders charts.
+
+## Non-goals
+
+- No business logic, data fetching, or page UI changes.
+- No PWA/Workbox changes — once chunks are split sensibly, precaching already helps.
+- No backend or Lovable Cloud instance changes — this is purely a frontend bundle + loader UX fix.

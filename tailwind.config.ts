@@ -170,6 +170,22 @@ export default {
           "60%": { opacity: "1" },
           "100%": { opacity: "0.5" },
         },
+        "ledge-breathe": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.95" },
+          "50%": { transform: "scale(1.04)", opacity: "1" },
+        },
+        "ledge-halo": {
+          "0%, 100%": { opacity: "0.35", transform: "scale(0.95)" },
+          "50%": { opacity: "0.6", transform: "scale(1.1)" },
+        },
+        "ledge-fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "ledge-line-in": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
