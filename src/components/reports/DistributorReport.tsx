@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
+import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatIndianDate } from "@/utils/formatDate";
@@ -18,8 +19,9 @@ export function DistributorReport() {
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
+  const [scope, setScope] = useState<RevenueScope>("delivered");
   const [selected, setSelected] = useState<(Distributor & { orderCount: number; revenue: number }) | null>(null);
-  const filteredOrders = filterByTimePeriod(orders, period);
+  const filteredOrders = applyRevenueScope(filterByTimePeriod(orders, period), scope);
 
   const data = distributors
     .map((d) => {
@@ -46,6 +48,7 @@ export function DistributorReport() {
     <div className="space-y-4 overflow-x-hidden">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
         <TimePeriodFilter value={period} onChange={setPeriod} />
+        <RevenueScopeFilter value={scope} onChange={setScope} />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
           <span className="whitespace-nowrap text-muted-foreground">
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(totalRevenue)}</span>
