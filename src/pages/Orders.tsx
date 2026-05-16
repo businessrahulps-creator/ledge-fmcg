@@ -26,6 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatIndianDate } from "@/utils/formatDate";
+import { KpiStrip } from "@/components/ui/kpi-strip";
+import { InsightLine } from "@/components/ui/insight-line";
+import { SignalCard } from "@/components/ui/signal-card";
+import { AlertTriangle, Truck } from "lucide-react";
 
 export default function Orders() {
   const api = useApi();
