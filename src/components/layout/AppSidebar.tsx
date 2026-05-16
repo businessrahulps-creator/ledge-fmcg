@@ -16,9 +16,6 @@ import {
   RotateCcw,
   FileText,
   Landmark,
-  BookOpen,
-  History,
-  AlertTriangle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,8 +34,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { useAuth } from "@/context/AuthContext";
-import { ActivityLog } from "@/components/layout/ActivityLog";
-import { PRETTY_VERSION, SHORT_VERSION } from "@/lib/app-version";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 import ledgeMark from "@/assets/ledge-mark.webp";
 
@@ -69,7 +64,6 @@ const relationshipsNav: NavItem[] = [
 ];
 
 const footerNav: NavItem[] = [
-  { title: "Help", url: "/help", icon: BookOpen },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -79,20 +73,16 @@ export function AppSidebar() {
   const location = useLocation();
   const { companyIncomplete } = useOnboarding();
   const { userRole } = useAuth();
-  const [activityOpen, setActivityOpen] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
 
-  // Insights group — Activity is a button (opens drawer), the rest are routes.
+  // Insights group — Reports + Performance. (Activity lives in the top bar.)
   const insightsNav: NavItem[] = [
     { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
     { title: "Performance", url: "/performance", icon: TrendingUp },
-    { title: "Activity", url: "/activity", icon: History, onClick: () => setActivityOpen(true) },
   ];
 
-  const effectiveFooter: NavItem[] = userRole === "super_admin"
-    ? [{ title: "Errors", url: "/admin/errors", icon: AlertTriangle }, ...footerNav]
-    : footerNav;
+  const effectiveFooter: NavItem[] = footerNav;
 
   const renderItem = (item: NavItem) => {
     const isActive = item.onClick ? false : location.pathname.startsWith(item.url);
@@ -259,22 +249,7 @@ export function AppSidebar() {
 
         <SidebarFooter className="px-2 pb-3 border-t border-border/40 pt-1">
           <SidebarMenu>{effectiveFooter.map(renderItem)}</SidebarMenu>
-
-          <Link
-            to="/settings"
-            className="mt-2 block text-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-            aria-label="App version — open Settings"
-            title={PRETTY_VERSION}
-          >
-            {collapsed ? (
-              <span className="text-[9px] tracking-tight num">{SHORT_VERSION}</span>
-            ) : (
-              <span className="text-[10px] num">{PRETTY_VERSION}</span>
-            )}
-          </Link>
         </SidebarFooter>
-
-        <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
       </Sidebar>
     </TooltipProvider>
   );

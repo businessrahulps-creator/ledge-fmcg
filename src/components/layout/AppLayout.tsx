@@ -65,13 +65,11 @@ const moreGroups = [
     label: "Insights",
     items: [
       { title: "Performance", url: "/performance", icon: TrendingUp },
-      { title: "Activity", url: "/activity", icon: History },
     ],
   },
   {
     label: "Account",
     items: [
-      { title: "Help", url: "/help", icon: BookOpen },
       { title: "Settings", url: "/settings", icon: Settings },
     ],
   },
@@ -92,7 +90,6 @@ const ROUTE_TITLES: Record<string, string> = {
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",
-  "/activity": "Activity",
   "/help": "Help",
   "/settings": "Settings",
 };
@@ -255,6 +252,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </div>
               )}
               <RefreshAppButton />
+              <button
+                type="button"
+                onClick={() => setActivityOpen(true)}
+                aria-label="Recent activity"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              >
+                <History className="h-[18px] w-[18px]" strokeWidth={1.7} />
+              </button>
               <NotificationCenter />
             </div>
           </header>
