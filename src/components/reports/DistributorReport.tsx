@@ -19,8 +19,9 @@ export function DistributorReport() {
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
+  const [scope, setScope] = useState<RevenueScope>("delivered");
   const [selected, setSelected] = useState<(Distributor & { orderCount: number; revenue: number }) | null>(null);
-  const filteredOrders = filterByTimePeriod(orders, period);
+  const filteredOrders = applyRevenueScope(filterByTimePeriod(orders, period), scope);
 
   const data = distributors
     .map((d) => {
