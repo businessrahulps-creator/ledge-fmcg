@@ -130,7 +130,7 @@ export function Founder() {
 
             <div className="mt-8">
               <p className="font-heading font-semibold text-[15.5px] text-foreground">Asha Ps</p>
-              <div className="h-px w-7 bg-[#0A0F1C] mt-1.5" />
+              <div className="h-px w-7 bg-primary mt-1.5" />
               <p className="font-body text-[13px] text-muted-foreground mt-1.5">Founder, Ledge</p>
             </div>
           </AnimateIn>
