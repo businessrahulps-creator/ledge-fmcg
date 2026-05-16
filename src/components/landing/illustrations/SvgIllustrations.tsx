@@ -1,23 +1,24 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-const C = "#0F172A";
+// V2 brand: Midnight / Terracotta / Forest / Bone
+const C = "#0F1F3A";              // Midnight
 const C_MUTED = "#475569";
 const C_FAINT = "#94A3B8";
-const FILL_BG = "rgba(15,23,42,0.025)";
-const FILL_ACCENT = "rgba(15,23,42,0.06)";
-const ZEBRA = "#FAFAFB";
-const INDIGO = "#4F46E5";
-const INDIGO_SOFT = "hsl(var(--accent) / 0.06)";
-const EMERALD = "#047857";
-const EMERALD_SOFT = "#ECFDF5";
-const EMERALD_BORDER = "#D1FAE5";
-const AMBER = "#B45309";
-const AMBER_SOFT = "#FFFBEB";
-const AMBER_BORDER = "#FEF3C7";
-const INDIGO_TEXT = "#4338CA";
-const INDIGO_PILL_BG = "#EEF2FF";
-const INDIGO_PILL_BORDER = "#E0E7FF";
+const FILL_BG = "rgba(15,31,58,0.025)";
+const FILL_ACCENT = "rgba(15,31,58,0.06)";
+const ZEBRA = "#F5EFE6";
+const INDIGO = "#A0522D";         // Terracotta (was Indigo)
+const INDIGO_SOFT = "rgba(160,82,45,0.08)";
+const EMERALD = "#0E2A22";        // Forest
+const EMERALD_SOFT = "#E6EDE9";
+const EMERALD_BORDER = "#CFDBD4";
+const AMBER = "#A0522D";
+const AMBER_SOFT = "#FBEFE6";
+const AMBER_BORDER = "#F0DBC8";
+const INDIGO_TEXT = "#7A3E22";    // Deep Terracotta
+const INDIGO_PILL_BG = "#FBEFE6";
+const INDIGO_PILL_BORDER = "#F0DBC8";
 const STROKE_W = 1;
 
 function useSvgInView() {
