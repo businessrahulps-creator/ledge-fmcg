@@ -15,6 +15,7 @@ import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/utils/errorLog";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import {
   AlertDialog,
   AlertDialogAction,
