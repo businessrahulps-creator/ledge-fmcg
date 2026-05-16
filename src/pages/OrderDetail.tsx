@@ -828,7 +828,7 @@ export default function OrderDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>Override & Save</Button>
+            <Button onClick={() => { setCreditOverrideOpen(false); proceedAfterDispatchCheck(); }}>Override & Save</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
