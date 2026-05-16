@@ -36,12 +36,12 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] leading-[1.4]",
         statusStyles[status],
         className,
       )}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", dotColors[status])} />
+      <span className={cn("inline-block h-[5px] w-[5px] rounded-full translate-y-[-0.5px]", dotColors[status])} />
       {statusLabels[status]}
     </span>
   );
