@@ -102,17 +102,17 @@ export function AppSidebar() {
         <SidebarMenuButton asChild isActive={isActive}>
           <NavLink
             to={item.url}
-            className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent ${isActive ? "bg-primary/[0.06] font-semibold text-primary" : "font-medium text-foreground/80"}`}
+            className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-sidebar-accent/70 ${isActive ? "font-semibold text-primary" : "font-medium text-foreground/75"}`}
             activeClassName="text-primary"
           >
             {isActive && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-primary" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full bg-primary" />
             )}
-            <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+            <item.icon className={`h-[18px] w-[18px] shrink-0 transition-colors ${isActive ? "text-primary" : "text-foreground/55"}`} strokeWidth={isActive ? 2 : 1.7} />
             {companyIncomplete && item.url === "/company" && (
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
             )}
-            <span>{item.title}</span>
+            <span className="tracking-[-0.005em]">{item.title}</span>
           </NavLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
