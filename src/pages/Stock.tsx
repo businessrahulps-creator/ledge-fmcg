@@ -18,6 +18,8 @@ import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
 import { useApi } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import {
   Dialog,
   DialogContent,
@@ -141,6 +143,21 @@ export default function Stock() {
     return map;
   }, [stockItemsList]);
   const getProductStock = (productId: string) => stockByProduct.get(productId) || 0;
+
+  // Aggregate stock health across all warehouses for hero strip + signal surface.
+  const stockSummary = useMemo(() => {
+    let totalValue = 0;
+    let lowCount = 0;
+    let criticalCount = 0;
+    let atRiskValue = 0;
+    for (const si of stockItemsList) {
+      totalValue += si.quantity * si.basePrice;
+      const h = getStockHealth(si.quantity, si.threshold);
+      if (h === "critical") { criticalCount += 1; atRiskValue += si.threshold * si.basePrice; }
+      else if (h === "low") { lowCount += 1; }
+    }
+    return { totalValue, lowCount, criticalCount, atRiskValue };
+  }, [stockItemsList]);
 
   const isLoading = usePageLoading(api.loading);
   const debouncedProductSearch = useDebounce(productSearch);
@@ -348,6 +365,31 @@ export default function Stock() {
             Manage your products and warehouse inventory
           </p>
         </div>
+
+        {(stockSummary.criticalCount > 0 || stockSummary.lowCount > 0) && (
+          <SignalCard
+            tier={stockSummary.criticalCount > 0 ? "destructive" : "warning"}
+            icon={AlertTriangle}
+            label={stockSummary.criticalCount > 0 ? "OUT OF STOCK" : "LOW STOCK"}
+            caption={
+              stockSummary.criticalCount > 0
+                ? `${stockSummary.criticalCount} SKU${stockSummary.criticalCount !== 1 ? "s" : ""} below reorder threshold — refill before next dispatch`
+                : `${stockSummary.lowCount} SKU${stockSummary.lowCount !== 1 ? "s" : ""} approaching reorder point`
+            }
+            subCaption={stockSummary.atRiskValue > 0 ? `≈ ${formatCurrency(stockSummary.atRiskValue)} revenue at risk` : undefined}
+            value={stockSummary.criticalCount > 0 ? stockSummary.criticalCount : stockSummary.lowCount}
+            valueSuffix="SKUs"
+          />
+        )}
+
+        <KpiStrip
+          cells={[
+            { label: "Total SKUs", value: formatNumber(products.length), zero: products.length === 0 },
+            ...(isAccountant ? [] : [{ label: "Stock value", value: formatCurrency(stockSummary.totalValue), zero: stockSummary.totalValue === 0 }]),
+            { label: "Low stock", value: formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: stockSummary.lowCount + stockSummary.criticalCount === 0 },
+            { label: "Warehouses", value: formatNumber(activeLocations.length), zero: activeLocations.length === 0 },
+          ]}
+        />
 
         <Tabs defaultValue="products" className="space-y-4 md:space-y-6">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">

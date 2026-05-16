@@ -11,6 +11,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
 import { formatCurrency } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
@@ -446,16 +447,15 @@ export default function NewOrder() {
 
             {/* Credit Limit Warning */}
             {selectedDealer && exceedsCreditLimit && (
-              <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Credit limit will be exceeded</p>
-                  <p className="mt-0.5">
-                    {selectedDealerObj?.name}'s projected outstanding: {formatCurrency(projectedOutstanding)} / Limit: {formatCurrency(creditLimit)}
-                    {isSuperAdmin && " — You can override as Super Admin."}
-                  </p>
-                </div>
-              </div>
+              <SignalCard
+                tier="destructive"
+                icon={AlertTriangle}
+                label="CREDIT LIMIT BREACH"
+                caption={`${selectedDealerObj?.name} will exceed credit limit if this order ships unpaid`}
+                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Limit ${formatCurrency(creditLimit)}${isSuperAdmin ? " — Super Admin can override" : ""}`}
+                value={formatCurrency(projectedOutstanding - creditLimit)}
+                valueSuffix="OVER LIMIT"
+              />
             )}
 
             {/* Order Lines */}
