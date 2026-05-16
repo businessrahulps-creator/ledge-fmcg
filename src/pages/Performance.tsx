@@ -250,7 +250,7 @@ export default function Performance() {
         name: o.distributorName,
         revenue: 0,
       };
-      existing.revenue += o.total;
+      existing.revenue += netTotal(o);
       map.set(o.distributorId, existing);
     });
     return Array.from(map.values())
