@@ -265,10 +265,35 @@ export default function OrderDetail() {
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
   };
 
+  const proceedAfterDispatchCheck = () => {
+    if (!order) return;
+    const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
+    if (movingToDispatched && editGodown && userRole !== "accountant") {
+      setDispatchPreview({ open: true, rows: [], loading: true });
+      supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
+        if (error) {
+          setDispatchPreview({ open: false, rows: [], loading: false });
+          toast.error("Could not load stock preview", { description: error.message });
+          return;
+        }
+        setDispatchPreview({ open: true, rows: (data as DispatchImpactRow[]) || [], loading: false });
+      });
+      return;
+    }
+    executeSaveOrder();
+  };
+
+  const confirmDispatch = async () => {
+    setDispatchPreview(p => ({ ...p, open: false }));
+    await executeSaveOrder();
+    const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
+    toast.success(`Dispatched. Stock updated for ${dispatchPreview.rows.length} product${dispatchPreview.rows.length === 1 ? "" : "s"}.${negatives > 0 ? ` ${negatives} below zero — please reconcile.` : ""}`);
+  };
+
   const saveOrder = () => {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
-    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+    if (!dealer || dealer.creditLimit <= 0) { proceedAfterDispatchCheck(); return; }
     const wasUnpaid = order.paymentStatus === "pending" || order.paymentStatus === "partial";
     const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
     if (willBeUnpaid) {
@@ -286,7 +311,7 @@ export default function OrderDetail() {
         return;
       }
     }
-    executeSaveOrder();
+    proceedAfterDispatchCheck();
   };
 
   const handleDeleteOrder = async () => {
