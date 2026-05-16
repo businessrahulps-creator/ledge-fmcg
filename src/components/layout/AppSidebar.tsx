@@ -225,7 +225,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {bottomNav.map((item) => {
+          {effectiveBottomNav.map((item) => {
             const isActive = location.pathname.startsWith(item.url);
             if (collapsed) {
               return (
