@@ -8,6 +8,7 @@ import { buildSalespersonScorecard, getPerformanceHealth, getPerformanceInsight,
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
