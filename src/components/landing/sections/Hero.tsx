@@ -87,7 +87,7 @@ export function Hero() {
                 className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.18) 0%, transparent 65%)",
+                    "radial-gradient(ellipse at 50% 50%, hsl(var(--primary) / 0.18) 0%, transparent 65%)",
                 }}
               />
               {/* Layer 2 — Bone-tinted glass stage */}

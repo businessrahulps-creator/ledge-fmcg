@@ -32,7 +32,7 @@ export function TrustBar() {
             {[...companies, ...companies].map((name, i) => (
               <span
                 key={i}
-                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-white border border-[#E2E8F0]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(15,23,42,0.03)]"
+                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-card border border-border shadow-depth-2"
               >
                 {name}
               </span>

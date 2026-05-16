@@ -121,7 +121,7 @@ export function DashboardSvg() {
       <defs>
         <linearGradient id="ds-shimmer" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-          <stop offset="50%" stopColor="rgba(79,70,229,0.10)" />
+          <stop offset="50%" stopColor="rgba(160,82,45,0.10)" />
           <stop offset="100%" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
         <clipPath id="ds-clip">
