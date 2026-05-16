@@ -132,7 +132,22 @@ export default function Salespersons() {
           </div>
         </div>
 
-        <div className="relative">
+        {(() => {
+          const totalRevenue = items.reduce((s, m) => s + (m.totalValue || 0), 0);
+          const totalOrders = items.reduce((s, m) => s + (m.totalOrders || 0), 0);
+          const top = items.length > 0 ? items.reduce((a, b) => (b.totalValue || 0) > (a.totalValue || 0) ? b : a) : null;
+          return (
+            <KpiStrip
+              cells={[
+                { label: "Team size", value: items.length, zero: items.length === 0 },
+                { label: "Total revenue", value: formatCurrency(totalRevenue), zero: totalRevenue === 0 },
+                { label: "Total orders", value: totalOrders, zero: totalOrders === 0 },
+                { label: "Top performer", value: top?.name || "—", zero: !top },
+              ]}
+            />
+          );
+        })()}
+
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search sales team..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 rounded-lg pl-10 md:max-w-md" />
         </div>
