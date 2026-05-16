@@ -364,16 +364,6 @@ export default function Stock() {
           </p>
         </div>
 
-        <Tabs defaultValue="products" className="space-y-4 md:space-y-6">
-          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
-      <div className="space-y-4 md:space-y-6">
-        <div>
-          <h1 className="h1-display">Stock</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
-            Manage your products and warehouse inventory
-          </p>
-        </div>
-
         {(stockSummary.criticalCount > 0 || stockSummary.lowCount > 0) && (
           <SignalCard
             tier={stockSummary.criticalCount > 0 ? "destructive" : "warning"}
