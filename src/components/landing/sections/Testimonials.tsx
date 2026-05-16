@@ -34,7 +34,7 @@ export function Testimonials() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">From the field</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Owners who stopped guessing.
             </h2>
           </div>
@@ -57,20 +57,20 @@ export function Testimonials() {
                   {/* Decorative quote glyph watermark */}
                   <span
                     aria-hidden
-                    className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-[#0A0F1C]/[0.05] select-none pointer-events-none"
+                    className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"
                     style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                   >
                     “
                   </span>
 
-                  <p className="relative font-body text-[16px] md:text-[17px] text-[#1F2937] leading-[1.6] tracking-[-0.005em] flex-1">
+                  <p className="relative font-body text-[16px] md:text-[17px] text-foreground leading-[1.6] tracking-[-0.005em] flex-1">
                     {t.quote}
                   </p>
-                  <div className="relative mt-6 pt-5 border-t border-[#ECEEF2] flex items-center gap-3.5">
+                  <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
                     <GradientOrb seed={t.name} size={40} />
                     <div>
-                      <p className="font-body font-semibold text-[14.5px] text-[#0A0F1C]">{t.name}</p>
-                      <p className="font-body text-[12.5px] text-[#64748B] mt-0.5">{t.role}</p>
+                      <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
+                      <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>
                     </div>
                   </div>
                 </div>

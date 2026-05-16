@@ -56,7 +56,7 @@ export function Footer() {
           transition={spring.premium}
           className="mb-14 md:mb-16 max-w-md"
         >
-          <Link to="/" className="font-heading font-extrabold text-2xl tracking-[-0.04em] text-[#0A0F1C]">
+          <Link to="/" className="font-heading font-semibold text-2xl tracking-[-0.04em] text-foreground">
             Ledge
           </Link>
           <p className="font-body text-[14px] text-[#52525B] leading-[1.6] mt-3">
@@ -80,8 +80,8 @@ export function Footer() {
               className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#0A0F1C]/[0.08] hover:border-[#0A0F1C]/[0.18] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.10)] transition-all duration-200"
               aria-label="Call Ledge sales"
             >
-              <Phone size={13} className="text-[#0A0F1C]" strokeWidth={2.2} />
-              <span className="font-body text-[13px] font-medium text-[#0A0F1C] tracking-[-0.005em]">
+              <Phone size={13} className="text-foreground" strokeWidth={2.2} />
+              <span className="font-body text-[13px] font-medium text-foreground tracking-[-0.005em]">
                 +91 81380 84689
               </span>
             </a>
@@ -109,7 +109,7 @@ export function Footer() {
         >
           {columns.map((col) => (
             <motion.div key={col.title} variants={fadeUp} transition={spring.default}>
-              <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-[#0A0F1C]/70 uppercase mb-4">
+              <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-foreground/70 uppercase mb-4">
                 {col.title}
               </h4>
               <ul className="space-y-2.5">
@@ -121,14 +121,14 @@ export function Footer() {
                       {isAnchor ? (
                         <a
                           href={href.replace("/", "")}
-                          className="font-body text-[13.5px] text-[#52525B] hover:text-[#0A0F1C] transition-colors duration-200"
+                          className="font-body text-[13.5px] text-[#52525B] hover:text-foreground transition-colors duration-200"
                         >
                           {link}
                         </a>
                       ) : (
                         <Link
                           to={href}
-                          className="font-body text-[13.5px] text-[#52525B] hover:text-[#0A0F1C] transition-colors duration-200"
+                          className="font-body text-[13.5px] text-[#52525B] hover:text-foreground transition-colors duration-200"
                         >
                           {link}
                         </Link>
@@ -146,7 +146,7 @@ export function Footer() {
             transition={spring.default}
             className="flex flex-col gap-3"
           >
-            <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-[#0A0F1C]/70 uppercase mb-1">
+            <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-foreground/70 uppercase mb-1">
               Status
             </h4>
 
@@ -200,7 +200,7 @@ export function Footer() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white/80 border border-[#0A0F1C]/[0.06] flex items-center justify-center text-[#71717A] hover:text-[#0A0F1C] hover:bg-white transition-colors duration-200 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.08)]"
+                  className="w-9 h-9 rounded-full bg-white/80 border border-[#0A0F1C]/[0.06] flex items-center justify-center text-[#71717A] hover:text-foreground hover:bg-white transition-colors duration-200 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.08)]"
                   aria-label={label}
                 >
                   <Icon size={16} />

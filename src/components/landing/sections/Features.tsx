@@ -17,7 +17,7 @@ export function Features() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Features</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Everything your business needs.
               <br />
               Nothing it doesn't.
@@ -34,33 +34,33 @@ export function Features() {
                   <div className="lp-bento-hero lp-card-premium p-7 h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-5">
                       <span className="lp-live-dot" />
-                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">Live now</span>
+                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">Live now</span>
                     </div>
-                    <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
+                    <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                       {feature.title}
                     </h3>
-                    <p className="font-body text-[14px] text-[#475569] leading-[1.55]">
+                    <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                       {feature.desc}
                     </p>
                     <div className="mt-auto pt-6">
-                      <p className="font-body text-[12.5px] text-[#3B3F66] tracking-tight">
-                        <span className="font-heading font-semibold text-[#0A0F1C]">₹4.2L</span> revenue today
-                        <span className="text-[#94A3B8] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-[#0A0F1C]">28</span> orders
-                        <span className="text-[#94A3B8] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-[#0A0F1C]">12</span> dispatched
+                      <p className="font-body text-[12.5px] text-muted-foreground tracking-tight">
+                        <span className="font-heading font-semibold text-foreground">₹4.2L</span> revenue today
+                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
+                        <span className="font-heading font-semibold text-foreground">28</span> orders
+                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
+                        <span className="font-heading font-semibold text-foreground">12</span> dispatched
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
                     <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 36, height: 36 }}>
-                      <feature.icon size={17} strokeWidth={1.75} className="text-[#1F2937]" />
+                      <feature.icon size={17} strokeWidth={1.75} className="text-foreground" />
                     </div>
-                    <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
+                    <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                       {feature.title}
                     </h3>
-                    <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
+                    <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                       {feature.desc}
                     </p>
                   </div>

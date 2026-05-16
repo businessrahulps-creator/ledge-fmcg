@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { spring, useParallaxY } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
-import { DashboardSvg } from "../illustrations/SvgIllustrations";
 import { CapsuleCTA } from "../CapsuleCTA";
+import heroDashboard from "@/assets/landing/hero-dashboard.png";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
@@ -32,7 +32,7 @@ export function Hero() {
           </motion.div>
 
           <motion.h1
-            className="font-heading font-semibold text-[40px] md:text-[52px] text-[#0A0F1C] leading-[1.08] tracking-[-0.025em] mt-7"
+            className="font-heading font-semibold text-[40px] md:text-[52px] text-foreground leading-[1.08] tracking-[-0.025em] mt-7"
             {...fadeUp(0.08)}
           >
             Run your factory and field
@@ -41,11 +41,11 @@ export function Hero() {
           </motion.h1>
 
           <motion.p
-            className="font-body text-[17px] md:text-[19px] text-[#475569] leading-[1.55] max-w-xl mt-7"
+            className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
             Orders, payments, stock, GST invoices, production. One mobile app.
-            Recover the <span className="font-semibold text-[#0A0F1C]">5–10% that leaks every year between your factory and your field</span>.
+            Recover the <span className="font-semibold text-foreground">5–10% that leaks every year between your factory and your field</span>.
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>
@@ -54,15 +54,15 @@ export function Hero() {
               href="#how-it-works"
               whileHover={{ x: 2 }}
               transition={spring.snappy}
-              className="font-body font-semibold text-[14.5px] text-[#0A0F1C] inline-flex items-center gap-1.5 group"
+              className="font-body font-semibold text-[14.5px] text-foreground inline-flex items-center gap-1.5 group"
             >
               See how it works
-              <ArrowRight size={15} strokeWidth={2.2} className="text-[#475569] group-hover:text-[#4F46E5] transition-colors" />
+              <ArrowRight size={15} strokeWidth={2.2} className="text-muted-foreground group-hover:text-accent transition-colors" />
             </motion.a>
           </motion.div>
 
           <motion.p
-            className="font-body text-[13px] text-[#64748B] mt-8"
+            className="font-body text-[13px] text-muted-foreground mt-8"
             {...fadeUp(0.32)}
           >
             No card required · Setup in 15 minutes · Built in India
@@ -90,13 +90,17 @@ export function Hero() {
                     "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.18) 0%, transparent 65%)",
                 }}
               />
-              {/* Layer 2 — glass stage */}
-              <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
-                {/* Layer 3 — browser frame */}
+              {/* Layer 2 — Bone-tinted glass stage */}
+              <div className="relative lp-card-glass p-3 md:p-4 rounded-md">
+                {/* Layer 3 — browser frame with real product UI */}
                 <BrowserFrame url="app.ledge.in/dashboard">
-                  <div className="p-4 bg-white">
-                    <DashboardSvg />
-                  </div>
+                  <img
+                    src={heroDashboard}
+                    alt="Ledge dashboard showing revenue, KPIs, and recent orders"
+                    width={1600}
+                    height={1024}
+                    className="block w-full h-auto"
+                  />
                 </BrowserFrame>
               </div>
               {/* Floating proof chip — reference signature, used once */}

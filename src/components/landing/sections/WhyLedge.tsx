@@ -17,7 +17,7 @@ export function WhyLedge() {
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Built different</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Powerful tools exist.
               <br />
               None were built for you.
@@ -31,7 +31,7 @@ export function WhyLedge() {
             {legacy.map((name) => (
               <span
                 key={name}
-                className="font-body text-[13px] font-medium text-[#94A3B8] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-[#ECEEF2]"
+                className="font-body text-[13px] font-medium text-[hsl(var(--muted-foreground)/0.7)] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-border"
               >
                 {name}
               </span>
@@ -50,19 +50,19 @@ export function WhyLedge() {
                 <div className={`${isHero ? "lp-bento-hero" : "lp-card"} lp-card-premium p-7 h-full flex flex-col relative`}>
                   {isHero && (
                     <div className="flex justify-end mb-5">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#3730A3] bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/70 px-2.5 py-1 rounded-full border border-white/80">
                         <span className="lp-live-dot" /> Offline-ready
                       </span>
                     </div>
                   )}
-                  <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight leading-snug">
+                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight leading-snug">
                     {block.title}
                   </h3>
-                  <p className="font-body text-[14px] text-[#475569] leading-[1.55]">
+                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                     {block.content}
                   </p>
                   <div className="mt-auto pt-6 flex justify-end">
-                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-[#4F46E5]/70" : "text-[#94A3B8]"}`} />
+                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-accent/70" : "text-[hsl(var(--muted-foreground)/0.7)]"}`} />
                   </div>
                 </div>
               </StaggerItem>

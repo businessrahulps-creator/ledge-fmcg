@@ -392,40 +392,40 @@
     background-image: linear-gradient(100deg, #6D28D9 0%, #7C3AED 35%, #4F46E5 65%, #2563EB 100%);
   }
 
-  /* Pure white — most sections live here. No wallpaper. */
+  /* V2 Bone — most sections live here. */
   .lp-mesh-light {
-    background-color: #FFFFFF;
+    background-color: hsl(var(--background));
   }
 
-  /* Warm neutral paper — for alternating section rhythm */
+  /* Warm Bone tint — alternating section rhythm */
   .lp-section-paper {
-    background-color: #FAFAFB;
+    background-color: hsl(34 35% 91%);
   }
 
-  /* Hero only — one extremely soft top haze, Cluely-style */
+  /* Hero — Bone with a soft Terracotta + Midnight haze */
   .lp-mesh-soft-warm {
-    background-color: #FFFFFF;
+    background-color: hsl(var(--background));
     background-image:
-      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(238,240,255,0.85) 0%, transparent 65%),
-      radial-gradient(ellipse 100% 40% at 50% 110%, rgba(245,245,250,0.7) 0%, transparent 70%);
+      radial-gradient(ellipse 90% 55% at 50% -10%, hsl(var(--accent) / 0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 100% 40% at 50% 110%, hsl(var(--primary) / 0.06) 0%, transparent 70%);
   }
 
-  /* Final CTA — calm light lavender close, not a nightclub */
+  /* Final CTA — deeper warm Bone close */
   .lp-mesh-dark {
-    background-color: #F4F4F8;
+    background-color: hsl(34 30% 88%);
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(238,240,255,0.95) 0%, transparent 65%);
+      radial-gradient(ellipse 80% 50% at 50% 0%, hsl(var(--accent) / 0.10) 0%, transparent 65%);
   }
 
   /* Soft dot grid — masked to fade out */
   .lp-grid-soft {
-    background-image: radial-gradient(circle, rgba(15,23,42,0.06) 1px, transparent 1px);
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.07) 1px, transparent 1px);
     background-size: 28px 28px;
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
     mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
   }
   .lp-grid-soft-dark {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-image: radial-gradient(circle, hsl(var(--background) / 0.08) 1px, transparent 1px);
     background-size: 32px 32px;
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
     mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%);
@@ -480,78 +480,80 @@
     width: 64px;
   }
 
-  /* Premium card surface — neutral shadows, no purple tint */
+  /* V2 card surface — Bone card on Bone, Midnight-tinted shadows */
   .lp-card {
-    @apply relative bg-white rounded-2xl;
-    border: 1px solid #ECEEF2;
+    @apply relative rounded-md;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 1px 2px rgba(15, 23, 42, 0.03),
-      0 8px 24px -16px rgba(15, 23, 42, 0.08);
+      inset 0 1px 0 hsl(var(--background) / 0.9),
+      0 1px 2px hsl(var(--primary) / 0.04),
+      0 8px 24px -16px hsl(var(--primary) / 0.10);
     transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 280ms ease;
   }
   .lp-card:hover {
     transform: translateY(-2px);
-    border-color: #D9DCE3;
+    border-color: hsl(var(--primary) / 0.18);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 2px 4px rgba(15, 23, 42, 0.04),
-      0 14px 32px -16px rgba(15, 23, 42, 0.12);
+      inset 0 1px 0 hsl(var(--background) / 0.9),
+      0 2px 4px hsl(var(--primary) / 0.05),
+      0 14px 32px -16px hsl(var(--primary) / 0.16);
   }
 
-  /* Glass card — frosted, kept ONLY for hero dashboard stage */
+  /* Glass card — kept ONLY for hero dashboard stage */
   .lp-card-glass {
-    @apply relative rounded-2xl;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    @apply relative rounded-md;
+    background: hsl(var(--card) / 0.72);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 8px 32px -8px rgba(15, 23, 42, 0.08),
-      0 24px 60px -20px rgba(15, 23, 42, 0.10);
+      inset 0 1px 0 hsl(var(--background) / 0.9),
+      0 8px 32px -8px hsl(var(--primary) / 0.10),
+      0 24px 60px -20px hsl(var(--primary) / 0.14);
   }
 
-  /* Light neutral card — for the FinalCTA / Outcome on paper bg */
+  /* Solid card variant — FinalCTA / Outcome on paper bg */
   .lp-card-dark {
-    @apply relative rounded-2xl bg-white;
-    border: 1px solid #ECEEF2;
+    @apply relative rounded-md;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 1px 2px rgba(15, 23, 42, 0.03),
-      0 8px 24px -16px rgba(15, 23, 42, 0.10);
+      inset 0 1px 0 hsl(var(--background) / 0.9),
+      0 1px 2px hsl(var(--primary) / 0.04),
+      0 8px 24px -16px hsl(var(--primary) / 0.12);
   }
 
-  /* Eyebrow chip — neutral, with a tiny indigo dot */
+  /* Eyebrow chip — Bone, with a tiny Terracotta dot */
   .lp-eyebrow {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
-    background: #F4F4F8;
-    border: 1px solid #ECEEF2;
-    color: #475569;
+    background: hsl(34 30% 90%);
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
   }
   .lp-eyebrow::before {
     content: "";
     width: 5px;
     height: 5px;
     border-radius: 9999px;
-    background: #4F46E5;
+    background: hsl(var(--accent));
   }
   .lp-eyebrow-dark {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
-    background: #F4F4F8;
-    border: 1px solid #ECEEF2;
-    color: #475569;
+    background: hsl(34 30% 90%);
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
   }
   .lp-eyebrow-dark::before {
     content: "";
     width: 5px;
     height: 5px;
     border-radius: 9999px;
-    background: #4F46E5;
+    background: hsl(var(--accent));
   }
 
   @media (max-width: 480px) {
@@ -584,17 +586,17 @@
       0 8px 20px -6px rgba(10, 15, 28, 0.10);
   }
 
-  /* Neutral icon tile — graphite default, indigo only when explicitly opted-in */
+  /* Neutral icon tile — Bone default, Terracotta wash when opted-in */
   .lp-icon-tile {
-    @apply w-11 h-11 rounded-xl flex items-center justify-center;
-    background: #F4F4F8;
-    border: 1px solid #ECEEF2;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    @apply w-11 h-11 rounded-md flex items-center justify-center;
+    background: hsl(34 30% 90%);
+    border: 1px solid hsl(var(--border));
+    box-shadow: inset 0 1px 0 hsl(var(--background) / 0.6);
     transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   .lp-icon-tile-accent {
-    background: #EEF0FF;
-    border-color: #DDE0F8;
+    background: hsl(var(--accent) / 0.10);
+    border-color: hsl(var(--accent) / 0.30);
   }
   .lp-card:hover .lp-icon-tile {
     transform: translateY(-1px) scale(1.04);
@@ -661,14 +663,14 @@
     align-items: baseline;
     padding: 0.05em 0.42em;
     border-radius: 0.55em;
-    background: linear-gradient(180deg, #F4F5FF 0%, #EEF0FF 100%);
-    border: 1px solid #D5DBFE;
-    color: #3730A3;
+    background: linear-gradient(180deg, hsl(var(--accent) / 0.10) 0%, hsl(var(--accent) / 0.18) 100%);
+    border: 1px solid hsl(var(--accent) / 0.35);
+    color: hsl(var(--accent));
     overflow: hidden;
     isolation: isolate;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.7),
-      0 1px 2px rgba(79,70,229,0.06);
+      inset 0 1px 0 hsl(var(--background) / 0.7),
+      0 1px 2px hsl(var(--accent) / 0.10);
     animation: lp-pill-settle 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .lp-pill-accent::after {
@@ -677,7 +679,7 @@
     top: 0; bottom: 0;
     left: 0;
     width: 40%;
-    background: linear-gradient(100deg, transparent 10%, rgba(99,102,241,0.28) 50%, transparent 90%);
+    background: linear-gradient(100deg, transparent 10%, hsl(var(--accent) / 0.32) 50%, transparent 90%);
     transform: translateX(-110%);
     animation: lp-pill-sheen-once 1400ms cubic-bezier(0.22, 1, 0.36, 1) 600ms 1 both;
     pointer-events: none;
@@ -797,8 +799,8 @@
   }
   .lp-capsule-cta:hover .lp-capsule-cta__arrow {
     transform: translateY(-50%) translateX(6px);
-    color: #4F46E5;
-    background-color: rgba(79,70,229,0.06);
+    color: hsl(var(--accent));
+    background-color: hsl(var(--accent) / 0.08);
   }
   .lp-capsule-cta:active .lp-capsule-cta__inner {
     transform: translateY(0) scale(0.985);
@@ -816,29 +818,29 @@
     background-color: rgba(199,210,254,0.10);
   }
 
-  /* 2. Content-grade frost — lighter than hero glass, with blue bloom */
+  /* 2. Content frost — Bone tinted with warm Terracotta bloom */
   .lp-glass-frost {
     position: relative;
-    border-radius: 1.25rem;
-    background: rgba(255,255,255,0.62);
+    border-radius: var(--radius);
+    background: hsl(var(--card) / 0.72);
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
-    border: 1px solid rgba(255,255,255,0.7);
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.95),
-      0 1px 2px rgba(15,23,42,0.04),
-      0 18px 50px -22px rgba(79,118,255,0.22);
+      inset 0 1px 0 hsl(var(--background) / 0.95),
+      0 1px 2px hsl(var(--primary) / 0.05),
+      0 18px 50px -22px hsl(var(--accent) / 0.22);
   }
   .lp-glass-frost::before {
     content: "";
     position: absolute;
     top: 0; left: 16px; right: 16px;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.45) 30%, rgba(96,165,250,0.45) 70%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--accent) / 0.45) 30%, hsl(var(--primary) / 0.30) 70%, transparent 100%);
     pointer-events: none;
   }
 
-  /* 3. Blue-gradient progress / stat capsule */
+  /* 3. Terracotta progress / stat capsule */
   .lp-progress-glass {
     position: relative;
     display: inline-flex;
@@ -846,23 +848,23 @@
     gap: 10px;
     padding: 10px 18px;
     border-radius: 9999px;
-    color: #FFFFFF;
+    color: hsl(var(--accent-foreground));
     font-weight: 600;
     font-size: 13.5px;
     letter-spacing: -0.005em;
-    background: linear-gradient(95deg, #4F46E5 0%, #6366F1 45%, #60A5FA 100%);
+    background: linear-gradient(95deg, hsl(var(--accent)) 0%, hsl(19 60% 48%) 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.35),
-      inset 0 -1px 0 rgba(15,23,42,0.08),
-      0 14px 36px -14px rgba(79,118,255,0.55),
-      0 2px 6px -2px rgba(79,70,229,0.30);
+      inset 0 1px 0 hsl(var(--background) / 0.30),
+      inset 0 -1px 0 hsl(var(--primary) / 0.10),
+      0 14px 36px -14px hsl(var(--accent) / 0.55),
+      0 2px 6px -2px hsl(var(--accent) / 0.30);
     isolation: isolate;
     overflow: hidden;
   }
   .lp-progress-glass::after {
     content: "";
     position: absolute; inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.30) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, hsl(var(--background) / 0.30) 50%, transparent 70%);
     transform: translateX(-100%);
     animation: lp-shimmer 5.5s linear infinite;
     pointer-events: none;
@@ -945,18 +947,18 @@
     }
   }
 
-  /* 5. Bento hero tile — ONE filled tile per multi-card section */
+  /* 5. Bento hero tile — ONE filled tile per multi-card section, Terracotta wash */
   .lp-bento-hero {
     position: relative;
-    border-radius: 1.25rem;
+    border-radius: var(--radius);
     background:
-      radial-gradient(ellipse 90% 70% at 30% 0%, rgba(238,243,255,0.95) 0%, transparent 65%),
-      linear-gradient(135deg, #F1F4FF 0%, #E5EBFF 60%, #DCE5FF 100%);
-    border: 1px solid #DDE3F8;
+      radial-gradient(ellipse 90% 70% at 30% 0%, hsl(var(--accent) / 0.14) 0%, transparent 65%),
+      linear-gradient(135deg, hsl(34 35% 92%) 0%, hsl(34 30% 88%) 60%, hsl(19 30% 84%) 100%);
+    border: 1px solid hsl(var(--accent) / 0.25);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.95),
-      0 1px 2px rgba(15,23,42,0.03),
-      0 24px 50px -24px rgba(79,118,255,0.30);
+      inset 0 1px 0 hsl(var(--background) / 0.95),
+      0 1px 2px hsl(var(--primary) / 0.04),
+      0 24px 50px -24px hsl(var(--accent) / 0.30);
     overflow: hidden;
     transition: transform 280ms cubic-bezier(0.22,1,0.36,1),
                 box-shadow 280ms cubic-bezier(0.22,1,0.36,1);
@@ -964,33 +966,33 @@
   .lp-bento-hero:hover {
     transform: translateY(-2px);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.95),
-      0 2px 4px rgba(15,23,42,0.04),
-      0 30px 60px -22px rgba(79,118,255,0.38);
+      inset 0 1px 0 hsl(var(--background) / 0.95),
+      0 2px 4px hsl(var(--primary) / 0.05),
+      0 30px 60px -22px hsl(var(--accent) / 0.38);
   }
 
-  /* Inner glass micro-card for use INSIDE bento-hero */
+  /* Inner micro-card for use INSIDE bento-hero */
   .lp-glass-micro {
     position: relative;
-    border-radius: 0.875rem;
-    background: rgba(255,255,255,0.85);
+    border-radius: var(--radius);
+    background: hsl(var(--card) / 0.88);
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);
-    border: 1px solid rgba(255,255,255,0.95);
+    border: 1px solid hsl(var(--border));
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,1),
-      0 8px 24px -10px rgba(15,23,42,0.12);
+      inset 0 1px 0 hsl(var(--background)),
+      0 8px 24px -10px hsl(var(--primary) / 0.14);
   }
 
-  /* Live pulse dot — for the bento "Live" hero in Features */
+  /* Live pulse dot — Forest success */
   @keyframes lp-live-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.55; transform: scale(0.92); }
   }
   .lp-live-dot {
     width: 6px; height: 6px; border-radius: 9999px;
-    background: #22C55E;
-    box-shadow: 0 0 0 3px rgba(34,197,94,0.18);
+    background: hsl(var(--success));
+    box-shadow: 0 0 0 3px hsl(var(--success) / 0.20);
     animation: lp-live-pulse 2.2s ease-in-out infinite;
     display: inline-block;
   }

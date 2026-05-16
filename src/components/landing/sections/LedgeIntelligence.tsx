@@ -100,18 +100,18 @@ function LiveRoute() {
 
       {/* Telemetry strip — grounds the abstract route in product specifics */}
       <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-2xl flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
-        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
-          <span className="font-body text-[#64748B]">Photo → Order</span>
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <span className="font-body text-muted-foreground">Photo → Order</span>
           <span className="font-heading font-semibold tracking-tight">~6 sec</span>
         </span>
         <span className="hidden sm:inline text-[#CBD5E1]">·</span>
-        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
-          <span className="font-body text-[#64748B]">Briefings</span>
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <span className="font-body text-muted-foreground">Briefings</span>
           <span className="font-heading font-semibold tracking-tight">06:00 IST daily</span>
         </span>
         <span className="hidden sm:inline text-[#CBD5E1]">·</span>
-        <span className="inline-flex items-center gap-1.5 text-[#0A0F1C]">
-          <span className="font-body text-[#64748B]">Voice</span>
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <span className="font-body text-muted-foreground">Voice</span>
           <span className="font-heading font-semibold tracking-tight">11 Indian languages</span>
         </span>
       </div>
@@ -164,7 +164,7 @@ export function LedgeIntelligence() {
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.06}>
-          <h2 className="font-heading font-semibold text-center text-[#0A0F1C] tracking-[-0.022em] leading-[1.1] text-[32px] md:text-[40px] mt-6">
+          <h2 className="font-heading font-semibold text-center text-foreground tracking-[-0.022em] leading-[1.1] text-[32px] md:text-[40px] mt-6">
             Ledge{" "}
             <span className="lp-pill-accent font-semibold">
               <span className="relative z-[2]">Intelligence</span>
@@ -175,7 +175,7 @@ export function LedgeIntelligence() {
 
         <AnimateIn variant="blurFadeUp" delay={0.1}>
           <div className="mt-4 flex justify-center">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#0A0F1C]/[0.08] text-[11.5px] font-medium text-[#475569] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#0A0F1C]/[0.08] text-[11.5px] font-medium text-muted-foreground shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
               <span className="lp-live-dot" />
               Launching Q3 2026 · Limited founding access
             </span>
@@ -183,7 +183,7 @@ export function LedgeIntelligence() {
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.16}>
-          <p className="mt-5 text-center font-body text-[#475569] text-[17px] leading-[1.55] max-w-2xl mx-auto">
+          <p className="mt-5 text-center font-body text-muted-foreground text-[17px] leading-[1.55] max-w-2xl mx-auto">
             Your always-on AI that thinks alongside you.
           </p>
         </AnimateIn>
@@ -208,23 +208,23 @@ export function LedgeIntelligence() {
                   <div className="lp-bento-hero lp-card-premium p-7 h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-5">
                       <span className="lp-live-dot" />
-                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">
+                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                         Featured
                       </span>
                     </div>
-                    <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
+                    <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                       {c.title}
                     </h3>
-                    <p className="font-body text-[14px] text-[#475569] leading-[1.55]">
+                    <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                       {c.desc}
                     </p>
                     <div className="mt-auto pt-6">
-                      <p className="font-body text-[12.5px] text-[#3B3F66] tracking-tight">
+                      <p className="font-body text-[12.5px] text-muted-foreground tracking-tight">
                         Snap chit
-                        <span className="text-[#94A3B8] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-[#0A0F1C]">Order draft</span>
-                        <span className="text-[#94A3B8] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-[#0A0F1C]">~6 sec</span>
+                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
+                        <span className="font-heading font-semibold text-foreground">Order draft</span>
+                        <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
+                        <span className="font-heading font-semibold text-foreground">~6 sec</span>
                       </p>
                     </div>
                   </div>
@@ -235,12 +235,12 @@ export function LedgeIntelligence() {
               <StaggerItem key={c.title}>
                 <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
                   <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 36, height: 36 }}>
-                    <Icon size={17} strokeWidth={1.75} className="text-[#1F2937]" />
+                    <Icon size={17} strokeWidth={1.75} className="text-foreground" />
                   </div>
-                  <h3 className="font-heading font-semibold text-[17px] text-[#0A0F1C] mb-2 tracking-tight">
+                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                     {c.title}
                   </h3>
-                  <p className="font-body text-[14px] text-[#64748B] leading-[1.55]">
+                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                     {c.desc}
                   </p>
                 </div>
@@ -260,14 +260,14 @@ export function LedgeIntelligence() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="lp-live-dot" />
-                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[#3730A3] font-semibold">
+                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                     Limited · <ScrollCounter target={SPOTS_CLAIMED} /> / {SPOTS_TOTAL} spots claimed
                   </span>
                 </div>
-                <p className="font-heading font-semibold text-[#0A0F1C] text-[18px] md:text-[20px] tracking-[-0.012em] leading-[1.3]">
-                  Founding 100 — lock in <span className="text-[#3730A3]">6 months free</span>.
+                <p className="font-heading font-semibold text-foreground text-[18px] md:text-[20px] tracking-[-0.012em] leading-[1.3]">
+                  Founding 100 — lock in <span className="text-accent">6 months free</span>.
                 </p>
-                <p className="font-body text-[13.5px] md:text-[14px] text-[#475569] leading-[1.55] mt-1.5">
+                <p className="font-body text-[13.5px] md:text-[14px] text-muted-foreground leading-[1.55] mt-1.5">
                   Today's customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
                 </p>
 
