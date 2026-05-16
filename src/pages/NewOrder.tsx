@@ -387,7 +387,7 @@ export default function NewOrder() {
             <ArrowLeft className="h-5 w-5" strokeWidth={1.5} />
           </button>
           <div className="flex-1">
-            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">New Order</h1>
+            <h1 className="h1-display">New Order</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Create a new sales order
             </p>

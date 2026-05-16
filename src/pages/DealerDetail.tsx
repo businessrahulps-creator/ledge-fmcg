@@ -86,7 +86,7 @@ export default function DealerDetail() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">{dealer.name}</h1>
+              <h1 className="h1-display">{dealer.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{dealer.location}</span>
                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dealer.contact}</span>

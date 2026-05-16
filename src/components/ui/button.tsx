@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  * - Active: subtle press (no scale on link)
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-[background-color,box-shadow,transform,color,border-color] duration-fast ease-fluent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium tracking-[-0.005em] ring-offset-background transition-[background-color,box-shadow,transform,color,border-color] duration-fast ease-fluent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -22,10 +22,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground shadow-depth-2 hover:bg-destructive/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
         outline:
-          "border border-input bg-background hover:bg-muted/60 hover:text-foreground active:bg-muted",
+          "border border-input bg-background hover:bg-muted/60 hover:text-foreground hover:border-foreground/20 active:bg-muted active:translate-y-[0.5px]",
         secondary:
           "bg-secondary text-secondary-foreground shadow-depth-2 hover:bg-secondary/80 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
         ghost: "hover:bg-muted/60 hover:text-foreground active:bg-muted",
+        subtle: "bg-transparent text-foreground/80 hover:bg-muted/50 hover:text-foreground active:bg-muted",
         link: "text-primary underline-offset-4 hover:underline",
         success:
           "bg-success text-success-foreground shadow-depth-2 hover:bg-success/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",

@@ -435,7 +435,7 @@ export default function Claims() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-[28px] leading-tight">Returns & Claims</h1>
+              <h1 className="h1-display">Returns & Claims</h1>
               {openCount > 0 && (
                 <Badge variant="secondary" className="bg-warning/10 text-warning">
                   {openCount} open

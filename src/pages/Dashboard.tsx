@@ -169,14 +169,24 @@ export default function Dashboard() {
         <SetupChecklist />
         {/* Header */}
         <div>
-          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
+          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight mt-1 md:text-[28px] leading-tight">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
-          <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
+          <div className="relative inline-block mt-1.5">
+            <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+            <motion.span
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: "left" }}
+              className="absolute -bottom-1 left-0 h-px w-full bg-foreground/30"
+              aria-hidden
+            />
+          </div>
+          <p className="text-[12px] text-muted-foreground mt-2 flex items-center gap-1.5">
             Updated {timeAgo}
             <span className="text-muted-foreground/30">·</span>
-            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors", isLoading && "opacity-50 pointer-events-none")}>
+            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("text-link", isLoading && "opacity-50 pointer-events-none")}>
               {isLoading ? "Refreshing…" : "Refresh"}
             </button>
           </p>
@@ -186,41 +196,41 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 200 }}
-            className="glass-card p-4 mt-5"
+            className="glass-card p-5 mt-6"
           >
-            <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-4">
               This Month · {monthLabel}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Revenue</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthRevenue)}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Revenue</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Orders</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{monthOrderCount}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Orders</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthOrderCount}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Outstanding</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthOutstanding)}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Outstanding</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthOutstanding)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Delivered</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{monthDeliveredPct}%</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Delivered</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthDeliveredPct}%</p>
               </div>
             </div>
 
             {/* 7-day revenue sparkline */}
-            <div className="mt-4">
-              <p className="text-[10px] text-muted-foreground/50 font-medium mb-2">Last 7 days</p>
+            <div className="mt-5">
+              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-2">Last 7 days</p>
               {allZero ? (
                 <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
               ) : (
                 <div>
-                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary/60" preserveAspectRatio="none">
+                  <svg viewBox="0 0 186 48" className="w-full h-12 text-primary" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
+                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.12" />
                         <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
                       </linearGradient>
                     </defs>
@@ -235,7 +245,7 @@ export default function Dashboard() {
                     <polyline
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       points={last7Days.map((d, i) => `${i * 30},${44 - (d.value / sparkMax) * 40}`).join(" ")}
@@ -245,15 +255,15 @@ export default function Dashboard() {
                         key={i}
                         cx={i * 30}
                         cy={44 - (d.value / sparkMax) * 40}
-                        r={i === 6 ? 3 : 2}
+                        r={i === 6 ? 2.5 : 1.5}
                         fill="currentColor"
-                        opacity={i === 6 ? 1 : 0.6}
+                        opacity={i === 6 ? 1 : 0.45}
                       />
                     ))}
                   </svg>
-                  <div className="flex justify-between mt-1">
+                  <div className="flex justify-between mt-1.5">
                     {last7Days.map((d, i) => (
-                      <span key={i} className={cn("text-[9px] tabular-nums", i === 6 ? "text-foreground font-medium" : "text-muted-foreground/50")}>{d.label}</span>
+                      <span key={i} className={cn("text-[9px] uppercase tracking-wider num", i === 6 ? "text-foreground font-semibold" : "text-muted-foreground/50")}>{d.label}</span>
                     ))}
                   </div>
                 </div>
@@ -279,18 +289,18 @@ export default function Dashboard() {
                         aria-label={fullLabel}
                         aria-pressed={isSelected}
                         className={cn(
-                          "relative flex flex-col items-center justify-center w-11 h-12 rounded-xl text-xs font-semibold transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          "relative flex flex-col items-center justify-center w-11 h-11 rounded-md text-xs font-semibold transition-all active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                           isSelected
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                            ? "bg-primary text-primary-foreground shadow-depth-4"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted/80"
                         )}
                       >
-                        <span className={cn("text-[9px] font-medium leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-70")}>
+                        <span className={cn("text-[9px] font-semibold tracking-wider uppercase leading-none mb-0.5", isSelected ? "opacity-90" : "opacity-65")}>
                           {weekdayLabel}
                         </span>
-                        <span className="text-sm font-bold tabular-nums leading-none">{d.getDate()}</span>
+                        <span className="text-sm font-semibold num leading-none">{d.getDate()}</span>
                         {isToday && !isSelected && (
-                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                          <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-primary" />
                         )}
                       </button>
                     );
@@ -315,10 +325,10 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
-              className="glass-card p-5 md:p-7 min-w-0"
+              className="glass-card card-hover p-5 md:p-6 min-w-0"
             >
-              <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
-              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase mb-2">{kpi.label}</p>
+              <p className="font-heading text-[26px] md:text-[30px] font-medium tracking-[-0.015em] leading-[1.05] num whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
             </motion.div>
           ))}
         </div>

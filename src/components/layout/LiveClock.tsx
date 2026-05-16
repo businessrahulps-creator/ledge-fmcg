@@ -17,9 +17,9 @@ export function LiveClock() {
   }, []);
 
   return (
-    <span className="inline-flex items-center font-mono text-[11px] font-medium text-muted-foreground">
-      {time}
-      <span className="ml-0.5 text-[9px] font-medium opacity-70">IST</span>
+    <span className="inline-flex items-baseline gap-1 num text-[11px] font-medium text-muted-foreground/90">
+      <span>{time}</span>
+      <span className="text-[9px] font-semibold tracking-[0.08em] uppercase text-muted-foreground/60">IST</span>
     </span>
   );
 }
