@@ -194,11 +194,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
 
         const [distRes, spRes, prodRes, godownRes, schemesRes] = await Promise.all([
-          fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name")),
-          fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name")),
-          fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name")),
-          fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name")),
-          fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+          fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
+          fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name"), 1000, 200, "salespersons"),
+          fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name"), 1000, 200, "products"),
+          fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name"), 1000, 200, "godowns"),
+          fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "schemes"),
         ]);
         if (token !== fetchTokenRef.current) return;
 
