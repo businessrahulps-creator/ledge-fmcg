@@ -46,6 +46,8 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
 
 const statusColors: Record<string, string> = {
@@ -117,6 +119,9 @@ export default function OrderDetail() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
+
+  type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
+  const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
 
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [claimType, setClaimType] = useState<"return" | "damage">("return");
@@ -260,10 +265,35 @@ export default function OrderDetail() {
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
   };
 
+  const proceedAfterDispatchCheck = () => {
+    if (!order) return;
+    const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
+    if (movingToDispatched && editGodown && userRole !== "accountant") {
+      setDispatchPreview({ open: true, rows: [], loading: true });
+      supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
+        if (error) {
+          setDispatchPreview({ open: false, rows: [], loading: false });
+          toast.error("Could not load stock preview", { description: error.message });
+          return;
+        }
+        setDispatchPreview({ open: true, rows: (data as DispatchImpactRow[]) || [], loading: false });
+      });
+      return;
+    }
+    executeSaveOrder();
+  };
+
+  const confirmDispatch = async () => {
+    setDispatchPreview(p => ({ ...p, open: false }));
+    await executeSaveOrder();
+    const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
+    toast.success(`Dispatched. Stock updated for ${dispatchPreview.rows.length} product${dispatchPreview.rows.length === 1 ? "" : "s"}.${negatives > 0 ? ` ${negatives} below zero — please reconcile.` : ""}`);
+  };
+
   const saveOrder = () => {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
-    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+    if (!dealer || dealer.creditLimit <= 0) { proceedAfterDispatchCheck(); return; }
     const wasUnpaid = order.paymentStatus === "pending" || order.paymentStatus === "partial";
     const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
     if (willBeUnpaid) {
@@ -281,7 +311,7 @@ export default function OrderDetail() {
         return;
       }
     }
-    executeSaveOrder();
+    proceedAfterDispatchCheck();
   };
 
   const handleDeleteOrder = async () => {
@@ -798,7 +828,7 @@ export default function OrderDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>Override & Save</Button>
+            <Button onClick={() => { setCreditOverrideOpen(false); proceedAfterDispatchCheck(); }}>Override & Save</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -885,6 +915,63 @@ export default function OrderDetail() {
             <Button variant="outline" onClick={() => setClaimModalOpen(false)}>Cancel</Button>
             <Button onClick={handleSubmitClaim} disabled={claimSubmitting}>
               {claimSubmitting ? "Submitting…" : claimType === "return" ? "Record Return & Restore Stock" : "Record Damage Claim"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dispatch preview & confirm */}
+      <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Confirm dispatch &amp; deduct stock</DialogTitle>
+            <DialogDescription>
+              Stock will be deducted from the selected warehouse for each product below. Rows highlighted in red will go below zero — dispatch is still allowed.
+            </DialogDescription>
+          </DialogHeader>
+          {dispatchPreview.loading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading stock impact…</div>
+          ) : (
+            <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-xs text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">Product</th>
+                    <th className="px-3 py-2 text-right font-medium">Need</th>
+                    <th className="px-3 py-2 text-right font-medium">In stock</th>
+                    <th className="px-3 py-2 text-right font-medium">After</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dispatchPreview.rows.map((r) => (
+                    <tr key={r.product_id} className={cn("border-t border-border", r.will_go_negative && "bg-destructive/5")}>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          {r.will_go_negative && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
+                          <span className={cn(r.will_go_negative && "text-destructive font-medium")}>{r.product_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.required_qty}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.current_qty}</td>
+                      <td className={cn("px-3 py-2 text-right tabular-nums", r.will_go_negative && "text-destructive font-medium")}>{r.after_qty}</td>
+                    </tr>
+                  ))}
+                  {dispatchPreview.rows.length === 0 && (
+                    <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No line items.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {dispatchPreview.rows.some(r => r.will_go_negative) && (
+            <p className="text-xs text-destructive">
+              ⚠️ One or more products will go below zero after this dispatch. Please reconcile inventory afterwards.
+            </p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDispatchPreview(p => ({ ...p, open: false }))}>Cancel</Button>
+            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0}>
+              Confirm dispatch &amp; deduct stock
             </Button>
           </DialogFooter>
         </DialogContent>

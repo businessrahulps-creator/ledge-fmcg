@@ -1113,9 +1113,10 @@ export type Database = {
           date: string
           godown_id: string
           id: string
-          order_id: string
+          order_id: string | null
           product_id: string
           quantity_deducted: number
+          source: string
         }
         Insert: {
           company_id: string
@@ -1123,9 +1124,10 @@ export type Database = {
           date?: string
           godown_id: string
           id?: string
-          order_id: string
+          order_id?: string | null
           product_id: string
           quantity_deducted: number
+          source?: string
         }
         Update: {
           company_id?: string
@@ -1133,9 +1135,10 @@ export type Database = {
           date?: string
           godown_id?: string
           id?: string
-          order_id?: string
+          order_id?: string | null
           product_id?: string
           quantity_deducted?: number
+          source?: string
         }
         Relationships: [
           {
@@ -1302,6 +1305,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dispatch_order_atomic: {
+        Args: {
+          p_dispatch_date?: string
+          p_dispatch_remarks?: string
+          p_driver_name?: string
+          p_order_id: string
+          p_vehicle?: string
+        }
+        Returns: Json
+      }
       get_company_id: { Args: never; Returns: string }
       get_next_invoice_number: {
         Args: { target_company_id: string }
@@ -1348,6 +1361,21 @@ export type Database = {
           order_number: string
           seq: number
         }[]
+      }
+      preview_dispatch_impact: {
+        Args: { p_order_id: string }
+        Returns: {
+          after_qty: number
+          current_qty: number
+          product_id: string
+          product_name: string
+          required_qty: number
+          will_go_negative: boolean
+        }[]
+      }
+      reverse_dispatch_for_order: {
+        Args: { p_order_id: string }
+        Returns: Json
       }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }

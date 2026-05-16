@@ -224,16 +224,10 @@ export function useBillingDomain(deps: BillingDeps) {
       }
 
       if (claim.restoreStock) {
-        const order = deps.getOrders().find(o => o.id === claim.orderId);
-        const godownId = order?.godownId;
-        if (godownId) {
-          for (const line of claim.lines) {
-            const { data: siData } = await supabase.from("stock_items").select("*")
-              .eq("company_id", deps.companyId).eq("product_id", line.productId).eq("godown_id", godownId).single();
-            if (siData) {
-              await supabase.from("stock_items").update({ quantity: siData.quantity + line.quantity } as any).eq("id", siData.id);
-            }
-          }
+        const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order" as any, { p_order_id: claim.orderId });
+        if (revErr) {
+          handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Claim recorded but stock not restored", context: { orderId: claim.orderId } });
+        } else {
           await deps.safeRefetchStockItems();
         }
       }
