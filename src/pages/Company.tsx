@@ -110,12 +110,13 @@ export default function Company() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !companyId) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("File too large", { description: "Logo must be under 2MB." });
+    const ALLOWED_LOGO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      toast.error("Unsupported file type", { description: "Use JPG, PNG or WebP." });
       return;
     }
-    if (!file.type.startsWith("image/")) {
-      toast.error("Invalid file type", { description: "Please upload an image file." });
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File too large", { description: "Logo must be under 2 MB." });
       return;
     }
     setLogoUploading(true);
