@@ -210,60 +210,7 @@ export default function Settings() {
           </div>
 
           <TabsContent value="team">
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground md:text-sm">
-                  {teamLoading ? "Loading…" : `${team.length} team members`}
-                </p>
-                <span className="text-xs text-muted-foreground">Share the signup link to invite new members</span>
-              </div>
-
-              <div className="glass-card overflow-hidden">
-                {team.length === 0 && !teamLoading && (
-                  <div className="px-6 py-8 text-center text-sm text-muted-foreground">No team members found.</div>
-                )}
-                {team.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 row-hover md:px-6 md:py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary md:h-10 md:w-10 md:text-sm">
-                        {m.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{m.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-muted-foreground truncate md:text-xs">{m.email}</p>
-                          {m.phone && <p className="hidden sm:block text-[10px] text-muted-foreground md:text-xs">· {m.phone}</p>}
-                          <span className={`hidden sm:inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium md:px-3 md:text-xs ${
-                            m.role === "super_admin" ? "bg-primary/15 text-primary" :
-                            m.role === "sales_manager" ? "bg-success/15 text-success" :
-                            "bg-warning/15 text-warning"
-                          }`}>
-                            {roleLabels[m.role]}
-                          </span>
-                        </div>
-                        <span className={`sm:hidden inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium mt-0.5 ${
-                          m.role === "super_admin" ? "bg-primary/15 text-primary" :
-                          m.role === "sales_manager" ? "bg-success/15 text-success" :
-                          "bg-warning/15 text-warning"
-                        }`}>
-                          {roleLabels[m.role]}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => { setEditMember({ ...m }); setIsNewMember(false); }}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      {m.userId !== user?.id && (
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            <TeamRoster companyId={companyId} />
           </TabsContent>
 
           {/* Subscription Tab */}
