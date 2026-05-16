@@ -163,12 +163,15 @@ export default function Company() {
         .from("companies")
         .update({ logo_url: "" })
         .eq("id", companyId);
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, { source: "crud:companies.removeLogo", title: "Failed to remove logo", context: { companyId } });
+        return;
+      }
       setLogoUrl("");
       updateCompanyInfo({ logoUrl: "" });
       toast.success("Logo removed", { description: "Company logo has been removed." });
     } catch (err: any) {
-      toast.error("Failed to remove logo", { description: err?.message || "Could not remove logo." });
+      handleSupabaseError(err, { source: "crud:companies.removeLogo", title: "Failed to remove logo", context: { companyId } });
     }
     setLogoUploading(false);
   };
