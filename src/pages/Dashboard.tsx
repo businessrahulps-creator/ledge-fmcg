@@ -295,16 +295,29 @@ export default function Dashboard() {
                     : renderDelta(deliveredDelta === 0 ? 0 : deliveredDelta, "pp"),
                 },
               ];
-              return cells.map((s, i) => (
-                <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
-                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
-                  <p className={cn(
-                    "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
-                    s.zero && "text-muted-foreground/35"
-                  )}>{s.value}</p>
-                  {s.insight}
-                </div>
-              ));
+              return cells.map((s, i) => {
+                const ctx = [
+                  `${monthOrderCount} orders this month (₹${monthRevenue} revenue)`,
+                  `${outstandingOrders.length} unpaid orders, avg ${avgOutstandingDays}d outstanding`,
+                  `${monthDeliveredPct}% delivered this month`,
+                  `Previous month (${prevMonthLabel}): ${prevMonthOrderCount} orders, ₹${prevMonthRevenue} revenue, ${prevMonthDeliveredPct}% delivered`,
+                ];
+                return (
+                  <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
+                    <div className="flex items-center gap-1">
+                      <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
+                      {!s.zero && (
+                        <ExplainButton metric={s.label} value={String(s.value)} context={ctx} />
+                      )}
+                    </div>
+                    <p className={cn(
+                      "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                      s.zero && "text-muted-foreground/35"
+                    )}>{s.value}</p>
+                    {s.insight}
+                  </div>
+                );
+              });
             })()}
           </div>
 
