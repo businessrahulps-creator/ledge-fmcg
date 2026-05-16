@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
+import ledgeLogo from "@/assets/ledge-logo.png";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -90,8 +91,8 @@ export default function Signup() {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         {/* Logo */}
         <div className="text-center">
-          <div className="mb-6">
-            <span className="font-heading font-extrabold text-3xl tracking-[-0.04em] text-foreground">Ledge</span>
+          <div className="mb-6 flex justify-center">
+            <img src={ledgeLogo} alt="Ledge" className="h-10 w-auto" decoding="async" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Create your workspace</h1>
           <p className="mt-2 text-sm text-muted-foreground">

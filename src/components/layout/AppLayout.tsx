@@ -10,6 +10,7 @@ import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
 import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
+import ledgeLogoAsset from "@/assets/ledge-logo.png";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -156,7 +157,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <header className={`sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6 transition-shadow duration-200 ${scrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "shadow-none"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
             <SidebarTrigger className="mr-3 hidden md:flex" />
             <div className="flex items-center md:hidden">
-              <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>
+              <img src={ledgeLogoAsset} alt="Ledge" className="h-6 w-auto" decoding="async" />
             </div>
             <PageTitle />
             <div className="ml-auto flex items-center gap-3">
