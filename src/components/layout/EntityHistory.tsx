@@ -54,7 +54,7 @@ export function EntityHistory({ entityType, entityId }: Props) {
               <div>
                 <p className="text-foreground/90">{e.summary}</p>
                 <p className="text-muted-foreground">
-                  {e.user_name || "System"} · {formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}
+                  {e.user_name || "System"} · <SmartTime date={e.created_at} />
                 </p>
               </div>
             </div>
