@@ -316,7 +316,24 @@ export default function Dashboard() {
                 );
               };
               const cells = [
-                { label: "Revenue", value: formatCurrency(monthRevenue), zero: monthRevenue === 0, insight: renderDelta(revenueDelta) },
+                {
+                  label: "Delivered Revenue",
+                  value: formatCurrency(monthDeliveredRev),
+                  zero: monthDeliveredRev === 0,
+                  insight: (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="insight-line insight-up inline-flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+                        Delivered
+                      </span>
+                      <span className="insight-line insight-flat inline-flex items-center gap-1.5 text-muted-foreground/70">
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning/60" aria-hidden />
+                        {formatCurrency(monthBookedRev)} in pipeline
+                      </span>
+                      {revenueDelta !== null && renderDelta(revenueDelta)}
+                    </div>
+                  ),
+                },
                 { label: "Orders", value: monthOrderCount.toString(), zero: monthOrderCount === 0, insight: renderDelta(ordersDelta) },
                 {
                   label: "Outstanding",
