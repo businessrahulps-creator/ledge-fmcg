@@ -248,6 +248,56 @@ export default function Orders() {
           </div>
         </div>
 
+        {/* This month — hairline KPI strip */}
+        <KpiStrip
+          cells={[
+            {
+              label: "Today",
+              value: insights.todaysCount,
+              zero: insights.todaysCount === 0,
+              insight: <InsightLine tone="flat" fallback={insights.todaysCount === 0 ? "No orders yet today" : `${insights.todaysCount} placed today`} />,
+            },
+            {
+              label: "This month",
+              value: insights.mtdCount,
+              zero: insights.mtdCount === 0,
+              insight: <InsightLine delta={insights.countDelta} comparator={prevMonthLabel} />,
+            },
+            {
+              label: "Revenue (MTD)",
+              value: formatCurrency(insights.mtdRevenue),
+              zero: insights.mtdRevenue === 0,
+              insight: <InsightLine delta={insights.revenueDelta} comparator={prevMonthLabel} />,
+            },
+            {
+              label: "Awaiting payment",
+              value: insights.pendingPayment,
+              zero: insights.pendingPayment === 0,
+              insight: insights.pendingPaymentValue > 0
+                ? <InsightLine tone="down" fallback={`${formatCurrency(insights.pendingPaymentValue)} outstanding`} />
+                : <InsightLine tone="up" fallback="All settled" />,
+            },
+          ]}
+        />
+
+        {/* Overdue dispatch — promoted destructive surface */}
+        {insights.overdueDispatch > 0 && (
+          <SignalCard
+            tier="destructive"
+            icon={AlertTriangle}
+            label="Overdue dispatch"
+            caption={`${insights.overdueDispatch} order${insights.overdueDispatch > 1 ? "s" : ""} past their dispatch date`}
+            subCaption={`${formatCurrency(insights.overdueDispatchValue)} pending delivery`}
+            value={insights.overdueDispatch}
+            valueSuffix="Orders"
+            interactive
+            onClick={() => setDeliveryFilter("pending")}
+            role="button"
+            tabIndex={0}
+            className="cursor-pointer"
+          />
+        )}
+
         {/* Filters */}
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <div className="relative flex-1">
