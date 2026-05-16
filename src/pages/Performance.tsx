@@ -509,14 +509,23 @@ export default function Performance() {
                 />
               )}
               <KpiStrip
-                cells={kpis.map(k => ({
-                  label: k.label,
-                  value: k.value,
-                  zero: k.value === "0" || k.value === "₹0",
-                  insight: k.change !== null ? (
-                    <InsightLine delta={Number(k.change.toFixed(0))} comparator="prev" goodWhen="up" />
-                  ) : undefined,
-                }))}
+                cells={kpis.map(k => {
+                  const periodLabel = period === "custom" ? "custom range" : period;
+                  const ctx = [
+                    `Period: ${periodLabel}`,
+                    `This period revenue ${formatCurrency(totalRevenue)} vs previous ${formatCurrency(prevRevenue)}`,
+                    ...kpis.map(o => `${o.label}: ${o.value}${o.change !== null ? ` (${o.change > 0 ? "+" : ""}${o.change.toFixed(0)}% vs prev)` : ""}`),
+                  ];
+                  return {
+                    label: k.label,
+                    value: k.value,
+                    zero: k.value === "0" || k.value === "₹0",
+                    insight: k.change !== null ? (
+                      <InsightLine delta={Number(k.change.toFixed(0))} comparator="prev" goodWhen="up" />
+                    ) : undefined,
+                    explain: { value: String(k.value), context: ctx },
+                  };
+                })}
               />
             </div>
           );

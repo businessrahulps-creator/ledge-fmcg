@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ExplainButton } from "@/components/ui/explain-button";
 
 export interface KpiCell {
   label: string;
@@ -10,6 +11,8 @@ export interface KpiCell {
   zero?: boolean;
   /** Optional click handler — wraps the cell in a button. */
   onClick?: () => void;
+  /** Optional AI "explain this number" hookup. Renders a ✦ next to the label. */
+  explain?: { value: string; context: string[] };
 }
 
 export interface KpiStripProps {
@@ -29,7 +32,12 @@ export function KpiStrip({ cells, className }: KpiStripProps) {
       {cells.map((c, i) => {
         const Inner = (
           <>
-            <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+              {c.explain && !c.zero && (
+                <ExplainButton metric={c.label} value={c.explain.value} context={c.explain.context} />
+              )}
+            </div>
             <p
               className={cn(
                 "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",

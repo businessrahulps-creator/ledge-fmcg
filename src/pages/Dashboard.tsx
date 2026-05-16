@@ -426,9 +426,19 @@ export default function Dashboard() {
           <div className="glass-card grid grid-cols-2 md:grid-cols-4 divide-x divide-border/60">
             {kpis.map((kpi) => {
               const isZero = kpi.value === "0" || kpi.value === "₹0";
+              const dailyCtx = [
+                `Date in view: ${selectedDateObj.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}`,
+                `Revenue: ${formatCurrency(totalRevenue)} across ${totalOrders} order(s)`,
+                `${pendingOrders} pending delivery, ${dispatchedOrders} dispatched`,
+              ];
               return (
                 <div key={kpi.label} className="px-4 py-4 min-w-0">
-                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
+                    {!isZero && (
+                      <ExplainButton metric={`${kpi.label} (selected day)`} value={String(kpi.value)} context={dailyCtx} />
+                    )}
+                  </div>
                   <p className={cn(
                     "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                     isZero && "text-muted-foreground/35"
