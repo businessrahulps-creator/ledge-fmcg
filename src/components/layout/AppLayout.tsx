@@ -432,6 +432,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       <div className="h-6" style={{ height: "calc(env(safe-area-inset-bottom) + 1.5rem)" }} />
                     </div>
                     {/* Bottom fade — affordance that there is more below */}
+                    {/* Top fade — content scrolled above */}
+                    <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent" aria-hidden />
+                    {/* Bottom fade — more content below */}
                     <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" aria-hidden />
                   </div>
                 </SheetContent>
