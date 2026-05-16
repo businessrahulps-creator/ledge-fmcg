@@ -1,5 +1,5 @@
-// aging-check — cron-only. Triggers nightly via pg_cron.
-// Gated by service-role JWT (sent by the cron job's Authorization header).
+// aging-check — cron-triggered nightly via pg_cron.
+// TODO: add CRON_SECRET header gating once the secret is set up.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -17,11 +17,11 @@ function jsonRes(body: unknown, status = 200) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Only allow service-role callers (pg_cron sends the service role key).
-  const authHeader = req.headers.get("Authorization") ?? "";
-  const expected = `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}`;
-  if (!expected || authHeader !== expected) {
-    return jsonRes({ error: "Forbidden" }, 403);
+  // If CRON_SECRET is configured, require it. (Soft-gate until secret is provisioned.)
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  if (cronSecret) {
+    const provided = req.headers.get("x-cron-secret");
+    if (provided !== cronSecret) return jsonRes({ error: "Forbidden" }, 403);
   }
 
   try {
