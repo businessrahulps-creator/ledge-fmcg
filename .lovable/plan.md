@@ -1,106 +1,81 @@
 
-## Goal
+## What's happening on getledge.in
 
-Stop offline mode from hurting real devices **right now**, without deleting any of the offline-mode code we've built. In ~2 months we flip one flag and it's back.
+I loaded https://getledge.in in a real browser. The site is blank because of a hard JavaScript error during boot:
 
-There are two separate things tangled together under "offline mode":
+```
+Uncaught ReferenceError: Cannot access 'S' before initialization
+  at https://getledge.in/assets/charts-DTlgJYNp.js:9:16763
+```
 
-1. **Service Worker / PWA caching** (`vite-plugin-pwa` → emits `sw.js`)
-   This is what actually causes the stale-render / "takes time to load" pain on installed devices. Once an SW is registered, it keeps serving the old shell until it's explicitly unregistered.
+Plus a secondary, non-fatal:
+```
+GET /manifest.json?v=3 → 404
+```
 
-2. **Offline data layer** (`src/lib/offline-store.ts` + queue replay + `useOnlineStatus` toasts)
-   Wired into `DataContext`, every domain hook (`useOrdersDomain`, `useDealersDomain`, …), `Settings` page (pending queue UI), and `AppLayout` (sync banner). Cached reads + queued writes when offline.
+(The `apple-mobile-web-app-capable` warning is cosmetic, ignore.)
 
-We disable both, but **keep all source files**.
+The TDZ error nukes the whole React tree before it can render → `<div id="root"></div>` stays empty → bone-coloured blank screen.
 
----
+## Why this is happening
 
-## Approach — feature flag + kill-switch
+This is the classic Vite/Rollup `manualChunks` Temporal Dead Zone bug. In `vite.config.ts` we split vendor code into many named chunks:
 
-### A. Kill the Service Worker (the real fix for stale devices)
+```ts
+if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
+if (id.includes("/@radix-ui/")) return "radix-vendor";
+if (id.includes("/@supabase/") || id.includes("/@tanstack/")) return "supabase-vendor";
+if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
+...
+```
 
-1. **Remove `VitePWA(...)` plugin** from `vite.config.ts` so new builds stop emitting a caching SW. Leave the import commented with a `// re-enable: see plan` note.
-2. **Ship a kill-switch `public/sw.js`** at the exact same path the old SW lived. On install it claims clients, deletes every cache, navigates open windows once, then `unregister()`s itself. Devices that already installed the PWA will silently clean themselves on next visit.
-3. **Keep a static `public/manifest.json`** (same icons, `display: standalone`, `start_url: /dashboard`) so "Add to Home Screen" still works — installability without a caching SW.
-4. **Strip SW registration from the app**: delete the `registerSW(...)` call in `src/components/UpdatePrompt.tsx` (or short-circuit the file to render nothing). Remove `vite-plugin-pwa/client` from `vite-env.d.ts`. Drop `vite-plugin-pwa` from devDependencies (optional — can leave for easy revival).
-5. Add `link rel="manifest"` directly in `index.html` (currently injected by the plugin).
+`recharts` and the `d3-*` constellation depend on each other and on shared utilities. When the splitter puts them in different chunks (or splits internal d3 helpers across chunks), the load order becomes non-deterministic. One chunk dereferences an exported binding from another chunk that hasn't run its module init yet → `ReferenceError: Cannot access 'X' before initialization`.
 
-### B. Neutralize the offline data layer (without ripping it out)
+Two important notes:
+1. **This bug is in the published build only** (timestamp `1778910002833`), because that's when these chunks were last produced. We haven't republished since.
+2. **The current source already has the offline-mode fixes from the last turn**, which includes the new static `public/manifest.json`. That will resolve the 404 the moment we publish — but only after we also fix the TDZ bug, otherwise we'd re-publish another broken build.
 
-Add a single flag `OFFLINE_MODE_ENABLED = false` in `src/lib/offline-store.ts`. When `false`:
+## The fix
 
-- `cacheData()` → no-op
-- `getCachedData()` → returns `null` (callers already handle "no cache" by hitting the network)
-- `enqueueMutation()` → throws / returns `{ queued: false }` so writes fail loudly instead of being silently queued
-- `getQueue()` → returns `[]`
-- `replaySingleMutation()` → no-op success
+### 1. Stop splitting `charts` (the actual TDZ culprit)
 
-Plus two small UI tweaks (kept narrow so the rest of the code is untouched):
+Remove the `recharts`/`d3-*` rule from `manualChunks` in `vite.config.ts`. Let recharts + its d3 deps land in the default Rollup-decided vendor chunk where the bundler can keep their dependency graph intact.
 
-- **`AppLayout.tsx`** — hide the "sync pending" banner when flag is off.
-- **`Settings.tsx`** — hide the "Pending offline changes" card when flag is off (or show a small "Offline mode is paused" note). All other Settings work stays intact.
-- **`useOnlineStatus`** — keep the hook returning `navigator.onLine` but skip the flush + toast spam when flag is off.
+That's a one-line removal:
 
-Everything else (`DataContext`, domain hooks, tests, mocks) keeps importing from `offline-store` exactly as today — the functions just become no-ops. Zero refactor risk.
+```ts
+// DELETE this line:
+if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
+```
 
-### C. Document the revival path
+We keep the safer splits (`react-vendor`, `radix-vendor`, `supabase-vendor`, `icons`, `motion`, `xlsx`, `date-fns`) — none of those have inter-chunk init dependencies the same way recharts ↔ d3 does.
 
-- Add a top-of-file comment in `offline-store.ts` and `vite.config.ts` pointing at `mem://features/offline-mode-paused` describing exactly what to flip.
-- Save a memory file `mem://features/offline-mode-paused` with the 4-step revival recipe (un-comment VitePWA, delete kill-switch sw.js, flip flag to true, re-add `registerSW` in UpdatePrompt).
+Bundle-size impact: recharts is ~150 KB gzipped; lazy-loaded routes that don't import it won't pay the cost because Rollup will keep it in a route-level chunk by default. We won't lose meaningful caching.
 
----
+### 2. Confirm `public/manifest.json` exists (it does)
 
-## Why not just delete it?
+Last turn I added `public/manifest.json` so the `<link rel="manifest" href="/manifest.json?v=3">` in `index.html` stops 404'ing. Nothing else to do here — just need to publish.
 
-We considered three options:
+### 3. Re-publish
 
-| Option | Effort | Risk of losing work | Stale-device fix |
-|---|---|---|---|
-| Delete offline code + PWA | High | High | Yes |
-| Feature flag + kill-switch SW *(picked)* | Low | None | Yes |
-| Just unregister SW, leave offline layer running | Lowest | None | Yes, but offline queue keeps silently swallowing writes if a user goes offline → data loss risk |
+The frontend update only goes live after the user clicks **Publish → Update** in the Lovable publish dialog. I'll surface that action at the end of the chat.
 
-The middle option gives us the device-side fix immediately and keeps the offline data layer dormant but visibly off (writes fail clearly when offline, instead of disappearing into a queue no one is watching).
+## What I am NOT changing
 
----
+- The offline-mode pause work from the previous turn stays exactly as-is (kill-switch `sw.js`, flag-gated offline store).
+- No source-code changes outside `vite.config.ts`.
+- No package upgrades. The TDZ is purely a chunking artifact, not a recharts bug.
 
 ## Files touched
 
-**Edited (small)**
-- `vite.config.ts` — remove `VitePWA(...)` from plugins array
-- `src/main.tsx` — drop the preview-iframe SW unregister block (kill-switch handles it everywhere now) or keep as-is, harmless
-- `src/components/UpdatePrompt.tsx` — return `null`, stop calling `registerSW`
-- `src/vite-env.d.ts` — drop the `vite-plugin-pwa/client` reference
-- `src/lib/offline-store.ts` — add `OFFLINE_MODE_ENABLED = false` flag + early returns
-- `src/components/layout/AppLayout.tsx` — gate sync banner on flag
-- `src/pages/Settings.tsx` — gate pending-queue card on flag
-- `src/hooks/use-online-status.tsx` — skip flush + toasts when flag off
-- `index.html` — add static `<link rel="manifest" href="/manifest.json">` + iOS meta tags
+**Edited (one line removed):**
+- `vite.config.ts`
 
-**Created**
-- `public/sw.js` — kill-switch service worker
-- `public/manifest.json` — static manifest (installability only)
-- `mem://features/offline-mode-paused` — revival recipe
+**Not touched:**
+- everything else
 
-**Deleted**
-- nothing
+## Risk
 
----
+Very low. We're removing a chunk-split rule, not changing app code. The worst case is one slightly larger vendor chunk on routes that use recharts (Dashboard, Reports, Performance). In return we get the published site loading at all.
 
-## What stays exactly as-is
-
-- All `offline-store.ts` storage logic (IndexedDB schema, queue serialization, replay logic)
-- All `cacheData`/`enqueueMutation` call sites across `DataContext` and domain hooks
-- All tests under `src/context/domains/__tests__/*` — they mock `offline-store` anyway
-- PWA icons under `public/`
-- Pending-queue UI components in `Settings.tsx`
-
-In ~2 months: flip `OFFLINE_MODE_ENABLED = true`, remove `public/sw.js` (and keep the kill-switch live for one release first), un-comment `VitePWA(...)`, restore `registerSW` in `UpdatePrompt.tsx`. ~15-minute job.
-
----
-
-## Caveats
-
-- **Installed PWAs on iOS keep `start_url` from install time** — devices that installed the old version will still launch the app, just without the caching SW. Cleanup is silent.
-- **One release with the kill-switch is required** before deleting `public/sw.js` entirely; otherwise devices that haven't visited yet stay on the old cached shell forever.
-- "Add to Home Screen" continues to work via the static manifest — no regression for users who want installability.
+After publish, I'll re-load getledge.in in the browser to confirm the blank screen is gone and console is clean.

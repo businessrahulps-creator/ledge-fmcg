@@ -38,7 +38,10 @@ export default defineConfig(({ mode }) => {
           if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/react-router-dom/") || id.includes("/scheduler/")) return "react-vendor";
           if (id.includes("/@radix-ui/")) return "radix-vendor";
           if (id.includes("/@supabase/") || id.includes("/@tanstack/")) return "supabase-vendor";
-          if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
+          // recharts + d3 intentionally NOT split — splitting them caused a TDZ
+          // ReferenceError ("Cannot access 'S' before initialization") on the
+          // published build that left the site blank. Let Rollup keep their
+          // dep graph intact inside the default vendor chunk.
           if (id.includes("/xlsx")) return "xlsx";
           if (id.includes("/lucide-react/")) return "icons";
           if (id.includes("/framer-motion/") || id.includes("/motion")) return "motion";
