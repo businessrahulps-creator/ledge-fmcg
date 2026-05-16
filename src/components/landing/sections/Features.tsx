@@ -1,5 +1,19 @@
+import { useRef, type ReactNode } from "react";
 import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw, CheckCircle2, AlertCircle, Clock, ArrowUpRight, BadgeCheck, Wallet } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { useTilt } from "@/lib/hooks/useTilt";
+
+/** Tilts a tinted feature card 3D on pointer move. */
+function TiltCard({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useTilt(ref, { max: 5, scale: 1.01 });
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
+}
+
 
 const features = [
   { icon: Contact, title: "Dealer Intelligence", desc: "Full history, credit and behaviour — instant. One profile per dealer." },
