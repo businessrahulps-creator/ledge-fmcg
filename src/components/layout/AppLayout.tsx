@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
+import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 
 
 import { RotateCcw, Target } from "lucide-react";
