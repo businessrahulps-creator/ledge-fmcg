@@ -919,6 +919,63 @@ export default function OrderDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dispatch preview & confirm */}
+      <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Confirm dispatch &amp; deduct stock</DialogTitle>
+            <DialogDescription>
+              Stock will be deducted from the selected warehouse for each product below. Rows highlighted in red will go below zero — dispatch is still allowed.
+            </DialogDescription>
+          </DialogHeader>
+          {dispatchPreview.loading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading stock impact…</div>
+          ) : (
+            <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-xs text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">Product</th>
+                    <th className="px-3 py-2 text-right font-medium">Need</th>
+                    <th className="px-3 py-2 text-right font-medium">In stock</th>
+                    <th className="px-3 py-2 text-right font-medium">After</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dispatchPreview.rows.map((r) => (
+                    <tr key={r.product_id} className={cn("border-t border-border", r.will_go_negative && "bg-destructive/5")}>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          {r.will_go_negative && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
+                          <span className={cn(r.will_go_negative && "text-destructive font-medium")}>{r.product_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.required_qty}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.current_qty}</td>
+                      <td className={cn("px-3 py-2 text-right tabular-nums", r.will_go_negative && "text-destructive font-medium")}>{r.after_qty}</td>
+                    </tr>
+                  ))}
+                  {dispatchPreview.rows.length === 0 && (
+                    <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No line items.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {dispatchPreview.rows.some(r => r.will_go_negative) && (
+            <p className="text-xs text-destructive">
+              ⚠️ One or more products will go below zero after this dispatch. Please reconcile inventory afterwards.
+            </p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDispatchPreview(p => ({ ...p, open: false }))}>Cancel</Button>
+            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0}>
+              Confirm dispatch &amp; deduct stock
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
