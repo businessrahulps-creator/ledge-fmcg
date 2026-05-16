@@ -234,6 +234,10 @@ export function Features() {
                   {feature.desc}
                 </p>
                 {i === 0 && <DealerPreview />}
+                {i === 1 && <StockHealthPreview />}
+                {i === 2 && <SchemePreview />}
+                {i === 3 && <TeamPreview />}
+                {i === 4 && <GstPreview />}
                 {i === 5 && <ClaimPreview />}
               </>
             );
