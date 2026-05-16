@@ -1,50 +1,29 @@
-# Landing page image performance pass
+# Remove Enterprise tier, keep 3 plans with breathing space
 
-## Problem
+## Changes in `src/components/landing/sections/Pricing.tsx`
 
-The four hero/step screenshots in `src/assets/landing/` are uncompressed PNGs at ~1.2–1.3 MB each (≈5.1 MB total) — this dominates landing page payload and slows LCP. Logo PNGs are also unoptimized (`ledge-logo.png` 113 KB, `ledge-app-icon.png` 98 KB, `ledge-mark.png` 37 KB). No `fetchpriority` / `preload` is set on the LCP image.
+1. **Drop the Enterprise plan** from the `plans` array (Free, Growth, Scale only).
+2. **Grid**: change `lg:grid-cols-4` → `lg:grid-cols-3`. Tighten `max-w-6xl` → `max-w-5xl` on the grid so 3 cards breathe without stretching too wide.
+3. **Remove tint logic for index 3** (`tintBone`). Keep Scale (i === 2) on Midnight tint, Growth highlighted, Free default.
+4. **Remove unused `Building2` import.**
+5. **Rewrite the WhatsApp helper line** below the grid to subtly surface enterprise needs. New copy:
 
-## What to ship
+   > Need something custom — Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
 
-### 1. Convert heavy PNGs to WebP
+   Same link, same styling, same single-line treatment. Pre-fill the wa.me `text` query with: `Hi, I'd like to discuss a custom Ledge plan for my business.`
 
-Using `sharp` (or `nix run nixpkgs#libwebp`), regenerate at ~80 quality, max width 1920px:
+## Memory
 
-| File | Before | Expected after |
-|---|---|---|
-| `landing/hero-dashboard.png` | 1.3 MB | ~120 KB `.webp` |
-| `landing/step-orders.png` | 1.2 MB | ~110 KB `.webp` |
-| `landing/step-stock.png` | 1.3 MB | ~110 KB `.webp` |
-| `landing/step-billing.png` | 1.3 MB | ~110 KB `.webp` |
-| `ledge-logo.png` | 113 KB | ~15 KB `.webp` |
-| `ledge-app-icon.png` | 98 KB | ~12 KB `.webp` |
-| `ledge-mark.png` | 37 KB | ~6 KB `.webp` |
-| `public/ledge-mark-watermark.png` | 37 KB | ~6 KB `.webp` |
+Update `mem://auth/pricing-tiers` from four-tier to three-tier (Free, Growth, Scale); note Enterprise is handled via WhatsApp conversation rather than a public card.
 
-Delete the original PNGs after replacement (no other refs).
+## Out of scope
 
-### 2. Update imports
-
-Switch imports from `.png` → `.webp` in:
-- `Hero.tsx`, `HowItWorks.tsx` (landing screenshots)
-- `Navbar.tsx`, `MobileMenuOverlay.tsx`, `Footer.tsx`, `Testimonials.tsx`, `SplashScreen.tsx`, `AppSidebar.tsx`, `AppLayout.tsx`, `Login.tsx`, `Signup.tsx`, `ResetPassword.tsx`, `ledge-loader.tsx` (logos)
-
-Keep PNG variants for: `apple-touch-icon.png`, `favicon.png`, `pwa-*.png` (PWA spec requires PNG).
-
-### 3. Loading hints
-
-- Hero image (`<img src={heroDashboard}>`): add `fetchPriority="high"` and `decoding="async"`. Add `<link rel="preload" as="image" href="...">` in `index.html` is skipped (Vite hashes the URL); rely on `fetchpriority`.
-- Step screenshots, testimonial avatars, footer/nav logos: ensure `loading="lazy"` + `decoding="async"`. Audit current `<img>` tags in `HowItWorks`, `Testimonials`, `Founder`, `Footer`, `Navbar`.
-- Add explicit `width` / `height` attributes on the four landing screenshots and avatars to prevent CLS.
-
-### 4. Out of scope
-
-- No new build plugins (no `vite-imagetools`) — one-shot conversion is enough.
-- No layout, copy, or motion changes.
-- No PWA icon changes (must remain PNG).
+- No copy changes to Free/Growth/Scale features, prices, or CTAs.
+- No layout changes elsewhere on the page (eyebrow, trust chip, headline untouched).
+- No new sections or modals.
 
 ## Verification
 
-- `du -sh src/assets/landing` drops from ~5.1 MB to <600 KB.
-- Build succeeds; preview renders hero + step screenshots correctly.
-- Network tab on `/`: hero image transfers <150 KB; total image bytes <800 KB.
+- Pricing renders 3 cards on desktop with comfortable gaps (centered, not stretched).
+- Mobile keeps single column; `md` keeps 2-up.
+- WhatsApp link opens with the new prefilled message.

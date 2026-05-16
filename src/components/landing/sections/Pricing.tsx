@@ -1,4 +1,4 @@
-import { Check, Gift, TrendingUp, Layers, Building2 } from "lucide-react";
+import { Check, Gift, TrendingUp, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
@@ -58,24 +58,6 @@ const plans = [
     cta: "Start Free Trial",
     highlighted: false,
   },
-  {
-    name: "Enterprise",
-    icon: Building2,
-    price: "Custom",
-    priceLabel: "",
-    period: "",
-    tagline: "Large operations, custom integrations.",
-    features: [
-      "Everything in Scale",
-      "Tally / SAP integration",
-      "Multi-brand workspaces",
-      "On-premise option",
-      "Dedicated onboarding",
-      "SLA support",
-    ],
-    cta: "Talk to Us",
-    highlighted: false,
-  },
 ];
 
 export function Pricing() {
@@ -118,16 +100,13 @@ export function Pricing() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto pt-4" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4" staggerTime={0.05}>
           {plans.map((plan, i) => {
             const tintMidnight = i === 2;     // Scale → Midnight authority
-            const tintBone = i === 3;          // Enterprise → Bone calm
             const cardClass = plan.highlighted
               ? "lp-bento-hero border border-primary/40 shadow-depth-8 lp-card-premium"
               : tintMidnight
               ? "lp-card-tinted lp-card-midnight"
-              : tintBone
-              ? "lp-card-tinted lp-card-bone"
               : "lp-card lp-card-premium";
             return (
               <StaggerItem key={plan.name}>
@@ -202,12 +181,12 @@ export function Pricing() {
 
         <div className="text-center mt-14 md:mt-16">
           <a
-            href="https://wa.me/918138084689?text=Hi%2C%20I%20have%20a%20question%20about%20Ledge%20pricing"
+            href="https://wa.me/918138084689?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20Ledge%20plan%20for%20my%20business."
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-[14px] text-foreground font-medium hover:text-accent transition-colors inline-block"
           >
-            Need help deciding? Chat on WhatsApp →
+            Need something custom — Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
           </a>
         </div>
       </div>
