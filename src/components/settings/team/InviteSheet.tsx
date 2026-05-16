@@ -1,29 +1,74 @@
 import { useState } from "react";
-import { Mail } from "lucide-react";
+import { Mail, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
 import { JOBS, type AppRole } from "./jobs";
-import { Check } from "lucide-react";
+import { useInvite } from "@/hooks/useInvite";
+import { InviteShareSheet } from "./InviteShareSheet";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  companyName: string;
+  onInviteSent: () => void;
 }
 
-/**
- * PR-D placeholder. UI is final; send logic arrives in PR-E.
- */
-export function InviteSheet({ open, onOpenChange }: Props) {
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Enter a valid email")
+  .max(255);
+
+// Owner cannot be invited — promotion is an in-roster action.
+const INVITABLE_JOBS = JOBS.filter((j) => j.role !== "super_admin");
+
+export function InviteSheet({ open, onOpenChange, companyName, onInviteSent }: Props) {
   const isMobile = useIsMobile();
+  const { sendInvite } = useInvite();
+
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("salesperson");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+
+  const reset = () => {
+    setEmail("");
+    setRole("salesperson");
+    setEmailError(null);
+    setShareToken(null);
+    setSubmitting(false);
+  };
+
+  const handleClose = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
+
+  const handleSubmit = async () => {
+    setEmailError(null);
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      setEmailError(parsed.error.issues[0]?.message ?? "Enter a valid email");
+      return;
+    }
+    setSubmitting(true);
+    const token = await sendInvite(parsed.data, role);
+    setSubmitting(false);
+    if (token) {
+      setShareToken(token);
+      onInviteSent();
+    }
+  };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         className={cn(
@@ -32,86 +77,118 @@ export function InviteSheet({ open, onOpenChange }: Props) {
         )}
       >
         <SheetHeader className="border-b border-border/60 p-5 text-left">
-          <SheetTitle className="text-lg">Invite someone to Ledge</SheetTitle>
+          <SheetTitle className="text-lg">
+            {shareToken ? "Share the invite" : "Invite someone to Ledge"}
+          </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            They'll get an email link to join your workspace.
+            {shareToken
+              ? "Send them the link — it works for 72 hours."
+              : "They'll get a link to join your workspace as the job you pick."}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 space-y-5 overflow-y-auto p-5">
-          <div className="space-y-2">
-            <Label htmlFor="invite-email" className="text-xs">
-              Email address
-            </Label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="invite-email"
-                type="email"
-                placeholder="priya@yourcompany.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
+        {shareToken ? (
+          <InviteShareSheet
+            token={shareToken}
+            email={email}
+            role={role}
+            companyName={companyName}
+            onDone={() => handleClose(false)}
+          />
+        ) : (
+          <>
+            <div className="flex-1 space-y-5 overflow-y-auto p-5">
+              <div className="space-y-2">
+                <Label htmlFor="invite-email" className="text-xs">
+                  Email address
+                </Label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="priya@yourcompany.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) setEmailError(null);
+                    }}
+                    className={cn("pl-9", emailError && "border-destructive")}
+                    autoComplete="off"
+                  />
+                </div>
+                {emailError && (
+                  <p className="text-[11px] text-destructive">{emailError}</p>
+                )}
+              </div>
 
-          <div className="space-y-2">
-            <Label className="text-xs">What will they do?</Label>
-            <div className="space-y-2">
-              {JOBS.map((j) => {
-                const Icon = j.icon;
-                const selected = j.role === role;
-                return (
-                  <button
-                    key={j.role}
-                    type="button"
-                    onClick={() => setRole(j.role)}
-                    className={cn(
-                      "w-full rounded-md border p-3 text-left transition-[border-color,background-color] duration-fast ease-fluent",
-                      selected
-                        ? "border-primary bg-primary/5"
-                        : "border-border/70 hover:border-foreground/30",
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
+              <div className="space-y-2">
+                <Label className="text-xs">What will they do?</Label>
+                <div className="space-y-2">
+                  {INVITABLE_JOBS.map((j) => {
+                    const Icon = j.icon;
+                    const selected = j.role === role;
+                    return (
+                      <button
+                        key={j.role}
+                        type="button"
+                        onClick={() => setRole(j.role)}
                         className={cn(
-                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
-                          selected ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70",
+                          "w-full rounded-md border p-3 text-left transition-[border-color,background-color] duration-fast ease-fluent",
+                          selected
+                            ? "border-primary bg-primary/5"
+                            : "border-border/70 hover:border-foreground/30",
                         )}
                       >
-                        <Icon className="h-4 w-4" strokeWidth={1.75} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold">{j.label}</p>
-                          {selected && <Check className="h-3.5 w-3.5 text-primary" />}
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={cn(
+                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
+                              selected
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-foreground/70",
+                            )}
+                          >
+                            <Icon className="h-4 w-4" strokeWidth={1.75} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold">{j.label}</p>
+                              {selected && <Check className="h-3.5 w-3.5 text-primary" />}
+                            </div>
+                            <p className="mt-0.5 text-xs text-muted-foreground">{j.oneLiner}</p>
+                          </div>
                         </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{j.oneLiner}</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="space-y-2 border-t border-border/60 bg-muted/30 p-4">
-          <p className="text-[11px] text-muted-foreground">
-            Invite sending arrives in the next update. For now, ask them to sign up and a workspace
-            admin can add them.
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-            <Button className="flex-1" disabled title="Coming in the next update">
-              Send invite
-            </Button>
-          </div>
-        </div>
+            <div className="space-y-2 border-t border-border/60 bg-muted/30 p-4">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleClose(false)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={handleSubmit} disabled={submitting || !email}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                    </>
+                  ) : (
+                    "Send invite"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );
