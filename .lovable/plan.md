@@ -1,77 +1,87 @@
-# PR11 — Break the Pattern (Insight Surfaces, Iconography, Color Depth)
+# PR12–15 — Platform-wide Pattern Break
 
-PR9/PR10 made the system **consistent**. The cost of consistency is that everything now looks like the same template — same rounded card, same destructive red, same 12px label. The "Credit at Risk" card is the tell: a critical financial alert is rendered with the exact same visual weight as a neutral KPI strip, with a generic outline triangle icon, a 12px label, and a flat ₹29 number.
+PR11 promoted Credit at Risk from flat KPI to a real risk surface with insight lines, icon tiers, and a 3-color semantic system. The same flatness exists across every inner page: rows of identical neutral KPI cards, undifferentiated alerts, generic outline icons, no MoM/peer deltas, no zero-state taming. This audit applies the same treatment platform-wide.
 
-PR11 is about **breaking the pattern in the right places** so the eye knows where to land.
+## Operating principles (carried from PR11)
 
-## What's still flat (concrete observations)
+1. **One hero per page.** Find the single most action-worthy number/state and promote it (32px Playfair, left rule, signal icon, insight line). Demote everything else to a hairline strip.
+2. **Three semantic tiers, always.** Success/Forest for on-track, Warning/Terracotta for "approaching", Destructive for breach. No page should be monochrome neutral.
+3. **Icon weight = signal strength.** `.icon-nav` for chrome, `.icon-inline` for body, `.icon-signal` (20px filled tint) for alerts and hero metrics only.
+4. **Every KPI gets an insight line** (`▲ 12% vs last month`, "Avg 14d", "On track") or it gets demoted to a label, never a bare number.
+5. **Tame zeros and empty states.** Dim to `text-muted-foreground/35`, or collapse to a single sentence.
+6. **Status surfaces beat status pills.** When a state needs action (overdue, low stock, lapsed dealer), add the left-bar treatment, not just a colored dot.
 
-1. **Credit at Risk card** — outline `AlertTriangle` at 16px in a pale circle, 12px destructive label, 18px bold number. Reads like a notification chip, not a P&L risk. The number (29 dealers, ~₹X lakhs at risk) should be the hero, not the headline word.
-2. **Color palette is binary** — we only use Midnight (primary) and Destructive (red). Forest, Terracotta/Amber, and a neutral "ink" tone are defined but unused on Dashboard. Result: alerts compete with primary actions, and there's no middle "attention" tier.
-3. **Icons all read the same** — every icon is a 14–16px Lucide outline at 1.5 stroke. No size/weight hierarchy. A risk icon should feel heavier than a nav icon.
-4. **"This Month · MAY 2026" label** floats top-right with no anchor. It's the same tracking/weight as "Daily breakdown" but lives in a different role (timeframe vs section title) — currently indistinguishable.
-5. **Empty/zero states are loud** — the "Daily breakdown" KPI row shows `₹0 / 0 / 0 / 0` at 24px Playfair. Zeros at editorial scale create false drama. Should dim or collapse.
-6. **No insight tier** — Dashboard shows raw KPIs but never tells the user *what changed*. A "vs last month" delta, a tiny arrow, or a "best day this week: WED" line would convert numbers into meaning. This is the single biggest 7→9 lever in dashboard design.
-7. **Sparkline is decorative, not labeled** — the peak (WED) has no callout. A small text label "Wed ₹X" anchored at the peak point turns the chart into a story.
-8. **StatusBadge has 5 states all using the same dot+pill shape**. Paid (success) and Pending (destructive) deserve identical *shape* but Pending could carry a subtle left-edge accent so the eye lands on what needs action — Paid is the calm default.
+## Per-page opportunities
 
-## Plan (one PR, surgical edits)
+### PR12 — Money pages (highest leverage)
+The pages where wrong-looking numbers cost real money.
 
-### 1. Promote Credit at Risk to a real risk surface
-- Change layout: left rule `border-l-[3px] border-destructive`, no rounded pill icon. Use **filled** `AlertTriangle` (`fill-destructive/15 stroke-destructive`) at 20px.
-- Number becomes the hero: `font-heading text-[32px] num text-destructive` on the right, with `dealersAtRisk.length` as primary and a secondary line `₹{atRiskAmount} outstanding`.
-- Label changes from "Credit at Risk" (12px) to `text-[11px] uppercase tracking-[0.18em] text-destructive/80` "AT RISK" with the human sentence "29 dealers over their credit limit" in `text-sm text-foreground`.
-- Hover: subtle `bg-destructive/[0.03]` wash, not the generic `card-hover` lift.
+- **`Billing.tsx`** (1055 lines): Outstanding total, Overdue >60d, Collected this month → hero card with Overdue as the promoted destructive surface (left rule, dealer count, ₹ amount, "X invoices past due"). Insight line under each tile (`▲ ₹X vs Apr`, "Avg DSO 18d"). Invoice rows: pending/overdue get left-bar StatusBadge (already shipped) plus row-level `border-l-2 border-destructive/40` when >60d overdue.
+- **`OrderDetail.tsx`** (868 lines): Promote "Balance due" when non-zero with the destructive surface treatment; demote "Subtotal/Tax/Discount" to hairline-divided strip. Payment status header → signal icon + 32px num. Add insight chip "Paid in 4 days" / "Overdue 12 days".
+- **`Claims.tsx`** (509): Pending claim value gets promoted to warning surface (Terracotta, since "approaching" not "breach"). Approved/rejected demoted.
 
-### 2. Introduce a 3-tier color semantic on Dashboard
-- **Calm (Forest/success)** — used for positive deltas, on-track targets, paid status. Currently unused on Dashboard hero — wire into "Delivered 67%" with a tiny `▲ 4%` in `text-success`.
-- **Attention (Terracotta/warning)** — used for "approaching limit" tier (e.g., dealers at 80–100% of credit limit, not yet over). Currently we jump straight from neutral to destructive. Add an "amber tier" mini-row above the destructive Credit at Risk card when relevant.
-- **Critical (Destructive)** — reserved for actual breach. The promoted card above.
+### PR13 — Inventory & operations
+- **`Stock.tsx`** (1004): Low-stock count → promoted destructive surface ("X SKUs below reorder point — ₹Y revenue at risk if dealer orders today"). Out-of-stock items get a row-level left-bar. "Healthy" stock gets a calm success dot, not a colored pill. Warehouse cards: utilization % gets the 3-tier color (≤70 success, 70–90 warning, >90 destructive).
+- **`Orders.tsx`** (400): Hero strip: "Pending dispatch" (warning), "Overdue delivery" (destructive), "Delivered this week" (success delta). Today's orders count → 32px num with `▲ vs yesterday`.
+- **`NewOrder.tsx`** (779): Credit-check inline result becomes a signal surface — when dealer is over limit, show the same red-left-bar block from Dashboard's Credit at Risk inline above the cart total (not a toast).
 
-### 3. Iconography hierarchy
-- Define three icon weights as utilities:
-  - `.icon-nav` — 16px stroke 1.5, `text-muted-foreground` (sidebar, table actions)
-  - `.icon-inline` — 14px stroke 1.75, current color (inline with text)
-  - `.icon-signal` — 20px stroke 2, filled background tint (alerts, hero metrics)
-- Apply across Dashboard, status surfaces, empty states. Replace generic `AlertTriangle` outline on Credit at Risk with the filled `signal` variant.
+### PR14 — People & performance
+- **`Dealers (Distributors).tsx`** (377): Lapsed dealers count → promoted warning surface ("12 dealers no order in 30+ days"). Top-revenue dealer chip → success surface with "▲ ₹X vs last month".
+- **`DealerDetail.tsx`** (585): Outstanding balance vs credit limit → promoted bar surface using 3-tier color based on utilization. "Last order 45 days ago" → warning insight chip in header, not buried in metadata.
+- **`Salespersons.tsx` + `SalespersonDetail.tsx`**: Target achievement % → 3-tier color hero (red <60, amber 60–90, success ≥90) with `▲ vs last month`. Promote "below target" reps as a warning row.
+- **`Performance.tsx`** (1054): This page is mostly KPI cards — heaviest refit. Convert top row to one hero (top mover / biggest drop) + hairline-divided supporting strip. Add MoM deltas everywhere. Add peak callouts to existing charts.
+- **`Targets.tsx`** (492): Behind-target reps/products → promoted warning/destructive surface with named list, not a generic count.
 
-### 4. Add an insight line to each KPI
-- Under each of the 4 "This Month" stats, add a 11px line: `▲ 12% vs Apr` / `▼ 3% vs Apr` / `On track` using `text-success` / `text-destructive` / `text-muted-foreground`.
-- For Outstanding: show "Avg 14 days" (DSO proxy) instead of a delta.
-- Keep the line optional via prop so empty/new accounts don't show noise.
+### PR15 — Detail/settings polish + global components
+- **`Schemes.tsx`** (601): Expiring schemes (next 7 days) → promoted warning surface. Active schemes count demoted.
+- **`Reports.tsx`, `Settings.tsx`, `Company.tsx`**: No KPIs but plenty of generic outline icons — apply `.icon-nav` vs `.icon-inline` distinction; promote unfinished setup steps in Settings (warning surface) similar to SetupChecklist.
+- **Global components**:
+  - `EntityHistory.tsx` / `ActivityLog.tsx`: critical events (payment failed, credit breach) get left-bar; routine events stay quiet.
+  - `NotificationCenter.tsx`: 3-tier semantic on notification type icons (currently all neutral).
+  - `EmptyState.tsx`: a calmer variant (`text-muted-foreground/40` headline, no big icon) for "no activity yet" cases to use across tables.
+- **New shared primitives** in `src/components/ui/`:
+  - `<SignalCard>` — the promoted surface used by Credit at Risk; props: `tier: 'success'|'warning'|'destructive'`, `icon`, `label`, `value`, `caption`, `insightLine`.
+  - `<KpiStrip>` — hairline-divided horizontal strip with insight-line slot per cell.
+  - `<InsightLine>` — `▲/▼/—` with delta + comparator + auto-color.
 
-### 5. Sparkline storytelling
-- Label the peak day inline: small `text-[10px]` chip anchored at the peak point with `Wed · ₹X`.
-- Label "today" with the same chip style at the rightmost point if non-zero.
-- Remove the redundant day-letter row underneath (SAT/SUN/...) when the chip carries the date — or keep but reduce to 8px opacity 0.35.
+Building these three first (start of PR12) lets every subsequent page swap in 5–10 lines instead of bespoke markup.
 
-### 6. Tame zero states
-- In "Daily breakdown" KPI row, when value is 0, render in `text-muted-foreground/40` at the same size, OR collapse the four cells into a single line "No activity yet — first order will appear here." This is the difference between "empty dashboard" and "broken dashboard".
+## Sequencing & sizing
 
-### 7. Section-title vs timeframe-chip distinction
-- "Daily breakdown" stays as the current uppercase tracked label (section title).
-- "This Month · May 2026" becomes a small **pill** with subtle background `bg-muted/40 px-2 py-0.5 rounded-full` so it reads as a *filter/timeframe*, not a section title.
+| PR | Pages | Effort | Why first |
+|----|-------|--------|-----------|
+| 12 | Shared primitives + Billing, OrderDetail, Claims | M | Money pages = highest user impact; primitives unblock the rest |
+| 13 | Stock, Orders, NewOrder | M | Operational daily-use surfaces |
+| 14 | Dealers, Salespersons, Performance, Targets, detail pages | L | Most KPI-heavy; biggest visual transformation |
+| 15 | Schemes, Reports, Settings, global components | S | Polish + consistency sweep |
 
-### 8. StatusBadge — quiet vs loud states
-- `paid`/`delivered` (good outcomes): keep current pill with dot.
-- `pending`/`partial` (needs attention): same pill but add a **2px left bar** in the status color so the eye scans action items down a column instantly.
-- `dispatched` (neutral in-flight): no bar, dot only.
+Each PR ends with a Playwright/manual screenshot pass and a memory note (`mem://style/pr12-…`).
 
-## Files touched
+## What this is NOT
 
-- `src/index.css` — `.icon-signal`, `.icon-inline`, `.icon-nav` utilities; insight-line + timeframe-pill helpers
-- `src/pages/Dashboard.tsx` — promote Credit at Risk, insight lines, sparkline chip, zero-state taming, timeframe pill
-- `src/components/ui/status-badge.tsx` — left-bar variant for `pending`/`partial`
-- Audit pass: 2–3 other pages that re-use these patterns (Orders header, Billing tiles) for one-shot consistency
+- Not a redesign — same layout, same routes, same data.
+- No new business logic. MoM deltas use existing data already in `DataContext`; where unavailable, the insight line is suppressed.
+- Landing/auth/dark mode untouched (already archived).
+- No mobile-specific redesign — desktop-first; mobile inherits via existing responsive utilities.
 
-## Out of scope
+## Out of scope / explicit non-goals
 
-- Landing/auth, dark mode, mobile redesign
-- Any data calculation (insight deltas use placeholder `compareWithPreviousMonth()` already in DataContext where available; otherwise the line is suppressed)
+- Charts library swap (Recharts stays).
+- New empty-state illustrations.
+- Reordering nav/IA.
+- Any change to PDF templates.
 
-## Verification
+## Risks
 
-Before/after screenshots of Dashboard at 1280×800. Confirm:
-- Credit at Risk card now visually outranks the neutral KPI strip
-- Three color tiers (Forest / Terracotta / Destructive) all appear at least once
-- No regression on contrast ratios; focus rings still visible
+- **Color overuse.** If every page promotes something, nothing stands out. Rule: max **one** promoted surface per page above the fold, max **two** total per page.
+- **Insight-line noise.** Suppress when sample size <2 months or value is 0. Better no line than `▲ 0%`.
+- **Primitive churn.** Build `SignalCard` / `KpiStrip` / `InsightLine` once at start of PR12, freeze API, then propagate.
+
+## Deliverable per PR
+
+- Working pages
+- Before/after screenshots at 1280×800
+- Memory file `mem://style/prNN-…`
+- Updated `mem://index.md`
+
+Ready to start with PR12 (shared primitives + money pages) when you approve.
