@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Table, Compass, Laptop } from "lucide-react";
+import { MessageCircle, Table, Compass, Laptop, AlertCircle } from "lucide-react";
 import { useParallaxY } from "@/lib/motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
@@ -52,9 +52,18 @@ export function Problem() {
             return (
               <StaggerItem key={card.title}>
                 <div className={`${isFeatured ? "lp-card-tinted lp-card-terracotta" : "lp-card"} p-7 h-full flex flex-col`}>
-                  <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
-                    <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
-                  </div>
+                  {isFeatured ? (
+                    <div className="mb-5">
+                      <span className="lp-pill lp-pill--warn">
+                        <span className="lp-pill__tile"><AlertCircle size={12} strokeWidth={2.5} /></span>
+                        <span className="lp-pill__label num-tabular">11:47 PM · Sunday</span>
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
+                      <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
+                    </div>
+                  )}
                   <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                     {card.title}
                   </h3>

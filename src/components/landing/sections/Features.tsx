@@ -1,4 +1,4 @@
-import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw } from "lucide-react";
+import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw, CheckCircle2, AlertCircle, Clock, ArrowUpRight, BadgeCheck, Wallet } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const features = [
@@ -9,6 +9,72 @@ const features = [
   { icon: IndianRupee, title: "GST Automation", desc: "Invoices, estimates, credit notes — one tap. CGST, SGST, IGST done." },
   { icon: RotateCcw, title: "Returns & Claims", desc: "Handled cleanly. No arguments. Full paper trail, every time." },
 ];
+
+/** Mini dealer roster — three rows with status pills */
+function DealerPreview() {
+  const rows = [
+    { name: "Aryan Beverages", status: "Active", variant: "success" as const, icon: CheckCircle2 },
+    { name: "Nova Retail Co.", status: "Slow", variant: "warn" as const, icon: Clock },
+    { name: "Coastal Naturals", status: "At risk", variant: "neutral" as const, icon: AlertCircle },
+  ];
+  return (
+    <div className="mt-5 space-y-2">
+      {rows.map((r) => (
+        <div
+          key={r.name}
+          className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white/90 backdrop-blur-sm"
+          style={{
+            color: "hsl(var(--foreground))",
+            boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)",
+          }}
+        >
+          <span className="font-body text-[13px] font-medium truncate" style={{ color: "hsl(var(--foreground))" }}>{r.name}</span>
+          <span className={`lp-pill lp-pill--${r.variant}`} style={{ padding: "4px 9px 4px 4px", boxShadow: "none" }}>
+            <span className="lp-pill__tile" style={{ width: 18, height: 18, borderRadius: 6 }}>
+              <r.icon size={10} strokeWidth={2.5} />
+            </span>
+            <span className="lp-pill__label" style={{ fontSize: 11.5 }}>{r.status}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Mini claim timeline — three status nodes */
+function ClaimPreview() {
+  const steps = [
+    { label: "Submitted", variant: "info" as const, icon: ArrowUpRight },
+    { label: "Approved", variant: "success" as const, icon: BadgeCheck },
+    { label: "Paid", variant: "success" as const, icon: Wallet },
+  ];
+  return (
+    <div className="mt-5">
+      <div
+        className="flex items-center justify-between gap-2 px-3 py-3 rounded-xl bg-white/85 backdrop-blur-sm"
+        style={{ boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)" }}
+      >
+        {steps.map((s, idx) => (
+          <div key={s.label} className="flex items-center gap-2 flex-1">
+            <span className={`lp-pill lp-pill--${s.variant}`} style={{ padding: "4px 9px 4px 4px", boxShadow: "none" }}>
+              <span className="lp-pill__tile" style={{ width: 18, height: 18, borderRadius: 6 }}>
+                <s.icon size={10} strokeWidth={2.5} />
+              </span>
+              <span className="lp-pill__label" style={{ fontSize: 11.5 }}>{s.label}</span>
+            </span>
+            {idx < steps.length - 1 && (
+              <span className="flex-1 h-px bg-border" aria-hidden />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between px-1">
+        <span className="font-body text-[12px]" style={{ color: "hsl(var(--accent-foreground) / 0.78)" }}>Claim #4821</span>
+        <span className="font-body text-[13px] font-semibold num-tabular" style={{ color: "hsl(var(--accent-foreground))" }}>₹38,400</span>
+      </div>
+    </div>
+  );
+}
 
 export function Features() {
   return (
@@ -43,6 +109,8 @@ export function Features() {
                   <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                     {feature.desc}
                   </p>
+                  {i === 0 && <DealerPreview />}
+                  {i === 5 && <ClaimPreview />}
                 </div>
               </StaggerItem>
             );

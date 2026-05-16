@@ -93,6 +93,17 @@ export function Outcome() {
                         <p className="font-body text-[13.5px] leading-[1.5] text-muted-foreground">
                           {o.label}
                         </p>
+
+                        <div className="mt-5">
+                          <span className="lp-pill-metric">
+                            <span className="lp-pill-metric__tile">
+                              <TrendingUp size={13} strokeWidth={2.2} />
+                            </span>
+                            <span className="lp-pill-metric__label">This quarter</span>
+                            <span className="lp-pill-metric__value">₹14.2L</span>
+                            <span className="lp-pill-metric__delta lp-pill-metric__delta--up">↑ 18%</span>
+                          </span>
+                        </div>
                       </div>
                     </StaggerItem>
                   );

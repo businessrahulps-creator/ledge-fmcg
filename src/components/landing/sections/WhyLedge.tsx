@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, ShieldCheck, FileText } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, FileText, Sparkles, ArrowRight } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
@@ -61,9 +61,24 @@ export function WhyLedge() {
                   <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
                     {block.content}
                   </p>
-                  <div className="mt-auto pt-6 flex justify-end">
-                    <block.icon size={16} strokeWidth={1.6} className={`lp-icon-premium ${isHero ? "text-accent/80" : "text-[hsl(var(--muted-foreground)/0.7)]"}`} />
-                  </div>
+                  {isHero ? (
+                    <div className="lp-insight lp-insight--on-dark mt-5">
+                      <div className="lp-insight__header">
+                        <Sparkles size={13} strokeWidth={2} />
+                        Field signal
+                      </div>
+                      <p className="lp-insight__body">
+                        3 orders queued in Wayanad. Will sync the moment signal returns.
+                      </p>
+                      <span className="lp-insight__link">
+                        See queue <ArrowRight size={12} strokeWidth={2.5} />
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mt-auto pt-6 flex justify-end">
+                      <block.icon size={16} strokeWidth={1.6} className="lp-icon-premium text-[hsl(var(--muted-foreground)/0.7)]" />
+                    </div>
+                  )}
                 </div>
               </StaggerItem>
             );
