@@ -134,13 +134,13 @@ describe("useOrdersDomain", () => {
     expect(addResult.success).toBe(false);
   });
 
-  it("updateOrder — dispatched triggers stock deduction", async () => {
+  it("updateOrder — dispatched calls dispatch_order_atomic RPC", async () => {
     const deps = makeDeps();
     const chain = createChainMock({ data: null, error: null });
     mockFrom.mockReturnValue(chain);
+    mockRpc.mockResolvedValueOnce({ data: { ok: true, warnings: [], lines: 1 }, error: null });
 
     const { result } = renderHook(() => useOrdersDomain(deps));
-    // Seed an order in state
     await act(async () => {
       result.current.setOrders([makeOrder({ id: "o1", orderNumber: "ORD-1", godownId: "g1" })]);
     });
@@ -149,9 +149,25 @@ describe("useOrdersDomain", () => {
       await result.current.updateOrder("o1", { deliveryStatus: "dispatched" });
     });
 
-    expect(deps.deductStockForOrder).toHaveBeenCalledWith(
-      "o1", expect.any(Array), "g1", "company-1"
-    );
+    expect(mockRpc).toHaveBeenCalledWith("dispatch_order_atomic", expect.objectContaining({ p_order_id: "o1" }));
+    expect(deps.safeRefetchStockItems).toHaveBeenCalled();
+  });
+
+  it("updateOrder — delivered after dispatched does NOT re-deduct", async () => {
+    const deps = makeDeps();
+    const chain = createChainMock({ data: null, error: null });
+    mockFrom.mockReturnValue(chain);
+
+    const { result } = renderHook(() => useOrdersDomain(deps));
+    await act(async () => {
+      result.current.setOrders([makeOrder({ id: "o1", orderNumber: "ORD-1", godownId: "g1", deliveryStatus: "dispatched" })]);
+    });
+
+    await act(async () => {
+      await result.current.updateOrder("o1", { deliveryStatus: "delivered" });
+    });
+
+    expect(mockRpc).not.toHaveBeenCalledWith("dispatch_order_atomic", expect.anything());
   });
 
   it("updateOrder — delivered after dispatched does NOT re-deduct", async () => {
