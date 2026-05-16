@@ -99,18 +99,22 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Right - Dashboard Mockup with 3-layer treatment */}
-        <div className="lg:col-span-5 w-full" style={{ perspective: "1400px" }}>
+        {/* Right - Dashboard Mockup with 3-layer treatment + scroll-scrubbed lift */}
+        <motion.div
+          className="lg:col-span-5 w-full"
+          style={{ perspective: "1400px", y: deviceY, scale: deviceScale, willChange: "transform" }}
+        >
           <motion.div
             initial={{ x: 30, opacity: 0, rotateY: 0, rotateX: 0 }}
             animate={{ x: 0, opacity: 1, rotateY: -5, rotateX: 3 }}
-            transition={{ ...spring.gentle as object, delay: 0.2 }}
+            transition={{ duration: duration.long, ease: ease.emphasized, delay: 0.2 }}
           >
             <motion.div
-              animate={{ y: [0, -6, 0] }}
+              animate={reduce ? undefined : { y: [0, -6, 0] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
+
               {/* Layer 1 — neutral graphite ambient shadow */}
               <div
                 aria-hidden
