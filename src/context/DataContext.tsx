@@ -377,22 +377,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!companyId || !authReady) return;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+    // Coalesce bursty inserts (e.g. 50 order_lines from one order) into a single
+    // refetch per table on a 250ms trailing edge. Cuts realtime fan-out cost
+    // dramatically when one user is doing bulk work.
+    const debouncedRefetch = (key: string, fn: () => any) => {
+      const existing = timers.get(key);
+      if (existing) clearTimeout(existing);
+      timers.set(key, setTimeout(() => { timers.delete(key); fn(); }, 250));
+    };
 
     const subscribe = () => {
       if (!navigator.onLine) return;
       channel = supabase
         .channel(`company-${companyId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => { orders.safeRefetch(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => { dealers.safeRefetch(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => { salespersons.safeRefetch(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => { catalog.safeRefetchProducts(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => { stock.safeRefetchGodowns(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => { stock.safeRefetchStockItems(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => { catalog.safeRefetchSchemes(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'claims', filter: `company_id=eq.${companyId}` }, () => { billing.safeRefetchClaims(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, () => { billing.safeRefetchInvoices(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => { targets.safeRefetchTargets(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => { targets.safeRefetchSecondarySales(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('orders', orders.safeRefetch))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('distributors', dealers.safeRefetch))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('salespersons', salespersons.safeRefetch))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('products', catalog.safeRefetchProducts))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('godowns', stock.safeRefetchGodowns))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('stock_items', stock.safeRefetchStockItems))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('schemes', catalog.safeRefetchSchemes))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'claims', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('claims', billing.safeRefetchClaims))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('invoices', billing.safeRefetchInvoices))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('targets', targets.safeRefetchTargets))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('secondary_sales', targets.safeRefetchSecondarySales))
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') console.warn('Realtime channel error — will retry automatically');
         });
@@ -408,6 +418,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
+      timers.forEach(t => clearTimeout(t));
+      timers.clear();
       if (channel) supabase.removeChannel(channel);
     };
   }, [companyId, authReady]);
