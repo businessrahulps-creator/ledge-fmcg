@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Table, Compass, Laptop } from "lucide-react";
+import { MessageCircle, Table, Compass, Laptop, AlertCircle } from "lucide-react";
 import { useParallaxY } from "@/lib/motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
