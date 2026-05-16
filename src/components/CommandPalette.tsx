@@ -159,6 +159,27 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>No matches. Try a different search.</CommandEmpty>
 
+        {!q && recent.length > 0 && (
+          <>
+            <CommandGroup heading="Recent">
+              {recent.map((r) => (
+                <CommandItem
+                  key={`recent-${r.to}`}
+                  value={`recent ${r.label.toLowerCase()} ${r.hint?.toLowerCase() ?? ""}`}
+                  onSelect={() => go(r.to)}
+                >
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{r.label}</span>
+                  {r.hint && (
+                    <span className="ml-2 truncate text-xs text-muted-foreground">{r.hint}</span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+
         <CommandGroup heading="Quick actions">
           <CommandItem value="new-order action create" onSelect={() => go("/orders/new")}>
             <Plus className="mr-2 h-4 w-4 text-muted-foreground" />
