@@ -288,14 +288,17 @@ export default function Settings() {
     }
     setSaving(true);
     try {
-      await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
-      await supabase.from("profiles").delete().eq("id", deleteMember.id);
-      toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
-      addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
-      setDeleteMember(null);
-      await loadTeam();
-    } catch (err: any) {
-      toast.error("Error", { description: err?.message || "Failed to remove member" });
+      const { error } = await supabase.rpc("delete_member_atomic" as any, { member_id: deleteMember.id });
+      if (error) {
+        handleSupabaseError(error, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
+      } else {
+        toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
+        addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
+        setDeleteMember(null);
+        await loadTeam();
+      }
+    } catch (err) {
+      handleSupabaseError(err, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
     }
     setSaving(false);
   };
