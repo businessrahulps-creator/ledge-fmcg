@@ -129,6 +129,7 @@ const App = () => (
                   <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Performance /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Settings /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><Help /></Suspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><Suspense fallback={Loader}><AdminErrors /></Suspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />
