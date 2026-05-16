@@ -16,9 +16,6 @@ import {
   RotateCcw,
   FileText,
   Landmark,
-  BookOpen,
-  History,
-  AlertTriangle,
 } from "lucide-react";
 import {
   Sidebar,
