@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const DEMO_PASSWORD = Deno.env.get("DEMO_ACCOUNT_PASSWORD") ?? "";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 function uuid() { return crypto.randomUUID(); }
@@ -302,9 +303,15 @@ Deno.serve(async (req) => {
     }
 
     // 1. Create auth user
+    if (!DEMO_PASSWORD) {
+      return new Response(
+        JSON.stringify({ error: "Server is missing DEMO_ACCOUNT_PASSWORD secret" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
     const { data: authData, error: authErr } = await admin.auth.admin.createUser({
       email: "asha@getledge.in",
-      password: "LedgeDemo2026",
+      password: DEMO_PASSWORD,
       email_confirm: true,
       user_metadata: { full_name: "Asha Menon", company_name: COMPANY.name },
     });
