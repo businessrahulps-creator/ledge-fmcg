@@ -1,73 +1,46 @@
-## The Ledge Toaster — Editorial Serif edition
+# Fix: page keeps "snapping back" / feels unstable
 
-A single, global Sonner restyle that becomes the most refined notification surface in the app. White card, Midnight ink, Playfair title + Inter body, semantic left bar, and a Terracotta progress thread that drains as the toast lives. Slide + soft scale in with Fluent decel, fade + accel out.
+## What's actually happening
 
-### Anatomy
+You're not being navigated to `/dashboard` by code — no page does that on its own except `/` (the landing page) when you're logged in. What you're seeing is a **loading flash** that looks like a refresh:
 
-```text
-┌─┬───────────────────────────────────────────┐
-│ │  ◐  Order saved                       ✕   │   ← Playfair title (16/22, Midnight)
-│▌│      Invoice #1042 sent to Ramesh & Sons. │   ← Inter description (13/18, muted)
-│ │      ────────────  Undo                   │   ← optional action (Terracotta link)
-└─┴───────────────────────────────────────────┘
-   ━━━━━━━━━━━━━━━━━━━━━━━━━░░░░░░░░░░░  ← Terracotta progress, drains over duration
-```
+1. Every time the tab regains focus, `AuthContext`'s `visibilitychange` handler unconditionally calls `supabase.auth.getSession()`, then `setSession`, `setUser`, and `fetchProfile(user.id)` — even when the session hasn't changed.
+2. Supabase also fires `onAuthStateChange` (`TOKEN_REFRESHED`) periodically. The current handler reacts by setting `profileLoaded = false` and re-running `fetchProfile`, again even when nothing changed.
+3. `fetchProfile` always calls `setProfile(...)` with a new object reference. `AuthContext`'s value object is rebuilt every render (no `useMemo`), so every consumer (`AppLayout`, `DataProvider`, `NoCompanyGuard`, sidebar, topbar, all pages) re-renders.
+4. While `profileLoaded` momentarily flips to `false`, downstream UI shows skeletons / spinners for ~200–800ms. The visual effect feels like "the page reset and went back to dashboard".
 
-- 4px colored **left bar** (Forest / Terracotta / Destructive / Midnight for default)
-- 18px lucide icon, weight 1.75, color-matched to the bar
-- White card (`bg-card`), 1px `surface-border`, `rounded-md` (6px), `shadow-depth-16`
-- 1px hairline divider between body and progress
-- 360px wide desktop, full-width minus 16px on mobile
-- Stack: bottom-right desktop, top-center mobile (already in sonner.tsx)
+There is also an auto-recovery `setup_new_company` RPC that re-runs inside every `fetchProfile` if `company_id` is missing — extra network noise that compounds the flicker.
 
-### Motion
+## Fix plan (frontend only, AuthContext)
 
-- **Enter**: `translateX(16px) scale(0.98) opacity:0 → 0 1 1`, 220ms `ease-fluent-decel`
-- **Sit**: hover deepens to `shadow-depth-28` and **pauses** the progress thread
-- **Exit**: `translateX(24px) opacity:0`, 160ms `ease-fluent-accel`
-- **Progress**: CSS `@keyframes drain` from `scaleX(1)` → `scaleX(0)` over `--toast-duration` (default 4000ms), `transform-origin:left`, paused via `animation-play-state` on hover/focus-within
-- Stack stagger: each subsequent toast offsets 6px and dims 4% (Sonner native, kept)
+**File: `src/context/AuthContext.tsx`**
 
-### Variants (semantic)
+1. **Make `setSession` / `setUser` idempotent.** Wrap the state setters so they only update when the session's `access_token` or user `id` actually changed. This stops `TOKEN_REFRESHED` and visibility re-checks from forcing every consumer to re-render.
+2. **Stop resetting `profileLoaded` on token refresh.** In `onAuthStateChange`, only call `setProfileLoaded(false)` + `fetchProfile` when:
+   - the event is `SIGNED_IN` AND the user id changed from the previous session, or
+   - the event is `SIGNED_OUT`.
+   Ignore `TOKEN_REFRESHED`, `USER_UPDATED`, `INITIAL_SESSION` for profile refetch purposes — they don't change who the user is.
+3. **Throttle the `visibilitychange` re-check.** Only call `getSession()` if it's been more than ~60s since the last check, and only call `fetchProfile` if the returned user id differs from the one already in state. Never set `profileLoaded` to `false` here.
+4. **Skip the `setProfile` write when the new row is equivalent.** Compare `id`, `company_id`, `full_name`, `email`, `phone`; if all match, keep the existing object reference. This avoids re-rendering every consumer on a no-op refresh.
+5. **Gate the `setup_new_company` auto-recovery.** Only attempt the RPC once per session (track with a `useRef`), not on every visibility tick.
+6. **Memoize the context value** with `useMemo` so consumers don't re-render just because `AuthProvider` re-rendered.
 
-| Variant     | Bar / Icon color           | Icon            |
-| ----------- | -------------------------- | --------------- |
-| default     | `--primary` (Midnight)     | `Info`          |
-| success     | `--success` (Forest)       | `CheckCircle2`  |
-| warning     | `--warning` (Terracotta)   | `AlertTriangle` |
-| error       | `--destructive`            | `XCircle`       |
-| loading     | Midnight + spinner         | `Loader2` spin  |
+## Expected result
 
-All colors via semantic tokens — no raw hex.
+- Switching tabs / coming back from background no longer flashes skeletons or loaders.
+- Token refresh (every ~50 min) becomes invisible to the UI.
+- DataContext stops being nudged into recomputing memos when profile content is unchanged.
+- No functional change to sign-in, sign-out, or workspace setup.
 
-### Files to change
+## Out of scope
 
-1. **`src/components/ui/sonner.tsx`** — rewrite `toastOptions.classNames` to apply the new layout, left bar (`before:` pseudo with semantic color), Playfair title (`font-heading`), Inter body, hairline divider, and the progress wrapper. Pass `icons={{ success, error, warning, info, loading }}` from lucide-react so every toast gets the right glyph. Set `duration: 4000`, `closeButton: true`, `gap: 10`.
-2. **`src/index.css`** — add a small block:
-   - `@keyframes ledge-toast-drain { from { transform: scaleX(1) } to { transform: scaleX(0) } }`
-   - `.ledge-toast-progress { animation: ledge-toast-drain var(--toast-duration,4000ms) linear forwards; transform-origin:left }`
-   - `[data-sonner-toast]:hover .ledge-toast-progress { animation-play-state: paused }`
-   - Optional `[data-sonner-toast][data-styled="true"]` overrides to reset Sonner's default padding so our layout owns spacing.
-3. **No changes** to `toast.tsx` / `toaster.tsx` (legacy Radix) — per scope, Sonner only. Existing `toast.success/error/...` callers across the app keep working unchanged.
+- No router/redirect logic is being changed (none is misbehaving).
+- No DataContext refactor — its effects already key on `companyId` (a stable string), so once `AuthContext` is calmed down, downstream churn disappears.
+- Service worker / offline mode (still paused).
 
-### Accessibility & polish
+## Verification
 
-- `role="status"` for default/success, `role="alert"` for error/warning (Sonner default, preserved)
-- Focus ring on close + action uses `--ring` (Midnight) via `shadow-focus`
-- Respect `prefers-reduced-motion`: disable drain animation and enter scale, keep opacity fade only
-- Tap target: close = 32×32 (matches `--control-h-compact`)
-- Max 3 visible toasts (Sonner `visibleToasts={3}`), rest queue
-
-### Out of scope
-
-- Legacy `useToast` / Radix toast (kept as-is; nothing in the app currently uses it for new code)
-- Landing-page-only toast variants — global Sonner already covers the landing
-- New `toast.promise()` styling beyond inheriting loading variant
-- Memory file update — will append a short note to `mem://style/toast-notifications` after implementation lands
-
-### Verification
-
-- Trigger one of each variant from `AdminErrors` or `Settings` dev hook → screenshot at 1202×875 and 390×844
-- Confirm progress drains, pauses on hover, resumes on leave
-- Confirm `prefers-reduced-motion: reduce` collapses to a quiet fade
-- Build passes, no console warnings from Sonner about unknown classNames keys
+- Open `/orders`, switch to another tab for 30s, come back → page should stay on `/orders` with no skeleton flash.
+- Leave tab idle for 60+ min so the Supabase access token refreshes → no visible reload.
+- Sign out / sign in → still works, lands on `/dashboard` once.
+- `NoCompanyGuard` still triggers correctly for a fresh user with no company.
