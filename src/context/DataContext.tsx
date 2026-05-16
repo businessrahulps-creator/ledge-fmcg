@@ -412,25 +412,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [companyId, authReady]);
 
-  // Computed values
-  const computedDistributors = useMemo(() =>
-    dealers.rawDistributors.map(d => {
-      const dOrders = orders.orders.filter(o => o.distributorId === d.id);
-      return { ...d, totalOrders: dOrders.length, totalValue: dOrders.reduce((s, o) => s + o.total, 0) };
-    }), [dealers.rawDistributors, orders.orders]);
-
-  const computedSalespersons = useMemo(() =>
-    salespersons.rawSalespersons.map(s => {
-      const sOrders = orders.orders.filter(o => o.salespersonId === s.id);
-      return { ...s, totalOrders: sOrders.length, totalValue: sOrders.reduce((sum, o) => sum + o.total, 0) };
-    }), [salespersons.rawSalespersons, orders.orders]);
-
-  const computedProducts = useMemo(() =>
-    catalog.rawProducts.map(p => {
-      const totalSold = orders.orders.reduce((sum, o) =>
-        sum + o.lines.filter(l => l.productId === p.id).reduce((s, l) => s + l.quantity, 0), 0);
-      return { ...p, totalSold };
-    }), [catalog.rawProducts, orders.orders]);
+  // The `refresh_entity_aggregates` Postgres trigger keeps total_orders,
+  // total_value, outstanding_amount, and total_sold accurate in the DB.
+  // We trust those columns instead of recomputing client-side every render
+  // (the old O(N×M) recompute was a major source of jank on large tenants).
+  const computedDistributors = dealers.rawDistributors;
+  const computedSalespersons = salespersons.rawSalespersons;
+  const computedProducts = catalog.rawProducts;
 
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
@@ -442,29 +430,44 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setCompanyInfo(prev => ({ ...prev, ...updates }));
   }, []);
 
-  return (
-    <DataContext.Provider
-      value={{
-        orders: orders.orders, distributors: computedDistributors, salespersons: computedSalespersons,
-        products: computedProducts, locations: stock.locations, stockItems: stock.stockItems,
-        schemes: catalog.schemes, loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
-        orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
-        addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
-        addDistributor: dealers.add, updateDistributor: dealers.update, deleteDistributor: dealers.remove,
-        addSalesperson: salespersons.add, updateSalesperson: salespersons.update, deleteSalesperson: salespersons.remove,
-        addProduct: catalog.addProduct, updateProduct: catalog.updateProduct, deleteProduct: catalog.deleteProduct,
-        addLocation: stock.addLocation, updateLocation: stock.updateLocation, deleteLocation: stock.deleteLocation,
-        addStockItem: stock.addStockItem, updateStockItem: stock.updateStockItem, deleteStockItem: stock.deleteStockItem,
-        setStockItems: stock.setStockItems,
-        addScheme: catalog.addScheme, updateScheme: catalog.updateScheme, deleteScheme: catalog.deleteScheme,
-        secondarySales: targets.secondarySales, addSecondarySale: targets.addSecondarySale, deleteSecondarySale: targets.deleteSecondarySale,
-        targets: targets.targets, addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
-        claims: billing.claims, addClaim: billing.addClaim, updateClaim: billing.updateClaim,
-        invoices: billing.invoices, addInvoice: billing.addInvoice, updateInvoice: billing.updateInvoice, deleteInvoice: billing.deleteInvoice,
-        nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber, refreshAll,
-      }}
-    >
-      {children}
-    </DataContext.Provider>
-  );
+  // Memoize the context value so consumers don't re-render on every parent tick.
+  // Keyed on the underlying state references that actually change.
+  const value = useMemo<DataContextType>(() => ({
+    orders: orders.orders, distributors: computedDistributors, salespersons: computedSalespersons,
+    products: computedProducts, locations: stock.locations, stockItems: stock.stockItems,
+    schemes: catalog.schemes, loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
+    addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
+    addDistributor: dealers.add, updateDistributor: dealers.update, deleteDistributor: dealers.remove,
+    addSalesperson: salespersons.add, updateSalesperson: salespersons.update, deleteSalesperson: salespersons.remove,
+    addProduct: catalog.addProduct, updateProduct: catalog.updateProduct, deleteProduct: catalog.deleteProduct,
+    addLocation: stock.addLocation, updateLocation: stock.updateLocation, deleteLocation: stock.deleteLocation,
+    addStockItem: stock.addStockItem, updateStockItem: stock.updateStockItem, deleteStockItem: stock.deleteStockItem,
+    setStockItems: stock.setStockItems,
+    addScheme: catalog.addScheme, updateScheme: catalog.updateScheme, deleteScheme: catalog.deleteScheme,
+    secondarySales: targets.secondarySales, addSecondarySale: targets.addSecondarySale, deleteSecondarySale: targets.deleteSecondarySale,
+    targets: targets.targets, addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
+    claims: billing.claims, addClaim: billing.addClaim, updateClaim: billing.updateClaim,
+    invoices: billing.invoices, addInvoice: billing.addInvoice, updateInvoice: billing.updateInvoice, deleteInvoice: billing.deleteInvoice,
+    nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber, refreshAll,
+  }), [
+    orders.orders, computedDistributors, computedSalespersons, computedProducts,
+    stock.locations, stock.stockItems, catalog.schemes,
+    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    orders.orderPrefix, orders.orderSequence, orders.setOrderPrefix,
+    orders.addOrder, orders.updateOrder, orders.deleteOrder,
+    dealers.add, dealers.update, dealers.remove,
+    salespersons.add, salespersons.update, salespersons.remove,
+    catalog.addProduct, catalog.updateProduct, catalog.deleteProduct,
+    stock.addLocation, stock.updateLocation, stock.deleteLocation,
+    stock.addStockItem, stock.updateStockItem, stock.deleteStockItem, stock.setStockItems,
+    catalog.addScheme, catalog.updateScheme, catalog.deleteScheme,
+    targets.secondarySales, targets.addSecondarySale, targets.deleteSecondarySale,
+    targets.targets, targets.addTarget, targets.updateTarget, targets.deleteTarget,
+    billing.claims, billing.addClaim, billing.updateClaim,
+    billing.invoices, billing.addInvoice, billing.updateInvoice, billing.deleteInvoice,
+    orders.nextOrderNumber, orders.previewOrderNumber, refreshAll,
+  ]);
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
