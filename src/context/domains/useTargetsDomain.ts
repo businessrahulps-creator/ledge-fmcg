@@ -5,6 +5,7 @@ import type { DomainDeps, SecondarySale, Target } from "@/context/data-types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
+import { fetchAllChunked } from "@/context/data-utils";
 
 export function useTargetsDomain(deps: DomainDeps) {
   const [targets, setTargets] = useState<Target[]>([]);
