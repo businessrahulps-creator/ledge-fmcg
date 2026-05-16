@@ -218,32 +218,69 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   const ID_CHUNK = 500;
   const PAGE = 1000;
   const MAX_PAGES = 200; // safety cap: 200k rows per id-chunk
-  const results: any[] = [];
-  const totalChunks = Math.ceil(ids.length / ID_CHUNK);
-  let totalPages = 0;
+  const PAGE_CONCURRENCY = 4;  // pages fetched in parallel within an id-chunk
+  const CHUNK_CONCURRENCY = 4; // id-chunks fetched in parallel
+
+  // Build id-chunks
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += ID_CHUNK) chunks.push(ids.slice(i, i + ID_CHUNK));
+  const totalChunks = chunks.length;
+
   let truncated = false;
-  for (let i = 0; i < ids.length; i += ID_CHUNK) {
-    const chunk = ids.slice(i, i + ID_CHUNK);
-    let pagesThisChunk = 0;
-    for (let page = 0; page < MAX_PAGES; page++) {
-      const from = page * PAGE;
-      const to = from + PAGE - 1;
-      const { data, error } = await supabase
-        .from(table as any)
-        .select("*")
-        .in(column, chunk)
-        .range(from, to) as any;
-      if (error) throw error;
-      const rows = (data || []) as any[];
-      results.push(...rows);
-      pagesThisChunk++;
-      totalPages++;
-      if (rows.length < PAGE) break;
-      if (page === MAX_PAGES - 1 && rows.length === PAGE) {
-        truncated = true;
+  let totalPages = 0;
+
+  // Fetch all pages for one id-chunk in waves of PAGE_CONCURRENCY. We don't know
+  // up-front how many pages exist, so each wave fires N speculative range
+  // requests at once. The wave loop stops as soon as any page returns < PAGE
+  // rows (the natural end of the result set), preserving the early-exit
+  // semantics of the previous sequential implementation while collapsing
+  // round-trip latency.
+  async function fetchChunk(chunk: string[]): Promise<any[]> {
+    const chunkRows: any[] = [];
+    let done = false;
+    for (let wave = 0; wave < MAX_PAGES && !done; wave += PAGE_CONCURRENCY) {
+      const waveSize = Math.min(PAGE_CONCURRENCY, MAX_PAGES - wave);
+      const pages = await Promise.all(
+        Array.from({ length: waveSize }, async (_, k) => {
+          const page = wave + k;
+          const from = page * PAGE;
+          const to = from + PAGE - 1;
+          const { data, error } = await supabase
+            .from(table as any)
+            .select("*")
+            .in(column, chunk)
+            .range(from, to) as any;
+          if (error) throw error;
+          return (data || []) as any[];
+        }),
+      );
+      // Preserve order: append pages in request order, stop at the first short
+      // page within this wave so we never count rows past the natural end.
+      for (const rows of pages) {
+        chunkRows.push(...rows);
+        totalPages++;
+        if (rows.length < PAGE) {
+          done = true;
+          break;
+        }
       }
+      // Safety cap: if we just finished the final wave and the last page was
+      // still full, the result set is larger than we're willing to fetch.
+      if (!done && wave + waveSize >= MAX_PAGES) truncated = true;
     }
+    return chunkRows;
   }
+
+  // Fetch id-chunks in parallel, capped at CHUNK_CONCURRENCY to avoid hammering
+  // PostgREST. Results are pushed in completion order — caller code already
+  // joins by id, never assumes order.
+  const results: any[] = [];
+  for (let i = 0; i < chunks.length; i += CHUNK_CONCURRENCY) {
+    const slice = chunks.slice(i, i + CHUNK_CONCURRENCY);
+    const settled = await Promise.all(slice.map(fetchChunk));
+    for (const rows of settled) results.push(...rows);
+  }
+
   if (truncated) {
     warnTruncationOnce(
       `${table}.${column}`,
