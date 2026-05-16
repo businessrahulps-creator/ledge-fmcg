@@ -134,14 +134,17 @@ export default function Dashboard() {
   const ordersDelta = pctDelta(monthOrderCount, prevMonthOrderCount);
   const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
   // DSO proxy: avg days since order for outstanding orders
+  const outstandingOrders = useMemo(
+    () => monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial"),
+    [monthlyOrders],
+  );
   const avgOutstandingDays = useMemo(() => {
-    const outstandingOrders = monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial");
     if (outstandingOrders.length === 0) return 0;
     return Math.round(outstandingOrders.reduce((s, o) => {
       const days = Math.max(0, Math.floor((today.getTime() - new Date(o.date + "T00:00:00").getTime()) / 86400000));
       return s + days;
     }, 0) / outstandingOrders.length);
-  }, [monthlyOrders, today]);
+  }, [outstandingOrders, today]);
 
   // 7-day revenue sparkline data
   const last7Days = useMemo(() => Array.from({ length: 7 }, (_, i) => {
