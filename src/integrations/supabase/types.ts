@@ -1482,6 +1482,12 @@ export type Database = {
     Functions: {
       aging_bucket_rank: { Args: { b: string }; Returns: number }
       check_aging_transitions: { Args: never; Returns: Json }
+      delete_member_atomic: {
+        Args: { member_id: string }
+        Returns: {
+          success: boolean
+        }[]
+      }
       dispatch_order_atomic: {
         Args: {
           p_dispatch_date?: string

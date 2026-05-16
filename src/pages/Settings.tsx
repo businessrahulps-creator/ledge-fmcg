@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { sanitizeInput } from "@/utils/sanitize";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -287,14 +288,17 @@ export default function Settings() {
     }
     setSaving(true);
     try {
-      await supabase.from("user_roles").delete().eq("id", deleteMember.roleId);
-      await supabase.from("profiles").delete().eq("id", deleteMember.id);
-      toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
-      addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
-      setDeleteMember(null);
-      await loadTeam();
-    } catch (err: any) {
-      toast.error("Error", { description: err?.message || "Failed to remove member" });
+      const { error } = await supabase.rpc("delete_member_atomic" as any, { member_id: deleteMember.id });
+      if (error) {
+        handleSupabaseError(error, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
+      } else {
+        toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
+        addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
+        setDeleteMember(null);
+        await loadTeam();
+      }
+    } catch (err) {
+      handleSupabaseError(err, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
     }
     setSaving(false);
   };
@@ -704,7 +708,7 @@ export default function Settings() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm">
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This action cannot be undone.
+                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This will remove the member and all their role assignments. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
