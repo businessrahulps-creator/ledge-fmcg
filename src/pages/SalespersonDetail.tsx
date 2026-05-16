@@ -72,7 +72,8 @@ export default function SalespersonDetail() {
             variant="outline"
             size="sm"
             className="h-9 gap-1.5 ml-13 sm:ml-0"
-            onClick={() => {
+            onClick={async () => {
+              const { SalespersonStatementPdf } = await import("@/components/pdf/SalespersonStatementPdf");
               downloadPdf(
                 pdfFilename("salesperson-statement", person.name.replace(/\s+/g, "-")),
                 SalespersonStatementPdf({
