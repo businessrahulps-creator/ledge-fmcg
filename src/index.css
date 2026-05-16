@@ -226,17 +226,60 @@
 }
 
 @layer utilities {
+  /* ── Editorial type system ── */
+  .h1-display {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: hsl(var(--foreground));
+  }
+  @media (min-width: 768px) {
+    .h1-display { font-size: 34px; }
+  }
+  .h2-display {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: hsl(var(--foreground));
+  }
+  .h1-subtitle {
+    @apply text-[13px] text-muted-foreground mt-1.5;
+  }
+
+  /* Tabular numerals — KPIs, tables, clocks, money */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "lnum";
+  }
+
+  /* Subtle text link — used for inline actions like Refresh */
+  .text-link {
+    @apply text-foreground/70 underline decoration-border underline-offset-[3px]
+           transition-colors hover:text-foreground hover:decoration-foreground/40
+           focus-visible:outline-none focus-visible:text-foreground;
+  }
+
+  /* Hairline gradient divider */
+  .section-divider {
+    height: 1px;
+    background-image: linear-gradient(to right, transparent, hsl(var(--border)) 20%, hsl(var(--border)) 80%, transparent);
+  }
+
   /* Fluent 2 surface — replaces glassmorphism. Same class name to keep
      consumer sites untouched during PR-by-PR rollout. */
   .glass-card {
-    @apply rounded-md bg-card border border-border/70 text-card-foreground;
-    box-shadow: var(--shadow-2);
+    @apply rounded-md bg-card border border-border/60 text-card-foreground;
+    box-shadow: var(--shadow-2), inset 0 1px 0 hsl(0 0% 100% / 0.6);
     transition: box-shadow var(--motion-normal) var(--motion-ease),
                 border-color var(--motion-normal) var(--motion-ease);
   }
 
   .row-hover {
-    @apply transition-[background-color] duration-150 ease-out hover:bg-muted/40;
+    @apply transition-[background-color] duration-150 ease-out hover:bg-muted/30;
   }
 
   .card-hover {
@@ -245,12 +288,12 @@
                 transform var(--motion-fast) var(--motion-ease);
   }
   .card-hover:hover {
-    box-shadow: var(--shadow-8);
+    box-shadow: var(--shadow-8), inset 0 1px 0 hsl(0 0% 100% / 0.6);
     border-color: hsl(var(--border));
   }
   .card-hover:active {
     transform: translateY(0.5px);
-    box-shadow: var(--shadow-2);
+    box-shadow: var(--shadow-2), inset 0 1px 0 hsl(0 0% 100% / 0.6);
   }
 
   .section-label {
