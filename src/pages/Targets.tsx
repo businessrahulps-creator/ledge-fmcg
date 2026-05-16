@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { SignalCard } from "@/components/ui/signal-card";
+import { KpiStrip } from "@/components/ui/kpi-strip";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
 
