@@ -26,8 +26,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              <span className="hidden sm:inline">The Operating System for Factory + Field</span>
-              <span className="sm:hidden">OS for Factory + Field</span>
+              <span className="hidden sm:inline">The Operating System for Kerala's FMCG Businesses</span>
+              <span className="sm:hidden">OS for Kerala's FMCG</span>
             </span>
           </motion.div>
 
@@ -35,17 +35,17 @@ export function Hero() {
             className="font-heading font-semibold text-[40px] md:text-[52px] text-foreground leading-[1.08] tracking-[-0.025em] mt-7"
             {...fadeUp(0.08)}
           >
-            Run your factory and field
+            Orders. Payments. Stock.
             <br />
-            the way they deserve.
+            Invoices. Reports. One mobile app.
           </motion.h1>
 
           <motion.p
             className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Orders, payments, stock, GST invoices, production. One mobile app.
-            Recover the <span className="font-semibold text-foreground">5–10% that leaks every year between your factory and your field</span>.
+            Built for distributors and FMCG owners in Kerala. Mobile-first. Works offline.
+            Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks every year between your factory and your field</span>.
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>
