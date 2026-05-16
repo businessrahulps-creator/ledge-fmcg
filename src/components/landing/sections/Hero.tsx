@@ -26,8 +26,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              <span className="hidden sm:inline">The Operating System for Kerala's FMCG Businesses</span>
-              <span className="sm:hidden">OS for Kerala's FMCG</span>
+              <span className="hidden sm:inline">The Operating System for India's FMCG Businesses</span>
+              <span className="sm:hidden">OS for India's FMCG</span>
             </span>
           </motion.div>
 
@@ -44,7 +44,7 @@ export function Hero() {
             className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Built for distributors and FMCG owners in Kerala. Mobile-first. Works offline.
+            Built for super-stockists and FMCG owners across India. Mobile-first. Works offline.
             Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks every year between your factory and your field</span>.
           </motion.p>
 
@@ -65,7 +65,7 @@ export function Hero() {
             className="font-body text-[13px] text-muted-foreground mt-8"
             {...fadeUp(0.32)}
           >
-            No card needed · 30-minute onboarding · Works on any phone · Built in India
+            No card needed · 30-minute onboarding · Works on any phone · Built in Kerala
           </motion.p>
         </div>
 

@@ -14,7 +14,7 @@ const capabilities = [
   {
     icon: Mic,
     title: "Voice Order Entry",
-    desc: "Speak the order in English or Malayalam. Done in 20 seconds.",
+    desc: "Speak the order in English or Hindi. Done in 20 seconds.",
   },
   {
     icon: Sparkles,
@@ -24,7 +24,7 @@ const capabilities = [
   {
     icon: Sunrise,
     title: "Natural Language Queries",
-    desc: "Ask in English or Malayalam. Get instant answers — no reports needed.",
+    desc: "Ask in English or Hindi. Get instant answers — no reports needed.",
   },
 ];
 
