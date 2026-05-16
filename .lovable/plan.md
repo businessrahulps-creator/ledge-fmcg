@@ -1,90 +1,80 @@
-## Backend & logic robustness pass
+# Platform tightening — findings & plan
 
-Extending the "noisy diagnostic toast" fix into a wider hygiene sweep across the DB, error handling, and Supabase function surface. Grouped from highest impact → lowest.
+Audited against Lovable + Supabase SaaS best practices. Most of the basics are already in place (RLS everywhere, roles in `user_roles`, `handleSupabaseError`, error_log rate limit, atomic RPCs with `company_id` guards). Below are the real gaps, ranked by impact.
 
----
+## Findings
 
-### 1. Database linter findings (security — 20 warnings)
+### 🔴 High — Edge function surface is wide open
+All 5 edge functions ship with no JWT verification and wildcard CORS:
+- `aging-check` — uses `SERVICE_ROLE_KEY` and calls `check_aging_transitions()`. **Anyone on the internet** can trigger it right now. Should be cron + service-role only.
+- `dashboard-digest`, `explain-metric` — call Lovable AI Gateway with our `LOVABLE_API_KEY`. **Anyone can spam them and burn our AI budget.** No auth check, no per-user rate limit.
+- `seed-demo-account`, `seed-test-accounts` — already gated by a password env var, but also publicly callable.
+- All five return raw `e.message` to the client — leaks internal errors.
 
-Ran `supabase--linter`. All are SECURITY DEFINER / search_path issues. Three categories:
+### 🟠 Medium — Auth hardening missing
+- **Leaked password protection (HIBP)** not enabled — users can sign up with `password123`.
+- **No CAPTCHA / signup rate limiting** — bot signup risk on the public `/signup`.
+- **No MFA** option for super_admins (acceptable for V1, worth noting).
 
-**a) Trigger-only functions accidentally exposed via PostgREST** (5 functions)
-These should never be called over the API — they only fire from triggers — but PostgREST currently lets `anon` / `authenticated` call them. Revoke EXECUTE.
+### 🟠 Medium — Database
+- Linter "Extension in Public" warning still open (likely `pg_trgm` or similar) — move to `extensions` schema or accept and document.
+- 9 remaining "SECURITY DEFINER callable by authenticated" warnings are **intentional** (our app RPCs) and already documented in `@security-memory` — confirmed each RPC does a `company_id = get_company_id()` guard. No action; just re-verifying.
+- No size/type validation on `company-logos` storage uploads — a user could upload 100MB files.
 
-- `update_updated_at()`
-- `set_delivered_at_on_status()`
-- `refresh_entity_aggregates()`
-- `restore_stock_on_deduction_delete()`
-- `on_auth_user_created()`
+### 🟡 Low — Observability & resilience
+- `error_log` has no retention policy — will grow unbounded. Add a 90-day prune (pg_cron).
+- No structured request/error metrics from edge functions (only `console.error`).
+- No automated tests on RLS policies — easy to regress when adding tables.
 
-**b) Admin / cron functions exposed to clients** (2 functions)
-Cron + admin only — should be `service_role` only.
+### ✅ Already solid (no change needed)
+- RLS on every table, scoped by `get_company_id()`.
+- Roles split into `user_roles` + `has_role()` security definer.
+- Atomic order/dispatch RPCs with retry on unique_violation.
+- Client-side `handleSupabaseError` + `errorLog` rate-limited at 30s.
+- `batchIn` / `fetchAllChunked` with sane 200×1000 caps.
+- Profiles table prevents users from changing their own `company_id`.
 
-- `check_aging_transitions()` — called by `aging-check` edge function
-- `aging_bucket_rank(text)` — helper, only used internally; also missing `SET search_path` → fix both at once
+## Proposed tightening plan
 
-**c) RLS helper functions exposed to anon** (2 functions)
-Needed by `authenticated` (RLS predicates), but `anon` has no reason to call them.
+### PR 1 — Edge function lockdown (highest impact)
 
-- `get_company_id()` — revoke from `anon` and `public`
-- `has_role(uuid, app_role)` — revoke from `anon` and `public`
+**`aging-check`** (cron-only):
+- Add `[functions.aging-check] verify_jwt = false` (already default) **+** require header `x-cron-secret` matching a new `CRON_SECRET` env var. Reject otherwise.
+- Sanitize error response: return `{ error: "Internal error", code }` not raw message.
 
-**d) App-callable RPCs — keep as-is** (intentional, called by signed-in users):
-`setup_new_company`, `get_next_order_number`, `get_next_invoice_number`, `insert_order_atomic`, `dispatch_order_atomic`, `reverse_dispatch_for_order`, `preview_dispatch_impact`. Linter still warns on these but the warning is informational — they need authenticated EXECUTE to work. We'll document this in the security memory so future scans don't re-flag them.
+**`dashboard-digest` + `explain-metric`** (authenticated users only):
+- Add `[functions.X] verify_jwt = true` in `config.toml` so Supabase rejects un-authed calls.
+- Inside the function, create a request-scoped supabase client with the user's JWT, call `auth.getUser()`, and gate on a valid user.
+- Add per-user in-memory token-bucket rate limit (e.g. 20 calls / 5 min) to cap AI spend.
+- Sanitize error responses.
 
-Single migration: `REVOKE EXECUTE ... FROM public, anon` (+ `authenticated` for trigger/admin functions) and `ALTER FUNCTION aging_bucket_rank SET search_path = public`.
+**`seed-demo-account` / `seed-test-accounts`**:
+- Keep public but require `Authorization: Bearer <secret>` header check before any work; return 401 fast.
+- Tighten CORS to our two production origins (`getledge.in`, `*.lovable.app`) instead of `*`.
 
----
+### PR 2 — Auth hardening
+- Enable **leaked password protection** (HIBP) via `configure_auth`.
+- Set min password length to 8.
+- Document in `@security-memory` that CAPTCHA is deferred (Lovable Cloud doesn't expose Turnstile config natively yet).
 
-### 2. Error-handling consistency
+### PR 3 — Storage & retention
+- Migration: add `pg_cron` job that deletes `error_log` rows older than 90 days.
+- Frontend: enforce 2MB / image-only on logo upload before calling storage (UI already does, just verify and add a fallback storage policy size check via a trigger).
+- Move any `public`-schema extensions to `extensions` schema (one migration).
 
-We have a clean `handleSupabaseError()` helper that maps Postgres codes (23505 dup, 23503 FK, 42501 RLS, etc.) → friendly toasts + logs. A few sites still surface raw `error.message`:
+### PR 4 — RLS regression safety
+- Add a one-file vitest that hits Supabase as `anon` and asserts every business table returns 0 rows / 401 — a smoke test against future "forgot RLS" mistakes.
+- Add a short `docs/SECURITY.md` capturing the rules (company_id scope, role checks, edge function auth model) so future contributors don't drift.
 
-- `src/pages/Company.tsx:230` — `toast.error("Error saving", { description: error.message })`
-- `src/pages/OrderDetail.tsx:277` — `toast.error("Could not load stock preview", { description: error.message })`
-- `src/pages/ResetPassword.tsx:47`, `src/pages/Company.tsx:165`, `src/components/onboarding/NoCompanyGuard.tsx:46`, `src/context/domains/useBillingDomain.ts:140 + 213` — `if (error) throw error` with no friendly mapping.
+### Out of scope (call out, don't do now)
+- MFA for super_admins.
+- FK constraints on `*_lines.parent_id` (intentional — performance vs. integrity tradeoff already accepted).
+- Per-tenant rate limits on RPCs (would need pg-side counter table; revisit if abuse seen).
 
-Migrate each to `handleSupabaseError(...)` (or for Billing throws, catch in caller and call helper). `Login.tsx` keeps its special-case handling because auth errors have unique branches that need raw matching.
+## Technical notes
+- `verify_jwt = true` in `supabase/config.toml` is the cleanest way to gate AI endpoints — Supabase rejects the request before our code runs, saving cold-start cost.
+- The cron-secret pattern for `aging-check` is needed even with service-role because the function URL is public; service-role is what the function uses internally, not what gates the request.
+- HIBP toggle is a single `configure_auth` call, no schema change.
+- `error_log` prune via `pg_cron` keeps the table fast and avoids paying for cold storage of stale debug rows.
 
----
-
-### 3. Toast-vs-log discipline (pattern from last fix)
-
-Audit confirms only one offender remained — the `warnPaginationOnce` toast we just removed. `warnTruncationOnce` (real data-loss) correctly stays as a user toast. No other dev-diagnostic toasts found.
-
-Add a one-line rule to the security/dev memory: **info-level pagination + perf diagnostics → `console.warn` + `logError`, never `toast`. Only data-loss / failed-mutation / actionable issues become toasts.**
-
----
-
-### 4. `batchIn` / `fetchAllChunked` safety review
-
-- `batchIn`: 200 pages × 1000 rows = 200k cap per id-chunk. For order_lines this is generous; one mega-order would have to exceed 200k lines to trip. Keep.
-- `fetchAllChunked`: same 200 × 1000 cap per table. With current data shape (~thousands of orders, hundreds of dealers), fine. If a tenant grows past ~150k rows in any single table the truncation toast will fire — acceptable signal.
-- No change needed; the patterns are correct. Just adding a code comment clarifying the cap rationale so a future contributor doesn't lower it.
-
----
-
-### 5. Files & migrations
-
-**Migration (one):**
-- `REVOKE EXECUTE` on 7 functions from `public` / `anon` / `authenticated` as appropriate
-- `ALTER FUNCTION public.aging_bucket_rank(text) SET search_path = public`
-
-**Code edits (frontend only):**
-- `src/pages/Company.tsx` — replace raw `error.message` with `handleSupabaseError`
-- `src/pages/OrderDetail.tsx` — same
-- `src/pages/ResetPassword.tsx` — same
-- `src/components/onboarding/NoCompanyGuard.tsx` — same
-- `src/context/domains/useBillingDomain.ts` — same for the 2 throw sites
-
-**Memory:**
-- `mem://safety/backend-hygiene` — short rule: toast = user-actionable only; raw `error.message` is banned in UI; all mutations go through `handleSupabaseError`.
-- `security--update_memory` — note the 7 intentionally-public RPCs so future scans skip them.
-
----
-
-### Out of scope (call out, don't touch)
-
-- Edge-function logic (aging-check, dashboard-digest, etc.) — already isolated, working.
-- RLS policies — audited, all tables are `company_id = get_company_id()` scoped correctly.
-- Adding a foreign-key constraint between e.g. `order_lines.order_id → orders.id`. None of the tables have FKs declared (intentional choice based on the schema). Worth a separate PR if you want it — happy to plan one.
+Approve and I'll ship PR 1 first (biggest risk reduction), then 2 → 3 → 4 in separate turns.
