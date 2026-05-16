@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { spring, useParallaxY } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
-import { DashboardSvg } from "../illustrations/SvgIllustrations";
 import { CapsuleCTA } from "../CapsuleCTA";
+import heroDashboard from "@/assets/landing/hero-dashboard.png";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
@@ -90,13 +90,17 @@ export function Hero() {
                     "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.18) 0%, transparent 65%)",
                 }}
               />
-              {/* Layer 2 — glass stage */}
-              <div className="relative lp-card-glass p-4 md:p-6 rounded-[1.75rem]">
-                {/* Layer 3 — browser frame */}
+              {/* Layer 2 — Bone-tinted glass stage */}
+              <div className="relative lp-card-glass p-3 md:p-4 rounded-md">
+                {/* Layer 3 — browser frame with real product UI */}
                 <BrowserFrame url="app.ledge.in/dashboard">
-                  <div className="p-4 bg-white">
-                    <DashboardSvg />
-                  </div>
+                  <img
+                    src={heroDashboard}
+                    alt="Ledge dashboard showing revenue, KPIs, and recent orders"
+                    width={1600}
+                    height={1024}
+                    className="block w-full h-auto"
+                  />
                 </BrowserFrame>
               </div>
               {/* Floating proof chip — reference signature, used once */}
