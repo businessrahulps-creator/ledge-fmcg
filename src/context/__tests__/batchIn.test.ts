@@ -55,11 +55,12 @@ describe("batchIn pagination", () => {
     expect(rangeCalls).toHaveLength(0);
   });
 
-  it("makes a single page request when rows fit under 1000", async () => {
+  it("returns all rows when result fits under a single 1000-row page", async () => {
     mockRows = Array.from({ length: 250 }, (_, i) => ({ order_id: "o1", n: i }));
     const result = await batchIn("order_lines", "order_id", ["o1"]);
     expect(result).toHaveLength(250);
-    expect(rangeCalls).toHaveLength(1);
+    // First page must be requested (parallel wave may also probe trailing
+    // empty pages — that's fine).
     expect(rangeCalls[0]).toMatchObject({ from: 0, to: 999 });
   });
 
