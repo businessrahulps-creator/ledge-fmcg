@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import type * as XLSXType from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { buildWorksheet } from "./exportCsv";
@@ -23,14 +23,15 @@ async function fetchAll<T>(
   return all;
 }
 
-function addSheet(wb: XLSX.WorkBook, name: string, headers: string[], rows: string[][]) {
+function addSheet(XLSX: typeof XLSXType, wb: XLSXType.WorkBook, name: string, headers: string[], rows: string[][]) {
   if (!rows.length) return false;
-  const ws = buildWorksheet(headers, rows);
+  const ws = buildWorksheet(XLSX, headers, rows);
   XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
   return true;
 }
 
 export async function exportFullBackup() {
+  const XLSX = await import("xlsx");
   const wb = XLSX.utils.book_new();
   let sheetCount = 0;
 
