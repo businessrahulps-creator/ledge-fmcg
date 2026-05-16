@@ -383,6 +383,17 @@ export default function OrderDetail() {
   }, [order, claimQuantities, claimType, claimReason, api.claims]);
 
   if (!order) {
+    // While data is still loading (cold start, two-phase fetch, or a
+    // transient empty-orders render) show a skeleton instead of flashing
+    // the "not found" empty state. Only show the real empty state once
+    // we're sure the order genuinely doesn't exist.
+    if (api.loading || orders.length === 0) {
+      return (
+        <AppLayout>
+          <RouteSkeleton />
+        </AppLayout>
+      );
+    }
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">
