@@ -398,19 +398,6 @@ function RosterCard({
   );
 }
 
-/* ---------- PendingInvitesSection (placeholder for PR-E) ---------- */
-
-function PendingInvitesSection() {
-  return (
-    <div className="rounded-md border border-dashed border-border/70 bg-muted/20 p-4">
-      <p className="text-xs font-medium text-foreground/80">Pending invites</p>
-      <p className="mt-1 text-[11px] text-muted-foreground">
-        No invites waiting. Once you invite someone, you'll be able to resend the email from here.
-      </p>
-    </div>
-  );
-}
-
 /* ---------- RemoveMemberDialog ---------- */
 
 interface RemoveProps {
