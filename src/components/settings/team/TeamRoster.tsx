@@ -199,7 +199,27 @@ export function TeamRoster({ companyId }: Props) {
         ))}
       </div>
 
-      <PendingInvitesSection />
+      {pendingInvites.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground/80">Pending invites</p>
+          {pendingInvites.map((inv) => (
+            <PendingInviteCard
+              key={inv.id}
+              invite={inv}
+              companyName={companyName}
+              onResend={handleResendInvite}
+              onCancel={handleCancelInvite}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-md border border-dashed border-border/70 bg-muted/20 p-4">
+          <p className="text-xs font-medium text-foreground/80">Pending invites</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            No invites waiting. Send one above and share the link on WhatsApp.
+          </p>
+        </div>
+      )}
 
       {pickerFor && (
         <JobPickerSheet
