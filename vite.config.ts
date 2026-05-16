@@ -30,8 +30,26 @@ export default defineConfig(({ mode }) => {
     // VitePWA(...) intentionally removed while offline mode is paused.
     // See mem://features/offline-mode-paused for the full config + revival recipe.
   ].filter(Boolean),
-  // Avoid manual vendor chunking in production. Recharts/d3 hit a Rollup
-  // inter-chunk initialization bug that can blank the published app.
+  // Recharts/d3 hit a Rollup inter-chunk init bug when manually chunked, so
+  // we leave charts in their default chunk. Everything else heavy that's safe
+  // to isolate gets its own chunk so the entry stays lean.
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("@react-pdf"))
+              return "vendor-pdf";
+            if (id.includes("framer-motion") || id.includes("/motion/"))
+              return "vendor-motion";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("date-fns")) return "vendor-datefns";
+          }
+        },
+      },
+    },
+  },
   esbuild: mode === "production" ? { drop: ["console", "debugger"] } : {},
   resolve: {
     alias: {
