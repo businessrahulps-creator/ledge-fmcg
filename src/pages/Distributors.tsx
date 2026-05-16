@@ -65,6 +65,25 @@ export default function Distributors() {
   const allOrders = api.orders.list();
   const deleteDealerOrderCount = deleteId ? allOrders.filter(o => o.distributorId === deleteId).length : 0;
 
+  // Portfolio health aggregations for hero strip + signal surface.
+  const portfolio = useMemo(() => {
+    let totalOutstanding = 0;
+    let overLimit = 0;
+    let overLimitValue = 0;
+    let approaching = 0;
+    for (const d of items) {
+      const limit = d.creditLimit || 0;
+      const out = d.outstandingAmount || 0;
+      totalOutstanding += out;
+      if (limit > 0) {
+        const pct = (out / limit) * 100;
+        if (pct >= 100) { overLimit += 1; overLimitValue += out - limit; }
+        else if (pct >= 70) { approaching += 1; }
+      }
+    }
+    return { totalOutstanding, overLimit, overLimitValue, approaching };
+  }, [items]);
+
   const openNew = () => {
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
     setIsNew(true);
