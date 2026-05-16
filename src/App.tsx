@@ -45,6 +45,7 @@ const Billing = lazy(routeImporters["/billing"] as any);
 const Help = lazy(routeImporters["/help"] as any);
 const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
+const AdminErrors = lazy(() => import("./pages/AdminErrors"));
 
 // Marketing/legal pages — kept lazy but not prefetched
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
