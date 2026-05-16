@@ -125,10 +125,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <header className={`sticky top-0 z-30 flex h-14 items-center overflow-x-hidden border-b border-border/40 bg-card/90 px-3 backdrop-blur-xl md:h-16 md:px-6 transition-shadow duration-200 ${scrolled ? "shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "shadow-none"}`} style={{ paddingTop: "env(safe-area-inset-top)" }}>
-            <SidebarTrigger className="mr-4 hidden md:flex" />
+            <SidebarTrigger className="mr-3 hidden md:flex" />
             <div className="flex items-center md:hidden">
               <span className="font-heading font-extrabold text-lg tracking-[-0.04em] text-foreground">Ledge</span>
             </div>
+            <PageTitle />
             <div className="ml-auto flex items-center gap-3">
               <AnimatePresence>
                 {isRefreshing && online && (
