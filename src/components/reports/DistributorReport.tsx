@@ -167,7 +167,7 @@ export function DistributorReport() {
                             <td className="px-2 py-2.5 max-w-[90px] truncate font-medium md:px-4">{o.orderNumber}</td>
                             <td className="px-2 py-2.5 text-muted-foreground md:px-4">{formatIndianDate(o.date)}</td>
                             <td className="px-2 py-2.5 md:px-4"><StatusBadge status={o.paymentStatus} /></td>
-                            <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
+                            <td className="px-2 py-2.5 text-right font-medium md:px-4">{formatCurrency(netTotal(o))}</td>
                           </tr>
                         ))}
                       </tbody>
