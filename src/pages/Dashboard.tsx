@@ -169,14 +169,24 @@ export default function Dashboard() {
         <SetupChecklist />
         {/* Header */}
         <div>
-          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase md:text-xs">
+          <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase">
             {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </p>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight mt-1 md:text-[28px] leading-tight">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
-          <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1.5">
+          <div className="relative inline-block mt-1.5">
+            <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+            <motion.span
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: "left" }}
+              className="absolute -bottom-1 left-0 h-px w-full bg-foreground/30"
+              aria-hidden
+            />
+          </div>
+          <p className="text-[12px] text-muted-foreground mt-2 flex items-center gap-1.5">
             Updated {timeAgo}
             <span className="text-muted-foreground/30">·</span>
-            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors", isLoading && "opacity-50 pointer-events-none")}>
+            <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("text-link", isLoading && "opacity-50 pointer-events-none")}>
               {isLoading ? "Refreshing…" : "Refresh"}
             </button>
           </p>
@@ -186,27 +196,27 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 200 }}
-            className="glass-card p-4 mt-5"
+            className="glass-card p-5 mt-6"
           >
-            <p className="text-[11px] text-muted-foreground/60 font-semibold tracking-widest uppercase mb-3">
+            <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.18em] uppercase mb-4">
               This Month · {monthLabel}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Revenue</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthRevenue)}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Revenue</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Orders</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{monthOrderCount}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Orders</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthOrderCount}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Outstanding</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{formatCurrency(monthOutstanding)}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Outstanding</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{formatCurrency(monthOutstanding)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Delivered</p>
-                <p className="text-sm font-bold tracking-tight tabular-nums">{monthDeliveredPct}%</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Delivered</p>
+                <p className="font-heading text-[22px] font-medium tracking-[-0.01em] num leading-[1.1] mt-1">{monthDeliveredPct}%</p>
               </div>
             </div>
 
