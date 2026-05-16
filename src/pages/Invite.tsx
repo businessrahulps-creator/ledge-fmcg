@@ -77,11 +77,10 @@ export default function Invite() {
         return;
       }
 
-      // Friendly error mapping
-      const rawMessage = result.message;
+      // Friendly error mapping (result is { ok: false; message: string })
+      const rawMessage: string = (result as { ok: false; message: string }).message;
       const msg = rawMessage.toLowerCase();
       if (msg.includes("another workspace")) {
-        // Resolve the user's current workspace name to show the friendly message
         let currentCompanyName = "another workspace";
         if (companyId) {
           const { data } = await supabase
@@ -106,7 +105,7 @@ export default function Invite() {
         setView({ kind: "already_accepted", preview });
         return;
       }
-      setView({ kind: "other_error", preview, message: result.message });
+      setView({ kind: "other_error", preview, message: rawMessage });
     })();
 
     return () => {
