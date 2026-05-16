@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
@@ -13,11 +13,13 @@ import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportPdf } from "@/components/pdf/ReportPdf";
+import { computeDealerAging, sortByRisk } from "@/lib/aging";
 
 export function PaymentReport() {
   const api = useApi();
   const { companyInfo } = api;
   const orders = api.orders.list();
+  const distributors = api.dealers.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
   const [scope, setScope] = useState<"delivered" | "all">("delivered");
@@ -88,6 +90,32 @@ export function PaymentReport() {
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+            title="Export aging summary (XLSX)"
+            onClick={() => {
+              const aging = sortByRisk(computeDealerAging(orders, distributors));
+              exportCsv(
+                csvFilename("payment-aging-summary"),
+                ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
+                aging.map((r) => [
+                  r.distributorName,
+                  r.bucket_0_30.toFixed(0),
+                  r.bucket_31_60.toFixed(0),
+                  r.bucket_61_90.toFixed(0),
+                  r.bucket_90_plus.toFixed(0),
+                  r.totalOutstanding.toFixed(0),
+                  r.creditLimit > 0 ? r.creditLimit.toFixed(0) : "—",
+                  r.creditLimit > 0 ? ((r.totalOutstanding / r.creditLimit) * 100).toFixed(0) : "—",
+                ]),
+              );
+            }}
+          >
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Aging Summary</span>
           </Button>
           <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
             <FileText className="h-3.5 w-3.5" />
