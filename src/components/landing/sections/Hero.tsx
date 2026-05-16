@@ -4,6 +4,7 @@ import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
 import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
+import { CursorAura } from "../CursorAura";
 import heroDashboard from "@/assets/landing/hero-dashboard.webp";
 
 /** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
@@ -32,7 +33,10 @@ export function Hero() {
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
-      {/* Ambient drifting light — the page's signature ambient motion. Drifts with scroll. */}
+      {/* Motion v3 — single pointer-reactive ambient gradient. Replaces per-button magnetic noise. */}
+      <CursorAura tint="hsl(var(--primary) / 0.10)" size={640} />
+
+      {/* Scroll-decay ambient light overlay — drifts as you leave the hero. */}
       <motion.div
         aria-hidden
         className="absolute inset-0 pointer-events-none"

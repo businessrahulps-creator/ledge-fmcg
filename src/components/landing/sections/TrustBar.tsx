@@ -1,4 +1,4 @@
-import { StaggerContainer, StaggerItem } from "../AnimateIn";
+// Motion v3 — stillness for stats. Logos still marquee; stats are simply present.
 
 const companies = [
   "Aryan Beverages",
@@ -41,24 +41,23 @@ export function TrustBar() {
         </div>
 
         {/* Stat Row — with hairline dividers + gradient numbers */}
-        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
           {stats.map((stat, i) => (
-            <StaggerItem key={stat.value}>
-              <div
-                className={`text-center px-4 ${
-                  i > 0 ? "md:border-l md:border-border" : ""
-                }`}
-              >
-                <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">
-                  {stat.value}
-                </div>
-                <div className="font-body text-[12px] md:text-[13px] text-muted-foreground mt-2.5 tracking-tight">
-                  {stat.label}
-                </div>
+            <div
+              key={stat.value}
+              className={`text-center px-4 ${
+                i > 0 ? "md:border-l md:border-border" : ""
+              }`}
+            >
+              <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">
+                {stat.value}
               </div>
-            </StaggerItem>
+              <div className="font-body text-[12px] md:text-[13px] text-muted-foreground mt-2.5 tracking-tight">
+                {stat.label}
+              </div>
+            </div>
           ))}
-        </StaggerContainer>
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
-import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimateIn } from "../AnimateIn";
+import { PressableCard } from "../PressableCard";
+import { useReducedMotion } from "framer-motion";
 import arnav from "@/assets/landing/testimonial-arnav.jpg";
 import priya from "@/assets/landing/testimonial-priya.jpg";
 import dev from "@/assets/landing/testimonial-dev.jpg";
@@ -33,7 +34,7 @@ const testimonials = [
 ];
 
 export function Testimonials() {
-  const reduce = useReducedMotion();
+  const _reduce = useReducedMotion();
 
   return (
     <section className="relative lp-section-paper py-20 md:py-28 overflow-hidden">
@@ -47,58 +48,51 @@ export function Testimonials() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto" staggerTime={0.06}>
+        {/* Motion v3 — cards are still on entrance. Hover = unified 120ms intent. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto">
           {testimonials.map((t, i) => {
             const isFeatured = i === 0;
             return (
-              <StaggerItem key={t.name} variant="scaleUp">
-                <motion.div
-                  className="relative h-full"
-                  whileHover={reduce ? undefined : { rotateX: -1.5, rotateY: 2, y: -4 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 22 }}
-                  style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-                >
-                  {/* Tilted depth layers (skip for tinted feature card) */}
-                  {!isFeatured && (
-                    <>
-                      <div aria-hidden className="absolute inset-0 lp-card opacity-40 -rotate-2 translate-x-1.5 translate-y-1.5 pointer-events-none" />
-                      <div aria-hidden className="absolute inset-0 lp-card opacity-70 rotate-1 -translate-x-1 translate-y-0.5 pointer-events-none" />
-                    </>
-                  )}
-                  {/* Front card */}
-                  <div className={`relative ${isFeatured ? "lp-card-tinted lp-card-bone" : "lp-glass-frost"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
-                    {/* Decorative quote glyph watermark */}
-                    <span
-                      aria-hidden
-                      className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"
-                      style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                    >
-                      "
-                    </span>
+              <PressableCard key={t.name} className="relative h-full">
+                {/* Tilted depth layers (skip for tinted feature card) */}
+                {!isFeatured && (
+                  <>
+                    <div aria-hidden className="absolute inset-0 lp-card opacity-40 -rotate-2 translate-x-1.5 translate-y-1.5 pointer-events-none" />
+                    <div aria-hidden className="absolute inset-0 lp-card opacity-70 rotate-1 -translate-x-1 translate-y-0.5 pointer-events-none" />
+                  </>
+                )}
+                {/* Front card */}
+                <div className={`relative ${isFeatured ? "lp-card-tinted lp-card-bone" : "lp-glass-frost"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
+                  <span
+                    aria-hidden
+                    className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                  >
+                    "
+                  </span>
 
-                    <p className="relative font-body text-[16px] md:text-[17px] text-foreground leading-[1.6] tracking-[-0.005em] flex-1">
-                      {t.quote}
-                    </p>
-                    <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
-                      <img
-                        src={t.avatar}
-                        alt={t.name}
-                        width={64}
-                        height={64}
-                        loading="lazy"
-                        className="w-12 h-12 rounded-full object-cover border border-border shadow-depth-2"
-                      />
-                      <div>
-                        <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
-                        <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>
-                      </div>
+                  <p className="relative font-body text-[16px] md:text-[17px] text-foreground leading-[1.6] tracking-[-0.005em] flex-1">
+                    {t.quote}
+                  </p>
+                  <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      className="w-12 h-12 rounded-full object-cover border border-border shadow-depth-2"
+                    />
+                    <div>
+                      <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
+                      <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>
                     </div>
                   </div>
-                </motion.div>
-              </StaggerItem>
+                </div>
+              </PressableCard>
             );
           })}
-        </StaggerContainer>
+        </div>
       </div>
     </section>
   );

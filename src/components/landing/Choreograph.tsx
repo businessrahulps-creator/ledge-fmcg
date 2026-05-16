@@ -43,9 +43,9 @@ export const Choreograph = forwardRef<HTMLDivElement, ChoreographProps>(
           visible: {
             opacity: 1,
             transition: {
-              duration: 0.2,
-              ease: ease.decelerate,
-              ...(staggerChildren ? { staggerChildren: 0.02 } : {}),
+              duration: 0.12,
+              ease: ease.standard,
+              ...(staggerChildren ? { staggerChildren: 0.01 } : {}),
             },
           },
         }
