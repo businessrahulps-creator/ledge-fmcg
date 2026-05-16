@@ -50,7 +50,7 @@ export function FinalCTA() {
           {...fadeUp(0.2)}
         >
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <CapsuleCTA to="/signup" variant="dark">Start 30-Day Free Trial</CapsuleCTA>
+            <CapsuleCTA to="/signup" variant="dark">Start Free Trial</CapsuleCTA>
             <a
               href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
               target="_blank"
