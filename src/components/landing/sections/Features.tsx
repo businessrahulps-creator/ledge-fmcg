@@ -18,9 +18,9 @@ export function Features() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Features</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Everything your business needs.
+              Simple tools.
               <br />
-              Nothing it doesn't.
+              Extraordinary results.
             </h2>
           </div>
         </AnimateIn>
