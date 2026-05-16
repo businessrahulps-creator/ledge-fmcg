@@ -119,6 +119,7 @@ export default function DealerDetail() {
               size="sm"
               className="h-9 gap-1.5"
               onClick={async () => {
+                const { DealerStatementPdf } = await import("@/components/pdf/DealerStatementPdf");
                 const doc = React.createElement(DealerStatementPdf, {
                   companyName: api.companyInfo.name,
                   companyAddress: api.companyInfo.address,
