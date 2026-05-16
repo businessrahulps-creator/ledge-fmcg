@@ -36,7 +36,7 @@ export function WhyLedge() {
                 {name}
               </span>
             ))}
-            <span className="font-heading font-semibold text-[14px] text-white px-4 py-1.5 rounded-full bg-[#0A0F1C]">
+            <span className="font-heading font-semibold text-[14px] text-primary-foreground px-4 py-1.5 rounded-full bg-primary">
               Ledge
             </span>
           </div>

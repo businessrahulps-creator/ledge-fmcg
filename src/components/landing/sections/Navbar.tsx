@@ -30,7 +30,7 @@ export function Navbar() {
         transition={spring.default}
         className={`fixed top-0 left-0 right-0 z-50 h-[60px] flex items-center transition-all duration-300 ${
           scrolled
-            ? "bg-white/65 backdrop-blur-xl backdrop-saturate-[1.8] border-b border-[#0A0F1C]/[0.06] shadow-[0_1px_0_rgba(255,255,255,0.7)_inset,0_8px_24px_-16px_rgba(15,23,42,0.10)]"
+            ? "bg-background/75 backdrop-blur-xl backdrop-saturate-[1.8] border-b border-border shadow-depth-2"
             : "bg-transparent"
         }`}
       >
@@ -77,7 +77,7 @@ export function Navbar() {
             <motion.div whileTap={{ scale: 0.97 }} transition={spring.snappy}>
               <Link
                 to="/signup"
-                className="lp-btn-primary-dark lp-shimmer inline-flex items-center text-white px-5 py-2 rounded-full font-body font-semibold text-[13.5px] transition-colors duration-200"
+                className="lp-btn-primary-dark lp-shimmer inline-flex items-center px-5 py-2 rounded-full font-body font-semibold text-[13.5px] transition-colors duration-200"
               >
                 Start Free Trial
               </Link>
