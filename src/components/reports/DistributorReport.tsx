@@ -28,7 +28,7 @@ export function DistributorReport() {
     .map((d) => {
       const dOrders = filteredOrders.filter((o) => o.distributorId === d.id);
       // Net revenue = invoiced amount after trade discounts (matches Dashboard / Billing)
-      const total = dOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+      const total = dOrders.reduce((s, o) => s + netTotal(o), 0);
       return { ...d, orderCount: dOrders.length, revenue: total };
     })
     .filter((d) => d.orderCount > 0)
