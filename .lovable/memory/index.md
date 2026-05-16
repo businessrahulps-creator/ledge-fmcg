@@ -4,6 +4,7 @@
 Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (accent/warning), Bone (bg). Playfair Display H1/H2 only + Inter everywhere else. 6px radius. Fluent 2 depth/motion/density tokens. No glassmorphism in `/app`. Dark mode archived. Mobile-first PWA for Indian FMCG distribution. Lovable Cloud + RLS. No Google OAuth. Max font weight `font-semibold`. All colors via semantic tokens — no raw hex in components.
 
 ## Memories
+- [Landing nav capsule](mem://style/landing-nav-capsule) — Arc-style split capsule → merges on scroll, ⌘K palette, live status dot, gradient-ring CTA
 
 ### Design system (read these for any visual work)
 - [Landing pill system](mem://style/landing-pill-system) — lp-pill/lp-pill-metric/lp-insight primitives; one pill cluster per section.
