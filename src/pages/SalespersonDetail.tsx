@@ -26,6 +26,13 @@ export default function SalespersonDetail() {
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
 
   if (!person) {
+    if (api.loading || items.length === 0) {
+      return (
+        <AppLayout>
+          <RouteSkeleton />
+        </AppLayout>
+      );
+    }
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">
