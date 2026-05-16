@@ -1493,6 +1493,7 @@ export type Database = {
         Returns: Json
       }
       get_company_id: { Args: never; Returns: string }
+      get_cron_secret: { Args: never; Returns: string }
       get_next_invoice_number: {
         Args: { target_company_id: string }
         Returns: {
