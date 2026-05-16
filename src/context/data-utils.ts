@@ -178,12 +178,25 @@ export function persistAllToCache(
 
 export async function batchIn(table: string, column: string, ids: string[]) {
   if (ids.length === 0) return [];
-  const CHUNK = 500;
+  const ID_CHUNK = 500;
+  const PAGE = 1000;
+  const MAX_PAGES = 200; // safety cap: 200k rows per id-chunk
   const results: any[] = [];
-  for (let i = 0; i < ids.length; i += CHUNK) {
-    const chunk = ids.slice(i, i + CHUNK);
-    const { data } = await supabase.from(table as any).select("*").in(column, chunk) as any;
-    if (data) results.push(...data);
+  for (let i = 0; i < ids.length; i += ID_CHUNK) {
+    const chunk = ids.slice(i, i + ID_CHUNK);
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const from = page * PAGE;
+      const to = from + PAGE - 1;
+      const { data, error } = await supabase
+        .from(table as any)
+        .select("*")
+        .in(column, chunk)
+        .range(from, to) as any;
+      if (error) throw error;
+      const rows = (data || []) as any[];
+      results.push(...rows);
+      if (rows.length < PAGE) break;
+    }
   }
   return results;
 }
