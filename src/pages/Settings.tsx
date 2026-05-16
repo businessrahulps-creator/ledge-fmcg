@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { sanitizeInput } from "@/utils/sanitize";
+import { useState, useEffect, useMemo } from "react";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
+import { Crown, CreditCard, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
+import { TeamRoster } from "@/components/settings/team/TeamRoster";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
