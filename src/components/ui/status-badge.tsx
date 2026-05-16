@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 type StatusType = "paid" | "partial" | "pending" | "dispatched" | "delivered";
