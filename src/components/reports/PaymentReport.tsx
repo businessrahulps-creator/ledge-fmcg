@@ -3,6 +3,7 @@ import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { netTotal } from "@/lib/revenue";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
@@ -22,8 +23,7 @@ export function PaymentReport() {
   const [scope, setScope] = useState<"delivered" | "all">("delivered");
   const [selected, setSelected] = useState<Order | null>(null);
 
-  // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
-  const netTotal = (o: Order) => Math.max(0, o.total - (o.schemeSavings || 0));
+  // netTotal imported from @/lib/revenue (single source of truth)
 
   const periodFiltered = filterByTimePeriod(orders, period);
   const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
@@ -64,7 +64,7 @@ export function PaymentReport() {
             {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
-          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
         <div className="sm:ml-auto">
           <Button

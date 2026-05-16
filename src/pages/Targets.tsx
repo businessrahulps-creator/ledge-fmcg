@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { useApi } from "@/services/api";
+import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatCurrency } from "@/data/mock-data";
@@ -270,7 +271,7 @@ export default function Targets() {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
       const cur = map.get(o.salespersonId) || { revenue: 0, orders: 0 };
-      cur.revenue += Math.max(0, o.total - (o.schemeSavings || 0));
+      cur.revenue += netTotal(o);
       cur.orders += 1;
       map.set(o.salespersonId, cur);
     });
@@ -281,7 +282,7 @@ export default function Targets() {
     const map = new Map<string, { revenue: number; orders: number }>();
     periodOrders.forEach(o => {
       const cur = map.get(o.distributorId) || { revenue: 0, orders: 0 };
-      cur.revenue += Math.max(0, o.total - (o.schemeSavings || 0));
+      cur.revenue += netTotal(o);
       cur.orders += 1;
       map.set(o.distributorId, cur);
     });
@@ -362,7 +363,7 @@ export default function Targets() {
           const spTargets = periodTargets.filter(t => t.entityType === "salesperson");
           const dlTargets = periodTargets.filter(t => t.entityType === "dealer");
           const totalTargetRev = periodTargets.reduce((s, t) => s + t.targetRevenue, 0);
-          const totalActualRev = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+          const totalActualRev = periodOrders.reduce((s, o) => s + netTotal(o), 0);
           const overallPct = totalTargetRev > 0 ? Math.round((totalActualRev / totalTargetRev) * 100) : 0;
           const overallStatus = getStatus(totalActualRev, totalTargetRev);
 

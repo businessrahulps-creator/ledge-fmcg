@@ -658,7 +658,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                         <td className="px-6 py-4">{order.distributorName}</td>
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                       </tr>
@@ -679,7 +679,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold">{o.distributorName}</span>
-                        <span className="text-sm font-bold">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
+                        <span className="text-sm font-bold">{formatCurrency(netTotal(o))}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mb-2">{o.salesperson}</p>
                       <div className="flex items-center justify-between">

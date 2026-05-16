@@ -694,7 +694,7 @@ export default function Performance() {
               const dealerData = dealers.map(d => {
                 const dOrders = orders.filter(o => o.distributorId === d.id);
                 const periodOrders = filteredOrders.filter(o => o.distributorId === d.id);
-                const revenue = periodOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const revenue = periodOrders.reduce((s, o) => s + netTotal(o), 0);
                 const risk = getChurnRisk(dOrders);
                 return { id: d.id, name: d.name, revenue, orderCount: periodOrders.length, risk };
               })
@@ -758,7 +758,7 @@ export default function Performance() {
               const spData = salespersons.map(sp => {
                 const spOrders = filteredOrders.filter(o => o.salespersonId === sp.id);
                 const allSpOrders = orders.filter(o => o.salespersonId === sp.id);
-                const revenue = spOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const revenue = spOrders.reduce((s, o) => s + netTotal(o), 0);
                 const health = getPerformanceHealth(allSpOrders);
                 return { id: sp.id, name: sp.name, revenue, orderCount: spOrders.length, health };
               })
@@ -924,7 +924,7 @@ export default function Performance() {
                 const pStart = t.periodStart;
                 const pEnd = t.periodType === "daily" ? pStart : t.periodType === "weekly" ? weekEnd : monthEnd;
                 const entityOrders = orders.filter(o => o.date >= pStart && o.date <= pEnd && (t.entityType === "salesperson" ? o.salespersonId === t.entityId : o.distributorId === t.entityId));
-                const actualRev = entityOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+                const actualRev = entityOrders.reduce((s, o) => s + netTotal(o), 0);
                 const actualOrd = entityOrders.length;
                 const pct = t.targetRevenue > 0 ? Math.round((actualRev / t.targetRevenue) * 100) : (t.targetOrders > 0 ? Math.round((actualOrd / t.targetOrders) * 100) : 0);
                 const periodLabel = t.periodType === "daily" ? "Today" : t.periodType === "weekly" ? "This Week" : "This Month";
