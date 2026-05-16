@@ -1,4 +1,4 @@
-import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.webp";
 
 export function SplashScreen() {
   return (

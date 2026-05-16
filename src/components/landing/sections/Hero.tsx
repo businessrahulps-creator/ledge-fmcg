@@ -4,7 +4,7 @@ import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
 import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
-import heroDashboard from "@/assets/landing/hero-dashboard.png";
+import heroDashboard from "@/assets/landing/hero-dashboard.webp";
 
 /** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
 const fadeUp = (delay: number) => ({
@@ -134,6 +134,8 @@ export function Hero() {
                       alt="Ledge dashboard showing revenue, KPIs, and recent orders"
                       width={1600}
                       height={1024}
+                      fetchPriority="high"
+                      decoding="async"
                       className="block w-full h-auto"
                     />
                     {/* Proof chip — anchored inside the frame like a real product notification */}

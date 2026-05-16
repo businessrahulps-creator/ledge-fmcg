@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ledgeLogo from "@/assets/ledge-logo.png";
+import ledgeLogo from "@/assets/ledge-logo.webp";
 import { toast } from "sonner";
 import {
   Dialog,

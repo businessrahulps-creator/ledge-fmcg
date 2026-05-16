@@ -2,9 +2,9 @@ import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimateIn } from "../AnimateIn";
 import { spring } from "@/lib/motion";
-import stepOrders from "@/assets/landing/step-orders.png";
-import stepStock from "@/assets/landing/step-stock.png";
-import stepBilling from "@/assets/landing/step-billing.png";
+import stepOrders from "@/assets/landing/step-orders.webp";
+import stepStock from "@/assets/landing/step-stock.webp";
+import stepBilling from "@/assets/landing/step-billing.webp";
 
 function ProductShot({ src, alt }: { src: string; alt: string }) {
   return (
