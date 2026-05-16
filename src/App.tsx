@@ -63,7 +63,6 @@ const Contact = lazy(() => import("./pages/Contact"));
 
 // Non-critical UI loaded after first paint — keeps the entry chunk lean
 // and stops these from blocking interactive readiness.
-const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const InstallPrompt = lazy(() => import("@/components/InstallPrompt").then(m => ({ default: m.InstallPrompt })));
 const UpdatePrompt = lazy(() => import("@/components/UpdatePrompt").then(m => ({ default: m.UpdatePrompt })));
