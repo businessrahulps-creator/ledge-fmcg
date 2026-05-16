@@ -46,7 +46,7 @@ export function Outcome() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">The Outcome</span>
+            <span className="lp-eyebrow">Before & After Ledge</span>
             <h2 className="font-heading font-semibold text-[32px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               What changes in the first{" "}
               <span className="lp-pill-accent font-semibold">
@@ -54,6 +54,9 @@ export function Outcome() {
               </span>
               <span className="ml-[-2px]">.</span>
             </h2>
+            <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55] max-w-2xl mx-auto">
+              Live dashboard. Five reports ready instantly. Any report in 60 seconds. Full visibility — zero chasing.
+            </p>
           </div>
         </AnimateIn>
 
