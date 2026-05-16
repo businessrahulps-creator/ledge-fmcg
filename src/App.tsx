@@ -160,22 +160,22 @@ const App = () => (
                   <Route path="/login" element={<DelayedSuspense fallback={ShellFallback}><Login /></DelayedSuspense>} />
                   <Route path="/signup" element={<DelayedSuspense fallback={ShellFallback}><Signup /></DelayedSuspense>} />
                   <Route path="/reset-password" element={<DelayedSuspense fallback={ShellFallback}><ResetPassword /></DelayedSuspense>} />
-                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OrderDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><DealerDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Distributors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Stock /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DealersFallback}><Distributors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={StockFallback}><Stock /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><SalespersonDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={SalespersonsFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Schemes /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Reports /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Reports /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={PerformanceFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />)
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
