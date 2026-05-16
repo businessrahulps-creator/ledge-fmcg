@@ -708,7 +708,7 @@ export default function Settings() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
               <AlertDialogDescription className="text-xs md:text-sm">
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This action cannot be undone.
+                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This will remove the member and all their role assignments. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
