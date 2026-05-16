@@ -18,6 +18,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { prefetchRoute } from "@/lib/route-prefetch";
 import {
   Select,
   SelectContent,
@@ -381,6 +382,8 @@ export default function Orders() {
                       <tr
                         key={order.id}
                         onClick={() => navigate(`/orders/${order.id}`)}
+                        onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
+                        onFocus={() => prefetchRoute(`/orders/${order.id}`)}
                         className="group border-b border-border/50 row-hover cursor-pointer"
                       >
                         <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
@@ -413,6 +416,7 @@ export default function Orders() {
                   <div
                     key={order.id}
                     onClick={() => navigate(`/orders/${order.id}`)}
+                    onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
                     className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
