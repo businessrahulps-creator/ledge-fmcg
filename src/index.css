@@ -984,6 +984,148 @@
     display: inline-block;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     TINTED CARD SYSTEM — Slowspace-inspired editorial color blocks
+     Used at most ONCE per section to spotlight a featured card.
+     Built on existing Midnight/Forest/Terracotta/Bone tokens.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Shared base — applied via class composition with the four variants */
+  .lp-card-tinted {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.06),
+      0 1px 2px hsl(var(--primary) / 0.06),
+      var(--shadow-16);
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lp-card-tinted:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.08),
+      0 2px 4px hsl(var(--primary) / 0.06),
+      var(--shadow-28);
+  }
+
+  /* Striped-mark watermark — echoes Slowspace's corner mark, reinforces logo */
+  .lp-card-tinted::after {
+    content: "";
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 56px;
+    height: 56px;
+    background-image: url("/ledge-mark-watermark.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: top right;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .lp-card-tinted > * { position: relative; z-index: 1; }
+
+  /* Vignette glow — same hue as the card, top-left, very low % */
+  .lp-card-tinted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 20% 0%, hsl(0 0% 100% / 0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── MIDNIGHT (authority) ─── */
+  .lp-card-midnight {
+    background:
+      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(218 50% 22%) 0%, transparent 55%),
+      linear-gradient(165deg, hsl(218 60% 16%) 0%, hsl(218 65% 11%) 100%);
+    border: 1px solid hsl(218 50% 22%);
+  }
+  .lp-card-midnight::after { filter: invert(1) brightness(2); opacity: 0.08; }
+  .lp-card-midnight,
+  .lp-card-midnight .text-foreground,
+  .lp-card-midnight h1, .lp-card-midnight h2, .lp-card-midnight h3, .lp-card-midnight h4 {
+    color: hsl(var(--primary-foreground));
+  }
+  .lp-card-midnight .text-muted-foreground,
+  .lp-card-midnight p { color: hsl(var(--primary-foreground) / 0.72); }
+  .lp-card-midnight .text-accent { color: hsl(34 60% 78%); }
+  .lp-card-midnight .lp-icon-tile {
+    background: hsl(0 0% 100% / 0.08);
+    border-color: hsl(0 0% 100% / 0.16);
+    color: hsl(var(--primary-foreground));
+  }
+  .lp-card-midnight .lp-icon-tile svg { color: hsl(var(--primary-foreground)); }
+
+  /* ─── FOREST (growth, recovery) ─── */
+  .lp-card-forest {
+    background:
+      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(165 45% 30%) 0%, transparent 55%),
+      linear-gradient(165deg, hsl(165 50% 22%) 0%, hsl(165 55% 16%) 100%);
+    border: 1px solid hsl(165 45% 30%);
+  }
+  .lp-card-forest::after { filter: invert(1) brightness(2); opacity: 0.08; }
+  .lp-card-forest,
+  .lp-card-forest .text-foreground,
+  .lp-card-forest h1, .lp-card-forest h2, .lp-card-forest h3, .lp-card-forest h4 {
+    color: hsl(var(--success-foreground));
+  }
+  .lp-card-forest .text-muted-foreground,
+  .lp-card-forest p { color: hsl(var(--success-foreground) / 0.78); }
+  .lp-card-forest .text-accent { color: hsl(34 60% 80%); }
+  .lp-card-forest .lp-icon-tile {
+    background: hsl(0 0% 100% / 0.10);
+    border-color: hsl(0 0% 100% / 0.18);
+    color: hsl(var(--success-foreground));
+  }
+  .lp-card-forest .lp-icon-tile svg { color: hsl(var(--success-foreground)); }
+
+  /* ─── TERRACOTTA (warmth, alarm, recovery) ─── */
+  .lp-card-terracotta {
+    background:
+      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(19 60% 50%) 0%, transparent 55%),
+      linear-gradient(165deg, hsl(19 56% 42%) 0%, hsl(19 60% 32%) 100%);
+    border: 1px solid hsl(19 60% 50%);
+  }
+  .lp-card-terracotta::after { filter: invert(1) brightness(2); opacity: 0.08; }
+  .lp-card-terracotta,
+  .lp-card-terracotta .text-foreground,
+  .lp-card-terracotta h1, .lp-card-terracotta h2, .lp-card-terracotta h3, .lp-card-terracotta h4 {
+    color: hsl(var(--accent-foreground));
+  }
+  .lp-card-terracotta .text-muted-foreground,
+  .lp-card-terracotta p { color: hsl(var(--accent-foreground) / 0.82); }
+  .lp-card-terracotta .text-accent { color: hsl(34 60% 92%); }
+  .lp-card-terracotta .lp-icon-tile {
+    background: hsl(0 0% 100% / 0.14);
+    border-color: hsl(0 0% 100% / 0.22);
+    color: hsl(var(--accent-foreground));
+  }
+  .lp-card-terracotta .lp-icon-tile svg { color: hsl(var(--accent-foreground)); }
+
+  /* ─── BONE (warm pause, calm) ─── */
+  .lp-card-bone {
+    background:
+      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(34 45% 95%) 0%, transparent 55%),
+      linear-gradient(165deg, hsl(34 38% 90%) 0%, hsl(34 30% 84%) 100%);
+    border: 1px solid hsl(34 30% 82%);
+  }
+  .lp-card-bone::after { opacity: 0.10; }
+  /* Bone keeps existing dark foreground tokens — no overrides needed */
+
+  /* Headlines inside tinted cards: bump to Playfair editorial weight */
+  .lp-card-tinted h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+
 
   /* ═══════════════════════════════════════════════════════════════
      PREMIUM INTERACTION LAYER — cards, icons, buttons
