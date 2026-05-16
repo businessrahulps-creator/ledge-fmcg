@@ -492,6 +492,40 @@ export default function Billing() {
           </Button>
         </div>
 
+        {/* Period KPIs — hairline strip computed from current filter */}
+        {(() => {
+          const total = filtered.length;
+          const drafts = filtered.filter(i => i.status === "draft" && isDraftType(i.docType)).length;
+          const finalized = filtered.filter(i => i.status === "final").length;
+          const billed = filtered.reduce((s, i) => s + (i.grandTotal || 0), 0);
+          const draftValue = filtered
+            .filter(i => i.status === "draft" && isDraftType(i.docType))
+            .reduce((s, i) => s + (i.grandTotal || 0), 0);
+          return (
+            <>
+              <KpiStrip
+                cells={[
+                  { label: "Documents", value: total, zero: total === 0 },
+                  { label: "Finalized", value: finalized, zero: finalized === 0, insight: finalized > 0 ? <InsightLine tone="up" fallback="Locked & legal" /> : undefined },
+                  { label: "Drafts", value: drafts, zero: drafts === 0, insight: drafts > 0 ? <InsightLine tone="down" fallback="Need finalization" /> : undefined },
+                  { label: "Billed value", value: formatCurrency(billed), zero: billed === 0 },
+                ]}
+              />
+              {drafts > 0 && (
+                <SignalCard
+                  tier="warning"
+                  icon={AlertTriangle}
+                  label="Drafts pending finalization"
+                  caption={`${drafts} GST/Credit note draft${drafts > 1 ? "s" : ""} not yet legally valid — finalize before sharing`}
+                  subCaption={draftValue > 0 ? `${formatCurrency(draftValue)} in unbilled value` : undefined}
+                  value={drafts}
+                  valueSuffix={drafts > 1 ? "Drafts" : "Draft"}
+                />
+              )}
+            </>
+          );
+        })()}
+
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 max-w-sm">
