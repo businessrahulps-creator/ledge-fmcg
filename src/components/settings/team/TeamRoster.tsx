@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { MoreHorizontal, Sparkles, Lock, UserPlus, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -33,6 +33,8 @@ import { useTeamRoster, rolesDefaultCaps, type RosterMember } from "./useTeamRos
 import { JobPickerSheet } from "./JobPickerSheet";
 import { InviteSheet } from "./InviteSheet";
 import { OverrideDrawerStub } from "./OverrideDrawerStub";
+import { PendingInviteCard, type PendingInvite } from "./PendingInviteCard";
+import { useInvite } from "@/hooks/useInvite";
 
 const INACTIVE_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -43,7 +45,8 @@ interface Props {
 export function TeamRoster({ companyId }: Props) {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
-  const { members, defaults, loading, refresh } = useTeamRoster(companyId);
+  const { members, pendingInvites, defaults, loading, refresh } = useTeamRoster(companyId);
+  const { resendInvite, cancelInvite } = useInvite();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [overrideFor, setOverrideFor] = useState<RosterMember | null>(null);
@@ -51,6 +54,39 @@ export function TeamRoster({ companyId }: Props) {
   const [selectedRole, setSelectedRole] = useState<AppRole>("salesperson");
   const [removeFor, setRemoveFor] = useState<RosterMember | null>(null);
   const [saving, setSaving] = useState(false);
+  const [companyName, setCompanyName] = useState<string>("");
+
+  useEffect(() => {
+    if (!companyId) return;
+    let alive = true;
+    supabase
+      .from("companies")
+      .select("name")
+      .eq("id", companyId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (alive && data?.name) setCompanyName(data.name);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [companyId]);
+
+  const handleResendInvite = async (inviteId: string) => {
+    const token = await resendInvite(inviteId);
+    if (token) {
+      toast.success("Invite refreshed", { description: "A new 72-hour link is ready to share." });
+      await refresh();
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    const ok = await cancelInvite(inviteId);
+    if (ok) {
+      toast.success("Invite cancelled");
+      await refresh();
+    }
+  };
 
   const ownerCount = useMemo(
     () => members.filter((m) => m.role === "super_admin").length,
@@ -163,7 +199,27 @@ export function TeamRoster({ companyId }: Props) {
         ))}
       </div>
 
-      <PendingInvitesSection />
+      {pendingInvites.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground/80">Pending invites</p>
+          {pendingInvites.map((inv) => (
+            <PendingInviteCard
+              key={inv.id}
+              invite={inv}
+              companyName={companyName}
+              onResend={handleResendInvite}
+              onCancel={handleCancelInvite}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-md border border-dashed border-border/70 bg-muted/20 p-4">
+          <p className="text-xs font-medium text-foreground/80">Pending invites</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            No invites waiting. Send one above and share the link on WhatsApp.
+          </p>
+        </div>
+      )}
 
       {pickerFor && (
         <JobPickerSheet
@@ -186,7 +242,12 @@ export function TeamRoster({ companyId }: Props) {
         />
       )}
 
-      <InviteSheet open={inviteOpen} onOpenChange={setInviteOpen} />
+      <InviteSheet
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        companyName={companyName}
+        onInviteSent={refresh}
+      />
 
       {overrideFor && (
         <OverrideDrawerStub
@@ -333,19 +394,6 @@ function RosterCard({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </div>
-  );
-}
-
-/* ---------- PendingInvitesSection (placeholder for PR-E) ---------- */
-
-function PendingInvitesSection() {
-  return (
-    <div className="rounded-md border border-dashed border-border/70 bg-muted/20 p-4">
-      <p className="text-xs font-medium text-foreground/80">Pending invites</p>
-      <p className="mt-1 text-[11px] text-muted-foreground">
-        No invites waiting. Once you invite someone, you'll be able to resend the email from here.
-      </p>
     </div>
   );
 }
