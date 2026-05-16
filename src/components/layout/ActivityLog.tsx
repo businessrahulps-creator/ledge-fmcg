@@ -148,7 +148,7 @@ export function ActivityLog({ open, onOpenChange }: Props) {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {entry.user_name || "System"}
                     {" · "}
-                    {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
+                    <SmartTime date={entry.created_at} />
                   </p>
                 </div>
               </div>
