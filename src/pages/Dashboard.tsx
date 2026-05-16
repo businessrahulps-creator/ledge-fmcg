@@ -103,6 +103,35 @@ export default function Dashboard() {
     : 0;
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
+  // Previous month aggregates for insight deltas
+  const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+  const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
+  const prevMonthlyOrders = orders.filter((o) => {
+    const d = new Date(o.date + "T00:00:00");
+    return d >= prevMonthStart && d <= prevMonthEnd;
+  });
+  const prevMonthRevenue = prevMonthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+  const prevMonthOrderCount = prevMonthlyOrders.length;
+  const prevMonthDeliveredPct = prevMonthOrderCount > 0
+    ? Math.round((prevMonthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / prevMonthOrderCount) * 100)
+    : 0;
+  const pctDelta = (curr: number, prev: number): number | null => {
+    if (prev === 0) return null;
+    return Math.round(((curr - prev) / prev) * 100);
+  };
+  const revenueDelta = pctDelta(monthRevenue, prevMonthRevenue);
+  const ordersDelta = pctDelta(monthOrderCount, prevMonthOrderCount);
+  const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
+  // DSO proxy: avg days since order for outstanding orders
+  const outstandingOrders = monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial");
+  const avgOutstandingDays = outstandingOrders.length > 0
+    ? Math.round(outstandingOrders.reduce((s, o) => {
+        const days = Math.max(0, Math.floor((today.getTime() - new Date(o.date + "T00:00:00").getTime()) / 86400000));
+        return s + days;
+      }, 0) / outstandingOrders.length)
+    : 0;
+
   // 7-day revenue sparkline data
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
