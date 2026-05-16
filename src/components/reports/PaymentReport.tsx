@@ -19,13 +19,15 @@ export function PaymentReport() {
   const orders = api.orders.list();
   const [period, setPeriod] = useState<TimePeriod>("monthly");
   const [filter, setFilter] = useState("all");
+  const [scope, setScope] = useState<"delivered" | "all">("delivered");
   const [selected, setSelected] = useState<Order | null>(null);
 
   // Net amount the dealer is billed (gross minus trade discounts) — matches Dashboard / Billing convention
-  const netTotal = (o: Order) => o.total - (o.schemeSavings || 0);
+  const netTotal = (o: Order) => Math.max(0, o.total - (o.schemeSavings || 0));
 
   const periodFiltered = filterByTimePeriod(orders, period);
-  const filtered = filter === "all" ? periodFiltered : periodFiltered.filter((o) => o.paymentStatus === filter);
+  const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
+  const filtered = filter === "all" ? scoped : scoped.filter((o) => o.paymentStatus === filter);
   const [pdfOpen, setPdfOpen] = useState(false);
   const rptSections: PdfSection[] = [
     { id: "company", label: "Company header" },
@@ -46,6 +48,15 @@ export function PaymentReport() {
             <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="partial">Partial</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={scope} onValueChange={(v) => setScope(v as "delivered" | "all")}>
+          <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="delivered">Delivered Only</SelectItem>
+            <SelectItem value="all">All Orders</SelectItem>
           </SelectContent>
         </Select>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">

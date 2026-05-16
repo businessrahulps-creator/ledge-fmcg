@@ -11,12 +11,13 @@ import { useAuth } from "@/context/AuthContext";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
-import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus, CheckCircle2, Clock } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { ExplainButton } from "@/components/ui/explain-button";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -90,37 +91,47 @@ export default function Dashboard() {
   const firstName = profile?.full_name?.split(" ")[0];
 
   // This Month aggregates (memoized — recompute only when orders change)
+  // Booked revenue scopes by order.date; delivered revenue scopes by delivered_at.
   const monthAgg = useMemo(() => {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthlyOrders = orders.filter((o) => {
-      const d = new Date(o.date + "T00:00:00");
+    const inMonthByDate = (iso?: string | null) => {
+      if (!iso) return false;
+      const d = new Date(iso.slice(0, 10) + "T00:00:00");
       return d >= monthStart && d <= today;
-    });
-    const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    };
+    const monthlyOrders = orders.filter((o) => inMonthByDate(o.date));
+    const monthDeliveredOrders = orders.filter((o) => isDelivered(o) && inMonthByDate(o.deliveredAt || undefined));
+    const monthBookedOrders = monthlyOrders.filter(isBooked);
+    const monthDeliveredRev = monthDeliveredOrders.reduce((s, o) => s + netTotal(o), 0);
+    const monthBookedRev = monthBookedOrders.reduce((s, o) => s + netTotal(o), 0);
     const monthOrderCount = monthlyOrders.length;
     const monthOutstanding = monthlyOrders
       .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
-      .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+      .reduce((s, o) => s + netTotal(o), 0);
     const monthDeliveredPct = monthOrderCount > 0
-      ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
+      ? Math.round((monthlyOrders.filter(isDelivered).length / monthOrderCount) * 100)
       : 0;
-    return { monthlyOrders, monthRevenue, monthOrderCount, monthOutstanding, monthDeliveredPct };
+    return { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct };
   }, [orders, today]);
-  const { monthlyOrders, monthRevenue, monthOrderCount, monthOutstanding, monthDeliveredPct } = monthAgg;
+  const { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct } = monthAgg;
+  const monthRevenue = monthDeliveredRev; // primary number = delivered
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
-  // Previous month aggregates for insight deltas
+  // Previous month aggregates for insight deltas (delivered-basis)
   const prevMonthAgg = useMemo(() => {
     const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-    const prevMonthlyOrders = orders.filter((o) => {
-      const d = new Date(o.date + "T00:00:00");
+    const inPrev = (iso?: string | null) => {
+      if (!iso) return false;
+      const d = new Date(iso.slice(0, 10) + "T00:00:00");
       return d >= prevMonthStart && d <= prevMonthEnd;
-    });
-    const prevMonthRevenue = prevMonthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    };
+    const prevMonthlyOrders = orders.filter((o) => inPrev(o.date));
+    const prevDeliveredOrders = orders.filter((o) => isDelivered(o) && inPrev(o.deliveredAt || undefined));
+    const prevMonthRevenue = prevDeliveredOrders.reduce((s, o) => s + netTotal(o), 0);
     const prevMonthOrderCount = prevMonthlyOrders.length;
     const prevMonthDeliveredPct = prevMonthOrderCount > 0
-      ? Math.round((prevMonthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / prevMonthOrderCount) * 100)
+      ? Math.round((prevMonthlyOrders.filter(isDelivered).length / prevMonthOrderCount) * 100)
       : 0;
     const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
     return { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel };
@@ -146,14 +157,14 @@ export default function Dashboard() {
     }, 0) / outstandingOrders.length);
   }, [outstandingOrders, today]);
 
-  // 7-day revenue sparkline data
+  // 7-day DELIVERED revenue sparkline (scoped by delivered_at)
   const last7Days = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - 6 + i);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const dayRevenue = orders
-      .filter(o => o.date === key)
-      .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+      .filter(o => isDelivered(o) && (o.deliveredAt || "").slice(0, 10) === key)
+      .reduce((s, o) => s + netTotal(o), 0);
     return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
   }), [orders, today]);
   const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
@@ -166,12 +177,15 @@ export default function Dashboard() {
   );
 
   const dayAgg = useMemo(() => {
-    const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    const deliveredOnDay = orders.filter((o) => isDelivered(o) && (o.deliveredAt || "").slice(0, 10) === selectedDate);
+    const dayDeliveredRev = deliveredOnDay.reduce((s, o) => s + netTotal(o), 0);
+    const dayBookedRev = bookedRevenue(filteredOrders);
+    const totalRevenue = dayDeliveredRev; // legacy alias used elsewhere
     const totalOrders = filteredOrders.length;
     const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
     const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
-    return { totalRevenue, totalOrders, pendingOrders, dispatchedOrders };
-  }, [filteredOrders]);
+    return { totalRevenue, dayDeliveredRev, dayBookedRev, totalOrders, pendingOrders, dispatchedOrders };
+  }, [orders, filteredOrders, selectedDate]);
   const { totalRevenue, totalOrders, pendingOrders, dispatchedOrders } = dayAgg;
 
   const kpis = [
@@ -302,7 +316,24 @@ export default function Dashboard() {
                 );
               };
               const cells = [
-                { label: "Revenue", value: formatCurrency(monthRevenue), zero: monthRevenue === 0, insight: renderDelta(revenueDelta) },
+                {
+                  label: "Delivered Revenue",
+                  value: formatCurrency(monthDeliveredRev),
+                  zero: monthDeliveredRev === 0,
+                  insight: (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="insight-line insight-up inline-flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+                        Delivered
+                      </span>
+                      <span className="insight-line insight-flat inline-flex items-center gap-1.5 text-muted-foreground/70">
+                        <span className="h-1.5 w-1.5 rounded-full bg-warning/60" aria-hidden />
+                        {formatCurrency(monthBookedRev)} in pipeline
+                      </span>
+                      {revenueDelta !== null && renderDelta(revenueDelta)}
+                    </div>
+                  ),
+                },
                 { label: "Orders", value: monthOrderCount.toString(), zero: monthOrderCount === 0, insight: renderDelta(ordersDelta) },
                 {
                   label: "Outstanding",

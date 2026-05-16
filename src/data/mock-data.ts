@@ -87,6 +87,7 @@ export interface Order {
   vehicle: string;
   driverName: string;
   deliveryStatus: "pending" | "dispatched" | "delivered";
+  deliveredAt?: string | null;
   dispatchRemarks: string;
   godownId?: string;
   schemeSavings: number;

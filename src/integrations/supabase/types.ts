@@ -729,6 +729,7 @@ export type Database = {
           company_id: string
           created_at: string
           date: string
+          delivered_at: string | null
           delivery_status: Database["public"]["Enums"]["delivery_status"]
           dispatch_date: string | null
           dispatch_remarks: string
@@ -751,6 +752,7 @@ export type Database = {
           company_id: string
           created_at?: string
           date?: string
+          delivered_at?: string | null
           delivery_status?: Database["public"]["Enums"]["delivery_status"]
           dispatch_date?: string | null
           dispatch_remarks?: string
@@ -773,6 +775,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           date?: string
+          delivered_at?: string | null
           delivery_status?: Database["public"]["Enums"]["delivery_status"]
           dispatch_date?: string | null
           dispatch_remarks?: string
