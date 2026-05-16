@@ -1,20 +1,31 @@
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useTransform, useReducedMotion, useMotionTemplate } from "framer-motion";
 import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
-import { spring, useParallaxY } from "@/lib/motion";
+import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
 import heroDashboard from "@/assets/landing/hero-dashboard.png";
 
+/** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 20, filter: "blur(4px)" },
+  initial: { opacity: 0, y: 16, filter: "blur(4px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  transition: { ...spring.default as object, delay },
+  transition: { duration: duration.medium, ease: ease.decelerate, delay },
 });
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
   const gridY = useParallaxY(sectionRef, 30);
+  /** Scroll-scrubbed progress through the hero — drives device lift + ambient light drift. */
+  const scrub = useScrollScrub(sectionRef, ["start start", "end start"]);
+  const deviceY = useTransform(scrub, [0, 1], reduce ? [0, 0] : [0, -64]);
+  const deviceScale = useTransform(scrub, [0, 1], reduce ? [1, 1] : [1, 0.96]);
+  const lightX = useTransform(scrub, [0, 1], reduce ? [50, 50] : [45, 58]);
+  const lightY = useTransform(scrub, [0, 1], reduce ? [50, 50] : [42, 62]);
+  const lightOpacity = useTransform(scrub, [0, 1], reduce ? [0.4, 0.4] : [0.7, 0.2]);
+  const lightBg = useMotionTemplate`radial-gradient(ellipse 800px 600px at ${lightX}% ${lightY}%, hsl(var(--primary) / 0.10) 0%, transparent 60%)`;
+
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-mesh-soft-warm pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
