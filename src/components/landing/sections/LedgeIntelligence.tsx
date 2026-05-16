@@ -167,7 +167,7 @@ export function LedgeIntelligence() {
           <h2 className="font-heading font-semibold text-center text-foreground tracking-[-0.022em] leading-[1.1] text-[32px] md:text-[40px] mt-6">
             Ledge{" "}
             <span className="lp-pill-accent font-semibold">
-              <span className="relative z-[2]">Intelligence</span>
+              <span className="relative z-[2]">Co-Pilot</span>
             </span>
             <span className="ml-[-2px]">.</span>
           </h2>
@@ -177,14 +177,14 @@ export function LedgeIntelligence() {
           <div className="mt-4 flex justify-center">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">
               <span className="lp-live-dot" />
-              Launching Q3 2026 · Limited founding access
+              Launching in 3 months · Founding members get early access free
             </span>
           </div>
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.16}>
           <p className="mt-5 text-center font-body text-muted-foreground text-[17px] leading-[1.55] max-w-2xl mx-auto">
-            Your always-on AI that thinks alongside you.
+            Ledge thinks. You lead.
           </p>
         </AnimateIn>
 
