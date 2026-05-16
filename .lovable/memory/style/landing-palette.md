@@ -1,8 +1,11 @@
 ---
-name: Landing palette (restraint + reference primitives)
-description: Landing uses white/paper neutrals with indigo accent. Reference-inspired primitives (capsule CTA, frost, bento hero) are deployed at most ONCE per section.
+name: Landing palette (LEGACY pre-rebrand snapshot)
+description: Documents the current indigo/paper landing language. Replaced by mem://style/landing-parity-checklist once the parity pass ships. Kept for historical context.
 type: design
 ---
+
+> **LEGACY** — pre-V2-parity. See `mem://style/landing-parity-checklist` for the active refit plan and `mem://style/design-system` for the V2 tokens this will migrate to.
+
 The **landing page** runs on restraint. White space does the work.
 
 **Backgrounds** (alternating rhythm, no wallpaper gradients):
