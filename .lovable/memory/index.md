@@ -6,6 +6,7 @@ Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (acce
 ## Memories
 
 ### Design system (read these for any visual work)
+- [Landing pill system](mem://style/landing-pill-system) — lp-pill/lp-pill-metric/lp-insight primitives; one pill cluster per section.
 - [Design system tokens (V2)](mem://style/design-system) — Live token reference: palette, type, radius, shadow, motion, density. Source of truth.
 - [App visual language](mem://style/app-visual-language) — Primitives (SignalCard/KpiStrip/InsightLine/StatusBadge), utilities (`.h1-display`, `.num`, `.card-hover`, `.glass-card`, `.status-*`), composition rules.
 - [Landing parity checklist](mem://style/landing-parity-checklist) — 2-pass refit playbook to bring landing onto V2 with grep regression gates.
