@@ -1,85 +1,85 @@
-# Final Landing Polish — "Pill, Proof, Preview"
+# Premium Navigation — Split Capsule (Arc/Raycast-style)
 
-## What I'm learning from your references
+Replace the current full-width transparent bar with two floating capsules that slide together into one pill as the user scrolls. Adds a command palette, a live status dot, and a gradient-ringed CTA.
 
-Looking at IMG_2804/2805/2806 (pill controls, status chips, Ask AI button), IMG_2808 (Ticketapp feature cards with mini product previews), and IMG_2817–2820 (Coach insight panel, spending pattern card, safe-to-spend arc, bottom nav with progress ring) — four traits repeat:
+## What the user will see
 
-1. **Pill geometry everywhere.** Fully-rounded capsules, not boxy cards. Soft, layered white shadows (top inner highlight + ambient drop), no harsh borders.
-2. **Status-as-pill.** Tiny rounded-square color tile + matching tinted text in one capsule (Pending / Submitted / Success). Zero borders, all weight comes from the color tile.
-3. **Insight micro-panels.** A small tinted-bg block *inside* a white card with a header row ("Coach insight"), one line of copy, and a colored "See breakdown →" link.
-4. **Mini product previews in feature cards.** The illustration zone shows the real product (rows, charts, chips) — not generic art. That's what makes Ticketapp feel like a "billion-dollar app."
+**At top of page (hero, scrollY = 0):**
+- Two separate floating capsules, 14px from the top, in the safe-area inset.
+- **Left capsule:** Ledge mark + wordmark, vertical divider, tiny pulsing green dot + "All systems operational" in 12px Inter medium.
+- **Right capsule:** Features · How It Works · Pricing links, vertical divider, ⌘K trigger (kbd-style chip), Sign in, then **Start Free Trial** as a Midnight pill with a soft gradient ring (Midnight → Forest at 25% opacity) that brightens on hover.
+- Both capsules: 44px tall, `rounded-full`, `bg-card/85` + `backdrop-blur-xl`, `shadow-depth-2`, 1px hairline border.
 
-Our current landing has the tinted cards (PR from last turn) but lacks the **pill vocabulary, the status chips, the insight panels, and real product micro-previews**. This plan adds those four things only.
+**After scrolling 16px:**
+- The two capsules slide inward (spring) and merge into one centered island pill — logo · status dot · links · ⌘K · Sign in · CTA — like Arc's address bar collapsing.
+- Width animates from `max-w-7xl spread` to `~880px centered island` over 320ms with `ease-fluent`.
+- Shadow deepens from `depth-2` → `depth-8`.
 
-## Plan: four additions, zero rewrites
+**Hover interactions:**
+- Links get a magnetic ink underline: a 2px Midnight bar that slides in from the left, scaled by mouse proximity (uses existing `MagneticWrapper` pattern).
+- ⌘K chip lifts 1px and the kbd glyphs invert color.
+- CTA gradient ring rotates 1 full turn over 6s on hover (subtle).
 
-### 1. Pill primitives in `index.css` (additive, no breaking changes)
+**⌘K command palette:**
+- `cmdk` library (already common in shadcn projects — install if missing).
+- Opens on ⌘K / Ctrl+K or click. Sections: Navigate (Features, Pricing, How It Works, Founder, Pricing FAQ), Account (Sign in, Start Free Trial), Contact (Call sales, WhatsApp sales).
+- 480px wide, frosted card, fuzzy search, arrow-key navigation, Esc to close.
 
-Add a small family under the existing `lp-*` namespace:
+**Mobile (<768px):**
+- One single centered pill: logo left, ⌘K replaced by a search icon, hamburger right. No status dot (saves width).
+- Keeps existing `MorphHamburger` + `MobileMenuOverlay` flow untouched.
 
-- `.lp-pill` — base capsule (white, fully rounded, layered shadow `inset 0 1px 0 white, 0 1px 2px rgba(15,31,58,.06), 0 8px 24px -12px rgba(15,31,58,.18)`). Used as the chrome for everything below.
-- `.lp-pill-status` + 5 variants `--success / --info / --warn / --danger / --neutral`. Renders an 18px rounded-square color tile (lucide icon inside) + tinted label, all inside one capsule. Maps to brand semantic tokens: Forest=success, Midnight=info, Terracotta=warn, muted=neutral.
-- `.lp-pill-metric` — capsule with a small icon tile on the left + label + delta chip on the right (the IMG_2818 "Dining +12%" pattern).
-- `.lp-pill-gradient` — the "Ask AI" gradient capsule (Terracotta→Midnight) for the one earned hero/CTA moment. Built on existing `lp-capsule-cta` styling, exposed as a compact pill variant.
-- `.lp-insight` — tinted micro-panel (Bone or faint Forest bg, 12px radius, soft inset). Header row uses a 16px monoline icon + label in muted-foreground; body line in foreground; footer link in Forest.
+## Why this feels premium
 
-All built from existing HSL tokens (Midnight/Forest/Terracotta/Bone). No new colors, no new fonts.
+- Two-capsule → one-capsule morph is the signature Arc move; very few Indian B2B SaaS sites do it.
+- Live status dot signals "we're a real product, not a landing page."
+- ⌘K signals "power tool for operators" — exactly the Indian FMCG distributor persona.
+- Gradient ring + Playfair-spaced wordmark inside the pill ties back to the brand without shouting.
 
-### 2. Apply pills where they earn their keep (six surgical spots)
+## Technical changes
 
-```text
-Hero        → replace the small "Built in Kerala" text with an lp-pill-status --success
-            → trust strip below CTA becomes 3 lp-pill chips (Offline-ready · GST-ready · Made in Kerala)
-TrustBar    → swap the row of plain logos for lp-pill containers (one per logo) — feels intentional
-Problem     → on the Terracotta hero card, add an lp-pill-status --warn ("Excel night · 11:47pm") above the headline
-WhyLedge    → on the Midnight card, add an lp-insight panel ("Coach insight" pattern) with one real Ledge line, e.g. "Your top 3 dealers haven't ordered in 12 days. Tap to nudge."
-Outcome     → the "Revenue recovered" Forest card gets an lp-pill-metric row inside (₹14.2L · +18% this quarter)
-FinalCTA    → primary CTA becomes lp-pill-gradient; secondary stays ghost
-```
+**Files to edit:**
+- `src/components/landing/sections/Navbar.tsx` — full rewrite (~180 lines). Uses `useScroll` from framer-motion for capsule merge, `useMotionValue` for magnetic underlines.
+- `src/index.css` — add `.lp-nav-capsule`, `.lp-nav-pill`, `.lp-nav-kbd`, `.lp-nav-cta-ring`, `.lp-nav-underline` primitives (~80 lines, semantic tokens only).
 
-No section gets more than **one** pill cluster. That's the rationing rule — pills are accents, not wallpaper.
+**Files to create:**
+- `src/components/landing/NavCommandPalette.tsx` — `cmdk`-based palette, ~140 lines.
+- `src/components/landing/NavStatusDot.tsx` — small reusable pulsing dot (extracted from existing footer pattern).
 
-### 3. Replace 2 of the 6 Features bento cards with **real product micro-previews** (the Ticketapp move)
+**Dependencies:**
+- Verify `cmdk` is installed (shadcn `command` component uses it — likely already present). If not, `bun add cmdk`.
 
-Currently Features.tsx has icon + headline + body. We'll upgrade the two largest cards to include a small **non-interactive product preview** rendered in JSX (no images):
+**Tokens / no new colors:**
+- Reuses existing `--primary` (Midnight), `--success` (Forest), `--card`, `--border`, `--ring`, `shadow-depth-2/8`, `ease-fluent`.
+- Gradient ring = `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--success) / 0.4))` masked with `padding-box` trick.
 
-- **Dealer Intelligence** (Forest tint): show a stacked list of 3 fake dealer rows with `lp-pill-status` chips (Active / Slow / At risk) — matches IMG_2808 Package Selling card.
-- **Returns & Claims** (Terracotta tint): show a mini timeline with 3 `lp-pill-status` nodes (Submitted → Approved → Paid) with a tiny ₹ amount.
+**Motion budget:**
+- Capsule merge: 320ms spring (stiffness 220, damping 28).
+- Underline magnetic: 60fps `transform: translateX()` only.
+- Gradient ring: CSS `@keyframes` 6s linear, paused unless `:hover`.
+- Respects `prefers-reduced-motion` — falls back to instant snap + static ring.
 
-Other 4 cards stay as-is (icon + copy). This gives the page two "wow" moments without bloating.
+**Accessibility:**
+- ⌘K trigger has `aria-label="Open command palette"` and visible kbd hint.
+- Palette traps focus, returns focus on close.
+- Status dot has `role="status"` + `aria-live="polite"`.
+- All nav links keep semantic `<a>` / `<Link>`.
 
-### 4. Type & rhythm tightening (tiny but high-leverage)
-
-- All new pills use **Inter 13/14px medium**, never Playfair (Playfair stays reserved for headlines).
-- Add 1 utility `.num-tabular` (`font-feature-settings: "tnum"`) and apply to every metric/number inside pills — fixes the jitter you get with proportional digits.
-- Increase vertical air around tinted cards by 8px so the new pills don't crowd the headlines.
-
-## Out of scope (intentionally)
-
-- No new colors, fonts, animations beyond a 200ms ease on pill hover.
-- No changes to Pricing, Founder, HowItWorks, Footer, Navbar, LedgeIntelligence (already dense enough).
-- No changes to the app (`/app/*`) — landing only.
-- No new images or assets — all previews rendered in JSX with existing tokens.
-
-## Files touched
-
-```text
-src/index.css                                    (+~120 lines of lp-pill-* / lp-insight)
-src/components/landing/sections/Hero.tsx         (status pill + 3 trust pills)
-src/components/landing/sections/TrustBar.tsx     (wrap logos in lp-pill)
-src/components/landing/sections/Problem.tsx      (warn pill on Terracotta card)
-src/components/landing/sections/WhyLedge.tsx     (lp-insight panel on Midnight card)
-src/components/landing/sections/Outcome.tsx      (lp-pill-metric on Forest card)
-src/components/landing/sections/Features.tsx     (2 cards get JSX micro-previews)
-src/components/landing/sections/FinalCTA.tsx     (CTA → lp-pill-gradient)
-mem://style/landing-pill-system                  (new memory: pill vocabulary + rationing rule)
-mem://index.md                                   (one new line)
-```
-
-## Why this lands the "billion-dollar" feel
-
-Your references don't win with color — they win with **a consistent component vocabulary** repeated at every scale: status, metric, control, insight. Right now Ledge has cards and headlines but no shared micro-grammar. Adding one pill family + one insight panel + two real product previews gives the eye the same "this team thought about every 40px" signal that Slowspace, Ticketapp, and the iOS reference shots all share — without redesigning a single section.
+**Out of scope (do not touch):**
+- Mobile menu overlay logic (`MobileMenuOverlay`, `MorphHamburger`).
+- Footer, hero, any section component.
+- Auth or routing.
 
 ## Verification
 
-After implementation: scroll the landing at 1440px and 390px, confirm pills line up on the baseline grid, hover states are subtle (no scale, just shadow lift), and the gradient CTA is the only saturated element per viewport.
+1. Scroll from 0 → 200px at 1440px viewport — capsules merge smoothly, no layout shift.
+2. Press ⌘K on Mac / Ctrl+K on Windows — palette opens, Esc closes, arrows navigate.
+3. Hover each nav link — magnetic underline tracks mouse.
+4. Resize to 390px — single mobile pill renders, hamburger still opens overlay.
+5. Toggle `prefers-reduced-motion` in devtools — animations collapse to instant.
+6. Lighthouse a11y on `/` stays ≥ 95.
+
+## Memory updates after build
+
+- Create `mem://style/landing-nav-capsule` documenting the split-capsule pattern, merge threshold, ⌘K shortcut.
+- Update `mem://index.md` Memories list.
