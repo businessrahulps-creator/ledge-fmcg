@@ -20,7 +20,7 @@ import { RotateCcw, Target } from "lucide-react";
 import { getQueue, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
-import { Download, Share, Plus } from "lucide-react";
+import { Download, Share, Plus, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Sheet,
