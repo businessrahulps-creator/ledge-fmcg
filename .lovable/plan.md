@@ -143,3 +143,12 @@ Realtime stays in `DataContext` but only invalidates query keys; no refetch in t
 ## Sequencing
 
 PR-A first (largest win, unblocks the rest), then F (dashboard RPC) since it depends on A's structure, then B → C → D → E in any order. Total: roughly 8–12 focused hours.
+
+## Status (May 2026)
+
+- ✅ PR-A (two-phase fetch + dropped O(N×M) recomputes + memo'd context value) shipped
+- ✅ PR-B (250ms realtime debounce) shipped
+- ✅ PR-D (manual vendor chunks) shipped
+- ✅ PR-E phase 1 — Dashboard reduces wrapped in `useMemo`; `StatusBadge` and `KpiStrip` wrapped in `React.memo`
+- ⏸ PR-C virtualization — DEFERRED. All three "big tables" (Orders/Stock/Billing) already use client-side pagination, so DOM is bounded; virtualization is low-ROI until row counts exceed pagination. Revisit if a single page hits >500 rendered rows.
+- ⏸ PR-F dashboard summary RPC — DEFERRED. Phase-2 background fetch + memoization brought Dashboard cost into acceptable range; the RPC remains the right long-term answer once a tenant accumulates years of history.
