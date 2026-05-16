@@ -13,6 +13,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { formatIndianDate } from "@/utils/formatDate";
 import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
+import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -202,6 +203,23 @@ export default function Dashboard() {
       <div className="space-y-7 md:space-y-8">
         {/* Onboarding checklist */}
         <SetupChecklist />
+
+        {/* AI "Today" briefing — 2-sentence Gemini digest, cached per-day */}
+        {(monthOrderCount > 0 || monthOutstanding > 0 || dealersAtRisk.length > 0) && (
+          <TodayDigest
+            cacheKey={todayIso}
+            context={{
+              todayOrders: totalOrders,
+              todayRevenue: totalRevenue,
+              monthOrders: monthOrderCount,
+              monthRevenue: monthRevenue,
+              outstanding: monthOutstanding,
+              overdueDealers: dealersAtRisk.length,
+              lowStockSkus: 0,
+              topDealer: topDistributors[0]?.name,
+            }}
+          />
+        )}
 
         {/* Hero: greeting + This Month + sparkline as ONE composed block */}
         <motion.section
