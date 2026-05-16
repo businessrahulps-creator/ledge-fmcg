@@ -220,13 +220,32 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
 
     const godownId = updates.godownId || currentOrder?.godownId;
-    if (
-      previousDelivery === "pending" &&
-      (newDelivery === "dispatched" || newDelivery === "delivered") &&
-      godownId && currentOrder && deps.companyId
-    ) {
-      const linesToUse = updates.lines || currentOrder.lines;
-      await deps.deductStockForOrder(id, linesToUse, godownId, deps.companyId);
+    const movingToDispatched = previousDelivery === "pending" && newDelivery === "dispatched";
+    const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
+                      (newDelivery === "pending" || newDelivery === "returned");
+
+    if (movingToDispatched && currentOrder && deps.companyId) {
+      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+        p_order_id: id,
+        p_dispatch_date: updates.dispatchDate || currentOrder.dispatchDate || null,
+        p_vehicle: updates.vehicle ?? null,
+        p_driver_name: updates.driverName ?? null,
+        p_dispatch_remarks: updates.dispatchRemarks ?? null,
+      });
+      if (dispErr) {
+        handleSupabaseError(dispErr, { source: "rpc:dispatch_order_atomic", title: "Failed to dispatch order", context: { id } });
+        return;
+      }
+      await deps.safeRefetchStockItems();
+    }
+
+    if (reverting && deps.companyId) {
+      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order" as any, { p_order_id: id });
+      if (revErr) {
+        handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Failed to reverse stock deduction", context: { id } });
+      } else {
+        await deps.safeRefetchStockItems();
+      }
     }
 
     setOrders(prev => prev.map(o => {
