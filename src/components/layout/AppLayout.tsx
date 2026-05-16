@@ -29,35 +29,47 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+import { ChevronRight } from "lucide-react";
+
 const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Performance", url: "/performance", icon: TrendingUp },
+  { title: "Insights", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
 const moreGroups = [
   {
-    label: "Manage",
+    label: "Work",
     items: [
-      { title: "Dealers", url: "/distributors", icon: UserRound },
-      { title: "Team", url: "/salespersons", icon: UserCheck },
-      { title: "Company", url: "/company", icon: Landmark },
-      { title: "Schemes", url: "/schemes", icon: Gift },
-      { title: "Targets", url: "/targets", icon: Target },
-    ],
-  },
-  {
-    label: "Analyze",
-    items: [
-      { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
-      { title: "Activity", url: "/activity", icon: History },
       { title: "Billing", url: "/billing", icon: FileText },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
   {
-    label: "Settings",
+    label: "Catalog",
+    items: [
+      { title: "Schemes", url: "/schemes", icon: Gift },
+      { title: "Targets", url: "/targets", icon: Target },
+    ],
+  },
+  {
+    label: "Relationships",
+    items: [
+      { title: "Dealers", url: "/distributors", icon: UserRound },
+      { title: "Sales Team", url: "/salespersons", icon: UserCheck },
+      { title: "Company", url: "/company", icon: Landmark },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { title: "Performance", url: "/performance", icon: TrendingUp },
+      { title: "Activity", url: "/activity", icon: History },
+    ],
+  },
+  {
+    label: "Account",
     items: [
       { title: "Help", url: "/help", icon: BookOpen },
       { title: "Settings", url: "/settings", icon: Settings },
