@@ -6,7 +6,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
-import { pdf } from "@react-pdf/renderer";
+// @react-pdf/renderer is dynamically imported below, never statically.
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -401,9 +401,12 @@ export default function Billing() {
     };
 
     try {
-      // Lazy-load the heavy GstInvoicePdf component (and the @react-pdf/renderer
-      // chunk it pulls in) only when the user actually downloads a PDF.
-      const { GstInvoicePdf } = await import("@/components/pdf/GstInvoicePdf");
+      // Lazy-load the heavy GstInvoicePdf component AND the @react-pdf/renderer
+      // chunk it depends on — only when the user actually downloads a PDF.
+      const [{ GstInvoicePdf }, { pdf }] = await Promise.all([
+        import("@/components/pdf/GstInvoicePdf"),
+        import("@react-pdf/renderer"),
+      ]);
       const blob = await pdf(<GstInvoicePdf data={pdfData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
