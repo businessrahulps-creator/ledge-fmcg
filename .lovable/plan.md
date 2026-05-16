@@ -1,87 +1,70 @@
-## Goal
 
-Take the V2 design from "good 7/10" to "crafted 9/10" without changing functionality, layout, or business logic. Five tight polish themes, all token‑level and component‑level. No new pages, no copy rewrites, no behavior changes.
+# PR10 — Editorial Composition Pass
 
-## Theme 1 — Typographic rhythm (the single biggest lift)
+PR9 fixed typography and tokens. PR10 fixes **composition**: hierarchy, rhythm, redundancy, and the few surfaces that still feel "templated". Goal: 9.5/10.
 
-Playfair currently renders with default leading and tracking, which makes H1s feel "set" rather than "designed." Editorial polish here radiates everywhere.
+## What's still off (from current screenshot)
 
-- H1 (Playfair): tighten `letter-spacing` to ~‑0.02em, `line-height` 1.05, true `font-weight: 500` (not semibold). Editorial weight, not bold weight.
-- H2 (Playfair): ‑0.01em tracking, line‑height 1.15.
-- Add a reusable `.h1-display` + `.h2-display` utility so every page H1 is identical (right now each page sets its own classes — drift is visible).
-- Subtitles under H1: standardize at `text-[13px] text-muted-foreground` with one‑line max, no `md:` doubling.
-- Inter body: enable `font-feature-settings: "ss01", "cv11"` + `text-rendering: optimizeLegibility`. Free quality win.
-- Numeric tabular alignment: add `.num` utility (`font-variant-numeric: tabular-nums`) and apply to every KPI value, table amount column, and the live clock.
+1. **Dashboard top** — huge dead space above "Good Evening, Asha". The onboarding banner sits as a floating island, disconnected from the page.
+2. **KPI duplication** — "This Month" card shows Revenue/Orders/Outstanding/Delivered, then immediately below the day-rail repeats Revenue/Orders/Pending/Dispatched as 4 separate cards. Reads as the same block twice.
+3. **Day-rail** — chips look like buttons in a vacuum; no anchoring label, no relation to the KPIs they drive.
+4. **"Updated just now · Refresh"** — plain text, no affordance; refresh icon in topbar duplicates it.
+5. **Sidebar** — active state (left bar + bold) is good, but section labels (`HOME`, `MANAGE`) feel heavy at current size; footer version string floats.
+6. **Topbar** — sidebar toggle, then a wall of empty space, then cluster of 4 controls on the right. No left-side context (page title / breadcrumb).
+7. **Tables (Orders etc.)** — row hover is subtle but rows still feel tall; first/last column padding inconsistent with card edge.
+8. **Cards globally** — inset highlight from PR9 is good but corners on nested elements (badges, inputs inside cards) still feel slightly mismatched (8px inside 6px).
 
-## Theme 2 — Surface, depth, and edges
+## Plan (5 themes, single PR)
 
-The Bone background + white cards is correct, but edges currently feel slightly hard and shadows slightly muddy.
+### 1. Dashboard composition
+- **Remove top dead space**: page padding `pt-8` → `pt-5`; banner becomes inline pill at top of content column with `border-l-2 border-success` accent instead of full card.
+- **Merge the two KPI blocks** into one composed hero:
+  - Greeting + date (left, ~40%)
+  - "This Month" KPIs as a **horizontal strip** to the right of greeting on desktop (4 stat cells with hairline dividers, no card border)
+  - Sparkline becomes a thin band **directly under** the KPI strip, full width, 56px tall
+  - Day-rail moves **below** with label "Daily breakdown" and the today's KPIs render as compact 4-up `text-2xl` values, **not** as 4 separate full cards
+- Net result: one continuous editorial block, not three stacked cards.
+- "Updated just now" → small `text-[11px] text-muted-foreground` with a real icon button for refresh; remove duplicate refresh icon from topbar.
 
-- Refine `--shadow-2` / `--shadow-4` to use a warm shadow color (Midnight at very low alpha, `hsl(218 60% 14% / 0.04)`) instead of cool slate — matches Bone palette.
-- Add `--shadow-focus: 0 0 0 3px hsl(var(--ring) / 0.18)` and replace ad‑hoc focus rings on Button/Input/Select with this token.
-- Card hairline border: lighten from `border-border/70` to `border-border/60` and add an inner highlight `inset 0 1px 0 hsl(0 0% 100% / 0.6)` on `.glass-card` for the "lifted paper" look.
-- Section dividers: replace solid `border-t` with `bg-gradient-to-r from-transparent via-border to-transparent` hairlines on Settings + Dashboard section breaks.
+### 2. Topbar context
+- Add page title (same string as sidebar active item) on the left of the topbar in Inter `text-sm font-medium`, after the sidebar toggle. Empty middle gets purpose.
+- Tighten right cluster: clock, role, notifications. Drop redundant refresh icon.
+- Reduce topbar height 56px → 52px; vertical hairlines already in place.
 
-## Theme 3 — Component micro‑polish
+### 3. Sidebar refinement
+- Section labels: `text-[10px]` → `text-[9px]`, `tracking-[0.18em]` → `tracking-[0.22em]`, color `text-muted-foreground/70`.
+- Item row height 40px → 36px; icon 18px → 16px for visual lightness.
+- Active item: keep 2px Midnight bar, change label weight `font-semibold` → `font-medium` + `text-foreground` (less shouty, the bar carries the signal).
+- Footer: pin to bottom with `mt-auto`, single line `Ledge · v26.05`, `text-[10px] opacity-50`.
 
-Small craft fixes on shared primitives, propagates app‑wide.
+### 4. Table density + edge alignment
+- Row height 52px → 44px on desktop, 52px on touch (mobile keeps tap target).
+- First column `pl-5`, last `pr-5` to align with card inner padding.
+- Header background: subtle `bg-muted/20` band (currently transparent), so header reads as a distinct zone.
+- Sticky first column on horizontal scroll for Orders / Stock tables.
 
-- **Button**: tighten letter‑spacing on labels (‑0.005em), default to `font-medium` not `font-semibold`, add `active:translate-y-[0.5px]` to default variant, normalize icon‑gap to `gap-1.5` (currently mix of 1.5 / 2). Add `subtle` variant (transparent bg, muted hover) for secondary actions like "Refresh" / "Export CSV".
-- **StatusBadge**: tighten — `text-[11px]`, `tracking-wide`, dot size 5px not 6px, vertical alignment fix (currently dot sits ~1px low), uppercase on the label for ledger feel.
-- **Input / Select**: 40px → keep, but add `focus-visible:border-ring` (currently border stays gray on focus, only ring changes — feels disconnected). Placeholder `text-muted-foreground/70` not `/100`.
-- **Table**: header row `text-[11px] uppercase tracking-wider text-muted-foreground`, row height tightened from 56px to 52px, hover background `bg-muted/30` (less heavy), add right‑aligned `.num` on amount cells.
-- **Tabs**: replace pill underline with a 2px Midnight bar that animates with `transition-transform`, matching the editorial tone.
+### 5. Nested radius + small details
+- All inputs/selects/badges inside cards: `rounded-md` (already 6px) — audit for stragglers still at 8px.
+- Replace remaining emoji (🎉 in onboarding banner) with a Lucide `PartyPopper` icon at `text-success`.
+- Add `:focus-visible` outline using `--shadow-focus` (added in PR9 but not yet wired into Button/Input — wire it).
+- Empty-state illustrations: replace generic gray boxes with a thin Midnight line drawing + one-line copy + single CTA.
 
-## Theme 4 — Top bar + sidebar refinement
+## Files touched
 
-These are visible on every screen. Currently functional but a bit raw.
+- `src/index.css` — focus ring wiring, header band utility
+- `src/components/layout/AppLayout.tsx` — topbar height, page title slot, drop refresh
+- `src/components/layout/AppSidebar.tsx` — density, label weight, footer
+- `src/components/ui/table.tsx` — row height, header band, edge padding
+- `src/pages/Dashboard.tsx` — full recomposition (biggest change)
+- `src/components/onboarding/*` — banner restyle
+- Audit pass on remaining `rounded-lg`/`rounded-xl` inside cards
 
-- **Top bar (`AppLayout`)**: current 56px header has the sidebar toggle far left and clock + user + bell crammed right. Add 16px gap rhythm, vertical hairline separators between clock / user / actions, and make the IST clock use `.num` + smaller `IST` label baseline‑aligned. "Super Admin" → make it a quiet chip with role color.
-- **Sidebar**: 
-  - Wordmark padding: align the "Ledge" mark optical center with nav item icons (currently sits ~2px left of icon column).
-  - Active item: replace background fill with left 2px Midnight bar + bold label — more editorial, less "selected pill."
-  - Section labels ("HOME", "MANAGE"): already small caps; tighten tracking to 0.18em and reduce vertical padding by 4px.
-  - Footer "Ledge v26.05.16.0455" → smaller, `text-[10px]`, opacity‑60.
+## Out of scope
 
-## Theme 5 — Dashboard hero + KPIs (the page everyone sees first)
+- Landing page, auth pages, dark mode
+- Any business logic or data changes
+- Mobile redesign (PR10 keeps current mobile, only desktop composition changes)
 
-- "Good Afternoon, Asha" block: add a thin 1px Midnight underline that animates in on mount under the greeting (editorial signature). Subtitle "Updated just now · Refresh" → restyle as `text-[12px]` with `Refresh` as a quiet text link not a button.
-- **This Month strip**: currently four labels feel like a header row. Promote to a proper card with subtle background tint (`bg-card`, depth‑2), KPI values in Playfair at 22px so they echo the H1, deltas (▲ 12%) added as muted micro‑labels.
-- **Mini chart**: thicken stroke to 1.5px Midnight, add `linearGradient` fill `Midnight → transparent` at 8% opacity for area, soften gridless baseline. Replace day labels with `text-[10px] uppercase tracking-wider`.
-- **Day chip rail (Sat 9 … Today 15)**: today chip uses Midnight bg (good); tighten chip height to 44px, add a tiny dot under today's chip as a "you are here" mark.
-- **4 KPI cards** (Revenue / Orders / Pending / Dispatched): currently feel utilitarian. Refit:
-  - Label: `text-[10px] uppercase tracking-widest text-muted-foreground` (already close)
-  - Value: Playfair `text-3xl`, tabular‑nums
-  - Add a tiny trend sparkline (12px tall) or a single delta line under each value
-  - Hover: `.card-hover` → already exists, just confirm it's applied.
+## Verification
 
-## Technical sections
-
-### Files touched
-
-- `src/index.css` — new H1/H2/num/shadow tokens; refined depth shadows; section divider utility.
-- `src/components/ui/button.tsx` — letter‑spacing, gap‑1.5, `subtle` variant.
-- `src/components/ui/input.tsx`, `select.tsx` — focus border, placeholder opacity.
-- `src/components/ui/status-badge.tsx` — size + alignment.
-- `src/components/ui/table.tsx` — header type, row height, .num on amount.
-- `src/components/ui/tabs.tsx` — underline indicator.
-- `src/components/layout/AppLayout.tsx` — top bar rhythm + separators.
-- `src/components/layout/AppSidebar.tsx` — wordmark alignment, left‑bar active state, footer version.
-- `src/components/layout/LiveClock.tsx` — tabular numerals.
-- `src/pages/Dashboard.tsx` — greeting underline, KPI typography upgrade, chart restyle.
-- Apply `.h1-display` across all page H1s via a small sed pass (PR6/PR7 already use the same class string).
-
-### Out of scope (do not touch)
-
-- Landing page (`src/components/landing/**`) — separate plan owns this.
-- Auth pages (Login/Signup) already polished in PR8.
-- Any business logic, data layer, routes, or copy.
-- Dark mode (archived for V2).
-
-### Rollout
-
-Single PR ("PR9 — Polish pass"), self‑contained. Verify by screenshotting Dashboard, Orders, Settings, Dealer detail at 1280×800 + 390×844 before/after.
-
-## Acceptance
-
-Side‑by‑side: H1s feel published (not typed), KPI numbers feel like a ledger (not a spreadsheet), shadows look warm (not slate), focus rings are visible and intentional, sidebar active state reads as editorial. Target: 9/10.
+Screenshot Dashboard, Orders, Stock, Settings at 1280×800 and 390×844 before/after. Confirm no horizontal scroll, no contrast regressions, focus rings visible on keyboard nav.
