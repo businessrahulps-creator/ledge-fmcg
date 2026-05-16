@@ -25,10 +25,14 @@ export function ProductReport() {
       let qty = 0;
       let rev = 0;
       filteredOrders.forEach((o) => {
+        const gross = o.lines.reduce((s, l) => s + l.lineTotal, 0);
+        const savings = o.schemeSavings || 0;
+        // Pro-rate order-level scheme savings across lines by line share of gross
+        const netFactor = gross > 0 ? Math.max(0, (gross - savings)) / gross : 1;
         o.lines.forEach((l) => {
           if (l.productId === p.id) {
             qty += l.quantity;
-            rev += l.lineTotal;
+            rev += l.lineTotal * netFactor;
           }
         });
       });
