@@ -218,7 +218,16 @@ export function useOrdersDomain(deps: OrdersDeps) {
       await deps.deductStockForOrder(id, linesToUse, godownId, deps.companyId);
     }
 
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+    setOrders(prev => prev.map(o => {
+      if (o.id !== id) return o;
+      const merged = { ...o, ...updates };
+      if (updates.deliveryStatus === "delivered" && !merged.deliveredAt) {
+        merged.deliveredAt = new Date().toISOString();
+      } else if (updates.deliveryStatus && updates.deliveryStatus !== "delivered") {
+        merged.deliveredAt = null;
+      }
+      return merged;
+    }));
 
     const summaryParts: string[] = [];
     if (updates.paymentStatus) summaryParts.push(`payment ${currentOrder?.paymentStatus || "?"} → ${updates.paymentStatus}`);
