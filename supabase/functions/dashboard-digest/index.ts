@@ -1,5 +1,7 @@
 // Dashboard "Today" digest — 2-3 sentence English summary of business state.
-// Uses Lovable AI Gateway (Gemini). No API key needed.
+// Uses Lovable AI Gateway (Gemini). Authenticated users only.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,18 +22,33 @@ interface DigestInput {
   };
 }
 
+function jsonRes(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Require authenticated user
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return jsonRes({ error: "Unauthorized" }, 401);
+
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claims?.claims?.sub) return jsonRes({ error: "Unauthorized" }, 401);
+
     const { context } = (await req.json()) as DigestInput;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "AI not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (!LOVABLE_API_KEY) return jsonRes({ error: "AI not configured" }, 500);
 
     const currency = context.currency ?? "₹";
     const fmt = (n: number) => {
@@ -68,22 +85,18 @@ Lead with the most important signal (revenue trend, overdue risk, or stock risk)
     });
 
     if (!aiRes.ok) {
-      const text = await aiRes.text();
-      return new Response(JSON.stringify({ error: "AI request failed", detail: text }), {
-        status: aiRes.status === 429 ? 429 : 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Pass through 429/402 status so the UI can show the right message; don't leak detail.
+      const code = aiRes.status === 429 ? 429 : aiRes.status === 402 ? 402 : 500;
+      const msg = code === 429 ? "Rate limited" : code === 402 ? "AI credits exhausted" : "AI request failed";
+      console.error("dashboard-digest AI error", aiRes.status, await aiRes.text().catch(() => ""));
+      return jsonRes({ error: msg }, code);
     }
 
     const data = await aiRes.json();
     const summary: string = data?.choices?.[0]?.message?.content?.trim() ?? "";
-    return new Response(JSON.stringify({ summary }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonRes({ summary });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("dashboard-digest error", err);
+    return jsonRes({ error: "Internal error" }, 500);
   }
 });
