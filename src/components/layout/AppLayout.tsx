@@ -65,13 +65,11 @@ const moreGroups = [
     label: "Insights",
     items: [
       { title: "Performance", url: "/performance", icon: TrendingUp },
-      { title: "Activity", url: "/activity", icon: History },
     ],
   },
   {
     label: "Account",
     items: [
-      { title: "Help", url: "/help", icon: BookOpen },
       { title: "Settings", url: "/settings", icon: Settings },
     ],
   },
