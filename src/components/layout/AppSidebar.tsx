@@ -1,6 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useScrollEdges } from "@/hooks/use-scroll-edges";
 import {
   House,
   ClipboardList,
