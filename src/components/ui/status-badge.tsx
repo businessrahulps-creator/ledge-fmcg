@@ -33,7 +33,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
+function StatusBadgeImpl({ status, className }: StatusBadgeProps) {
   return (
     <span
       className={cn(
@@ -47,3 +47,5 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     </span>
   );
 }
+
+export const StatusBadge = memo(StatusBadgeImpl);
