@@ -51,12 +51,12 @@ export function SetupChecklist() {
         <motion.div
           initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, height: 0 }} transition={{ type: "spring", damping: 20, stiffness: 300 }}
-          className="glass-card rounded-2xl p-5 flex items-center gap-3 border border-primary/20"
+          className="flex items-center gap-2.5 rounded-md border-l-2 border-success bg-success/5 pl-3 pr-2 py-2"
         >
-          <PartyPopper className="h-5 w-5 text-primary shrink-0" />
-          <p className="text-sm font-medium text-foreground flex-1">You're all set! Ledge is ready to go.</p>
-          <button onClick={dismissCelebration} className="p-1 rounded-lg hover:bg-muted/60 text-muted-foreground/60 hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
-            <X className="h-4 w-4" />
+          <PartyPopper className="h-4 w-4 text-success shrink-0" />
+          <p className="text-[13px] font-medium text-foreground flex-1">You're all set — Ledge is ready to go.</p>
+          <button onClick={dismissCelebration} className="p-1 rounded-md hover:bg-success/10 text-muted-foreground/70 hover:text-foreground transition-colors shrink-0" aria-label="Dismiss">
+            <X className="h-3.5 w-3.5" />
           </button>
         </motion.div>
       </AnimatePresence>
