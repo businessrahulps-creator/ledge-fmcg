@@ -29,6 +29,7 @@ import {
   Settings,
   Plus,
   Search,
+  Clock,
 } from "lucide-react";
 
 /**
