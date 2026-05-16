@@ -195,18 +195,23 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  // Credit at Risk — memoized over distributors
-  const creditRisk = useMemo(() => {
-    const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
-    const dealersApproaching = distributors.filter(d => {
-      if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
-      const pct = d.outstandingAmount / d.creditLimit;
-      return pct >= 0.8;
-    });
-    const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
-    return { dealersAtRisk, dealersApproaching, atRiskAmount };
-  }, [distributors]);
-  const { dealersAtRisk, dealersApproaching, atRiskAmount } = creditRisk;
+  // Credit at Risk — aging-based, computed from orders + distributors
+  const agingRows = useMemo(
+    () => sortByRisk(computeDealerAging(orders, distributors, today)),
+    [orders, distributors, today],
+  );
+  const totalOutstandingAll = useMemo(
+    () => agingRows.reduce((s, r) => s + r.totalOutstanding, 0),
+    [agingRows],
+  );
+  const topRiskDealers = useMemo(() => agingRows.slice(0, 5), [agingRows]);
+  const worstAcross: AgingBucket | null = topRiskDealers[0]?.worstBucket ?? null;
+  const cardTier: "destructive" | "warning" | "neutral" =
+    worstAcross === "b90" ? "destructive"
+    : worstAcross === "b61" ? "destructive"
+    : worstAcross === "b31" ? "warning"
+    : "neutral";
+  const isSalesperson = userRole === "salesperson";
 
   const topDistributors = useMemo(
     () => [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4),
