@@ -53,8 +53,8 @@ function LiveRoute() {
       <svg viewBox="0 0 860 240" className="relative w-full h-auto" style={{ maxHeight: 260 }}>
         <defs>
           <linearGradient id="li-route-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#4F46E5" />
-            <stop offset="100%" stopColor="#0EA5E9" />
+            <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--accent))" />
           </linearGradient>
           <filter id="li-pulse-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="2.4" />
@@ -62,7 +62,7 @@ function LiveRoute() {
           <path id="li-route-ref" d={d} fill="none" />
         </defs>
 
-        <path d={d} fill="none" stroke="#E2E8F0" strokeWidth="1.5" strokeLinecap="round" />
+        <path d={d} fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" strokeLinecap="round" />
 
         <path
           d={d}
@@ -77,19 +77,19 @@ function LiveRoute() {
 
         {stops.map((s, i) => (
           <g key={i}>
-            <circle cx={s.x} cy={s.y} r="7" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1.5" />
-            <circle cx={s.x} cy={s.y} r="2.5" fill="#4F46E5" />
+            <circle cx={s.x} cy={s.y} r="7" fill="hsl(var(--card))" stroke="hsl(var(--border))" strokeWidth="1.5" />
+            <circle cx={s.x} cy={s.y} r="2.5" fill="hsl(var(--accent))" />
           </g>
         ))}
 
         {!reduce && (
           <g className="li-route-pulse">
-            <circle r="9" fill="#4F46E5" opacity="0.18" filter="url(#li-pulse-glow)">
+            <circle r="9" fill="hsl(var(--accent))" opacity="0.18" filter="url(#li-pulse-glow)">
               <animateMotion dur="6s" repeatCount="indefinite" rotate="auto">
                 <mpath href="#li-route-ref" />
               </animateMotion>
             </circle>
-            <circle r="5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="2">
+            <circle r="5" fill="hsl(var(--accent))" stroke="hsl(var(--card))" strokeWidth="2">
               <animateMotion dur="6s" repeatCount="indefinite" rotate="auto">
                 <mpath href="#li-route-ref" />
               </animateMotion>
@@ -175,7 +175,7 @@ export function LedgeIntelligence() {
 
         <AnimateIn variant="blurFadeUp" delay={0.1}>
           <div className="mt-4 flex justify-center">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#0A0F1C]/[0.08] text-[11.5px] font-medium text-muted-foreground shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">
               <span className="lp-live-dot" />
               Launching Q3 2026 · Limited founding access
             </span>

@@ -121,8 +121,8 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           transition={childEnter}
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0A0F1C]/[0.04] border border-[#0A0F1C]/[0.06] text-[12px] text-[#52525B] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shadow-[0_0_0_3px_rgba(22,163,74,0.18)]" />
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-muted border border-border text-[12px] text-muted-foreground font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--success))] shadow-[0_0_0_3px_hsl(var(--success)/0.18)]" />
             30-day free trial · No card · Cancel anytime
           </span>
         </motion.div>
@@ -136,14 +136,14 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           <Link
             to="/signup"
             onClick={onClose}
-            className="lp-btn-primary-dark lp-shimmer flex items-center justify-center text-white rounded-2xl py-4 font-body font-semibold text-[15px]"
+            className="lp-btn-primary-dark lp-shimmer flex items-center justify-center rounded-md py-4 font-body font-semibold text-[15px]"
           >
             Get Started Free
           </Link>
           <Link
             to="/login"
             onClick={onClose}
-            className="flex items-center justify-center bg-[#0A0F1C]/[0.04] hover:bg-[#0A0F1C]/[0.07] text-foreground border border-[#0A0F1C]/[0.06] rounded-2xl py-4 font-body font-semibold text-[15px] transition-colors"
+            className="flex items-center justify-center bg-muted hover:bg-muted/70 text-foreground border border-border rounded-md py-4 font-body font-semibold text-[15px] transition-colors"
           >
             Sign in
           </Link>

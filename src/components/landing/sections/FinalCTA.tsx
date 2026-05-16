@@ -55,7 +55,7 @@ export function FinalCTA() {
               href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white border border-[#0A0F1C]/[0.08] hover:border-[#0A0F1C]/[0.18] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_12px_-6px_rgba(15,23,42,0.10)] transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-all"
               aria-label="Chat with Ledge sales on WhatsApp"
             >
               <WhatsAppIcon className="w-4 h-4 text-[#128C7E]" />

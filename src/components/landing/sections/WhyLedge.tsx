@@ -31,12 +31,12 @@ export function WhyLedge() {
             {legacy.map((name) => (
               <span
                 key={name}
-                className="font-body text-[13px] font-medium text-[hsl(var(--muted-foreground)/0.7)] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-border"
+                className="font-body text-[13px] font-medium text-muted-foreground/70 line-through decoration-muted-foreground/40 px-3.5 py-1.5 rounded-full bg-muted border border-border"
               >
                 {name}
               </span>
             ))}
-            <span className="font-heading font-semibold text-[14px] text-white px-4 py-1.5 rounded-full bg-[#0A0F1C]">
+            <span className="font-heading font-semibold text-[14px] text-primary-foreground px-4 py-1.5 rounded-full bg-primary">
               Ledge
             </span>
           </div>

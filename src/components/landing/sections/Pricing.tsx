@@ -124,7 +124,7 @@ export function Pricing() {
                 style={plan.highlighted ? { overflow: "visible" } : undefined}
               >
                 {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-[#0A0F1C] shadow-md z-10">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-primary-foreground text-[11px] font-semibold px-3.5 py-1 rounded-full whitespace-nowrap tracking-[0.04em] bg-primary shadow-depth-4 z-10">
                     Most Popular
                   </span>
                 )}
@@ -170,8 +170,8 @@ export function Pricing() {
                   transition={spring.snappy}
                   className={`mt-7 w-full py-3 rounded-full text-center font-semibold text-[13.5px] transition-colors duration-200 block ${
                     plan.highlighted
-                      ? "lp-btn-primary-dark text-white"
-                      : "border border-border text-foreground hover:border-[#0A0F1C] bg-white"
+                      ? "lp-btn-primary-dark"
+                      : "border border-border text-foreground hover:border-primary bg-card"
                   }`}
                 >
                   {plan.cta}

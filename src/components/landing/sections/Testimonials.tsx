@@ -1,27 +1,34 @@
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 import { motion, useReducedMotion } from "framer-motion";
-import { GradientOrb } from "../GradientOrb";
+import arnav from "@/assets/landing/testimonial-arnav.jpg";
+import priya from "@/assets/landing/testimonial-priya.jpg";
+import dev from "@/assets/landing/testimonial-dev.jpg";
+import rohan from "@/assets/landing/testimonial-rohan.jpg";
 
 const testimonials = [
   {
     quote: "I check the dashboard before I start my day. That's it. The whole operation used to live in my head.",
     name: "Arnav Sethi",
     role: "Owner, Aryan Beverages, Pune",
+    avatar: arnav,
   },
   {
     quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn't been opened once.",
     name: "Priya Anand",
     role: "Operations Head, Coastal Naturals, Kochi",
+    avatar: priya,
   },
   {
     quote: "Caught a critical low on our top SKU four days early. Festival season went perfectly.",
     name: "Dev Sharma",
     role: "Warehouse Lead, Nova Retail Co., Chennai",
+    avatar: dev,
   },
   {
     quote: "I open the dealer profile in the car. I walk in knowing everything. Dealers notice.",
     name: "Rohan Nair",
     role: "Senior Sales Executive, Sterling FMCG, Bangalore",
+    avatar: rohan,
   },
 ];
 
@@ -67,7 +74,14 @@ export function Testimonials() {
                     {t.quote}
                   </p>
                   <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
-                    <GradientOrb seed={t.name} size={40} />
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      className="w-12 h-12 rounded-full object-cover border border-border shadow-depth-2"
+                    />
                     <div>
                       <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
                       <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>

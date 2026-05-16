@@ -12,14 +12,14 @@ export function BrowserFrame({
 }) {
   return (
     <div
-      className={`rounded-3xl overflow-hidden bg-white border border-[#E8E5E0] ${className}`}
+      className={`rounded-md overflow-hidden bg-card border border-border ${className}`}
       style={{
         boxShadow:
-          "0 1px 3px rgba(15,23,42,0.04), 0 30px 80px -16px rgba(15,23,42,0.10), 0 0 0 1px rgba(15,23,42,0.02), inset 0 1px 0 rgba(255,255,255,0.7)",
+          "0 1px 3px hsl(var(--primary) / 0.04), 0 30px 80px -16px hsl(var(--primary) / 0.14), 0 0 0 1px hsl(var(--primary) / 0.02), inset 0 1px 0 hsl(0 0% 100% / 0.7)",
       }}
     >
       {/* Title bar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#E8E5E0] bg-[#F8F7F5]">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-secondary">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
