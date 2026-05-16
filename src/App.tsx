@@ -13,6 +13,12 @@ import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import { isPreviewEnv } from "@/lib/preview-env";
 import { LedgeLoader } from "@/components/ui/ledge-loader";
 import { RouteSkeleton } from "@/components/ui/route-skeleton";
+import {
+  DashboardSkeleton,
+  ListPageSkeleton,
+  TablePageSkeleton,
+  DashboardPageSkeleton,
+} from "@/components/ui/page-skeleton";
 import { DelayedSuspense } from "@/components/ui/delayed-suspense";
 import { routeImporters, prefetchLikelyNext } from "@/lib/route-prefetch";
 
@@ -122,6 +128,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // the very first paint (Index/Login) where there's no shell yet.
 const RouteFallback = <RouteSkeleton />;
 const ShellFallback = <LedgeLoader />;
+
+// Per-route skeletons that mirror real layouts — feels continuous, no flash.
+const DashboardFallback = <DashboardSkeleton />;
+const OrdersFallback = <TablePageSkeleton rows={8} />;
+const BillingFallback = <TablePageSkeleton rows={8} />;
+const DealersFallback = <ListPageSkeleton cards={6} />;
+const SalespersonsFallback = <ListPageSkeleton cards={6} />;
+const StockFallback = <TablePageSkeleton rows={8} />;
+const PerformanceFallback = <DashboardPageSkeleton />;
+const ReportsFallback = <DashboardPageSkeleton />;
 
 const App = () => (
   <ErrorBoundary>
