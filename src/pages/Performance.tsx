@@ -428,6 +428,24 @@ export default function Performance() {
               </Button>
             </div>
 
+            {/* Revenue mode toggle */}
+            <div className="flex w-full gap-1 rounded-full bg-muted/50 p-1 sm:w-auto sm:self-end">
+              {(["delivered", "booked"] as RevenueMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setRevenueMode(m)}
+                  className={`flex-1 sm:flex-none rounded-full px-3 py-1.5 text-xs font-medium transition-all inline-flex items-center justify-center gap-1.5 ${
+                    revenueMode === m
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${m === "delivered" ? "bg-success" : "bg-warning/70"}`} aria-hidden />
+                  {m === "delivered" ? "Delivered Revenue" : "Booked Revenue"}
+                </button>
+              ))}
+            </div>
+
             {period === "custom" && (
               <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                 <Popover>
