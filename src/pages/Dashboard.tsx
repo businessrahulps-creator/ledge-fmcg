@@ -325,10 +325,10 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
-              className="glass-card p-5 md:p-7 min-w-0"
+              className="glass-card card-hover p-5 md:p-6 min-w-0"
             >
-              <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase mb-2">{kpi.label}</p>
-              <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
+              <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase mb-2">{kpi.label}</p>
+              <p className="font-heading text-[26px] md:text-[30px] font-medium tracking-[-0.015em] leading-[1.05] num whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
             </motion.div>
           ))}
         </div>
