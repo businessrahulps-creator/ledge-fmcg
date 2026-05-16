@@ -18,9 +18,9 @@ export function WhyLedge() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Built different</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Powerful tools exist.
+              Every tool exists.
               <br />
-              None were built for you.
+              None built for you.
             </h2>
           </div>
         </AnimateIn>
