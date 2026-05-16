@@ -118,6 +118,9 @@ export default function OrderDetail() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
 
+  type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
+  const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
+
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [claimType, setClaimType] = useState<"return" | "damage">("return");
   const [claimReason, setClaimReason] = useState("");
