@@ -78,46 +78,54 @@ export default function Dashboard() {
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const todayIso = toIsoDate(today);
-  const last7Dates = Array.from({ length: 7 }, (_, i) => {
+  const last7Dates = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - 6 + i);
     return d;
-  });
+  }), [today]);
   const [selectedDate, setSelectedDate] = useState(todayIso);
-  const selectedDateObj = new Date(selectedDate + "T00:00:00");
+  const selectedDateObj = useMemo(() => new Date(selectedDate + "T00:00:00"), [selectedDate]);
   const firstName = profile?.full_name?.split(" ")[0];
 
-  // This Month aggregates
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const monthlyOrders = orders.filter((o) => {
-    const d = new Date(o.date + "T00:00:00");
-    return d >= monthStart && d <= today;
-  });
-  const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-  const monthOrderCount = monthlyOrders.length;
-  const monthOutstanding = monthlyOrders
-    .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
-    .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-  const monthDeliveredPct = monthOrderCount > 0
-    ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
-    : 0;
+  // This Month aggregates (memoized — recompute only when orders change)
+  const monthAgg = useMemo(() => {
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthlyOrders = orders.filter((o) => {
+      const d = new Date(o.date + "T00:00:00");
+      return d >= monthStart && d <= today;
+    });
+    const monthRevenue = monthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    const monthOrderCount = monthlyOrders.length;
+    const monthOutstanding = monthlyOrders
+      .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
+      .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    const monthDeliveredPct = monthOrderCount > 0
+      ? Math.round((monthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / monthOrderCount) * 100)
+      : 0;
+    return { monthlyOrders, monthRevenue, monthOrderCount, monthOutstanding, monthDeliveredPct };
+  }, [orders, today]);
+  const { monthlyOrders, monthRevenue, monthOrderCount, monthOutstanding, monthDeliveredPct } = monthAgg;
   const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
   // Previous month aggregates for insight deltas
-  const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
-  const prevMonthlyOrders = orders.filter((o) => {
-    const d = new Date(o.date + "T00:00:00");
-    return d >= prevMonthStart && d <= prevMonthEnd;
-  });
-  const prevMonthRevenue = prevMonthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-  const prevMonthOrderCount = prevMonthlyOrders.length;
-  const prevMonthDeliveredPct = prevMonthOrderCount > 0
-    ? Math.round((prevMonthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / prevMonthOrderCount) * 100)
-    : 0;
+  const prevMonthAgg = useMemo(() => {
+    const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+    const prevMonthlyOrders = orders.filter((o) => {
+      const d = new Date(o.date + "T00:00:00");
+      return d >= prevMonthStart && d <= prevMonthEnd;
+    });
+    const prevMonthRevenue = prevMonthlyOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    const prevMonthOrderCount = prevMonthlyOrders.length;
+    const prevMonthDeliveredPct = prevMonthOrderCount > 0
+      ? Math.round((prevMonthlyOrders.filter((o) => o.deliveryStatus === "delivered").length / prevMonthOrderCount) * 100)
+      : 0;
+    const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
+    return { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel };
+  }, [orders, today]);
+  const { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel } = prevMonthAgg;
   const pctDelta = (curr: number, prev: number): number | null => {
     if (prev === 0) return null;
     return Math.round(((curr - prev) / prev) * 100);
@@ -126,16 +134,17 @@ export default function Dashboard() {
   const ordersDelta = pctDelta(monthOrderCount, prevMonthOrderCount);
   const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
   // DSO proxy: avg days since order for outstanding orders
-  const outstandingOrders = monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial");
-  const avgOutstandingDays = outstandingOrders.length > 0
-    ? Math.round(outstandingOrders.reduce((s, o) => {
-        const days = Math.max(0, Math.floor((today.getTime() - new Date(o.date + "T00:00:00").getTime()) / 86400000));
-        return s + days;
-      }, 0) / outstandingOrders.length)
-    : 0;
+  const avgOutstandingDays = useMemo(() => {
+    const outstandingOrders = monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial");
+    if (outstandingOrders.length === 0) return 0;
+    return Math.round(outstandingOrders.reduce((s, o) => {
+      const days = Math.max(0, Math.floor((today.getTime() - new Date(o.date + "T00:00:00").getTime()) / 86400000));
+      return s + days;
+    }, 0) / outstandingOrders.length);
+  }, [monthlyOrders, today]);
 
   // 7-day revenue sparkline data
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
+  const last7Days = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - 6 + i);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -143,20 +152,24 @@ export default function Dashboard() {
       .filter(o => o.date === key)
       .reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
     return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
-  });
+  }), [orders, today]);
   const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
   const allZero = last7Days.every(d => d.value === 0);
 
-  // Note: blocking page skeleton removed — render layout immediately and let
-  // each section render inline skeletons via empty-state UIs while data streams in.
+  // Filter orders by the exact selected date (rolling 7-day window picker) — memoized
+  const filteredOrders = useMemo(
+    () => orders.filter((o) => o.date === selectedDate),
+    [orders, selectedDate],
+  );
 
-  // Filter orders by the exact selected date (rolling 7-day window picker)
-  const filteredOrders = orders.filter((o) => o.date === selectedDate);
-
-  const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-  const totalOrders = filteredOrders.length;
-  const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
-  const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
+  const dayAgg = useMemo(() => {
+    const totalRevenue = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
+    const totalOrders = filteredOrders.length;
+    const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
+    const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
+    return { totalRevenue, totalOrders, pendingOrders, dispatchedOrders };
+  }, [filteredOrders]);
+  const { totalRevenue, totalOrders, pendingOrders, dispatchedOrders } = dayAgg;
 
   const kpis = [
     { label: "Revenue", value: formatCurrency(totalRevenue) },
@@ -165,19 +178,29 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  // Credit at Risk
-  const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
-  const dealersApproaching = distributors.filter(d => {
-    if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
-    const pct = d.outstandingAmount / d.creditLimit;
-    return pct >= 0.8;
-  });
-  const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
+  // Credit at Risk — memoized over distributors
+  const creditRisk = useMemo(() => {
+    const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
+    const dealersApproaching = distributors.filter(d => {
+      if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
+      const pct = d.outstandingAmount / d.creditLimit;
+      return pct >= 0.8;
+    });
+    const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
+    return { dealersAtRisk, dealersApproaching, atRiskAmount };
+  }, [distributors]);
+  const { dealersAtRisk, dealersApproaching, atRiskAmount } = creditRisk;
 
-  const topDistributors = [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4);
+  const topDistributors = useMemo(
+    () => [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4),
+    [distributors],
+  );
   const maxDistVal = topDistributors[0]?.totalValue || 1;
 
-  const topProducts = [...products].sort((a, b) => b.totalSold - a.totalSold).slice(0, 4);
+  const topProducts = useMemo(
+    () => [...products].sort((a, b) => b.totalSold - a.totalSold).slice(0, 4),
+    [products],
+  );
   const maxProdVal = topProducts[0]?.totalSold || 1;
 
   const recentOrders = filteredOrders.slice(0, 6);
