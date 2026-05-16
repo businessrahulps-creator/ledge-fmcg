@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, History } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { SmartTime } from "@/components/ui/smart-time";
 
 interface ActivityEntry {
   id: string;
@@ -54,7 +54,7 @@ export function EntityHistory({ entityType, entityId }: Props) {
               <div>
                 <p className="text-foreground/90">{e.summary}</p>
                 <p className="text-muted-foreground">
-                  {e.user_name || "System"} · {formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}
+                  {e.user_name || "System"} · <SmartTime date={e.created_at} />
                 </p>
               </div>
             </div>

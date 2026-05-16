@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications, NotificationType } from "@/hooks/use-notifications";
-import { formatDistanceToNow } from "date-fns";
+import { SmartTime } from "@/components/ui/smart-time";
 
 const typeConfig: Record<NotificationType, { icon: typeof Bell; colorClass: string }> = {
   order_placed: { icon: Package, colorClass: "border-l-emerald-500 dark:border-l-emerald-400" },
@@ -85,7 +85,7 @@ export function NotificationCenter() {
                         {notif.description}
                       </p>
                       <p className="mt-1 text-[10px] text-muted-foreground/70">
-                        {formatDistanceToNow(notif.timestamp, { addSuffix: true })}
+                        <SmartTime date={notif.timestamp} />
                       </p>
                     </div>
                   </button>
