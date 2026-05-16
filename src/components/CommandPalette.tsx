@@ -82,6 +82,11 @@ export function CommandPalette() {
   const dealers = open ? api.dealers.list() : [];
   const products = open ? api.products.list() : [];
 
+  // Hydrate recent items when the palette opens.
+  useEffect(() => {
+    if (open) setRecent(getRecent().slice(0, 5));
+  }, [open]);
+
   const q = query.trim().toLowerCase();
 
   const matchedOrders = useMemo(() => {
