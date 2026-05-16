@@ -100,16 +100,13 @@ export function Pricing() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto pt-4" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4" staggerTime={0.05}>
           {plans.map((plan, i) => {
             const tintMidnight = i === 2;     // Scale → Midnight authority
-            const tintBone = i === 3;          // Enterprise → Bone calm
             const cardClass = plan.highlighted
               ? "lp-bento-hero border border-primary/40 shadow-depth-8 lp-card-premium"
               : tintMidnight
               ? "lp-card-tinted lp-card-midnight"
-              : tintBone
-              ? "lp-card-tinted lp-card-bone"
               : "lp-card lp-card-premium";
             return (
               <StaggerItem key={plan.name}>
