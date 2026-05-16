@@ -1049,6 +1049,7 @@ export default function Performance() {
 
           const { companyInfo } = api;
 
+          const { PerformanceReportPdf } = await import("@/components/pdf/PerformanceReportPdf");
           const doc = React.createElement(PerformanceReportPdf, {
             title: "Performance Report",
             subtitle: periodLabel,
