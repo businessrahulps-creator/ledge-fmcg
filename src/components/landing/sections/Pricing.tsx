@@ -58,24 +58,6 @@ const plans = [
     cta: "Start Free Trial",
     highlighted: false,
   },
-  {
-    name: "Enterprise",
-    icon: Building2,
-    price: "Custom",
-    priceLabel: "",
-    period: "",
-    tagline: "Large operations, custom integrations.",
-    features: [
-      "Everything in Scale",
-      "Tally / SAP integration",
-      "Multi-brand workspaces",
-      "On-premise option",
-      "Dedicated onboarding",
-      "SLA support",
-    ],
-    cta: "Talk to Us",
-    highlighted: false,
-  },
 ];
 
 export function Pricing() {
