@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
 import { spring, useParallaxY } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
