@@ -47,21 +47,24 @@ export function Problem() {
         </AnimateIn>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto" staggerTime={0.05}>
-          {cards.map((card, i) => (
-            <StaggerItem key={card.title}>
-              <div className="lp-card p-7 h-full flex flex-col">
-                <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
-                  <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
+          {cards.map((card, i) => {
+            const isFeatured = i === 3; // "Excel Nights" — emotional peak
+            return (
+              <StaggerItem key={card.title}>
+                <div className={`${isFeatured ? "lp-card-tinted lp-card-terracotta" : "lp-card"} p-7 h-full flex flex-col`}>
+                  <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
+                    <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
+                    {card.title}
+                  </h3>
+                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
+                    {card.description}
+                  </p>
                 </div>
-                <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
-                  {card.title}
-                </h3>
-                <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
-                  {card.description}
-                </p>
-              </div>
-            </StaggerItem>
-          ))}
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
       </div>
     </section>
