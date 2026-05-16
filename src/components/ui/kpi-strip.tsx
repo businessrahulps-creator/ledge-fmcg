@@ -24,7 +24,7 @@ export interface KpiStripProps {
  * Hairline-separated horizontal stat strip. Replaces rows of identical KPI cards.
  * Zero values render dimmed instead of competing with real numbers.
  */
-export function KpiStrip({ cells, className }: KpiStripProps) {
+function KpiStripImpl({ cells, className }: KpiStripProps) {
   const cols = cells.length;
   const gridCols = cols === 2 ? "grid-cols-2" : cols === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-4";
   return (
@@ -63,3 +63,5 @@ export function KpiStrip({ cells, className }: KpiStripProps) {
     </div>
   );
 }
+
+export const KpiStrip = React.memo(KpiStripImpl);
