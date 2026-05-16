@@ -20,12 +20,12 @@ Source: `.lovable/plan.md`.
 - PR10 Inline "explain this number" — edge function `explain-metric` (Gemini 2.5 Flash) + `<ExplainButton>` ✦ component. Wired into Dashboard "This Month" cells (Revenue/Orders/Outstanding/Delivered). Pattern: pass `metric`, `value`, `context[]` bullets; popover memoises result per open.
 - PR11 Keyboard shortcuts — `<KeyboardShortcuts>` mounted in AppLayout. Maps: `?` overlay, `n` new order, `g`-prefix nav (`g d/o/b/s/e/t/r/p`). Skips when typing in input/textarea/contentEditable. Two-key chord has 1.2s window.
 - PR12a Polish: `<SmartTime>` component (`src/components/ui/smart-time.tsx`) — just now → N min ago → today HH:MM → Yesterday → Tue 12 May → 12 May 2024. Self-updates every 60s. Tabular-nums + focus rings already covered in index.css.
+- PR12b ExplainButton rolled into Dashboard Daily Breakdown KPIs + Performance KpiStrip via new optional `explain` prop on `KpiCell` (`src/components/ui/kpi-strip.tsx`). Hidden on zero values; ✦ icon next to label.
 
 ## Next / Not yet wired
-- Wire `useAutosave` into Company + Settings forms
+- Wire `useAutosave` into Settings (Company has explicit Save w/ confirm — autosave is wrong fit there)
 - Roll out `<DataTable>` to Orders / Billing / Stock
-- Replace ad-hoc time displays with `<SmartTime>`
-- Add ExplainButton to Daily Breakdown KPIs + Performance/Reports tiles
+- Replace ad-hoc time displays with `<SmartTime>` where they're activity timestamps (not business order dates)
 - PR8b Virtualize Orders + Stock when row counts justify
 
 ## Notes
