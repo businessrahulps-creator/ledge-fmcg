@@ -31,7 +31,7 @@ export function WhyLedge() {
             {legacy.map((name) => (
               <span
                 key={name}
-                className="font-body text-[13px] font-medium text-[hsl(var(--muted-foreground)/0.7)] line-through decoration-[#94A3B8]/50 px-3.5 py-1.5 rounded-full bg-[#F8FAFC] border border-border"
+                className="font-body text-[13px] font-medium text-muted-foreground/70 line-through decoration-muted-foreground/40 px-3.5 py-1.5 rounded-full bg-muted border border-border"
               >
                 {name}
               </span>
