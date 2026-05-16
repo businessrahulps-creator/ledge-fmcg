@@ -142,6 +142,21 @@ export default function Stock() {
   }, [stockItemsList]);
   const getProductStock = (productId: string) => stockByProduct.get(productId) || 0;
 
+  // Aggregate stock health across all warehouses for hero strip + signal surface.
+  const stockSummary = useMemo(() => {
+    let totalValue = 0;
+    let lowCount = 0;
+    let criticalCount = 0;
+    let atRiskValue = 0;
+    for (const si of stockItemsList) {
+      totalValue += si.quantity * si.basePrice;
+      const h = getStockHealth(si.quantity, si.threshold);
+      if (h === "critical") { criticalCount += 1; atRiskValue += si.threshold * si.basePrice; }
+      else if (h === "low") { lowCount += 1; }
+    }
+    return { totalValue, lowCount, criticalCount, atRiskValue };
+  }, [stockItemsList]);
+
   const isLoading = usePageLoading(api.loading);
   const debouncedProductSearch = useDebounce(productSearch);
   const debouncedWarehouseSearch = useDebounce(warehouseSearch);
