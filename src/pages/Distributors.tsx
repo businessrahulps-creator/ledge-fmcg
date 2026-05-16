@@ -180,7 +180,33 @@ export default function Distributors() {
               <Plus className="h-4 w-4" />
               Add Dealer
             </Button>
-          </div>
+        </div>
+
+        {(portfolio.overLimit > 0 || portfolio.approaching > 0) && (
+          <SignalCard
+            tier={portfolio.overLimit > 0 ? "destructive" : "warning"}
+            icon={AlertTriangle}
+            label={portfolio.overLimit > 0 ? "OVER CREDIT LIMIT" : "APPROACHING LIMIT"}
+            caption={
+              portfolio.overLimit > 0
+                ? `${portfolio.overLimit} dealer${portfolio.overLimit !== 1 ? "s" : ""} past credit limit — pause unpaid orders`
+                : `${portfolio.approaching} dealer${portfolio.approaching !== 1 ? "s" : ""} at 70%+ of credit limit`
+            }
+            subCaption={portfolio.overLimitValue > 0 ? `${formatCurrency(portfolio.overLimitValue)} over limit in total` : undefined}
+            value={portfolio.overLimit > 0 ? portfolio.overLimit : portfolio.approaching}
+            valueSuffix="DEALERS"
+          />
+        )}
+
+        <KpiStrip
+          cells={[
+            { label: "Active dealers", value: items.length, zero: items.length === 0 },
+            { label: "Total outstanding", value: formatCurrency(portfolio.totalOutstanding), zero: portfolio.totalOutstanding === 0 },
+            { label: "Approaching limit", value: portfolio.approaching, zero: portfolio.approaching === 0 },
+            { label: "Over limit", value: portfolio.overLimit, zero: portfolio.overLimit === 0 },
+          ]}
+        />
+
         </div>
 
         <div className="relative">
