@@ -163,70 +163,94 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return loaded;
   }, []);
 
-  // Fetch all data
+  // Two-phase fetch:
+  //   Phase 1 (critical): company info + small reference data needed everywhere
+  //                       (distributors, salespersons, products, godowns, schemes, locations).
+  //                       Unblocks first paint as soon as it resolves.
+  //   Phase 2 (heavy):    orders + lines + claims + invoices + stock_items + targets + secondary_sales.
+  //                       Runs in parallel with phase 1 but does NOT block the loading flag,
+  //                       so pages that don't depend on heavy data render immediately.
   const fetchAll = useCallback(async (cId: string, token: number, isBackground = false) => {
     if (isBackground) setIsRefreshing(true);
     else setLoading(true);
-    try {
-      const { data: company } = await supabase
-        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
-      if (token !== fetchTokenRef.current) return;
-      if (company) {
-        orders.setOrderPrefixState(company.order_prefix);
-        orders.setOrderSequence(company.next_order_sequence);
-        setCompanyInfo({
-          name: company.name || "", address: company.address || "", gstin: company.gstin || "",
-          logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
-          pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
-          bankName: (company as any).bank_name || "", bankAccountName: (company as any).bank_account_name || "",
-          bankAccount: (company as any).bank_account || "",
-          bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
-        });
-      }
 
-      // Each table is fetched in 1000-row pages until exhausted to bypass
-      // Supabase's silent SELECT cap (was previously losing rows past 1000).
-      const [distRes, spRes, prodRes, godownRes, stockRes, ordersRes, schemesRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
-        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name")),
-        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name")),
-        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name")),
-        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name")),
+    // ---------- Phase 1: critical (gates `loading`) ----------
+    const phase1 = (async () => {
+      try {
+        const { data: company } = await supabase
+          .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
+        if (token !== fetchTokenRef.current) return;
+        if (company) {
+          orders.setOrderPrefixState(company.order_prefix);
+          orders.setOrderSequence(company.next_order_sequence);
+          setCompanyInfo({
+            name: company.name || "", address: company.address || "", gstin: company.gstin || "",
+            logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
+            pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
+            bankName: (company as any).bank_name || "", bankAccountName: (company as any).bank_account_name || "",
+            bankAccount: (company as any).bank_account || "",
+            bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
+          });
+        }
+
+        const [distRes, spRes, prodRes, godownRes, schemesRes] = await Promise.all([
+          fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name")),
+          fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name")),
+          fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name")),
+          fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name")),
+          fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        ]);
+        if (token !== fetchTokenRef.current) return;
+
+        const dists = (distRes as any[]).map(mapDistributor);
+        dealers.setDistributors(dists);
+        cacheData(cId, "distributors", dists);
+
+        const sps = (spRes as any[]).map(mapSalesperson);
+        salespersons.setSalespersons(sps);
+
+        const prods = (prodRes as any[]).map(mapProduct);
+        catalog.setProducts(prods);
+
+        const gds = (godownRes as any[]).map(mapGodown);
+        stock.setLocations(gds);
+
+        const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
+        catalog.setSchemes(mappedSchemes);
+
+        // Stash for phase 2 stock-item mapping
+        return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
+      } finally {
+        // Flip loading off the moment critical data lands, even if phase 2 is still running.
+        if (token === fetchTokenRef.current) setLoading(false);
+      }
+    })();
+
+    // ---------- Phase 2: heavy (runs in parallel, doesn't gate `loading`) ----------
+    const phase2 = (async () => {
+      const [stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
         fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
         fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
         fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
         fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
         fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
         fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
       ]);
+      return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
+    })();
 
-      const claimIds = (claimsRes as any[]).map((c: any) => c.id);
-      const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
-
-      const [claimLinesData, invoiceLinesData] = await Promise.all([
-        batchIn("claim_lines", "claim_id", claimIds),
-        batchIn("invoice_lines", "invoice_id", invoiceIds),
-      ]);
+    try {
+      const phase1Out = await phase1;
       if (token !== fetchTokenRef.current) return;
 
-      const dists = (distRes as any[]).map(mapDistributor);
-      dealers.setDistributors(dists);
-      cacheData(cId, "distributors", dists);
+      const { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes } = await phase2;
+      if (token !== fetchTokenRef.current) return;
 
-      const sps = (spRes as any[]).map(mapSalesperson);
-      salespersons.setSalespersons(sps);
-
-      const prods = (prodRes as any[]).map(mapProduct);
-      catalog.setProducts(prods);
-
-      const gds = (godownRes as any[]).map(mapGodown);
-      stock.setLocations(gds);
+      const prods = phase1Out?.prods || [];
+      const gds = phase1Out?.gds || [];
 
       const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
       stock.setStockItems(sis);
-
-      const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
-      catalog.setSchemes(mappedSchemes);
 
       const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
       targets.setSecondarySales(mappedSS);
@@ -234,28 +258,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       targets.setTargets(mappedTargets);
 
+      const claimIds = (claimsRes as any[]).map((c: any) => c.id);
+      const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
+      const orderIds = (ordersRes as any[]).map((o: any) => o.id);
+
+      const [claimLinesData, invoiceLinesData, allLines, allOrderSchemes] = await Promise.all([
+        batchIn("claim_lines", "claim_id", claimIds),
+        batchIn("invoice_lines", "invoice_id", invoiceIds),
+        batchIn("order_lines", "order_id", orderIds),
+        batchIn("order_schemes", "order_id", orderIds),
+      ]);
+      if (token !== fetchTokenRef.current) return;
+
       const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
       billing.setClaims(mappedClaims);
 
       const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, invoiceLinesData));
       billing.setInvoices(mappedInvoices);
 
-      const orderIds = (ordersRes as any[]).map((o: any) => o.id);
-      const [allLines, allOrderSchemes] = await Promise.all([
-        batchIn("order_lines", "order_id", orderIds),
-        batchIn("order_schemes", "order_id", orderIds),
-      ]);
-      if (token !== fetchTokenRef.current) return;
-
       const mappedOrders = mapOrders((ordersRes as any[]) || [], allLines, allOrderSchemes);
       orders.setOrders(mappedOrders);
       setIsOfflineData(false);
 
       persistAllToCache(cId, {
-        orders: mappedOrders, distributors: dists, salespersons: sps,
-        products: prods, locations: gds, stockItems: sis, schemes: mappedSchemes,
-        orderPrefix: company?.order_prefix || "ORD",
-        orderSequence: company?.next_order_sequence || 1,
+        orders: mappedOrders, distributors: phase1Out?.dists || [], salespersons: phase1Out?.sps || [],
+        products: prods, locations: gds, stockItems: sis, schemes: phase1Out?.mappedSchemes || [],
+        orderPrefix: phase1Out?.orderPrefix || "ORD",
+        orderSequence: phase1Out?.orderSequence || 1,
       });
     } catch (err) {
       console.error("Data fetch error:", err);
@@ -263,7 +292,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!navigator.onLine) await loadFromCache(cId);
     } finally {
       if (token === fetchTokenRef.current) {
-        setLoading(false);
+        setLoading(false); // safety: ensure off even if phase 1 threw
         setIsRefreshing(false);
       }
     }
