@@ -175,7 +175,7 @@ const App = () => (
                   <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Reports /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={PerformanceFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />)
+                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={PerformanceFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
