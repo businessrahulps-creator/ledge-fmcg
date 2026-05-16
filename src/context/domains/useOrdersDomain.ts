@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Order, OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { mapOrders, fetchAllChunked } from "@/context/data-utils";
+import { mapOrders, fetchAllChunked, batchIn } from "@/context/data-utils";
 import type { DomainDeps, AddOrderResult } from "@/context/data-types";
 import { fmtAmount, logActivity } from "@/utils/activityLog";
 import { toast } from "sonner";
