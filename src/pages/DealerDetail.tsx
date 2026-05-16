@@ -15,7 +15,7 @@ import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
-import { DealerStatementPdf } from "@/components/pdf/DealerStatementPdf";
+// DealerStatementPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 import { buildScorecard, churnRiskConfig } from "@/utils/dealerScorecard";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
