@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { WA_GREEN, WA_TEXT } from "./constants";
 
 /**
  * Mobile-only sticky bottom CTA bar.
@@ -47,7 +48,8 @@ export function MobileStickyCtaBar() {
               href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 rounded-md py-3 text-center font-body font-semibold text-[14px] bg-[#25D366]/10 border border-[#25D366]/30 text-[#0F5132]"
+              className="flex-1 rounded-md py-3 text-center font-body font-semibold text-[14px]"
+              style={{ backgroundColor: `${WA_GREEN}1a`, borderColor: `${WA_GREEN}4d`, color: WA_TEXT, borderWidth: 1, borderStyle: "solid" }}
               aria-label="WhatsApp Sales"
             >
               WhatsApp

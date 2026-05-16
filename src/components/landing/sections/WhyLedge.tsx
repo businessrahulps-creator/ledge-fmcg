@@ -12,7 +12,7 @@ const legacy = ["Tally", "Zoho Books", "Vyapar", "SAP"];
 
 export function WhyLedge() {
   return (
-    <section className="bg-white py-24 md:py-32 lg:py-36">
+    <section className="bg-white py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">

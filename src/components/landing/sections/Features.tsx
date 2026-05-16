@@ -54,8 +54,8 @@ export function Features() {
                   </div>
                 ) : (
                   <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
-                    <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 36, height: 36 }}>
-                      <feature.icon size={17} strokeWidth={1.75} className="text-foreground" />
+                    <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 40, height: 40 }}>
+                      <feature.icon size={20} strokeWidth={2} className="text-foreground icon-signal" />
                     </div>
                     <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
                       {feature.title}

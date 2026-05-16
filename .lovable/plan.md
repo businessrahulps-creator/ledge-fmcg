@@ -1,94 +1,88 @@
-## PR18 — Landing V2 Final Sweep
+## PR19 — Landing Final Polish & Parity Audit
 
-Goal: every pixel on the landing page reads Midnight / Bone / Terracotta / Forest. No indigo, no slate-blue, no `#0A0F1C` literals, no orbs.
+After PR18 the landing reads Midnight/Bone/Terracotta at first glance, but a code-level audit still finds **148 raw hex/rgba hits** and several UX gaps versus the app. This pass closes all of them in one shot.
 
-### Audit (what's still wrong)
+### A. Color residue still in the code (must be zero after this PR)
 
-```text
-INDIGO / BLUE LITERALS STILL ALIVE
-  src/index.css                 :  --ink #4F46E5, --accent-indigo, brand-gradient-cool (lines 26-29, 371-392)
-                                   lp-capsule-cta hover/ripple uses rgba(79,70,229,…)        (lines 716, 744, 764)
-                                   lp-capsule-cta--dark hover arrow color #C7D2FE             (line 817)
-                                   lp-proof-chip dot #818CF8                                  (line 905)
-                                   lp-mobile-menu-bg uses #FFFFFF + cool wash                 (line 447)
-  GradientOrb.tsx               :  indigo + violet palettes
-  DeviceFrames.tsx              :  default variant "indigo"
-  SvgIllustrations.tsx          :  INDIGO = "#4F46E5", C = "#0F172A" (steps 1/2/3 + features)
-  LedgeIntelligence.tsx         :  route gradient + pulse circles use #4F46E5/#0EA5E9
-  Footer.tsx                    :  radial wash rgba(79,70,229,…), bg #FAFAFC, hex #0A0F1C/#52525B/#71717A everywhere, emerald-400/500 pings
-  MobileMenuOverlay.tsx         :  #0A0F1C bg/border literals, #16A34A dot, lp-btn-primary-dark (graphite, not Midnight)
-  MobileStickyCtaBar.tsx        :  same #0A0F1C literals + lp-btn-primary-dark
-  Navbar.tsx                    :  scrolled bg + border + shadow use #0A0F1C, CTA = lp-btn-primary-dark (graphite gradient)
-  Pricing.tsx                   :  "Most Popular" badge bg-[#0A0F1C], free-tier CTA uses lp-btn-primary-dark
-  WhyLedge.tsx                  :  bg-[#0A0F1C] pill
-  FinalCTA.tsx                  :  CapsuleCTA dark variant = graphite (#1F2937→#0A0F1C), trust pill #0A0F1C literals
-  Testimonials.tsx              :  uses <GradientOrb /> instead of real faces
-  Hero.tsx                      :  proof chip "₹2.4Cr tracked this week" = lp-proof-chip (dark graphite + indigo dot)
-```
+**`src/index.css`**
+- Line 425, 1035–1037, 1070–1071: shadows + bottom-fade still use `rgba(15,23,42,…)` (legacy slate). Swap to `hsl(var(--primary) / x)` so depth is Midnight-tinted.
+- Line 1006: `lp-card-glass` cursor glow = `rgba(99,102,241,…)` (indigo). Swap to `hsl(var(--accent) / 0.10)` (Terracotta).
+- Line 1039: `lp-card-glass` hover border = `rgba(99,102,241,0.22)`. Swap to `hsl(var(--accent) / 0.22)`.
+- Line 1091–1092: drop-shadow filter uses indigo `rgba(79,70,229,…)`. Swap to accent.
+- Line 862: hardcoded `#94A3B8` text. Swap to `hsl(var(--muted-foreground))`.
 
-### Pass A — CSS token rebuild (`src/index.css`)
+**`src/components/landing/illustrations/SvgIllustrations.tsx`** — the file used in `Features.tsx`; still indigo/slate inside:
+- `C_MUTED #475569`, `C_FAINT #94A3B8`, stroke `#E5E7EB`, fills `#FFFFFF` everywhere → switch to a small palette derived from Midnight + neutrals (`#0F1F3A` muted/faint tints, `border` `#E8E1D4` Bone-tinted, surface `#FFFFFF` is fine).
+- Line 122: gradient stop `rgba(79,70,229,0.10)` indigo. → Terracotta.
+- Lines 318–321 product dots `#F59E0B / #3B82F6 / #10B981 / #F43F5E`: replace with `accent / primary / success / destructive` HSL hexes so chips read as brand.
+- Comments still say "indigo accent" / "solid indigo" — rename to "accent".
 
-Single source of truth. Once these are fixed, most components inherit the right look automatically.
+**`src/components/landing/GradientOrb.tsx`** — still ships 6 indigo/violet/sky/emerald palettes even though Testimonials no longer use it. Delete the file (and remove the no-longer-needed import in `Outcome.tsx` if any). Verify with `rg "GradientOrb"`.
 
-1. **Delete legacy indigo tokens** (lines 10-29): `--violet*`, `--ink`, `--accent-indigo`, `--accent-wash`. Replace any consumers with `hsl(var(--primary))` / `hsl(var(--accent))`.
-2. **`brand-gradient-cool*` (lines 370-377) and `lp-gradient-bg-cool` (lines 387-393)** → rebuild as Midnight→Terracotta gradient (`hsl(var(--primary))` 0% → `hsl(var(--accent))` 100%) or delete if unused.
-3. **`lp-btn-primary-dark` (line 574)** → swap graphite `#1F2937→#0A0F1C` for Midnight `hsl(var(--primary))` with a subtle lift (top stop = `hsl(218 60% 20%)`). Same fix on `lp-capsule-cta--dark` (line 811).
-4. **`lp-capsule-cta` hover & ripple (lines 716, 744, 764)** → replace `rgba(79,70,229,…)` indigo bloom with Terracotta `hsl(var(--accent) / 0.22)` bloom and `hsl(var(--accent) / 0.28)` ripple. Hover arrow stays `text-accent` (already correct).
-5. **`lp-capsule-cta--dark` hover arrow (line 817)** → `#C7D2FE` → `hsl(var(--accent-foreground))` on Terracotta wash, or simply `hsl(34 47% 96%)` (Bone).
-6. **`lp-proof-chip` (lines 882-908)** → background = Midnight (`hsl(var(--primary))`), dot = Terracotta (`hsl(var(--accent))`), keep white text. This is the hero "₹2.4Cr tracked this week" pill.
-7. **`lp-mobile-menu-bg` (line 447)** → `#FFFFFF` → `hsl(var(--background))` Bone, washes recolored to `hsl(var(--primary) / 0.05)` and `hsl(var(--accent) / 0.04)`.
-8. **`lp-menu-link-underline` background (line 475)** → `#0A0F1C` → `hsl(var(--primary))`.
-9. **Anywhere `#0A0F1C` / `#FAFAFC` / `#FAFAFA` / `#1F2937` / `#52525B` / `#71717A` appears in CSS** → semantic tokens.
+**`src/components/landing/DeviceFrames.tsx`**
+- macOS dots `#FF5F57 / #FEBC2E / #28C840` — keep (real Mac chrome convention) but pull into a single `MAC_DOTS` const for clarity.
+- URL bar border `#E8E5E0`, text `#A8A29E` → semantic `border-border` / `text-muted-foreground`.
+- PhoneFrame gradient `#18181B → #2A2A2E` (graphite) → Midnight gradient (`hsl(218 60% 14%) → hsl(218 60% 20%)`).
+- Notch `#1A1A1A`, status dots `#1A1A1A` → `bg-primary`.
+- All shadow `rgba(15,23,42,…)` → Midnight-tinted.
+- Variant washes use `rgba(13,148,136,…)` teal — swap to Terracotta/Bone tints; rename variants if needed.
 
-Regression gate after Pass A:
+**`src/components/landing/MorphHamburger.tsx`** — inline shadow `rgba(15,23,42,…)` → Midnight tint.
+
+**`src/components/landing/MobileStickyCtaBar.tsx`** — WhatsApp button hardcodes `#25D366 / #0F5132`. WhatsApp green is a brand color, **keep** it but pull into a single `WA_GREEN` token in a `landing/constants.ts` so it's documented and not stray hex.
+
+**`src/components/landing/MobileWhatsAppFab.tsx`** — same; consume from `WA_GREEN`.
+
+**`src/components/landing/Nilavilakku.tsx`** — gold/amber palette is intentional brand moment (lamp). Add a header comment "INTENTIONAL: gold gilt palette, do not migrate." Leave colors as-is.
+
+Regression gate (must return 0):
 ```bash
-rg -n '#4F46E5|#4f46e5|#0A0F1C|#0F172A|#1F2937|#FAFAFC|indigo|sky-[0-9]|violet|blue-[0-9]|rgba\(79,70,229' src/index.css src/components/landing
-# must return 0
+rg -n 'rgba\(15,23,42|rgba\(79,70,229|rgba\(99,102,241|#4F46E5|#0F172A|#0A0F1C|#1F2937|#475569|#94A3B8|#E5E7EB|indigo|sky-[0-9]|violet|blue-[0-9]' src/index.css src/components/landing 2>/dev/null | grep -v Nilavilakku
 ```
 
-### Pass B — Component-level cleanup
+### B. UX/structure gaps vs the app
 
-| File | Change |
-|---|---|
-| `Navbar.tsx` | scrolled `bg-white/65` → `bg-background/75`, border `#0A0F1C/.06` → `border-border`, shadow tokens → `shadow-depth-2`. CTA: drop `lp-btn-primary-dark lp-shimmer` chain; use `bg-primary text-primary-foreground` rounded-full pill (consistent with app). |
-| `MobileMenuOverlay.tsx` | Replace all `#0A0F1C/.04` etc. with `bg-muted/border-border`. CTA: `bg-primary text-primary-foreground` rounded-md (Fluent). Dot `#16A34A` → `hsl(var(--success))`. |
-| `MobileStickyCtaBar.tsx` | Same Midnight CTA + token swap. |
-| `Pricing.tsx` | "Most Popular" badge `bg-[#0A0F1C]` → `bg-primary text-primary-foreground`. Free/Scale/Enterprise CTA: drop `lp-btn-primary-dark`, use `bg-primary` for highlighted, outlined for rest. Hover border `#0A0F1C` → `border-primary`. |
-| `WhyLedge.tsx` | `bg-[#0A0F1C]` → `bg-primary`. |
-| `FinalCTA.tsx` | Trust pill: WhatsApp button border/shadow tokens → semantic. Keep CapsuleCTA but now its dark variant is Midnight (handled in Pass A). |
-| `Footer.tsx` | Bulk swap: `bg-[#FAFAFC]` → `bg-secondary`; all `#0A0F1C/*` → `border-border` / `text-foreground/X`; `#52525B`/`#71717A`/`#A1A1AA` → `text-muted-foreground` / `text-muted-foreground/70`; ambient wash radial recolored to `hsl(var(--accent)/0.06)`+`hsl(var(--primary)/0.04)`; emerald pings → `hsl(var(--success))`. |
-| `LedgeIntelligence.tsx` | SVG `LiveRoute`: gradient stops `#4F46E5`/`#0EA5E9` → Midnight→Terracotta; stop dots and pulse `#4F46E5` → `hsl(var(--accent))`; backing path `#E2E8F0` → `hsl(var(--border))`. "Launching Q3" pill bg/border → semantic. Keep CapsuleCTA dark for "Claim my spot" — it'll auto-fix from Pass A. |
-| `SvgIllustrations.tsx` | Replace top-level constants `C = "#0F172A"` → Midnight hex `#0F1F3A`, `INDIGO = "#4F46E5"` → Terracotta `#A0522D`. (Even though landing now uses real PNGs in HowItWorks, these illustrations still ship elsewhere — keep the file color-correct.) |
-| `DeviceFrames.tsx` | Default `variant = "indigo"` → `"terracotta"`. Rename the variant map: `indigo`→`terracotta` (Terracotta wash), `lavender`→`bone`, keep `emerald`. Update Hero's usage if it passes a variant (it doesn't, so default change is enough). |
-| `Hero.tsx` | Proof chip text/dot already render via `lp-proof-chip` — Pass A makes it Midnight + Terracotta dot. No JSX change needed. |
-| `GradientOrb.tsx` | Becomes obsolete after Testimonials change. Leave file, remove indigo/violet palettes for safety. |
+These came up while re-screenshotting the live page:
 
-### Pass C — Testimonials: real owner faces
+1. **Massive vertical gaps between sections.** The screenshots show ~400px of empty Bone between Testimonials → Pricing and Hero → Features. Tighten section paddings to `py-20 md:py-28` (matches app density) and drop any duplicate `pt-24` on sections that already follow a section.
+2. **Navbar CTA still feels heavy.** "Start Free Trial" is a solid Midnight pill (correct) but uses `lp-btn-primary-dark lp-shimmer` — the shimmer is the old graphite shimmer. Either retune the shimmer to a Terracotta sheen at low opacity, or drop it on the small nav size and keep shimmer only on the Hero CapsuleCTA.
+3. **Hero proof chip is detached.** It floats below the BrowserFrame against empty Bone; on desktop it visually orphans. Move it inside the frame's bottom-right corner (like a real notification toast) so it reads as part of the product, not a sticker.
+4. **Features grid icons are flat lucide outlines.** The app uses three icon weight tiers (`.icon-nav / .icon-inline / .icon-signal`). Apply `.icon-signal` (20px, stroke 2) to the Feature card icons so they match the app's promoted-surface treatment.
+5. **No `SignalCard` mirror on landing.** The app's signature primitive is the tier-stripped SignalCard at top of every page. Landing has nothing analogous. Add ONE faux SignalCard inside the Hero BrowserFrame (e.g. "Credit at Risk · ₹3.2L · 4 dealers") as a static screenshot-style element so visitors recognize it the moment they sign up. This is the single highest-leverage parity move.
+6. **Pricing "Most Popular" highlight is weak.** Currently just a Midnight badge on a Bone card. Add a `depth-8` shadow + 1px primary border to the highlighted tier, matching the app's `.card-hover` press state at rest.
+7. **Footer is correct color but cold.** Add one warm `hsl(var(--accent) / 0.04)` radial wash top-right + a thin `section-divider` above the bottom legal row so it doesn't feel like a wall of muted text.
+8. **Mobile menu CTA labels don't match desktop.** Desktop says "Start Free Trial"; mobile overlay says "Get Started". Standardize to "Start Free Trial" everywhere.
+9. **No focus-visible parity.** Landing CTAs use ad-hoc focus styles; app uses `focus-visible:ring-2 ring-ring ring-offset-2`. Apply the same chain to `lp-btn-primary-dark`, `lp-capsule-cta`, and the nav CTA.
+10. **Hero image lacks a "BrowserFrame chrome consistency with app."** The `BrowserFrame` URL bar now reads `app.ledge.in/dashboard` but the chrome border radius is `rounded-md` (6px) while the inner image is square — wrap the `<img>` in `rounded-[4px] overflow-hidden` so the corners match.
 
-Replace `<GradientOrb />` with AI-generated portraits.
+### C. Files touched
 
-1. Generate 4 portraits with `imagegen--generate_image` (premium model, transparent_background: false, 512×512, jpg):
-   - **Arnav Sethi** — Indian male, 45, beverage factory owner, warm half-smile, kurta over collared shirt, soft natural light, neutral warm background, editorial portrait.
-   - **Priya Anand** — Indian female, 38, operations head, confident calm expression, modern saree, soft warm studio light, neutral background.
-   - **Dev Sharma** — Indian male, 32, warehouse manager, polo shirt, light beard, friendly, warehouse softly out of focus behind.
-   - **Rohan Nair** — Indian male, 29, field sales executive, light blue shirt with no tie, on-the-go portrait, daylight.
-   - Save to `src/assets/landing/testimonial-arnav.jpg` etc. Style note in every prompt: "natural skin tones, no AI gloss, magazine cover quality, warm Bone-toned background to match #F5EFE6."
-2. Update `testimonials` array in `Testimonials.tsx` with an `avatar` field and import the images.
-3. Replace `<GradientOrb seed={t.name} size={40} />` with `<img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover border border-border" />`.
-4. QA: open each generated image, confirm no warped faces / weird hands / fake text. Regenerate up to 2x per portrait if needed.
+- `src/index.css` — token cleanup section A.
+- `src/components/landing/illustrations/SvgIllustrations.tsx` — palette swap + comments.
+- `src/components/landing/DeviceFrames.tsx` — Midnight chrome, semantic borders, image inner radius, optional faux SignalCard slot.
+- `src/components/landing/GradientOrb.tsx` — **delete**.
+- `src/components/landing/MorphHamburger.tsx` — Midnight shadow.
+- `src/components/landing/MobileStickyCtaBar.tsx`, `MobileWhatsAppFab.tsx`, new `src/components/landing/constants.ts` — single `WA_GREEN` token.
+- `src/components/landing/sections/Hero.tsx` — move proof chip inside BrowserFrame; add inline SignalCard mirror.
+- `src/components/landing/sections/Features.tsx` — apply `.icon-signal` to icons.
+- `src/components/landing/sections/Pricing.tsx` — highlight depth-8 + primary border.
+- `src/components/landing/sections/Footer.tsx` — warm wash + divider.
+- `src/components/landing/sections/Navbar.tsx`, `MobileMenuOverlay.tsx` — CTA label parity, focus-visible chain, shimmer retune.
+- `src/components/landing/CapsuleCTA.tsx` — focus-visible chain.
+- All section files — section padding pass (`py-20 md:py-28`).
+- `.lovable/memory/style/landing-v2-refit.md` — append PR19 section.
 
-### Pass D — Memory + index
+### D. Out of scope
 
-- Append PR18 section to `mem://style/landing-v2-refit.md` with the token map and "no indigo / no #0A0F1C" rule.
-- Add a Core line to `mem://index.md`: *Landing: only Midnight/Bone/Terracotta/Forest. No indigo, no #0A0F1C literals, no GradientOrb avatars.*
+- No copy/IA changes (only the mobile menu CTA label is synced).
+- No new sections.
+- `Nilavilakku.tsx` palette stays gold (intentional brand moment).
+- WhatsApp green stays `#25D366` (third-party brand color, documented as exception).
+- App pages untouched.
 
-### Out of scope
+### E. Verification
 
-- No copy changes, no layout/IA changes, no new sections.
-- `lp-*` primitive **API** unchanged; only their internals are recolored.
-- No dark-mode landing variant.
-
-### Verification
-
-1. Regression grep above returns 0.
-2. Browser screenshot of `/` at desktop + mobile — confirm: nav CTA Midnight, hero proof chip Midnight w/ Terracotta dot, LedgeIntelligence route Terracotta, testimonial cards show real faces, pricing highlighted card Midnight CTA, footer is Bone with no blue wash, mobile menu CTA Midnight.
+1. Regression grep above returns **0** outside `Nilavilakku.tsx` and `constants.ts`.
+2. Browser screenshots at desktop 1280 + mobile 390 of: Navbar (idle + scrolled), Hero with proof chip inside frame, Features card with icon, Pricing highlighted card, Mobile menu overlay, Footer.
+3. `rg "GradientOrb"` returns 0.
+4. Tab through Hero, Navbar, Pricing CTAs — every focused element shows the app's ring.

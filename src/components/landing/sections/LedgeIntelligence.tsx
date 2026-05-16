@@ -153,7 +153,7 @@ export function LedgeIntelligence() {
     <section
       id="intelligence"
       ref={sectionRef}
-      className="relative lp-section-paper py-24 md:py-32 lg:py-36 overflow-hidden"
+      className="relative lp-section-paper py-20 md:py-28 overflow-hidden"
       aria-label="Ledge Intelligence"
     >
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
@@ -273,7 +273,7 @@ export function LedgeIntelligence() {
 
                 {/* Progress — uses existing lp-progress-glass primitive */}
                 <div className="mt-4 max-w-md">
-                  <div className="relative h-1.5 rounded-full bg-[#E2E8F0] overflow-hidden">
+                  <div className="relative h-1.5 rounded-full bg-border overflow-hidden">
                     <motion.div
                       className="lp-progress-glass absolute inset-y-0 left-0 rounded-full"
                       initial={{ width: 0 }}

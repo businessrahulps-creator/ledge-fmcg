@@ -17,7 +17,7 @@ export function Founder() {
   const auraY = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-30, 30]);
 
   return (
-    <section ref={sectionRef} className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
+    <section ref={sectionRef} className="relative bg-white py-20 md:py-28 overflow-hidden">
       {/* Soft section ambient wash */}
       <motion.div
         aria-hidden
@@ -58,7 +58,7 @@ export function Founder() {
                 className="absolute -inset-4 rounded-[2.5rem] blur-2xl opacity-40 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 60% 70%, rgba(15,23,42,0.22) 0%, transparent 65%)",
+                    "radial-gradient(ellipse at 60% 70%, hsl(var(--primary) / 0.22) 0%, transparent 65%)",
                 }}
               />
 
@@ -67,13 +67,13 @@ export function Founder() {
                 className="relative rounded-[2rem] bg-white p-3 pb-4"
                 style={{
                   boxShadow:
-                    "0 1px 0 rgba(255,255,255,0.9) inset, 0 30px 80px -20px rgba(15,23,42,0.28), 0 10px 30px -12px rgba(15,23,42,0.18)",
+                    "0 1px 0 rgba(255,255,255,0.9) inset, 0 30px 80px -20px hsl(var(--primary) / 0.28), 0 10px 30px -12px hsl(var(--primary) / 0.18)",
                 }}
               >
                 {/* Inner ring + image */}
                 <div
                   className="relative rounded-[1.5rem] overflow-hidden bg-[hsl(34_30%_90%)] aspect-[4/5]"
-                  style={{ boxShadow: "inset 0 0 0 1px rgba(15,23,42,0.06)" }}
+                  style={{ boxShadow: "inset 0 0 0 1px hsl(var(--primary) / 0.06)" }}
                 >
                   {/* LQIP blur */}
                   <img

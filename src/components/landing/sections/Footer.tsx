@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
 import { MagneticWrapper } from "@/components/landing/MagneticWrapper";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
 import { Nilavilakku } from "@/components/landing/Nilavilakku";
 
@@ -29,7 +30,7 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-secondary pt-24 md:pt-28 pb-12 border-t border-border overflow-hidden">
+    <footer className="relative bg-secondary pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
       {/* Layered ambient wash — Midnight + Terracotta */}
       <div
         aria-hidden
@@ -89,11 +90,12 @@ export function Footer() {
               href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/15 hover:border-[#25D366]/50 transition-all duration-200"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-200"
+              style={{ backgroundColor: `${WA_GREEN}1a`, borderColor: `${WA_GREEN}4d`, borderWidth: 1, borderStyle: "solid" }}
               aria-label="Chat with Ledge on WhatsApp"
             >
-              <WhatsAppIcon className="w-3.5 h-3.5 text-[#128C7E]" />
-              <span className="font-body text-[13px] font-medium text-[#0F5132] tracking-[-0.005em]">
+              <WhatsAppIcon className="w-3.5 h-3.5" style={{ color: WA_GREEN_DARK }} />
+              <span className="font-body text-[13px] font-medium tracking-[-0.005em]" style={{ color: WA_TEXT }}>
                 WhatsApp Sales
               </span>
             </a>

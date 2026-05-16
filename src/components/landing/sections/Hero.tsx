@@ -87,34 +87,36 @@ export function Hero() {
                 className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 50% 50%, rgba(15,23,42,0.18) 0%, transparent 65%)",
+                    "radial-gradient(ellipse at 50% 50%, hsl(var(--primary) / 0.18) 0%, transparent 65%)",
                 }}
               />
               {/* Layer 2 — Bone-tinted glass stage */}
               <div className="relative lp-card-glass p-3 md:p-4 rounded-md">
                 {/* Layer 3 — browser frame with real product UI */}
                 <BrowserFrame url="app.ledge.in/dashboard">
-                  <img
-                    src={heroDashboard}
-                    alt="Ledge dashboard showing revenue, KPIs, and recent orders"
-                    width={1600}
-                    height={1024}
-                    className="block w-full h-auto"
-                  />
+                  <div className="relative">
+                    <img
+                      src={heroDashboard}
+                      alt="Ledge dashboard showing revenue, KPIs, and recent orders"
+                      width={1600}
+                      height={1024}
+                      className="block w-full h-auto"
+                    />
+                    {/* Proof chip — anchored inside the frame like a real product notification */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring.gentle as object, delay: 0.6 }}
+                      className="absolute bottom-3 right-3 z-10"
+                    >
+                      <span className="lp-proof-chip">
+                        <span className="lp-proof-chip__dot" />
+                        ₹2.4Cr tracked this week
+                      </span>
+                    </motion.div>
+                  </div>
                 </BrowserFrame>
               </div>
-              {/* Floating proof chip — reference signature, used once */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...spring.gentle as object, delay: 0.6 }}
-                className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-10"
-              >
-                <span className="lp-proof-chip">
-                  <span className="lp-proof-chip__dot" />
-                  ₹2.4Cr tracked this week
-                </span>
-              </motion.div>
             </motion.div>
           </motion.div>
         </div>

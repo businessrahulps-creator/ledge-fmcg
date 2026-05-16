@@ -18,7 +18,7 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="py-16 md:py-20 bg-white border-b border-[#E5E7EB]/60">
+    <section className="py-16 md:py-20 bg-white border-b border-border">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         {/* Logo Marquee — soft pill chips */}
         <div
@@ -32,7 +32,7 @@ export function TrustBar() {
             {[...companies, ...companies].map((name, i) => (
               <span
                 key={i}
-                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-white border border-[#E2E8F0]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(15,23,42,0.03)]"
+                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-card border border-border shadow-depth-2"
               >
                 {name}
               </span>
@@ -46,7 +46,7 @@ export function TrustBar() {
             <StaggerItem key={stat.value}>
               <div
                 className={`text-center px-4 ${
-                  i > 0 ? "md:border-l md:border-[#E2E8F0]/70" : ""
+                  i > 0 ? "md:border-l md:border-border" : ""
                 }`}
               >
                 <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">

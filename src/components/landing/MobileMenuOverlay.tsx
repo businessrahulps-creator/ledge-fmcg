@@ -136,9 +136,9 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           <Link
             to="/signup"
             onClick={onClose}
-            className="lp-btn-primary-dark lp-shimmer flex items-center justify-center rounded-md py-4 font-body font-semibold text-[15px]"
+            className="lp-btn-primary-dark lp-shimmer flex items-center justify-center rounded-md py-4 font-body font-semibold text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Get Started Free
+            Start Free Trial
           </Link>
           <Link
             to="/login"
