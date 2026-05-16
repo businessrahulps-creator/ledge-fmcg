@@ -74,7 +74,14 @@ export function Testimonials() {
                     {t.quote}
                   </p>
                   <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
-                    <GradientOrb seed={t.name} size={40} />
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      className="w-12 h-12 rounded-full object-cover border border-border shadow-depth-2"
+                    />
                     <div>
                       <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
                       <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>
