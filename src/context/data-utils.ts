@@ -176,14 +176,55 @@ export function persistAllToCache(
 
 // --- Batch IN queries ---
 
+// Once-per-session dedupe so we don't spam the user with the same warning on
+// every refetch. Cleared on page reload.
+const paginationWarnedKeys = new Set<string>();
+const truncationWarnedKeys = new Set<string>();
+
+function warnPaginationOnce(key: string, detail: string) {
+  if (paginationWarnedKeys.has(key)) return;
+  paginationWarnedKeys.add(key);
+  console.warn(`[pagination] ${key}: ${detail}`);
+  toast.message("Large dataset paginated", {
+    description: `${key} — ${detail}. Loading may take longer than usual.`,
+    duration: 6000,
+  });
+  logError({
+    source: `pagination:${key}`,
+    error: `Pagination needed: ${detail}`,
+    severity: "info",
+    context: { key, detail },
+  });
+}
+
+function warnTruncationOnce(key: string, detail: string) {
+  if (truncationWarnedKeys.has(key)) return;
+  truncationWarnedKeys.add(key);
+  console.error(`[truncation] ${key}: ${detail}`);
+  toast.warning("Some records may be missing", {
+    description: `${key} hit the safety cap (${detail}). Reports and totals on this page may be incomplete — please contact support.`,
+    duration: 12000,
+  });
+  logError({
+    source: `truncation:${key}`,
+    error: `Query truncated at safety cap: ${detail}`,
+    severity: "warning",
+    context: { key, detail },
+  });
+}
+
 export async function batchIn(table: string, column: string, ids: string[]) {
   if (ids.length === 0) return [];
   const ID_CHUNK = 500;
   const PAGE = 1000;
   const MAX_PAGES = 200; // safety cap: 200k rows per id-chunk
   const results: any[] = [];
+  const totalChunks = Math.ceil(ids.length / ID_CHUNK);
+  let totalPages = 0;
+  let truncated = false;
   for (let i = 0; i < ids.length; i += ID_CHUNK) {
     const chunk = ids.slice(i, i + ID_CHUNK);
+    let pagesThisChunk = 0;
     for (let page = 0; page < MAX_PAGES; page++) {
       const from = page * PAGE;
       const to = from + PAGE - 1;
@@ -195,8 +236,24 @@ export async function batchIn(table: string, column: string, ids: string[]) {
       if (error) throw error;
       const rows = (data || []) as any[];
       results.push(...rows);
+      pagesThisChunk++;
+      totalPages++;
       if (rows.length < PAGE) break;
+      if (page === MAX_PAGES - 1 && rows.length === PAGE) {
+        truncated = true;
+      }
     }
+  }
+  if (truncated) {
+    warnTruncationOnce(
+      `${table}.${column}`,
+      `>${MAX_PAGES * PAGE} rows per id-chunk`,
+    );
+  } else if (totalPages > 1 || totalChunks > 1) {
+    warnPaginationOnce(
+      `${table}.${column}`,
+      `${ids.length} ids in ${totalChunks} chunk(s), ${results.length} rows across ${totalPages} page(s)`,
+    );
   }
   return results;
 }
@@ -207,13 +264,16 @@ export async function batchIn(table: string, column: string, ids: string[]) {
 // the in-memory DataContext, so we page through the result set 1000 rows at a
 // time using `.range(from, to)` until we get a short page. Pass a `build`
 // function that returns the base query (filters + ordering applied) — we'll
-// add the range each iteration.
+// add the range each iteration. `label` identifies the query in warnings.
 export async function fetchAllChunked<T = any>(
   build: () => any,
   pageSize = 1000,
   maxPages = 200, // safety cap: 200 * 1000 = 200k rows per table
+  label?: string,
 ): Promise<T[]> {
   const results: T[] = [];
+  let pages = 0;
+  let truncated = false;
   for (let page = 0; page < maxPages; page++) {
     const from = page * pageSize;
     const to = from + pageSize - 1;
@@ -221,7 +281,17 @@ export async function fetchAllChunked<T = any>(
     if (error) throw error;
     const rows = (data || []) as T[];
     results.push(...rows);
+    pages++;
     if (rows.length < pageSize) break;
+    if (page === maxPages - 1 && rows.length === pageSize) {
+      truncated = true;
+    }
+  }
+  const key = label || "fetchAllChunked";
+  if (truncated) {
+    warnTruncationOnce(key, `>${maxPages * pageSize} rows`);
+  } else if (pages > 1) {
+    warnPaginationOnce(key, `${results.length} rows across ${pages} page(s)`);
   }
   return results;
 }
