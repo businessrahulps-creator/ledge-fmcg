@@ -12,7 +12,7 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+// ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 import { computeDealerAging, sortByRisk } from "@/lib/aging";
 
 export function PaymentReport() {

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+// ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
 export function ProductReport() {
   const api = useApi();
@@ -201,7 +201,8 @@ export function ProductReport() {
         onOpenChange={setPdfOpen}
         sections={rptSections}
         title="Export Product Report PDF"
-        onGenerate={(sel) => {
+        onGenerate={async (sel) => {
+          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
           downloadPdf(
             pdfFilename("product-report"),
             <ReportPdf

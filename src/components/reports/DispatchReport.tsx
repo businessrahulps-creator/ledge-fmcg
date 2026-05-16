@@ -12,7 +12,7 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
-import { ReportPdf } from "@/components/pdf/ReportPdf";
+// ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
 export function DispatchReport() {
   const api = useApi();
@@ -211,7 +211,8 @@ export function DispatchReport() {
         onOpenChange={setPdfOpen}
         sections={rptSections}
         title="Export Dispatch Report PDF"
-        onGenerate={(sel) => {
+        onGenerate={async (sel) => {
+          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
           downloadPdf(
             pdfFilename("dispatch-report"),
             <ReportPdf
