@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Link, useNavigate } from "react-router-dom";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatIndianDate } from "@/utils/formatDate";
@@ -49,7 +50,8 @@ function getGreeting() {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { profile, userRole } = useAuth();
+  const { profile } = useAuth();
+  const canSeeMoney = useCan("see_money");
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
@@ -213,7 +215,7 @@ export default function Dashboard() {
     : worstAcross === "b61" ? "destructive"
     : worstAcross === "b31" ? "warning"
     : "neutral";
-  const isSalesperson = userRole === "salesperson";
+  // (aging visibility gated by useCan("see_money"))
 
   const topDistributors = useMemo(
     () => [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4),
@@ -514,7 +516,7 @@ export default function Dashboard() {
         </section>
 
         {/* Credit at Risk — aging-driven, hidden for salesperson role */}
-        {!isSalesperson && agingRows.length > 0 && (
+        {canSeeMoney && agingRows.length > 0 && (
           <section className="space-y-3">
             <SignalCard
               tier={cardTier}
