@@ -173,8 +173,22 @@ export type Database = {
             foreignKeyName: "claims_distributor_id_fkey"
             columns: ["distributor_id"]
             isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "claims_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
             referencedRelation: "distributors"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "claims_order_id_fkey"
@@ -251,6 +265,30 @@ export type Database = {
           state_code?: string
           trial_ends_at?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      dealer_aging_state: {
+        Row: {
+          company_id: string
+          distributor_id: string
+          id: string
+          last_checked_at: string
+          last_worst_bucket: string | null
+        }
+        Insert: {
+          company_id: string
+          distributor_id: string
+          id?: string
+          last_checked_at?: string
+          last_worst_bucket?: string | null
+        }
+        Update: {
+          company_id?: string
+          distributor_id?: string
+          id?: string
+          last_checked_at?: string
+          last_worst_bucket?: string | null
         }
         Relationships: []
       }
@@ -585,6 +623,13 @@ export type Database = {
             foreignKeyName: "invoices_source_order_id_fkey"
             columns: ["source_order_id"]
             isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "invoices_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -667,6 +712,13 @@ export type Database = {
             foreignKeyName: "order_lines_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -708,6 +760,13 @@ export type Database = {
           scheme_name?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "order_schemes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
           {
             foreignKeyName: "order_schemes_order_id_fkey"
             columns: ["order_id"]
@@ -801,6 +860,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
           },
           {
             foreignKeyName: "orders_distributor_id_fkey"
@@ -1033,6 +1099,13 @@ export type Database = {
             foreignKeyName: "schemes_dealer_id_fkey"
             columns: ["dealer_id"]
             isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "schemes_dealer_id_fkey"
+            columns: ["dealer_id"]
+            isOneToOne: false
             referencedRelation: "distributors"
             referencedColumns: ["id"]
           },
@@ -1089,6 +1162,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secondary_sales_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
           },
           {
             foreignKeyName: "secondary_sales_distributor_id_fkey"
@@ -1154,6 +1234,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "godowns"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_deductions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "stock_deductions_order_id_fkey"
@@ -1302,9 +1389,99 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dealer_aging: {
+        Row: {
+          bucket_0_30: number | null
+          bucket_31_60: number | null
+          bucket_61_90: number | null
+          bucket_90_plus: number | null
+          company_id: string | null
+          credit_limit: number | null
+          distributor_id: string | null
+          distributor_name: string | null
+          oldest_age_days: number | null
+          partial_count: number | null
+          total_outstanding: number | null
+          worst_bucket: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_aging: {
+        Row: {
+          age_days: number | null
+          bucket: string | null
+          company_id: string | null
+          delivered_at: string | null
+          distributor_id: string | null
+          distributor_name: string | null
+          order_date: string | null
+          order_id: string | null
+          order_number: string | null
+          outstanding_amount: number | null
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Insert: {
+          age_days?: never
+          bucket?: never
+          company_id?: string | null
+          delivered_at?: string | null
+          distributor_id?: string | null
+          distributor_name?: string | null
+          order_date?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          outstanding_amount?: never
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Update: {
+          age_days?: never
+          bucket?: never
+          company_id?: string | null
+          delivered_at?: string | null
+          distributor_id?: string | null
+          distributor_name?: string | null
+          order_date?: string | null
+          order_id?: string | null
+          order_number?: string | null
+          outstanding_amount?: never
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      aging_bucket_rank: { Args: { b: string }; Returns: number }
+      check_aging_transitions: { Args: never; Returns: Json }
       dispatch_order_atomic: {
         Args: {
           p_dispatch_date?: string

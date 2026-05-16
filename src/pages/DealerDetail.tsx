@@ -38,6 +38,10 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { formatIndianDate } from "@/utils/formatDate";
+import { cn } from "@/lib/utils";
+import {
+  outstandingOrdersForDealer, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE,
+} from "@/lib/aging";
 
 export default function DealerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -181,6 +185,116 @@ export default function DealerDetail() {
                 );
               })()}
             </div>
+
+            {/* Outstanding & Aging */}
+            {(() => {
+              const outRows = outstandingOrdersForDealer(orders, id || "");
+              const totalOut = outRows.reduce((s, r) => s + r.outstanding, 0);
+              if (totalOut <= 0) return null;
+              const buckets = {
+                b0: outRows.filter(r => r.bucket === "b0").reduce((s, r) => s + r.outstanding, 0),
+                b31: outRows.filter(r => r.bucket === "b31").reduce((s, r) => s + r.outstanding, 0),
+                b61: outRows.filter(r => r.bucket === "b61").reduce((s, r) => s + r.outstanding, 0),
+                b90: outRows.filter(r => r.bucket === "b90").reduce((s, r) => s + r.outstanding, 0),
+              };
+              const limit = dealer.creditLimit || 0;
+              const util = limit > 0 ? (totalOut / limit) * 100 : null;
+              const utilTone = util === null
+                ? "text-muted-foreground"
+                : util >= 100 ? "text-destructive" : util >= 70 ? "text-warning" : "text-success";
+              const order: Array<keyof typeof buckets> = ["b0", "b31", "b61", "b90"];
+              return (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold md:text-sm">Outstanding & Aging</h3>
+                  <div className="grid grid-cols-3 gap-2 md:gap-3">
+                    <div className="glass-card p-3">
+                      <span className="text-[10px] text-muted-foreground">Total Outstanding</span>
+                      <p className="mt-0.5 text-sm font-semibold num">{formatCurrency(totalOut)}</p>
+                    </div>
+                    <div className="glass-card p-3">
+                      <span className="text-[10px] text-muted-foreground">Credit Limit</span>
+                      <p className="mt-0.5 text-sm font-semibold num">{limit > 0 ? formatCurrency(limit) : "No limit set"}</p>
+                    </div>
+                    <div className="glass-card p-3">
+                      <span className="text-[10px] text-muted-foreground">Utilization</span>
+                      <p className={cn("mt-0.5 text-sm font-semibold num", utilTone)}>
+                        {util === null ? "—" : `${util.toFixed(0)}%`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Segmented bucket bar */}
+                  <div className="glass-card p-3">
+                    <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/40">
+                      {order.map((k) => {
+                        const pct = totalOut > 0 ? (buckets[k] / totalOut) * 100 : 0;
+                        if (pct <= 0) return null;
+                        return (
+                          <div
+                            key={k}
+                            className={cn("h-full", BUCKET_TONE[k].segBg)}
+                            style={{ width: `${pct}%` }}
+                            title={`${BUCKET_LABEL[k]} · ${formatCurrency(buckets[k])}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
+                      {order.map((k) => (
+                        <div key={k} className="flex items-center gap-2">
+                          <span className={cn("h-2 w-2 rounded-full", BUCKET_TONE[k].segBg)} />
+                          <div className="min-w-0">
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{BUCKET_SHORT[k]} days</p>
+                            <p className={cn("text-xs font-semibold num", buckets[k] > 0 ? BUCKET_TONE[k].text : "text-muted-foreground/60")}>
+                              {formatCurrency(buckets[k])}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Outstanding orders table */}
+                  <div className="glass-card overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                          <th className="px-4 py-2.5 font-medium">Order</th>
+                          <th className="px-4 py-2.5 font-medium">Date</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Total</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Outstanding</th>
+                          <th className="px-4 py-2.5 font-medium">Age</th>
+                          <th className="px-4 py-2.5 font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {outRows.map((r) => {
+                          const tone = BUCKET_TONE[r.bucket];
+                          return (
+                            <tr
+                              key={r.orderId}
+                              className="border-b border-border/50 row-hover cursor-pointer"
+                              onClick={() => navigate(`/orders/${r.orderId}`)}
+                            >
+                              <td className="px-4 py-3 font-medium text-primary">{r.orderNumber}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.date)}</td>
+                              <td className="px-4 py-3 text-right num">{formatCurrency(r.total)}</td>
+                              <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.outstanding)}</td>
+                              <td className="px-4 py-3">
+                                <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", tone.badge)}>
+                                  {r.ageDays}d · {BUCKET_SHORT[r.bucket]}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3"><StatusBadge status={r.paymentStatus} /></td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Churn Risk */}
             <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 ${risk.bg}`}>

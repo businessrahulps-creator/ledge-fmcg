@@ -18,6 +18,8 @@ import { ExplainButton } from "@/components/ui/explain-button";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
+import { computeDealerAging, sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
+import { SignalCard } from "@/components/ui/signal-card";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -47,7 +49,7 @@ function getGreeting() {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, userRole } = useAuth();
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
@@ -195,18 +197,23 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  // Credit at Risk — memoized over distributors
-  const creditRisk = useMemo(() => {
-    const dealersAtRisk = distributors.filter(d => d.creditLimit > 0 && d.outstandingAmount >= d.creditLimit);
-    const dealersApproaching = distributors.filter(d => {
-      if (d.creditLimit <= 0 || d.outstandingAmount >= d.creditLimit) return false;
-      const pct = d.outstandingAmount / d.creditLimit;
-      return pct >= 0.8;
-    });
-    const atRiskAmount = dealersAtRisk.reduce((s, d) => s + d.outstandingAmount, 0);
-    return { dealersAtRisk, dealersApproaching, atRiskAmount };
-  }, [distributors]);
-  const { dealersAtRisk, dealersApproaching, atRiskAmount } = creditRisk;
+  // Credit at Risk — aging-based, computed from orders + distributors
+  const agingRows = useMemo(
+    () => sortByRisk(computeDealerAging(orders, distributors, today)),
+    [orders, distributors, today],
+  );
+  const totalOutstandingAll = useMemo(
+    () => agingRows.reduce((s, r) => s + r.totalOutstanding, 0),
+    [agingRows],
+  );
+  const topRiskDealers = useMemo(() => agingRows.slice(0, 5), [agingRows]);
+  const worstAcross: AgingBucket | null = topRiskDealers[0]?.worstBucket ?? null;
+  const cardTier: "destructive" | "warning" | "neutral" =
+    worstAcross === "b90" ? "destructive"
+    : worstAcross === "b61" ? "destructive"
+    : worstAcross === "b31" ? "warning"
+    : "neutral";
+  const isSalesperson = userRole === "salesperson";
 
   const topDistributors = useMemo(
     () => [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4),
@@ -246,7 +253,7 @@ export default function Dashboard() {
         <SetupChecklist />
 
         {/* AI "Today" briefing — 2-sentence Gemini digest, cached per-day */}
-        {(monthOrderCount > 0 || monthOutstanding > 0 || dealersAtRisk.length > 0) && (
+        {(monthOrderCount > 0 || monthOutstanding > 0 || agingRows.length > 0) && (
           <TodayDigest
             cacheKey={todayIso}
             context={{
@@ -255,7 +262,7 @@ export default function Dashboard() {
               monthOrders: monthOrderCount,
               monthRevenue: monthRevenue,
               outstanding: monthOutstanding,
-              overdueDealers: dealersAtRisk.length,
+              overdueDealers: agingRows.filter(r => r.worstBucket === "b61" || r.worstBucket === "b90").length,
               lowStockSkus: 0,
               topDealer: topDistributors[0]?.name,
             }}
@@ -506,50 +513,47 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Credit attention tier — amber, only shown when approaching but not over */}
-        {dealersApproaching.length > 0 && dealersAtRisk.length === 0 && (
-          <Link to="/distributors" className="block group">
-            <div className="flex items-stretch gap-3 border-l-[3px] border-warning bg-warning/[0.04] hover:bg-warning/[0.08] transition-colors rounded-r-md px-4 py-3">
-              <div className="flex items-center">
-                <AlertTriangle className="icon-signal text-warning" fill="hsl(var(--warning) / 0.15)" />
-              </div>
-              <div className="flex-1 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-warning/90">Approaching limit</p>
-                  <p className="text-sm text-foreground mt-0.5">
-                    {dealersApproaching.length} dealer{dealersApproaching.length > 1 ? "s" : ""} above 80% of credit limit
-                  </p>
-                </div>
-                <span className="font-heading text-[28px] num text-warning leading-none">{dealersApproaching.length}</span>
-              </div>
+        {/* Credit at Risk — aging-driven, hidden for salesperson role */}
+        {!isSalesperson && agingRows.length > 0 && (
+          <section className="space-y-3">
+            <SignalCard
+              tier={cardTier}
+              label="Credit at Risk"
+              caption={`${formatCurrency(totalOutstandingAll)} outstanding across ${agingRows.length} dealer${agingRows.length > 1 ? "s" : ""}`}
+              subCaption={worstAcross
+                ? <>Oldest: {agingRows[0].oldestAgeDays}d · {BUCKET_LABEL[worstAcross]}</>
+                : undefined}
+              value={agingRows.length}
+              valueSuffix={agingRows.length === 1 ? "Dealer" : "Dealers"}
+            />
+            <div className="glass-card divide-y divide-border/50">
+              {topRiskDealers.map((r) => {
+                const tone = r.worstBucket ? BUCKET_TONE[r.worstBucket] : BUCKET_TONE.b0;
+                return (
+                  <Link
+                    key={r.distributorId}
+                    to={`/distributors/${r.distributorId}`}
+                    className="flex items-center justify-between gap-3 px-4 py-3 row-hover"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{r.distributorName}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground num">
+                        {formatCurrency(r.totalOutstanding)} · {r.oldestAgeDays}d oldest
+                      </p>
+                    </div>
+                    <span className={cn("shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", tone.badge)}>
+                      {r.worstBucket ? BUCKET_SHORT[r.worstBucket] : "—"} days
+                    </span>
+                  </Link>
+                );
+              })}
+              {agingRows.length > 5 && (
+                <Link to="/distributors" className="block px-4 py-2.5 text-center text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  View all {agingRows.length} dealers ›
+                </Link>
+              )}
             </div>
-          </Link>
-        )}
-
-        {/* Credit at Risk — promoted to a real risk surface */}
-        {dealersAtRisk.length > 0 && (
-          <Link to="/distributors" className="block group">
-            <div className="flex items-stretch gap-3 border-l-[3px] border-destructive bg-destructive/[0.03] hover:bg-destructive/[0.07] transition-colors rounded-r-md px-4 py-4">
-              <div className="flex items-center">
-                <AlertTriangle className="icon-signal text-destructive" fill="hsl(var(--destructive) / 0.15)" />
-              </div>
-              <div className="flex-1 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-destructive/90">At Risk</p>
-                  <p className="text-sm text-foreground mt-0.5">
-                    {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} over their credit limit
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 num">
-                    {formatCurrency(atRiskAmount)} outstanding
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-heading text-[32px] num text-destructive leading-none">{dealersAtRisk.length}</p>
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-destructive/70 mt-1.5">Dealers</p>
-                </div>
-              </div>
-            </div>
-          </Link>
+          </section>
         )}
 
         {/* Dealers + Products side-by-side on desktop */}

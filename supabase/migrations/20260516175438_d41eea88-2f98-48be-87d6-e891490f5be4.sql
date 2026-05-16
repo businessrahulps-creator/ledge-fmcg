@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.check_aging_transitions() FROM PUBLIC, authenticated, anon;
