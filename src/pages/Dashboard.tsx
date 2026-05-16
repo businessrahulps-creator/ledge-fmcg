@@ -679,7 +679,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold">{o.distributorName}</span>
-                        <span className="text-sm font-bold">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
+                        <span className="text-sm font-bold">{formatCurrency(netTotal(o))}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mb-2">{o.salesperson}</p>
                       <div className="flex items-center justify-between">
