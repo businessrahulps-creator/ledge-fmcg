@@ -222,7 +222,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     const godownId = updates.godownId || currentOrder?.godownId;
     const movingToDispatched = previousDelivery === "pending" && newDelivery === "dispatched";
     const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
-                      (newDelivery === "pending" || newDelivery === "returned");
+                      newDelivery === "pending";
 
     if (movingToDispatched && currentOrder && deps.companyId) {
       const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
