@@ -2,26 +2,15 @@ import type * as XLSXType from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { buildWorksheet } from "./exportCsv";
+import { fetchAllChunked } from "@/context/data-utils";
 
 const s = (v: unknown) => String(v ?? "");
 const n = (v: unknown) => String(v ?? 0);
 
-const PAGE_SIZE = 1000;
-
-async function fetchAll<T>(
-  queryFn: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
-): Promise<T[]> {
-  const all: T[] = [];
-  let offset = 0;
-  while (true) {
-    const { data, error } = await queryFn(offset, offset + PAGE_SIZE - 1);
-    if (error || !data) break;
-    all.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    offset += PAGE_SIZE;
-  }
-  return all;
-}
+// Thin wrapper so each backup section gets a descriptive `label` in any
+// pagination/truncation warnings surfaced by fetchAllChunked.
+const fetchAll = <T = any>(label: string, build: () => any) =>
+  fetchAllChunked<T>(build, 1000, 200, `backup:${label}`);
 
 function addSheet(XLSX: typeof XLSXType, wb: XLSXType.WorkBook, name: string, headers: string[], rows: string[][]) {
   if (!rows.length) return false;
