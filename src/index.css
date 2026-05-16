@@ -349,31 +349,29 @@
     background-image: var(--brand-gradient-soft);
   }
 
-  /* Landing-only cool gradient — coral-free. Purple → Violet → Electric Blue. */
+  /* Landing-only brand gradient — Midnight → Terracotta (V2) */
   .brand-gradient-cool-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(90deg, #7C3AED 0%, #6C5CE7 50%, #2563EB 100%);
+    background-image: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
   .brand-gradient-cool-bg {
-    background-image: linear-gradient(90deg, #7C3AED 0%, #6C5CE7 50%, #2563EB 100%);
+    background-image: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
   .brand-gradient-cool-soft-bg {
-    background-image: linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(108,92,231,0.08) 50%, rgba(37,99,235,0.10) 100%);
+    background-image: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--accent) / 0.10) 100%);
   }
 
   /* ═══════════════════════════════════════════════════════════════
      LANDING PAGE PREMIUM PRIMITIVES (lp-*)
-     Restraint pass: white space does the work. Indigo is an EARNED
-     accent, never wallpaper. Used only inside src/components/landing/.
+     V2 Brand: Midnight + Terracotta on Bone. Earned moments only.
      ═══════════════════════════════════════════════════════════════ */
 
-  /* Brand gradient text — reserved for the ONE earned moment per page */
   .lp-gradient-text-cool {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(100deg, #6D28D9 0%, #7C3AED 35%, #4F46E5 65%, #2563EB 100%);
+    background-image: linear-gradient(100deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
   .lp-gradient-bg-cool {
-    background-image: linear-gradient(100deg, #6D28D9 0%, #7C3AED 35%, #4F46E5 65%, #2563EB 100%);
+    background-image: linear-gradient(100deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
 
   /* V2 Bone — most sections live here. */
