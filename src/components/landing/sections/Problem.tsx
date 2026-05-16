@@ -7,23 +7,23 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 const cards = [
   {
     icon: MessageCircle,
-    title: "WhatsApp orders get lost",
-    description: "Voice notes, paper chits, four phone calls. You still don't know what sold today.",
+    title: "Lost Orders",
+    description: "WhatsApp chits. Half get lost. You still don't know what sold today.",
   },
   {
     icon: Table,
-    title: "Excel is always one version behind",
-    description: "Orders, payments and stock live in three sheets that never talk to each other.",
+    title: "Payment Chaos",
+    description: "Cash, UPI, cheque. No single source of truth. Always one version behind.",
   },
   {
     icon: Compass,
-    title: "Stock-outs hit before you see them",
-    description: "You learn a godown is empty when the dealer calls to complain.",
+    title: "Blind Stock",
+    description: "Empty shelf? You find out last — when the dealer calls to complain.",
   },
   {
     icon: Laptop,
-    title: "ERPs your team won't open",
-    description: "Tally and SAP were built for desktops. Your field team gave up by week two.",
+    title: "Excel Nights",
+    description: "Two days to build one report. Every week. Your weekends are gone.",
   },
 ];
 
@@ -38,10 +38,11 @@ export function Problem() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">The old way</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em] mt-6">
-              Running both sides is hard.
-              <br />
-              Your software shouldn't be.
+              The old way is bleeding you dry.
             </h2>
+            <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
+              You're running on yesterday's data. Your competitors aren't.
+            </p>
           </div>
         </AnimateIn>
 

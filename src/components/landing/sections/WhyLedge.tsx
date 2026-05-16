@@ -2,13 +2,13 @@ import { Smartphone, WifiOff, ShieldCheck, FileText } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
-  { icon: Smartphone, title: "Installs from a link in 90 seconds.", content: "PWA. No app store. No IT team. No training day." },
+  { icon: Smartphone, title: "Mobile-first. Any phone.", content: "PWA. No app store. No IT team. Installs from a link in 90 seconds." },
   { icon: WifiOff, title: "Works when the network doesn't.", content: "Offline orders queue and sync the moment signal returns." },
-  { icon: ShieldCheck, title: "Four roles. One system.", content: "Owner, manager, accountant, salesperson. Each sees what they should." },
-  { icon: FileText, title: "GST invoices that build themselves.", content: "CGST, SGST, IGST auto-calculated. PDF in one click." },
+  { icon: ShieldCheck, title: "Schemes, warehouses, credit control.", content: "The whole distribution layer — built in. Not bolted on." },
+  { icon: FileText, title: "Basics in 30 minutes. No trainer.", content: "Your team is live by lunch. No desktop. No IT. No excuses." },
 ];
 
-const legacy = ["Tally", "Zoho Books", "Vyapar", "SAP"];
+const legacy = ["Tally", "Zoho Books", "Vyapar", "Khatabook"];
 
 export function WhyLedge() {
   return (
@@ -18,9 +18,9 @@ export function WhyLedge() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Built different</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Powerful tools exist.
+              Every tool exists.
               <br />
-              None were built for you.
+              None built for you.
             </h2>
           </div>
         </AnimateIn>

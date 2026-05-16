@@ -8,23 +8,23 @@ const capabilities = [
   {
     icon: Camera,
     title: "Photo-to-Order",
-    desc: "Snap a handwritten chit. Get a clean digital order in seconds.",
+    desc: "Photograph a handwritten chit. Ledge fills the order instantly.",
     hero: true,
   },
   {
-    icon: Sunrise,
-    title: "Daily AI Briefings",
-    desc: "Every morning, your team wakes up to dealer priorities, ranked.",
+    icon: Mic,
+    title: "Voice Order Entry",
+    desc: "Speak the order in English or Malayalam. Done in 20 seconds.",
   },
   {
     icon: Sparkles,
     title: "Smart Scheme Suggestions",
-    desc: "The right scheme for the right dealer. Recommended, not guessed.",
+    desc: "AI tells you who'll buy — before you pitch. The right scheme, every time.",
   },
   {
-    icon: Mic,
-    title: "Dealer 360° + Voice Orders",
-    desc: "Full dealer health at a glance. Speak orders the way you talk.",
+    icon: Sunrise,
+    title: "Natural Language Queries",
+    desc: "Ask in English or Malayalam. Get instant answers — no reports needed.",
   },
 ];
 
@@ -167,7 +167,7 @@ export function LedgeIntelligence() {
           <h2 className="font-heading font-semibold text-center text-foreground tracking-[-0.022em] leading-[1.1] text-[32px] md:text-[40px] mt-6">
             Ledge{" "}
             <span className="lp-pill-accent font-semibold">
-              <span className="relative z-[2]">Intelligence</span>
+              <span className="relative z-[2]">Co-Pilot</span>
             </span>
             <span className="ml-[-2px]">.</span>
           </h2>
@@ -177,14 +177,14 @@ export function LedgeIntelligence() {
           <div className="mt-4 flex justify-center">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">
               <span className="lp-live-dot" />
-              Launching Q3 2026 · Limited founding access
+              Launching in 3 months · Founding members get early access free
             </span>
           </div>
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.16}>
           <p className="mt-5 text-center font-body text-muted-foreground text-[17px] leading-[1.55] max-w-2xl mx-auto">
-            Your always-on AI that thinks alongside you.
+            Ledge thinks. You lead.
           </p>
         </AnimateIn>
 

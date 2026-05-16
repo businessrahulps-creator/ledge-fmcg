@@ -1,13 +1,13 @@
-import { LayoutDashboard, Route, Contact, Warehouse, IndianRupee, Layers } from "lucide-react";
+import { Contact, HeartPulse, Gift, Users, IndianRupee, RotateCcw } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const features = [
-  { icon: LayoutDashboard, title: "Live business dashboard", desc: "Today's revenue, orders, dispatches. The moment you log in." },
-  { icon: Route, title: "Order lifecycle, tracked", desc: "Pending → Dispatched → Delivered. Every step logged." },
-  { icon: Contact, title: "Dealer intelligence", desc: "Lifetime value, outstanding, full history. One profile." },
-  { icon: Warehouse, title: "Stock health alerts", desc: "Green, amber, red. Per SKU, per godown. Never face a stockout." },
-  { icon: IndianRupee, title: "Payments tracked properly", desc: "Cash, UPI, cheque, bank. All reconciled in one place." },
-  { icon: Layers, title: "Schemes, targets, claims", desc: "The whole ops layer. Not just orders." },
+  { icon: Contact, title: "Dealer Intelligence", desc: "Full history, credit and behaviour — instant. One profile per dealer." },
+  { icon: HeartPulse, title: "Stock Health", desc: "Green, amber, red — per SKU, per godown. Before problems hit." },
+  { icon: Gift, title: "Schemes & Targets", desc: "Auto-tracked. Always accurate. No more end-of-month surprises." },
+  { icon: Users, title: "Team Performance", desc: "Every rep's orders and targets, live. Know who's performing — and why." },
+  { icon: IndianRupee, title: "GST Automation", desc: "Invoices, estimates, credit notes — one tap. CGST, SGST, IGST done." },
+  { icon: RotateCcw, title: "Returns & Claims", desc: "Handled cleanly. No arguments. Full paper trail, every time." },
 ];
 
 export function Features() {
@@ -18,9 +18,9 @@ export function Features() {
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
             <span className="lp-eyebrow">Features</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Everything your business needs.
+              Simple tools.
               <br />
-              Nothing it doesn't.
+              Extraordinary results.
             </h2>
           </div>
         </AnimateIn>
@@ -44,11 +44,11 @@ export function Features() {
                     </p>
                     <div className="mt-auto pt-6">
                       <p className="font-body text-[12.5px] text-muted-foreground tracking-tight">
-                        <span className="font-heading font-semibold text-foreground">₹4.2L</span> revenue today
+                        <span className="font-heading font-semibold text-foreground">Lifetime value</span>
                         <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">28</span> orders
+                        <span className="font-heading font-semibold text-foreground">Credit days</span>
                         <span className="text-[hsl(var(--muted-foreground)/0.7)] mx-1.5">·</span>
-                        <span className="font-heading font-semibold text-foreground">12</span> dispatched
+                        <span className="font-heading font-semibold text-foreground">Full history</span>
                       </p>
                     </div>
                   </div>

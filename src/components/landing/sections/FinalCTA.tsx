@@ -31,18 +31,18 @@ export function FinalCTA() {
           className="font-heading font-semibold text-[34px] md:text-[48px] text-foreground leading-[1.08] tracking-[-0.025em]"
           {...fadeUp(0.05)}
         >
-          Ready to run your business
+          One app. Every role.
           <br />
-          the way it deserves?
+          Total clarity.
         </motion.h2>
 
         <motion.p
           className="font-body text-[17px] md:text-[19px] text-muted-foreground max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
-          Start your 30-day free trial today. No card. No commitment.
+          Start free for 30 days. No card needed. Setup in 30 minutes.
           <br />
-          Just clarity. From day one.
+          Owner, manager, accountant, salesperson — one screen, one truth.
         </motion.p>
 
         <motion.div
@@ -50,7 +50,7 @@ export function FinalCTA() {
           {...fadeUp(0.2)}
         >
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <CapsuleCTA to="/signup" variant="dark">Start 30-Day Free Trial</CapsuleCTA>
+            <CapsuleCTA to="/signup" variant="dark">Start Free Trial</CapsuleCTA>
             <a
               href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
               target="_blank"

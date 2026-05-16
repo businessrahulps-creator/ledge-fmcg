@@ -61,7 +61,7 @@ export function Footer() {
             Ledge
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
-            The order-to-dispatch system for Indian FMCG. Built by an owner, for owners.
+            Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for Kerala's FMCG businesses.
           </p>
           {/* Live now pulse */}
           <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border shadow-depth-2">
