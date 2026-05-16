@@ -90,7 +90,24 @@ export default defineConfig(({ mode }) => {
       },
     }),
   ].filter(Boolean),
-  build: {},
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/react-router-dom/") || id.includes("/scheduler/")) return "react-vendor";
+          if (id.includes("/@radix-ui/")) return "radix-vendor";
+          if (id.includes("/@supabase/") || id.includes("/@tanstack/")) return "supabase-vendor";
+          if (id.includes("/recharts/") || id.includes("/d3-")) return "charts";
+          if (id.includes("/xlsx")) return "xlsx";
+          if (id.includes("/lucide-react/")) return "icons";
+          if (id.includes("/framer-motion/") || id.includes("/motion")) return "motion";
+          if (id.includes("/date-fns/")) return "date-fns";
+          return undefined;
+        },
+      },
+    },
+  },
   esbuild: mode === "production" ? { drop: ["console", "debugger"] } : {},
   resolve: {
     alias: {
