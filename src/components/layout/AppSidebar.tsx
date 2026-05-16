@@ -204,7 +204,7 @@ export function AppSidebar() {
   return (
     <TooltipProvider>
       <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-card">
-        <SidebarHeader className="p-4">
+        <SidebarHeader className="p-3">
           <Link to="/dashboard" className="flex items-center gap-3">
             {collapsed ? (
               <div className="relative h-7 w-7 shrink-0">
@@ -237,19 +237,32 @@ export function AppSidebar() {
           </Link>
         </SidebarHeader>
 
-        <SidebarContent className="px-2">
-          {renderGroup("Work", workNav, false)}
-          {renderGroup("Catalog", catalogNav, true)}
-          {renderGroup("Relationships", relationshipsNav, true)}
-          {renderGroup("Insights", insightsNav, true)}
-        </SidebarContent>
+        {/* Scroll region with edge-fade affordances. */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <SidebarContent ref={scrollRef} className="px-2 scrollbar-thin-hover">
+            {renderGroup("Work", workNav, false)}
+            {renderGroup("Catalog", catalogNav, true)}
+            {renderGroup("Relationships", relationshipsNav, true)}
+            {renderGroup("Insights", insightsNav, true)}
+          </SidebarContent>
+          {/* Top fade — there's content above */}
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute left-0 right-0 top-0 h-6 bg-gradient-to-b from-card to-transparent transition-opacity duration-200 ${showTopFade ? "opacity-100" : "opacity-0"}`}
+          />
+          {/* Bottom fade — there's content below */}
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute left-0 right-0 bottom-0 h-8 bg-gradient-to-t from-card to-transparent transition-opacity duration-200 ${showBottomFade ? "opacity-100" : "opacity-0"}`}
+          />
+        </div>
 
-        <SidebarFooter className="px-2 pb-4 border-t border-border/40 pt-2">
+        <SidebarFooter className="px-2 pb-3 border-t border-border/40 pt-1">
           <SidebarMenu>{effectiveFooter.map(renderItem)}</SidebarMenu>
 
           <Link
             to="/settings"
-            className="mt-3 block text-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+            className="mt-2 block text-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
             aria-label="App version — open Settings"
             title={PRETTY_VERSION}
           >
