@@ -242,7 +242,12 @@ export function TeamRoster({ companyId }: Props) {
         />
       )}
 
-      <InviteSheet open={inviteOpen} onOpenChange={setInviteOpen} />
+      <InviteSheet
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        companyName={companyName}
+        onInviteSent={refresh}
+      />
 
       {overrideFor && (
         <OverrideDrawerStub
