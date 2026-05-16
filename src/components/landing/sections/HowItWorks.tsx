@@ -2,14 +2,27 @@ import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimateIn } from "../AnimateIn";
 import { spring } from "@/lib/motion";
-import { BrowserFrame, PhoneFrame } from "../DeviceFrames";
-import { OrderFormSvg, DashboardMiniSvg, InvoiceStockSvg } from "../illustrations/SvgIllustrations";
+import stepOrders from "@/assets/landing/step-orders.png";
+import stepStock from "@/assets/landing/step-stock.png";
+import stepBilling from "@/assets/landing/step-billing.png";
 
-function PremiumStage({ children }: { children: React.ReactNode; accent?: "violet" | "indigo" | "blue" }) {
+function ProductShot({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative">
-      <div className="relative lp-glass-frost p-4 md:p-6 rounded-[1.75rem]">
-        {children}
+      <div
+        aria-hidden
+        className="absolute -inset-6 rounded-md blur-3xl opacity-25 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(var(--accent) / 0.18) 0%, transparent 65%)" }}
+      />
+      <div className="relative lp-glass-frost p-2 md:p-3 rounded-md overflow-hidden">
+        <img
+          src={src}
+          alt={alt}
+          width={1280}
+          height={896}
+          loading="lazy"
+          className="block w-full h-auto rounded-[4px]"
+        />
       </div>
     </div>
   );
@@ -19,52 +32,28 @@ const steps = [
   {
     badge: "01",
     icon: Smartphone,
-    accent: "violet" as const,
     title: "Field team places an order in 60 seconds.",
     description: "Pick dealer, add products, submit. Sequential order number, instantly.",
-    mockup: () => (
-      <PremiumStage accent="violet">
-        <PhoneFrame>
-          <div className="p-3 bg-white">
-            <OrderFormSvg />
-          </div>
-        </PhoneFrame>
-      </PremiumStage>
-    ),
+    image: stepOrders,
+    alt: "Mobile order capture screen with auto-saved status and Save Order action",
     reversed: false,
   },
   {
     badge: "02",
     icon: LayoutDashboard,
-    accent: "indigo" as const,
-    title: "Your dashboard updates live.",
-    description: "Revenue, dispatches, outstanding. Moving in real time. No evening summary call.",
-    mockup: () => (
-      <PremiumStage accent="indigo">
-        <BrowserFrame url="app.ledge.in/dashboard">
-          <div className="p-4 bg-white">
-            <DashboardMiniSvg />
-          </div>
-        </BrowserFrame>
-      </PremiumStage>
-    ),
+    title: "Your stock health stays in the green.",
+    description: "Per-SKU, per-godown health bars. Low stock surfaces before the dealer call.",
+    image: stepStock,
+    alt: "Stock health table with color-coded badges per SKU",
     reversed: true,
   },
   {
     badge: "03",
     icon: Truck,
-    accent: "blue" as const,
     title: "Dispatch → stock deducts → GST invoice generates.",
     description: "One tap. Accountant skips Tally. CGST/SGST/IGST calculated automatically.",
-    mockup: () => (
-      <PremiumStage accent="blue">
-        <BrowserFrame url="app.ledge.in/stock">
-          <div className="p-4 bg-white">
-            <InvoiceStockSvg />
-          </div>
-        </BrowserFrame>
-      </PremiumStage>
-    ),
+    image: stepBilling,
+    alt: "GST invoice page with itemized breakdown and Paid status",
     reversed: false,
   },
 ];
