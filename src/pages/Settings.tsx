@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { sanitizeInput } from "@/utils/sanitize";
+import { useState, useEffect, useMemo } from "react";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
-import { Users, Plus, Pencil, Trash2, Crown, CreditCard, X, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone } from "lucide-react";
+import { Crown, CreditCard, AlertTriangle, Clock, Database, RotateCw, CheckCircle2, XCircle, Download, Share, Smartphone, Trash2 } from "lucide-react";
+import { TeamRoster } from "@/components/settings/team/TeamRoster";
 import { getQueue, clearQueue, removeFromQueue, replaySingleMutation, getRetryStatus, setRetryStatus as saveRetryStatus, QueuedMutation, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -45,22 +45,6 @@ import { useApi } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
-
-interface TeamMember {
-  id: string;
-  userId: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: "super_admin" | "sales_manager" | "accountant";
-  roleId: string;
-}
-
-const roleLabels: Record<string, string> = {
-  super_admin: "Super Admin",
-  sales_manager: "Sales Manager",
-  accountant: "Accountant",
-};
 
 function InstallAppCard() {
   const { canInstall, isIOS, isStandalone, permanentlyDismissed, triggerInstall, dismissForever } = useInstallPrompt();
@@ -183,126 +167,6 @@ export default function Settings() {
     return () => { supabase.removeChannel(channel); };
   }, [companyId]);
 
-  const [team, setTeam] = useState<TeamMember[]>([]);
-  const [teamLoading, setTeamLoading] = useState(true);
-  const [editMember, setEditMember] = useState<TeamMember | null>(null);
-  const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
-  const [isNewMember, setIsNewMember] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const loadTeam = useCallback(async () => {
-    if (!companyId) return;
-    setTeamLoading(true);
-    try {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, user_id, full_name, email, phone")
-        .eq("company_id", companyId);
-
-      if (!profiles || profiles.length === 0) {
-        setTeam([]);
-        setTeamLoading(false);
-        return;
-      }
-
-      const userIds = profiles.map((p) => p.user_id);
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("id, user_id, role")
-        .in("user_id", userIds);
-
-      const roleMap = new Map<string, { roleId: string; role: string }>(
-        (roles || []).map((r) => [r.user_id, { roleId: r.id, role: r.role }])
-      );
-
-      const members: TeamMember[] = profiles
-        .filter((p) => roleMap.has(p.user_id))
-        .map((p) => {
-          const r = roleMap.get(p.user_id)!;
-          return {
-            id: p.id,
-            userId: p.user_id,
-            name: p.full_name || "",
-            email: p.email || "",
-            phone: p.phone || "",
-            role: r.role as TeamMember["role"],
-            roleId: r.roleId,
-          };
-        });
-
-      setTeam(members);
-    } catch {
-      // silent
-    }
-    setTeamLoading(false);
-  }, [companyId]);
-
-  useEffect(() => { loadTeam(); }, [loadTeam]);
-
-
-  const saveMember = async () => {
-    if (!editMember?.name || !editMember?.email || !companyId) return;
-    if (isNewMember) return; // New member creation disabled
-
-    // Defense-in-depth: prevent self role-change (would cause RLS lockout)
-    const original = team.find((t) => t.id === editMember.id);
-    const isSelf = editMember.userId === user?.id;
-    if (isSelf && original && original.role !== editMember.role) {
-      toast.error("You can't change your own role", {
-        description: "Ask another Super Admin to update it for you.",
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ full_name: sanitizeInput(editMember.name), phone: sanitizeInput(editMember.phone) })
-        .eq("id", editMember.id);
-      if (profileError) throw profileError;
-
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .update({ role: editMember.role })
-        .eq("id", editMember.roleId);
-      if (roleError) throw roleError;
-
-      toast.success("Member updated", { description: `${editMember.name} has been updated.` });
-      setEditMember(null);
-      await loadTeam();
-    } catch (err: any) {
-      toast.error("Error", { description: err?.message || "Failed to save member" });
-    }
-    setSaving(false);
-  };
-
-  const confirmRemoveMember = async () => {
-    if (!deleteMember) return;
-    if (deleteMember.userId === user?.id) {
-      toast.error("You can't remove yourself", {
-        description: "Ask another Super Admin to remove your account.",
-      });
-      setDeleteMember(null);
-      return;
-    }
-    setSaving(true);
-    try {
-      const { error } = await supabase.rpc("delete_member_atomic" as any, { member_id: deleteMember.id });
-      if (error) {
-        handleSupabaseError(error, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
-      } else {
-        toast.success("Member removed", { description: `${deleteMember.name} has been removed.` });
-        addNotification("team_update", "Team Member Removed", `${deleteMember.name} was removed from the team.`);
-        setDeleteMember(null);
-        await loadTeam();
-      }
-    } catch (err) {
-      handleSupabaseError(err, { source: "settings:member.delete", title: "Failed to remove member", context: { memberId: deleteMember.id } });
-    }
-    setSaving(false);
-  };
-
   const trialDaysLeft = useMemo(() => {
     if (!trialEndsAt) return 0;
     return Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000));
@@ -346,60 +210,7 @@ export default function Settings() {
           </div>
 
           <TabsContent value="team">
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground md:text-sm">
-                  {teamLoading ? "Loading…" : `${team.length} team members`}
-                </p>
-                <span className="text-xs text-muted-foreground">Share the signup link to invite new members</span>
-              </div>
-
-              <div className="glass-card overflow-hidden">
-                {team.length === 0 && !teamLoading && (
-                  <div className="px-6 py-8 text-center text-sm text-muted-foreground">No team members found.</div>
-                )}
-                {team.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between border-b border-border/50 px-3 py-3 last:border-b-0 row-hover md:px-6 md:py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary md:h-10 md:w-10 md:text-sm">
-                        {m.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{m.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-muted-foreground truncate md:text-xs">{m.email}</p>
-                          {m.phone && <p className="hidden sm:block text-[10px] text-muted-foreground md:text-xs">· {m.phone}</p>}
-                          <span className={`hidden sm:inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium md:px-3 md:text-xs ${
-                            m.role === "super_admin" ? "bg-primary/15 text-primary" :
-                            m.role === "sales_manager" ? "bg-success/15 text-success" :
-                            "bg-warning/15 text-warning"
-                          }`}>
-                            {roleLabels[m.role]}
-                          </span>
-                        </div>
-                        <span className={`sm:hidden inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium mt-0.5 ${
-                          m.role === "super_admin" ? "bg-primary/15 text-primary" :
-                          m.role === "sales_manager" ? "bg-success/15 text-success" :
-                          "bg-warning/15 text-warning"
-                        }`}>
-                          {roleLabels[m.role]}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => { setEditMember({ ...m }); setIsNewMember(false); }}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      {m.userId !== user?.id && (
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive md:h-10 md:w-10" onClick={() => setDeleteMember(m)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            <TeamRoster companyId={companyId} />
           </TabsContent>
 
           {/* Subscription Tab */}
@@ -598,70 +409,7 @@ export default function Settings() {
           </TabsContent>
         </Tabs>
 
-        {/* Add/Edit Member Dialog */}
-        <Dialog open={!!editMember} onOpenChange={() => setEditMember(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">{isNewMember ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
-              <DialogDescription className="sr-only">{isNewMember ? "Add a new team member" : "Edit team member details"}</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveMember(); }}>
-            {editMember && (
-              <div className="space-y-3 md:space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Full Name</Label>
-                  <Input value={editMember.name} onChange={(e) => setEditMember({ ...editMember, name: e.target.value })} className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Email</Label>
-                  <Input
-                    value={editMember.email}
-                    onChange={(e) => setEditMember({ ...editMember, email: e.target.value })}
-                    className="h-10 rounded-lg"
-                    disabled={!isNewMember}
-                  />
-                  {!isNewMember && <p className="text-[10px] text-muted-foreground">Email cannot be changed after creation</p>}
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Phone</Label>
-                  <Input
-                    value={editMember.phone}
-                    onChange={(e) => setEditMember({ ...editMember, phone: e.target.value })}
-                    className="h-10 rounded-lg"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Role</Label>
-                  <Select
-                    value={editMember.role}
-                    onValueChange={(v) => setEditMember({ ...editMember, role: v as TeamMember["role"] })}
-                    disabled={editMember.userId === user?.id}
-                  >
-                    <SelectTrigger className="h-10 rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="sales_manager">Sales Manager</SelectItem>
-                      <SelectItem value="accountant">Accountant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {editMember.userId === user?.id && (
-                    <p className="text-[11px] text-muted-foreground">
-                      You can't change your own role. Ask another Super Admin to do it for you.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            <DialogFooter className="gap-2 sm:gap-0 mt-4">
-              <Button type="button" variant="outline" onClick={() => setEditMember(null)}>Cancel</Button>
-              <Button type="submit" disabled={saving}>{isNewMember ? "Add Member" : "Save Changes"}</Button>
-            </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {/* Team edit/invite/remove flows live inside <TeamRoster /> */}
         {/* Install App Card — mobile only, shown when not installed */}
         <InstallAppCard />
 
@@ -702,23 +450,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteMember} onOpenChange={(open) => !open && setDeleteMember(null)}>
-          <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-base md:text-lg">Remove Team Member</AlertDialogTitle>
-              <AlertDialogDescription className="text-xs md:text-sm">
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteMember?.name}</span> from the team? This will remove the member and all their role assignments. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="gap-2 sm:gap-0">
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRemoveMember} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Remove
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         <AlertDialog open={showClearQueueConfirm} onOpenChange={setShowClearQueueConfirm}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
