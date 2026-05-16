@@ -985,6 +985,21 @@ export type Database = {
           },
         ]
       }
+      role_capabilities_default: {
+        Row: {
+          capability: Database["public"]["Enums"]["capability_key"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          capability: Database["public"]["Enums"]["capability_key"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          capability?: Database["public"]["Enums"]["capability_key"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       salespersons: {
         Row: {
           company_id: string
@@ -1372,6 +1387,33 @@ export type Database = {
           },
         ]
       }
+      user_capability_overrides: {
+        Row: {
+          capability: Database["public"]["Enums"]["capability_key"]
+          created_at: string
+          granted: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capability: Database["public"]["Enums"]["capability_key"]
+          created_at?: string
+          granted: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capability?: Database["public"]["Enums"]["capability_key"]
+          created_at?: string
+          granted?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1520,6 +1562,13 @@ export type Database = {
           seq: number
         }[]
       }
+      has_capability: {
+        Args: {
+          _capability: Database["public"]["Enums"]["capability_key"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1573,7 +1622,22 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "sales_manager" | "accountant" | "salesperson"
+      app_role:
+        | "super_admin"
+        | "sales_manager"
+        | "accountant"
+        | "salesperson"
+        | "viewer"
+      capability_key:
+        | "manage_team"
+        | "manage_billing"
+        | "see_money"
+        | "manage_stock"
+        | "manage_schemes"
+        | "see_all_dealers"
+        | "override_credit_limit"
+        | "view_error_logs"
+        | "see_own_performance_only"
       delivery_status: "pending" | "dispatched" | "delivered"
       payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
       payment_status: "paid" | "partial" | "pending"
@@ -1704,7 +1768,24 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "sales_manager", "accountant", "salesperson"],
+      app_role: [
+        "super_admin",
+        "sales_manager",
+        "accountant",
+        "salesperson",
+        "viewer",
+      ],
+      capability_key: [
+        "manage_team",
+        "manage_billing",
+        "see_money",
+        "manage_stock",
+        "manage_schemes",
+        "see_all_dealers",
+        "override_credit_limit",
+        "view_error_logs",
+        "see_own_performance_only",
+      ],
       delivery_status: ["pending", "dispatched", "delivered"],
       payment_mode: ["cash", "bank_transfer", "cheque", "upi"],
       payment_status: ["paid", "partial", "pending"],
