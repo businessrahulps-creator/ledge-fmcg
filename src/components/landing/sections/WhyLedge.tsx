@@ -1,4 +1,4 @@
-import { Smartphone, WifiOff, ShieldCheck, FileText } from "lucide-react";
+import { Smartphone, WifiOff, ShieldCheck, FileText, Sparkles, ArrowRight } from "lucide-react";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
