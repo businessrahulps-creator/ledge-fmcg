@@ -392,29 +392,63 @@ export default function Dashboard() {
 
           {/* Compact KPI row */}
           <div className="glass-card grid grid-cols-2 md:grid-cols-4 divide-x divide-border/60">
-            {kpis.map((kpi) => (
-              <div key={kpi.label} className="px-4 py-4 min-w-0">
-                <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
-                <p className="font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis">{kpi.value}</p>
-              </div>
-            ))}
+            {kpis.map((kpi) => {
+              const isZero = kpi.value === "0" || kpi.value === "₹0";
+              return (
+                <div key={kpi.label} className="px-4 py-4 min-w-0">
+                  <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
+                  <p className={cn(
+                    "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                    isZero && "text-muted-foreground/35"
+                  )}>{kpi.value}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* Credit at Risk */}
+        {/* Credit attention tier — amber, only shown when approaching but not over */}
+        {dealersApproaching.length > 0 && dealersAtRisk.length === 0 && (
+          <Link to="/distributors" className="block group">
+            <div className="flex items-stretch gap-3 border-l-[3px] border-warning bg-warning/[0.04] hover:bg-warning/[0.08] transition-colors rounded-r-md px-4 py-3">
+              <div className="flex items-center">
+                <AlertTriangle className="icon-signal text-warning" fill="hsl(var(--warning) / 0.15)" />
+              </div>
+              <div className="flex-1 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-warning/90">Approaching limit</p>
+                  <p className="text-sm text-foreground mt-0.5">
+                    {dealersApproaching.length} dealer{dealersApproaching.length > 1 ? "s" : ""} above 80% of credit limit
+                  </p>
+                </div>
+                <span className="font-heading text-[28px] num text-warning leading-none">{dealersApproaching.length}</span>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Credit at Risk — promoted to a real risk surface */}
         {dealersAtRisk.length > 0 && (
-          <Link to="/distributors" className="block">
-            <div className="glass-card p-4 flex items-center gap-3 card-hover">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-4 w-4 text-destructive" />
+          <Link to="/distributors" className="block group">
+            <div className="flex items-stretch gap-3 border-l-[3px] border-destructive bg-destructive/[0.03] hover:bg-destructive/[0.07] transition-colors rounded-r-md px-4 py-4">
+              <div className="flex items-center">
+                <AlertTriangle className="icon-signal text-destructive" fill="hsl(var(--destructive) / 0.15)" />
               </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} at or over credit limit
-                </p>
+              <div className="flex-1 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-destructive/90">At Risk</p>
+                  <p className="text-sm text-foreground mt-0.5">
+                    {dealersAtRisk.length} dealer{dealersAtRisk.length > 1 ? "s" : ""} over their credit limit
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 num">
+                    {formatCurrency(atRiskAmount)} outstanding
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-heading text-[32px] num text-destructive leading-none">{dealersAtRisk.length}</p>
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-destructive/70 mt-1.5">Dealers</p>
+                </div>
               </div>
-              <span className="text-lg font-bold text-destructive">{dealersAtRisk.length}</span>
             </div>
           </Link>
         )}
