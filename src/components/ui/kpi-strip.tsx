@@ -32,7 +32,12 @@ export function KpiStrip({ cells, className }: KpiStripProps) {
       {cells.map((c, i) => {
         const Inner = (
           <>
-            <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+              {c.explain && !c.zero && (
+                <ExplainButton metric={c.label} value={c.explain.value} context={c.explain.context} />
+              )}
+            </div>
             <p
               className={cn(
                 "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
