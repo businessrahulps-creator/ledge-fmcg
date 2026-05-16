@@ -219,7 +219,6 @@ export function useOrdersDomain(deps: OrdersDeps) {
       }
     }
 
-    const godownId = updates.godownId || currentOrder?.godownId;
     const movingToDispatched = previousDelivery === "pending" && newDelivery === "dispatched";
     const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
                       newDelivery === "pending";
