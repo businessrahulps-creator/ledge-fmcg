@@ -134,6 +134,8 @@ export function Hero() {
                       alt="Ledge dashboard showing revenue, KPIs, and recent orders"
                       width={1600}
                       height={1024}
+                      fetchPriority="high"
+                      decoding="async"
                       className="block w-full h-auto"
                     />
                     {/* Proof chip — anchored inside the frame like a real product notification */}
