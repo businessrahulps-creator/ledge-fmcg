@@ -229,12 +229,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // ---------- Phase 2: heavy (runs in parallel, doesn't gate `loading`) ----------
     const phase2 = (async () => {
       const [stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
-        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
-        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false })),
+        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
+        fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "orders"),
+        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "secondary_sales"),
+        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "targets"),
+        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
+        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
     })();
