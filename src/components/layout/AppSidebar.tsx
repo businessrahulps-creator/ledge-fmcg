@@ -249,19 +249,6 @@ export function AppSidebar() {
 
         <SidebarFooter className="px-2 pb-3 border-t border-border/40 pt-1">
           <SidebarMenu>{effectiveFooter.map(renderItem)}</SidebarMenu>
-
-          <Link
-            to="/settings"
-            className="mt-2 block text-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-            aria-label="App version — open Settings"
-            title={PRETTY_VERSION}
-          >
-            {collapsed ? (
-              <span className="text-[9px] tracking-tight num">{SHORT_VERSION}</span>
-            ) : (
-              <span className="text-[10px] num">{PRETTY_VERSION}</span>
-            )}
-          </Link>
         </SidebarFooter>
 
         <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
