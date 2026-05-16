@@ -241,8 +241,9 @@ export function PaymentReport() {
         onOpenChange={setPdfOpen}
         sections={rptSections}
         title="Export Payment Report PDF"
-        onGenerate={(sel) => {
+        onGenerate={async (sel) => {
           const totalAmount = filtered.reduce((s, o) => s + netTotal(o), 0);
+          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
           downloadPdf(
             pdfFilename("payment-report"),
             <ReportPdf
