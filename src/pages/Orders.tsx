@@ -121,6 +121,47 @@ export default function Orders() {
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
+  // ── Period insights (no new business logic — derived from existing orders)
+  const insights = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const net = (o: typeof orders[number]) => (o.total ?? 0) - (o.schemeSavings || 0);
+
+    let mtdCount = 0, mtdRevenue = 0, prevCount = 0, prevRevenue = 0;
+    let pendingPayment = 0, pendingPaymentValue = 0;
+    let overdueDispatch = 0, overdueDispatchValue = 0;
+    let todaysCount = 0;
+
+    for (const o of orders) {
+      const t = new Date(o.date).getTime();
+      if (t >= startOfMonth) { mtdCount++; mtdRevenue += net(o); }
+      else if (t >= startOfPrevMonth) { prevCount++; prevRevenue += net(o); }
+      if (o.date?.slice(0, 10) === todayIso) todaysCount++;
+      if (o.paymentStatus === "pending" || o.paymentStatus === "partial") {
+        pendingPayment++; pendingPaymentValue += net(o);
+      }
+      if (o.deliveryStatus === "pending" && o.dispatchDate && new Date(o.dispatchDate) < now) {
+        overdueDispatch++; overdueDispatchValue += net(o);
+      }
+    }
+    const pct = (cur: number, prev: number) =>
+      prev === 0 ? null : Math.round(((cur - prev) / prev) * 100);
+    return {
+      mtdCount, mtdRevenue, todaysCount, pendingPayment, pendingPaymentValue,
+      overdueDispatch, overdueDispatchValue,
+      revenueDelta: pct(mtdRevenue, prevRevenue),
+      countDelta: pct(mtdCount, prevCount),
+    };
+  }, [orders]);
+
+  const prevMonthLabel = useMemo(() => {
+    const d = new Date(); d.setMonth(d.getMonth() - 1);
+    return d.toLocaleString("en-IN", { month: "short" });
+  }, []);
+
+
   // Show skeleton on first paint when we're loading and no orders are cached yet.
   if (isLoading && orders.length === 0) {
     return (
