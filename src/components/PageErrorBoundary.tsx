@@ -23,6 +23,12 @@ export class PageErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("PageErrorBoundary caught:", error, errorInfo);
+    logError({
+      source: "react:PageErrorBoundary",
+      error,
+      severity: "error",
+      context: { componentStack: String(errorInfo?.componentStack || "").slice(0, 2000), boundary: "page" },
+    });
   }
 
   render() {
