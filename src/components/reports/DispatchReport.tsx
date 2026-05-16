@@ -67,7 +67,7 @@ export function DispatchReport() {
                   o.vehicle || "",
                   o.driverName || "",
                   o.deliveryStatus,
-                  formatCurrency(o.total - (o.schemeSavings || 0)),
+                  formatCurrency(netTotal(o)),
                 ])
               );
             }}
