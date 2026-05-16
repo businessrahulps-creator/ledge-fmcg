@@ -2,9 +2,11 @@
  * Single source of truth for code-split route imports.
  *
  * Each value is a thunk that triggers the dynamic import for a page chunk.
- * `App.tsx` wraps these in `React.lazy()`. After login, `<RoutePrefetcher />`
- * walks this map on `requestIdleCallback` and warms every chunk in the
- * background, so subsequent navigations feel instant.
+ * `App.tsx` wraps these in `React.lazy()`. `<NavLink>` calls `prefetchRoute`
+ * on hover/touch/focus so the chunk is already in the browser cache by the
+ * time the user clicks. `prefetchLikelyNext` warms a tiny set of "next
+ * likely" destinations on idle — never the whole app, which used to
+ * saturate slow mobile connections and make navigation feel glitchy.
  */
 
 export const routeImporters = {
@@ -32,16 +34,31 @@ export type RoutePath = keyof typeof routeImporters;
 
 const warmed = new Set<string>();
 
+function resolveImporter(path: string): (() => Promise<unknown>) | undefined {
+  const map = routeImporters as Record<string, () => Promise<unknown>>;
+  // Exact match first
+  if (map[path]) return map[path];
+  // Only collapse the trailing segment to ":id" when there's a known
+  // collection route AND the trailing segment is NOT a static sub-route
+  // (e.g. "/orders/new" must not collapse to "/orders/:id").
+  const lastSlash = path.lastIndexOf("/");
+  if (lastSlash <= 0) return undefined;
+  const parent = path.slice(0, lastSlash);
+  const tail = path.slice(lastSlash + 1);
+  // Skip if the parent route doesn't exist or the tail is itself a static page
+  if (!map[parent]) return undefined;
+  const collapsed = `${parent}/:id`;
+  if (!map[collapsed]) return undefined;
+  // Heuristic: only treat as id when tail looks like an id (not "new"/"edit")
+  if (/^(new|edit|create|add)$/i.test(tail)) return undefined;
+  return map[collapsed];
+}
+
 /** Trigger a chunk download (no-op if already warmed). */
 export function prefetchRoute(path: string): void {
-  // Try exact match first, then strip params
-  const importer =
-    (routeImporters as Record<string, () => Promise<unknown>>)[path] ??
-    (routeImporters as Record<string, () => Promise<unknown>>)[
-      path.replace(/\/[^/]+$/, "/:id")
-    ];
-  if (!importer) return;
   if (warmed.has(path)) return;
+  const importer = resolveImporter(path);
+  if (!importer) return;
   warmed.add(path);
   // Fire-and-forget; failures are not user-visible
   importer().catch(() => warmed.delete(path));
@@ -54,16 +71,43 @@ const ric: IdleCb =
   ((cb: () => void) => window.setTimeout(cb, 1));
 
 /**
- * Warm every authenticated route chunk on idle, one at a time,
- * so we never block interaction or saturate the network.
+ * For each page, the 1–2 most likely next destinations. Used to gently
+ * warm only what the user is most likely to click — never the whole app.
  */
-export function prefetchAllRoutes(): void {
-  const paths = Object.keys(routeImporters);
+const likelyNext: Record<string, string[]> = {
+  "/dashboard": ["/orders", "/distributors"],
+  "/orders": ["/orders/new", "/billing"],
+  "/orders/new": ["/orders"],
+  "/distributors": ["/orders/new"],
+  "/billing": ["/orders"],
+  "/stock": ["/orders/new"],
+  "/salespersons": ["/performance"],
+  "/reports": ["/performance"],
+  "/performance": ["/reports"],
+};
+
+/** Warm the 1–2 likely next routes from the current path, on idle. */
+export function prefetchLikelyNext(currentPath: string): void {
+  // Normalise dynamic segments back to the registered key form
+  const key = currentPath in likelyNext
+    ? currentPath
+    : currentPath.replace(/\/[^/]+$/, "/:id") in likelyNext
+      ? currentPath.replace(/\/[^/]+$/, "/:id")
+      : currentPath;
+  const next = likelyNext[key];
+  if (!next || next.length === 0) return;
   let i = 0;
   const step = () => {
-    if (i >= paths.length) return;
-    prefetchRoute(paths[i++]);
+    if (i >= next.length) return;
+    prefetchRoute(next[i++]);
     ric(step, { timeout: 2000 });
   };
   ric(step, { timeout: 2000 });
+}
+
+/** @deprecated kept for backwards compat — now a no-op. */
+export function prefetchAllRoutes(): void {
+  // Intentionally empty. Blanket prefetch saturated slow mobile networks
+  // and caused the very "glitchy navigation" we were trying to prevent.
+  // Per-link hover + prefetchLikelyNext are used instead.
 }
