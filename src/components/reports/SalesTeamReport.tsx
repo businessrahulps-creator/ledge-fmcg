@@ -57,7 +57,7 @@ export function SalesTeamReport() {
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{totalOrders} orders</span>
           <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
-          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
         <div className="sm:ml-auto flex gap-2">
           <Button
