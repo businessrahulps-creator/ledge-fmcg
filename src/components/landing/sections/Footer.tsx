@@ -7,7 +7,7 @@ import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
 import ledgeLogo from "@/assets/ledge-logo.png";
-import { Nilavilakku } from "@/components/landing/Nilavilakku";
+
 
 const linkMap: Record<string, string> = {
   "Features": "/#features",
