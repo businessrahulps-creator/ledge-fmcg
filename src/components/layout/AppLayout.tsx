@@ -90,7 +90,6 @@ const ROUTE_TITLES: Record<string, string> = {
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",
-  "/activity": "Activity",
   "/help": "Help",
   "/settings": "Settings",
 };
