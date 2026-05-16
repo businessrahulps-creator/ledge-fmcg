@@ -63,6 +63,35 @@ const moreGroups = [
 
 const allMoreItems = moreGroups.flatMap((g) => g.items);
 
+const ROUTE_TITLES: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/orders": "Orders",
+  "/billing": "Billing",
+  "/stock": "Stock",
+  "/distributors": "Dealers",
+  "/salespersons": "Sales Team",
+  "/schemes": "Schemes",
+  "/targets": "Targets",
+  "/claims": "Returns",
+  "/company": "Company",
+  "/reports": "Reports",
+  "/performance": "Performance",
+  "/activity": "Activity",
+  "/help": "Help",
+  "/settings": "Settings",
+};
+
+function PageTitle() {
+  const location = useLocation();
+  const match = Object.keys(ROUTE_TITLES).find((p) => location.pathname.startsWith(p));
+  if (!match) return null;
+  return (
+    <span className="hidden md:inline-flex items-center text-sm font-medium text-foreground/85 tracking-[-0.005em]">
+      {ROUTE_TITLES[match]}
+    </span>
+  );
+}
+
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const { isRefreshing } = useData();
