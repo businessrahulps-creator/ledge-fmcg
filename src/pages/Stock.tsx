@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useCan } from "@/hooks/useCan";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -385,7 +385,7 @@ export default function Stock() {
         <KpiStrip
           cells={[
             { label: "Total SKUs", value: formatNumber(products.length), zero: products.length === 0 },
-            ...(isAccountant ? [] : [{ label: "Stock value", value: formatCurrency(stockSummary.totalValue), zero: stockSummary.totalValue === 0 }]),
+            ...(!canManageStock ? [] : [{ label: "Stock value", value: formatCurrency(stockSummary.totalValue), zero: stockSummary.totalValue === 0 }]),
             { label: "Low stock", value: formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: stockSummary.lowCount + stockSummary.criticalCount === 0 },
             { label: "Warehouses", value: formatNumber(activeLocations.length), zero: activeLocations.length === 0 },
           ]}
@@ -436,7 +436,7 @@ export default function Stock() {
                     <Download className="h-4 w-4" />
                     <span className="hidden sm:inline">Export CSV</span>
                   </Button>
-                  {!isAccountant && (
+                  {canManageStock && (
                     <Button onClick={openNewProduct} className="flex-1 sm:flex-none">
                       <Plus className="h-4 w-4" />
                       Add Product
@@ -456,7 +456,7 @@ export default function Stock() {
                         <th className="px-6 py-3 font-medium text-right">Base Price</th>
                         <th className="px-6 py-3 font-medium text-right">Total Sold</th>
                         <th className="px-6 py-3 font-medium text-right">Total Stock</th>
-                        {!isAccountant && <th className="px-6 py-3 font-medium text-right">Actions</th>}
+                        {canManageStock && <th className="px-6 py-3 font-medium text-right">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -468,7 +468,7 @@ export default function Stock() {
                           <td className="px-6 py-4 text-right font-medium">{formatCurrency(p.basePrice)}</td>
                           <td className="px-6 py-4 text-right text-muted-foreground">{formatNumber(p.totalSold)}</td>
                           <td className="px-6 py-4 text-right font-semibold">{formatNumber(getProductStock(p.id))}</td>
-                          {!isAccountant && (
+                          {canManageStock && (
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
@@ -499,7 +499,7 @@ export default function Stock() {
                           </span>
                         </div>
                       </div>
-                      {!isAccountant && (
+                      {canManageStock && (
                         <div className="flex gap-1 shrink-0 ml-2">
                           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditProduct({ ...p }); setIsNewProduct(false); }}>
                             <Pencil className="h-3.5 w-3.5" />
@@ -520,7 +520,7 @@ export default function Stock() {
                     <Package className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                     <p className="mt-3 text-sm font-medium">No products found</p>
                     <p className="text-xs text-muted-foreground">Add your first product to get started</p>
-                    {!isAccountant && (
+                    {canManageStock && (
                       <Button size="sm" className="mt-3" onClick={openNewProduct}>
                         <Plus className="h-4 w-4" />
                         Add Product
@@ -539,7 +539,7 @@ export default function Stock() {
                 <p className="text-xs text-muted-foreground md:text-sm">
                   {activeLocations.length} active warehouse{activeLocations.length !== 1 ? "s" : ""}
                 </p>
-                {!isAccountant && (
+                {canManageStock && (
                   <Button onClick={openNewWarehouse} className="w-full sm:w-auto">
                     <Plus className="h-4 w-4" />
                     Add Warehouse
@@ -567,7 +567,7 @@ export default function Stock() {
                             {loc.address.split(",").slice(-2).join(",").trim()}
                           </p>
                         </div>
-                        {!isAccountant && (
+                        {canManageStock && (
                           <div className="flex gap-0.5 shrink-0">
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={(e) => { e.stopPropagation(); setEditWarehouse({ ...loc }); setIsNewWarehouse(false); }}>
                               <Pencil className="h-3 w-3" />
@@ -601,7 +601,7 @@ export default function Stock() {
                   <Warehouse className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                   <p className="mt-3 text-sm font-medium">No warehouses yet</p>
                   <p className="text-xs text-muted-foreground">Add your first warehouse to start tracking inventory</p>
-                  {!isAccountant && (
+                  {canManageStock && (
                     <Button size="sm" className="mt-3" onClick={openNewWarehouse}>
                       <Plus className="h-4 w-4" />
                       Add Warehouse
@@ -662,7 +662,7 @@ export default function Stock() {
                             <Download className="h-4 w-4" />
                             <span className="hidden sm:inline">Export CSV</span>
                           </Button>
-                          {!isAccountant && (
+                          {canManageStock && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
                               <PackagePlus className="h-4 w-4" />
                               <span className="hidden sm:inline">Add Product</span>
@@ -689,7 +689,7 @@ export default function Stock() {
                             {paginatedInventory.map((si) => {
                               const health = getStockHealth(si.quantity, si.threshold);
                               return (
-                                <tr key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${isAccountant ? "" : "cursor-pointer"}`}>
+                                <tr key={si.id} onClick={!canManageStock ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 row-hover ${!canManageStock ? "" : "cursor-pointer"}`}>
                                   <td className="px-6 py-4 font-medium">{si.productName}</td>
                                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{si.sku}</td>
                                   <td className={`px-6 py-4 text-right font-semibold ${health === "critical" ? "text-destructive" : health === "low" ? "text-warning" : ""}`}>
@@ -710,7 +710,7 @@ export default function Stock() {
                         {paginatedInventory.map((si) => {
                           const health = getStockHealth(si.quantity, si.threshold);
                           return (
-                            <div key={si.id} onClick={isAccountant ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 px-4 py-3 card-hover ${isAccountant ? "" : "cursor-pointer"}`}>
+                            <div key={si.id} onClick={!canManageStock ? undefined : () => setEditStockItem({ ...si })} className={`border-b border-border/50 px-4 py-3 card-hover ${!canManageStock ? "" : "cursor-pointer"}`}>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium truncate">{si.productName}</span>
                                 <HealthBadge health={health} />
@@ -741,7 +741,7 @@ export default function Stock() {
           </TabsContent>
         </Tabs>
 
-        {!isAccountant && (<>
+        {canManageStock && (<>
         {/* Add/Edit Product Dialog */}
         <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
