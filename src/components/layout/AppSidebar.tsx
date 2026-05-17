@@ -86,13 +86,7 @@ export function AppSidebar() {
   const effectiveFooter: NavItem[] = footerNav;
 
   const renderItem = (item: NavItem) => {
-    // Split off any query string so pathname.startsWith comparisons stay correct.
-    const [itemPath, itemSearch] = item.url.split("?");
-    const isActive = item.onClick
-      ? false
-      : itemSearch
-        ? location.pathname === itemPath && location.search.includes(itemSearch)
-        : location.pathname.startsWith(itemPath) && !location.search.includes("filter=outstanding");
+    const isActive = item.onClick ? false : location.pathname.startsWith(item.url);
     const Icon = item.icon;
 
     if (collapsed) {
