@@ -79,6 +79,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
+  const hasHydratedRef = useRef(false);
+  const lastFetchAtRef = useRef(0);
 
   // Activity log shorthand
   const log = useCallback((entityType: string, entityId: string, action: string, summary: string, metadata?: Record<string, any>) => {
