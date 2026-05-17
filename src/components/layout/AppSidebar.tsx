@@ -14,7 +14,6 @@ import {
   Gift,
   Target,
   RotateCcw,
-  FileText,
   Landmark,
   Wallet,
 } from "lucide-react";
