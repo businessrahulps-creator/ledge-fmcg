@@ -17,8 +17,16 @@ export interface NumberInputProps
    * When false, blurring an empty field snaps to `min ?? 0`.
    */
   allowEmpty?: boolean;
+  /**
+   * Render as a rupee amount: prefixes ₹ inside the input and formats the
+   * committed value with Indian commas on blur. While focused the field shows
+   * raw digits so cursor/selection behaviour stays sane.
+   */
+  currency?: boolean;
   className?: string;
 }
+
+const inrFormatter = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 
 /**
  * Numeric input with sane UX:
