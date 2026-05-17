@@ -123,9 +123,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const billing = useBillingDomain(billingDeps);
 
-  // Clear data when no company
+  // Clear data only when the user is truly signed out. A transient `companyId`
+  // gap (profile refresh, token refresh) must NOT wipe already-loaded data,
+  // otherwise pages flash empty mid-session.
   useEffect(() => {
-    if (authReady && !companyId) {
+    if (authReady && !user) {
       orders.setOrders([]);
       dealers.setDistributors([]);
       salespersons.setSalespersons([]);
@@ -139,7 +141,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       billing.setInvoices([]);
       setLoading(false);
     }
-  }, [authReady, companyId]);
+  }, [authReady, user]);
 
   // Load from IDB cache (offline fallback)
   const loadFromCache = useCallback(async (cId: string) => {
@@ -182,63 +184,59 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (isColdStart) setLoading(true);
     else setIsRefreshing(true);
 
-    // ---------- Phase 1: critical (gates `loading`) ----------
-    const phase1 = (async () => {
-      try {
-        const { data: company } = await supabase
-          .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
-        if (token !== fetchTokenRef.current) return;
-        if (company) {
-          orders.setOrderPrefixState(company.order_prefix);
-          orders.setOrderSequence(company.next_order_sequence);
-          setCompanyInfo({
-            name: company.name || "", address: company.address || "", gstin: company.gstin || "",
-            logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
-            pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
-            bankName: (company as any).bank_name || "", bankAccountName: (company as any).bank_account_name || "",
-            bankAccount: (company as any).bank_account || "",
-            bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
-          });
-        }
-
-        const [distRes, spRes, prodRes, godownRes, schemesRes] = await Promise.all([
-          fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
-          fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name"), 1000, 200, "salespersons"),
-          fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name"), 1000, 200, "products"),
-          fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name"), 1000, 200, "godowns"),
-          fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "schemes"),
-        ]);
-        if (token !== fetchTokenRef.current) return;
-
-        const dists = (distRes as any[]).map(mapDistributor);
-        dealers.setDistributors(dists);
-        cacheData(cId, "distributors", dists);
-
-        const sps = (spRes as any[]).map(mapSalesperson);
-        salespersons.setSalespersons(sps);
-
-        const prods = (prodRes as any[]).map(mapProduct);
-        catalog.setProducts(prods);
-
-        const gds = (godownRes as any[]).map(mapGodown);
-        stock.setLocations(gds);
-
-        const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
-        catalog.setSchemes(mappedSchemes);
-
-        // Stash for phase 2 stock-item mapping
-        return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
-        // Cold start intentionally keeps `loading=true` until phase 2 finishes
-        // (see outer finally). Avoids the "loading→false, arrays still empty"
-        // window where pages flash empty numbers before phase 2 lands.
-        return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
-      } catch (err) {
-        // Re-throw so the outer try/catch logs it; do NOT swallow here.
-        throw err;
+    // Helper: commit phase-1 state. On cold start we commit incrementally so the
+    // first paint can land asap. On background refresh we DEFER all commits until
+    // both phases have succeeded, so the live UI never sees a partial snapshot.
+    const applyPhase1 = (p1: any) => {
+      if (!p1) return;
+      const { company, dists, sps, prods, gds, mappedSchemes } = p1;
+      if (company) {
+        orders.setOrderPrefixState(company.order_prefix);
+        orders.setOrderSequence(company.next_order_sequence);
+        setCompanyInfo({
+          name: company.name || "", address: company.address || "", gstin: company.gstin || "",
+          logoUrl: company.logo_url || "", phone: (company as any).phone || "", email: (company as any).email || "",
+          pan: (company as any).pan || "", stateCode: (company as any).state_code || "",
+          bankName: (company as any).bank_name || "", bankAccountName: (company as any).bank_account_name || "",
+          bankAccount: (company as any).bank_account || "",
+          bankIfsc: (company as any).bank_ifsc || "", invoicePrefix: (company as any).invoice_prefix || "INV",
+        });
       }
+      dealers.setDistributors(dists);
+      cacheData(cId, "distributors", dists);
+      salespersons.setSalespersons(sps);
+      catalog.setProducts(prods);
+      stock.setLocations(gds);
+      catalog.setSchemes(mappedSchemes);
+    };
+
+    // ---------- Phase 1: critical reference data ----------
+    const phase1 = (async () => {
+      const { data: company } = await supabase
+        .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
+
+      const [distRes, spRes, prodRes, godownRes, schemesRes] = await Promise.all([
+        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
+        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name"), 1000, 200, "salespersons"),
+        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name"), 1000, 200, "products"),
+        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name"), 1000, 200, "godowns"),
+        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "schemes"),
+      ]);
+
+      const dists = (distRes as any[]).map(mapDistributor);
+      const sps = (spRes as any[]).map(mapSalesperson);
+      const prods = (prodRes as any[]).map(mapProduct);
+      const gds = (godownRes as any[]).map(mapGodown);
+      const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
+
+      return {
+        company, dists, sps, prods, gds, mappedSchemes,
+        orderPrefix: company?.order_prefix || "ORD",
+        orderSequence: company?.next_order_sequence || 1,
+      };
     })();
 
-    // ---------- Phase 2: heavy (runs in parallel, doesn't gate `loading`) ----------
+    // ---------- Phase 2: heavy data (runs in parallel) ----------
     const phase2 = (async () => {
       const [stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
         fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
@@ -252,23 +250,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     })();
 
     try {
-      const phase1Out = await phase1;
-      if (token !== fetchTokenRef.current) return;
+      // On cold start, apply phase-1 as soon as it's ready so first paint isn't
+      // gated on heavy queries. On background refresh, hold everything until
+      // phase-2 is also ready, then commit atomically.
+      let phase1Out: any = null;
+      if (isColdStart) {
+        phase1Out = await phase1;
+        if (token !== fetchTokenRef.current) return;
+        applyPhase1(phase1Out);
+      }
 
-      const { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes } = await phase2;
+      const [p1Final, p2] = await Promise.all([isColdStart ? Promise.resolve(phase1Out) : phase1, phase2]);
       if (token !== fetchTokenRef.current) return;
+      phase1Out = p1Final;
 
+      const { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes } = p2;
       const prods = phase1Out?.prods || [];
       const gds = phase1Out?.gds || [];
-
-      const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
-      stock.setStockItems(sis);
-
-      const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
-      targets.setSecondarySales(mappedSS);
-
-      const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
-      targets.setTargets(mappedTargets);
 
       const claimIds = (claimsRes as any[]).map((c: any) => c.id);
       const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
@@ -282,13 +280,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ]);
       if (token !== fetchTokenRef.current) return;
 
+      // Map everything before touching state — so a mapping crash can't half-commit.
+      const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
+      const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
+      const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
-      billing.setClaims(mappedClaims);
-
       const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, invoiceLinesData));
-      billing.setInvoices(mappedInvoices);
-
       const mappedOrders = mapOrders((ordersRes as any[]) || [], allLines, allOrderSchemes);
+
+      // Atomic commit window — for background refresh, phase-1 also lands here.
+      if (!isColdStart) applyPhase1(phase1Out);
+      stock.setStockItems(sis);
+      targets.setSecondarySales(mappedSS);
+      targets.setTargets(mappedTargets);
+      billing.setClaims(mappedClaims);
+      billing.setInvoices(mappedInvoices);
       orders.setOrders(mappedOrders);
       setIsOfflineData(false);
 
@@ -301,7 +307,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Data fetch error:", err);
       logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
-      if (!navigator.onLine) await loadFromCache(cId);
+      // Background refresh: keep the last good snapshot — never blank the UI.
+      // Cold start with no network: try to paint from IDB cache so the user
+      // still sees something.
+      if (isColdStart && !navigator.onLine) await loadFromCache(cId);
     } finally {
       if (token === fetchTokenRef.current) {
         setLoading(false);
