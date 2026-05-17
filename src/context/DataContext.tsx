@@ -438,6 +438,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [companyId, authReady]);
 
+  // Background staleness refresh: every 5 min while tab is open, and on
+  // visibility-regained if data is older than 5 min. All silent — never flips
+  // `loading`, so pages keep showing their current numbers and update in place.
+  useEffect(() => {
+    if (!companyId || !authReady) return;
+    const FIVE_MIN = 5 * 60 * 1000;
+
+    const backgroundRefetch = () => {
+      if (!navigator.onLine) return;
+      const token = ++fetchTokenRef.current;
+      fetchAll(companyId, token, true);
+    };
+
+    const interval = window.setInterval(backgroundRefetch, FIVE_MIN);
+
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastFetchAtRef.current > FIVE_MIN) backgroundRefetch();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [companyId, authReady, fetchAll]);
+
   // The `refresh_entity_aggregates` Postgres trigger keeps total_orders,
   // total_value, outstanding_amount, and total_sold accurate in the DB.
   // We trust those columns instead of recomputing client-side every render
