@@ -33,7 +33,7 @@ export const JOBS: JobDef[] = [
     label: "Accountant",
     oneLiner: "Keeps the books. Sees money and reports, can't touch stock.",
     longDescription:
-      "Sees revenue, dues, and reports. Can't add stock or change schemes. Perfect for your CA or finance lead.",
+      "Sees revenue, dues, and reports. Can't add stock or change schemes. Doesn't place orders. Perfect for your CA or finance lead.",
     icon: Calculator,
   },
   {
@@ -73,6 +73,7 @@ export const CAP_LABEL: Record<string, string> = {
   override_credit_limit: "credit overrides",
   view_error_logs: "error logs",
   see_own_performance_only: "their own performance view",
+  place_orders: "placing orders",
 };
 
 export function capLabels(caps: string[]): string {

@@ -75,15 +75,19 @@ export function useOnboarding() {
       isComplete: (salespersons?.length || 0) > 0,
       path: "/salespersons",
     },
-    {
-      id: "order",
-      label: "Create your first order",
-      description: "See Ledge in action",
-      icon: ClipboardList,
-      isComplete: (orders?.length || 0) > 0,
-      path: "/orders/new",
-    },
-  ], [companyInfo, dealers, products, salespersons, orders]);
+    ...(canPlaceOrders
+      ? [
+          {
+            id: "order",
+            label: "Create your first order",
+            description: "See Ledge in action",
+            icon: ClipboardList,
+            isComplete: (orders?.length || 0) > 0,
+            path: "/orders/new",
+          },
+        ]
+      : []),
+  ], [companyInfo, dealers, products, salespersons, orders, canPlaceOrders]);
 
   const completedCount = steps.filter((s) => s.isComplete).length;
   const totalSteps = steps.length;
