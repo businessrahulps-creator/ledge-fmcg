@@ -321,13 +321,16 @@ export default function Dashboard() {
                     <span className="text-muted-foreground/30">·</span>
                   </>
                 )}
-                {pendingOrders > 0 ? (
-                  <Link to="/orders" className="hover:text-primary transition-colors">
-                    {pendingOrders} {pendingOrders === 1 ? "order" : "orders"} waiting to send
-                  </Link>
-                ) : (
-                  <span className="text-muted-foreground/70">All orders sent</span>
-                )}
+                {(() => {
+                  const pendingToSend = orders.filter((o) => o.deliveryStatus === "pending").length;
+                  return pendingToSend > 0 ? (
+                    <Link to="/orders" className="hover:text-primary transition-colors">
+                      {pendingToSend} {pendingToSend === 1 ? "order" : "orders"} waiting to send
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground/70">All orders sent</span>
+                  );
+                })()}
                 {(() => {
                   const overdueCount = agingRows.filter(r => r.worstBucket === "b61" || r.worstBucket === "b90").length;
                   if (overdueCount === 0) return null;
