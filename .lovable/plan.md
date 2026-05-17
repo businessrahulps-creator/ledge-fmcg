@@ -1,76 +1,42 @@
+# New App Icon Rollout
 
-# Brand Color Placement Plan
+The uploaded image is the **iOS-style rounded-square app icon** (Ledge striped mark on a white rounded tile with padding). It replaces every surface where the OS / browser / install prompt shows a launcher icon. The bare `ledge-mark.webp` used inline next to the wordmark inside the app stays as-is — it's a different role (transparent inline mark, not a launcher tile).
 
-Principle: each brand color = one job. We are not adding decoration. We are promoting moments where the color already *means* something so the brand reads as intentional, not painted on.
+## Files to replace (asset swap)
 
-Tokens stay as-is (`--midnight`, `--success` Forest, `--warning` Terracotta, `--background` Bone). No new hex values. No raw colors in components.
+Copy the uploaded PNG to a working path, then re-export to the right sizes/formats:
 
----
+| Target | Used for | How |
+|---|---|---|
+| `public/favicon.png` | Browser tab favicon | Resize → 64×64 PNG |
+| `public/apple-touch-icon.png` | iOS home-screen "Add to Home Screen" | Resize → 180×180 PNG |
+| `public/pwa-192.png` | Android PWA install | Resize → 192×192 PNG |
+| `public/pwa-512.png` | Android PWA splash / high-DPI | Resize → 512×512 PNG |
+| `public/pwa-maskable-512.png` | Android adaptive (maskable) | 512×512 PNG with the mark scaled to ~70% inside the safe zone, white background extended edge-to-edge |
+| `src/assets/ledge-app-icon.webp` | In-app references to the launcher tile (InstallPrompt, LedgeSealMoment, etc.) | Re-export as 512×512 WebP |
 
-## PR-A — Terracotta promotion: attention that needs a human
+ImageMagick will be used (via `nix run nixpkgs#imagemagick`) to do the resize + maskable composition in one pass.
 
-**Why first:** lowest risk, highest emotional payoff. Terracotta already exists as warning; we're sharpening *where* it shows up.
+## Files NOT touched
 
-Scope:
-- **Aging buckets in Billing** — 30+ neutral, 60+ Terracotta wash + left-bar, 90+ destructive. Today it's a flat color ramp; intensify the 60+ Terracotta moment.
-- **Credit at Risk SignalCard** — already promoted (PR11); lock canonical Terracotta tokens, remove any lingering amber.
-- **Claims page header accent** — thin Terracotta top-rule on PageHeader, signals "warm conversation, not error."
-- **First-week onboarding active chapter** — Terracotta left-bar on the currently-active ChapterCard.
+- `src/assets/ledge-mark.webp` — bare inline mark (sidebar, AuthShell, Welcome cover, loader). Different role. Stays.
+- `src/assets/ledge-mark-watermark.webp` — large faint watermark on PDFs/auth. Stays.
+- `src/assets/ledge-logo.webp` — full wordmark. Stays.
+- `index.html`, `manifest.webmanifest` — paths already point at the filenames above, no markup edits needed.
 
-Files: `src/pages/Billing.tsx`, `src/pages/Claims.tsx`, `src/components/onboarding/ChapterCard.tsx`, `src/index.css` (one new `.aging-warn` utility if needed).
+## Verification
 
----
+After the swap, re-view each generated file with `code--view` to confirm:
+- Favicon is crisp at small size (the stripes shouldn't muddy)
+- Maskable variant has the mark fully inside the inner 80% safe zone (so Android's circle/squircle crop doesn't clip it)
+- WebP re-export of `ledge-app-icon.webp` looks identical to the source PNG
 
-## PR-B — Forest promotion: money in, health
+Then bump `theme_color` in `manifest.webmanifest`? — No, current `#0F1F3A` (Midnight) is correct for the Android status bar; the launcher tile is white but the chrome around it should stay Midnight. No change.
 
-Scope:
-- **Revenue recognized KPI** on Dashboard + Performance — Forest underline accent beneath the number (not on the number).
-- **Payment received rows** in Billing — Forest left-bar on `status=paid` rows (mirrors how pending gets warning today).
-- **Targets ≥ 100%** — Forest pill with tiny up-tick on Targets cards and Salesperson scorecards.
-- **Stock "healthy" badge** — canonicalize on Forest token (some places still use raw emerald per PR6 notes — sweep).
+## Out of scope
 
-Files: `src/pages/Dashboard.tsx`, `src/pages/Performance.tsx`, `src/pages/Billing.tsx`, `src/pages/Targets.tsx`, `src/pages/SalespersonDetail.tsx`, `src/pages/Stock.tsx`.
+- Logo wordmark redesign
+- Splash screen layout (just consumes the existing mark)
+- iOS splash images beyond apple-touch-icon (none currently configured)
 
----
-
-## PR-C — Midnight as letterhead: authority and finality
-
-Scope:
-- **PDF letterhead pass** — unify Midnight band across `OrderInvoicePdf`, `GstInvoicePdf`, `DealerStatementPdf`, `SalespersonStatementPdf`, `PerformanceReportPdf`, `ReportPdf`. One shared `PdfHeader` styling.
-- **Detail page Midnight band** — thin 4px Midnight rule above PageHeader on DealerDetail, OrderDetail, SalespersonDetail. "Record of truth."
-- **Reconciled / locked rows** — faint Midnight left-bar on reconciled orders and closed-period rows (currently generic muted).
-
-Files: `src/components/pdf/PdfHeader.tsx`, `src/components/pdf/PdfStyles.ts`, all `src/components/pdf/*Pdf.tsx`, `src/pages/DealerDetail.tsx`, `src/pages/OrderDetail.tsx`, `src/pages/SalespersonDetail.tsx`, `src/components/ui/page-header.tsx` (optional `accent` prop).
-
----
-
-## PR-D — Bone as stationery + audit sweep
-
-Scope:
-- **PDF body background** — explicit Bone (not pure white) so printed Ledge documents read as branded stationery.
-- **Settings section dividers** — Bone bands between groups for editorial rhythm on Settings + Company pages.
-- **Audit sweep** — `rg "emerald-|amber-|red-|blue-|orange-"` across `/src/pages` and `/src/components` (excluding `/landing`). Convert any survivors to semantic tokens. This is the final cleanup of the PR6/PR7 migration.
-
-Files: `src/components/pdf/PdfStyles.ts`, `src/pages/Settings.tsx`, `src/pages/Company.tsx`, plus whatever the sweep surfaces.
-
----
-
-## Out of scope (explicit)
-
-- Landing page — has its own tinted-card system (`mem://style/landing-tinted-cards`) and its own rebrand plan. Untouched.
-- Tinting random Cards in `/app` — would dilute Bone-as-surface. Forbidden.
-- Gradients on brand colors — kept flat and honest.
-- Hover/press states — those stay depth tokens, never brand color.
-- Dark mode — archived for V2.
-
-## Memory updates after each PR
-
-Append a short memory under `mem://style/brand-placement-<pr>` recording what shipped and which tokens are now canonical for that meaning.
-
-## Suggested order
-
-A → B → C → D. Each is independently shippable. PR-A and PR-B are ~1 session each. PR-C is the largest (PDF unification). PR-D is a cleanup.
-
----
-
-Approve and I'll start with PR-A.
+Single-session change. Ship after visual QA of the 6 regenerated files.
