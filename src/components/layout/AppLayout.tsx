@@ -391,51 +391,80 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-                <SheetContent side="bottom" className="rounded-t-[20px] px-0 pt-2 pb-0 h-[88vh] flex flex-col">
+                <SheetContent side="bottom" className="rounded-t-[24px] px-0 pt-2 pb-0 h-[92vh] flex flex-col bg-card border-t border-border/60">
                   {/* Drag handle */}
-                  <div className="w-10 h-1 rounded-full bg-muted-foreground/25 mx-auto mb-2 shrink-0" />
-                  <SheetHeader className="px-5 pb-2 shrink-0">
-                    <SheetTitle className="text-left text-lg font-semibold tracking-[-0.01em]">Menu</SheetTitle>
+                  <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-3 shrink-0" />
+
+                  {/* Account header — Material-style identity block */}
+                  <SheetHeader className="px-5 pb-3 shrink-0 text-left space-y-0">
+                    <SheetTitle className="sr-only">Menu</SheetTitle>
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex items-center justify-center font-semibold text-[15px] tracking-[-0.01em] shadow-depth-2">
+                        {(profile?.full_name || profile?.email || "?").trim().charAt(0).toUpperCase()}
+                        <span
+                          className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${online ? "bg-success" : "bg-muted-foreground/50"}`}
+                          aria-hidden
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold text-foreground tracking-[-0.01em] truncate">
+                          {profile?.full_name || "Welcome"}
+                        </p>
+                        <p className="text-[12px] text-muted-foreground truncate flex items-center gap-1.5">
+                          {userRole && (
+                            <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-1.5 py-px text-[10px] font-medium uppercase tracking-[0.04em]">
+                              {userRole}
+                            </span>
+                          )}
+                          <span className="truncate">{profile?.email || "Not signed in"}</span>
+                        </p>
+                      </div>
+                    </div>
                   </SheetHeader>
 
-                  {/* Search button — opens command palette */}
-                  <div className="px-5 pb-3 shrink-0">
+                  {/* Search — Fluent-style command entry */}
+                  <div className="px-5 pb-3 pt-1 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
                         setMoreOpen(false);
-                        // Small delay so sheet close animation doesn't fight focus.
                         setTimeout(() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette")), 120);
                       }}
-                      className="flex w-full items-center gap-2 h-10 rounded-md border border-border/60 bg-muted/40 hover:bg-muted/60 transition-colors px-3 text-sm text-muted-foreground"
+                      className="flex w-full items-center gap-2.5 h-11 rounded-lg border border-border/70 bg-muted/30 hover:bg-muted/50 active:bg-muted/60 transition-colors px-3.5 text-[13.5px] text-muted-foreground"
                     >
                       <Search className="h-4 w-4 opacity-70" />
                       <span className="flex-1 text-left">Search orders, dealers, products…</span>
+                      <kbd className="hidden sm:inline-flex items-center rounded border border-border/70 bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/80">⌘K</kbd>
                     </button>
                   </div>
 
                   {/* Scrollable sectioned list */}
                   <div className="relative flex-1 min-h-0">
                     <div className="absolute inset-0 overflow-y-auto px-5 pb-8">
-                      {moreGroups.map((group, gIdx) => (
+                      {moreGroups.map((group, gIdx) => {
+                        const tone = TONE_STYLES[group.tone];
+                        return (
                         <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
-                          <p className="text-[11px] font-medium normal-case tracking-normal text-muted-foreground/70 mb-1 px-1">
+                          <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1.5 px-1">
                             {group.label}
                           </p>
-                          <div className="rounded-lg border border-border/50 bg-card overflow-hidden divide-y divide-border/40">
+                          <div className="rounded-xl border border-border/50 bg-background/60 overflow-hidden divide-y divide-border/40 shadow-depth-2">
                             {group.items.map((item) => {
                               const active = location.pathname.startsWith(item.url);
-                              const rowCls = `flex w-full items-center gap-3 px-3.5 h-12 text-left transition-colors ${active ? "bg-primary/[0.06]" : "active:bg-muted/60"}`;
+                              const rowCls = `group flex w-full items-center gap-3 px-3.5 h-[52px] text-left transition-colors ${active ? "bg-primary/[0.05]" : "hover:bg-muted/40 active:bg-muted/60"}`;
                               const Icon = item.icon;
                               const inner = (
                                 <>
-                                  <span className={`flex h-8 w-8 items-center justify-center rounded-md ${active ? "bg-primary/10 text-primary" : "bg-muted/50 text-foreground/70"}`}>
-                                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.7} />
+                                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${active ? tone.activeBg + " " + tone.activeFg : tone.iconBg + " " + tone.iconFg}`}>
+                                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
                                   </span>
-                                  <span className={`flex-1 text-[15px] tracking-[-0.005em] ${active ? "font-semibold text-primary" : "font-medium text-foreground/90"}`}>
+                                  <span className={`flex-1 text-[15px] tracking-[-0.005em] ${active ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
                                     {item.title}
                                   </span>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                                  {active && (
+                                    <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                                  )}
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 transition-transform group-active:translate-x-0.5" />
                                 </>
                               );
                               return item.url === "/activity" ? (
@@ -460,14 +489,36 @@ export function AppLayout({ children }: { children: ReactNode }) {
                             })}
                           </div>
                         </div>
-                      ))}
-                      <div className="h-6" style={{ height: "calc(env(safe-area-inset-bottom) + 1.5rem)" }} />
+                        );
+                      })}
+
+                      {/* Sign out */}
+                      {profile && (
+                        <button
+                          type="button"
+                          onClick={async () => { setMoreOpen(false); await signOut(); }}
+                          className="mt-5 flex w-full items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background text-[14px] font-medium text-foreground/80 hover:bg-muted/40 active:bg-muted/60 transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign out
+                        </button>
+                      )}
+
+                      {/* Footer status strip */}
+                      <div className="mt-4 flex items-center justify-between px-1 text-[11px] text-muted-foreground/70">
+                        <span className="inline-flex items-center gap-1.5">
+                          <CircleDot className={`h-3 w-3 ${online ? "text-success" : "text-muted-foreground/50"}`} />
+                          {online ? "Online" : "Offline"}
+                        </span>
+                        <span className="tracking-[-0.005em]">Ledge · v2</span>
+                      </div>
+
+                      <div style={{ height: "calc(env(safe-area-inset-bottom) + 1.5rem)" }} />
                     </div>
-                    {/* Bottom fade — affordance that there is more below */}
-                    {/* Top fade — content scrolled above */}
-                    <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent" aria-hidden />
-                    {/* Bottom fade — more content below */}
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent" aria-hidden />
+                    {/* Top fade */}
+                    <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-card to-transparent" aria-hidden />
+                    {/* Bottom fade */}
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent" aria-hidden />
                   </div>
                 </SheetContent>
               </Sheet>
