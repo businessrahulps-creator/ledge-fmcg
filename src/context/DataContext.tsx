@@ -176,8 +176,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   //                       Runs in parallel with phase 1 but does NOT block the loading flag,
   //                       so pages that don't depend on heavy data render immediately.
   const fetchAll = useCallback(async (cId: string, token: number, isBackground = false) => {
-    if (isBackground) setIsRefreshing(true);
-    else setLoading(true);
+    // Cold start = very first fetch for this session AND caller wants a foreground load.
+    // Every later call (refresh, realtime, sync, tick) is silent — no skeleton flicker.
+    const isColdStart = !hasHydratedRef.current && !isBackground;
+    if (isColdStart) setLoading(true);
+    else setIsRefreshing(true);
 
     // ---------- Phase 1: critical (gates `loading`) ----------
     const phase1 = (async () => {
