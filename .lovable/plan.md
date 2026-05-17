@@ -1,73 +1,88 @@
-# Motion Law — Surgical Implementation Plan
+# Navigation Stability — Audit + Surgical Fix
 
-Apply one unified motion language across routes, sheets, dialogs, buttons, cards, and toasts. Six files touched. No data, no tables, no form fields animated. `prefers-reduced-motion` collapses to opacity-only 120ms everywhere via Tailwind's `motion-reduce:` variants.
+## Audit: what the code actually does
 
-## Files touched (exactly 6, all already in scope)
+I traced every entry point that could trigger a fetch or flip `loading`.
 
-1. `src/components/layout/AppLayout.tsx` — route transition
-2. `src/components/ui/sheet.tsx` — drawer spring
-3. `src/components/ui/dialog.tsx` — modal spring
-4. `src/components/ui/button.tsx` — press state
-5. `src/components/ui/card.tsx` — hover state (desktop)
-6. `src/components/ui/sonner.tsx` — toast position
+### What is already correct (do not touch)
 
-No other file modified. No new CSS tokens, no new keyframes, no edits to `index.css`, `tailwind.config.ts`, or `motion.ts`.
+| Concern | Reality | Evidence |
+|---|---|---|
+| Per-navigation fetch | **Never happens.** `fetchAll` runs only when `companyId` changes. | `DataContext.tsx:304-322` — single effect, deps `[companyId, fetchAll, loadFromCache]`; both callbacks are stable `useCallback`s. |
+| React-Query staleTime / cacheTime | **N/A — no React Query in the app.** Data is plain React state in `DataContext`, shared above the router. State is preserved across navigation by construction. | `services/api.ts` is a thin selector over `useData()`. No `useQuery` anywhere. |
+| Realtime subscribed/unsubscribed on nav | **Mounted once at provider.** Single channel `company-${companyId}` subscribed in `DataContext` effect, torn down only on `companyId` change or unmount. | `DataContext.tsx:379-428` |
+| Per-page mount fetches | None. No page calls `refreshAll` on mount. `useEffect`s in pages only handle filters/sessionStorage/dialog params. | `rg refreshAll src/pages` → only handlers behind pull-to-refresh + manual button (Dashboard, Orders). |
+| Skeleton gating (Orders / Billing / Stock) | Already `isLoading && X.length === 0`. Correct. | `Orders.tsx:171`, `Billing.tsx:482`, `Stock.tsx:352` |
+| Distributors / Schemes / Targets / Claims / Performance / Dashboard / Reports | **Render no skeleton at all** — they declare `isLoading` but never gate UI on it. So no flicker there either. | `rg isLoading src/pages` shows declarations only. |
 
-## Per-file change
+**Conclusion on PROBLEMS 1, 4, 5:** the symptoms cannot come from per-nav refetches or realtime churn — neither happens. The data layer is already structured the way the brief asks.
 
-### 1. AppLayout.tsx — Route cross-fade (lines 313–324)
-Replace the current spring fade with the Motion Law:
-- `initial={{ opacity: 0, x: 4 }}` (new route enters from 4px forward)
-- `animate={{ opacity: 1, x: 0 }}`
-- `exit={{ opacity: 0, x: -4 }}` (old route recedes)
-- `transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}`
-- Wrap with `useReducedMotion()` from framer-motion; when true → opacity only, `duration: 0.12`, no x.
-- `AnimatePresence mode="wait"` stays.
+### What is actually wrong (root causes of the perceived flicker)
 
-### 2. sheet.tsx — Spring-like edge slide
-True CSS spring is not native; approximate stiffness 260 / damping 28 with a slight-overshoot cubic-bezier so it reads as a settle, not a snap.
-- On `sheetVariants` base class: change `data-[state=open]:duration-500 data-[state=closed]:duration-300` → `data-[state=open]:duration-[360ms] data-[state=closed]:duration-[220ms] data-[state=open]:ease-[cubic-bezier(0.34,1.15,0.55,1)] data-[state=closed]:ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:duration-[120ms] motion-reduce:ease-linear motion-reduce:transition-opacity motion-reduce:!animate-none`
-- Overlay (line 22): tighten to `data-[state=open]:duration-[220ms]` and add `motion-reduce:duration-[120ms]`. No translate on overlay.
+| # | Defect | File:Line | Effect the user sees |
+|---|---|---|---|
+| **A** | `refreshAll` calls `fetchAll(companyId, token)` with default `isBackground=false`, which sets `loading=true`. | `DataContext.tsx:438-442` | Hitting **Refresh** or **pull-to-refresh** flips `api.loading→true`, so Orders/Billing/Stock fall back to their skeleton (whenever the page happens to also be empty). Looks like "page broke". |
+| **B** | Same bug in offline-sync replay path: `await fetchAll(companyId, token)` without `true`. | `DataContext.tsx:363-366` | After regaining connectivity, every page flashes a skeleton. |
+| **C** | `fetchAll` is **two-phase**: phase 1 unblocks `loading` after critical data; phase 2 (orders, invoices, claims, targets, secondary_sales, stock_items) finishes 1–5 s later. During that window `loading=false` AND arrays are still empty. | `DataContext.tsx:176-302` | On first login (or any cold start, see D), a page navigated to during that window shows empty numbers, then "magically" fills. Reads as "data loaded again." |
+| **D** | `OFFLINE_MODE_ENABLED = false` → `loadFromCache` is a no-op, so **every full page reload is cold**. The IDB warm-boot path that would mitigate (C) is intentionally disabled. | `lib/offline-store.ts:9`, `DataContext.tsx:143-167` | Hard refresh (F5) — which users mentally lump in with "navigation" — always shows the cold-start skeleton, even after they've already used the app. |
+| **E** | No periodic refresh and no `visibilitychange` refresh. Data can sit > 5 min stale; user reopens the tab and the numbers are old until they manually refresh. | `DataContext.tsx` (absent) | Not the flicker complaint, but it is part of the brief (5-min staleness). |
 
-### 3. dialog.tsx — Spring from center
-- `DialogContent` (line 39): replace `duration-200` with `data-[state=open]:duration-[280ms] data-[state=closed]:duration-[180ms] data-[state=open]:ease-[cubic-bezier(0.34,1.15,0.55,1)] data-[state=closed]:ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:!duration-[120ms] motion-reduce:ease-linear`.
-- Keep the existing zoom + slide-from-top-48% (acts as "nearest edge" feel from the trigger area). Strip the `slide-out-to-left-1/2 / slide-in-from-left-1/2` pair to remove horizontal jitter — keep vertical only.
-- Overlay (line 22): mirror sheet overlay timing.
+PROBLEMS 1, 4 (no-refetch-on-nav), and 5 (realtime stays up) — **already satisfied by current architecture**. No code change needed; I'll note this in the response instead of forcing a no-op edit.
 
-### 4. button.tsx — 1px depress, 4% opacity, 90ms
-- Update root cva string (line 16): change `duration-fast` → `duration-[90ms]` and append `motion-reduce:transition-opacity motion-reduce:duration-[120ms]`.
-- Variant `active:` states: change every `active:translate-y-[0.5px]` → `active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0`. Applies to: default, destructive, secondary, success. For outline → add `active:opacity-[0.96] motion-reduce:active:translate-y-0` alongside existing `active:translate-y-[0.5px]` replaced to `active:translate-y-px`. Ghost/subtle/link/pill: add `active:opacity-[0.96]` only (no translate on link).
+PROBLEMS 2, 3 — the perception is real, but the cause is defects A–E above, not skeleton gating logic.
 
-### 5. card.tsx — Desktop hover lift + depth-8
-- Card root (line 14): extend className to `rounded-md border border-border/70 bg-card text-card-foreground shadow-depth-2 transition-[box-shadow,border-color,transform] duration-normal ease-fluent md:hover:-translate-y-1 md:hover:shadow-depth-8 motion-reduce:transform-none motion-reduce:transition-opacity`.
-- Mobile (no `md:`) sees no transform — touch devices shouldn't fake hover.
-- SignalCard and other composed cards inherit automatically (they wrap Card or use depth-2 directly; we only touch the primitive).
+## Fix plan — apply in order, smallest blast radius first
 
-### 6. sonner.tsx — Bottom-center on mobile
-- Line 17: `position={isMobile ? "top-center" : "bottom-right"}` → `position={isMobile ? "bottom-center" : "bottom-right"}`.
-- Sonner's own enter animation already springs from the chosen edge; no further change.
+Each fix is one tiny edit. No UI files. No new dependencies. No restructure.
 
-## Reduced-motion contract
-Every animated rule above pairs with a `motion-reduce:` variant that:
-- Removes transforms (`motion-reduce:transform-none` / `motion-reduce:translate-y-0`)
-- Caps duration to 120ms
-- Switches to linear/opacity-only transition
-The route transition reads `useReducedMotion()` at runtime and emits the opacity-only variant.
+### Files touched (exactly 1)
 
-## Out of scope (explicitly NOT touched)
-- Tables, form fields, NumberInput, KPI numbers — no animation changes
-- `src/lib/motion.ts` — tokens unchanged
-- `index.css`, `tailwind.config.ts` — no new keyframes (existing `duration-normal`, `ease-fluent`, `shadow-depth-8`, `shadow-depth-2` already exist)
-- All consumers of Button/Card/Sheet/Dialog — they inherit automatically
-- AlertDialog, HoverCard, Popover — not in the user's list
-- Landing-page Press/Magnetic wrappers — separate motion contract
-- AnimatePresence usage inside NotificationCenter, onboarding moments — out of scope
+1. `src/context/DataContext.tsx`
 
-## Verification after build
-- `/orders/new` → `/orders` cross-fade: 220ms, 4px forward parallax
-- Open mobile bottom-nav sheet: springs from bottom
-- Open any Dialog: settles with slight overshoot
-- Tap primary CTA: 1px down, slight dim, snaps back in <100ms
-- Hover any Card on desktop: lifts 4px, depth-8 shadow
-- Trigger a toast on mobile: appears bottom-center
-- DevTools → Rendering → Emulate prefers-reduced-motion: all transforms disappear, opacity-only at 120ms
+That's it. No `data-utils`, no `offline-store`, no pages, no UI primitives. Re-enabling the IDB cache is explicitly out of scope (memory says offline mode is paused).
+
+### Fix A — `refreshAll` must be background-only
+Change `refreshAll` (`DataContext.tsx:438-442`) to call `fetchAll(companyId, token, true)`. Result: `api.loading` stays false during a manual or pull-to-refresh; the existing `isRefreshing` flag handles the subtle "refreshing…" affordance. Skeleton no longer appears on refresh.
+
+### Fix B — Sync-replay refetch must be background-only
+`DataContext.tsx:363-366`: change `await fetchAll(companyId, token)` to `await fetchAll(companyId, token, true)`. Same reasoning as A.
+
+### Fix C — Show stale-but-correct numbers during phase 2
+Phase-2 entities (`orders`, `invoices`, `claims`, `targets`, `secondaryS̃ales`, `stockItems`) currently bind to fresh arrays only after phase 2 lands. We can't enable IDB caching (out of scope), but we can stop the **second** cold window: keep `loading=true` until phase 2 finishes on the **very first** fetch (cold start only), then for every subsequent `fetchAll` keep it background.
+
+Implementation: add a `hasHydratedRef = useRef(false)`. Inside `fetchAll`:
+- If `isBackground` OR `hasHydratedRef.current` → never flip `loading`.
+- Only the cold first fetch keeps `loading=true` and only flips it false **after** phase 2 settles (move the `setLoading(false)` from phase 1's finally to the outer finally for the cold path).
+- At the end of any successful fetch, `hasHydratedRef.current = true`.
+
+Net effect: cold start shows a skeleton **once**, until *all* data is in. Every later fetch (realtime, refresh, sync, tick) is silent. Pages that already gate on `isLoading && X.length===0` stop flickering between empty-state and data.
+
+### Fix D — Document, do not change
+IDB cache is intentionally disabled (`OFFLINE_MODE_ENABLED = false`). I will not flip it without an explicit user OK — memory tags it as paused. Mention to the user in the response that the hard-reload cold-start is the unavoidable consequence of that decision, and offer to revive it as a follow-up.
+
+### Fix E — 5-minute background tick + visibility refresh
+Add one new `useEffect` in `DataProvider` (next to the existing realtime effect), gated on `companyId && authReady`:
+- `setInterval` every 5 min → `fetchAll(companyId, ++fetchTokenRef.current, true)`.
+- `document.addEventListener('visibilitychange', ...)`: when tab becomes visible and `Date.now() - lastFetchAtRef.current > 5*60*1000`, call the same background `fetchAll`.
+- Track `lastFetchAtRef = useRef(0)`; stamp it at the end of every successful `fetchAll`.
+- Cleanup on unmount/companyId change clears interval + listener.
+
+All background — never flips `loading`.
+
+## What this does NOT do (by design)
+
+- No staleTime / cacheTime config (no React Query in the codebase).
+- No change to skeleton-gating logic in pages (already correct where it matters).
+- No realtime restructuring (already provider-level).
+- No re-enable of IDB cache (paused per project memory).
+- No new files, no new exports, no UI primitive edits.
+
+## Verification
+
+After the edit:
+- `rg "fetchAll\(companyId, token\)" src/context/DataContext.tsx` → zero foreground calls outside the cold-start path.
+- Manual refresh on `/orders` with data present → no skeleton, just a quiet `isRefreshing=true → false` cycle.
+- Browser DevTools → Network throttle "Slow 3G", navigate /dashboard → /orders → /billing after first load → no new request fired; pages render instantly from in-memory state.
+- After 5 min idle, watch network → one silent burst of the same queries; `loading` stays false the whole time.
+- `visibilitychange` to a tab idle > 5 min → one silent burst, no skeleton.
+- Cold login → skeleton stays up until ALL data (phase 1 + phase 2) is hydrated, then disappears once. No second flicker.

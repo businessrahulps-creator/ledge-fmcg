@@ -79,6 +79,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   });
   const fetchTokenRef = useRef(0);
   const isSyncingRef = useRef(false);
+  const hasHydratedRef = useRef(false);
+  const lastFetchAtRef = useRef(0);
 
   // Activity log shorthand
   const log = useCallback((entityType: string, entityId: string, action: string, summary: string, metadata?: Record<string, any>) => {
@@ -174,8 +176,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   //                       Runs in parallel with phase 1 but does NOT block the loading flag,
   //                       so pages that don't depend on heavy data render immediately.
   const fetchAll = useCallback(async (cId: string, token: number, isBackground = false) => {
-    if (isBackground) setIsRefreshing(true);
-    else setLoading(true);
+    // Cold start = very first fetch for this session AND caller wants a foreground load.
+    // Every later call (refresh, realtime, sync, tick) is silent — no skeleton flicker.
+    const isColdStart = !hasHydratedRef.current && !isBackground;
+    if (isColdStart) setLoading(true);
+    else setIsRefreshing(true);
 
     // ---------- Phase 1: critical (gates `loading`) ----------
     const phase1 = (async () => {
@@ -223,9 +228,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
         // Stash for phase 2 stock-item mapping
         return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
-      } finally {
-        // Flip loading off the moment critical data lands, even if phase 2 is still running.
-        if (token === fetchTokenRef.current) setLoading(false);
+        // Cold start intentionally keeps `loading=true` until phase 2 finishes
+        // (see outer finally). Avoids the "loading→false, arrays still empty"
+        // window where pages flash empty numbers before phase 2 lands.
+        return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
+      } catch (err) {
+        // Re-throw so the outer try/catch logs it; do NOT swallow here.
+        throw err;
       }
     })();
 
@@ -295,8 +304,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!navigator.onLine) await loadFromCache(cId);
     } finally {
       if (token === fetchTokenRef.current) {
-        setLoading(false); // safety: ensure off even if phase 1 threw
+        setLoading(false);
         setIsRefreshing(false);
+        hasHydratedRef.current = true;
+        lastFetchAtRef.current = Date.now();
       }
     }
   }, [loadFromCache]);
@@ -362,7 +373,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
         if (synced > 0) {
           const token = ++fetchTokenRef.current;
-          await fetchAll(companyId, token);
+          await fetchAll(companyId, token, true);
         }
       } finally {
         isSyncingRef.current = false;
@@ -427,6 +438,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [companyId, authReady]);
 
+  // Background staleness refresh: every 5 min while tab is open, and on
+  // visibility-regained if data is older than 5 min. All silent — never flips
+  // `loading`, so pages keep showing their current numbers and update in place.
+  useEffect(() => {
+    if (!companyId || !authReady) return;
+    const FIVE_MIN = 5 * 60 * 1000;
+
+    const backgroundRefetch = () => {
+      if (!navigator.onLine) return;
+      const token = ++fetchTokenRef.current;
+      fetchAll(companyId, token, true);
+    };
+
+    const interval = window.setInterval(backgroundRefetch, FIVE_MIN);
+
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastFetchAtRef.current > FIVE_MIN) backgroundRefetch();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [companyId, authReady, fetchAll]);
+
   // The `refresh_entity_aggregates` Postgres trigger keeps total_orders,
   // total_value, outstanding_amount, and total_sold accurate in the DB.
   // We trust those columns instead of recomputing client-side every render
@@ -438,7 +476,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
-    await fetchAll(companyId, token);
+    // Manual / pull-to-refresh is always background — `isRefreshing` covers
+    // the affordance, `loading` stays false so pages don't fall back to skeleton.
+    await fetchAll(companyId, token, true);
   }, [companyId, fetchAll]);
 
   const updateCompanyInfo = useCallback((updates: Partial<CompanyInfo>) => {
