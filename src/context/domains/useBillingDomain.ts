@@ -160,7 +160,7 @@ export function useBillingDomain(deps: BillingDeps) {
   }, [deps.companyId]);
 
   const updateInvoice = useCallback(async (id: string, updates: Partial<Invoice>) => {
-    const dbUpdates: Record<string, any> = {};
+    const dbUpdates: TablesUpdate<"invoices"> = {};
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
     if (updates.vehicle !== undefined) dbUpdates.vehicle = updates.vehicle;
@@ -242,7 +242,7 @@ export function useBillingDomain(deps: BillingDeps) {
   }, [deps.companyId, deps.getOrders, deps.safeRefetchStockItems]);
 
   const updateClaim = useCallback(async (id: string, updates: Partial<Claim>) => {
-    const dbUpdates: Record<string, any> = {};
+    const dbUpdates: TablesUpdate<"claims"> = {};
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.resolutionNotes !== undefined) dbUpdates.resolution_notes = sanitizeInput(updates.resolutionNotes);
     if (updates.status === "resolved") dbUpdates.resolved_at = new Date().toISOString();
