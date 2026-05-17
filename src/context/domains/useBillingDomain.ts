@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Order } from "@/data/mock-data";
 import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, TablesUpdate } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { logError } from "@/utils/errorLog";
