@@ -436,7 +436,12 @@ export default function Claims() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="relative pl-3">
+            {/* Brand placement (PR-A): Terracotta rule — claims are warm conversations. */}
+            <span
+              aria-hidden
+              className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-warning"
+            />
             <h1 className="h1-display">Returns & Claims</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Track returned goods and damage claims against orders

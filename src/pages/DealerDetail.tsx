@@ -277,7 +277,7 @@ export default function DealerDetail() {
                               className="border-b border-border/50 row-hover cursor-pointer"
                               onClick={() => navigate(`/orders/${r.orderId}`)}
                             >
-                              <td className="px-4 py-3 font-medium text-primary">{r.orderNumber}</td>
+                              <td className={cn("relative px-4 py-3 font-medium text-primary", tone.leftBar)}>{r.orderNumber}</td>
                               <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.date)}</td>
                               <td className="px-4 py-3 text-right num">{formatCurrency(r.total)}</td>
                               <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.outstanding)}</td>

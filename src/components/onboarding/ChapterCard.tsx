@@ -45,10 +45,12 @@ export function ChapterCard({ chapter, state, celebrating, onClick, index }: Pro
       whileHover={interactive && !reduce ? { y: -2 } : undefined}
       whileTap={interactive && !reduce ? { y: 0, scale: 0.995 } : undefined}
       className={[
-        "group relative w-full rounded-md border bg-card px-4 py-4 text-left",
+        "group relative w-full overflow-hidden rounded-md border bg-card px-4 py-4 text-left",
         "transition-shadow duration-normal ease-fluent",
         interactive ? "border-border/80 shadow-depth-2 hover:shadow-depth-8 cursor-pointer" : "border-border/60 shadow-depth-2",
         !interactive ? "cursor-default" : "",
+        // Brand placement (PR-A): Terracotta left-bar marks the active chapter.
+        state === "active" ? "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-warning" : "",
       ].join(" ")}
       style={{ perspective: 1000 }}
       aria-current={state === "active" ? "step" : undefined}
