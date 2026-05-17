@@ -21,6 +21,13 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-console": ["warn", { allow: [] }],
     },
+  },
+  {
+    // Justified console usage: React error boundaries (dev DX), centralized
+    // logger, and dev-only IDB diagnostics already have inline disables.
+    files: ["src/utils/errorLog.ts"],
+    rules: { "no-console": "off" },
   },
 );
