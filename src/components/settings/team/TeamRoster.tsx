@@ -32,7 +32,7 @@ import { JOB_BY_ROLE, capLabels, type AppRole } from "./jobs";
 import { useTeamRoster, rolesDefaultCaps, type RosterMember } from "./useTeamRoster";
 import { JobPickerSheet } from "./JobPickerSheet";
 import { InviteSheet } from "./InviteSheet";
-import { OverrideDrawerStub } from "./OverrideDrawerStub";
+import { OverrideDrawer } from "./OverrideDrawer";
 import { PendingInviteCard, type PendingInvite } from "./PendingInviteCard";
 import { useInvite } from "@/hooks/useInvite";
 
@@ -250,10 +250,12 @@ export function TeamRoster({ companyId }: Props) {
       />
 
       {overrideFor && (
-        <OverrideDrawerStub
+        <OverrideDrawer
           open={!!overrideFor}
           onOpenChange={(o) => !o && setOverrideFor(null)}
-          memberName={overrideFor.name || "this member"}
+          member={overrideFor}
+          defaults={defaults}
+          onSaved={refresh}
         />
       )}
 
@@ -316,7 +318,7 @@ function RosterCard({
               you
             </span>
           )}
-          {member.hasOverrides && (
+          {member.hasOverrides && member.role !== "super_admin" && (
             <button
               type="button"
               onClick={onOpenOverrides}
@@ -380,10 +382,15 @@ function RosterCard({
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem disabled={isLastOwner} onSelect={onChangeJob}>
               Change job
             </DropdownMenuItem>
+            {member.role !== "super_admin" && (
+              <DropdownMenuItem onSelect={onOpenOverrides}>
+                Fine-tune access
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               disabled={isLastOwner}
               className="text-destructive focus:text-destructive"
