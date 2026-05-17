@@ -12,6 +12,7 @@ import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -341,29 +342,21 @@ export default function Orders() {
 
         {/* Table */}
         {filtered.length === 0 ? (
-          <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
-            {orders.length === 0 ? (
-              <>
-                <ShoppingCart className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No orders yet</p>
-                <p className="text-xs text-muted-foreground">Create your first sales order to get started</p>
-                <Can do="place_orders">
-                  <Link to="/orders/new">
-                    <Button size="sm" className="mt-3">
-                      <Plus className="h-4 w-4" />
-                      New Order
-                    </Button>
-                  </Link>
-                </Can>
-              </>
-            ) : (
-              <>
-                <Filter className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No orders match your filters</p>
-                <p className="text-xs text-muted-foreground">Try adjusting your search or filters</p>
-              </>
-            )}
-          </div>
+          orders.length === 0 ? (
+            <EmptyCard
+              icon={ShoppingCart}
+              title="No orders yet today."
+              description="When you take an order it'll show up here."
+              actionLabel="Take a new order"
+              onAction={() => navigate("/orders/new")}
+            />
+          ) : (
+            <EmptyCard
+              icon={Filter}
+              title="No orders match your filters."
+              description="Try clearing the search or switching a filter."
+            />
+          )
         ) : (
           <div className="glass-card overflow-hidden">
             <div className="hidden md:block overflow-x-auto">
