@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
 import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -449,19 +450,13 @@ export default function Targets() {
                 );
               })
             ) : (
-              <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
-                <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">{q ? "No matching team members" : "No team members yet"}</p>
-                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your sales team to start setting targets"}</p>
-                {!q && (
-                  <Link to="/salespersons">
-                    <Button size="sm" className="mt-3">
-                      <Plus className="h-4 w-4" />
-                      Add Team Member
-                    </Button>
-                  </Link>
-                )}
-              </div>
+              <EmptyCard
+                icon={UserCheck}
+                title={q ? "No matching team members." : "No team members yet."}
+                description={q ? "Try a different search term." : "Add your sales team so you can set monthly targets for each person."}
+                actionLabel={!q ? "Add team member" : undefined}
+                onAction={!q ? () => { window.location.href = "/salespersons"; } : undefined}
+              />
             );
             })()}
           </TabsContent>
