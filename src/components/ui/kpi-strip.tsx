@@ -69,6 +69,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
