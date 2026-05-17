@@ -1,113 +1,73 @@
+# Motion Law — Surgical Implementation Plan
 
-# Wave 1 — Surgical Build Plan
+Apply one unified motion language across routes, sheets, dialogs, buttons, cards, and toasts. Six files touched. No data, no tables, no form fields animated. `prefers-reduced-motion` collapses to opacity-only 120ms everywhere via Tailwind's `motion-reduce:` variants.
 
-Scope locked. **Dropped:** dual-language labels, voice input. **Everything else from Wave 1 + panel notes — in.** Surgical edits only, no architectural churn, no new dependencies.
+## Files touched (exactly 6, all already in scope)
 
----
+1. `src/components/layout/AppLayout.tsx` — route transition
+2. `src/components/ui/sheet.tsx` — drawer spring
+3. `src/components/ui/dialog.tsx` — modal spring
+4. `src/components/ui/button.tsx` — press state
+5. `src/components/ui/card.tsx` — hover state (desktop)
+6. `src/components/ui/sonner.tsx` — toast position
 
-## What ships in this wave
+No other file modified. No new CSS tokens, no new keyframes, no edits to `index.css`, `tailwind.config.ts`, or `motion.ts`.
 
-### 1 · Dashboard hero — one sentence, one number
-**File:** `src/pages/Dashboard.tsx` (+ small helper in `src/components/dashboard/`)
+## Per-file change
 
-Replace the existing top hero block with a single Playfair line that answers the only question that matters at 9am:
+### 1. AppLayout.tsx — Route cross-fade (lines 313–324)
+Replace the current spring fade with the Motion Law:
+- `initial={{ opacity: 0, x: 4 }}` (new route enters from 4px forward)
+- `animate={{ opacity: 1, x: 0 }}`
+- `exit={{ opacity: 0, x: -4 }}` (old route recedes)
+- `transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}`
+- Wrap with `useReducedMotion()` from framer-motion; when true → opacity only, `duration: 0.12`, no x.
+- `AnimatePresence mode="wait"` stays.
 
-> **₹2,42,000** to collect today
-> *5 orders waiting to send · 3 invoices overdue*
+### 2. sheet.tsx — Spring-like edge slide
+True CSS spring is not native; approximate stiffness 260 / damping 28 with a slight-overshoot cubic-bezier so it reads as a settle, not a snap.
+- On `sheetVariants` base class: change `data-[state=open]:duration-500 data-[state=closed]:duration-300` → `data-[state=open]:duration-[360ms] data-[state=closed]:duration-[220ms] data-[state=open]:ease-[cubic-bezier(0.34,1.15,0.55,1)] data-[state=closed]:ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:duration-[120ms] motion-reduce:ease-linear motion-reduce:transition-opacity motion-reduce:!animate-none`
+- Overlay (line 22): tighten to `data-[state=open]:duration-[220ms]` and add `motion-reduce:duration-[120ms]`. No translate on overlay.
 
-- Big number = Playfair Display, semantic `text-primary`, computed live from existing `DataContext` selectors (no new queries).
-- Subtitle = Inter, muted, **clickable fragments** that deep-link: "5 orders waiting to send" → `/orders?status=not-sent`, "3 invoices overdue" → `/billing?filter=overdue`.
-- Empty state (new user, zero data): *"Your day starts here. Add your first dealer to begin."* + single CTA.
-- Existing KPI tiles below stay — but visually demoted (smaller, lighter weight) so the hero owns the eye.
+### 3. dialog.tsx — Spring from center
+- `DialogContent` (line 39): replace `duration-200` with `data-[state=open]:duration-[280ms] data-[state=closed]:duration-[180ms] data-[state=open]:ease-[cubic-bezier(0.34,1.15,0.55,1)] data-[state=closed]:ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:!duration-[120ms] motion-reduce:ease-linear`.
+- Keep the existing zoom + slide-from-top-48% (acts as "nearest edge" feel from the trigger area). Strip the `slide-out-to-left-1/2 / slide-in-from-left-1/2` pair to remove horizontal jitter — keep vertical only.
+- Overlay (line 22): mirror sheet overlay timing.
 
-### 2 · "Money to Collect" as a bottom-nav surface (mobile) + sidebar promotion (desktop)
-**Files:** `src/components/layout/AppSidebar.tsx`, `src/components/layout/AppLayout.tsx`
+### 4. button.tsx — 1px depress, 4% opacity, 90ms
+- Update root cva string (line 16): change `duration-fast` → `duration-[90ms]` and append `motion-reduce:transition-opacity motion-reduce:duration-[120ms]`.
+- Variant `active:` states: change every `active:translate-y-[0.5px]` → `active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0`. Applies to: default, destructive, secondary, success. For outline → add `active:opacity-[0.96] motion-reduce:active:translate-y-0` alongside existing `active:translate-y-[0.5px]` replaced to `active:translate-y-px`. Ghost/subtle/link/pill: add `active:opacity-[0.96]` only (no translate on link).
 
-- Desktop sidebar: **rename "Insights" group → keep, but add a new top-of-Work item: "Money to Collect"** (`/billing?filter=outstanding`, icon: `Wallet`). Sits between Orders and Billing.
-- Mobile: the current mobile nav (if present in AppLayout) gets the same "Money to Collect" entry as a first-class destination, not nested.
-- Uses existing Billing page with a pre-applied filter — **no new page**.
+### 5. card.tsx — Desktop hover lift + depth-8
+- Card root (line 14): extend className to `rounded-md border border-border/70 bg-card text-card-foreground shadow-depth-2 transition-[box-shadow,border-color,transform] duration-normal ease-fluent md:hover:-translate-y-1 md:hover:shadow-depth-8 motion-reduce:transform-none motion-reduce:transition-opacity`.
+- Mobile (no `md:`) sees no transform — touch devices shouldn't fake hover.
+- SignalCard and other composed cards inherit automatically (they wrap Card or use depth-2 directly; we only touch the primitive).
 
-### 3 · Plain-English status pills + glyph per status
-**File:** `src/components/ui/status-badge.tsx`
+### 6. sonner.tsx — Bottom-center on mobile
+- Line 17: `position={isMobile ? "top-center" : "bottom-right"}` → `position={isMobile ? "bottom-center" : "bottom-right"}`.
+- Sonner's own enter animation already springs from the chosen edge; no further change.
 
-Rewrite labels and add a leading glyph (Lucide icon, 10px, inherits color). No new variants, no API change — same `StatusType` union.
+## Reduced-motion contract
+Every animated rule above pairs with a `motion-reduce:` variant that:
+- Removes transforms (`motion-reduce:transform-none` / `motion-reduce:translate-y-0`)
+- Caps duration to 120ms
+- Switches to linear/opacity-only transition
+The route transition reads `useReducedMotion()` at runtime and emits the opacity-only variant.
 
-| Current | New label | Glyph |
-|---|---|---|
-| Paid | Paid | ✓ `Check` |
-| Partial | Part paid | `CircleDashed` |
-| Pending | Not paid yet | `Clock` |
-| Dispatched | On the way | `Truck` |
-| Delivered | Delivered | ✓ `Check` |
+## Out of scope (explicitly NOT touched)
+- Tables, form fields, NumberInput, KPI numbers — no animation changes
+- `src/lib/motion.ts` — tokens unchanged
+- `index.css`, `tailwind.config.ts` — no new keyframes (existing `duration-normal`, `ease-fluent`, `shadow-depth-8`, `shadow-depth-2` already exist)
+- All consumers of Button/Card/Sheet/Dialog — they inherit automatically
+- AlertDialog, HoverCard, Popover — not in the user's list
+- Landing-page Press/Magnetic wrappers — separate motion contract
+- AnimatePresence usage inside NotificationCenter, onboarding moments — out of scope
 
-Susan's refinement (inline "next verb") deferred to Wave 3 — keeps this PR surgical.
-
-### 4 · Kill LiveClock on mobile, put search in its place
-**Files:** `src/components/layout/AppLayout.tsx`, `src/components/layout/LiveClock.tsx` (kept, only desktop usage)
-
-- On `<640px`, render a search affordance ("Find a dealer or order") that opens the **existing** `CommandPalette` with `dealers` scope pre-selected. Zero new search infra.
-- Desktop unchanged — LiveClock stays as a quiet bottom-of-topbar element.
-
-### 5 · WhatsApp button on every dealer card
-**Files:** `src/pages/Distributors.tsx`, `src/pages/DealerDetail.tsx`, possibly `src/components/dashboard/TodayDigest.tsx`
-
-- Reuse existing `src/components/ui/WhatsAppIcon.tsx` and `src/utils/shareWhatsApp.ts`.
-- One-tap button per dealer row → opens WhatsApp with pre-filled text using dealer name + current outstanding from `useDealersDomain`:
-  *"Namaste {name} ji, ₹{outstanding} pending. Please pay when convenient. Thank you."*
-- Hidden if dealer has no phone OR outstanding ≤ 0.
-
-### 6 · Indian comma formatting + ₹ prefix in every money input
-**Files:** `src/components/ui/number-input.tsx` (extend, don't fork), one new prop `currency?: boolean`
-
-- When `currency` is true: render ₹ as a leading adornment, format the **displayed** draft with Indian commas on blur (keep raw digits while editing — don't fight the cursor).
-- Sweep `NewOrder.tsx`, `Billing.tsx`, `Targets.tsx`, `Schemes.tsx` to add `currency` where the field is rupees.
-- Right-align money columns in `data-table.tsx` consumers (one util class pass, no schema change).
-
----
-
-## What's explicitly NOT in this wave
-
-- Dual-language labels — dropped per your instruction
-- Voice search — dropped per your instruction
-- New Order three-section refactor → Wave 2
-- "Schemes" rename / inline explainers → Wave 3
-- Destructive-copy rewrite → Wave 4
-- Empty-state micro-previews → Wave 5
-- Reports/Performance tab merge → Wave 5
-
----
-
-## Order of edits (one PR, six commits in this sequence)
-
-```text
-1. status-badge.tsx          ← lowest risk, visible everywhere
-2. number-input.tsx + sweep  ← additive prop, no breakage
-3. AppSidebar.tsx            ← add "Money to Collect" entry
-4. AppLayout.tsx             ← mobile topbar swap
-5. Distributors.tsx + DealerDetail.tsx ← WhatsApp button
-6. Dashboard.tsx             ← hero rewrite (last, biggest visual delta)
-```
-
-After each commit: visual check at 390×844 and 1280×720, then move on.
-
----
-
-## Verification before closing
-
-- All five existing e2e specs pass (`auth`, `billing`, `order-lifecycle`).
-- StatusBadge snapshot tests — if any exist — updated with new labels.
-- Dashboard renders on a brand-new account (zero data) without errors.
-- Linter warning count unchanged from baseline (20).
-- Mobile preview: thumb can reach hero CTA, WhatsApp button, and Money-to-Collect tab one-handed.
-
----
-
-## Non-negotiables (carry-overs from project memory)
-
-- No raw color classes — semantic tokens only.
-- No new npm dependencies.
-- `prefers-reduced-motion` respected on any new transition.
-- All Supabase calls already go through `handleSupabaseError` — don't reinvent.
-- `NumberInput` extension stays backwards-compatible (existing callers unaffected).
-
-Approve and I'll build commits 1→6 in order, pausing only if a step uncovers something this plan didn't anticipate.
+## Verification after build
+- `/orders/new` → `/orders` cross-fade: 220ms, 4px forward parallax
+- Open mobile bottom-nav sheet: springs from bottom
+- Open any Dialog: settles with slight overshoot
+- Tap primary CTA: 1px down, slight dim, snaps back in <100ms
+- Hover any Card on desktop: lifts 4px, depth-8 shadow
+- Trigger a toast on mobile: appears bottom-center
+- DevTools → Rendering → Emulate prefers-reduced-motion: all transforms disappear, opacity-only at 120ms
