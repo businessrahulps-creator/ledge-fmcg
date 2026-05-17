@@ -21,6 +21,7 @@ import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { prefetchRoute } from "@/lib/route-prefetch";
 import { Can } from "@/components/auth/Can";
+import { useCan } from "@/hooks/useCan";
 import {
   Select,
   SelectContent,
