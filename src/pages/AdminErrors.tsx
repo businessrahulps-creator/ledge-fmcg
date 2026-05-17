@@ -19,7 +19,7 @@ interface ErrorRow {
   severity: string;
   message: string;
   stack: string;
-  context: any;
+  context: Record<string, unknown> | null;
   resolved: boolean;
   user_id: string | null;
 }
@@ -42,7 +42,7 @@ export default function AdminErrors() {
   const load = useCallback(async () => {
     setBusy(true);
     let q = supabase
-      .from("error_log" as any)
+      .from("error_log")
       .select("id, created_at, source, severity, message, stack, context, resolved, user_id")
       .order("created_at", { ascending: false })
       .limit(200);
@@ -52,7 +52,7 @@ export default function AdminErrors() {
       logError({ source: "page:AdminErrors.load", error });
       setRows([]);
     } else {
-      setRows((data as any) || []);
+      setRows((data ?? []) as ErrorRow[]);
     }
     setBusy(false);
   }, [filter]);
@@ -66,8 +66,8 @@ export default function AdminErrors() {
 
   const resolve = async (id: string) => {
     const { error } = await supabase
-      .from("error_log" as any)
-      .update({ resolved: true } as any)
+      .from("error_log")
+      .update({ resolved: true })
       .eq("id", id);
     if (error) {
       logError({ source: "page:AdminErrors.resolve", error });
@@ -126,7 +126,7 @@ export default function AdminErrors() {
               {rows.map((r) => {
                 const open = expanded === r.id;
                 const when = new Date(r.created_at);
-                const route = r.context?.route || "—";
+                const route = (r.context && typeof r.context === "object" && "route" in r.context ? String((r.context as Record<string, unknown>).route ?? "") : "") || "—";
                 return (
                   <li key={r.id} className="p-3 sm:p-4">
                     <button

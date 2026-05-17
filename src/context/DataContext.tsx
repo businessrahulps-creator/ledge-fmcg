@@ -243,8 +243,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "orders"),
         fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "secondary_sales"),
         fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "targets"),
-        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
-        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
+        fetchAllChunked(() => supabase.from("claims").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
+        fetchAllChunked(() => supabase.from("invoices").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
     })();
@@ -305,7 +305,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         orderSequence: phase1Out?.orderSequence || 1,
       });
     } catch (err) {
-      console.error("Data fetch error:", err);
       logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
       // Background refresh: keep the last good snapshot — never blank the UI.
       // Cold start with no network: try to paint from IDB cache so the user
@@ -350,7 +349,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       isSyncingRef.current = true;
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { console.warn("No active session — skipping queue sync"); return; }
+        if (!session) { return; }
 
         const queue = await getQueue();
         if (queue.length === 0) return;
@@ -365,7 +364,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const result = await replaySingleMutation(mutation);
             if (result.ok) { succeeded = true; synced++; break; }
             const errMsg = "error" in result ? result.error : "unknown";
-            console.error(`Sync failed (attempt ${attempt}/${MAX_RETRIES}):`, mutation.table, errMsg);
             logError({ source: "sync:replay", error: errMsg, severity: "warning", context: { table: mutation.table, type: mutation.type, attempt } });
             if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, 1000 * attempt));
           }
@@ -427,7 +425,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('targets', targets.safeRefetchTargets))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('secondary_sales', targets.safeRefetchSecondarySales))
         .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') console.warn('Realtime channel error — will retry automatically');
+          if (status === 'CHANNEL_ERROR') logError({ source: "realtime:channel_error", error: "Realtime channel error — will retry", severity: "info", context: { companyId } });
         });
     };
 

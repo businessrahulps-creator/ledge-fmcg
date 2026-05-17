@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { Order, OrderLine } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
@@ -123,7 +124,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       }
 
       if (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") {
-        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
           p_order_id: inserted.id,
           p_dispatch_date: order.dispatchDate || null,
           p_vehicle: order.vehicle || null,
@@ -157,7 +158,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     const previousDelivery = currentOrder?.deliveryStatus || "pending";
     const newDelivery = updates.deliveryStatus || previousDelivery;
 
-    const dbUpdates: Record<string, any> = {};
+    const dbUpdates: TablesUpdate<"orders"> = {};
     if (updates.paymentMode !== undefined) dbUpdates.payment_mode = updates.paymentMode;
     if (updates.paymentStatus !== undefined) dbUpdates.payment_status = updates.paymentStatus;
     if (updates.deliveryStatus !== undefined) dbUpdates.delivery_status = updates.deliveryStatus;
@@ -189,7 +190,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
 
     if (Object.keys(dbUpdates).length > 0) {
-      const { error } = await supabase.from("orders").update(dbUpdates as any).eq("id", id);
+      const { error } = await supabase.from("orders").update(dbUpdates).eq("id", id);
       if (error) { handleSupabaseError(error, { source: "crud:orders.update", title: "Failed to update order", context: { id } }); return; }
     }
 
@@ -219,7 +220,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
                       newDelivery === "pending";
 
     if (movingToDispatched && currentOrder && deps.companyId) {
-      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
         p_order_id: id,
         p_dispatch_date: updates.dispatchDate || currentOrder.dispatchDate || null,
         p_vehicle: updates.vehicle ?? null,
@@ -234,7 +235,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
 
     if (reverting && deps.companyId) {
-      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order" as any, { p_order_id: id });
+      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: id });
       if (revErr) {
         handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Failed to reverse stock deduction", context: { id } });
       } else {

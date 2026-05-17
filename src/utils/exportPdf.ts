@@ -1,5 +1,6 @@
 import React from "react";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 
 /** Helvetica-safe currency formatter for PDF rendering (uses "Rs." instead of ₹) */
 export function formatCurrencyPdf(amount: number): string {
@@ -22,7 +23,7 @@ export async function downloadPdf(filename: string, document: React.ReactElement
     setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("PDF exported", { description: filename });
   } catch (err) {
-    console.error("PDF export failed", err);
+    logError({ source: "export:pdf", error: err, severity: "warning", context: { filename } });
     toast.error("PDF export failed", { description: "Please try again." });
   }
 }

@@ -21,12 +21,22 @@ const ENTITIES = [
 
 export type CacheableEntity = (typeof ENTITIES)[number];
 
+// IDB cache failures are silently swallowed in production — the cache is an
+// offline-mode optimization (currently paused), never the source of truth.
+// In dev we surface them so a corrupt IDB is debuggable.
+const dbg = (msg: string, e: unknown) => {
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console -- dev-only IDB diagnostic
+    console.warn(msg, e);
+  }
+};
+
 export async function cacheData(companyId: string, entity: CacheableEntity, data: any) {
   if (!OFFLINE_MODE_ENABLED) return;
   try {
     await set(cacheKey(companyId, entity), data);
   } catch (e) {
-    console.warn("IDB cache write failed:", e);
+    dbg("IDB cache write failed:", e);
   }
 }
 
@@ -35,7 +45,7 @@ export async function getCachedData<T = any>(companyId: string, entity: Cacheabl
   try {
     return await get<T>(cacheKey(companyId, entity));
   } catch (e) {
-    console.warn("IDB cache read failed:", e);
+    dbg("IDB cache read failed:", e);
     return undefined;
   }
 }
@@ -50,7 +60,7 @@ export async function clearCache(companyId: string) {
       }
     }
   } catch (e) {
-    console.warn("IDB cache clear failed:", e);
+    dbg("IDB cache clear failed:", e);
   }
 }
 
@@ -89,7 +99,7 @@ export async function setRetryStatus(status: RetryStatusMap) {
   try {
     await set(RETRY_STATUS_KEY, status);
   } catch (e) {
-    console.warn("IDB retry status write failed:", e);
+    dbg("IDB retry status write failed:", e);
   }
 }
 
@@ -112,7 +122,7 @@ async function markIdempotent(mutationId: string) {
     const arr = [...s].slice(-500);
     await set(IDEMPOTENCY_KEY, arr);
   } catch (e) {
-    console.warn("IDB idempotency write failed:", e);
+    dbg("IDB idempotency write failed:", e);
   }
 }
 
@@ -279,7 +289,6 @@ export async function replaySingleMutation(
             }
           }
         } catch (stockErr) {
-          console.error("Stock deduction during replay partially failed:", stockErr);
           try {
             const { logError } = await import("@/utils/errorLog");
             logError({
