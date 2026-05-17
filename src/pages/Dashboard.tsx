@@ -633,13 +633,15 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                 <p className="text-sm font-medium">No orders on {formatIndianDate(selectedDate)}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Create an order to see it here</p>
               </div>
-              <Link
-                to="/orders/new"
-                className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Create Order
-              </Link>
+              {useCan("place_orders") && (
+                <Link
+                  to="/orders/new"
+                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Create Order
+                </Link>
+              )}
             </div>
           ) : (
             <>
