@@ -449,7 +449,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const refreshAll = useCallback(async () => {
     if (!companyId) return;
     const token = ++fetchTokenRef.current;
-    await fetchAll(companyId, token);
+    // Manual / pull-to-refresh is always background — `isRefreshing` covers
+    // the affordance, `loading` stays false so pages don't fall back to skeleton.
+    await fetchAll(companyId, token, true);
   }, [companyId, fetchAll]);
 
   const updateCompanyInfo = useCallback((updates: Partial<CompanyInfo>) => {
