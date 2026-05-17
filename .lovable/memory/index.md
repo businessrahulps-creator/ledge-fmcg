@@ -16,6 +16,10 @@ Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (acce
 - [Brand moments (RETIRED)](mem://style/brand-moments) — Rationing rule retired in V2; tokens are now used semantically.
 
 ### Recent PR notes
+- [Brand placement PR-A (Terracotta)](mem://style/brand-placement-pr-a) — Terracotta canonical for "needs a human": aging 61-90, claims header, active onboarding chapter.
+- [Brand placement PR-B (Forest)](mem://style/brand-placement-pr-b) — Forest canonical for "money in / goal beaten": Dashboard revenue underline, Targets Exceeded amplified.
+- [Brand placement PR-C (Midnight letterhead)](mem://style/brand-placement-pr-c) — Midnight letterhead across PDFs + 3px rule on detail-page titles.
+- [Brand placement PR-D (Bone + sweep)](mem://style/brand-placement-pr-d) — PDFs render on Bone; raw color survivors swept to semantic tokens.
 - [PR15 Performance + Schemes](mem://style/pr15-performance-schemes) — SignalCard hero on Performance; expiring-soon SignalCard on Schemes.
 - [PR14 Dealers / Salespersons / Targets](mem://style/pr14-dealers-salespersons-targets) — KpiStrip + SignalCard across CRM and target pages.
 - [PR13 Stock + NewOrder](mem://style/pr13-stock-neworder) — Stock low/critical SignalCard; credit-limit breach SignalCard on NewOrder.
