@@ -585,13 +585,15 @@ export default function Billing() {
         </div>
 
         {/* Invoice List */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="glass-card overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className={filtered.length === 0 ? "" : "glass-card overflow-hidden"}>
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" strokeWidth={1.5} />
-              <p className="text-sm font-medium text-muted-foreground">No documents yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Create your first billing document from an order</p>
-            </div>
+            <EmptyCard
+              icon={FileText}
+              title="All clear. Nothing to bill right now."
+              description="Bills you create will appear here. Start one from an existing order."
+              actionLabel="New Document"
+              onAction={() => { resetForm(); setShowCreate(true); }}
+            />
           ) : (
             <>
               {/* Desktop table */}
