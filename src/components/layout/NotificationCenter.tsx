@@ -6,9 +6,9 @@ import { useNotifications, NotificationType } from "@/hooks/use-notifications";
 import { SmartTime } from "@/components/ui/smart-time";
 
 const typeConfig: Record<NotificationType, { icon: typeof Bell; colorClass: string }> = {
-  order_placed: { icon: Package, colorClass: "border-l-emerald-500 dark:border-l-emerald-400" },
-  stock_alert: { icon: AlertTriangle, colorClass: "border-l-amber-500 dark:border-l-amber-400" },
-  team_update: { icon: Users, colorClass: "border-l-blue-500 dark:border-l-blue-400" },
+  order_placed: { icon: Package, colorClass: "border-l-success" },
+  stock_alert: { icon: AlertTriangle, colorClass: "border-l-warning" },
+  team_update: { icon: Users, colorClass: "border-l-primary" },
   general: { icon: Info, colorClass: "border-l-muted-foreground" },
 };
 

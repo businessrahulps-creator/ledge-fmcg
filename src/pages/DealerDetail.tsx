@@ -176,7 +176,7 @@ export default function DealerDetail() {
                 const limit = dealer.creditLimit || 0;
                 const outstanding = dealer.outstandingAmount || 0;
                 const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-                const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-red-500" : pct >= 70 ? "border-amber-500" : "border-emerald-500";
+                const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-destructive" : pct >= 70 ? "border-warning" : "border-success";
                 const textColor = limit === 0 ? "" : pct >= 100 ? "text-destructive" : pct >= 70 ? "text-warning" : "text-success";
                 return (
                   <div className={`col-span-2 glass-card ${borderColor} p-3 md:p-4`}>
