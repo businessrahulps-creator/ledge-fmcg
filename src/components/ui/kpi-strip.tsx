@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ExplainButton } from "@/components/ui/explain-button";
+import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
 
 export interface KpiCell {
   label: string;
@@ -18,17 +19,25 @@ export interface KpiCell {
 export interface KpiStripProps {
   cells: KpiCell[];
   className?: string;
+  /** Optional trust stamp rendered above the strip, right-aligned. */
+  reconciledAt?: Date;
 }
 
 /**
  * Hairline-separated horizontal stat strip. Replaces rows of identical KPI cards.
  * Zero values render dimmed instead of competing with real numbers.
  */
-function KpiStripImpl({ cells, className }: KpiStripProps) {
+function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
   const cols = cells.length;
   const gridCols = cols === 2 ? "grid-cols-2" : cols === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-4";
   return (
-    <div className={cn("grid border-y border-border/60 divide-x divide-border/60", gridCols, className)}>
+    <div className={cn(reconciledAt && "space-y-1.5", className)}>
+      {reconciledAt && (
+        <div className="flex justify-end px-1">
+          <ReconcileStamp updatedAt={reconciledAt} />
+        </div>
+      )}
+      <div className={cn("grid border-y border-border/60 divide-x divide-border/60", gridCols)}>
       {cells.map((c, i) => {
         const Inner = (
           <>
