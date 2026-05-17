@@ -126,7 +126,7 @@ export default function AdminErrors() {
               {rows.map((r) => {
                 const open = expanded === r.id;
                 const when = new Date(r.created_at);
-                const route = r.context?.route || "—";
+                const route = (r.context && typeof r.context === "object" && "route" in r.context ? String((r.context as Record<string, unknown>).route ?? "") : "") || "—";
                 return (
                   <li key={r.id} className="p-3 sm:p-4">
                     <button
