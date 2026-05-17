@@ -304,8 +304,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!navigator.onLine) await loadFromCache(cId);
     } finally {
       if (token === fetchTokenRef.current) {
-        setLoading(false); // safety: ensure off even if phase 1 threw
+        setLoading(false);
         setIsRefreshing(false);
+        hasHydratedRef.current = true;
+        lastFetchAtRef.current = Date.now();
       }
     }
   }, [loadFromCache]);
