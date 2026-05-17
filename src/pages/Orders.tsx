@@ -349,8 +349,8 @@ export default function Orders() {
               icon={ShoppingCart}
               title="No orders yet today."
               description="When you take an order it'll show up here."
-              actionLabel="Take a new order"
-              onAction={() => navigate("/orders/new")}
+              actionLabel={canPlaceOrders ? "Take a new order" : undefined}
+              onAction={canPlaceOrders ? () => navigate("/orders/new") : undefined}
             />
           ) : (
             <EmptyCard
