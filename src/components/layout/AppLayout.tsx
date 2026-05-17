@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History, Wallet } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
@@ -42,7 +42,7 @@ const moreGroups = [
   {
     label: "Work",
     items: [
-      { title: "Billing", url: "/billing", icon: FileText },
+      { title: "Money to Collect", url: "/billing", icon: Wallet },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
@@ -80,7 +80,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/orders": "Orders",
-  "/billing": "Billing",
+  "/billing": "Money to Collect",
   "/stock": "Stock",
   "/distributors": "Dealers",
   "/salespersons": "Sales Team",
