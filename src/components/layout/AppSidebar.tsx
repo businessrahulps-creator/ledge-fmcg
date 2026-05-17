@@ -16,6 +16,7 @@ import {
   RotateCcw,
   FileText,
   Landmark,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
