@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/command";
 import { getRecent, type RecentItem } from "@/lib/recent-items";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import {
   House,
   ClipboardList,
@@ -50,6 +51,7 @@ export function CommandPalette() {
   const [recent, setRecent] = useState<RecentItem[]>([]);
   const navigate = useNavigate();
   const api = useApi();
+  const canPlaceOrders = useCan("place_orders");
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -181,11 +183,13 @@ export function CommandPalette() {
         )}
 
         <CommandGroup heading="Quick actions">
-          <CommandItem value="new-order action create" onSelect={() => go("/orders/new")}>
-            <Plus className="mr-2 h-4 w-4 text-muted-foreground" />
-            New order
-            <CommandShortcut>N</CommandShortcut>
-          </CommandItem>
+          {canPlaceOrders && (
+            <CommandItem value="new-order action create" onSelect={() => go("/orders/new")}>
+              <Plus className="mr-2 h-4 w-4 text-muted-foreground" />
+              New order
+              <CommandShortcut>N</CommandShortcut>
+            </CommandItem>
+          )}
           <CommandItem value="search-orders action" onSelect={() => go("/orders")}>
             <Search className="mr-2 h-4 w-4 text-muted-foreground" />
             Search all orders

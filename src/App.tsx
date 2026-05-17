@@ -10,6 +10,7 @@ import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
+import { RequireCapability } from "@/components/auth/RequireCapability";
 import { isPreviewEnv } from "@/lib/preview-env";
 import { LedgeLoader } from "@/components/ui/ledge-loader";
 import { RouteSkeleton } from "@/components/ui/route-skeleton";
@@ -164,7 +165,7 @@ const App = () => (
                   <Route path="/invite/:token" element={<DelayedSuspense fallback={ShellFallback}><Invite /></DelayedSuspense>} />
                   <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/new" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/orders/new" element={<ProtectedRoute><RequireCapability capability="place_orders" message="Placing orders isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
                   <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OrderDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><DealerDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DealersFallback}><Distributors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />

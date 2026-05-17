@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useCan } from "@/hooks/useCan";
 
 const NAV_SHORTCUTS: { keys: string; label: string; to: string }[] = [
   { keys: "g d", label: "Go to Dashboard", to: "/dashboard" },
@@ -47,6 +48,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
  */
 export function KeyboardShortcuts() {
   const navigate = useNavigate();
+  const canPlaceOrders = useCan("place_orders");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export function KeyboardShortcuts() {
 
       // Single-key shortcuts
       if (key === "n") {
+        if (!canPlaceOrders) return;
         e.preventDefault();
         navigate("/orders/new");
         return;
@@ -97,14 +100,17 @@ export function KeyboardShortcuts() {
       window.removeEventListener("keydown", onKeyDown);
       if (pendingG !== null) window.clearTimeout(pendingG);
     };
-  }, [navigate]);
+  }, [navigate, canPlaceOrders]);
 
   const sections = useMemo(
     () => [
       { title: "Navigate", items: NAV_SHORTCUTS.map(({ keys, label }) => ({ keys, label })) },
-      { title: "Global", items: GLOBAL_SHORTCUTS },
+      {
+        title: "Global",
+        items: GLOBAL_SHORTCUTS.filter((s) => s.keys !== "n" || canPlaceOrders),
+      },
     ],
-    []
+    [canPlaceOrders]
   );
 
   return (

@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import {
   Landmark,
   Image,
@@ -22,6 +23,7 @@ export interface OnboardingStep {
 
 export function useOnboarding() {
   const api = useApi();
+  const canPlaceOrders = useCan("place_orders");
   const [dismissed, setDismissed] = useState(() => {
     try { return localStorage.getItem(DISMISSED_KEY) === "1"; } catch { return false; }
   });
@@ -73,15 +75,19 @@ export function useOnboarding() {
       isComplete: (salespersons?.length || 0) > 0,
       path: "/salespersons",
     },
-    {
-      id: "order",
-      label: "Create your first order",
-      description: "See Ledge in action",
-      icon: ClipboardList,
-      isComplete: (orders?.length || 0) > 0,
-      path: "/orders/new",
-    },
-  ], [companyInfo, dealers, products, salespersons, orders]);
+    ...(canPlaceOrders
+      ? [
+          {
+            id: "order",
+            label: "Create your first order",
+            description: "See Ledge in action",
+            icon: ClipboardList,
+            isComplete: (orders?.length || 0) > 0,
+            path: "/orders/new",
+          },
+        ]
+      : []),
+  ], [companyInfo, dealers, products, salespersons, orders, canPlaceOrders]);
 
   const completedCount = steps.filter((s) => s.isComplete).length;
   const totalSteps = steps.length;

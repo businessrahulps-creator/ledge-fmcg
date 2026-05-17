@@ -19,6 +19,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { prefetchRoute } from "@/lib/route-prefetch";
+import { Can } from "@/components/auth/Can";
 import {
   Select,
   SelectContent,
@@ -240,12 +241,14 @@ export default function Orders() {
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Export PDF</span>
             </Button>
-            <Link to="/orders/new" className="flex-1 sm:flex-none">
-              <Button className="w-full">
-                <Plus className="h-4 w-4" />
-                New Order
-              </Button>
-            </Link>
+            <Can do="place_orders">
+              <Link to="/orders/new" className="flex-1 sm:flex-none">
+                <Button className="w-full">
+                  <Plus className="h-4 w-4" />
+                  New Order
+                </Button>
+              </Link>
+            </Can>
           </div>
         </div>
 
@@ -344,12 +347,14 @@ export default function Orders() {
                 <ShoppingCart className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
                 <p className="mt-3 text-sm font-medium">No orders yet</p>
                 <p className="text-xs text-muted-foreground">Create your first sales order to get started</p>
-                <Link to="/orders/new">
-                  <Button size="sm" className="mt-3">
-                    <Plus className="h-4 w-4" />
-                    New Order
-                  </Button>
-                </Link>
+                <Can do="place_orders">
+                  <Link to="/orders/new">
+                    <Button size="sm" className="mt-3">
+                      <Plus className="h-4 w-4" />
+                      New Order
+                    </Button>
+                  </Link>
+                </Can>
               </>
             ) : (
               <>
