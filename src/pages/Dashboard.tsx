@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
 import { computeDealerAging, sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
 import { SignalCard } from "@/components/ui/signal-card";
+import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -314,6 +315,9 @@ export default function Dashboard() {
                   />
                 </div>
               )}
+              <div className="mt-2">
+                <ReconcileStamp updatedAt={lastUpdated} />
+              </div>
               <p className="text-[13px] text-foreground/75 mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {canSeeMoney && totalOutstandingAll > 0 && (
                   <>
