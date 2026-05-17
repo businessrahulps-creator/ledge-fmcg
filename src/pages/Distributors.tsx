@@ -337,8 +337,8 @@ export default function Distributors() {
                       <Input type="email" value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="dealer@example.com" className="h-10 rounded-lg" />
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
-                      <Label className="text-xs md:text-sm">Credit Limit (₹)</Label>
-                      <NumberInput allowDecimal allowEmpty={false} min={0} value={editItem.creditLimit} onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                      <Label className="text-xs md:text-sm">Credit Limit</Label>
+                      <NumberInput currency allowDecimal allowEmpty={false} min={0} value={editItem.creditLimit} onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
                     </div>
                   </div>
                 </div>
