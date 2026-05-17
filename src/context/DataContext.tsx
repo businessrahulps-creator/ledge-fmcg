@@ -123,9 +123,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const billing = useBillingDomain(billingDeps);
 
-  // Clear data when no company
+  // Clear data only when the user is truly signed out. A transient `companyId`
+  // gap (profile refresh, token refresh) must NOT wipe already-loaded data,
+  // otherwise pages flash empty mid-session.
   useEffect(() => {
-    if (authReady && !companyId) {
+    if (authReady && !user) {
       orders.setOrders([]);
       dealers.setDistributors([]);
       salespersons.setSalespersons([]);
@@ -139,7 +141,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       billing.setInvoices([]);
       setLoading(false);
     }
-  }, [authReady, companyId]);
+  }, [authReady, user]);
 
   // Load from IDB cache (offline fallback)
   const loadFromCache = useCallback(async (cId: string) => {
