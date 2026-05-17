@@ -16,6 +16,7 @@ import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus, Che
 import { FirstWeek } from "@/components/onboarding/FirstWeek";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { ExplainButton } from "@/components/ui/explain-button";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
