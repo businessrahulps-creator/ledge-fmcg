@@ -1,9 +1,15 @@
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Footer } from "@/components/landing/sections/Footer";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white font-body antialiased scroll-smooth">
+      <SeoHead
+        title="Privacy Policy — Ledge"
+        description="How Ledge collects, uses, and protects your data on getledge.in. Your business data stays in your workspace, encrypted in transit and at rest."
+        path="/privacy-policy"
+      />
       <Navbar />
       <section className="pt-28 pb-14 md:pt-36 md:pb-20 bg-[#F8F7F5]">
         <div className="max-w-3xl mx-auto px-6 text-center">

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, Globe } from "lucide-react";
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Footer } from "@/components/landing/sections/Footer";
 
