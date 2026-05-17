@@ -91,20 +91,20 @@ export function buildSalespersonScorecard(spOrders: Order[]): SalespersonScoreca
 export const performanceHealthConfig: Record<PerformanceHealth, { label: string; color: string; bg: string; dot: string }> = {
   high: {
     label: "High Performer",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-500/10",
-    dot: "bg-emerald-500",
+    color: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   medium: {
     label: "Moderate",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-500/10",
-    dot: "bg-amber-500",
+    color: "text-warning",
+    bg: "bg-warning/10",
+    dot: "bg-warning",
   },
   low: {
     label: "Needs Attention",
-    color: "text-red-600 dark:text-red-400",
-    bg: "bg-red-500/10",
-    dot: "bg-red-500",
+    color: "text-destructive",
+    bg: "bg-destructive/10",
+    dot: "bg-destructive",
   },
 };

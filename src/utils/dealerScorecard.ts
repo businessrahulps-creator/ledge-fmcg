@@ -79,20 +79,20 @@ export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
 export const churnRiskConfig: Record<ChurnRisk, { label: string; color: string; bg: string; dot: string }> = {
   low: {
     label: "Low Risk",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-500/10",
-    dot: "bg-emerald-500",
+    color: "text-success",
+    bg: "bg-success/10",
+    dot: "bg-success",
   },
   medium: {
     label: "Medium Risk",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-500/10",
-    dot: "bg-amber-500",
+    color: "text-warning",
+    bg: "bg-warning/10",
+    dot: "bg-warning",
   },
   high: {
     label: "High Risk",
-    color: "text-red-600 dark:text-red-400",
-    bg: "bg-red-500/10",
-    dot: "bg-red-500",
+    color: "text-destructive",
+    bg: "bg-destructive/10",
+    dot: "bg-destructive",
   },
 };
