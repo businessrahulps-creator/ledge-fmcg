@@ -16,6 +16,7 @@ import { ShoppingCart, Plus, AlertTriangle, TrendingUp, TrendingDown, Minus, Che
 import { FirstWeek } from "@/components/onboarding/FirstWeek";
 import { TodayDigest } from "@/components/dashboard/TodayDigest";
 import { ExplainButton } from "@/components/ui/explain-button";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
@@ -434,7 +435,7 @@ export default function Dashboard() {
                     <p className={cn(
                       "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                       s.zero && "text-muted-foreground/35"
-                    )}>{s.value}</p>
+                    )}><AnimatedNumber value={s.value} /></p>
                     {s.insight}
                   </div>
                 );
@@ -563,7 +564,7 @@ export default function Dashboard() {
                   <p className={cn(
                     "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                     isZero && "text-muted-foreground/35"
-                  )}>{kpi.value}</p>
+                  )}><AnimatedNumber value={kpi.value} /></p>
                 </div>
               );
             })}
@@ -716,7 +717,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
-                      <tr key={order.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => navigate(`/orders/${order.id}`)}>
+                      <tr key={order.id} className="border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none" onClick={() => navigate(`/orders/${order.id}`)}>
                         <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
