@@ -1,5 +1,6 @@
 import React from "react";
 import { toast } from "sonner";
+import { logError } from "@/utils/errorLog";
 
 /** Helvetica-safe currency formatter for PDF rendering (uses "Rs." instead of ₹) */
 export function formatCurrencyPdf(amount: number): string {

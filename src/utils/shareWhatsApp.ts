@@ -2,6 +2,7 @@ import React from "react";
 import { toast } from "sonner";
 import type { Order } from "@/data/mock-data";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { logError } from "@/utils/errorLog";
 
 interface CompanyInfo {
   name: string;

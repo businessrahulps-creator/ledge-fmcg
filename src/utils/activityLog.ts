@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/utils/errorLog";
 
 interface LogActivityParams {
   companyId: string;
