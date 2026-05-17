@@ -1,6 +1,7 @@
 import * as React from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export interface InsightLineProps {
   /** Numeric delta (positive = up). Null/undefined suppresses the comparator line and renders the fallback if provided. */
@@ -54,9 +55,7 @@ function InsightLineImpl({ delta, suffix = "%", comparator, goodWhen = "up", fal
   return (
     <span className={cn("insight-line", good ? "insight-up" : "insight-down", className)}>
       <Icon className="icon-inline" />
-      {up ? "+" : ""}
-      {delta}
-      {suffix}
+      <AnimatedNumber value={`${up ? "+" : ""}${delta}${suffix}`} />
       {comparator ? ` vs ${comparator}` : ""}
     </span>
   );

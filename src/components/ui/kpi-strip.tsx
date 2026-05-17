@@ -2,6 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ExplainButton } from "@/components/ui/explain-button";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export interface KpiCell {
   label: string;
@@ -53,7 +54,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
                 c.zero && "text-muted-foreground/35",
               )}
             >
-              {c.value}
+              <AnimatedNumber value={c.value} />
             </p>
             {c.insight && <div className="mt-0">{c.insight}</div>}
           </>
