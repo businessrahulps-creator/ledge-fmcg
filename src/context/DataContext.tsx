@@ -373,7 +373,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
         if (synced > 0) {
           const token = ++fetchTokenRef.current;
-          await fetchAll(companyId, token);
+          await fetchAll(companyId, token, true);
         }
       } finally {
         isSyncingRef.current = false;
