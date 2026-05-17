@@ -2,10 +2,14 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, SecondarySale, Target } from "@/context/data-types";
+import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { enqueueMutation } from "@/lib/offline-store";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { fetchAllChunked } from "@/context/data-utils";
+
+type TargetRow = Tables<"targets">;
+type SecondarySaleRow = Tables<"secondary_sales">;
 
 export function useTargetsDomain(deps: DomainDeps) {
   const [targets, setTargets] = useState<Target[]>([]);
@@ -29,11 +33,11 @@ export function useTargetsDomain(deps: DomainDeps) {
       return;
     }
 
-    const { data, error } = await supabase.from("targets").insert(dbRow as any).select().single();
+    const { data, error } = await supabase.from("targets").insert(dbRow).select().single();
     if (error) { handleSupabaseError(error, { source: "crud:targets.add", title: "Failed to save target" }); return; }
     if (data) {
       const mapped: Target = {
-        id: (data as any).id, entityType: target.entityType, entityId: target.entityId,
+        id: data.id, entityType: target.entityType, entityId: target.entityId,
         entityName: target.entityName, periodType: target.periodType, periodStart: target.periodStart,
         targetRevenue: target.targetRevenue, targetOrders: target.targetOrders,
       };
@@ -54,7 +58,7 @@ export function useTargetsDomain(deps: DomainDeps) {
       return;
     }
 
-    const { error } = await supabase.from("targets").update(dbUpdates as any).eq("id", target.id);
+    const { error } = await supabase.from("targets").update(dbUpdates).eq("id", target.id);
     if (error) { handleSupabaseError(error, { source: "crud:targets.update", title: "Failed to update target", context: { id: target.id } }); return; }
     setTargets(prev => prev.map(t => t.id === target.id ? target : t));
   }, []);
@@ -91,11 +95,11 @@ export function useTargetsDomain(deps: DomainDeps) {
       return;
     }
 
-    const { data, error } = await supabase.from("secondary_sales").insert(dbRow as any).select().single();
+    const { data, error } = await supabase.from("secondary_sales").insert(dbRow).select().single();
     if (error) { handleSupabaseError(error, { source: "crud:secondary_sales.add", title: "Failed to record secondary sale" }); return; }
     if (data) {
       const mapped: SecondarySale = {
-        id: (data as any).id, distributorId: sale.distributorId, productId: sale.productId,
+        id: data.id, distributorId: sale.distributorId, productId: sale.productId,
         productName: sale.productName, retailerName: sale.retailerName,
         quantity: sale.quantity, date: sale.date, remarks: sale.remarks,
       };
@@ -119,20 +123,20 @@ export function useTargetsDomain(deps: DomainDeps) {
 
   const safeRefetchTargets = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
-    const data = await fetchAllChunked<any>(
+    const data = await fetchAllChunked<TargetRow>(
       () => supabase.from("targets").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }),
       1000, 200, "targets",
     );
-    setTargets(data.map((t: any) => ({ id: t.id, entityType: t.entity_type, entityId: t.entity_id, entityName: t.entity_name, periodType: t.period_type, periodStart: t.period_start, targetRevenue: t.target_revenue, targetOrders: t.target_orders })));
+    setTargets(data.map((t) => ({ id: t.id, entityType: t.entity_type, entityId: t.entity_id, entityName: t.entity_name, periodType: t.period_type, periodStart: t.period_start, targetRevenue: Number(t.target_revenue), targetOrders: t.target_orders })));
   }, [deps.companyId]);
 
   const safeRefetchSecondarySales = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
-    const data = await fetchAllChunked<any>(
+    const data = await fetchAllChunked<SecondarySaleRow>(
       () => supabase.from("secondary_sales").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }),
       1000, 200, "secondary_sales",
     );
-    setSecondarySales(data.map((s: any) => ({ id: s.id, distributorId: s.distributor_id, productId: s.product_id, productName: s.product_name, retailerName: s.retailer_name, quantity: s.quantity, date: s.date, remarks: s.remarks })));
+    setSecondarySales(data.map((s) => ({ id: s.id, distributorId: s.distributor_id, productId: s.product_id, productName: s.product_name, retailerName: s.retailer_name, quantity: s.quantity, date: s.date, remarks: s.remarks })));
   }, [deps.companyId]);
 
   return {
