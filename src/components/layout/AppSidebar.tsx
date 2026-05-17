@@ -48,8 +48,7 @@ type NavItem = {
 const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Money to Collect", url: "/billing?filter=outstanding", icon: Wallet },
-  { title: "Billing", url: "/billing", icon: FileText },
+  { title: "Money to Collect", url: "/billing", icon: Wallet },
   { title: "Returns", url: "/claims", icon: RotateCcw },
 ];
 
