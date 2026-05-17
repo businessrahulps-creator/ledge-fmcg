@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, FileText, Landmark, BookOpen, History } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
@@ -42,7 +42,7 @@ const moreGroups = [
   {
     label: "Work",
     items: [
-      { title: "Billing", url: "/billing", icon: FileText },
+      { title: "Money to Collect", url: "/billing", icon: Wallet },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
@@ -80,7 +80,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/orders": "Orders",
-  "/billing": "Billing",
+  "/billing": "Money to Collect",
   "/stock": "Stock",
   "/distributors": "Dealers",
   "/salespersons": "Sales Team",
@@ -200,7 +200,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   ⌘K
                 </kbd>
               </button>
-              <LiveClock />
+              {/* Mobile: compact search icon replacing the desktop-only clock. */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette"))}
+                aria-label="Search"
+                className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              >
+                <Search className="h-[18px] w-[18px]" strokeWidth={1.7} />
+              </button>
+              <div className="hidden sm:inline-flex">
+                <LiveClock />
+              </div>
               {userRole && (
                 <>
                   <span className="hidden sm:inline-block h-3.5 w-px bg-border/70" aria-hidden />

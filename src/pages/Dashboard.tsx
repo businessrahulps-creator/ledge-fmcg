@@ -283,18 +283,68 @@ export default function Dashboard() {
               <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">
                 {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
               </p>
-              <div className="relative inline-block mt-1.5">
-                <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ transformOrigin: "left" }}
-                  className="absolute -bottom-1 left-0 h-px w-full bg-foreground/25"
-                  aria-hidden
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1.5">
+              {/* Wave 1 hero: money-first sentence answers "what matters today?" */}
+              {canSeeMoney && totalOutstandingAll > 0 ? (
+                <div className="relative inline-block mt-1.5">
+                  <h1 className="h1-display">
+                    <Link to="/billing" className="hover:underline underline-offset-4 decoration-foreground/20">
+                      {formatCurrency(totalOutstandingAll)}
+                    </Link>{" "}
+                    <span className="text-foreground/70 font-normal">to collect</span>
+                  </h1>
+                  <motion.span
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ transformOrigin: "left" }}
+                    className="absolute -bottom-1 left-0 h-px w-full bg-foreground/25"
+                    aria-hidden
+                  />
+                </div>
+              ) : (
+                <div className="relative inline-block mt-1.5">
+                  <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+                  <motion.span
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ transformOrigin: "left" }}
+                    className="absolute -bottom-1 left-0 h-px w-full bg-foreground/25"
+                    aria-hidden
+                  />
+                </div>
+              )}
+              <p className="text-[13px] text-foreground/75 mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+                {canSeeMoney && totalOutstandingAll > 0 && (
+                  <>
+                    <span className="text-muted-foreground/80">{getGreeting()}{firstName ? `, ${firstName}` : ""}</span>
+                    <span className="text-muted-foreground/30">·</span>
+                  </>
+                )}
+                {(() => {
+                  const pendingToSend = orders.filter((o) => o.deliveryStatus === "pending").length;
+                  return pendingToSend > 0 ? (
+                    <Link to="/orders" className="hover:text-primary transition-colors">
+                      {pendingToSend} {pendingToSend === 1 ? "order" : "orders"} waiting to send
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground/70">All orders sent</span>
+                  );
+                })()}
+                {(() => {
+                  const overdueCount = agingRows.filter(r => r.worstBucket === "b61" || r.worstBucket === "b90").length;
+                  if (overdueCount === 0) return null;
+                  return (
+                    <>
+                      <span className="text-muted-foreground/30">·</span>
+                      <Link to="/billing" className="hover:text-destructive transition-colors text-destructive/85">
+                        {overdueCount} dealer{overdueCount === 1 ? "" : "s"} overdue
+                      </Link>
+                    </>
+                  );
+                })()}
+              </p>
+              <p className="text-[11px] text-muted-foreground/70 mt-2 flex items-center gap-1.5">
                 Updated {timeAgo}
                 <span className="text-muted-foreground/30">·</span>
                 <button onClick={() => { if (!isLoading) api.refreshAll(); }} className={cn("text-link", isLoading && "opacity-50 pointer-events-none")}>

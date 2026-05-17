@@ -14,8 +14,8 @@ import {
   Gift,
   Target,
   RotateCcw,
-  FileText,
   Landmark,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,7 +47,7 @@ type NavItem = {
 const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Billing", url: "/billing", icon: FileText },
+  { title: "Money to Collect", url: "/billing", icon: Wallet },
   { title: "Returns", url: "/claims", icon: RotateCcw },
 ];
 

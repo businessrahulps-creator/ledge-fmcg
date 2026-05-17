@@ -17,8 +17,16 @@ export interface NumberInputProps
    * When false, blurring an empty field snaps to `min ?? 0`.
    */
   allowEmpty?: boolean;
+  /**
+   * Render as a rupee amount: prefixes ₹ inside the input and formats the
+   * committed value with Indian commas on blur. While focused the field shows
+   * raw digits so cursor/selection behaviour stays sane.
+   */
+  currency?: boolean;
   className?: string;
 }
+
+const inrFormatter = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 
 /**
  * Numeric input with sane UX:
@@ -39,7 +47,9 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       max,
       allowDecimal = false,
       allowEmpty = true,
+      currency = false,
       onBlur,
+      onFocus,
       className,
       ...rest
     },
@@ -49,6 +59,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       ? ""
       : String(value);
 
+    const [focused, setFocused] = React.useState(false);
     // Local string mirror so the user can type "0.", "", "5" etc. without the parent
     // value yanking the display back. We re-sync from props when the parent value
     // diverges from what we have parsed.
@@ -68,9 +79,10 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let next = e.target.value;
-      // Normalize: strip stray spaces, convert comma decimal to dot
-      next = next.replace(/\s+/g, "");
-      if (allowDecimal) next = next.replace(",", ".");
+      // Strip whitespace, commas (so users can paste "1,20,000"), normalise decimal.
+      next = next.replace(/\s+/g, "").replace(/,/g, "");
+      if (allowDecimal) next = next.replace(/(?!^)-/g, ""); // keep only leading minus
+      // (comma already stripped; allow comma-as-decimal only when decimals allowed)
 
       if (next !== "" && !validPattern.test(next)) return; // reject keystroke
       if (!allowNegative && next.startsWith("-")) return;
@@ -89,7 +101,18 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       onValueChange(parsed);
     };
 
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      setFocused(true);
+      // When currency, switch to raw digits for editing.
+      if (currency) {
+        const raw = valueAsString;
+        setDraft(raw);
+      }
+      onFocus?.(e);
+    };
+
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      setFocused(false);
       let committed: number | null;
       if (draft === "" || draft === "-" || draft === "." || draft === "-.") {
         committed = allowEmpty ? null : (min ?? 0);
@@ -101,13 +124,22 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         if (typeof min === "number" && committed < min) committed = min;
         if (typeof max === "number" && committed > max) committed = max;
       }
-      const nextDraft = committed === null ? "" : String(committed);
+      const nextDraft = committed === null
+        ? ""
+        : currency
+          ? inrFormatter.format(committed)
+          : String(committed);
       setDraft(nextDraft);
       onValueChange(committed);
       onBlur?.(e);
     };
 
-    return (
+    // When NOT focused and currency, show formatted version (overrides draft for display only).
+    const displayValue = currency && !focused && draft !== "" && !Number.isNaN(Number(draft.replace(/,/g, "")))
+      ? inrFormatter.format(Number(draft.replace(/,/g, "")))
+      : draft;
+
+    const input = (
       <Input
         {...rest}
         ref={ref}
@@ -115,15 +147,31 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         inputMode={allowDecimal ? "decimal" : "numeric"}
         pattern={allowDecimal ? "[0-9]*[.,]?[0-9]*" : "[0-9]*"}
         autoComplete="off"
-        value={draft}
+        value={displayValue}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         className={cn(
           // Hide native spinners (they mostly add clutter and don't work well on touch)
           "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          currency && "pl-6",
           className,
         )}
       />
+    );
+
+    if (!currency) return input;
+
+    return (
+      <div className="relative">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/80 num"
+        >
+          ₹
+        </span>
+        {input}
+      </div>
     );
   },
 );
