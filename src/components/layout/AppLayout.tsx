@@ -2,7 +2,7 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet, LogOut, CircleDot } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
