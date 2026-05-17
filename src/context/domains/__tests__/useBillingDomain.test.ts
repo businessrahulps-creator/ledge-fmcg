@@ -112,6 +112,9 @@ describe("useBillingDomain", () => {
       getOrders: vi.fn().mockReturnValue([{ id: "o1", godownId: "g1" }]),
     });
 
+    // reverse_dispatch_for_order rpc default
+    mockRpc.mockResolvedValue({ data: null, error: null });
+
     // Mock claims insert
     const claimChain = createChainMock({ data: { id: "cl-1" }, error: null });
     const linesChain = createChainMock({ data: null, error: null });
