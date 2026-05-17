@@ -49,7 +49,7 @@ export const JOBS: JobDef[] = [
     label: "Viewer",
     oneLiner: "Read-only. Can look, can't change anything.",
     longDescription:
-      "Can browse the workspace without making changes. Good for auditors or short-term observers.",
+      "Perfect for an investor, your CA, or anyone who needs visibility without the ability to touch your data.",
     icon: Eye,
   },
 ];
