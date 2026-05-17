@@ -20,6 +20,7 @@ import { useApi } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
+import { EmptyCard } from "@/components/ui/empty-card";
 import {
   Dialog,
   DialogContent,
@@ -516,17 +517,13 @@ export default function Stock() {
                 <ListPagination page={productsPagination.page} totalPages={productsPagination.totalPages} onPageChange={productsPagination.setPage} />
 
                 {filteredProducts.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <Package className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                    <p className="mt-3 text-sm font-medium">No products found</p>
-                    <p className="text-xs text-muted-foreground">Add your first product to get started</p>
-                    {canManageStock && (
-                      <Button size="sm" className="mt-3" onClick={openNewProduct}>
-                        <Plus className="h-4 w-4" />
-                        Add Product
-                      </Button>
-                    )}
-                  </div>
+                  <EmptyCard
+                    icon={Package}
+                    title="No products in your catalog."
+                    description="Add a product so you can stock and sell it."
+                    actionLabel={canManageStock ? "Add product" : undefined}
+                    onAction={canManageStock ? openNewProduct : undefined}
+                  />
                 )}
               </div>
             </div>
