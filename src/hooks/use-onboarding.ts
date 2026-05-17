@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import {
   Landmark,
   Image,
@@ -22,6 +23,7 @@ export interface OnboardingStep {
 
 export function useOnboarding() {
   const api = useApi();
+  const canPlaceOrders = useCan("place_orders");
   const [dismissed, setDismissed] = useState(() => {
     try { return localStorage.getItem(DISMISSED_KEY) === "1"; } catch { return false; }
   });
