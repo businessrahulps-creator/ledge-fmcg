@@ -486,19 +486,13 @@ export default function Targets() {
                 );
               })
             ) : (
-              <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
-                <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">{q ? "No matching dealers" : "No dealers yet"}</p>
-                <p className="text-xs text-muted-foreground">{q ? "Try a different search term" : "Add your dealer network to start setting targets"}</p>
-                {!q && (
-                  <Link to="/distributors">
-                    <Button size="sm" className="mt-3">
-                      <Plus className="h-4 w-4" />
-                      Add Dealer
-                    </Button>
-                  </Link>
-                )}
-              </div>
+              <EmptyCard
+                icon={MapPin}
+                title={q ? "No matching dealers." : "No dealers yet."}
+                description={q ? "Try a different search term." : "Add your dealer network so you can set targets per dealer."}
+                actionLabel={!q ? "Add dealer" : undefined}
+                onAction={!q ? () => { window.location.href = "/distributors"; } : undefined}
+              />
             );
             })()}
           </TabsContent>
