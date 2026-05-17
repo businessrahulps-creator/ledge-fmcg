@@ -200,7 +200,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   ⌘K
                 </kbd>
               </button>
-              <LiveClock />
+              {/* Mobile: compact search icon replacing the desktop-only clock. */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette"))}
+                aria-label="Search"
+                className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              >
+                <Search className="h-[18px] w-[18px]" strokeWidth={1.7} />
+              </button>
+              <div className="hidden sm:inline-flex">
+                <LiveClock />
+              </div>
               {userRole && (
                 <>
                   <span className="hidden sm:inline-block h-3.5 w-px bg-border/70" aria-hidden />
