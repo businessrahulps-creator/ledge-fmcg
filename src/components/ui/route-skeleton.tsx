@@ -1,9 +1,16 @@
+import { useDelayedShow } from "@/hooks/use-delayed-show";
+
 /**
  * Compact, layout-preserving skeleton for route-level Suspense fallbacks.
  * Used instead of the full-screen splash so navigation feels continuous
  * (sidebar/topbar stay mounted around it).
+ *
+ * Guarded by useDelayedShow(180) — fast prefetched navigations never see
+ * the loader; only genuinely slow chunks render it.
  */
 export function RouteSkeleton() {
+  const show = useDelayedShow(180);
+  if (!show) return null;
   return (
     <div
       className="w-full px-4 py-6 sm:px-6 sm:py-8 animate-in fade-in duration-200"
