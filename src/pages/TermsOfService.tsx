@@ -1,9 +1,15 @@
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Footer } from "@/components/landing/sections/Footer";
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-white font-body antialiased scroll-smooth">
+      <SeoHead
+        title="Terms of Service — Ledge"
+        description="The terms that govern your use of the Ledge platform at getledge.in. Read these before creating an account or running your business on Ledge."
+        path="/terms-of-service"
+      />
       <Navbar />
       <section className="pt-28 pb-14 md:pt-36 md:pb-20 bg-[#F8F7F5]">
         <div className="max-w-3xl mx-auto px-6 text-center">

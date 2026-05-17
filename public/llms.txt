@@ -1,0 +1,24 @@
+# Ledge
+
+> Ledge is a mobile-first, order-to-dispatch platform built for Indian FMCG distributors, super-stockists, and manufacturers. It replaces spreadsheets, WhatsApp threads, and legacy ERP with one clean app for orders, stock, dealers, payments, and GST.
+
+Ledge runs in the browser and as an installable Progressive Web App (PWA), with offline-ready order capture for field sales teams in low-connectivity areas. Pricing starts free for 30 days, then three public tiers (Free, Growth, Scale). Custom/enterprise plans are available via WhatsApp at +91 81380 84689.
+
+## Pages
+
+- [Home](/): Product overview, pricing, and 30-day free trial signup.
+- [About Us](/about-us): Why Ledge exists and who it's built for.
+- [Contact](/contact): Sales, support, and partnership contacts.
+- [Sign In / Sign Up](/auth): Account access via email or Google.
+- [Privacy Policy](/privacy-policy): How Ledge collects and protects user data.
+- [Terms of Service](/terms-of-service): Rules for using the platform.
+- [Refund Policy](/refund-policy): Cancellation and refund terms for paid plans.
+
+## Key facts
+
+- Built for: Indian FMCG distributors, super-stockists, manufacturers.
+- Core modules: orders, stock & warehouses, dealers, sales team, schemes, targets, claims, billing, reports.
+- Languages supported: English, Hindi, Malayalam.
+- GST-ready invoicing, WhatsApp order sharing, role-based access (Super Admin, Sales Manager, Accountant, Salesperson).
+- Free trial: 30 days, no credit card required.
+- Contact: hello@getledge.in · +91 81380 84689

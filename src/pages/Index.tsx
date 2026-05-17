@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SplashScreen } from "@/components/SplashScreen";
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Hero } from "@/components/landing/sections/Hero";
 import { TrustBar } from "@/components/landing/sections/TrustBar";
@@ -29,19 +30,26 @@ export default function Index() {
 
   return (
     <div className="font-body antialiased light" data-theme="light" style={{ colorScheme: "light", scrollBehavior: "smooth" }}>
+      <SeoHead
+        title="Ledge — The Operating System for India's FMCG Businesses"
+        description="Orders, payments, stock, invoices and reports — one mobile app for India's FMCG super-stockists. Mobile-first, works offline. Start free for 30 days."
+        path="/"
+      />
       <Navbar />
-      <Hero />
-      <TrustBar />
-      <Problem />
-      <HowItWorks />
-      <Outcome />
-      <LedgeIntelligence />
-      <Features />
-      <WhyLedge />
-      <Testimonials />
-      <Founder />
-      <Pricing />
-      <FinalCTA />
+      <main>
+        <Hero />
+        <TrustBar />
+        <Problem />
+        <HowItWorks />
+        <Outcome />
+        <LedgeIntelligence />
+        <Features />
+        <WhyLedge />
+        <Testimonials />
+        <Founder />
+        <Pricing />
+        <FinalCTA />
+      </main>
       <Footer />
     </div>
   );

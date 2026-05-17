@@ -3,7 +3,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
-const BASE_URL = "https://www.getledge.in";
+const BASE_URL = "https://getledge.in";
 
 interface SitemapEntry {
   path: string;
@@ -14,11 +14,15 @@ interface SitemapEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
-// Only public, indexable routes. App routes are auth-gated and excluded.
+// Public, indexable routes only.
+// /login, /signup are Navigate redirects → excluded (canonical = /auth).
+// /welcome, /reset-password are post-auth flows → excluded.
+// All /dashboard, /orders, /stock, etc. are auth-gated → excluded.
 const entries: SitemapEntry[] = [
   { path: "/", lastmod: today, changefreq: "weekly", priority: "1.0" },
   { path: "/about-us", lastmod: today, changefreq: "monthly", priority: "0.7" },
   { path: "/contact", lastmod: today, changefreq: "monthly", priority: "0.7" },
+  { path: "/auth", lastmod: today, changefreq: "monthly", priority: "0.5" },
   { path: "/privacy-policy", lastmod: today, changefreq: "yearly", priority: "0.3" },
   { path: "/terms-of-service", lastmod: today, changefreq: "yearly", priority: "0.3" },
   { path: "/refund-policy", lastmod: today, changefreq: "yearly", priority: "0.3" },

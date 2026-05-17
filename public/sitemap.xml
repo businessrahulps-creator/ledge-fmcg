@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.getledge.in/</loc>
+    <loc>https://getledge.in/</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.getledge.in/about-us</loc>
+    <loc>https://getledge.in/about-us</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.getledge.in/contact</loc>
+    <loc>https://getledge.in/contact</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.getledge.in/privacy-policy</loc>
+    <loc>https://getledge.in/auth</loc>
+    <lastmod>2026-05-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://getledge.in/privacy-policy</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.getledge.in/terms-of-service</loc>
+    <loc>https://getledge.in/terms-of-service</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.getledge.in/refund-policy</loc>
+    <loc>https://getledge.in/refund-policy</loc>
     <lastmod>2026-05-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

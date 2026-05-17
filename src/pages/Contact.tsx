@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, Globe } from "lucide-react";
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Footer } from "@/components/landing/sections/Footer";
 
@@ -15,6 +16,11 @@ const fadeUp = {
 export default function Contact() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <SeoHead
+        title="Contact Ledge — Talk to Sales for Indian FMCG"
+        description="Reach the Ledge team for demos, onboarding help, or partnership questions. Call or WhatsApp +91 81380 84689, or email hello@getledge.in."
+        path="/contact"
+      />
       <Navbar />
 
       {/* Hero */}

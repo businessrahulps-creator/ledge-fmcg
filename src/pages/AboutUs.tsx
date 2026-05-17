@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Building2, Target, Users, Shield, Mail } from "lucide-react";
+import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Footer } from "@/components/landing/sections/Footer";
 
@@ -49,6 +50,11 @@ const sections = [
 export default function AboutUs() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <SeoHead
+        title="About Ledge — Built for Indian FMCG Owners"
+        description="Ledge is built for Indian business owners who run both factory and field. One platform for orders, payments, dealers, and stock — in real time, from any device."
+        path="/about-us"
+      />
       <Navbar />
 
       {/* Hero */}
@@ -76,7 +82,7 @@ export default function AboutUs() {
       </section>
 
       {/* Content */}
-      <section className="flex-1 py-12 md:py-20">
+      <main className="flex-1 py-12 md:py-20">
         <div className="max-w-3xl mx-auto px-6 space-y-14">
           {sections.map((s, idx) => (
             <motion.div
@@ -152,7 +158,7 @@ export default function AboutUs() {
             </div>
           </motion.div>
         </div>
-      </section>
+      </main>
 
       <Footer />
     </div>
