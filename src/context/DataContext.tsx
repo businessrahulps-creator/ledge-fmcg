@@ -228,9 +228,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
         // Stash for phase 2 stock-item mapping
         return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
-      } finally {
-        // Flip loading off the moment critical data lands, even if phase 2 is still running.
-        if (token === fetchTokenRef.current) setLoading(false);
+        // Cold start intentionally keeps `loading=true` until phase 2 finishes
+        // (see outer finally). Avoids the "loading→false, arrays still empty"
+        // window where pages flash empty numbers before phase 2 lands.
+        return { prods, gds, orderPrefix: company?.order_prefix || "ORD", orderSequence: company?.next_order_sequence || 1, dists, sps, mappedSchemes };
+      } catch (err) {
+        // Re-throw so the outer try/catch logs it; do NOT swallow here.
+        throw err;
       }
     })();
 
