@@ -109,6 +109,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const { isRefreshing } = useData();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
   const mainRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
 
