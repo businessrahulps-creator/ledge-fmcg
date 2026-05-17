@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
@@ -307,25 +308,21 @@ export default function Distributors() {
         {filtered.length > 0 ? (
           <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         ) : (
-          <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
-            {items.length === 0 ? (
-              <>
-                <MapPin className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No dealers yet</p>
-                <p className="text-xs text-muted-foreground">Add your first dealer to start managing your network</p>
-                <Button size="sm" className="mt-3" onClick={openNew}>
-                  <Plus className="h-4 w-4" />
-                  Add Dealer
-                </Button>
-              </>
-            ) : (
-              <>
-                <Search className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                <p className="mt-3 text-sm font-medium">No dealers match your search</p>
-                <p className="text-xs text-muted-foreground">Try a different search term</p>
-              </>
-            )}
-          </div>
+          items.length === 0 ? (
+            <EmptyCard
+              icon={MapPin}
+              title="No dealers added yet."
+              description="Add your first dealer to start taking orders and tracking outstanding."
+              actionLabel="Add dealer"
+              onAction={openNew}
+            />
+          ) : (
+            <EmptyCard
+              icon={Search}
+              title="No dealers match your search."
+              description="Try a different name, city, or phone number."
+            />
+          )
         )}
 
         {/* Add/Edit Dialog */}

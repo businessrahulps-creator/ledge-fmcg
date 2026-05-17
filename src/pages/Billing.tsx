@@ -4,6 +4,8 @@ import { Plus, FileText, Download, Trash2, Lock, Search, Filter, Link2, ArrowRig
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
+import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 // @react-pdf/renderer is dynamically imported below, never statically.
@@ -85,6 +87,12 @@ export default function Billing() {
   const [searchParams] = useSearchParams();
 
   const isLoading = usePageLoading(api.loading);
+
+  // Trust stamp: refresh whenever a non-loading invoice snapshot lands.
+  const [lastReconciled, setLastReconciled] = useState(() => new Date());
+  useEffect(() => {
+    if (!api.loading) setLastReconciled(new Date());
+  }, [api.loading, invoices.length]);
 
   // Persist filters across navigation (e.g. opening a draft and coming back)
   const FILTER_KEY = "billing:filters";
@@ -482,12 +490,15 @@ export default function Billing() {
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="h1-display">Billing</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
               Generate invoices, estimates, and credit notes from orders
             </p>
+            <div className="mt-1.5">
+              <ReconcileStamp updatedAt={lastReconciled} />
+            </div>
           </div>
           <Button onClick={() => { resetForm(); setShowCreate(true); }} className="gap-1.5">
             <Plus className="h-4 w-4" />
@@ -574,13 +585,15 @@ export default function Billing() {
         </div>
 
         {/* Invoice List */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className="glass-card overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className={filtered.length === 0 ? "" : "glass-card overflow-hidden"}>
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" strokeWidth={1.5} />
-              <p className="text-sm font-medium text-muted-foreground">No documents yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Create your first billing document from an order</p>
-            </div>
+            <EmptyCard
+              icon={FileText}
+              title="All clear. Nothing to bill right now."
+              description="Bills you create will appear here. Start one from an existing order."
+              actionLabel="New Document"
+              onAction={() => { resetForm(); setShowCreate(true); }}
+            />
           ) : (
             <>
               {/* Desktop table */}

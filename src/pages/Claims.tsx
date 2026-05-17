@@ -481,10 +481,11 @@ export default function Claims() {
           <TabsContent value={tab} className="mt-4">
             {filtered.length === 0 ? (
               <EmptyState
+                card
                 icon={RotateCcw}
-                title={`No ${tab === "all" ? "" : tab} claims`}
-                description={tab === "open" ? "All clear! No pending returns or claims." : "Claims will appear here once recorded."}
-                actionLabel={tab === "open" ? "New Claim" : undefined}
+                title={tab === "open" ? "No returns or claims." : `No ${tab} claims.`}
+                description={tab === "open" ? "When a dealer returns stock or raises a claim, it lives here." : "Claims will appear here once recorded."}
+                actionLabel={tab === "open" ? "Record a return" : undefined}
                 onAction={tab === "open" ? () => setNewClaimOpen(true) : undefined}
               />
             ) : (

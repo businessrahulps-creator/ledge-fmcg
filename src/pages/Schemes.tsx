@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -252,19 +253,13 @@ export default function Schemes() {
 
           {/* Empty state */}
           {schemes.length === 0 && (
-            <div className="glass-card rounded-md p-8 text-center">
-              <Gift className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-              <h3 className="text-sm font-semibold">No schemes yet</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Create your first scheme to automatically apply discounts to orders
-              </p>
-              {canManageSchemes && (
-                <Button onClick={openAdd} variant="outline" className="mt-4 gap-1.5" size="sm">
-                  <Plus className="h-3.5 w-3.5" />
-                  Create Scheme
-                </Button>
-              )}
-            </div>
+            <EmptyCard
+              icon={Gift}
+              title="No offers running."
+              description="Create an offer to push slow stock or reward your big dealers."
+              actionLabel={canManageSchemes ? "Create offer" : undefined}
+              onAction={canManageSchemes ? openAdd : undefined}
+            />
           )}
 
           {/* Active Schemes */}

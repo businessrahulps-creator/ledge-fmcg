@@ -1,5 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyCard } from "@/components/ui/empty-card";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
@@ -8,18 +9,18 @@ interface EmptyStateProps {
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
-  /** When true, renders inside a glass-card with padding (use on standalone pages). */
+  /** When true, renders inside a Cream EmptyCard surface (use on standalone pages). */
   card?: boolean;
   className?: string;
 }
 
 /**
  * Standardized empty state for list pages.
- * - Soft icon, friendly title, optional description, single primary CTA.
- * - Use `card` prop when not already inside a card container.
+ * - When `card` is true, delegates to <EmptyCard /> for unified Cream surface.
+ * - When `card` is false, renders the legacy inline soft icon + text layout.
  */
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   actionLabel,
@@ -27,11 +28,23 @@ export function EmptyState({
   card = false,
   className,
 }: EmptyStateProps) {
+  if (card) {
+    return (
+      <EmptyCard
+        icon={icon}
+        title={title}
+        description={description}
+        actionLabel={actionLabel}
+        onAction={onAction}
+        className={className}
+      />
+    );
+  }
+  const Icon = icon;
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center",
-        card ? "glass-card rounded-xl py-12 px-6" : "py-16",
+        "flex flex-col items-center justify-center text-center py-16",
         className,
       )}
     >
