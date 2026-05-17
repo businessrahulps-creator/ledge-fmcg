@@ -38,9 +38,20 @@ const primaryMobileNav = [
   { title: "Insights", url: "/reports", icon: ChartNoAxesCombined },
 ];
 
-const moreGroups = [
+type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
+
+const TONE_STYLES: Record<MoreTone, { iconBg: string; iconFg: string; activeBg: string; activeFg: string }> = {
+  warning: { iconBg: "bg-warning/10", iconFg: "text-warning", activeBg: "bg-warning/15", activeFg: "text-warning" },
+  primary: { iconBg: "bg-primary/10", iconFg: "text-primary", activeBg: "bg-primary/15", activeFg: "text-primary" },
+  success: { iconBg: "bg-success/10", iconFg: "text-success", activeBg: "bg-success/15", activeFg: "text-success" },
+  accent:  { iconBg: "bg-accent/15",  iconFg: "text-accent-foreground", activeBg: "bg-accent/25", activeFg: "text-accent-foreground" },
+  muted:   { iconBg: "bg-muted",      iconFg: "text-foreground/70", activeBg: "bg-primary/10",  activeFg: "text-primary" },
+};
+
+const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
   {
     label: "Work",
+    tone: "warning",
     items: [
       { title: "Money to Collect", url: "/billing", icon: Wallet },
       { title: "Returns", url: "/claims", icon: RotateCcw },
@@ -48,6 +59,7 @@ const moreGroups = [
   },
   {
     label: "Catalog",
+    tone: "primary",
     items: [
       { title: "Schemes", url: "/schemes", icon: Gift },
       { title: "Targets", url: "/targets", icon: Target },
@@ -55,6 +67,7 @@ const moreGroups = [
   },
   {
     label: "Relationships",
+    tone: "success",
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
@@ -63,12 +76,14 @@ const moreGroups = [
   },
   {
     label: "Insights",
+    tone: "accent",
     items: [
       { title: "Performance", url: "/performance", icon: TrendingUp },
     ],
   },
   {
     label: "Account",
+    tone: "muted",
     items: [
       { title: "Settings", url: "/settings", icon: Settings },
     ],
