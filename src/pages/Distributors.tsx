@@ -7,6 +7,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -248,6 +249,27 @@ export default function Distributors() {
                   )}
                 </div>
                 <div className="flex gap-0.5 shrink-0">
+                  {d.contact && (d.outstandingAmount || 0) > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-success active:scale-95"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
+                        const amount = formatCurrency(d.outstandingAmount || 0);
+                        const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
+                        const url = phone
+                          ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
+                          : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                        window.open(url, "_blank", "noopener,noreferrer");
+                      }}
+                      aria-label={`Send payment reminder to ${d.name} on WhatsApp`}
+                      title="Send payment reminder on WhatsApp"
+                    >
+                      <WhatsAppIcon className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
                     <Pencil className="h-3 w-3" />
                   </Button>
