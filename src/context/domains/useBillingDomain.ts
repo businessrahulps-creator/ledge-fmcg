@@ -119,7 +119,7 @@ export function useBillingDomain(deps: BillingDeps) {
       const seq = Array.isArray(seqData) ? seqData[0] : seqData;
       const invoiceNumber = `${seq.prefix}-${new Date().getFullYear()}-${String(seq.seq).padStart(4, "0")}`;
 
-      const { data, error } = await supabase.from("invoices" as any).insert({
+      const { data, error } = await supabase.from("invoices").insert({
         company_id: deps.companyId, doc_type: invoice.docType, invoice_number: invoiceNumber,
         invoice_date: invoice.invoiceDate, source_order_id: invoice.sourceOrderId || null,
         buyer_name: sanitizeInput(invoice.buyerName), buyer_address: sanitizeInput(invoice.buyerAddress),
@@ -141,7 +141,7 @@ export function useBillingDomain(deps: BillingDeps) {
       const invId = (data as any).id;
 
       if (invoice.lines.length > 0) {
-        const { error: lErr } = await supabase.from("invoice_lines" as any).insert(
+        const { error: lErr } = await supabase.from("invoice_lines").insert(
           invoice.lines.map(l => ({
             invoice_id: invId, product_name: sanitizeInput(l.productName), hsn_code: sanitizeInput(l.hsnCode),
             quantity: l.quantity, unit: l.unit, unit_price: l.unitPrice, taxable_value: l.taxableValue,
@@ -173,7 +173,7 @@ export function useBillingDomain(deps: BillingDeps) {
       return;
     }
 
-    const { error } = await supabase.from("invoices" as any).update(dbUpdates).eq("id", id);
+    const { error } = await supabase.from("invoices").update(dbUpdates).eq("id", id);
     if (error) { handleSupabaseError(error, { source: "crud:invoices.update", title: "Failed to update document", context: { id } }); return; }
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
   }, []);
@@ -188,7 +188,7 @@ export function useBillingDomain(deps: BillingDeps) {
       return false;
     }
 
-    const { error } = await supabase.from("invoices" as any).delete().eq("id", id);
+    const { error } = await supabase.from("invoices").delete().eq("id", id);
     if (error) { handleSupabaseError(error, { source: "crud:invoices.delete", title: "Failed to delete document", context: { id } }); return false; }
     setInvoices(prev => prev.filter(i => i.id !== id));
     return true;
@@ -204,7 +204,7 @@ export function useBillingDomain(deps: BillingDeps) {
     }
 
     try {
-      const { data, error } = await supabase.from("claims" as any).insert({
+      const { data, error } = await supabase.from("claims").insert({
         company_id: deps.companyId, order_id: claim.orderId, order_number: claim.orderNumber,
         distributor_id: claim.distributorId, distributor_name: sanitizeInput(claim.distributorName),
         claim_type: claim.claimType, status: "open", reason: sanitizeInput(claim.reason),
@@ -214,7 +214,7 @@ export function useBillingDomain(deps: BillingDeps) {
       const claimId = (data as any).id;
 
       if (claim.lines.length > 0) {
-        const { error: linesErr } = await supabase.from("claim_lines" as any).insert(
+        const { error: linesErr } = await supabase.from("claim_lines").insert(
           claim.lines.map(l => ({
             claim_id: claimId, product_id: l.productId, product_name: sanitizeInput(l.productName),
             quantity: l.quantity, unit_price: l.unitPrice, line_total: l.lineTotal,
@@ -224,7 +224,7 @@ export function useBillingDomain(deps: BillingDeps) {
       }
 
       if (claim.restoreStock) {
-        const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order" as any, { p_order_id: claim.orderId });
+        const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: claim.orderId });
         if (revErr) {
           handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Claim recorded but stock not restored", context: { orderId: claim.orderId } });
         } else {
@@ -254,7 +254,7 @@ export function useBillingDomain(deps: BillingDeps) {
       return;
     }
 
-    const { error } = await supabase.from("claims" as any).update(dbUpdates).eq("id", id);
+    const { error } = await supabase.from("claims").update(dbUpdates).eq("id", id);
     if (error) { handleSupabaseError(error, { source: "crud:claims.update", title: "Failed to update claim", context: { id } }); return; }
     setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
   }, []);
@@ -270,7 +270,7 @@ export function useBillingDomain(deps: BillingDeps) {
   const safeRefetchClaims = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const data = await fetchAllChunked<ClaimRow>(() =>
-      supabase.from("claims" as any).select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+      supabase.from("claims").select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
     );
     setClaims(data.map(mapClaimRow));
   }, [deps.companyId]);

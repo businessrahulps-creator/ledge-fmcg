@@ -123,7 +123,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       }
 
       if (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") {
-        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
           p_order_id: inserted.id,
           p_dispatch_date: order.dispatchDate || null,
           p_vehicle: order.vehicle || null,
@@ -219,7 +219,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
                       newDelivery === "pending";
 
     if (movingToDispatched && currentOrder && deps.companyId) {
-      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic" as any, {
+      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
         p_order_id: id,
         p_dispatch_date: updates.dispatchDate || currentOrder.dispatchDate || null,
         p_vehicle: updates.vehicle ?? null,
@@ -234,7 +234,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
 
     if (reverting && deps.companyId) {
-      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order" as any, { p_order_id: id });
+      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: id });
       if (revErr) {
         handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Failed to reverse stock deduction", context: { id } });
       } else {

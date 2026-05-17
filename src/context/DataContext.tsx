@@ -243,8 +243,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "orders"),
         fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "secondary_sales"),
         fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "targets"),
-        fetchAllChunked(() => supabase.from("claims" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
-        fetchAllChunked(() => supabase.from("invoices" as any).select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
+        fetchAllChunked(() => supabase.from("claims").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
+        fetchAllChunked(() => supabase.from("invoices").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
     })();
