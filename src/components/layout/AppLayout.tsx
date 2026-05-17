@@ -121,7 +121,7 @@ function PageTitle() {
 }
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { userRole } = useAuth();
+  const { userRole, profile, signOut } = useAuth();
   const { isRefreshing } = useData();
   const location = useLocation();
   const reduceMotion = useReducedMotion();
