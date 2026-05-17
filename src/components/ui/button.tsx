@@ -13,24 +13,24 @@ import { cn } from "@/lib/utils";
  * - Active: subtle press (no scale on link)
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium tracking-[-0.005em] ring-offset-background transition-[background-color,box-shadow,transform,color,border-color] duration-fast ease-fluent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium tracking-[-0.005em] ring-offset-background transition-[background-color,box-shadow,transform,color,border-color,opacity] duration-[90ms] ease-fluent motion-reduce:!transition-opacity motion-reduce:!duration-[120ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-depth-2 hover:bg-primary/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
+          "bg-primary text-primary-foreground shadow-depth-2 hover:bg-primary/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-depth-2 hover:bg-destructive/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
+          "bg-destructive text-destructive-foreground shadow-depth-2 hover:bg-destructive/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0",
         outline:
-          "border border-input bg-background hover:bg-muted/60 hover:text-foreground hover:border-foreground/20 active:bg-muted active:translate-y-[0.5px]",
+          "border border-input bg-background hover:bg-muted/60 hover:text-foreground hover:border-foreground/20 active:bg-muted active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-depth-2 hover:bg-secondary/80 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
-        ghost: "hover:bg-muted/60 hover:text-foreground active:bg-muted",
-        subtle: "bg-transparent text-foreground/80 hover:bg-muted/50 hover:text-foreground active:bg-muted",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-secondary text-secondary-foreground shadow-depth-2 hover:bg-secondary/80 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0",
+        ghost: "hover:bg-muted/60 hover:text-foreground active:bg-muted active:opacity-[0.96]",
+        subtle: "bg-transparent text-foreground/80 hover:bg-muted/50 hover:text-foreground active:bg-muted active:opacity-[0.96]",
+        link: "text-primary underline-offset-4 hover:underline active:opacity-[0.96]",
         success:
-          "bg-success text-success-foreground shadow-depth-2 hover:bg-success/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-[0.5px]",
-        pill: "rounded-pill bg-primary text-primary-foreground shadow-depth-2 hover:bg-primary/90 hover:shadow-depth-4",
+          "bg-success text-success-foreground shadow-depth-2 hover:bg-success/90 hover:shadow-depth-4 active:shadow-depth-2 active:translate-y-px active:opacity-[0.96] motion-reduce:active:translate-y-0",
+        pill: "rounded-pill bg-primary text-primary-foreground shadow-depth-2 hover:bg-primary/90 hover:shadow-depth-4 active:opacity-[0.96]",
       },
       size: {
         default: "h-10 px-5 py-2",

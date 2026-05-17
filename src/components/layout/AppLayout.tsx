@@ -4,7 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
 import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet } from "lucide-react";
 import { useData } from "@/context/DataContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
@@ -109,6 +109,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole } = useAuth();
   const { isRefreshing } = useData();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
   const mainRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
 
@@ -313,10 +314,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  transition={{ type: "spring", damping: 26, stiffness: 200 }}
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
+                  animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -4 }}
+                  transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.2, 0.8, 0.2, 1] }}
                   style={{ willChange: "opacity, transform" }}
                 >
                   {children}
