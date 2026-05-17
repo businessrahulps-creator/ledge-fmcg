@@ -26,7 +26,7 @@ interface ErrorRow {
 
 const SEVERITY_TONE: Record<string, string> = {
   error: "bg-destructive/10 text-destructive border-destructive/20",
-  warning: "bg-amber-500/10 text-amber-700 border-amber-500/20",
+  warning: "bg-warning/10 text-warning border-warning/20",
   info: "bg-muted text-muted-foreground border-border",
 };
 
@@ -118,7 +118,7 @@ export default function AdminErrors() {
             </div>
           ) : rows.length === 0 ? (
             <div className="p-10 text-center text-sm text-muted-foreground">
-              <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald-500" />
+              <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success" />
               No errors {filter === "open" ? "open" : "logged"}. The app is running clean.
             </div>
           ) : (
@@ -143,7 +143,7 @@ export default function AdminErrors() {
                           </Badge>
                           <span className="text-xs font-mono text-muted-foreground">{r.source}</span>
                           {r.resolved && (
-                            <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
+                            <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/20">
                               resolved
                             </Badge>
                           )}
