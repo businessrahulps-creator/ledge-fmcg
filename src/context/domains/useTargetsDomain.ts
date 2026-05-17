@@ -127,7 +127,7 @@ export function useTargetsDomain(deps: DomainDeps) {
       () => supabase.from("targets").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }),
       1000, 200, "targets",
     );
-    setTargets(data.map((t) => ({ id: t.id, entityType: t.entity_type, entityId: t.entity_id, entityName: t.entity_name, periodType: t.period_type, periodStart: t.period_start, targetRevenue: Number(t.target_revenue), targetOrders: t.target_orders })));
+    setTargets(data.map((t) => ({ id: t.id, entityType: t.entity_type as Target["entityType"], entityId: t.entity_id, entityName: t.entity_name, periodType: t.period_type as Target["periodType"], periodStart: t.period_start, targetRevenue: Number(t.target_revenue), targetOrders: t.target_orders })));
   }, [deps.companyId]);
 
   const safeRefetchSecondarySales = useCallback(async () => {
