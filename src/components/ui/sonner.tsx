@@ -14,7 +14,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
-      position={isMobile ? "top-center" : "bottom-right"}
+      position={isMobile ? "bottom-center" : "bottom-right"}
       visibleToasts={3}
       gap={10}
       duration={4000}
