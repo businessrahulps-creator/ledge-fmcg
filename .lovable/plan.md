@@ -1,44 +1,76 @@
-**Root cause audit**
 
-1. **Loaded data can be cleared during transient auth/profile gaps**
-   - `src/context/DataContext.tsx:126-142`
-   - The effect clears every data array whenever `authReady && !companyId` is true. If the profile/company id briefly drops during auth/profile refresh, already-rendered pages receive empty arrays, so KPI numbers and lists disappear, then return when `companyId` resolves again.
+# Brand Color Placement Plan
 
-2. **Background refresh can publish partial page state**
-   - `src/context/DataContext.tsx:204-227`
-   - Phase 1 of `fetchAll` immediately replaces distributors/products/salespersons/schemes while phase 2 is still loading. On pages whose numbers combine phase-1 and phase-2 data, this can create a short inconsistent/empty-looking frame during background refresh.
+Principle: each brand color = one job. We are not adding decoration. We are promoting moments where the color already *means* something so the brand reads as intentional, not painted on.
 
-3. **Fetch failures still end the refresh after partially-applied state**
-   - `src/context/DataContext.tsx:301-310`
-   - If phase 2 fails after phase 1 has already replaced data, the app keeps the partial state. The console shows repeated pagination/logging around `order_lines` and `order_schemes`, so this is the area most likely to amplify the flicker on all pages.
+Tokens stay as-is (`--midnight`, `--success` Forest, `--warning` Terracotta, `--background` Bone). No new hex values. No raw colors in components.
 
-4. **There is a small duplicate return bug in phase 1**
-   - `src/context/DataContext.tsx:230-234`
-   - Not the main glitch, but it confirms the fetch block was edited recently and should be cleaned while touching the same file.
+---
 
-**Files to touch**
+## PR-A — Terracotta promotion: attention that needs a human
 
-- `src/context/DataContext.tsx` only.
+**Why first:** lowest risk, highest emotional payoff. Terracotta already exists as warning; we're sharpening *where* it shows up.
 
-**Fix plan**
+Scope:
+- **Aging buckets in Billing** — 30+ neutral, 60+ Terracotta wash + left-bar, 90+ destructive. Today it's a flat color ramp; intensify the 60+ Terracotta moment.
+- **Credit at Risk SignalCard** — already promoted (PR11); lock canonical Terracotta tokens, remove any lingering amber.
+- **Claims page header accent** — thin Terracotta top-rule on PageHeader, signals "warm conversation, not error."
+- **First-week onboarding active chapter** — Terracotta left-bar on the currently-active ChapterCard.
 
-1. **Stop clearing data during profile/company transient states**
-   - Change the clear-data effect so it only clears arrays when the user is truly signed out, not merely when `companyId` is temporarily null.
-   - This directly prevents the dealer page and other pages from receiving empty arrays for one second.
+Files: `src/pages/Billing.tsx`, `src/pages/Claims.tsx`, `src/components/onboarding/ChapterCard.tsx`, `src/index.css` (one new `.aging-warn` utility if needed).
 
-2. **Make background refresh atomic**
-   - For background fetches, collect phase 1 + phase 2 results first, then commit all state together after the full fetch succeeds.
-   - Keep cold-start behavior as-is: first load can still show skeleton until data is ready.
-   - This preserves the current UI while fresh data is loading, then swaps to the new snapshot in one render.
+---
 
-3. **Preserve last good data on fetch error**
-   - If a background fetch fails, do not replace any existing data with partial results and do not flip the app into empty states.
-   - Only offline cold-start should attempt cache fallback.
+## PR-B — Forest promotion: money in, health
 
-4. **Remove the unreachable duplicate return**
-   - Delete the duplicate return in phase 1 while keeping behavior unchanged.
+Scope:
+- **Revenue recognized KPI** on Dashboard + Performance — Forest underline accent beneath the number (not on the number).
+- **Payment received rows** in Billing — Forest left-bar on `status=paid` rows (mirrors how pending gets warning today).
+- **Targets ≥ 100%** — Forest pill with tiny up-tick on Targets cards and Salesperson scorecards.
+- **Stock "healthy" badge** — canonicalize on Forest token (some places still use raw emerald per PR6 notes — sweep).
 
-**Expected result**
+Files: `src/pages/Dashboard.tsx`, `src/pages/Performance.tsx`, `src/pages/Billing.tsx`, `src/pages/Targets.tsx`, `src/pages/SalespersonDetail.tsx`, `src/pages/Stock.tsx`.
 
-- Navigating or waiting on `/distributors` should no longer cause dealers, KPI values, or page content to disappear and reappear.
-- Background refreshes still happen, but the user keeps seeing the last stable snapshot until the next full snapshot is ready.
+---
+
+## PR-C — Midnight as letterhead: authority and finality
+
+Scope:
+- **PDF letterhead pass** — unify Midnight band across `OrderInvoicePdf`, `GstInvoicePdf`, `DealerStatementPdf`, `SalespersonStatementPdf`, `PerformanceReportPdf`, `ReportPdf`. One shared `PdfHeader` styling.
+- **Detail page Midnight band** — thin 4px Midnight rule above PageHeader on DealerDetail, OrderDetail, SalespersonDetail. "Record of truth."
+- **Reconciled / locked rows** — faint Midnight left-bar on reconciled orders and closed-period rows (currently generic muted).
+
+Files: `src/components/pdf/PdfHeader.tsx`, `src/components/pdf/PdfStyles.ts`, all `src/components/pdf/*Pdf.tsx`, `src/pages/DealerDetail.tsx`, `src/pages/OrderDetail.tsx`, `src/pages/SalespersonDetail.tsx`, `src/components/ui/page-header.tsx` (optional `accent` prop).
+
+---
+
+## PR-D — Bone as stationery + audit sweep
+
+Scope:
+- **PDF body background** — explicit Bone (not pure white) so printed Ledge documents read as branded stationery.
+- **Settings section dividers** — Bone bands between groups for editorial rhythm on Settings + Company pages.
+- **Audit sweep** — `rg "emerald-|amber-|red-|blue-|orange-"` across `/src/pages` and `/src/components` (excluding `/landing`). Convert any survivors to semantic tokens. This is the final cleanup of the PR6/PR7 migration.
+
+Files: `src/components/pdf/PdfStyles.ts`, `src/pages/Settings.tsx`, `src/pages/Company.tsx`, plus whatever the sweep surfaces.
+
+---
+
+## Out of scope (explicit)
+
+- Landing page — has its own tinted-card system (`mem://style/landing-tinted-cards`) and its own rebrand plan. Untouched.
+- Tinting random Cards in `/app` — would dilute Bone-as-surface. Forbidden.
+- Gradients on brand colors — kept flat and honest.
+- Hover/press states — those stay depth tokens, never brand color.
+- Dark mode — archived for V2.
+
+## Memory updates after each PR
+
+Append a short memory under `mem://style/brand-placement-<pr>` recording what shipped and which tokens are now canonical for that meaning.
+
+## Suggested order
+
+A → B → C → D. Each is independently shippable. PR-A and PR-B are ~1 session each. PR-C is the largest (PDF unification). PR-D is a cleanup.
+
+---
+
+Approve and I'll start with PR-A.

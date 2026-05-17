@@ -56,7 +56,7 @@ export function SaveIndicator({ status, lastSavedAt, className }: SaveIndicatorP
   }
   if (status === "offline") {
     return (
-      <span className={cn(base, "text-amber-600 dark:text-amber-400", className)}>
+      <span className={cn(base, "text-warning", className)}>
         <WifiOff className="h-3 w-3" />
         Offline — will sync
       </span>

@@ -5,14 +5,15 @@ export const pdfStyles = StyleSheet.create({
     padding: 40,
     fontFamily: "Helvetica",
     fontSize: 9,
-    color: "#000",
+    color: "#0F1F3A",
+    backgroundColor: "#F5EFE6",
   },
-  // Header
+  // Header — Midnight letterhead (PR-C brand placement)
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 20,
-    borderBottom: "1pt solid #000",
+    borderBottom: "1.5pt solid #0F1F3A",
     paddingBottom: 10,
   },
   companyName: {
@@ -107,7 +108,7 @@ export const pdfStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#374151",
+    backgroundColor: "#0F1F3A",
     color: "#fff",
     paddingVertical: 6,
     paddingHorizontal: 8,
@@ -168,7 +169,7 @@ export const pdfStyles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderTop: "1pt solid #374151",
+    borderTop: "1pt solid #0F1F3A",
     backgroundColor: "#F3F4F6",
   },
   totalsLabel: {

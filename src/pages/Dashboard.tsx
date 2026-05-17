@@ -436,6 +436,10 @@ export default function Dashboard() {
                       "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                       s.zero && "text-muted-foreground/35"
                     )}><AnimatedNumber value={s.value} /></p>
+                    {/* Brand placement (PR-B): Forest underline marks "money in" on Delivered Revenue. */}
+                    {i === 0 && !s.zero && (
+                      <span aria-hidden className="mt-1 block h-[2px] w-8 rounded-full bg-success/80" />
+                    )}
                     {s.insight}
                   </div>
                 );

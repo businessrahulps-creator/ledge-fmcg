@@ -97,7 +97,9 @@ export default function DealerDetail() {
             <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => navigate("/distributors")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
+            <div className="relative pl-3">
+              {/* Brand placement (PR-C): Midnight rule — record of truth. */}
+              <span aria-hidden className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary" />
               <h1 className="h1-display">{dealer.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{dealer.location}</span>
@@ -174,7 +176,7 @@ export default function DealerDetail() {
                 const limit = dealer.creditLimit || 0;
                 const outstanding = dealer.outstandingAmount || 0;
                 const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-                const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-red-500" : pct >= 70 ? "border-amber-500" : "border-emerald-500";
+                const borderColor = limit === 0 ? "border-border" : pct >= 100 ? "border-destructive" : pct >= 70 ? "border-warning" : "border-success";
                 const textColor = limit === 0 ? "" : pct >= 100 ? "text-destructive" : pct >= 70 ? "text-warning" : "text-success";
                 return (
                   <div className={`col-span-2 glass-card ${borderColor} p-3 md:p-4`}>
@@ -277,7 +279,7 @@ export default function DealerDetail() {
                               className="border-b border-border/50 row-hover cursor-pointer"
                               onClick={() => navigate(`/orders/${r.orderId}`)}
                             >
-                              <td className="px-4 py-3 font-medium text-primary">{r.orderNumber}</td>
+                              <td className={cn("relative px-4 py-3 font-medium text-primary", tone.leftBar)}>{r.orderNumber}</td>
                               <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.date)}</td>
                               <td className="px-4 py-3 text-right num">{formatCurrency(r.total)}</td>
                               <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.outstanding)}</td>

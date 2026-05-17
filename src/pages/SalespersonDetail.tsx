@@ -60,7 +60,9 @@ export default function SalespersonDetail() {
             <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => navigate("/salespersons")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
+            <div className="relative pl-3">
+              {/* Brand placement (PR-C): Midnight rule — record of truth. */}
+              <span aria-hidden className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary" />
               <h1 className="h1-display">{person.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{person.region}</span>

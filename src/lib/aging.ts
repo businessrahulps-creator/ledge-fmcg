@@ -18,34 +18,45 @@ export const BUCKET_SHORT: Record<AgingBucket, string> = {
   b90: "90+",
 };
 
-/** Tailwind tone tokens (text + bg) per bucket. */
+/**
+ * Tailwind tone tokens per bucket.
+ * Brand placement (PR-A): 0-30 stays neutral, 31-60 is a soft warm hint,
+ * 61-90 is the canonical Terracotta moment ("this needs you"), 90+ is
+ * destructive. `leftBar` is consumed by row renderers to flag attention.
+ */
 export const BUCKET_TONE: Record<
   AgingBucket,
-  { text: string; bg: string; segBg: string; badge: string }
+  { text: string; bg: string; segBg: string; badge: string; leftBar: string }
 > = {
   b0: {
     text: "text-muted-foreground",
     bg: "bg-muted/40",
     segBg: "bg-muted-foreground/35",
     badge: "bg-muted text-muted-foreground border border-border",
+    leftBar: "",
   },
   b31: {
-    text: "text-warning",
-    bg: "bg-warning/10",
-    segBg: "bg-warning/70",
-    badge: "bg-warning/15 text-warning border border-warning/30",
+    // Soft warm hint — not yet a brand moment, just a whisper.
+    text: "text-foreground/75",
+    bg: "bg-warning/5",
+    segBg: "bg-warning/40",
+    badge: "bg-warning/10 text-warning/90 border border-warning/20",
+    leftBar: "",
   },
   b61: {
-    text: "text-accent",
-    bg: "bg-accent/10",
-    segBg: "bg-accent/75",
-    badge: "bg-accent/15 text-accent border border-accent/30",
+    // The canonical Terracotta moment. Wash + bar + bold text.
+    text: "text-warning",
+    bg: "bg-warning/12",
+    segBg: "bg-warning/80",
+    badge: "bg-warning/15 text-warning border border-warning/35",
+    leftBar: "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-warning",
   },
   b90: {
     text: "text-destructive",
     bg: "bg-destructive/10",
     segBg: "bg-destructive/80",
     badge: "bg-destructive/15 text-destructive border border-destructive/30",
+    leftBar: "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-destructive",
   },
 };
 

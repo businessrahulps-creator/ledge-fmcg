@@ -285,8 +285,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 transition={{ type: "spring", damping: 26, stiffness: 200 }}
                 className={`flex items-center justify-center gap-1.5 py-1 text-center text-xs ${
                   syncing
-                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-warning/10 text-warning"
                 }`}
               >
                 {syncing ? (
@@ -299,7 +299,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     <WifiOff className="h-3 w-3" />
                     Offline — using cached data
                     {pendingCount > 0 && (
-                      <span className="ml-1 inline-flex items-center rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                      <span className="ml-1 inline-flex items-center rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-semibold">
                         {pendingCount} pending
                       </span>
                     )}
