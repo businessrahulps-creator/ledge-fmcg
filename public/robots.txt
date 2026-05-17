@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://www.getledge.in/sitemap.xml
+Sitemap: https://getledge.in/sitemap.xml
