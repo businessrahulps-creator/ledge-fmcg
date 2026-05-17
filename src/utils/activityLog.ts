@@ -28,7 +28,7 @@ export async function logActivity(params: LogActivityParams) {
       metadata: params.metadata || {},
     });
   } catch (err) {
-    console.warn("Activity log insert failed:", err);
+    logError({ source: "audit:activity_log.insert", error: err, severity: "warning", context: { entityType: params.entityType, action: params.action } });
   }
 }
 

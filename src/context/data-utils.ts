@@ -184,7 +184,6 @@ const truncationWarnedKeys = new Set<string>();
 function warnPaginationOnce(key: string, detail: string) {
   if (paginationWarnedKeys.has(key)) return;
   paginationWarnedKeys.add(key);
-  console.warn(`[pagination] ${key}: ${detail}`);
   logError({
     source: `pagination:${key}`,
     error: `Pagination needed: ${detail}`,
@@ -196,7 +195,6 @@ function warnPaginationOnce(key: string, detail: string) {
 function warnTruncationOnce(key: string, detail: string) {
   if (truncationWarnedKeys.has(key)) return;
   truncationWarnedKeys.add(key);
-  console.error(`[truncation] ${key}: ${detail}`);
   toast.warning("Some records may be missing", {
     description: `${key} hit the safety cap (${detail}). Reports and totals on this page may be incomplete — please contact support.`,
     duration: 12000,

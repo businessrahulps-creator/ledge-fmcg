@@ -90,7 +90,7 @@ export async function shareOrderOnWhatsApp(
     toast.dismiss(loadingToast);
     // User cancelled share sheet — not an error
     if (err?.name === "AbortError") return;
-    console.error("WhatsApp share failed", err);
+    logError({ source: "share:whatsapp.order", error: err, severity: "warning" });
     toast.error("Share failed", { description: "Please try again." });
   }
 }
@@ -239,7 +239,7 @@ export async function shareInvoiceOnWhatsApp(inv: InvoiceShareData) {
   } catch (err: any) {
     toast.dismiss(loadingToast);
     if (err?.name === "AbortError") return;
-    console.error("WhatsApp share failed", err);
+    logError({ source: "share:whatsapp.invoice", error: err, severity: "warning" });
     toast.error("Share failed", { description: "Please try again." });
   }
 }

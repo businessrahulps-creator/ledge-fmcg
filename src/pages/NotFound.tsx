@@ -2,14 +2,18 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logError } from "@/utils/errorLog";
 
 const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Keep diagnostic for analytics; not user-facing.
-    // eslint-disable-next-line no-console
-    console.warn("404 — non-existent route:", location.pathname);
+    logError({
+      source: "route:404",
+      error: `Non-existent route: ${location.pathname}`,
+      severity: "info",
+      context: { path: location.pathname, referrer: typeof document !== "undefined" ? document.referrer : "" },
+    });
   }, [location.pathname]);
 
   return (
