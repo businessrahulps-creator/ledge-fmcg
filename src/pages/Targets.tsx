@@ -102,7 +102,8 @@ function getStatus(actual: number, target: number): StatusKey {
 }
 
 const STATUS_CONFIG: Record<StatusKey, { label: string; color: string; bg: string; dot: string }> = {
-  exceeded: { label: "Exceeded", color: "text-success", bg: "bg-success/5", dot: "bg-success" },
+  // Brand placement (PR-B): "Exceeded" is the canonical Forest moment — money goal beaten.
+  exceeded: { label: "Exceeded", color: "text-success font-semibold", bg: "bg-success/12 ring-1 ring-success/20", dot: "bg-success" },
   on_track: { label: "On Track", color: "text-primary", bg: "bg-primary/5", dot: "bg-primary" },
   behind: { label: "Behind Target", color: "text-warning", bg: "bg-warning/5", dot: "bg-warning" },
   needs_attention: { label: "Needs Attention", color: "text-destructive", bg: "bg-destructive/5", dot: "bg-destructive" },
