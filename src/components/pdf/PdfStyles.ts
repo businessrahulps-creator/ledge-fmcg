@@ -5,7 +5,8 @@ export const pdfStyles = StyleSheet.create({
     padding: 40,
     fontFamily: "Helvetica",
     fontSize: 9,
-    color: "#000",
+    color: "#0F1F3A",
+    backgroundColor: "#F5EFE6",
   },
   // Header — Midnight letterhead (PR-C brand placement)
   headerRow: {
