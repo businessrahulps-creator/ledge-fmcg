@@ -1,42 +1,55 @@
-# New App Icon Rollout
+# SEO Setup — Final Pass
 
-The uploaded image is the **iOS-style rounded-square app icon** (Ledge striped mark on a white rounded tile with padding). It replaces every surface where the OS / browser / install prompt shows a launcher icon. The bare `ledge-mark.webp` used inline next to the wordmark inside the app stays as-is — it's a different role (transparent inline mark, not a launcher tile).
+You're already in great shape. Most of the heavy lifting is done: `index.html` has title, meta description, canonical, full `og:*` / `twitter:*` set, theme-color, apple-touch, and a rich JSON-LD `@graph` (Organization + WebSite + SoftwareApplication + FAQPage). `robots.txt` exists. Lovable's SEO scanner currently reports **zero findings**.
 
-## Files to replace (asset swap)
+Three concrete gaps remain — plus one in-product step on your side.
 
-Copy the uploaded PNG to a working path, then re-export to the right sizes/formats:
+## What I'll do (code)
 
-| Target | Used for | How |
-|---|---|---|
-| `public/favicon.png` | Browser tab favicon | Resize → 64×64 PNG |
-| `public/apple-touch-icon.png` | iOS home-screen "Add to Home Screen" | Resize → 180×180 PNG |
-| `public/pwa-192.png` | Android PWA install | Resize → 192×192 PNG |
-| `public/pwa-512.png` | Android PWA splash / high-DPI | Resize → 512×512 PNG |
-| `public/pwa-maskable-512.png` | Android adaptive (maskable) | 512×512 PNG with the mark scaled to ~70% inside the safe zone, white background extended edge-to-edge |
-| `src/assets/ledge-app-icon.webp` | In-app references to the launcher tile (InstallPrompt, LedgeSealMoment, etc.) | Re-export as 512×512 WebP |
+### 1. Generate a sitemap
+No `public/sitemap.xml` exists today. Add a generator (the recommended pattern for this stack — keeps the sitemap in sync as routes change):
 
-ImageMagick will be used (via `nix run nixpkgs#imagemagick`) to do the resize + maskable composition in one pass.
+- Create `scripts/generate-sitemap.ts` listing the **6 public, indexable routes**:
+  - `/` (priority 1.0)
+  - `/about-us`
+  - `/contact`
+  - `/privacy-policy`
+  - `/terms-of-service`
+  - `/refund-policy`
+- All app routes (`/dashboard`, `/orders`, `/stock`, etc.) are auth-gated → **deliberately excluded**.
+- Wire `predev` + `prebuild` scripts in `package.json` so the file regenerates on every dev start and every publish.
+- Base URL: `https://www.getledge.in` (matches your canonical).
 
-## Files NOT touched
+### 2. Add `Sitemap:` directive to robots.txt
+Append `Sitemap: https://www.getledge.in/sitemap.xml` so crawlers discover it without guessing the path.
 
-- `src/assets/ledge-mark.webp` — bare inline mark (sidebar, AuthShell, Welcome cover, loader). Different role. Stays.
-- `src/assets/ledge-mark-watermark.webp` — large faint watermark on PDFs/auth. Stays.
-- `src/assets/ledge-logo.webp` — full wordmark. Stays.
-- `index.html`, `manifest.webmanifest` — paths already point at the filenames above, no markup edits needed.
+### 3. Update the LinkedIn `sameAs`
+The current `sameAs` in the Organization JSON-LD points at a personal LinkedIn (`asha-ps-6b0673207`). For brand SEO this should be the **company** LinkedIn page. If you don't have one yet, I'll remove the array entirely (better than pointing at a personal profile from the company schema). **Tell me which:** keep, swap for a company URL, or remove.
 
-## Verification
+## What's NOT changing (and why)
 
-After the swap, re-view each generated file with `code--view` to confirm:
-- Favicon is crisp at small size (the stripes shouldn't muddy)
-- Maskable variant has the mark fully inside the inner 80% safe zone (so Android's circle/squircle crop doesn't clip it)
-- WebP re-export of `ledge-app-icon.webp` looks identical to the source PNG
+- **Title / description / og tags** — already strong and keyword-tuned.
+- **JSON-LD** — already structured for both Google rich results and AI search (ChatGPT, Perplexity, Gemini).
+- **og:image** — already set; leaving it as-is.
+- **`react-helmet-async`** — not needed. Per-route SEO only matters if you publish blog posts or product pages. Static landing + 5 policy pages don't need it. Skip until you launch content marketing.
+- **Manifest, favicon, apple-touch** — all wired correctly with cache-bust query strings.
 
-Then bump `theme_color` in `manifest.webmanifest`? — No, current `#0F1F3A` (Midnight) is correct for the Android status bar; the launcher tile is white but the chrome around it should stay Midnight. No change.
+## What you do in Lovable (UI steps — 2 minutes)
 
-## Out of scope
+After I ship the sitemap:
 
-- Logo wordmark redesign
-- Splash screen layout (just consumes the existing mark)
-- iOS splash images beyond apple-touch-icon (none currently configured)
+1. **Open the SEO & AI search view.**
+   - **Desktop**: click the SEO icon in the navigation bar above the preview (or `Cmd+K` → "SEO").
+   - **Mobile**: tap the **…** in the bottom-right (Chat mode) → **SEO & AI search**.
+2. **Click "Run scan"** to get a fresh report.
+3. **Connect Google Search Console** when prompted — Lovable will auto-verify your domain via meta tag (no DNS edits needed) and submit `sitemap.xml` to Google for you. This is the single biggest unlock for actually getting indexed.
+4. Optionally: **Bing Webmaster Tools** — same idea, takes 1 minute, helps with Bing + ChatGPT search.
 
-Single-session change. Ship after visual QA of the 6 regenerated files.
+## After it's live
+
+Publish once, then in the SEO view you'll see real impression/click data within ~2–4 days. From there I can:
+- Run Semrush keyword research grounded in your actual landing copy
+- Spot any pages that need rewriting for specific FMCG-distribution keywords
+- Build a competitor gap analysis vs other FMCG-DMS tools
+
+**Approve and I'll ship the three code changes. Tell me your LinkedIn preference (company URL / remove / keep) in the same reply.**
