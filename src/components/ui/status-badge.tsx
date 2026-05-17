@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Check, CircleDashed, Clock, Truck } from "lucide-react";
+import { Check, CircleDashed, Clock, Truck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type StatusType = "paid" | "partial" | "pending" | "dispatched" | "delivered";
@@ -22,7 +22,7 @@ const statusLabels: Record<StatusType, string> = {
   delivered: "Delivered",
 };
 
-const statusIcons: Record<StatusType, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
+const statusIcons: Record<StatusType, LucideIcon> = {
   paid: Check,
   partial: CircleDashed,
   pending: Clock,
