@@ -39,6 +39,7 @@ export default function Orders() {
   const api = useApi();
   const { companyInfo } = api;
   const navigate = useNavigate();
+  const canPlaceOrders = useCan("place_orders");
   const orders = api.orders.list();
   const invoices = api.invoices.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
