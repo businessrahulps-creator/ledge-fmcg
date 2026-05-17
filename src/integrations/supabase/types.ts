@@ -1697,6 +1697,7 @@ export type Database = {
         | "override_credit_limit"
         | "view_error_logs"
         | "see_own_performance_only"
+        | "place_orders"
       delivery_status: "pending" | "dispatched" | "delivered"
       invite_status: "pending" | "accepted" | "expired"
       payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
@@ -1845,6 +1846,7 @@ export const Constants = {
         "override_credit_limit",
         "view_error_logs",
         "see_own_performance_only",
+        "place_orders",
       ],
       delivery_status: ["pending", "dispatched", "delivered"],
       invite_status: ["pending", "accepted", "expired"],
