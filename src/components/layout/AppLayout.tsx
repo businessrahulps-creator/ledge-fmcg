@@ -4,7 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
 import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet } from "lucide-react";
 import { useData } from "@/context/DataContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
