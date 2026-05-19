@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -10,9 +11,12 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { MobileSearchSheet } from "@/components/ui/mobile-search-sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { getRecent, type RecentItem } from "@/lib/recent-items";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
+
 import {
   House,
   ClipboardList,
