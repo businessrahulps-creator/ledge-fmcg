@@ -173,17 +173,137 @@ export default function Command() {
 
   const companyName = api.companyInfo?.name?.trim() || "My Business";
 
+  // Build PDF snapshot data
+  const products = api.products?.list?.() ?? [];
+  const pdfData: CommandPdfProps = useMemo(() => {
+    const periodOrders = ordersInPeriod(orders, range);
+    const orderCount = periodOrders.length;
+    const aov = orderCount ? revenue / orderCount : 0;
+    const collections = collectionsInPeriod(orders, range);
+    const outstanding = outstandingTotal(distributors);
+    const creditAtRiskDealers = distributors
+      .filter((d) => d.creditLimit > 0 && d.outstandingAmount / d.creditLimit >= 0.9)
+      .sort((a, b) => b.outstandingAmount / b.creditLimit - a.outstandingAmount / a.creditLimit);
+    const creditAtRiskAmount = creditAtRiskDealers.reduce((s, d) => s + d.outstandingAmount, 0);
+
+    const agingRows = computeDealerAging(orders, distributors);
+    const aging = agingRows.reduce(
+      (acc, r) => ({
+        b0: acc.b0 + r.bucket_0_30,
+        b31: acc.b31 + r.bucket_31_60,
+        b61: acc.b61 + r.bucket_61_90,
+        b90: acc.b90 + r.bucket_90_plus,
+      }),
+      { b0: 0, b31: 0, b61: 0, b90: 0 },
+    );
+
+    // Pipeline by status
+    const stageDefs: Array<{ stage: string; match: (o: typeof orders[number]) => boolean }> = [
+      { stage: "Pending", match: (o) => o.deliveryStatus === "pending" && o.paymentStatus === "pending" },
+      { stage: "Confirmed", match: (o) => o.deliveryStatus === "pending" && o.paymentStatus !== "pending" },
+      { stage: "Dispatched", match: (o) => o.deliveryStatus === "dispatched" },
+      { stage: "Delivered", match: (o) => o.deliveryStatus === "delivered" },
+    ];
+    const pipeline = stageDefs.map((d) => {
+      const rows = periodOrders.filter(d.match);
+      return { stage: d.stage, count: rows.length, value: rows.reduce((s, o) => s + (o.total || 0), 0) };
+    });
+
+    const trend = buildRevenueTrend(orders, targets, range, 12).map((p) => ({
+      label: p.label,
+      actual: p.actual,
+      target: p.target,
+    }));
+
+    // Leaderboards
+    const revByDealer = new Map<string, number>();
+    const revBySp = new Map<string, number>();
+    const revByProd = new Map<string, number>();
+    const qtyByProd = new Map<string, number>();
+    for (const o of periodOrders) {
+      revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + (o.total || 0));
+      revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + (o.total || 0));
+      for (const ln of o.lines) {
+        revByProd.set(ln.productId, (revByProd.get(ln.productId) || 0) + (ln.lineTotal || 0));
+        qtyByProd.set(ln.productId, (qtyByProd.get(ln.productId) || 0) + (ln.quantity || 0));
+      }
+    }
+    const topDealers = [...revByDealer.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([id, val]) => ({
+        name: distributors.find((d) => d.id === id)?.name || "Unknown",
+        primary: formatCurrencyPdf(val),
+      }));
+    const topSalespersons = [...revBySp.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([id, val]) => {
+        const sp = salespersons.find((s) => s.id === id);
+        const tgt = targets.find((t) => t.entityId === id && t.entityType === "salesperson");
+        const pct = tgt?.targetRevenue ? `${Math.round((val / tgt.targetRevenue) * 100)}%` : "—";
+        return { name: sp?.name || "Unknown", primary: formatCurrencyPdf(val), secondary: pct };
+      });
+    const topProducts = [...revByProd.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([id, val]) => ({
+        name: products.find((p: { id: string; name: string }) => p.id === id)?.name || "Unknown",
+        primary: formatCurrencyPdf(val),
+        secondary: `${qtyByProd.get(id) || 0}`,
+      }));
+
+    return {
+      companyName,
+      companyAddress: api.companyInfo?.address || undefined,
+      gstin: api.companyInfo?.gstin || undefined,
+      logoUrl: api.companyInfo?.logoUrl || undefined,
+      periodLabel: PERIOD_LABELS[period],
+      fromDate: range.from.toLocaleDateString("en-IN"),
+      toDate: range.to.toLocaleDateString("en-IN"),
+      kpis: [
+        { label: "Revenue", value: formatCurrencyPdf(revenue) },
+        { label: "Orders", value: String(orderCount) },
+        { label: "Avg Order", value: formatCurrencyPdf(aov) },
+        { label: "Collections", value: formatCurrencyPdf(collections) },
+        { label: "Outstanding", value: formatCurrencyPdf(outstanding) },
+        { label: "Credit at risk", value: formatCurrencyPdf(creditAtRiskAmount) },
+      ],
+      signals: signals.map((s) => ({
+        label: s.label,
+        message: s.message,
+        tier: s.tier,
+        value: s.value != null ? String(s.value) : undefined,
+      })),
+      aging,
+      pipeline,
+      trend,
+      topDealers,
+      topSalespersons,
+      topProducts,
+      creditAtRisk: creditAtRiskDealers.slice(0, 15).map((d) => ({
+        name: d.name,
+        outstanding: d.outstandingAmount,
+        limit: d.creditLimit,
+        utilization: d.outstandingAmount / d.creditLimit,
+      })),
+      showLeaderboards: !isAccountant,
+    };
+  }, [orders, distributors, salespersons, targets, products, range, period, revenue, signals, companyName, api.companyInfo, isAccountant]);
+
   // Density + shortcuts + cheat sheet
   const { density, toggle: toggleDensity } = useDensityPreference();
   const [cheatOpen, setCheatOpen] = useState(false);
 
+  const exportPdfRef = useRef<HTMLButtonElement | null>(null);
   useCommandShortcuts({
     onGoOverview: () => updateParam({ tab: "overview" }),
     onGoPeople: () => !isAccountant && updateParam({ tab: "people" }),
     onGoProducts: () => !isAccountant && updateParam({ tab: "products" }),
     onGoReports: () => updateParam({ tab: "drill" }),
     onPeriod: (p) => updateParam({ period: p as CommandPeriod }),
-    onPrint: () => window.print(),
+    onPrint: () => exportPdfRef.current?.click(),
+    onPrintBrowser: () => window.print(),
     onToggleCheatSheet: () => setCheatOpen((v) => !v),
     onToggleDensity: toggleDensity,
   });
