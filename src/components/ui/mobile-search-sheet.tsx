@@ -18,7 +18,10 @@ interface MobileSearchSheetProps {
   children: React.ReactNode;
   /** Optional leading slot replacing the default back button. */
   leading?: React.ReactNode;
+  /** Replace the entire search input area (still keeps back button + sticky styling). */
+  headerSlot?: React.ReactNode;
 }
+
 
 /**
  * Full-height mobile search sheet — slides down from the top, pins to 100dvh,
