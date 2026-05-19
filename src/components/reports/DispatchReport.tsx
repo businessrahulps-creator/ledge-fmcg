@@ -95,6 +95,27 @@ export function DispatchReport() {
         </div>
       </div>
 
+      <ReportExportFooter
+        onExcel={() =>
+          exportCsv(
+            csvFilename("dispatch-report"),
+            ["Order", "Dealer", "Date", "Dispatch Date", "Vehicle", "Driver", "Delivery Status", "Amount"],
+            filtered.map((o) => [
+              o.orderNumber,
+              o.distributorName,
+              formatIndianDate(o.date),
+              formatIndianDate(o.dispatchDate),
+              o.vehicle || "",
+              o.driverName || "",
+              o.deliveryStatus,
+              formatCurrency(netTotal(o)),
+            ])
+          )
+        }
+        onPdf={() => setPdfOpen(true)}
+      />
+
+
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
           {selected && (
