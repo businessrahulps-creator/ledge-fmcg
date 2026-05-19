@@ -15,6 +15,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
+import { EntityCard } from "@/components/ui/entity-card";
+import { Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
