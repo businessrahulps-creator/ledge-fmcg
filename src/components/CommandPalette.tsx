@@ -56,6 +56,8 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const api = useApi();
   const canPlaceOrders = useCan("place_orders");
+  const isMobile = useIsMobile();
+
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
