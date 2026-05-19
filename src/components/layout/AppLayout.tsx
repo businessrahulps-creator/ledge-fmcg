@@ -468,16 +468,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                   <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 transition-transform group-active:translate-x-0.5" />
                                 </>
                               );
-                              return item.url === "/activity" ? (
-                                <button
-                                  key={item.title}
-                                  type="button"
-                                  onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
-                                  className={rowCls}
-                                >
-                                  {inner}
-                                </button>
-                              ) : (
+                              return (
                                 <Link
                                   key={item.title}
                                   to={item.url}
