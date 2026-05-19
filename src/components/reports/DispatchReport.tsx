@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Download, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ReportExportFooter } from "./ReportExportFooter";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { netTotal } from "@/lib/revenue";
