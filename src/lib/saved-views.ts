@@ -69,7 +69,7 @@ export function useSavedViews() {
       }
       const { data, error } = await supabase
         .from("command_saved_views")
-        .insert({ company_id: companyId, user_id: user.id, name: trimmed, params: params as unknown as Record<string, unknown> })
+        .insert({ company_id: companyId, user_id: user.id, name: trimmed, params: params as never })
         .select()
         .single();
       if (error) {
