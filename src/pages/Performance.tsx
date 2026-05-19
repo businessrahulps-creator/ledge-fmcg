@@ -672,9 +672,9 @@ export default function Performance() {
                   {topSchemes.length > 0 && (
                     <div className="space-y-1.5">
                       {topSchemes.map(ts => (
-                        <div key={ts.name} className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
-                          <div className="flex items-center gap-2 shrink-0">
+                        <div key={ts.name} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-muted-foreground truncate">{ts.name}</span>
+                          <div className="flex items-center gap-2 shrink-0 whitespace-nowrap tabular-nums">
                             <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
                             <span className="font-medium text-success">{formatCurrency(ts.savings)}</span>
                           </div>
