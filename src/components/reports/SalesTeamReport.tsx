@@ -59,27 +59,6 @@ export function SalesTeamReport() {
           <span className="whitespace-nowrap text-muted-foreground">{data.length} members</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
-        <div className="sm:ml-auto flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-            onClick={() => {
-              exportCsv(
-                csvFilename("sales-team-report"),
-                ["Name", "Region", "Phone", "Orders", "Revenue"],
-                data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
-              );
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-          <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </Button>
-        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
