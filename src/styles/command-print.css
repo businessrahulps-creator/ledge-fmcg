@@ -85,14 +85,7 @@
 
 }
 
-
-
-/* Push content below the fixed preview toolbar (≈44px). */
-body[data-print-preview] [data-app-shell] {
-  padding-top: 48px !important;
-}
-
-/* The print caption is hidden on screen (outside preview). */
+/* The print caption is hidden on screen. */
 [data-print-only] {
   display: none;
 }
