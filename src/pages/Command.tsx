@@ -427,6 +427,7 @@ export default function Command() {
         </Tabs>
       </section>
       <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />
+      <PrintPreviewOverlay open={printPreviewOpen} onClose={() => setPrintPreviewOpen(false)} />
     </AppLayout>
   );
 }
