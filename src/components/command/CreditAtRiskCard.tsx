@@ -1,12 +1,15 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowRight, MessageCircle } from "lucide-react";
-import { formatCurrency, type Distributor } from "@/data/mock-data";
+import { formatCurrency, type Distributor, type Order } from "@/data/mock-data";
 import { CommandEmptyState } from "./CommandEmptyState";
+import { computeDealerAging } from "@/lib/aging";
 import { toast } from "sonner";
 
 interface Props {
   distributors: Distributor[];
+  orders: Order[];
 }
 
 type Tier = "watch" | "warn" | "critical";
@@ -50,15 +53,25 @@ function whatsappReminder(d: Distributor) {
   toast.success(phone ? "WhatsApp opened" : "WhatsApp opened — no number on file");
 }
 
-export function CreditAtRiskCard({ distributors }: Props) {
-  const all = distributors
-    .filter((d) => d.creditLimit > 0 && d.outstandingAmount / d.creditLimit >= 0.7)
-    .map((d) => ({ ...d, util: d.outstandingAmount / d.creditLimit }))
-    .sort((a, b) => b.util - a.util);
-
-  const rows = all.slice(0, 5);
-  const exposure = all.reduce((s, d) => s + (d.outstandingAmount || 0), 0);
-  const criticalCount = all.filter((d) => d.util >= 0.95).length;
+export function CreditAtRiskCard({ distributors, orders }: Props) {
+  const { rows, all, exposure, criticalCount } = useMemo(() => {
+    const aging = computeDealerAging(orders, distributors);
+    const dpoBy = new Map(aging.map((a) => [a.distributorId, a.oldestAgeDays]));
+    // "At risk" = >=70% credit utilisation. Sort by absolute exposure (₹)
+    // so the biggest money in the air rises to the top, not the % bar shape.
+    const all = distributors
+      .filter((d) => d.creditLimit > 0 && d.outstandingAmount / d.creditLimit >= 0.7)
+      .map((d) => ({
+        ...d,
+        util: d.outstandingAmount / d.creditLimit,
+        dpo: dpoBy.get(d.id) || 0,
+      }))
+      .sort((a, b) => b.outstandingAmount - a.outstandingAmount);
+    const rows = all.slice(0, 5);
+    const exposure = all.reduce((s, d) => s + (d.outstandingAmount || 0), 0);
+    const criticalCount = all.filter((d) => d.util >= 0.95).length;
+    return { rows, all, exposure, criticalCount };
+  }, [distributors, orders]);
 
   return (
     <Card className="p-4">
@@ -78,14 +91,13 @@ export function CreditAtRiskCard({ distributors }: Props) {
         <CommandEmptyState title="No dealers over 70% credit utilisation" hint="You're in the clear." />
       ) : (
         <>
-          {/* Exposure header strip */}
           <div className="mb-3 flex items-end justify-between gap-3 rounded-md bg-destructive/[0.04] px-3 py-2 border-l-[3px] border-destructive">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-destructive">Total exposure</p>
               <p className="font-heading text-[22px] leading-tight num text-foreground">{formatCurrency(exposure)}</p>
             </div>
             <p className="text-[11px] text-muted-foreground text-right">
-              {all.length} dealer{all.length === 1 ? "" : "s"}
+              {all.length} dealer{all.length === 1 ? "" : "s"} · sorted by exposure
               {criticalCount > 0 && (
                 <>
                   {" · "}
@@ -105,7 +117,19 @@ export function CreditAtRiskCard({ distributors }: Props) {
                     <Link to={`/distributors/${r.id}`} className="min-w-0 flex-1 truncate text-sm text-foreground hover:underline">
                       {r.name}
                     </Link>
-                    <span className={`num text-xs font-medium ${textClass[tier]}`}>{pct}%</span>
+                    <div className="flex shrink-0 items-center gap-2 text-xs">
+                      {r.dpo > 0 && (
+                        <span
+                          className={`num font-medium ${
+                            r.dpo > 90 ? "text-destructive" : r.dpo > 60 ? "text-warning" : "text-muted-foreground"
+                          }`}
+                          title="Oldest unpaid invoice (days)"
+                        >
+                          {r.dpo}d
+                        </span>
+                      )}
+                      <span className={`num font-medium ${textClass[tier]}`}>{pct}%</span>
+                    </div>
                   </div>
                   <div className="mt-1 flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
                     <span className="num truncate">
