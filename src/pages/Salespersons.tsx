@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import { Plus, Search, Pencil, Trash2, UserCheck, Download } from "lucide-react";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { KpiStrip } from "@/components/ui/kpi-strip";
+import { EmptyCard } from "@/components/ui/empty-card";
+import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
@@ -154,47 +156,73 @@ export default function Salespersons() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
-          {paginatedSales.map((s, i) => (
-            <div
-              key={s.id}
-              onClick={() => navigate(`/salespersons/${s.id}`)}
-              className="cursor-pointer glass-card card-hover p-5 md:p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold md:text-base">{s.name}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{s.region}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{s.phone}</p>
+          {paginatedSales.map((s) => {
+            const avgOrder = s.totalOrders > 0 ? s.totalValue / s.totalOrders : 0;
+            return (
+              <div
+                key={s.id}
+                onClick={() => navigate(`/salespersons/${s.id}`)}
+                className="cursor-pointer glass-card card-hover p-5 md:p-6"
+              >
+                <div className="flex items-start gap-3">
+                  <EntityAvatar name={s.name} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-semibold md:text-base">{s.name}</h3>
+                    {s.region && (
+                      <span className="mt-1 inline-flex items-center rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/15">
+                        {s.region}
+                      </span>
+                    )}
+                    {s.phone && (
+                      <p className="mt-1 truncate text-[11px] text-muted-foreground/80">{s.phone}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-0.5 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-0.5 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border/30 pt-4 text-[11px]">
+                  <div>
+                    <p className="text-muted-foreground">Orders</p>
+                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{s.totalOrders}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Revenue</p>
+                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{formatCurrency(s.totalValue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Avg order</p>
+                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{avgOrder > 0 ? formatCurrency(avgOrder) : "—"}</p>
+                  </div>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4 text-xs md:text-sm">
-                <span className="text-muted-foreground">{s.totalOrders} orders</span>
-                <span className="font-semibold">{formatCurrency(s.totalValue)}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filtered.length > 0 ? (
           <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <UserCheck className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-            <p className="mt-3 text-sm font-medium">No team members found</p>
-            <p className="text-xs text-muted-foreground">Add your first team member to get started</p>
-            <Button size="sm" className="mt-3" onClick={openNew}>
-              <Plus className="h-4 w-4" />
-              Add Team Member
-            </Button>
-          </div>
+          items.length === 0 ? (
+            <EmptyCard
+              icon={UserCheck}
+              title="No team members yet."
+              description="Add your first team member to start tracking their orders and revenue."
+              actionLabel="Add team member"
+              onAction={openNew}
+            />
+          ) : (
+            <EmptyCard
+              icon={Search}
+              title="No team members match your search."
+              description="Try a different name, phone, or region."
+            />
+          )
         )}
 
         {/* Add/Edit Dialog */}

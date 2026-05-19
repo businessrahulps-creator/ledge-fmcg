@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
@@ -17,6 +17,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
+import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
@@ -233,76 +234,93 @@ export default function Distributors() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
-          {paginatedDealers.map((d, i) => (
-            <div
-              key={d.id}
-              onClick={() => navigate(`/distributors/${d.id}`)}
-              className="cursor-pointer glass-card card-hover p-5 md:p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold md:text-base">{d.name}</h3>
-                  {d.location && (
-                    <p className="mt-1.5 text-xs text-muted-foreground md:mt-2">{d.location}</p>
-                  )}
-                  {d.contact && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">{d.contact}</p>
-                  )}
-                </div>
-                <div className="flex gap-0.5 shrink-0">
-                  {d.contact && (d.outstandingAmount || 0) > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-success active:scale-95"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
-                        const amount = formatCurrency(d.outstandingAmount || 0);
-                        const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
-                        const url = phone
-                          ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
-                          : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                        window.open(url, "_blank", "noopener,noreferrer");
-                      }}
-                      aria-label={`Send payment reminder to ${d.name} on WhatsApp`}
-                      title="Send payment reminder on WhatsApp"
-                    >
-                      <WhatsAppIcon className="h-3.5 w-3.5" />
+          {paginatedDealers.map((d) => {
+            const limit = d.creditLimit || 0;
+            const outstanding = d.outstandingAmount || 0;
+            const hasCredit = limit > 0 || outstanding > 0;
+            const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
+            const tone =
+              limit === 0 ? "muted" : pct >= 100 ? "destructive" : pct >= 70 ? "warning" : "success";
+            const barColor =
+              tone === "destructive" ? "bg-destructive" :
+              tone === "warning" ? "bg-warning" :
+              tone === "success" ? "bg-success" : "bg-muted-foreground/40";
+            const dotColor = barColor;
+            return (
+              <div
+                key={d.id}
+                onClick={() => navigate(`/distributors/${d.id}`)}
+                className="cursor-pointer glass-card card-hover p-5 md:p-6"
+              >
+                <div className="flex items-start gap-3">
+                  <EntityAvatar name={d.name} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-semibold md:text-base">{d.name}</h3>
+                    {d.location && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">{d.location}</p>
+                    )}
+                    {d.contact && (
+                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground/80">{d.contact}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-0.5 shrink-0">
+                    {d.contact && outstanding > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-success active:scale-95"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
+                          const amount = formatCurrency(outstanding);
+                          const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
+                          const url = phone
+                            ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
+                            : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                          window.open(url, "_blank", "noopener,noreferrer");
+                        }}
+                        aria-label={`Send payment reminder to ${d.name} on WhatsApp`}
+                        title="Send payment reminder on WhatsApp"
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
+                      <Pencil className="h-3 w-3" />
                     </Button>
-                  )}
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 flex flex-col gap-2 border-t border-border/30 pt-4">
-                <div className="flex items-center justify-between text-xs md:text-sm">
-                  <span className="text-muted-foreground">{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
-                  <span className="font-semibold">{formatCurrency(d.totalValue)}</span>
-                </div>
-                {(() => {
-                  const limit = d.creditLimit || 0;
-                  const outstanding = d.outstandingAmount || 0;
-                  if (limit === 0 && outstanding === 0) return null;
-                  const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-                  const dotColor = limit === 0 ? "bg-muted-foreground" : pct >= 100 ? "bg-destructive" : pct >= 70 ? "bg-warning" : "bg-success";
-                  return (
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
-                        Outstanding
-                      </span>
-                      <span>{formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}</span>
+                <div className="mt-4 flex flex-col gap-2.5 border-t border-border/30 pt-4">
+                  <div className="flex items-center justify-between text-xs md:text-sm">
+                    <span className="text-muted-foreground">{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
+                    <span className="num font-semibold">{formatCurrency(d.totalValue)}</span>
+                  </div>
+                  {hasCredit && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+                          Outstanding
+                        </span>
+                        <span className="num">{formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}</span>
+                      </div>
+                      {limit > 0 && (
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                          <div
+                            className={`h-full transition-all ${barColor}`}
+                            style={{ width: `${Math.min(pct, 100)}%` }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  );
-                })()}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filtered.length > 0 ? (
