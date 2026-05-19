@@ -62,6 +62,9 @@ export interface EntityCardProps {
   /** Overflow menu items. Renders a ··· trigger top-right. */
   menu?: EntityCardMenuItem[];
 
+  /** Optional body slot rendered between hero and footer cells. */
+  children?: React.ReactNode;
+
   onClick?: () => void;
   className?: string;
   /** Compact density (sm tiles in lists). */
@@ -84,6 +87,7 @@ function EntityCardImpl({
   cells,
   primaryAction,
   menu,
+  children,
   onClick,
   className,
   compact,
