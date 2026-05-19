@@ -23,7 +23,13 @@ interface Props {
 
 export function CommandKpiCard({ label, value, pct, inverse, hint, spark, href, index = 0 }: Props) {
   const sparkData = (spark && spark.length > 1 ? spark : []).map((v, i) => ({ i, v }));
-  const sparkUp = sparkData.length > 1 && sparkData[sparkData.length - 1].v >= sparkData[0].v;
+  // Gate: drop the sparkline when the series is effectively flat (variance < 5%
+  // of peak) or when peak is zero — those renders are visual noise, not signal.
+  const sparkPeak = sparkData.reduce((m, p) => Math.max(m, p.v), 0);
+  const sparkMin = sparkData.reduce((m, p) => Math.min(m, p.v), sparkPeak);
+  const sparkVariance = sparkPeak > 0 ? (sparkPeak - sparkMin) / sparkPeak : 0;
+  const showSpark = sparkData.length > 1 && sparkPeak > 0 && sparkVariance >= 0.05;
+  const sparkUp = showSpark && sparkData[sparkData.length - 1].v >= sparkData[0].v;
   const sparkColor = inverse
     ? sparkUp ? "hsl(var(--destructive))" : "hsl(var(--success))"
     : sparkUp ? "hsl(var(--success))" : "hsl(var(--destructive))";
