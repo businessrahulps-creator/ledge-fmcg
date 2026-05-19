@@ -76,13 +76,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
     ],
   },
   {
-    label: "Insights",
-    tone: "accent",
-    items: [
-      { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
-    ],
-  },
-  {
     label: "Account",
     tone: "muted",
     items: [
