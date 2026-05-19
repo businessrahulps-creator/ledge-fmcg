@@ -116,6 +116,18 @@ export function ProductReport() {
         </div>
       </div>
 
+      <ReportExportFooter
+        onExcel={() =>
+          exportCsv(
+            csvFilename("product-report"),
+            ["Product", "SKU", "Qty Sold", "Revenue"],
+            data.map((p) => [p.name, p.sku, String(p.qtySold), formatCurrency(p.revenue)])
+          )
+        }
+        onPdf={() => setPdfOpen(true)}
+      />
+
+
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
           {selected && (
