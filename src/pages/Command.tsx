@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -185,9 +185,16 @@ export default function Command() {
     Object.entries(currentParams).filter(([, v]) => v != null) as [string, string][],
   ).toString();
 
+  // Keep last non-null blast payload so the Sheet has data to render during its
+  // close animation. Unmounting Radix's Sheet while it's still open leaks
+  // `body { pointer-events: none }` and breaks page scrolling.
+  const lastBlastPayloadRef = useRef(blastPayload);
+  if (blastPayload) lastBlastPayloadRef.current = blastPayload;
+  const renderedBlast = blastPayload ?? lastBlastPayloadRef.current;
+
   return (
     <AppLayout>
-      <main
+      <section
         data-command-root
         data-density={density}
         className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6"
@@ -248,15 +255,15 @@ export default function Command() {
           onBlast={(id) => setBlastSignalId(id)}
         />
 
-        {blastPayload && (
+        {renderedBlast && (
           <WhatsAppBlastSheet
             open={!!blastSignalId}
             onClose={() => setBlastSignalId(null)}
-            title={blastPayload.title}
-            description={blastPayload.description}
-            dealers={blastPayload.dealers}
+            title={renderedBlast.title}
+            description={renderedBlast.description}
+            dealers={renderedBlast.dealers}
             orders={orders}
-            defaultTemplate={blastPayload.defaultTemplate}
+            defaultTemplate={renderedBlast.defaultTemplate}
           />
         )}
 
@@ -287,7 +294,7 @@ export default function Command() {
           {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
           <TabsContent value="drill"><DrillDownTab /></TabsContent>
         </Tabs>
-      </main>
+      </section>
       <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />
     </AppLayout>
   );

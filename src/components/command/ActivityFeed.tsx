@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, Package, Truck, FileWarning, ShoppingCart } from "lucide-react";
@@ -38,7 +39,7 @@ function timeAgoShort(ts: number): string {
   return `${Math.floor(hrs / 24)}d`;
 }
 
-export function ActivityFeed({ orders, claims, windowHours = 48 }: Props) {
+function ActivityFeedInner({ orders, claims, windowHours = 48 }: Props) {
   const cutoff = Date.now() - windowHours * 3600_000;
   const items: FeedItem[] = [];
 
@@ -153,3 +154,5 @@ export function ActivityFeed({ orders, claims, windowHours = 48 }: Props) {
     </Card>
   );
 }
+
+export const ActivityFeed = memo(ActivityFeedInner);

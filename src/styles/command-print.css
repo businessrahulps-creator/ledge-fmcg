@@ -5,7 +5,21 @@
     margin: 14mm 12mm;
   }
 
-  /* Force a clean light background regardless of theme. */
+  /* Neutralize the app shell's fixed viewport height + overflow clipping so the
+     browser can paginate the actual document instead of capturing one screen. */
+  html,
+  body,
+  #root,
+  [data-app-shell],
+  [data-app-shell] > div,
+  [data-app-shell] > div > div {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
   html,
   body {
     background: #ffffff !important;
@@ -14,27 +28,41 @@
     print-color-adjust: exact !important;
   }
 
-  /* Hide app chrome — sidebar, topbar, tab strips, period selector, action buttons. */
-  [data-print-hide],
+  /* Hide app chrome — sidebar, topbar, mobile bottom nav, tab strips, action buttons. */
   aside,
-  nav[aria-label="Sidebar"],
+  [data-sidebar],
   header[role="banner"],
+  [data-app-shell] header,
+  [data-mobile-nav],
+  [data-print-hide],
   .command-no-print,
   [role="tablist"] {
     display: none !important;
   }
 
-  /* Expand the content area to full page width. */
+  /* Both the outer scroll <main> (AppLayout) and the inner content region need to
+     release their constraints so content flows down the page. */
   main,
   [data-command-root] {
     width: 100% !important;
     max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
     background: #ffffff !important;
   }
 
-  /* Cards/sections — flatten shadows + force black border for clarity on paper. */
+  /* Kill the route-transition motion wrapper (max-w-5xl mx-auto). */
+  [data-app-shell] main > div {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Cards/sections — flatten shadows + force a thin border for clarity on paper,
+     and keep each card on one page when possible. */
   [data-command-root] [class*="rounded-md"],
   [data-command-root] [class*="rounded-lg"] {
     box-shadow: none !important;
@@ -50,8 +78,10 @@
   }
 
   /* Tighten chart heights for paper. */
-  [data-command-root] .recharts-wrapper {
-    max-height: 220px !important;
+  [data-command-root] .recharts-wrapper,
+  [data-command-root] .recharts-responsive-container {
+    max-height: 240px !important;
+    height: 240px !important;
   }
 
   /* Show the print-only caption (period + generated-at). */
@@ -59,8 +89,9 @@
     display: block !important;
   }
 
-  /* Hide all interactive controls on cards. */
-  button:not([data-print-keep]) {
+  /* Hide all interactive controls on cards (chips, dropdowns, action buttons). */
+  button:not([data-print-keep]),
+  [data-print-only-hide] {
     display: none !important;
   }
 }

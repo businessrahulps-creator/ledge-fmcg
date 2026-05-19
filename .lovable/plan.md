@@ -1,74 +1,68 @@
-## Phase D — Enterprise polish for "My Business"
+## /command — bug fixes & perf pass
 
-Goal: turn `/command` from a power-user dashboard into a surface that fits how owners and managers actually run their week — saved slices, an email that lands every Monday morning, a clean printout for the office wall, and the keyboard shortcuts an operator expects.
+### What's actually broken (diagnosis)
 
-A `dashboard-digest` edge function already exists in the repo, so the email piece is mostly wiring + a cron + a settings UI rather than greenfield.
+**1. Print shows only one page, looks like a screenshot of the website**
 
----
+`AppLayout` wraps everything in `<div className="flex h-dvh w-full overflow-hidden">` and the scroller is an inner `<main className="flex-1 overflow-y-auto overflow-x-hidden ...">`. On `window.print()`, the browser respects those rigid heights — the document becomes exactly one viewport tall with `overflow:hidden`, so the printer just captures that one frame instead of paginating real content. Our `command-print.css` overrides `main` width but never neutralizes the `h-dvh` / `overflow:hidden` on the ancestor shells, the sticky header, or the inner scroll-main. That is why the result feels like a "print of the website".
 
-### 1. Saved views (was deferred from Phase C)
-- New table `command_saved_views (id, user_id, company_id, name, params jsonb, is_pinned, created_at)`. RLS: read = same company, write = own rows.
-- New component `SavedViewsMenu` in the page header (right of the period selector): dropdown of views + "Save current as…" + pin toggle.
-- `params` captures `{period, from, to, tab}` (URL-derivable today — slicer chips land later if/when we ship C3).
-- Pinned views render as 1–3 small chips above the SignalBar so an owner can flip between "All business" and "At-risk only" with one click.
+**2. Page can't scroll on /command**
 
-### 2. Scheduled weekly digest
-- New table `digest_subscriptions (id, user_id, company_id, frequency, day_of_week, hour_local, timezone, enabled, last_sent_at)`. RLS = own row.
-- `digest-cron` edge function (new, hourly): finds subscriptions whose local time matches now, calls existing `dashboard-digest` per subscriber, writes `last_sent_at`.
-- pg_cron job hits `digest-cron` hourly.
-- New page section in Settings → "Weekly digest" — toggle, day-of-week, time. Plus a "Send me a test now" button.
-- Digest email uses Lovable transactional email (`weekly-business-digest` template) with: net position, top 3 signals, top dealer, biggest at-risk dealer, link to `/command`.
+Two contributing issues:
 
-### 3. Print layout
-- New `print.css` (loaded only on `/command`): hides AppLayout chrome, sidebar, tabs, period selector controls; expands all KPI / leaderboard / chart cards full-width; forces light tokens; page-breaks between Overview sections so a 1–2 page A4 prints cleanly.
-- "Print" button in the page header (icon-only on mobile).
-- `CommandLineChart` gets a print-specific stroke width + a static caption ("Period: …, Generated: …") so the printout is self-explanatory.
+- **Nested `<main>`**: `AppLayout` already renders the scroll `<main>`. `Command.tsx` wraps its content in a *second* `<main data-command-root>`. Two `<main>` elements is invalid a11y, and more importantly, on some setups the inner element steals focus/scroll affordance and confuses the outer scroller (especially with the new `<KeyboardCheatSheet>` Radix Sheet mounted next to it).
+- **Radix scroll-lock leak**: `WhatsAppBlastSheet` is rendered as `{blastPayload && <Sheet open=... />}`. When the user closes the sheet, `setBlastSignalId(null)` makes `blastPayload` null, which **unmounts** the Sheet *before* Radix's close cleanup runs. Radix Dialog/Sheet then never restores `body { pointer-events: auto }` and `body { overflow: hidden }`, which is exactly the "can't scroll, something is blocking" symptom. Same risk exists if `KeyboardCheatSheet` toggles fast.
 
-### 4. Density toggle + keyboard shortcuts
-- Add `dense` preference (localStorage, no DB): toggles a `data-density="dense"` attribute on the `/command` root; KPI cards shrink padding, leaderboards switch to 8-row, chart height drops from 280 → 220.
-- Shortcuts (only when no input is focused):
-  - `g o / g p / g s / g r` → Overview / People / Products / Reports tabs.
-  - `1 / 2 / 3 / 4 / 5` → period 7d / 30d / 90d / YTD / custom.
-  - `s` → focus SavedViews menu, `p` → print, `?` → cheat-sheet sheet.
-- Small `KeyboardCheatSheet` component, opened by `?`.
+**3. Misc perf hotspots**
 
-### 5. Targeted a11y pass
-- Add proper landmarks: `<nav aria-label="Period">`, `<section aria-labelledby>` on each Overview block.
-- Every interactive icon-only button gets an `aria-label` (audit `SignalActions`, `RunRatePill`, `KpiCard` already do — fill the gaps).
-- Focus rings on the new `SignalBar` button wrapper (lost when we converted from `<Link>` to nested button).
-- Run a quick contrast check on warning/destructive pills against tinted backgrounds; bump opacity where it fails AA.
+- `Command.tsx` keeps a `lastUpdated` `useState` that re-renders the entire Command tree (including all charts) on every `api.loading` flip.
+- `CommandLineChart`, `AgingStrip`, `PipelineFunnel`, `LeaderboardCard`, `CreditAtRiskCard`, `ActivityFeed` are not memoized — they re-render even when their inputs didn't change.
+- Sparkline math in `OverviewTab.useMemo` already iterates `orders` 3× — fine, but it's recomputed when only `range` changes; we'll inline a single-pass reducer.
 
----
+### Fixes
 
-### Technical notes
+**A. Print: rebuild the print stylesheet so it actually paginates** (`src/styles/command-print.css`)
 
-**Migrations (one):**
-- `command_saved_views` + RLS + index on `(company_id, user_id)`.
-- `digest_subscriptions` + RLS + unique `(user_id)` + index on `(enabled, hour_local)`.
+```text
+@media print:
+  html, body, #root, [data-app-shell], [data-app-shell] > *  →
+    height: auto !important; max-height: none !important;
+    overflow: visible !important; display: block !important;
+  Hide: <aside>, [role="banner"], [data-mobile-nav], .command-no-print, [data-print-hide], [role="tablist"]
+  main (both outer and inner) → height:auto; overflow:visible; padding:0; width:100%
+  Cards → break-inside: avoid
+  [data-print-break] → page-break-before
+```
 
-**New files:**
-- `src/components/command/SavedViewsMenu.tsx`
-- `src/components/command/KeyboardCheatSheet.tsx`
-- `src/components/command/PrintButton.tsx`
-- `src/hooks/useCommandShortcuts.ts`
-- `src/hooks/useDensityPreference.ts`
-- `src/styles/command-print.css` (imported only in `Command.tsx`)
-- `src/lib/saved-views.ts` (CRUD + realtime hook, mirrors `command-acks.ts` pattern)
-- `src/pages/SettingsDigest.tsx` (or section in existing Settings)
-- `supabase/functions/digest-cron/index.ts`
-- `supabase/functions/_shared/transactional-email-templates/weekly-business-digest.tsx`
+Tag `AppLayout`'s root wrapper with `data-app-shell` so the print rules can target it without rewriting layout. Tag the bottom mobile nav with `data-mobile-nav`.
 
-**Modified:**
-- `src/pages/Command.tsx` — mount `SavedViewsMenu`, `PrintButton`, density toggle, shortcut hook, print stylesheet, pinned-view chips.
-- `src/components/command/SignalBar.tsx` — restore focus ring on the converted button.
-- Settings route — add "Weekly digest" card.
-- `_shared/transactional-email-templates/registry.ts` — register new template.
+Verify: `window.print()` on /command produces multi-page A4 with all sections, not a single screenshot.
 
-**Out of scope (kept for a possible Phase E):**
-- Segmentation slicer (territory/rep/channel) — depends on dealer + product metadata we haven't modelled.
-- Annotations / comments on signals.
-- Share/snapshot URL (signed read-only link).
+**B. Scroll: stop the Radix leak and remove nested `<main>`** (`src/pages/Command.tsx`)
 
----
+- Change inner `<main data-command-root>` → `<section data-command-root>` (keep aria-label).
+- Render `WhatsAppBlastSheet` unconditionally: keep the last non-null `blastPayload` in a ref so the sheet has data to render during its close animation, and drive open purely from `!!blastSignalId`. The sheet then unmounts only *after* Radix's exit cleanup, restoring `body` styles.
+- Same guard for `KeyboardCheatSheet` (already unconditional — confirm).
+- Add a tiny "scroll-lock janitor" in `AppLayout` that, on every route change, resets `document.body.style.pointerEvents = ""` and `document.body.style.overflow = ""`. Cheap belt-and-suspenders against future Radix leaks.
 
-Say **go** to ship all five, or pick a slice: **D1** (saved views), **D2** (digest), **D3** (print), **D4** (density+shortcuts), **D5** (a11y).
+**C. Perf: memoize hot children + scope `lastUpdated`**
+
+- Move `lastUpdated` into a small `<MemoryStripMount>` subcomponent so its tick doesn't re-render charts.
+- Wrap `CommandLineChart`, `AgingStrip`, `PipelineFunnel`, `LeaderboardCard`, `CreditAtRiskCard`, `ActivityFeed`, `CommandKpiCard` in `React.memo` with shallow prop comparison (they already take plain primitives/arrays).
+- Collapse the 3 sparkline loops in `OverviewTab.useMemo` into a single pass over `orders`.
+
+**D. Print button affordance**
+
+Currently `<PrintButton>` is a 36×36 icon-only square with no visible label; users don't notice it. Keep size but add `<span className="sr-only">Print</span>` (already aria-labelled — fine) and add a print-only header inside `[data-command-root]` showing company name + period so the printed first page reads as a report header (currently only a `data-print-only` caption exists; we'll style it as a print title block).
+
+### Out of scope
+
+- Re-architecting AppLayout to lose the fixed-shell scroll model (would touch every page).
+- A dedicated "Generate PDF" flow (html2canvas/jsPDF) — current ask is "fix print"; if browser print is good enough after these fixes we don't need it. We can revisit if you want a styled PDF export later.
+
+### Verification checklist
+
+1. /command scrolls smoothly on desktop + mobile viewport.
+2. Open the "Silent & owing" WhatsApp blast sheet, close it → page still scrolls (no body lock leak).
+3. `Cmd/Ctrl+P` on /command → A4 preview shows multiple pages with all sections (Hero, KPIs, Aging, Pipeline, Trend, Leaderboards, Credit-at-risk); no sidebar/topbar; cards don't break across pages.
+4. React Profiler: switching period no longer re-renders unaffected charts.

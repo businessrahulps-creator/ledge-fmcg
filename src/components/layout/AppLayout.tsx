@@ -146,6 +146,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
       recordRecent({ kind: "page", label: ROUTE_TITLES[match], to: match });
     });
   }, [location.pathname]);
+
+  // Scroll-lock janitor — reset any leaked Radix Dialog/Sheet body styles on route change.
+  // Radix can leave `pointer-events: none` / `overflow: hidden` on <body> if a modal is
+  // unmounted before its exit animation completes. This prevents "page won't scroll" bugs.
+  useEffect(() => {
+    document.body.style.pointerEvents = "";
+    if (document.body.style.overflow === "hidden") document.body.style.overflow = "";
+  }, [location.pathname]);
+
   const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -190,7 +199,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <TopProgress active={isRefreshing && online} />
       <CommandPalette />
       <KeyboardShortcuts />
-      <div className="flex h-dvh w-full overflow-hidden bg-background">
+      <div data-app-shell className="flex h-dvh w-full overflow-hidden bg-background">
         <div className="hidden md:block">
           <AppSidebar />
         </div>
@@ -343,6 +352,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           {/* Bottom Nav — mobile only — edge-to-edge, flat, 5 slots */}
           <nav
+            data-mobile-nav
             className="sticky bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl md:hidden"
             style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))" }}
             aria-label="Primary"

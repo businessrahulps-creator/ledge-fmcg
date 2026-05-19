@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/data/mock-data";
@@ -17,7 +18,7 @@ interface Stage {
   tone: string;
 }
 
-export function PipelineFunnel({ orders }: Props) {
+function PipelineFunnelInner({ orders }: Props) {
   // Confirmed = pending delivery; Dispatched; Delivered (unpaid); Invoiced (partial); Collected (paid)
   const buckets = {
     confirmed: { count: 0, value: 0 },
@@ -107,3 +108,5 @@ export function PipelineFunnel({ orders }: Props) {
     </Card>
   );
 }
+
+export const PipelineFunnel = memo(PipelineFunnelInner);

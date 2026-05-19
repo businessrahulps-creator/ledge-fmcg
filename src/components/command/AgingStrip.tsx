@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/data/mock-data";
@@ -22,7 +23,7 @@ function rowField() {
   return { bucket_0_30: 0, bucket_31_60: 0, bucket_61_90: 0, bucket_90_plus: 0 };
 }
 
-export function AgingStrip({ orders, distributors }: Props) {
+function AgingStripInner({ orders, distributors }: Props) {
   const rows = computeDealerAging(orders, distributors);
   const totals = rows.reduce(
     (acc, r) => ({
@@ -113,3 +114,5 @@ export function AgingStrip({ orders, distributors }: Props) {
     </Card>
   );
 }
+
+export const AgingStrip = memo(AgingStripInner);

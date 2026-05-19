@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowRight, MessageCircle } from "lucide-react";
@@ -53,7 +53,7 @@ function whatsappReminder(d: Distributor) {
   toast.success(phone ? "WhatsApp opened" : "WhatsApp opened — no number on file");
 }
 
-export function CreditAtRiskCard({ distributors, orders }: Props) {
+function CreditAtRiskCardInner({ distributors, orders }: Props) {
   const { rows, all, exposure, criticalCount } = useMemo(() => {
     const aging = computeDealerAging(orders, distributors);
     const dpoBy = new Map(aging.map((a) => [a.distributorId, a.oldestAgeDays]));
@@ -162,3 +162,5 @@ export function CreditAtRiskCard({ distributors, orders }: Props) {
     </Card>
   );
 }
+
+export const CreditAtRiskCard = memo(CreditAtRiskCardInner);
