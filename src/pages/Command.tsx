@@ -346,6 +346,7 @@ export default function Command() {
             >
               {density === "dense" ? "Compact" : "Comfortable"}
             </button>
+            <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
             <PrintButton />
             <nav aria-label="Period" className="contents">
               <PeriodSelector
