@@ -131,7 +131,7 @@ export function CommandPdf({
         </View>
 
         {/* Signals */}
-        <SectionTitle>Signals ({signals.length})</SectionTitle>
+        <SectionTitle>{`Signals (${signals.length})`}</SectionTitle>
         <View style={s.table}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: "12%" }]}>Tier</Text>
