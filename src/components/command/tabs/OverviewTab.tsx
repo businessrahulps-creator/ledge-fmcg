@@ -85,6 +85,28 @@ export function OverviewTab({ range }: Props) {
         };
       });
 
+    // 7-bucket sparklines for KPI cards (within the selected period).
+    const buckets = 7;
+    const span = range.to.getTime() - range.from.getTime();
+    const bucketSize = span / buckets;
+    const revSpark = new Array(buckets).fill(0);
+    const ordSpark = new Array(buckets).fill(0);
+    const colSpark = new Array(buckets).fill(0);
+    for (const o of orders) {
+      const od = new Date(o.date);
+      if (od < range.from || od > range.to) continue;
+      const idx = Math.min(buckets - 1, Math.max(0, Math.floor((od.getTime() - range.from.getTime()) / bucketSize)));
+      ordSpark[idx] += 1;
+      if (o.paymentStatus === "paid") colSpark[idx] += o.total || 0;
+      if (o.deliveryStatus === "dispatched" || o.deliveryStatus === "delivered") {
+        const ref = o.dispatchDate ? new Date(o.dispatchDate) : od;
+        if (ref >= range.from && ref <= range.to) {
+          const ridx = Math.min(buckets - 1, Math.max(0, Math.floor((ref.getTime() - range.from.getTime()) / bucketSize)));
+          revSpark[ridx] += o.total || 0;
+        }
+      }
+    }
+
     return {
       revenue,
       prevRevenue,
@@ -96,6 +118,9 @@ export function OverviewTab({ range }: Props) {
       trend,
       topDealers,
       topSkus,
+      revSpark,
+      ordSpark,
+      colSpark,
     };
   }, [orders, distributors, products, targets, range]);
 
@@ -106,26 +131,37 @@ export function OverviewTab({ range }: Props) {
       ) : (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <CommandKpiCard
+            index={0}
             label="Revenue (dispatched)"
             value={formatCurrency(computed.revenue)}
             pct={pctDelta(computed.revenue, computed.prevRevenue)}
+            spark={computed.revSpark}
+            href="/orders?filter=dispatched"
           />
           <CommandKpiCard
+            index={1}
             label="Orders"
             value={String(computed.orderCount)}
             pct={pctDelta(computed.orderCount, computed.prevOrderCount)}
+            spark={computed.ordSpark}
+            href="/orders"
           />
           <CommandKpiCard
+            index={2}
             label="Collections"
             value={formatCurrency(computed.collections)}
             pct={pctDelta(computed.collections, computed.prevCollections)}
+            spark={computed.colSpark}
+            href="/orders?filter=paid"
           />
           <CommandKpiCard
+            index={3}
             label="Outstanding"
             value={formatCurrency(computed.outstanding)}
             pct={null}
             inverse
             hint="From all dealers"
+            href="/distributors?filter=outstanding"
           />
         </div>
       )}
