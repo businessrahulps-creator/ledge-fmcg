@@ -3,6 +3,11 @@ import { FileDown, Loader2 } from "lucide-react";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { CommandPdf, type CommandPdfProps } from "@/components/pdf/CommandPdf";
 import type { CommandPeriod } from "@/lib/command-signals";
+import {
+  MARGIN_PT,
+  PDF_PAGE_SIZE,
+  usePrintPreferences,
+} from "@/hooks/usePrintPreferences";
 
 interface Props {
   data: CommandPdfProps;
@@ -14,12 +19,20 @@ export const ExportPdfButton = forwardRef<HTMLButtonElement, Props>(function Exp
   ref,
 ) {
   const [busy, setBusy] = useState(false);
+  const { pageSize, margin } = usePrintPreferences();
 
   const handle = async () => {
     if (busy) return;
     setBusy(true);
     try {
-      await downloadPdf(pdfFilename("command", period), <CommandPdf {...data} />);
+      await downloadPdf(
+        pdfFilename("command", period),
+        <CommandPdf
+          {...data}
+          pageSize={PDF_PAGE_SIZE[pageSize]}
+          pagePadding={MARGIN_PT[margin]}
+        />,
+      );
     } finally {
       setBusy(false);
     }

@@ -49,6 +49,8 @@ export interface CommandPdfCreditRow {
 }
 
 export interface CommandPdfProps {
+  pageSize?: "A4" | "LETTER";
+  pagePadding?: number;
   companyName: string;
   companyAddress?: string;
   gstin?: string;
@@ -88,6 +90,8 @@ function EmptyRow({ cols, label = "No data" }: { cols: number; label?: string })
 }
 
 export function CommandPdf({
+  pageSize = "A4",
+  pagePadding,
   companyName,
   companyAddress,
   gstin,
@@ -106,9 +110,10 @@ export function CommandPdf({
   creditAtRisk,
   showLeaderboards = true,
 }: CommandPdfProps) {
+  const pageStyle = pagePadding != null ? [s.page, { padding: pagePadding }] : s.page;
   return (
     <Document>
-      <Page size="A4" style={s.page}>
+      <Page size={pageSize} style={pageStyle}>
         <PdfHeader
           title="Command Snapshot"
           subtitle={`${periodLabel} · ${fromDate} – ${toDate}`}
@@ -197,7 +202,7 @@ export function CommandPdf({
         <PdfFooter />
       </Page>
 
-      <Page size="A4" style={s.page}>
+      <Page size={pageSize} style={pageStyle}>
         <PdfHeader
           title="Command Snapshot"
           subtitle={`${periodLabel} · ${fromDate} – ${toDate}`}
