@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { ReportExportFooter } from "./ReportExportFooter";
 import { formatCurrency, type Order } from "@/data/mock-data";
 import { useApi } from "@/services/api";
