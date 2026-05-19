@@ -1002,21 +1002,24 @@ export default function Stock() {
                 <div className="space-y-3 md:space-y-4">
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Product *</Label>
-                    <Select value={addStockProductId} onValueChange={setAddStockProductId} disabled={noneAvailable}>
-                      <SelectTrigger className="h-10 rounded-lg" aria-disabled={noneAvailable}>
-                        <SelectValue placeholder={noneAvailable ? "All products already stocked here" : "Select a product"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableProducts.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {noneAvailable && (
-                      <p className="text-[11px] text-muted-foreground">
-                        Every product already exists in this warehouse. Tap a row in the inventory list to update its quantity.
-                      </p>
-                    )}
+                    <EntityPicker
+                      value={addStockProductId}
+                      onChange={setAddStockProductId}
+                      disabled={noneAvailable}
+                      placeholder={noneAvailable ? "All products already stocked here" : "Search for a product"}
+                      searchPlaceholder="Search by name or SKU…"
+                      emptyHint="No matching products."
+                      options={availableProducts.map((p) => ({
+                        value: p.id,
+                        label: p.name,
+                        hint: (p as any).sku || undefined,
+                      }))}
+                      helperText={
+                        noneAvailable
+                          ? "Every product already exists in this warehouse. Tap a row in the inventory list to update its quantity."
+                          : undefined
+                      }
+                    />
                   </div>
                   {!noneAvailable && (
                     <div className="space-y-1.5 md:space-y-2">
