@@ -1,50 +1,74 @@
-# WhatsApp share text — validation plan
+## Goal
+A reliable Playwright spec that guards the two bugs we just fixed on `/command`: vertical scrolling must work (no Radix scroll-lock leak), and the print stylesheet must paginate into multiple A4 pages (not a one-page "screenshot of the website").
 
-## What I checked
+## File
+`e2e/command-scroll-print.spec.ts` — new spec, follows the existing `e2e/*.spec.ts` pattern with `playwright-fixture`.
 
-Every WhatsApp entrypoint in the app and what it pulls from:
+Because `/command` requires an authenticated session and the current `order-lifecycle.spec.ts` is `test.skip(true, ...)` for that reason, the new file will follow the same convention: a top-level `test.skip(!process.env.E2E_AUTH_STATE, "...")` so it runs locally / in CI when an auth storageState is wired, and no-ops otherwise. The body is real, not a stub.
 
-| Caller | Source of truth | Period-aware? | Verdict |
-|---|---|---|---|
-| `shareOrderOnWhatsApp` (OrderDetail) | live `order` prop — dealer, date, lines, grand total | n/a (single order) | ✅ correct |
-| `shareInvoiceOnWhatsApp` (Billing) | live `inv` (subtotal, CGST/SGST/IGST, grand total, buyer) | n/a (single invoice) | ✅ correct |
-| `shareDealerOnWhatsApp` (DealerDetail) | live dealer object (`totalOrders`, `totalValue`, contact) | reflects current DataContext | ✅ correct |
-| Distributors card "Remind" | live `d.outstandingAmount` from `paginatedDealers` (search/page reactive) | uses running balance, not period slice | ✅ correct by design |
-| `CreditAtRiskCard` "Remind" | live `d.outstandingAmount`, `d.creditLimit` | running balance | ✅ correct by design |
-| `WhatsAppBlastSheet` (Command) | `{dealer_name, outstanding, last_order_date}` merge fields, built from props `dealers` + `orders` | `outstanding` = running balance; `last_order_date` scans full orders array | ✅ semantically correct (chase the full balance, not a window slice) — but has a **stale-template bug** |
+## Test 1 — Scrolling is not blocked
 
-## Bugs found
+Reproduces the WhatsAppBlastSheet / KeyboardCheatSheet leak.
 
-**1. Stale `template` in `WhatsAppBlastSheet`** — `useState(defaultTemplate)` only seeds on first mount. If the sheet stays mounted (it does — Command renders it unconditionally per the earlier scroll-lock fix) and the parent switches it from "dormant chase" → "credit-blocked", the textarea keeps the prior template. Also fails to re-seed if dealer set changes mid-open.
+1. `page.goto("/command")`, wait for the "My Business" H1.
+2. Capture `initialScrollY = await page.evaluate(() => window.scrollY)`.
+3. Open and close a sheet that previously leaked scroll-lock:
+   - Press `?` to open KeyboardCheatSheet → press `Escape`.
+   - Click a "Send WhatsApp" trigger (or dispatch the same way the Credit at Risk card does) → press `Escape`.
+4. Assert body styles are clean:
+   ```ts
+   const { overflow, pointerEvents } = await page.evaluate(() => ({
+     overflow: document.body.style.overflow,
+     pointerEvents: document.body.style.pointerEvents,
+   }));
+   expect(overflow).not.toBe("hidden");
+   expect(pointerEvents).not.toBe("none");
+   ```
+5. Programmatic scroll + wheel scroll both move the page:
+   ```ts
+   await page.mouse.wheel(0, 2000);
+   await page.waitForFunction((y0) => window.scrollY > y0 + 200, initialScrollY);
+   ```
+6. Assert the page is actually taller than the viewport (`scrollHeight > innerHeight + 400`) so the assertion is meaningful even if seed data shrinks.
 
-**2. Zero test coverage** for any share-text builder. A period/total regression would ship silently.
+## Test 2 — Print produces multiple paginated pages
 
-## What I'll do
+Uses Chromium's `page.pdf()` against the same `@media print` stylesheet `window.print()` triggers — this is the most reliable way to assert pagination in headless Playwright.
 
-### A. Fix the stale template
-- `WhatsAppBlastSheet`: re-seed `template` when `defaultTemplate` changes (effect with the prop as dep) **and** when the sheet transitions from closed → open. Keep user edits while the sheet is open with the same template prop.
+1. `page.goto("/command")`, wait for content (KPI strip + Aging strip + Pipeline).
+2. `await page.emulateMedia({ media: "print" });`
+3. Sanity-check that the print stylesheet neutralized the shell:
+   ```ts
+   const shell = await page.evaluate(() => {
+     const el = document.querySelector("[data-app-shell]") ?? document.body;
+     const cs = getComputedStyle(el);
+     return { overflow: cs.overflow, height: cs.height };
+   });
+   expect(shell.overflow).not.toBe("hidden");
+   ```
+   (If `[data-app-shell]` isn't present yet, the spec will add the attribute to `AppLayout`'s root — single-line, presentation-only — so the test has a stable hook. No logic change.)
+4. Generate a PDF with A4 + print background:
+   ```ts
+   const pdf = await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: false });
+   ```
+5. Parse page count from the PDF bytes without adding a dependency:
+   ```ts
+   const text = pdf.toString("latin1");
+   const pageCount = (text.match(/\/Type\s*\/Page[^s]/g) || []).length;
+   expect(pageCount).toBeGreaterThanOrEqual(2);
+   ```
+6. Save the artifact to `test-results/command-print.pdf` via `testInfo.attach` so failures are debuggable.
+7. Restore: `await page.emulateMedia({ media: null });`
 
-### B. Add unit tests (`src/utils/__tests__/shareWhatsApp.test.ts` + `src/components/command/__tests__/WhatsAppBlastSheet.test.tsx`)
-Locked-down assertions on the built strings:
+## Auth strategy (technical note)
 
-1. **Order summary** — given an order with 2 lines, asserts message contains the exact `distributorName`, ISO date formatted as `en-IN`, every `productName × quantity = ₹lineTotal`, and the grand `Total` line equals `formatCurrency(order.total)`.
-2. **Invoice summary (intra-state)** — asserts CGST + SGST lines present, IGST absent, subtotal + grand total match input.
-3. **Invoice summary (inter-state)** — IGST present, CGST/SGST absent.
-4. **Mutation reactivity** — call builder twice with the same order reference after mutating `order.total` and a `lines[i].quantity`; asserts the second string reflects the new numbers (catches any accidental memoisation).
-5. **Blast sheet rendering** — render with 3 dealers (one missing phone), default template using all three merge fields; assert:
-   - `{dealer_name}`, `{outstanding}` (formatted ₹), `{last_order_date}` resolved per dealer
-   - dealer with no orders shows "no order on record"
-   - reachable count = 2 of 3
-6. **Blast sheet re-seeds** — rerender with a new `defaultTemplate` prop, assert the textarea text updates (currently fails — passes after fix A).
-7. **Blast sheet reflects dealer changes** — rerender with a filtered `dealers` array (1 dealer), assert preview count drops to 1 and the remaining message uses the new dealer's `outstandingAmount`.
+Two acceptable paths — I'll implement (a) and document (b):
 
-### C. Out of scope (flagging for confirmation)
-- No share message currently embeds the **/command period label** (e.g. "Last 30 days"). The audit shows this is intentional — running balances and last-order dates don't change with the dashboard period. If you want the period stamped into blast messages (e.g. "as of last 30 days"), say the word and I'll add a `{period}` merge field + thread the active period from Command into the sheet.
+(a) **Skip-by-default, opt-in via env.** Mirrors `order-lifecycle.spec.ts`. CI sets `E2E_AUTH_STATE=1` and a `storageState` once auth fixtures land. Zero infra change today.
 
-## Files touched
+(b) **Reuse storage state from a `global.setup.ts`** that signs in once with a seeded test user. Out of scope for this PR but the spec is written so flipping to (b) is a one-line change in `playwright-fixture`.
 
-- `src/components/command/WhatsAppBlastSheet.tsx` — template re-seed effect
-- `src/utils/__tests__/shareWhatsApp.test.ts` — new
-- `src/components/command/__tests__/WhatsAppBlastSheet.test.tsx` — new
-
-No other production code changes.
+## Out of scope
+- Visual-regression screenshots of print preview (Chromium's PDF rasterization is flaky across CI runners).
+- Asserting exact page count (depends on seed data volume); `>= 2` is the contract that catches the regression.
+- Wiring CI auth state — separate task.
