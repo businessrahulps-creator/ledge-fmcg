@@ -172,6 +172,8 @@ function EntityCardImpl({
       {/* Action chip */}
       {primaryAction && <div className="mt-3 flex">{primaryAction}</div>}
 
+      {children && <div className="mt-3">{children}</div>}
+
       {/* KpiStrip footer */}
       {trimmedCells.length > 0 && (
         <div
