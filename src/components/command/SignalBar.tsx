@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, Clock, TrendingUp, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertTriangle, Clock, TrendingUp, AlertCircle, CheckCircle2, ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CommandSignal } from "@/lib/command-signals";
 
 interface Props {
   signals: CommandSignal[];
   lastUpdated: Date | null;
+  /** Max signals to show before "+ N more". Default 3. */
+  collapseAt?: number;
 }
 
 const tierStyles = {
@@ -32,7 +35,11 @@ function timeAgo(d: Date | null): string {
   return hrs === 1 ? "1 hour ago" : `${hrs} hours ago`;
 }
 
-export function SignalBar({ signals, lastUpdated }: Props) {
+export function SignalBar({ signals, lastUpdated, collapseAt = 3 }: Props) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? signals : signals.slice(0, collapseAt);
+  const hiddenCount = Math.max(0, signals.length - collapseAt);
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -52,33 +59,45 @@ export function SignalBar({ signals, lastUpdated }: Props) {
           <p className="text-xs text-muted-foreground">No risks or alerts to act on right now.</p>
         </div>
       ) : (
-        <div className="grid gap-2 md:grid-cols-2">
-          {signals.map((s) => {
-            const style = tierStyles[s.tier];
-            const Icon = tierIcon[s.tier];
-            return (
-              <Link
-                key={s.id}
-                to={s.href}
-                className={cn(
-                  "group flex items-center gap-3 rounded-r-md border-l-[3px] px-3 py-2.5 transition-colors hover:bg-muted/40",
-                  style.border,
-                  style.bg,
-                )}
-              >
-                <Icon className={cn("h-4 w-4 shrink-0", style.text)} />
-                <div className="min-w-0 flex-1">
-                  <p className={cn("text-[10px] font-semibold uppercase tracking-[0.16em]", style.text)}>{s.label}</p>
-                  <p className="truncate text-sm text-foreground">{s.message}</p>
-                </div>
-                <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-foreground/70 group-hover:text-foreground">
-                  {s.cta}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <>
+          <div className="grid gap-2 md:grid-cols-2">
+            {visible.map((s) => {
+              const style = tierStyles[s.tier];
+              const Icon = tierIcon[s.tier];
+              return (
+                <Link
+                  key={s.id}
+                  to={s.href}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-r-md border-l-[3px] px-3 py-2.5 transition-colors hover:bg-muted/40",
+                    style.border,
+                    style.bg,
+                  )}
+                >
+                  <Icon className={cn("h-4 w-4 shrink-0", style.text)} />
+                  <div className="min-w-0 flex-1">
+                    <p className={cn("text-[10px] font-semibold uppercase tracking-[0.16em]", style.text)}>{s.label}</p>
+                    <p className="truncate text-sm text-foreground">{s.message}</p>
+                  </div>
+                  <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-foreground/70 group-hover:text-foreground">
+                    {s.cta}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
+              {expanded ? "Show less" : `+ ${hiddenCount} more`}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
