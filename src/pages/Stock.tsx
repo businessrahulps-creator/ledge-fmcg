@@ -983,22 +983,21 @@ export default function Stock() {
           </DialogContent>
         </Dialog>
 
-        {/* Add New Product to Warehouse — only lists products NOT already stocked here.
-            For products already in this warehouse, users adjust via the row's Edit dialog. */}
+        {/* Add Stock — universal upsert. Pick any product; if already stocked here,
+            the entered quantity is added to the existing row. Otherwise a new row is created. */}
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">Add Product to Warehouse</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">Add Stock</DialogTitle>
               <DialogDescription className="text-xs">
-                Add a product that isn't yet stocked in this warehouse. To change the quantity of a product already here, click its row in the inventory list.
+                Pick a product and enter quantity. If it's already stocked here, this amount will be added to the current quantity.
               </DialogDescription>
             </DialogHeader>
             {(() => {
-              const stockedProductIds = new Set(
-                stockItemsList.filter((si) => si.godownId === selectedWarehouse).map((si) => si.productId),
-              );
-              const availableProducts = products.filter((p) => !stockedProductIds.has(p.id));
-              const noneAvailable = availableProducts.length === 0;
+              const stockedQtyByProduct = new Map<string, number>();
+              stockItemsList
+                .filter((si) => si.godownId === selectedWarehouse)
+                .forEach((si) => stockedQtyByProduct.set(si.productId, si.quantity));
               return (
                 <div className="space-y-3 md:space-y-4">
                   <div className="space-y-1.5 md:space-y-2">
@@ -1006,40 +1005,36 @@ export default function Stock() {
                     <EntityPicker
                       value={addStockProductId}
                       onChange={setAddStockProductId}
-                      disabled={noneAvailable}
-                      placeholder={noneAvailable ? "All products already stocked here" : "Search for a product"}
+                      placeholder="Search for a product"
                       searchPlaceholder="Search by name or SKU…"
                       emptyHint="No matching products."
-                      options={availableProducts.map((p) => ({
-                        value: p.id,
-                        label: p.name,
-                        hint: (p as any).sku || undefined,
-                      }))}
-                      helperText={
-                        noneAvailable
-                          ? "Every product already exists in this warehouse. Tap a row in the inventory list to update its quantity."
-                          : undefined
-                      }
+                      options={products.map((p) => {
+                        const existingQty = stockedQtyByProduct.get(p.id);
+                        return {
+                          value: p.id,
+                          label: p.name,
+                          hint: (p as any).sku || undefined,
+                          meta: existingQty != null ? `In stock: ${existingQty}` : "New",
+                        };
+                      })}
                     />
                   </div>
-                  {!noneAvailable && (
-                    <div className="space-y-1.5 md:space-y-2">
-                      <Label className="text-xs md:text-sm">Initial Quantity *</Label>
-                      <NumberInput
-                        allowEmpty={false}
-                        min={1}
-                        value={addStockQty}
-                        onValueChange={(v) => setAddStockQty(v ?? 1)}
-                        className="h-10 rounded-lg"
-                      />
-                    </div>
-                  )}
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Quantity to Add *</Label>
+                    <NumberInput
+                      allowEmpty={false}
+                      min={1}
+                      value={addStockQty}
+                      onValueChange={(v) => setAddStockQty(v ?? 1)}
+                      className="h-10 rounded-lg"
+                    />
+                  </div>
                 </div>
               );
             })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock} disabled={!addStockProductId}>Add to Warehouse</Button>
+              <Button onClick={handleAddStock} disabled={!addStockProductId}>Add Stock</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
