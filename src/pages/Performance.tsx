@@ -784,7 +784,7 @@ export default function Performance() {
                         <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/salespersons")}>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{d.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                            <p className="text-[10px] text-muted-foreground truncate tabular-nums">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
                           </div>
                           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${hc.color} ${hc.bg} shrink-0`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${hc.dot}`} />
