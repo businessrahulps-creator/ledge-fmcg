@@ -33,7 +33,7 @@ const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
+  { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
 ];
 
 type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
