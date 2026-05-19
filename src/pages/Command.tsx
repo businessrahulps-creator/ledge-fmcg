@@ -330,6 +330,7 @@ export default function Command() {
         className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6"
         aria-label="My Business"
       >
+        <PrintSettingsStyle />
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="h1-display">{companyName}</h1>
