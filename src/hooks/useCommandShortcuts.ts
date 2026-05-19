@@ -7,6 +7,7 @@ interface Handlers {
   onGoReports: () => void;
   onPeriod: (period: "7d" | "30d" | "90d" | "ytd" | "custom") => void;
   onPrint: () => void;
+  onPrintBrowser?: () => void;
   onToggleCheatSheet: () => void;
   onToggleDensity: () => void;
 }
