@@ -341,7 +341,11 @@ export default function Stock() {
         addStockItem(newItem);
       }
     }
-    toast.success("Stock added", { description: `${addStockQty} units added successfully.` });
+    toast.success(existing ? "Stock updated" : "Product stocked", {
+      description: existing
+        ? `Added ${addStockQty} units to existing stock (now ${existing.quantity + addStockQty}).`
+        : `${addStockQty} units stocked in this warehouse.`,
+    });
     setAddStockOpen(false);
     setAddStockProductId("");
     setAddStockQty(0);
