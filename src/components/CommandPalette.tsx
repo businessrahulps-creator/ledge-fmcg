@@ -282,26 +282,33 @@ export function CommandPalette() {
         onOpenChange={setOpen}
         title="Search"
         headerSlot={
-          <CommandInput
-            value={query}
-            onValueChange={setQuery}
-            placeholder="Search orders, dealers, products…"
-            className="h-10 text-base"
-          />
+          <div className="flex flex-1 items-center rounded-md border border-border/60 bg-muted/40 px-2">
+            <Command
+              className="flex w-full bg-transparent"
+              shouldFilter={false}
+            >
+              <CommandInput
+                value={query}
+                onValueChange={setQuery}
+                placeholder="Search orders, dealers, products…"
+                className="h-10 text-base"
+                autoFocus
+              />
+            </Command>
+          </div>
         }
       >
         <Command
           className="flex h-full flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]]:px-1 [&_[cmdk-item]]:min-h-[48px] [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2 [&_[cmdk-item]]:text-[15px] [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
-          shouldFilter
-          value={undefined}
         >
-          {/* Hidden mirror input so cmdk picks up the query from headerSlot */}
-          <CommandInput value={query} onValueChange={setQuery} className="sr-only" />
+          {/* Mirror input drives cmdk's internal filter for the list below */}
+          <CommandInput value={query} onValueChange={setQuery} className="sr-only h-0 border-0 p-0" />
           {listContent}
         </Command>
       </MobileSearchSheet>
     );
   }
+
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
