@@ -5,6 +5,10 @@ import { CommandKpiCard } from "../CommandKpiCard";
 import { CommandLineChart } from "../CommandLineChart";
 import { LeaderboardCard } from "../LeaderboardCard";
 import { CreditAtRiskCard } from "../CreditAtRiskCard";
+import { HeroBand } from "../HeroBand";
+import { AgingStrip } from "../AgingStrip";
+import { ActivityFeed } from "../ActivityFeed";
+import { PipelineFunnel } from "../PipelineFunnel";
 import { KpiRowSkeleton, ChartSkeleton, CardSkeleton } from "../CommandSkeleton";
 import { Card } from "@/components/ui/card";
 import { Users, Package } from "lucide-react";
@@ -15,20 +19,24 @@ import {
   ordersInPeriod,
   outstandingTotal,
   pctDelta,
+  PERIOD_LABELS,
+  type CommandPeriod,
   type PeriodRange,
 } from "@/lib/command-signals";
 
 interface Props {
   range: PeriodRange;
+  period?: CommandPeriod;
 }
 
-export function OverviewTab({ range }: Props) {
+export function OverviewTab({ range, period = "30d" }: Props) {
   const api = useApi();
   const loading = api.loading;
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
   const targets = api.targets.list();
+  const claims = api.claims.list();
 
   const computed = useMemo(() => {
     const prevRange: PeriodRange = {
@@ -124,8 +132,21 @@ export function OverviewTab({ range }: Props) {
     };
   }, [orders, distributors, products, targets, range]);
 
+  const periodLabel = PERIOD_LABELS[period] ?? "Period";
+
   return (
     <div className="space-y-4 md:space-y-6">
+      {loading ? (
+        <CardSkeleton height={140} />
+      ) : (
+        <HeroBand
+          collected={computed.collections}
+          newInvoiced={computed.revenue}
+          prevCollected={computed.prevCollections}
+          periodLabel={periodLabel}
+        />
+      )}
+
       {loading ? (
         <KpiRowSkeleton />
       ) : (
@@ -170,6 +191,20 @@ export function OverviewTab({ range }: Props) {
         </div>
       )}
 
+      <div className="grid gap-4 md:grid-cols-2">
+        {loading ? (
+          <>
+            <CardSkeleton height={200} />
+            <CardSkeleton height={200} />
+          </>
+        ) : (
+          <>
+            <AgingStrip orders={orders} distributors={distributors} />
+            <PipelineFunnel orders={orders} />
+          </>
+        )}
+      </div>
+
       <Card className="p-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Revenue trend</h3>
@@ -181,9 +216,10 @@ export function OverviewTab({ range }: Props) {
         {loading ? <ChartSkeleton /> : <CommandLineChart data={computed.trend} />}
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         {loading ? (
           <>
+            <CardSkeleton height={260} />
             <CardSkeleton height={260} />
             <CardSkeleton height={260} />
           </>
@@ -204,6 +240,7 @@ export function OverviewTab({ range }: Props) {
               emptyTitle="No SKU revenue yet this period"
               viewAllHref="/stock"
             />
+            <ActivityFeed orders={orders} claims={claims} />
           </>
         )}
       </div>
