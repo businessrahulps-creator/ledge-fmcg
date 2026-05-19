@@ -187,7 +187,7 @@ export function CommandPdf({
             pipeline.map((r, i) => (
               <View key={r.stage} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
                 <Text style={[s.tableCell, { width: "50%" }]}>{r.stage}</Text>
-                <Text style={[s.tableCellRight, { width: "20%" }]}>{r.count}</Text>
+                <Text style={[s.tableCellRight, { width: "20%" }]}>{String(r.count)}</Text>
                 <Text style={[s.tableCellRight, { width: "30%" }]}>{formatCurrencyPdf(r.value)}</Text>
               </View>
             ))
