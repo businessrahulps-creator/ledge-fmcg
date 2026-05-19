@@ -8,7 +8,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-react";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
@@ -211,8 +211,8 @@ export default function Orders() {
               aria-label="Export CSV"
               onClick={() => {
                 const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
-                exportCsv(
-                  csvFilename("orders"),
+                exportXlsx(
+                  xlsxFilename("orders"),
                   ["Order #", "Date", "Dealer", "Sales Person", "Amount", "Payment Mode", "Payment Status", "Delivery Status", "Dispatch Date", "Vehicle", "Driver", "Warehouse"],
                   filtered.map((o) => [
                     o.orderNumber,

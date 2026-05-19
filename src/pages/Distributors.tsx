@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
@@ -174,8 +174,8 @@ export default function Distributors() {
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               aria-label="Export CSV"
               onClick={() => {
-                exportCsv(
-                  csvFilename("dealers"),
+                exportXlsx(
+                  xlsxFilename("dealers"),
                   ["Name", "Location", "Contact", "Total Orders", "Total Value"],
                   filtered.map((d) => [
                     d.name,

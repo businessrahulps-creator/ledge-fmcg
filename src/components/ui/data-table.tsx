@@ -2,7 +2,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { ArrowUpDown, Download, Rows3, Rows4, Rows2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 
 export type DataTableDensity = "compact" | "comfortable" | "spacious";
 
@@ -108,7 +108,7 @@ export function DataTable<T>({
         return "";
       })
     );
-    exportCsv(csvFilename(csvName), headers, rowsCsv);
+    exportXlsx(xlsxFilename(csvName), headers, rowsCsv);
   };
 
   return (

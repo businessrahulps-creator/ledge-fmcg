@@ -5,7 +5,7 @@ import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
 import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
@@ -118,8 +118,8 @@ export function ProductReport() {
 
       <ReportExportFooter
         onExcel={() =>
-          exportCsv(
-            csvFilename("product-report"),
+          exportXlsx(
+            xlsxFilename("product-report"),
             ["Product", "SKU", "Qty Sold", "Revenue"],
             data.map((p) => [p.name, p.sku, String(p.qtySold), formatCurrency(p.revenue)])
           )

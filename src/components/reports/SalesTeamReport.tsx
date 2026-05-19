@@ -6,7 +6,7 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, ty
 import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportExportFooter } from "./ReportExportFooter";
@@ -103,8 +103,8 @@ export function SalesTeamReport() {
 
       <ReportExportFooter
         onExcel={() =>
-          exportCsv(
-            csvFilename("sales-team-report"),
+          exportXlsx(
+            xlsxFilename("sales-team-report"),
             ["Name", "Region", "Phone", "Orders", "Revenue"],
             data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
           )

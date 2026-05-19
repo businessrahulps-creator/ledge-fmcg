@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
@@ -122,8 +122,8 @@ export function PaymentReport() {
 
       <ReportExportFooter
         onExcel={() =>
-          exportCsv(
-            csvFilename("payment-report"),
+          exportXlsx(
+            xlsxFilename("payment-report"),
             ["Order", "Dealer", "Date", "Amount", "Payment Status", "Payment Mode"],
             filtered.map((o) => [
               o.orderNumber,
@@ -144,8 +144,8 @@ export function PaymentReport() {
             title="Export aging summary (XLSX)"
             onClick={() => {
               const aging = sortByRisk(computeDealerAging(orders, distributors));
-              exportCsv(
-                csvFilename("payment-aging-summary"),
+              exportXlsx(
+                xlsxFilename("payment-aging-summary"),
                 ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
                 aging.map((r) => [
                   r.distributorName,
