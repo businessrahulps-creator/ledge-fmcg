@@ -255,15 +255,15 @@ export default function Command() {
           onBlast={(id) => setBlastSignalId(id)}
         />
 
-        {blastPayload && (
+        {renderedBlast && (
           <WhatsAppBlastSheet
             open={!!blastSignalId}
             onClose={() => setBlastSignalId(null)}
-            title={blastPayload.title}
-            description={blastPayload.description}
-            dealers={blastPayload.dealers}
+            title={renderedBlast.title}
+            description={renderedBlast.description}
+            dealers={renderedBlast.dealers}
             orders={orders}
-            defaultTemplate={blastPayload.defaultTemplate}
+            defaultTemplate={renderedBlast.defaultTemplate}
           />
         )}
 
