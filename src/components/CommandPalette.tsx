@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -10,9 +11,12 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { MobileSearchSheet } from "@/components/ui/mobile-search-sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { getRecent, type RecentItem } from "@/lib/recent-items";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
+
 import {
   House,
   ClipboardList,
@@ -52,6 +56,8 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const api = useApi();
   const canPlaceOrders = useCan("place_orders");
+  const isMobile = useIsMobile();
+
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -151,14 +157,9 @@ export function CommandPalette() {
     { label: "Settings", to: "/settings", icon: Settings },
   ];
 
-  return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput
-        value={query}
-        onValueChange={setQuery}
-        placeholder="Search orders, dealers, products, or jump to a page…"
-      />
-      <CommandList>
+  const listContent = (
+    <CommandList className={isMobile ? "max-h-none flex-1 overflow-y-auto" : undefined}>
+
         <CommandEmpty>No matches. Try a different search.</CommandEmpty>
 
         {!q && recent.length > 0 && (
@@ -272,6 +273,52 @@ export function CommandPalette() {
           </>
         )}
       </CommandList>
+  );
+
+  if (isMobile) {
+    return (
+      <MobileSearchSheet
+        open={open}
+        onOpenChange={setOpen}
+        title="Search"
+        headerSlot={
+          <div className="flex flex-1 items-center rounded-md border border-border/60 bg-muted/40 px-2">
+            <Command
+              className="flex w-full bg-transparent"
+              shouldFilter={false}
+            >
+              <CommandInput
+                value={query}
+                onValueChange={setQuery}
+                placeholder="Search orders, dealers, products…"
+                className="h-10 text-base"
+                autoFocus
+              />
+            </Command>
+          </div>
+        }
+      >
+        <Command
+          className="flex h-full flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]]:px-1 [&_[cmdk-item]]:min-h-[48px] [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2 [&_[cmdk-item]]:text-[15px] [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
+        >
+          {/* Mirror input drives cmdk's internal filter for the list below */}
+          <CommandInput value={query} onValueChange={setQuery} className="sr-only h-0 border-0 p-0" />
+          {listContent}
+        </Command>
+      </MobileSearchSheet>
+    );
+  }
+
+
+  return (
+    <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandInput
+        value={query}
+        onValueChange={setQuery}
+        placeholder="Search orders, dealers, products, or jump to a page…"
+      />
+      {listContent}
     </CommandDialog>
   );
 }
+
