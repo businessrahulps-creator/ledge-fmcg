@@ -94,9 +94,6 @@ export default function Command() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="h1-display">{companyName}</h1>
-            <p className="mt-0.5 font-heading text-xs italic text-muted-foreground md:mt-1 md:text-sm">
-              by Ledge Intelligence
-            </p>
           </div>
           <PeriodSelector
             period={period}
