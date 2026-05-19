@@ -43,7 +43,7 @@ export function useSignalAcks() {
       .eq("company_id", companyId)
       .order("updated_at", { ascending: false });
     if (error) {
-      handleSupabaseError(error, "signal-acks.fetch");
+      handleSupabaseError(error, { source: "signal-acks.fetch", title: "Failed to load signals" });
       return;
     }
     setAcks((data ?? []) as SignalAck[]);
@@ -84,7 +84,7 @@ export function useSignalAcks() {
         ? await supabase.from("signal_acknowledgements").update(payload).eq("id", existing.id)
         : await supabase.from("signal_acknowledgements").insert(payload);
       if (error) {
-        handleSupabaseError(error, "signal-acks.snooze");
+        handleSupabaseError(error, { source: "signal-acks.snooze", title: "Failed to snooze signal" });
         return;
       }
       toast.success(`Snoozed for ${days} day${days === 1 ? "" : "s"}`);
@@ -108,7 +108,7 @@ export function useSignalAcks() {
         ? await supabase.from("signal_acknowledgements").update(payload).eq("id", existing.id)
         : await supabase.from("signal_acknowledgements").insert(payload);
       if (error) {
-        handleSupabaseError(error, "signal-acks.assign");
+        handleSupabaseError(error, { source: "signal-acks.assign", title: "Failed to assign signal" });
         return;
       }
       toast.success(`Assigned to ${assigneeName}`);
@@ -132,7 +132,7 @@ export function useSignalAcks() {
         ? await supabase.from("signal_acknowledgements").update(payload).eq("id", existing.id)
         : await supabase.from("signal_acknowledgements").insert(payload);
       if (error) {
-        handleSupabaseError(error, "signal-acks.resolve");
+        handleSupabaseError(error, { source: "signal-acks.resolve", title: "Failed to resolve signal" });
         return;
       }
       toast.success("Marked resolved");
@@ -149,7 +149,7 @@ export function useSignalAcks() {
         .delete()
         .eq("id", existing.id);
       if (error) {
-        handleSupabaseError(error, "signal-acks.clear");
+        handleSupabaseError(error, { source: "signal-acks.clear", title: "Failed to clear signal" });
         return;
       }
       toast.success("Cleared");
@@ -198,7 +198,7 @@ export function useTeammates() {
         .select("user_id, full_name, email")
         .eq("company_id", companyId);
       if (error) {
-        handleSupabaseError(error, "teammates.fetch");
+        handleSupabaseError(error, { source: "teammates.fetch", title: "Failed to load teammates" });
         return;
       }
       if (cancelled) return;
