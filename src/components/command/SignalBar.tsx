@@ -1,14 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { AlertTriangle, Clock, TrendingUp, AlertCircle, CheckCircle2, ArrowRight, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { AlertTriangle, Clock, TrendingUp, AlertCircle, CheckCircle2, ArrowRight, ChevronDown, MessageCircle, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CommandSignal } from "@/lib/command-signals";
+import { SignalActions } from "./SignalActions";
+import type { SignalAck } from "@/lib/command-acks";
 
 interface Props {
   signals: CommandSignal[];
   lastUpdated: Date | null;
   /** Max signals to show before "+ N more". Default 3. */
   collapseAt?: number;
+  /** Acks keyed by signal id. */
+  acks?: Map<string, SignalAck>;
+  /** Teammate name lookup for showing "Assigned to X" pill. */
+  teammateLookup?: Map<string, string>;
+  /** Action handlers. */
+  onSnooze?: (signalId: string, days: number) => void;
+  onAssign?: (signalId: string, userId: string, userName: string) => void;
+  onResolve?: (signalId: string) => void;
+  onClear?: (signalId: string) => void;
+  /** Signals that support a WhatsApp blast (dormant, dormant-owing, credit-risk). */
+  onBlast?: (signalId: string) => void;
+  blastableIds?: Set<string>;
 }
 
 const tierStyles = {
@@ -35,8 +49,28 @@ function timeAgo(d: Date | null): string {
   return hrs === 1 ? "1 hour ago" : `${hrs} hours ago`;
 }
 
-export function SignalBar({ signals, lastUpdated, collapseAt = 3 }: Props) {
+function snoozeRemaining(until: string): string {
+  const ms = new Date(until).getTime() - Date.now();
+  const days = Math.ceil(ms / 86400_000);
+  if (days <= 1) return "Snoozed · <1d";
+  return `Snoozed · ${days}d`;
+}
+
+export function SignalBar({
+  signals,
+  lastUpdated,
+  collapseAt = 3,
+  acks,
+  teammateLookup,
+  onSnooze,
+  onAssign,
+  onResolve,
+  onClear,
+  onBlast,
+  blastableIds,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
   const visible = expanded ? signals : signals.slice(0, collapseAt);
   const hiddenCount = Math.max(0, signals.length - collapseAt);
 
@@ -64,26 +98,77 @@ export function SignalBar({ signals, lastUpdated, collapseAt = 3 }: Props) {
             {visible.map((s) => {
               const style = tierStyles[s.tier];
               const Icon = tierIcon[s.tier];
+              const ack = acks?.get(s.id);
+              const assignedName = ack?.assigned_to ? teammateLookup?.get(ack.assigned_to) : null;
+              const canBlast = !!onBlast && blastableIds?.has(s.id);
+
               return (
-                <Link
+                <div
                   key={s.id}
-                  to={s.href}
                   className={cn(
-                    "group flex items-center gap-3 rounded-r-md border-l-[3px] px-3 py-2.5 transition-colors hover:bg-muted/40",
+                    "group flex items-center gap-2 rounded-r-md border-l-[3px] px-3 py-2.5 transition-colors hover:bg-muted/40",
                     style.border,
                     style.bg,
                   )}
                 >
-                  <Icon className={cn("h-4 w-4 shrink-0", style.text)} />
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("text-[10px] font-semibold uppercase tracking-[0.16em]", style.text)}>{s.label}</p>
-                    <p className="truncate text-sm text-foreground">{s.message}</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate(s.href)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <Icon className={cn("h-4 w-4 shrink-0", style.text)} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className={cn("text-[10px] font-semibold uppercase tracking-[0.16em]", style.text)}>
+                          {s.label}
+                        </p>
+                        {ack?.snoozed_until && new Date(ack.snoozed_until).getTime() > Date.now() && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                            <Clock className="h-2.5 w-2.5" />
+                            {snoozeRemaining(ack.snoozed_until)}
+                          </span>
+                        )}
+                        {assignedName && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-primary">
+                            <UserCheck className="h-2.5 w-2.5" />
+                            {assignedName.split(" ")[0]}
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-sm text-foreground">{s.message}</p>
+                    </div>
+                    <span className="hidden shrink-0 items-center gap-1 text-xs font-medium text-foreground/70 group-hover:text-foreground sm:flex">
+                      {s.cta}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </button>
+
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    {canBlast && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onBlast!(s.id);
+                        }}
+                        aria-label="Send WhatsApp blast"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-success"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    {onSnooze && onAssign && onResolve && onClear && (
+                      <SignalActions
+                        signalKey={s.id}
+                        ack={ack}
+                        onSnooze={(days) => onSnooze(s.id, days)}
+                        onAssign={(uid, uname) => onAssign(s.id, uid, uname)}
+                        onResolve={() => onResolve(s.id)}
+                        onClear={() => onClear(s.id)}
+                      />
+                    )}
                   </div>
-                  <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-foreground/70 group-hover:text-foreground">
-                    {s.cta}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                </Link>
+                </div>
               );
             })}
           </div>
