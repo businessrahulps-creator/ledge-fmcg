@@ -146,6 +146,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
       recordRecent({ kind: "page", label: ROUTE_TITLES[match], to: match });
     });
   }, [location.pathname]);
+
+  // Scroll-lock janitor — reset any leaked Radix Dialog/Sheet body styles on route change.
+  // Radix can leave `pointer-events: none` / `overflow: hidden` on <body> if a modal is
+  // unmounted before its exit animation completes. This prevents "page won't scroll" bugs.
+  useEffect(() => {
+    document.body.style.pointerEvents = "";
+    if (document.body.style.overflow === "hidden") document.body.style.overflow = "";
+  }, [location.pathname]);
+
   const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
