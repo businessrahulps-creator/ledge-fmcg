@@ -49,36 +49,6 @@ export function DispatchReport() {
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)}</span>
         </div>
-        <div className="sm:ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-            onClick={() => {
-              exportCsv(
-                csvFilename("dispatch-report"),
-                ["Order", "Dealer", "Date", "Dispatch Date", "Vehicle", "Driver", "Delivery Status", "Amount"],
-                filtered.map((o) => [
-                  o.orderNumber,
-                  o.distributorName,
-                  formatIndianDate(o.date),
-                  formatIndianDate(o.dispatchDate),
-                  o.vehicle || "",
-                  o.driverName || "",
-                  o.deliveryStatus,
-                  formatCurrency(netTotal(o)),
-                ])
-              );
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-          <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </Button>
-        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
