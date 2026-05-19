@@ -141,9 +141,9 @@ export function PaymentReport() {
             variant="outline"
             size="sm"
             className="h-10 px-4"
-            title="Export aging summary (XLSX)"
+            title="Export aging summary for current filters (XLSX)"
             onClick={() => {
-              const aging = sortByRisk(computeDealerAging(orders, distributors));
+              const aging = sortByRisk(computeDealerAging(filtered, distributors));
               exportXlsx(
                 xlsxFilename("payment-aging-summary"),
                 ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
