@@ -137,7 +137,8 @@ export function EntityPicker({
           onOpenAutoFocus={(e) => {
             // Focus the search input on open.
             e.preventDefault();
-            (e.currentTarget.querySelector("input") as HTMLInputElement | null)?.focus();
+            const target = e.currentTarget as HTMLElement | null;
+            target?.querySelector<HTMLInputElement>("input")?.focus();
           }}
         >
           <div className="flex items-center gap-2 border-b border-border/60 px-2.5 py-2">
