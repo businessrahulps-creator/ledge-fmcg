@@ -23,6 +23,7 @@ export const routeImporters = {
   "/targets": () => import("@/pages/Targets"),
   "/reports": () => import("@/pages/Reports"),
   "/performance": () => import("@/pages/Performance"),
+  "/command": () => import("@/pages/Command"),
   "/settings": () => import("@/pages/Settings"),
   "/billing": () => import("@/pages/Billing"),
   "/help": () => import("@/pages/Help"),
@@ -81,9 +82,10 @@ const likelyNext: Record<string, string[]> = {
   "/distributors": ["/orders/new"],
   "/billing": ["/orders"],
   "/stock": ["/orders/new"],
-  "/salespersons": ["/performance"],
-  "/reports": ["/performance"],
-  "/performance": ["/reports"],
+  "/salespersons": ["/command"],
+  "/reports": ["/command"],
+  "/performance": ["/command"],
+  "/command": ["/distributors", "/orders"],
 };
 
 /** Warm the 1–2 likely next routes from the current path, on idle. */
