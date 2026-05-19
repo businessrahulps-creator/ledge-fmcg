@@ -1,8 +1,4 @@
-/* Print stylesheet — takes effect for real print AND for in-app Print Preview
-   (body[data-print-preview]). Keeping both selectors in lockstep guarantees
-   the preview matches the printer output. */
-
-/* Shared rule set, applied via @media print OR body[data-print-preview]. */
+/* Print stylesheet for /command. */
 @media print {
   @page {
     size: A4 portrait;
