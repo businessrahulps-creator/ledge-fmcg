@@ -331,28 +331,34 @@ export default function Command() {
         aria-label="My Business"
       >
         <PrintSettingsStyle />
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
             <h1 className="h1-display">{companyName}</h1>
             <p data-print-only className="mt-1 text-xs text-muted-foreground">
               Period: {range.from.toLocaleDateString()} – {range.to.toLocaleDateString()} · Generated {new Date().toLocaleString()}
             </p>
           </div>
-          <div className="command-no-print flex flex-wrap items-end gap-2" aria-label="View controls">
-            <SavedViewsMenu currentParams={currentParams} />
-            <button
-              type="button"
-              onClick={toggleDensity}
-              aria-label={density === "dense" ? "Switch to comfortable density" : "Switch to compact density"}
-              title="Toggle density (D)"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              {density === "dense" ? "Compact" : "Comfortable"}
-            </button>
-            <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
-            <PrintButton onClick={() => window.print()} />
-            <PrintSettingsMenu />
-            <nav aria-label="Period" className="contents">
+          <div className="command-no-print flex flex-col gap-2 lg:items-end" aria-label="View controls">
+            {/* Row 1 — Actions */}
+            <div className="flex flex-wrap items-center gap-2">
+              <SavedViewsMenu currentParams={currentParams} />
+              <button
+                type="button"
+                onClick={toggleDensity}
+                aria-label={density === "dense" ? "Switch to comfortable density" : "Switch to compact density"}
+                title="Toggle density (D)"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                {density === "dense" ? "Compact" : "Comfortable"}
+              </button>
+              <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
+              <div className="inline-flex items-center gap-1 rounded-md border border-border bg-card p-0.5">
+                <PrintButton onClick={() => window.print()} />
+                <PrintSettingsMenu />
+              </div>
+            </div>
+            {/* Row 2 — Period */}
+            <nav aria-label="Period" className="flex">
               <PeriodSelector
                 period={period}
                 customFrom={customFrom}
@@ -363,6 +369,7 @@ export default function Command() {
             </nav>
           </div>
         </div>
+
 
         <PinnedViewChips currentParamString={currentParamString} />
 
