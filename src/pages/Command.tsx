@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,11 @@ import { PeopleTab } from "@/components/command/tabs/PeopleTab";
 import { ProductsTab } from "@/components/command/tabs/ProductsTab";
 import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
 import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
+import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
+import { PrintButton } from "@/components/command/PrintButton";
+import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
+import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
+import { useDensityPreference } from "@/hooks/useDensityPreference";
 import { useSignalAcks, useTeammates, activeAcksMap, shouldHideSignal } from "@/lib/command-acks";
 import {
   deriveSignals,
@@ -20,6 +25,7 @@ import {
   ordersInPeriod,
   type CommandPeriod,
 } from "@/lib/command-signals";
+import "@/styles/command-print.css";
 
 type TabId = "overview" | "people" | "products" | "drill";
 
