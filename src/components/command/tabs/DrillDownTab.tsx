@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { DistributorReport } from "@/components/reports/DistributorReport";
 import { ProductReport } from "@/components/reports/ProductReport";
 import { PaymentReport } from "@/components/reports/PaymentReport";
@@ -48,36 +47,6 @@ export function DrillDownTab({ defaultReport = "distributors", onReportChange }:
 
       <div>
         <Active />
-      </div>
-
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/60 pt-3">
-        <p className="mr-auto text-[11px] text-muted-foreground">
-          Each report includes its own export controls above. These shortcuts trigger the same actions.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const btn = document.querySelector<HTMLButtonElement>(
-              'button[data-export="excel"], button[data-export="xlsx"], button[aria-label*="Excel" i]',
-            );
-            btn?.click();
-          }}
-        >
-          Download Excel
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const btn = document.querySelector<HTMLButtonElement>(
-              'button[data-export="pdf"], button[aria-label*="PDF" i]',
-            );
-            btn?.click();
-          }}
-        >
-          Download PDF
-        </Button>
       </div>
     </div>
   );
