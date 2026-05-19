@@ -69,60 +69,6 @@ export function PaymentReport() {
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
-        <div className="sm:ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-            onClick={() => {
-              exportCsv(
-                csvFilename("payment-report"),
-                ["Order", "Dealer", "Date", "Amount", "Payment Status", "Payment Mode"],
-                filtered.map((o) => [
-                  o.orderNumber,
-                  o.distributorName,
-                  formatIndianDate(o.date),
-                  formatCurrency(netTotal(o)),
-                  o.paymentStatus,
-                  o.paymentMode.replace("_", " "),
-                ])
-              );
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-            title="Export aging summary (XLSX)"
-            onClick={() => {
-              const aging = sortByRisk(computeDealerAging(orders, distributors));
-              exportCsv(
-                csvFilename("payment-aging-summary"),
-                ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
-                aging.map((r) => [
-                  r.distributorName,
-                  r.bucket_0_30.toFixed(0),
-                  r.bucket_31_60.toFixed(0),
-                  r.bucket_61_90.toFixed(0),
-                  r.bucket_90_plus.toFixed(0),
-                  r.totalOutstanding.toFixed(0),
-                  r.creditLimit > 0 ? r.creditLimit.toFixed(0) : "—",
-                  r.creditLimit > 0 ? ((r.totalOutstanding / r.creditLimit) * 100).toFixed(0) : "—",
-                ]),
-              );
-            }}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Aging Summary</span>
-          </Button>
-          <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </Button>
-        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
