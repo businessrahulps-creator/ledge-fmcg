@@ -1,74 +1,91 @@
-## Goal
-A reliable Playwright spec that guards the two bugs we just fixed on `/command`: vertical scrolling must work (no Radix scroll-lock leak), and the print stylesheet must paginate into multiple A4 pages (not a one-page "screenshot of the website").
+# Premium Polish Sweep — 5 Phases
 
-## File
-`e2e/command-scroll-print.spec.ts` — new spec, follows the existing `e2e/*.spec.ts` pattern with `playwright-fixture`.
+You called out 12 issues across 7 surfaces. Below: every issue mapped to a fix, plus the adjacent problems I found while tracing them, grouped so each phase is a clean, surgical PR that can ship and be QA'd independently.
 
-Because `/command` requires an authenticated session and the current `order-lifecycle.spec.ts` is `test.skip(true, ...)` for that reason, the new file will follow the same convention: a top-level `test.skip(!process.env.E2E_AUTH_STATE, "...")` so it runs locally / in CI when an auth storageState is wired, and no-ops otherwise. The body is real, not a stub.
+## The team (roles I'll wear)
 
-## Test 1 — Scrolling is not blocked
+- **UI Surgeon** — token-only edits, no logic churn (Phases 1, 3, 4)
+- **Mobile Lead** — bottom nav, sheets, search, menu parity (Phase 2)
+- **Surface Architect** — Targets, Dealers, Sales Team card systems (Phase 4)
+- **Code Janitor** — removes dead PWA/activity affordances safely (Phase 1)
+- **QA** — Playwright pass + visual diff per phase (every phase)
 
-Reproduces the WhatsAppBlastSheet / KeyboardCheatSheet leak.
+---
 
-1. `page.goto("/command")`, wait for the "My Business" H1.
-2. Capture `initialScrollY = await page.evaluate(() => window.scrollY)`.
-3. Open and close a sheet that previously leaked scroll-lock:
-   - Press `?` to open KeyboardCheatSheet → press `Escape`.
-   - Click a "Send WhatsApp" trigger (or dispatch the same way the Credit at Risk card does) → press `Escape`.
-4. Assert body styles are clean:
-   ```ts
-   const { overflow, pointerEvents } = await page.evaluate(() => ({
-     overflow: document.body.style.overflow,
-     pointerEvents: document.body.style.pointerEvents,
-   }));
-   expect(overflow).not.toBe("hidden");
-   expect(pointerEvents).not.toBe("none");
-   ```
-5. Programmatic scroll + wheel scroll both move the page:
-   ```ts
-   await page.mouse.wheel(0, 2000);
-   await page.waitForFunction((y0) => window.scrollY > y0 + 200, initialScrollY);
-   ```
-6. Assert the page is actually taller than the viewport (`scrollHeight > innerHeight + 400`) so the assertion is meaningful even if seed data shrinks.
+## Phase 1 — Quick Wins & Dead Code (½ day, low risk)
 
-## Test 2 — Print produces multiple paginated pages
+Pure deletions and one-file fixes. Ships first to clear noise.
 
-Uses Chromium's `page.pdf()` against the same `@media print` stylesheet `window.print()` triggers — this is the most reliable way to assert pagination in headless Playwright.
+1. **Command "Last 30 days" header layout** — `Command.tsx` header is `flex-wrap items-end justify-between` with 6 controls + period selector wrapping awkwardly. Fix: split into two rows on `<lg` (actions row + period row right-aligned), tighten gaps, drop the stacked `20 Apr – 20 May` caption onto the same line as the select.
+2. **Remove "Check for updates"** — delete `RefreshAppButton` mount from `AppLayout` topbar (PWA disabled per `mem://features/offline-mode-paused`). Keep the component file for now; just unmount.
+3. **Hide Activity log entry-point** — gate `ActivityLog` trigger behind a `VITE_FEATURE_ACTIVITY` flag, default off. Routes/page stay; only the topbar/menu affordance hides.
+4. **Billing filter row** — `All Types` and `All Time` on the same line on mobile (`grid-cols-2 gap-2` instead of stacked).
+5. **Mobile menu nav label parity** — audit `AppSidebar` (desktop) vs mobile menu sheet labels; align verbatim (e.g. "Money to Collect" vs "Billing", "Sales Team" vs "Salespersons"). Single source of truth in a `nav-items.ts` constant.
 
-1. `page.goto("/command")`, wait for content (KPI strip + Aging strip + Pipeline).
-2. `await page.emulateMedia({ media: "print" });`
-3. Sanity-check that the print stylesheet neutralized the shell:
-   ```ts
-   const shell = await page.evaluate(() => {
-     const el = document.querySelector("[data-app-shell]") ?? document.body;
-     const cs = getComputedStyle(el);
-     return { overflow: cs.overflow, height: cs.height };
-   });
-   expect(shell.overflow).not.toBe("hidden");
-   ```
-   (If `[data-app-shell]` isn't present yet, the spec will add the attribute to `AppLayout`'s root — single-line, presentation-only — so the test has a stable hook. No logic change.)
-4. Generate a PDF with A4 + print background:
-   ```ts
-   const pdf = await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: false });
-   ```
-5. Parse page count from the PDF bytes without adding a dependency:
-   ```ts
-   const text = pdf.toString("latin1");
-   const pageCount = (text.match(/\/Type\s*\/Page[^s]/g) || []).length;
-   expect(pageCount).toBeGreaterThanOrEqual(2);
-   ```
-6. Save the artifact to `test-results/command-print.pdf` via `testInfo.attach` so failures are debuggable.
-7. Restore: `await page.emulateMedia({ media: null });`
+**Adjacent pattern fixes found**: stray `Refresh` text button on Dashboard hero ("Updated just now · Refresh") — same dead PWA loop, remove.
 
-## Auth strategy (technical note)
+---
 
-Two acceptable paths — I'll implement (a) and document (b):
+## Phase 2 — Mobile Shell Premium Pass (1 day)
 
-(a) **Skip-by-default, opt-in via env.** Mirrors `order-lifecycle.spec.ts`. CI sets `E2E_AUTH_STATE=1` and a `storageState` once auth fixtures land. Zero infra change today.
+The "kills the premium feel" cluster. All in `src/components/layout/` + mobile menu sheet + `CommandPalette`.
 
-(b) **Reuse storage state from a `global.setup.ts`** that signs in once with a seeded test user. Out of scope for this PR but the spec is written so flipping to (b) is a one-line change in `playwright-fixture`.
+6. **Mobile menu tinted tiles** — current light-orange/peach tile backgrounds (`bg-accent/...` style) feel cheap. Switch to Bone surface + thin Midnight hairline + Forest/Terracotta only on the leading icon chip. Matches `mem://style/landing-tinted-cards` discipline (one tint per section, not per row).
+7. **Mobile Search UX** — current full-screen overlay has misaligned input, no recent/empty state, results jump. Rebuild: sticky search header (56px), grouped sections (Recent / Quick actions / Results), `Esc` and swipe-down close, focus-trap, no layout shift behind it. Reuse `CommandPalette` logic, new mobile shell.
+8. **Insights tab broken on mobile** — Performance/Insights page overflows, chart legends wrap into KPIs. Add `min-w-0` to flex children, switch KPI strip to `grid-cols-2`, charts get a horizontal scroll container with snap.
+9. **Bottom nav polish** — tighten to 56px, active pill uses Midnight not raw bg, add 1px top hairline so it floats over content.
 
-## Out of scope
-- Visual-regression screenshots of print preview (Chromium's PDF rasterization is flaky across CI runners).
-- Asserting exact page count (depends on seed data volume); `>= 2` is the contract that catches the regression.
-- Wiring CI auth state — separate task.
+---
+
+## Phase 3 — Forms & Dropdowns Correctness (½ day)
+
+The "nothing comes" + "endless scroll" cluster. Touches all `Select`/`Combobox` usages, not just Stock.
+
+10. **Add Product to Warehouse — empty dropdown** — `availableProducts` is filtering out *all* products when every product is already stocked. Today the placeholder says "All products already stocked here" but the trigger still looks active. Fix: when `availableProducts.length === 0`, disable the trigger entirely, show inline help "Every product already exists here — tap a row to edit quantity", and hide the Initial Quantity field.
+11. **Searchable + virtualized product picker** — replace raw `Select` with `Command` combobox (already in shadcn) anywhere product/dealer/salesperson lists can exceed ~20 items: Stock add-product, NewOrder line items, Targets entity picker, Schemes. Add typeahead + `react-virtual` for >100 rows. One shared `<EntityPicker>` primitive.
+12. **Audit pass**: grep all `<Select>` with `.map(` over `products|distributors|salespersons|dealers` — migrate to `EntityPicker`. Likely 6–8 call sites.
+
+---
+
+## Phase 4 — Surface Upgrades: Targets, Dealers, Sales Team (1–1.5 days)
+
+The "feels like a form" / "too basic" cluster. Highest visual lift.
+
+13. **Targets page** — currently a bare table+form. Promote to: hero KPI strip (Total target / Attainment / At-risk count), grouped cards per period with progress ring, inline edit drawer instead of full-page form. Use `SignalCard` + `KpiStrip` from `mem://style/pr12-money-pages`.
+14. **Dealer cards** — redesign list/grid card: avatar monogram on Midnight, dealer name in Playfair, two-line meta, right-side outstanding pill (Terracotta if >0), tiny sparkline of last 8 weeks revenue, scheme/credit badges. Keep table view as alternate via density toggle.
+15. **Sales Team cards** — mirror dealer card shape: monogram, name, this-month attainment ring, top-dealer chip, last activity dot. Symmetry with dealer cards = system feel.
+16. **Adjacent**: Schemes list cards get the same primitive treatment (found while reviewing — same "basic form" feel).
+
+---
+
+## Phase 5 — Systemic Polish Sweep (½ day)
+
+Patterns I spotted that aren't in your list but match the same complaints. Done last because they touch many files lightly.
+
+17. **Spacing rhythm** — standardize page headers to one primitive (`PageHeader`) already created in `mem://roadmap/billion-dollar`. Migrate Billing, Targets, Stock, Performance, Schemes (currently each hand-rolled).
+18. **Empty states** — every "no data" today is a centered muted line. Replace with `CommandEmptyState` primitive (icon + title + one action).
+19. **Toasts hygiene** — sweep for dev-y toasts ("Failed to fetch X"); enforce `handleSupabaseError` per `mem://safety/backend-hygiene`.
+20. **Print/PDF leftover** — the dashed A4 guides convo from last turn is still open; bundle the decision (skip guides, just add cross-browser Playwright assert) into this phase as the QA closer.
+
+---
+
+## Sequencing & risk
+
+```text
+P1 ──► P2 ──► P3 ──► P4 ──► P5
+1d total visible improvement after P1+P2 (highest user-perceived lift)
+P3 is risk-isolated (one new primitive, swap call sites)
+P4 is the big visual moment — gets its own QA day
+P5 only after P1–4 ship clean
+```
+
+Each phase ends with: typecheck, `bunx vitest run`, Playwright smoke on `/command`, `/stock`, `/billing`, `/targets`, `/distributors`, manual mobile preview at 390×844.
+
+---
+
+## Open questions before I start
+
+1. **Activity log** — hide entirely (Phase 1 #3) or keep the page reachable via `/activity` direct URL? I'd default to "hide affordance, keep route."
+2. **Targets redesign (Phase 4 #13)** — full surface rebuild OK, or do you want me to ship design directions first (3 prototypes via `create_directions`) before I touch code?
+3. **Dealer/Sales card (Phase 4 #14–15)** — same question: do you want rendered direction options, or do you trust the spec above and want me to build it?
+4. **PWA "Check for updates" (Phase 1 #2)** — fully delete `RefreshAppButton.tsx` or keep the file dormant for when offline mode revives?
