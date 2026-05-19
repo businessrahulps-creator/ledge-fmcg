@@ -38,12 +38,15 @@ const primaryMobileNav = [
 
 type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
 
+// V2 unified palette — neutral Bone chip backgrounds, semantic color reserved for the
+// icon stroke only. This removes the "tinted-quilt" feel users called out on mobile
+// and keeps the surface feeling premium and consistent across groups.
 const TONE_STYLES: Record<MoreTone, { iconBg: string; iconFg: string; activeBg: string; activeFg: string }> = {
-  warning: { iconBg: "bg-warning/10", iconFg: "text-warning", activeBg: "bg-warning/15", activeFg: "text-warning" },
-  primary: { iconBg: "bg-primary/10", iconFg: "text-primary", activeBg: "bg-primary/15", activeFg: "text-primary" },
-  success: { iconBg: "bg-success/10", iconFg: "text-success", activeBg: "bg-success/15", activeFg: "text-success" },
-  accent:  { iconBg: "bg-accent/15",  iconFg: "text-accent-foreground", activeBg: "bg-accent/25", activeFg: "text-accent-foreground" },
-  muted:   { iconBg: "bg-muted",      iconFg: "text-foreground/70", activeBg: "bg-primary/10",  activeFg: "text-primary" },
+  warning: { iconBg: "bg-muted/60",  iconFg: "text-warning",            activeBg: "bg-warning/12",  activeFg: "text-warning" },
+  primary: { iconBg: "bg-muted/60",  iconFg: "text-primary",            activeBg: "bg-primary/10",  activeFg: "text-primary" },
+  success: { iconBg: "bg-muted/60",  iconFg: "text-success",            activeBg: "bg-success/12",  activeFg: "text-success" },
+  accent:  { iconBg: "bg-muted/60",  iconFg: "text-accent-foreground",  activeBg: "bg-accent/15",   activeFg: "text-accent-foreground" },
+  muted:   { iconBg: "bg-muted/60",  iconFg: "text-foreground/70",      activeBg: "bg-primary/10",  activeFg: "text-primary" },
 };
 
 const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
