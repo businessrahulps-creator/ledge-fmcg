@@ -51,7 +51,7 @@ export function useSavedViews() {
       handleSupabaseError(error, { source: "saved-views.fetch", title: "Failed to load saved views" });
       return;
     }
-    setViews((data ?? []) as SavedView[]);
+    setViews((data ?? []) as unknown as SavedView[]);
     setLoading(false);
   }, [companyId, user]);
 
@@ -69,7 +69,7 @@ export function useSavedViews() {
       }
       const { data, error } = await supabase
         .from("command_saved_views")
-        .insert({ company_id: companyId, user_id: user.id, name: trimmed, params })
+        .insert({ company_id: companyId, user_id: user.id, name: trimmed, params: params as unknown as Record<string, unknown> })
         .select()
         .single();
       if (error) {
@@ -78,7 +78,7 @@ export function useSavedViews() {
       }
       toast.success(`Saved “${trimmed}”`);
       await fetchViews();
-      return data as SavedView;
+      return data as unknown as SavedView;
     },
     [companyId, user, fetchViews],
   );
