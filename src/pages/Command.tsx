@@ -15,6 +15,8 @@ import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
 import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
 import { PrintButton } from "@/components/command/PrintButton";
 import { ExportPdfButton } from "@/components/command/ExportPdfButton";
+import { PrintSettingsMenu } from "@/components/command/PrintSettingsMenu";
+import { PrintSettingsStyle } from "@/components/command/PrintSettingsStyle";
 import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
 import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
 import { useDensityPreference } from "@/hooks/useDensityPreference";
@@ -348,6 +350,7 @@ export default function Command() {
             </button>
             <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
             <PrintButton onClick={() => window.print()} />
+            <PrintSettingsMenu />
             <nav aria-label="Period" className="contents">
               <PeriodSelector
                 period={period}
