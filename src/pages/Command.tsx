@@ -295,6 +295,7 @@ export default function Command() {
   // Density + shortcuts + cheat sheet
   const { density, toggle: toggleDensity } = useDensityPreference();
   const [cheatOpen, setCheatOpen] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false);
 
   const exportPdfRef = useRef<HTMLButtonElement | null>(null);
   useCommandShortcuts({
