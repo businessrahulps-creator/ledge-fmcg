@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EntityPicker } from "@/components/ui/entity-picker";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
