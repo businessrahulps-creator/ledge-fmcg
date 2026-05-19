@@ -86,30 +86,33 @@ export function MobileSearchSheet({
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            <div className="flex flex-1 items-center gap-2 rounded-md border border-border/60 bg-muted/40 px-2.5">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <Input
-                ref={inputRef}
-                value={query ?? ""}
-                onChange={(e) => onQueryChange?.(e.target.value)}
-                placeholder={placeholder}
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck={false}
-                enterKeyHint="search"
-                className="h-10 flex-1 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() => onQueryChange?.("")}
-                  aria-label="Clear search"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground active:bg-muted/60"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : null}
-            </div>
+            {headerSlot ?? (
+              <div className="flex flex-1 items-center gap-2 rounded-md border border-border/60 bg-muted/40 px-2.5">
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <Input
+                  ref={inputRef}
+                  value={query ?? ""}
+                  onChange={(e) => onQueryChange?.(e.target.value)}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="search"
+                  className="h-10 flex-1 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => onQueryChange?.("")}
+                    aria-label="Clear search"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground active:bg-muted/60"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
+            )}
+
           </div>
 
           {/* Body */}
