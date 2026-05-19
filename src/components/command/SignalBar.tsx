@@ -114,7 +114,7 @@ export function SignalBar({
                   <button
                     type="button"
                     onClick={() => navigate(s.href)}
-                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     <Icon className={cn("h-4 w-4 shrink-0", style.text)} />
                     <div className="min-w-0 flex-1">
