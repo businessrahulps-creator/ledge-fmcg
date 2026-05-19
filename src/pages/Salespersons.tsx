@@ -42,6 +42,19 @@ export default function Salespersons() {
   const api = useApi();
   const navigate = useNavigate();
   const items = api.salespersons.list();
+  const orders = api.orders.list();
+
+  // dealers-served per salesperson (distinct dealerIds)
+  const dealersServedBySp = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const o of orders) {
+      if (!o.salespersonId) continue;
+      const set = map.get(o.salespersonId) ?? new Set<string>();
+      set.add(o.distributorId);
+      map.set(o.salespersonId, set);
+    }
+    return map;
+  }, [orders]);
   const addSalesperson = api.salespersons.create;
   const updateSalesperson = api.salespersons.update;
   const deleteSalesperson = api.salespersons.remove;
@@ -159,52 +172,36 @@ export default function Salespersons() {
         <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {paginatedSales.map((s) => {
             const avgOrder = s.totalOrders > 0 ? s.totalValue / s.totalOrders : 0;
+            const dealersServed = dealersServedBySp.get(s.id)?.size ?? 0;
+            const tier: "success" | "warning" | "muted" =
+              s.totalValue > 0 ? "success" : s.totalOrders > 0 ? "warning" : "muted";
             return (
-              <div
+              <EntityCard
                 key={s.id}
+                tier={tier}
+                avatar={<EntityAvatar name={s.name} size="md" />}
+                title={s.name}
+                subtitle={s.region || undefined}
+                tertiary={s.phone || undefined}
+                hero={{
+                  value: formatCurrency(s.totalValue),
+                  label: "Lifetime revenue",
+                }}
+                cells={[
+                  { label: "Orders", value: s.totalOrders, zero: s.totalOrders === 0 },
+                  { label: "Avg order", value: avgOrder > 0 ? formatCurrency(avgOrder) : "—", zero: avgOrder === 0 },
+                  { label: "Dealers", value: dealersServed, zero: dealersServed === 0 },
+                ]}
+                menu={[
+                  { label: "Edit member", icon: Pencil, onSelect: () => openEdit(s, { stopPropagation: () => {} } as React.MouseEvent) },
+                  { label: "Remove member", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(s.id) },
+                ]}
                 onClick={() => navigate(`/salespersons/${s.id}`)}
-                className="cursor-pointer glass-card card-hover p-5 md:p-6"
-              >
-                <div className="flex items-start gap-3">
-                  <EntityAvatar name={s.name} size="md" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-semibold md:text-base">{s.name}</h3>
-                    {s.region && (
-                      <span className="mt-1 inline-flex items-center rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/15">
-                        {s.region}
-                      </span>
-                    )}
-                    {s.phone && (
-                      <p className="mt-1 truncate text-[11px] text-muted-foreground/80">{s.phone}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-0.5 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(s, e)} aria-label={`Edit ${s.name}`}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }} aria-label={`Delete ${s.name}`}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border/30 pt-4 text-[11px]">
-                  <div>
-                    <p className="text-muted-foreground">Orders</p>
-                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{s.totalOrders}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Revenue</p>
-                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{formatCurrency(s.totalValue)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Avg order</p>
-                    <p className="num mt-0.5 text-sm font-semibold text-foreground">{avgOrder > 0 ? formatCurrency(avgOrder) : "—"}</p>
-                  </div>
-                </div>
-              </div>
+              />
             );
           })}
         </div>
+
 
         {filtered.length > 0 ? (
           <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
