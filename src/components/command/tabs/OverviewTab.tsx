@@ -29,13 +29,14 @@ interface Props {
   period?: CommandPeriod;
 }
 
-export function OverviewTab({ range }: Props) {
+export function OverviewTab({ range, period = "30d" }: Props) {
   const api = useApi();
   const loading = api.loading;
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
   const targets = api.targets.list();
+  const claims = api.claims.list();
 
   const computed = useMemo(() => {
     const prevRange: PeriodRange = {
