@@ -889,14 +889,14 @@ export default function Performance() {
               if (atRisk.length === 0) return null;
               return (
                 <div className="glass-card rounded-md p-4 flex items-center gap-3 border-l-[3px] border-l-destructive cursor-pointer card-hover" onClick={() => navigate("/distributors")}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-destructive/10">
                     <AlertTriangle className="h-4 w-4 text-destructive" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-destructive truncate">Credit at Risk</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
                   </div>
-                  <span className="text-lg font-bold text-destructive">{atRisk.length}</span>
+                  <span className="shrink-0 tabular-nums text-lg font-bold text-destructive">{atRisk.length}</span>
                 </div>
               );
             })()}
