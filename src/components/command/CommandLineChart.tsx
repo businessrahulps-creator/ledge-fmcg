@@ -25,13 +25,39 @@ interface Props {
 export function CommandLineChart({ data, height = 240 }: Props) {
   const hasAny = data.some((p) => p.actual > 0 || p.target > 0);
 
-  const { peak, zeroRuns } = useMemo(() => {
-    if (!hasAny) return { peak: null as TrendPoint | null, zeroRuns: [] as Array<{ from: string; to: string }> };
+  const { peak, zeroRuns, maxActual, perBucketTarget, targetUnreachable, projectedClose, periodTarget, paceLabel } = useMemo(() => {
+    if (!hasAny) {
+      return {
+        peak: null as TrendPoint | null,
+        zeroRuns: [] as Array<{ from: string; to: string }>,
+        maxActual: 0,
+        perBucketTarget: 0,
+        targetUnreachable: false,
+        projectedClose: 0,
+        periodTarget: 0,
+        paceLabel: "",
+      };
+    }
     let peak: TrendPoint | null = null;
-    for (const p of data) if (p.actual > 0 && (!peak || p.actual > peak.actual)) peak = p;
+    let maxA = 0;
+    let totalActual = 0;
+    for (const p of data) {
+      if (p.actual > 0 && (!peak || p.actual > peak.actual)) peak = p;
+      if (p.actual > maxA) maxA = p.actual;
+      totalActual += p.actual;
+    }
+    const perBucketTarget = data[0]?.target || 0;
+    const periodTarget = perBucketTarget * data.length;
+    // Project close: simple linear extrapolation from buckets elapsed (any bucket
+    // with actual>0 counts as "elapsed"; if none, fall back to all elapsed).
+    const elapsed = Math.max(1, data.filter((p) => p.actual > 0).length);
+    const projectedClose = (totalActual / elapsed) * data.length;
+    const pace = periodTarget > 0 ? Math.round((projectedClose / periodTarget) * 100) : 0;
+    const paceLabel = periodTarget > 0 ? `${pace}% of target pace` : "";
+    // If the target line would dwarf the actual series, hide it and show context
+    // as a caption instead — the chart should breathe.
+    const targetUnreachable = perBucketTarget > 0 && maxA > 0 && perBucketTarget > maxA * 2.5;
 
-    // Identify contiguous zero-actual buckets between the first and last non-zero
-    // so we can shade "no dispatches" bands without grey-ing the whole future tail.
     const firstNonZero = data.findIndex((p) => p.actual > 0);
     const lastNonZero = data.length - 1 - [...data].reverse().findIndex((p) => p.actual > 0);
     const runs: Array<{ from: string; to: string }> = [];
@@ -45,7 +71,7 @@ export function CommandLineChart({ data, height = 240 }: Props) {
         }
       }
     }
-    return { peak, zeroRuns: runs };
+    return { peak, zeroRuns: runs, maxActual: maxA, perBucketTarget, targetUnreachable, projectedClose, periodTarget, paceLabel };
   }, [data, hasAny]);
 
   if (!hasAny) {
@@ -57,6 +83,12 @@ export function CommandLineChart({ data, height = 240 }: Props) {
       />
     );
   }
+
+  // Y-axis domain — when target is unreachable, scale to actuals only so the
+  // series isn't crushed into the floor.
+  const yMax = targetUnreachable
+    ? Math.max(maxActual, 1) * 1.2
+    : Math.max(maxActual, perBucketTarget, 1) * 1.1;
 
   return (
     <div style={{ width: "100%", height }}>
