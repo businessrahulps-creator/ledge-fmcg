@@ -137,7 +137,7 @@ export default function Command() {
             </TabsList>
           </div>
 
-          <TabsContent value="overview"><OverviewTab range={range} /></TabsContent>
+          <TabsContent value="overview"><OverviewTab range={range} period={period} /></TabsContent>
           {!isAccountant && <TabsContent value="people"><PeopleTab range={range} /></TabsContent>}
           {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
           <TabsContent value="drill"><DrillDownTab /></TabsContent>
