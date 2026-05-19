@@ -33,7 +33,7 @@ const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Insights", url: "/reports", icon: ChartNoAxesCombined },
+  { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
 ];
 
 type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
@@ -76,7 +76,7 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
     label: "Insights",
     tone: "accent",
     items: [
-      { title: "Performance", url: "/performance", icon: TrendingUp },
+      { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
     ],
   },
   {
@@ -285,15 +285,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   )}
                 </div>
               )}
-              <RefreshAppButton />
-              <button
-                type="button"
-                onClick={() => setActivityOpen(true)}
-                aria-label="Recent activity"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-              >
-                <History className="h-[18px] w-[18px]" strokeWidth={1.7} />
-              </button>
+              {/* PWA "Check for updates" + Activity log entry-points removed in Phase 1 polish.
+                  PWA offline mode is paused (mem://features/offline-mode-paused);
+                  Activity log route remains reachable directly via /activity. */}
               <NotificationCenter />
             </div>
           </header>
