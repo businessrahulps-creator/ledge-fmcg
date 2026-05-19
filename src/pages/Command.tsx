@@ -14,6 +14,7 @@ import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
 import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
 import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
 import { PrintButton } from "@/components/command/PrintButton";
+import { PrintPreviewOverlay } from "@/components/command/PrintPreviewOverlay";
 import { ExportPdfButton } from "@/components/command/ExportPdfButton";
 import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
 import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
@@ -294,6 +295,7 @@ export default function Command() {
   // Density + shortcuts + cheat sheet
   const { density, toggle: toggleDensity } = useDensityPreference();
   const [cheatOpen, setCheatOpen] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false);
 
   const exportPdfRef = useRef<HTMLButtonElement | null>(null);
   useCommandShortcuts({
@@ -303,7 +305,7 @@ export default function Command() {
     onGoReports: () => updateParam({ tab: "drill" }),
     onPeriod: (p) => updateParam({ period: p as CommandPeriod }),
     onPrint: () => exportPdfRef.current?.click(),
-    onPrintBrowser: () => window.print(),
+    onPrintBrowser: () => setPrintPreviewOpen(true),
     onToggleCheatSheet: () => setCheatOpen((v) => !v),
     onToggleDensity: toggleDensity,
   });
@@ -347,7 +349,7 @@ export default function Command() {
               {density === "dense" ? "Compact" : "Comfortable"}
             </button>
             <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
-            <PrintButton />
+            <PrintButton onClick={() => setPrintPreviewOpen(true)} />
             <nav aria-label="Period" className="contents">
               <PeriodSelector
                 period={period}
@@ -425,6 +427,7 @@ export default function Command() {
         </Tabs>
       </section>
       <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />
+      <PrintPreviewOverlay open={printPreviewOpen} onClose={() => setPrintPreviewOpen(false)} />
     </AppLayout>
   );
 }

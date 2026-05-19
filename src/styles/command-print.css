@@ -1,12 +1,14 @@
-/* Print stylesheet — only takes effect when the user prints /command. */
+/* Print stylesheet — takes effect for real print AND for in-app Print Preview
+   (body[data-print-preview]). Keeping both selectors in lockstep guarantees
+   the preview matches the printer output. */
+
+/* Shared rule set, applied via @media print OR body[data-print-preview]. */
 @media print {
   @page {
     size: A4 portrait;
     margin: 14mm 12mm;
   }
 
-  /* Neutralize the app shell's fixed viewport height + overflow clipping so the
-     browser can paginate the actual document instead of capturing one screen. */
   html,
   body,
   #root,
@@ -28,7 +30,6 @@
     print-color-adjust: exact !important;
   }
 
-  /* Hide app chrome — sidebar, topbar, mobile bottom nav, tab strips, action buttons. */
   aside,
   [data-sidebar],
   header[role="banner"],
@@ -40,8 +41,6 @@
     display: none !important;
   }
 
-  /* Both the outer scroll <main> (AppLayout) and the inner content region need to
-     release their constraints so content flows down the page. */
   main,
   [data-command-root] {
     width: 100% !important;
@@ -54,15 +53,12 @@
     background: #ffffff !important;
   }
 
-  /* Kill the route-transition motion wrapper (max-w-5xl mx-auto). */
   [data-app-shell] main > div {
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* Cards/sections — flatten shadows + force a thin border for clarity on paper,
-     and keep each card on one page when possible. */
   [data-command-root] [class*="rounded-md"],
   [data-command-root] [class*="rounded-lg"] {
     box-shadow: none !important;
@@ -71,32 +67,129 @@
     page-break-inside: avoid;
   }
 
-  /* Page-break hints between major sections. */
   [data-print-break] {
     break-before: page;
     page-break-before: always;
   }
 
-  /* Tighten chart heights for paper. */
   [data-command-root] .recharts-wrapper,
   [data-command-root] .recharts-responsive-container {
     max-height: 240px !important;
     height: 240px !important;
   }
 
-  /* Show the print-only caption (period + generated-at). */
   [data-print-only] {
     display: block !important;
   }
 
-  /* Hide all interactive controls on cards (chips, dropdowns, action buttons). */
   button:not([data-print-keep]),
   [data-print-only-hide] {
     display: none !important;
   }
+
+  /* Preview-only toolbar must never appear on paper. */
+  [data-print-preview-toolbar] {
+    display: none !important;
+  }
 }
 
-/* The print caption is hidden on screen. */
+/* ===== In-app Print Preview — same rules, applied on screen ===== */
+body[data-print-preview] {
+  background: #e9e7e1 !important;
+  overflow: auto !important;
+  /* Page-break guides: faint dashed horizontal line every A4 portrait page. */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 1122px,
+    rgba(15, 31, 58, 0.18) 1122px,
+    rgba(15, 31, 58, 0.18) 1123px
+  );
+  background-attachment: fixed;
+}
+
+body[data-print-preview] html,
+body[data-print-preview],
+body[data-print-preview] #root,
+body[data-print-preview] [data-app-shell],
+body[data-print-preview] [data-app-shell] > div,
+body[data-print-preview] [data-app-shell] > div > div {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+body[data-print-preview] aside,
+body[data-print-preview] [data-sidebar],
+body[data-print-preview] header[role="banner"],
+body[data-print-preview] [data-app-shell] header,
+body[data-print-preview] [data-mobile-nav],
+body[data-print-preview] [data-print-hide],
+body[data-print-preview] .command-no-print,
+body[data-print-preview] [role="tablist"] {
+  display: none !important;
+}
+
+body[data-print-preview] main,
+body[data-print-preview] [data-command-root] {
+  width: 794px !important;
+  max-width: 794px !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  margin: 56px auto 64px !important;
+  padding: 56px 48px !important;
+  background: #ffffff !important;
+  box-shadow: 0 18px 50px -20px rgba(15, 31, 58, 0.28),
+    0 4px 12px -6px rgba(15, 31, 58, 0.18);
+}
+
+body[data-print-preview] [data-app-shell] main > div {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body[data-print-preview] [data-command-root] [class*="rounded-md"],
+body[data-print-preview] [data-command-root] [class*="rounded-lg"] {
+  box-shadow: none !important;
+  border: 1px solid #d4d4d4 !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+body[data-print-preview] [data-command-root] .recharts-wrapper,
+body[data-print-preview] [data-command-root] .recharts-responsive-container {
+  max-height: 240px !important;
+  height: 240px !important;
+}
+
+body[data-print-preview] [data-print-only] {
+  display: block !important;
+}
+
+body[data-print-preview] button:not([data-print-keep]):not([data-print-preview-toolbar] button),
+body[data-print-preview] [data-print-only-hide] {
+  display: none !important;
+}
+
+/* The toolbar itself stays visible in preview mode. */
+body[data-print-preview] [data-print-preview-toolbar],
+body[data-print-preview] [data-print-preview-toolbar] * {
+  display: revert !important;
+}
+body[data-print-preview] [data-print-preview-toolbar] {
+  display: flex !important;
+}
+
+/* Push content below the fixed preview toolbar (≈44px). */
+body[data-print-preview] [data-app-shell] {
+  padding-top: 48px !important;
+}
+
+/* The print caption is hidden on screen (outside preview). */
 [data-print-only] {
   display: none;
 }
