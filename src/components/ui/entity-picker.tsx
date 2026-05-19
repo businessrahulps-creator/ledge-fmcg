@@ -3,7 +3,10 @@ import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MobileSearchSheet } from "@/components/ui/mobile-search-sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+
 
 export interface EntityOption {
   value: string;
