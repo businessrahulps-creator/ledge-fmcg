@@ -7,6 +7,7 @@ interface Handlers {
   onGoReports: () => void;
   onPeriod: (period: "7d" | "30d" | "90d" | "ytd" | "custom") => void;
   onPrint: () => void;
+  onPrintBrowser?: () => void;
   onToggleCheatSheet: () => void;
   onToggleDensity: () => void;
 }
@@ -40,6 +41,12 @@ export function useCommandShortcuts(h: Handlers, enabled: boolean = true) {
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e.target)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // Shift+P → browser print fallback
+      if (e.shiftKey && (e.key === "P" || e.key === "p")) {
+        if (h.onPrintBrowser) { h.onPrintBrowser(); e.preventDefault(); return; }
+      }
+      if (e.shiftKey) return;
 
       // Two-key sequences: g + letter
       if (pendingG) {

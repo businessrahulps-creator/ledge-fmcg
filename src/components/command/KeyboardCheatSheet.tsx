@@ -15,7 +15,8 @@ const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["3"], label: "Period: Last 90 days" },
   { keys: ["4"], label: "Period: Year to date" },
   { keys: ["5"], label: "Period: Custom" },
-  { keys: ["P"], label: "Print page" },
+  { keys: ["P"], label: "Download PDF snapshot" },
+  { keys: ["Shift", "P"], label: "Browser print" },
   { keys: ["D"], label: "Toggle compact density" },
   { keys: ["?"], label: "Show this cheat-sheet" },
 ];
