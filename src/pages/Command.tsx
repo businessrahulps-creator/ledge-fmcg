@@ -11,10 +11,13 @@ import { OverviewTab } from "@/components/command/tabs/OverviewTab";
 import { PeopleTab } from "@/components/command/tabs/PeopleTab";
 import { ProductsTab } from "@/components/command/tabs/ProductsTab";
 import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
+import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
+import { useSignalAcks, useTeammates, activeAcksMap, shouldHideSignal } from "@/lib/command-acks";
 import {
   deriveSignals,
   dispatchedRevenue,
   getPeriodRange,
+  ordersInPeriod,
   type CommandPeriod,
 } from "@/lib/command-signals";
 
@@ -58,12 +61,82 @@ export default function Command() {
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
   const targets = api.targets.list();
-  const signals = useMemo(
+  const allSignals = useMemo(
     () => deriveSignals({ orders, distributors, salespersons, targets, range }),
     [orders, distributors, salespersons, targets, range],
   );
 
+  // Acknowledgements (snooze / assign / resolve) + filter hidden signals
+  const { acks, snooze, assign, resolve, clear } = useSignalAcks();
+  const teammates = useTeammates();
+  const acksMap = useMemo(() => activeAcksMap(acks), [acks]);
+  const teammateLookup = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const t of teammates) m.set(t.user_id, t.full_name);
+    return m;
+  }, [teammates]);
+  const signals = useMemo(
+    () => allSignals.filter((s) => !shouldHideSignal(acksMap.get(s.id))),
+    [allSignals, acksMap],
+  );
+
   const revenue = useMemo(() => dispatchedRevenue(orders, range), [orders, range]);
+
+  // WhatsApp blast — which signals support it + the dealer set per blast
+  const blastableIds = useMemo(() => new Set(["dormant-owing", "dormant", "credit-risk"]), []);
+  const [blastSignalId, setBlastSignalId] = useState<string | null>(null);
+  const blastPayload = useMemo(() => {
+    if (!blastSignalId) return null;
+    const periodOrders = ordersInPeriod(orders, range);
+    const lastByDealer = new Map<string, Date>();
+    for (const o of orders) {
+      const d = new Date(o.date);
+      const cur = lastByDealer.get(o.distributorId);
+      if (!cur || d > cur) lastByDealer.set(o.distributorId, d);
+    }
+    if (blastSignalId === "dormant") {
+      const dealers = distributors.filter((d) => {
+        if (d.totalOrders === 0) return false;
+        const last = lastByDealer.get(d.id);
+        return !last || last < range.from;
+      });
+      return {
+        title: "Re-engage dormant dealers",
+        description: `Message ${dealers.length} dealer${dealers.length === 1 ? "" : "s"} who stopped ordering this period.`,
+        dealers,
+        defaultTemplate:
+          "Hi {dealer_name}, we noticed your last order was on {last_order_date}. Anything we can do to help you restock? Reply to this message and we'll arrange it.",
+      };
+    }
+    if (blastSignalId === "dormant-owing") {
+      const dealers = distributors.filter((d) => {
+        if ((d.outstandingAmount || 0) <= 0) return false;
+        if (d.totalOrders === 0) return false;
+        const last = lastByDealer.get(d.id);
+        return !last || last < range.from;
+      });
+      return {
+        title: "Chase silent & owing dealers",
+        description: `${dealers.length} dealer${dealers.length === 1 ? "" : "s"} have outstanding balance and stopped ordering.`,
+        dealers,
+        defaultTemplate:
+          "Hi {dealer_name}, a friendly reminder — outstanding balance is {outstanding}. Your last order was on {last_order_date}. Please share a settlement date so we can resume supply.",
+      };
+    }
+    if (blastSignalId === "credit-risk") {
+      const dealers = distributors.filter(
+        (d) => d.creditLimit > 0 && d.outstandingAmount / d.creditLimit >= 0.9,
+      );
+      return {
+        title: "Notify credit-blocked dealers",
+        description: `${dealers.length} dealer${dealers.length === 1 ? "" : "s"} are at 90%+ of credit limit.`,
+        dealers,
+        defaultTemplate:
+          "Hi {dealer_name}, you're nearing your credit limit (outstanding {outstanding}). Please clear part of the balance to keep orders flowing.",
+      };
+    }
+    return null;
+  }, [blastSignalId, orders, distributors, range]);
 
   const updateParam = (next: Partial<{ tab: TabId; period: CommandPeriod; from?: string; to?: string }>) => {
     const params = new URLSearchParams(search);
@@ -113,7 +186,30 @@ export default function Command() {
           />
         )}
 
-        <SignalBar signals={signals} lastUpdated={lastUpdated} />
+        <SignalBar
+          signals={signals}
+          lastUpdated={lastUpdated}
+          acks={acksMap}
+          teammateLookup={teammateLookup}
+          onSnooze={(id, days) => snooze(id, days)}
+          onAssign={(id, uid, uname) => assign(id, uid, uname)}
+          onResolve={(id) => resolve(id)}
+          onClear={(id) => clear(id)}
+          blastableIds={blastableIds}
+          onBlast={(id) => setBlastSignalId(id)}
+        />
+
+        {blastPayload && (
+          <WhatsAppBlastSheet
+            open={!!blastSignalId}
+            onClose={() => setBlastSignalId(null)}
+            title={blastPayload.title}
+            description={blastPayload.description}
+            dealers={blastPayload.dealers}
+            orders={orders}
+            defaultTemplate={blastPayload.defaultTemplate}
+          />
+        )}
 
         <Tabs value={safeTab} onValueChange={(v) => updateParam({ tab: v as TabId })} className="w-full min-w-0 space-y-4 md:space-y-6">
           <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide">

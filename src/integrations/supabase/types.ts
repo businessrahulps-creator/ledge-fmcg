@@ -199,6 +199,39 @@ export type Database = {
           },
         ]
       }
+      command_saved_views: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          name: string
+          params: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          name: string
+          params?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          name?: string
+          params?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string
@@ -1206,6 +1239,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      signal_acknowledgements: {
+        Row: {
+          actor: string
+          assigned_to: string | null
+          company_id: string
+          created_at: string
+          id: string
+          resolved_at: string | null
+          signal_key: string
+          snoozed_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          actor: string
+          assigned_to?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          signal_key: string
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actor?: string
+          assigned_to?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          signal_key?: string
+          snoozed_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       stock_deductions: {
         Row: {

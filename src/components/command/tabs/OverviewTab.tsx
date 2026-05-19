@@ -9,6 +9,7 @@ import { HeroBand } from "../HeroBand";
 import { AgingStrip } from "../AgingStrip";
 import { ActivityFeed } from "../ActivityFeed";
 import { PipelineFunnel } from "../PipelineFunnel";
+import { RunRatePill } from "../RunRatePill";
 import { KpiRowSkeleton, ChartSkeleton, CardSkeleton } from "../CommandSkeleton";
 import { Card } from "@/components/ui/card";
 import { Users, Package } from "lucide-react";
@@ -115,6 +116,15 @@ export function OverviewTab({ range, period = "30d" }: Props) {
       }
     }
 
+    // Period target — sum salesperson monthly targets, scaled to period length.
+    const monthlyTargetTotal = targets
+      .filter((t) => t.entityType === "salesperson")
+      .reduce((s, t) => s + (t.targetRevenue || 0), 0);
+    const daysTotal = Math.max(1, Math.round((range.to.getTime() - range.from.getTime()) / 86400_000));
+    const now = Date.now();
+    const daysElapsed = Math.max(1, Math.min(daysTotal, Math.round((Math.min(now, range.to.getTime()) - range.from.getTime()) / 86400_000)));
+    const periodTarget = Math.round(monthlyTargetTotal * (daysTotal / 30));
+
     return {
       revenue,
       prevRevenue,
@@ -129,6 +139,9 @@ export function OverviewTab({ range, period = "30d" }: Props) {
       revSpark,
       ordSpark,
       colSpark,
+      periodTarget,
+      daysElapsed,
+      daysTotal,
     };
   }, [orders, distributors, products, targets, range]);
 
@@ -204,6 +217,16 @@ export function OverviewTab({ range, period = "30d" }: Props) {
           </>
         )}
       </div>
+
+      {!loading && (
+        <RunRatePill
+          actualRevenue={computed.revenue}
+          actualCollections={computed.collections}
+          periodTarget={computed.periodTarget}
+          daysElapsed={computed.daysElapsed}
+          daysTotal={computed.daysTotal}
+        />
+      )}
 
       <Card className="p-4">
         <div className="mb-3 flex items-center justify-between">
