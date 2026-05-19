@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { CommandPdf, type CommandPdfProps } from "@/components/pdf/CommandPdf";
@@ -9,7 +9,10 @@ interface Props {
   period: CommandPeriod;
 }
 
-export function ExportPdfButton({ data, period }: Props) {
+export const ExportPdfButton = forwardRef<HTMLButtonElement, Props>(function ExportPdfButton(
+  { data, period },
+  ref,
+) {
   const [busy, setBusy] = useState(false);
 
   const handle = async () => {
@@ -24,6 +27,7 @@ export function ExportPdfButton({ data, period }: Props) {
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={handle}
       disabled={busy}
@@ -35,4 +39,4 @@ export function ExportPdfButton({ data, period }: Props) {
       <span>{busy ? "Generating…" : "Download PDF"}</span>
     </button>
   );
-}
+});
