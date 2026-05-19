@@ -162,3 +162,4 @@ export function CreditAtRiskCard({ distributors, orders }: Props) {
     </Card>
   );
 }
+export const CreditAtRiskCard = memo(CreditAtRiskCardInner);

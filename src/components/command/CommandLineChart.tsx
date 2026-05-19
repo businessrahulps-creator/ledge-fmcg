@@ -204,3 +204,4 @@ export function CommandLineChart({ data, height = 240 }: Props) {
     </div>
   );
 }
+export const CommandLineChart = memo(CommandLineChartInner);
