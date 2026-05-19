@@ -1,30 +1,29 @@
-## Finding
+## Bug
 
-The footer label is already correct. `src/utils/exportCsv.ts` dynamically imports SheetJS (`xlsx`), builds a worksheet with autofilter and auto column widths, and writes a real `.xlsx` binary via `XLSX.writeFile`. `csvFilename()` already returns `entity_YYYY-MM-DD.xlsx`. Excel opens these as native workbooks, not as CSV.
+`PaymentReport`'s Aging Summary button feeds the **raw `orders`** array (and the full `distributors` list) into `computeDealerAging`. It ignores `period`, `scope`, and `paymentStatus` — so the user sees one dataset on screen and downloads a different one. Main XLSX/PDF use `filtered`; only this extra button is wrong.
 
-The only thing misleading is the source code: the filename, the exported function name, and the import paths still say "csv". A new contributor reading the report files would (correctly) wonder why a button labelled "Download Excel" calls `exportCsv(csvFilename(...))`.
+## Semantic note
 
-## Plan: rename for honesty, no behavior change
+`computeDealerAging` itself skips orders via `isOutstandingOrder` and `orderOutstanding > 0`. So combining it with the on-screen `paymentStatus = "paid"` filter would correctly produce zero rows — that is the user's intent when they pick "paid only". The fix is honest: respect the filter even if the result is empty (the empty-state toast already handles that).
 
-1. Rename file `src/utils/exportCsv.ts` → `src/utils/exportXlsx.ts`.
-2. Inside the new file:
-   - Rename `exportCsv` → `exportXlsx` (keep `export const exportCsv = exportXlsx` as a deprecated alias for one release so nothing breaks mid-refactor, then remove).
-   - Remove the `csvFilename` deprecated alias (it already forwards to `xlsxFilename`). Callers will be migrated in the same pass.
-3. Update the 5 report files to import from `@/utils/exportXlsx` and call `exportXlsx(xlsxFilename(...), ...)`:
-   - `PaymentReport.tsx` (also the aging summary export)
-   - `DistributorReport.tsx`
-   - `DispatchReport.tsx`
-   - `SalesTeamReport.tsx`
-   - `ProductReport.tsx`
-4. Leave `ReportExportFooter` untouched — `excelLabel = "Download Excel"` already matches reality. Add a one-line JSDoc note clarifying the output is a real `.xlsx` workbook.
-5. Quick grep for any other `exportCsv` / `csvFilename` callers outside reports; migrate any stragglers.
-6. Verify: trigger one report download, confirm the file opens in Excel/Numbers as a native workbook with autofilter on the header row (it already does — this is a rename-only PR).
+## Plan (frontend only, one file)
+
+Edit `src/components/reports/PaymentReport.tsx`, the `extra` button at lines ~144–161:
+
+1. Replace `computeDealerAging(orders, distributors)` with `computeDealerAging(filtered, distributors)` so it honours period + scope + status.
+2. Append a period suffix to the filename for parity with how users read the main report: `xlsxFilename(\`payment-aging-summary-${period}\`)` — keeps the dated `_YYYY-MM-DD.xlsx` convention. (Optional polish; can drop if it complicates `xlsxFilename` semantics. Keeping minimal: leave filename alone unless you want it.)
+3. Add a `title` tooltip update: "Export aging summary for current filters (XLSX)" so the button label matches behaviour.
+
+That is the entire change — three lines touched. No helper changes, no other reports affected, no backend.
+
+## Verification
+
+- Set period to "This Week", click Aging Summary → row count ≤ rows visible in main table's dealers, and totals match per-dealer outstanding within that period.
+- Set status to "Paid" → empty-state toast fires ("Nothing to export").
+- Set scope to "Delivered only" → undelivered-but-outstanding dealers drop out.
 
 ## Out of scope
 
-- No change to the button label, footer layout, PDF export, or toast copy.
-- No new dependency — SheetJS is already in use.
-
-## Why not "switch to true XLSX"
-
-That work is already done. Doing it "again" would just be this rename pass.
+- Aging logic itself (`computeDealerAging`).
+- Other reports — already verified to use `filtered`/`data` in the previous turn.
+- PDF aging export (none exists yet).
