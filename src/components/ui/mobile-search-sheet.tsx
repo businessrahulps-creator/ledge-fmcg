@@ -38,7 +38,9 @@ export function MobileSearchSheet({
   footer,
   children,
   leading,
+  headerSlot,
 }: MobileSearchSheetProps) {
+
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Auto-focus after the slide animation completes — iOS-safe.
