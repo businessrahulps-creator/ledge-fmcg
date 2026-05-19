@@ -135,7 +135,6 @@ const BillingFallback = <TablePageSkeleton rows={8} />;
 const DealersFallback = <ListPageSkeleton cards={6} />;
 const SalespersonsFallback = <ListPageSkeleton cards={6} />;
 const StockFallback = <TablePageSkeleton rows={8} />;
-const PerformanceFallback = <DashboardPageSkeleton />;
 const ReportsFallback = <DashboardPageSkeleton />;
 
 const App = () => (
