@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -204,6 +204,5 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
     </div>
   );
 }
-export const CommandLineChart = memo(CommandLineChartInner);
 
 export const CommandLineChart = memo(CommandLineChartInner);

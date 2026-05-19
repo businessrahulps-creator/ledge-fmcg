@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowRight, MessageCircle } from "lucide-react";
@@ -162,6 +162,5 @@ function CreditAtRiskCardInner({ distributors, orders }: Props) {
     </Card>
   );
 }
-export const CreditAtRiskCard = memo(CreditAtRiskCardInner);
 
 export const CreditAtRiskCard = memo(CreditAtRiskCardInner);
