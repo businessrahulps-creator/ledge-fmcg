@@ -117,7 +117,7 @@ function CreditAtRiskCardInner({ distributors, orders }: Props) {
                     <Link to={`/distributors/${r.id}`} className="min-w-0 flex-1 truncate text-sm text-foreground hover:underline">
                       {r.name}
                     </Link>
-                    <div className="flex shrink-0 items-center gap-2 text-xs">
+                    <div className="flex shrink-0 items-center gap-2 text-xs whitespace-nowrap tabular-nums">
                       {r.dpo > 0 && (
                         <span
                           className={`num font-medium ${
