@@ -14,6 +14,7 @@ import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
 import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
 import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
 import { PrintButton } from "@/components/command/PrintButton";
+import { ExportPdfButton } from "@/components/command/ExportPdfButton";
 import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
 import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
 import { useDensityPreference } from "@/hooks/useDensityPreference";
@@ -21,10 +22,17 @@ import { useSignalAcks, useTeammates, activeAcksMap, shouldHideSignal } from "@/
 import {
   deriveSignals,
   dispatchedRevenue,
-  getPeriodRange,
+  collectionsInPeriod,
+  outstandingTotal,
   ordersInPeriod,
+  buildRevenueTrend,
+  getPeriodRange,
+  PERIOD_LABELS,
   type CommandPeriod,
 } from "@/lib/command-signals";
+import { computeDealerAging } from "@/lib/aging";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import type { CommandPdfProps } from "@/components/pdf/CommandPdf";
 import "@/styles/command-print.css";
 
 type TabId = "overview" | "people" | "products" | "drill";
