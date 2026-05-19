@@ -17,6 +17,8 @@ import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } 
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
+import { EntityCard } from "@/components/ui/entity-card";
+import { EntityAvatar } from "@/components/ui/entity-avatar";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -163,15 +165,28 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
     toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
   }, [dirty, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
 
+  const tier: "success" | "warning" | "destructive" | "muted" =
+    overallStatus === "exceeded" || overallStatus === "on_track" ? "success"
+    : overallStatus === "behind" ? "warning"
+    : overallStatus === "needs_attention" ? "destructive"
+    : "muted";
+
+  const hasAnyTarget = targetRev > 0 || targetOrd > 0;
+  const heroPct = targetRev > 0
+    ? Math.round((actualRevenue / targetRev) * 100)
+    : targetOrd > 0
+      ? Math.round((actualOrders / targetOrd) * 100)
+      : 0;
+
   return (
-    <div className="glass-card p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold">{entityName}</p>
-          <p className="text-xs text-muted-foreground">{subtitle}</p>
-        </div>
+    <EntityCard
+      tier={tier}
+      avatar={<EntityAvatar name={entityName} size="md" />}
+      title={entityName}
+      subtitle={subtitle}
+      statusChip={
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${sc.color} ${sc.bg}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${sc.color} ${sc.bg}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
             {sc.label}
           </span>
@@ -179,11 +194,15 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
             <Button size="sm" className="h-7 text-xs" onClick={handleSave}>Save</Button>
           )}
         </div>
-      </div>
-
+      }
+      hero={hasAnyTarget ? {
+        value: `${heroPct}%`,
+        label: targetRev > 0 ? "Of revenue target" : "Of orders target",
+      } : undefined}
+    >
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label className="text-[10px] text-muted-foreground font-medium">Revenue Target (₹)</label>
+          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Revenue target</label>
           <NumberInput
             allowDecimal
             allowEmpty
@@ -197,15 +216,15 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
           {targetRev > 0 && (
             <div className="space-y-1">
               <div className="flex justify-between text-[10px]">
-                <span className="text-muted-foreground">Actual: {formatCurrency(actualRevenue)}</span>
-                <span className={sc.color}>{Math.round((actualRevenue / targetRev) * 100)}%</span>
+                <span className="text-muted-foreground num">{formatCurrency(actualRevenue)} / {formatCurrency(targetRev)}</span>
+                <span className={`${sc.color} num`}>{Math.round((actualRevenue / targetRev) * 100)}%</span>
               </div>
               <Progress value={Math.min(revPct, 100)} className={`h-1.5 ${getProgressColor(revStatus)}`} />
             </div>
           )}
         </div>
         <div className="space-y-1.5">
-          <label className="text-[10px] text-muted-foreground font-medium">Orders Target</label>
+          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Orders target</label>
           <NumberInput
             allowEmpty
             min={0}
@@ -218,15 +237,15 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
           {targetOrd > 0 && (
             <div className="space-y-1">
               <div className="flex justify-between text-[10px]">
-                <span className="text-muted-foreground">Actual: {actualOrders}</span>
-                <span className={STATUS_CONFIG[ordStatus].color}>{Math.round((actualOrders / targetOrd) * 100)}%</span>
+                <span className="text-muted-foreground num">{actualOrders} / {targetOrd}</span>
+                <span className={`${STATUS_CONFIG[ordStatus].color} num`}>{Math.round((actualOrders / targetOrd) * 100)}%</span>
               </div>
               <Progress value={Math.min(ordPct, 100)} className={`h-1.5 ${getProgressColor(ordStatus)}`} />
             </div>
           )}
         </div>
       </div>
-    </div>
+    </EntityCard>
   );
 }
 
