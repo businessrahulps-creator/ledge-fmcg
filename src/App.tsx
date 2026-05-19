@@ -49,6 +49,7 @@ const Schemes = lazy(routeImporters["/schemes"] as any);
 const Targets = lazy(routeImporters["/targets"] as any);
 const Reports = lazy(routeImporters["/reports"] as any);
 const Performance = lazy(routeImporters["/performance"] as any);
+const Command = lazy(routeImporters["/command"] as any);
 const Settings = lazy(routeImporters["/settings"] as any);
 const Billing = lazy(routeImporters["/billing"] as any);
 const Help = lazy(routeImporters["/help"] as any);
@@ -177,8 +178,9 @@ const App = () => (
                   <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Reports /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/performance" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={PerformanceFallback}><Performance /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/command" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/reports" element={<Navigate to="/command?tab=drill" replace />} />
+                  <Route path="/performance" element={<Navigate to="/command?tab=overview" replace />} />
                   <Route path="/settings" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
