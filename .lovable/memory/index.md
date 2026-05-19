@@ -6,6 +6,7 @@ Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (acce
 ## Memories
 - [Motion System v2](mem://style/motion-v2) — Fluent 2 + M3 Expressive doctrine, three ranks, named easings, scroll-scrubbed Hero, 3D tilt on tinted cards
 - [Landing nav capsule](mem://style/landing-nav-capsule) — Arc-style split capsule → merges on scroll, ⌘K palette, live status dot, gradient-ring CTA
+- [Command surface](mem://style/command-surface) — Unified /command merging old /reports + /performance. URL state contract, signal engine, deep-link contract.
 
 ### Design system (read these for any visual work)
 - [Landing pill system](mem://style/landing-pill-system) — lp-pill/lp-pill-metric/lp-insight primitives; one pill cluster per section.
