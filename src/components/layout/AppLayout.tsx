@@ -33,7 +33,7 @@ const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
+  { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
 ];
 
 type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
@@ -76,13 +76,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
     ],
   },
   {
-    label: "Insights",
-    tone: "accent",
-    items: [
-      { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
-    ],
-  },
-  {
     label: "Account",
     tone: "muted",
     items: [
@@ -96,6 +89,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/orders": "Orders",
+  "/command": "Insights",
   "/billing": "Money to Collect",
   "/stock": "Stock",
   "/distributors": "Dealers",
@@ -344,55 +338,73 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </main>
 
-          {/* Bottom Nav — mobile only — edge-to-edge, flat, 5 slots */}
+          {/* Bottom Nav — mobile only — edge-to-edge, equal 5-column grid */}
           <nav
             data-mobile-nav
             className="sticky bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl md:hidden"
             style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))" }}
             aria-label="Primary"
           >
-            <div className="flex w-full items-stretch justify-around">
+            <div className="grid w-full grid-cols-5 items-stretch">
               {primaryMobileNav.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
+                const Icon = item.icon;
                 return (
-                  <Link
+                  <motion.div
                     key={item.title}
-                    to={item.url}
-                    aria-current={isActive ? "page" : undefined}
-                    className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-transform active:scale-[0.97]"
+                    whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                    className="flex"
                   >
-                    {isActive && (
-                      <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full bg-primary" aria-hidden />
-                    )}
-                    <item.icon
-                      className={`h-[22px] w-[22px] transition-colors ${isActive ? "text-primary" : "text-muted-foreground/70"}`}
-                      strokeWidth={isActive ? 2 : 1.6}
-                    />
-                    <span className={`text-[10.5px] transition-colors whitespace-nowrap ${isActive ? "text-primary font-semibold" : "text-muted-foreground/80 font-medium"}`}>
-                      {item.title}
-                    </span>
-                  </Link>
+                    <Link
+                      to={item.url}
+                      aria-current={isActive ? "page" : undefined}
+                      className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
+                    >
+                      <span
+                        className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors duration-200 ${isActive ? "bg-primary/10" : "bg-transparent"}`}
+                      >
+                        <Icon
+                          className={`h-[22px] w-[22px] transition-colors ${isActive ? "text-primary" : "text-foreground/55"}`}
+                          strokeWidth={1.75}
+                        />
+                      </span>
+                      <span className={`text-[10.5px] leading-none tracking-[-0.005em] transition-colors ${isActive ? "text-primary font-semibold" : "text-foreground/60 font-medium"}`}>
+                        {item.title}
+                      </span>
+                    </Link>
+                  </motion.div>
                 );
               })}
 
               {/* Menu drawer trigger */}
-              <button
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-transform active:scale-[0.97]"
-                aria-label="Open menu"
+              <motion.div
+                whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                className="flex"
               >
-                {isMoreActive && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 rounded-full bg-primary" aria-hidden />
-                )}
-                <MoreHorizontal
-                  className={`h-[22px] w-[22px] transition-colors ${isMoreActive ? "text-primary" : "text-muted-foreground/70"}`}
-                  strokeWidth={isMoreActive ? 2 : 1.6}
-                />
-                <span className={`text-[10.5px] transition-colors whitespace-nowrap ${isMoreActive ? "text-primary font-semibold" : "text-muted-foreground/80 font-medium"}`}>
-                  Menu
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
+                  aria-label="Open menu"
+                  aria-expanded={moreOpen}
+                >
+                  <span
+                    className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors duration-200 ${isMoreActive ? "bg-primary/10" : "bg-transparent"}`}
+                  >
+                    <MoreHorizontal
+                      className={`h-[22px] w-[22px] transition-colors ${isMoreActive ? "text-primary" : "text-foreground/55"}`}
+                      strokeWidth={1.75}
+                    />
+                  </span>
+                  <span className={`text-[10.5px] leading-none tracking-[-0.005em] transition-colors ${isMoreActive ? "text-primary font-semibold" : "text-foreground/60 font-medium"}`}>
+                    Menu
+                  </span>
+                </button>
+              </motion.div>
+
+
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetContent side="bottom" className="rounded-t-[24px] px-0 pt-2 pb-0 h-[92vh] flex flex-col bg-card border-t border-border/60">
