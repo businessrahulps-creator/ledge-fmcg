@@ -1,80 +1,31 @@
-# Mobile Search & Dropdown Rebuild
-
 ## Problem
 
-On phones the universal search (`CommandPalette`) and the searchable dropdowns (`EntityPicker` used in New Order, Stock, etc.) both render as desktop primitives:
+The "Add Product to Warehouse" dialog on `src/pages/Stock.tsx` was narrowed to only list products **not yet stocked** in the selected warehouse. When every catalog product is already present (as in Depot — Coimbatore), the picker shows "All products already stocked here" and the button feels broken. The user correctly points out that the original behavior — "add stock for any product" — was simpler and never had this dead-end state.
 
-- **CommandPalette** uses a centered `Dialog` (`max-w-lg`) with a fixed `max-h-[300px]` list. On a 375px screen it leaves tiny gutters, the on-screen keyboard covers half the results, and long order/dealer rows truncate awkwardly.
-- **EntityPicker** uses a Radix `Popover` whose width is locked to the trigger (`w-[--radix-popover-trigger-width]`). Inside a narrow form column the dropdown is ~150px wide, the search input has no breathing room, and tapping it on iOS scrolls the popover off-anchor.
-- Neither surface handles the iOS visual-viewport keyboard inset — the list scrolls behind the keyboard instead of resizing.
+Row-click already handles editing existing stock, so the dialog adds little value in its current form. Best fix: restore it as a universal **upsert** that works for any product.
 
-## Goal
+## Fix
 
-A single mobile pattern: **slide-up full-height sheet** with a sticky search header, results that fill the remaining viewport, and a safe-area-aware bottom padding. Desktop behavior is unchanged.
+Rework the Add dialog in `src/pages/Stock.tsx` (lines 986–1045):
 
-## Approach
-
-### 1. New primitive: `MobileSearchSheet`
-`src/components/ui/mobile-search-sheet.tsx`
-
-- Wraps Radix `Dialog` but renders a top→bottom slide sheet pinned to `inset-0` on mobile (`< md`).
-- Layout:
-  ```text
-  ┌─ sticky header (safe-area-top, 56px) ─┐
-  │  [back]  search input         [clear] │
-  ├───────────────────────────────────────┤
-  │  scrollable results region            │
-  │  (flex-1, overscroll-contain)         │
-  ├─ optional sticky footer (hint chips) ─┤
-  └───────────────────────────────────────┘
-  ```
-- Uses `100dvh` + `env(safe-area-inset-bottom)` so the iOS keyboard collapses the list region instead of overlapping it.
-- Auto-focuses the search input after the open animation (delay ~120 ms to avoid iOS focus-jump).
-- Exposes slots: `header`, `children` (results), optional `footer`.
-
-### 2. `CommandPalette` — responsive split
-`src/components/CommandPalette.tsx`
-
-- Use `useIsMobile()`.
-- Desktop: existing `CommandDialog` (unchanged).
-- Mobile: render `MobileSearchSheet` containing a `cmdk` `Command` tree with the same groups (Recent, Quick actions, Go to, Orders, Dealers, Products).
-  - List uses `flex-1 min-h-0 overflow-y-auto` so it stretches.
-  - Rows get a 48px touch target and 2-line layout (label + muted hint).
-  - Empty state and "Showing N of M" footer reuse existing copy.
-- Mobile topbar search button still dispatches `ledge:open-command-palette` — no consumer changes.
-
-### 3. `EntityPicker` — sheet variant on mobile
-`src/components/ui/entity-picker.tsx`
-
-- Detect mobile via `useIsMobile()`.
-- Desktop: keep current Popover behavior.
-- Mobile: trigger opens `MobileSearchSheet` with the same search input, filtered list, and row template (label / hint / meta chip). Selecting a row commits and closes the sheet.
-- All existing props (`options`, `value`, `onChange`, `placeholder`, `searchPlaceholder`, `emptyHint`, `helperText`, `maxHeight`) stay; `maxHeight` is ignored on mobile (full sheet).
-- No call-site changes needed in `NewOrder.tsx`, `Stock.tsx`, etc.
-
-### 4. Small polish
-- Add `overscroll-behavior: contain` and `touch-action: pan-y` to the results regions so a scroll inside the sheet doesn't pull the page.
-- Lock body scroll while sheet is open (Radix already handles this via Dialog).
-- Tap-target audit: ensure every row is ≥44px and uses `active:bg-muted/60` for tactile feedback.
-- Respect `prefers-reduced-motion` — disable slide animation.
-
-## Files
-
-**New**
-- `src/components/ui/mobile-search-sheet.tsx`
-
-**Edited**
-- `src/components/CommandPalette.tsx` — desktop/mobile branch
-- `src/components/ui/entity-picker.tsx` — desktop/mobile branch
+1. **Drop the `availableProducts` filter.** List every catalog product in the EntityPicker, regardless of whether it's already stocked in the selected warehouse.
+2. **Relabel** dialog title → "Add Stock", description → "Pick a product and enter quantity. If it's already stocked here, this amount will be added to the current quantity." Button → "Add Stock".
+3. **For each product option**, append a `meta` chip showing existing quantity in this warehouse (e.g. `In stock: 120`) so the user knows whether they're adding to an existing row or creating a new one. No chip if not yet stocked.
+4. **Upsert logic in `handleAddStock`**:
+   - If a `StockItem` exists for `(selectedWarehouse, productId)`, call `updateStockItem` with `quantity: existing.quantity + addStockQty`.
+   - Else, call `addStockItem` with the new row (existing behavior).
+   - Toast copy reflects which path ran ("Added 50 to existing stock" vs "Stocked new product").
+5. **Remove the `noneAvailable` branch** and the helper text about "every product already exists" — no longer reachable.
 
 ## Out of scope
-- No changes to search ranking, fuzzy matching, or which entities are searchable.
-- No changes to desktop layouts.
-- Saved views / print menus stay as is.
+
+- No catalog changes (creating brand-new SKUs still happens via the Products tab).
+- No schema changes; `StockItem` shape and `addStockItem` / `updateStockItem` signatures are unchanged.
+- No visual redesign of the dialog beyond copy.
 
 ## Verification
-- Manual at 375 × 812 (iPhone SE/13): open palette from mobile topbar → keyboard appears, list shrinks above it, scrolling stays inside sheet.
-- New Order at 360 × 800: open Dealer picker → full-height sheet, typing filters, tap commits and returns to form.
-- Stock "Add Product" at 360 × 800: same sheet flow.
-- Desktop (≥768px): both surfaces render exactly as today (visual diff = none).
-- `bun run tsc --noEmit` clean.
+
+- Open Add Stock in a fully-stocked warehouse → all products listed with "In stock: N" chips.
+- Pick an already-stocked product, enter 10 → row quantity increments by 10, toast confirms.
+- Pick a not-yet-stocked product → new row created at entered qty, toast confirms.
+- `tsc --noEmit` clean.
