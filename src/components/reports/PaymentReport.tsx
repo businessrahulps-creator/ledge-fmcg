@@ -120,6 +120,53 @@ export function PaymentReport() {
         </div>
       </div>
 
+      <ReportExportFooter
+        onExcel={() =>
+          exportCsv(
+            csvFilename("payment-report"),
+            ["Order", "Dealer", "Date", "Amount", "Payment Status", "Payment Mode"],
+            filtered.map((o) => [
+              o.orderNumber,
+              o.distributorName,
+              formatIndianDate(o.date),
+              formatCurrency(netTotal(o)),
+              o.paymentStatus,
+              o.paymentMode.replace("_", " "),
+            ])
+          )
+        }
+        onPdf={() => setPdfOpen(true)}
+        extra={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 px-4"
+            title="Export aging summary (XLSX)"
+            onClick={() => {
+              const aging = sortByRisk(computeDealerAging(orders, distributors));
+              exportCsv(
+                csvFilename("payment-aging-summary"),
+                ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
+                aging.map((r) => [
+                  r.distributorName,
+                  r.bucket_0_30.toFixed(0),
+                  r.bucket_31_60.toFixed(0),
+                  r.bucket_61_90.toFixed(0),
+                  r.bucket_90_plus.toFixed(0),
+                  r.totalOutstanding.toFixed(0),
+                  r.creditLimit > 0 ? r.creditLimit.toFixed(0) : "—",
+                  r.creditLimit > 0 ? ((r.totalOutstanding / r.creditLimit) * 100).toFixed(0) : "—",
+                ]),
+              );
+            }}
+          >
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>Aging Summary</span>
+          </Button>
+        }
+      />
+
+
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
           {selected && (
