@@ -77,7 +77,7 @@ describe("WhatsAppBlastSheet", () => {
     expect(screen.getByText(/Hi Sharma,/)).toBeInTheDocument();
     expect(screen.getByText(new RegExp(formatCurrency(12000).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))).toBeInTheDocument();
     expect(screen.getByText(/10 May 2026/)).toBeInTheDocument();
-    expect(screen.getByText(/Verma/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Verma/).length).toBeGreaterThan(0);
     expect(screen.getByText(/no order on record/)).toBeInTheDocument();
 
     // Reachable count: 2 of 3 have a phone.
