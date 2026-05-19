@@ -289,19 +289,12 @@ export default function Dashboard() {
               {canSeeMoney && totalOutstandingAll > 0 ? (
                 <div className="relative inline-block mt-1.5">
                   <h1 className="h1-display">
-                    <Link to="/billing" className="hover:underline underline-offset-4 decoration-foreground/20">
-                      {formatCurrency(totalOutstandingAll)}
+                    <Link to="/billing" className="hover:underline underline-offset-[6px] decoration-foreground/20">
+                      <span className="font-sans font-normal text-foreground/80 mr-0.5 tracking-normal">₹</span>
+                      <span className="num tabular-nums">{formatCurrency(totalOutstandingAll).replace(/^₹/, "")}</span>
                     </Link>{" "}
                     <span className="text-foreground/70 font-normal">to collect</span>
                   </h1>
-                  <motion.span
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ transformOrigin: "left" }}
-                    className="absolute -bottom-1 left-0 h-px w-full bg-foreground/25"
-                    aria-hidden
-                  />
                 </div>
               ) : (
                 <div className="relative inline-block mt-1.5">
