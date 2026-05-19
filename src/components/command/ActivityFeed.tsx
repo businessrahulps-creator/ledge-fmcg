@@ -93,7 +93,7 @@ export function ActivityFeed({ orders, claims, windowHours = 48 }: Props) {
   }
 
   for (const c of claims) {
-    const ts = safeTime(c.claimDate);
+    const ts = safeTime(c.createdAt);
     if (ts >= cutoff) {
       items.push({
         id: `claim-${c.id}`,
@@ -101,7 +101,7 @@ export function ActivityFeed({ orders, claims, windowHours = 48 }: Props) {
         icon: FileWarning,
         tone: "text-warning",
         label: "Claim raised",
-        message: `${c.distributorName || "Dealer"} · ${formatCurrency(c.claimAmount || 0)}`,
+        message: `${c.distributorName || "Dealer"} · ${formatCurrency(c.totalClaimValue || 0)}`,
         href: "/claims",
       });
     }
