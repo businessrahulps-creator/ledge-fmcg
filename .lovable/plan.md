@@ -1,51 +1,64 @@
 ## Goal
 
-Give every export triggered from the report footer (Excel, PDF, and PaymentReport's Aging Summary) a clear loading state plus success/error toasts, so users get feedback during the brief generation window and aren't left guessing if a click registered.
+When the user triggers print on `/command` (via the Printer button or `Shift+P`), show an in-app Print Preview that reflects the actual paginated output. They scroll through the simulated A4 pages, confirm everything looks right, then click "Print now" to fire the real print dialog. No more "click print → realise it looks wrong → cancel → tweak → repeat".
 
-## Approach
+## Approach — iframe-based WYSIWYG preview
 
-Centralize the behavior inside `src/components/reports/ReportExportFooter.tsx` so all 5 reports inherit it without per-call boilerplate.
+The cleanest way to guarantee what-you-see-is-what-prints is to render the same Command view inside an iframe sized to A4 width, with the existing `@media print` rules promoted to also apply via a `.print-mode` class. The iframe becomes the source of truth — clicking "Print" calls `iframe.contentWindow.print()` so only the iframe content is sent to the printer, sidestepping any future regressions in app shell print CSS.
 
-### 1. `ReportExportFooter` upgrades
+### 1. New `PrintPreviewDialog.tsx` (`src/components/command/`)
 
-- Accept handlers that may return `void | Promise<void>`.
-- Internal `useState` tracks `excelLoading`, `pdfLoading` independently.
-- On click: set loading → `await Promise.resolve(onExcel())` inside `try/catch` → toast on result → unset loading.
-  - Success: `toast.success("Excel ready", { description: "Download started." })` / `"PDF ready"`.
-  - Error: `toast.error("Export failed", { description: err.message })` and route through `logError` for console hygiene (no-console rule).
-- Buttons show `Loader2` spinner (animate-spin) in place of the icon while loading and become `disabled`.
-- Both Excel and PDF buttons are disabled while either is running to prevent double-fire.
+Full-screen Radix `Dialog` with a slim toolbar:
 
-### 2. New `extraAction` prop for typed slots (replaces ad-hoc `extra` JSX in PaymentReport)
-
-```ts
-extraAction?: {
-  label: string;
-  icon: LucideIcon;
-  onClick: () => void | Promise<void>;
-  title?: string;
-};
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Print Preview · Last 30 days · 3 pages    [Close]  [Print] │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──── A4 page 1 ────┐                                       │
+│  │ (live Command UI) │   ← iframe, 794px wide, scrollable   │
+│  └───────────────────┘                                       │
+│  ─ ─ ─ page break ─ ─ ─                                      │
+│  ┌──── A4 page 2 ────┐                                       │
+│  …                                                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Footer renders this with the same loading/toast wrapper. Keep the existing `extra: ReactNode` prop as an escape hatch for future custom slots, but migrate PaymentReport's Aging Summary button to `extraAction` so it gets the same UX.
+- iframe `src="/command?print=1&period=<current>&tab=<current>&view=<current>"` — carries the user's current filters so the preview matches what they're looking at.
+- iframe width: 794px (A4 portrait @ 96dpi). Toolbar adds horizontal scroll on small viewports.
+- Page-break visualization: inside the iframe body, a repeating linear-gradient draws a faint dashed horizontal line every 1123px (A4 portrait height) so the user can literally see where each page will split. Computed once on load; pure CSS, zero JS pagination math.
+- Page count read from `iframe.contentDocument.body.scrollHeight / 1123` and shown in the toolbar.
+- "Print" button → `iframe.contentWindow?.focus(); iframe.contentWindow?.print();`.
+- `afterprint` listener on the iframe closes the dialog automatically.
+- `Esc` closes via Radix default.
 
-### 3. PaymentReport migration
+### 2. `/command` route — print mode
 
-- Replace the inline `<Button>` inside `extra={…}` with `extraAction={{ label: "Aging Summary", icon: BarChart3, onClick: () => { … existing exportXlsx call … } }}`.
-- Drop the now-unused `Button` import if nothing else needs it.
+Command.tsx detects `?print=1` via `useSearchParams`:
 
-### 4. PDF flow nuance
+- Wraps its root in `<body data-print-preview>` (set via `useEffect`) and renders only the section content (no sidebar/topbar/bottom-nav — those already live in AppLayout but we mount the route inside a stripped layout when `print=1`).
+- The existing `@media print` selectors in `src/styles/command-print.css` get a sibling rule set scoped under `body[data-print-preview]` so the same hiding/flattening behaviour activates on screen inside the iframe. Refactor: extract the shared rule block into a mixin-like CSS group used by both selectors — no duplication.
+- A tiny header on the print page mirrors `<p data-print-only>` content (period + generated-at) — already in place.
 
-`onPdf` in every report currently just calls `setPdfOpen(true)` and the actual PDF is generated inside a Dialog by `@react-pdf/renderer`. A success toast at click time would be misleading ("PDF ready" before it's rendered). Handling:
+To avoid double app shell mounting, gate AppLayout in `App.tsx` (or wherever it wraps `/command`) with a check: if `?print=1`, render the route bare. Cleanest: a new `PrintShell` layout used by a sibling route entry that points to the same Command component.
 
-- If `onPdf` resolves synchronously in <50ms, **skip** the success toast (the dialog opening is its own feedback) but still show the spinner briefly and surface any thrown error as a toast.
-- Errors thrown synchronously still produce `toast.error("Couldn't open PDF preview")`.
+### 3. Trigger points
 
-This keeps the toast meaningful: success toasts only fire for true file-download actions (Excel + Aging Summary), error toasts fire for all three.
+- `PrintButton.tsx` → opens `PrintPreviewDialog` (state lifted to Command.tsx).
+- `useCommandShortcuts` → `Shift+P` opens the preview (currently calls `window.print()` directly).
+- `P` remains the branded PDF export (unchanged).
+- `KeyboardCheatSheet` updates the `Shift+P` label from "Browser print" to "Print preview".
 
-## Files touched
+### 4. Files
 
-- `src/components/reports/ReportExportFooter.tsx` — loading state, toast wrapper, `extraAction` prop, spinner.
-- `src/components/reports/PaymentReport.tsx` — migrate Aging Summary button to `extraAction`.
+- New: `src/components/command/PrintPreviewDialog.tsx`
+- Modified: `src/components/command/PrintButton.tsx` (accept `onClick` prop, lift state)
+- Modified: `src/pages/Command.tsx` (mount dialog, read `?print=1`, pass to shortcuts)
+- Modified: `src/hooks/useCommandShortcuts.ts` (rename `onPrintBrowser` semantics to `onPrintPreview`)
+- Modified: `src/components/command/KeyboardCheatSheet.tsx` (label)
+- Modified: `src/styles/command-print.css` (mirror `@media print` rules under `body[data-print-preview]`)
+- Modified: route config to mount `/command?print=1` outside AppLayout (likely `src/App.tsx`)
 
-No business-logic or data changes; presentation only.
+## Out of scope
+
+- True per-page pagination preview with widow/orphan controls (would need a paged-media polyfill like `pagedjs`; overkill for V1).
+- Editing margins/orientation from the preview toolbar — the browser's native print dialog already exposes those after "Print now".
