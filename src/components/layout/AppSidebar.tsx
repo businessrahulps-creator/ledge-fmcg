@@ -75,9 +75,9 @@ export function AppSidebar() {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
 
-  // Insights group — unified Command surface (replaces Reports + Performance).
+  // Insights group — unified My Business surface (replaces Reports + Performance).
   const insightsNav: NavItem[] = [
-    { title: "Command", url: "/command", icon: ChartNoAxesCombined },
+    { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
   ];
 
   const effectiveFooter: NavItem[] = footerNav;
