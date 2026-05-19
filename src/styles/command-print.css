@@ -1,0 +1,79 @@
+/* Print stylesheet — only takes effect when the user prints /command. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
+
+  /* Force a clean light background regardless of theme. */
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0F1F3A !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app chrome — sidebar, topbar, tab strips, period selector, action buttons. */
+  [data-print-hide],
+  aside,
+  nav[aria-label="Sidebar"],
+  header[role="banner"],
+  .command-no-print,
+  [role="tablist"] {
+    display: none !important;
+  }
+
+  /* Expand the content area to full page width. */
+  main,
+  [data-command-root] {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* Cards/sections — flatten shadows + force black border for clarity on paper. */
+  [data-command-root] [class*="rounded-md"],
+  [data-command-root] [class*="rounded-lg"] {
+    box-shadow: none !important;
+    border: 1px solid #d4d4d4 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Page-break hints between major sections. */
+  [data-print-break] {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Tighten chart heights for paper. */
+  [data-command-root] .recharts-wrapper {
+    max-height: 220px !important;
+  }
+
+  /* Show the print-only caption (period + generated-at). */
+  [data-print-only] {
+    display: block !important;
+  }
+
+  /* Hide all interactive controls on cards. */
+  button:not([data-print-keep]) {
+    display: none !important;
+  }
+}
+
+/* The print caption is hidden on screen. */
+[data-print-only] {
+  display: none;
+}
+
+/* Density toggle — applies on screen, not in print. */
+[data-density="dense"] .command-kpi-card {
+  padding: 0.75rem !important;
+}
+[data-density="dense"] .recharts-wrapper {
+  height: 220px !important;
+}
