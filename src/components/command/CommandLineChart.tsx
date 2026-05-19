@@ -10,6 +10,7 @@ import {
   Tooltip,
   ReferenceArea,
   ReferenceDot,
+  ReferenceLine,
 } from "recharts";
 import { CommandEmptyState } from "./CommandEmptyState";
 import { LineChart as LineChartIcon } from "lucide-react";
