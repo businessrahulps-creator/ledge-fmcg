@@ -208,7 +208,7 @@ export function OverviewTab({ range }: Props) {
         )}
       </div>
 
-      {loading ? <CardSkeleton height={200} /> : <CreditAtRiskCard distributors={distributors} />}
+      {loading ? <CardSkeleton height={200} /> : <CreditAtRiskCard distributors={distributors} orders={orders} />}
     </div>
   );
 }
