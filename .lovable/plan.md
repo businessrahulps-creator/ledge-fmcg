@@ -1,55 +1,99 @@
+
 ## Goal
 
-Eliminate horizontal page scroll and clipped numbers on the **Performance** (`/performance`) and **Command** (`/command`) pages at 360–390 px widths. Keep desktop unchanged.
+Lift the three list cards from generic "avatar + stats grid" tiles to **editorial, KPI-led cards** that match the promoted surfaces already shipped on Dashboard / My Business (SignalCard, KpiStrip, CreditAtRiskCard).
 
-## Audit (what's overflowing)
+Brand taste is locked (Midnight/Forest/Terracotta/Bone, Playfair H1/H2 + Inter, Fluent 2 depth & motion). We are changing **composition, hierarchy, density, and visual emphasis** — not tokens.
 
-**Performance — header (src/pages/Performance.tsx ~378–514)**
-- Right cluster (period pills + revenue toggle + Export + custom-range From/To) sits in a `flex flex-col` next to the title. The custom-range row uses two fixed `w-[140px]` date buttons with a literal "to" between them → 140 + 140 + gaps overflows narrow phones.
-- The "Showing …" date caption is `sm:text-right` only, no `truncate`.
+## Diagnosis (what's wrong today)
 
-**Performance — Overview/People/Products sections**
-- Several rows pair a long entity name with a currency chip using `ml-auto` but no `shrink-0 whitespace-nowrap` on the chip → currency wraps or pushes off-edge (Scheme card line 666, Top Dealers row 720+, similar product rows).
-- KpiStrip cells on Performance feed `formatCurrency(totalRevenue)` which on long values can clip — needs `tabular-nums break-keep` and `min-w-0` on the cell wrapper.
+All three cards share the same flat pattern: small bold name → tiny stat grid → faint divider. No hero number, no Playfair moment, no visual story. Targets card is the weakest — raw `NumberInput` rows dominate the surface. Action buttons (Pencil/Trash/WhatsApp) crowd the header and steal attention from the data.
 
-**Command — page (src/pages/Command.tsx)**
-- Wrapper already has `min-w-0 overflow-x-hidden`, so any overflow is from child primitives leaking. Audit and tighten:
-  - `HeroBand`, `CommandKpiCard`, `SignalCard`, `KpiStrip` value text → enforce `tabular-nums whitespace-nowrap` with a mobile size step-down and `min-w-0` on flex parents.
-  - `LeaderboardCard`, `CreditAtRiskCard`, `AgingStrip`, `RunRatePill`, `PipelineFunnel` rows → name `min-w-0 truncate`, metric chip `shrink-0 whitespace-nowrap`.
-  - `CommandLineChart` and any Recharts wrapper → ensure parent has `w-full min-w-0` and `ResponsiveContainer width="100%"` (most already do; verify).
+## One direction, three surfaces
 
-## Fix
+### Shared anatomy ("Editorial KPI Card")
 
-### 1. `src/pages/Performance.tsx`
-- Wrap header right cluster in `w-full min-w-0 sm:w-auto` and add `overflow-x-hidden` to the outer header row only on mobile.
-- Custom-range row: change both date buttons from `w-[140px]` to `min-w-0 flex-1 sm:w-[140px] sm:flex-none`; wrap the whole row in `flex-wrap`. Make the "to" separator `shrink-0`.
-- "Showing …" caption: add `truncate` and `max-w-full`.
-- Scheme card header (~666): currency chip → add `shrink-0 whitespace-nowrap tabular-nums`.
-- Top Dealers/Products/Alerts rows: name span → `min-w-0 truncate`; revenue/risk chips → `shrink-0 whitespace-nowrap tabular-nums`.
+```text
+┌─────────────────────────────────────────────────┐
+│ ▌ AVATAR  Name                       ··· menu  │   ← header rail (3px brand left bar)
+│           secondary line · tertiary line        │
+│                                                  │
+│  ₹ 12,34,567               +12%  vs last week   │   ← hero: Playfair 26px num + InsightLine
+│  Total revenue                                   │
+│                                                  │
+│ ───────────────────────────────────────────────  │   ← hairline
+│  Orders   Avg    Outstanding ▓▓▓▓▓░░░  62%      │   ← KpiStrip-style footer row
+└─────────────────────────────────────────────────┘
+```
 
-### 2. `src/components/command/*` and Command page primitives
-- HeroBand main number: `text-2xl sm:text-4xl md:text-5xl tabular-nums whitespace-nowrap`, parent `min-w-0`.
-- KpiStrip / CommandKpiCard / SignalCard value: same `tabular-nums whitespace-nowrap`, label `truncate`, cell wrapper `min-w-0`.
-- Leaderboard / Aging / RunRate / CreditAtRisk / PipelineFunnel rows: enforce the `min-w-0 truncate` + `shrink-0 whitespace-nowrap` pattern on every flex row.
-- Any horizontal pill strip (signal chips, period selector inside Command) keeps `overflow-x-auto scrollbar-hide` plus `pr-2` to avoid clipping the last chip's shadow.
+Key moves:
+- **Left brand bar** (3px Midnight/Forest/Terracotta) — encodes status at a glance (healthy / watch / at-risk). Reuses the SignalCard tier system.
+- **One hero number** in Playfair 26px with `tabular-nums` — the card finally has a focal point.
+- **InsightLine** under the hero (delta vs previous period, same primitive used on Dashboard).
+- **Hairline-separated KpiStrip footer** (2–3 cells max) — same primitive used on Command, gives instant family resemblance.
+- **Action cluster moves to a `···` overflow menu** (DropdownMenu) — removes 2–3 icon buttons from the header. Only the highest-intent action (WhatsApp reminder on overdue dealers) stays as a chip in the footer.
+- **`card-hover` + `depth-2 → depth-8`** translate-y press already in tokens; reused, not re-derived.
+- **Compact density toggle** respected: padding drops `p-5 md:p-6` → `p-4` in compact, hero shrinks 26→22px.
 
-### 3. Defensive guardrail
-- Add `overflow-x-clip` to the `<main>` in `src/components/layout/AppLayout.tsx` (mobile only via `md:overflow-x-visible`) so any future child can't break the page horizontally. Behavior on desktop unchanged.
+### Per-surface specialization
+
+**Dealers (`Distributors.tsx`)**
+- Hero number: **Outstanding** if `> 0`, else **Total revenue** (the number the user actually opens this card to see).
+- Left bar tier: `destructive` if util ≥ 100%, `warning` ≥ 70%, `success` if active with low util, `muted` if no credit set.
+- Footer KpiStrip cells: **Orders** · **Lifetime value** · **Utilization bar** (the existing % bar, promoted into the strip with `dpo` chip when overdue).
+- WhatsApp reminder chip surfaces in the footer (not header) when `outstanding > 0`, mirroring CreditAtRiskCard's hover-revealed "Remind" pattern.
+
+**Sales Team (`Salespersons.tsx`)**
+- Hero number: **Revenue this period** (current filter window — wire to the existing period selector if present, else lifetime).
+- Region pill moves into the header sub-line as a small `timeframe-pill`-style chip (already tokenized).
+- Left bar tier: derived from pace vs target (`success` ≥ 100%, `warning` ≥ 70%, `destructive` < 50%, `muted` no target).
+- Footer KpiStrip: **Orders** · **Avg order** · **Dealers served** (new — derived from `orders.distinctBy(dealerId)`; falls back to "—" when zero).
+
+**Targets (`Targets.tsx` — `TargetCard`)**
+- Hardest refit. Today the card *is* a form; we keep it editable but reframe it as a **progress card with inline edit**, not a form with progress strapped on.
+- Hero number: **% to target** in Playfair (e.g. `82%`), color-tinted by `STATUS_CONFIG[overallStatus]`, with subtitle `₹4.1L of ₹5L · 6 days left`.
+- Status pill stays top-right but uses StatusBadge tokens (left-bar variant from PR11).
+- Revenue + Orders rows collapse into a **two-row mini-table** under the hero: each row = label · actual / target · progress bar · % chip. NumberInputs become inline-edit (click value to swap to input), which removes the "two big input boxes" visual weight.
+- Save button stays inline on dirty, but as a quiet primary chip (h-7, secondary visual weight) so it doesn't compete with the hero.
+
+## New primitive (small, shared)
+
+Add `src/components/ui/entity-card.tsx`:
+
+```tsx
+<EntityCard
+  tier="success" | "warning" | "destructive" | "muted"
+  avatar={<EntityAvatar name={…} />}
+  title={…} subtitle={…} tertiary={…}
+  hero={{ value, label, insight }}        // Playfair num + InsightLine
+  cells={[{label, value}, …]}             // KpiStrip-style footer (max 3)
+  primaryAction={…}                       // optional footer chip (WhatsApp)
+  menu={[{label, onClick, icon}, …]}      // DropdownMenu overflow
+  onClick={…}                             // whole-card navigation
+/>
+```
+
+Internally composes `Card` (depth-2) + `EntityAvatar` + `KpiStrip` + `InsightLine` — zero new tokens, all existing primitives. The three pages map their domain data into this one shape.
+
+## Files touched
+
+- **New** `src/components/ui/entity-card.tsx` — the shared composition.
+- **Edit** `src/pages/Distributors.tsx` — replace lines 250–321 card body with `<EntityCard …>`.
+- **Edit** `src/pages/Salespersons.tsx` — replace lines 162–203 card body with `<EntityCard …>`.
+- **Edit** `src/pages/Targets.tsx` — refactor `TargetCard` (lines 166–230) around `EntityCard` + inline-edit rows.
+- **No** changes to `index.css`, tokens, or `tailwind.config.ts`.
 
 ## Out of scope
 
-- No data, route, or business-logic changes.
-- No restructuring of card hierarchies, no new components.
-- No font/typography redesign — only mobile sizing tweaks where numbers clip.
+- Page-level header/filter/pagination changes.
+- Dealer/Salesperson detail pages.
+- Any business-logic shifts (totals, formulas, RBAC).
+- New tokens, gradients, or animation primitives beyond what `card-hover` / `ease-fluent` already ship.
 
-## Verification
+## Acceptance
 
-- Set preview to mobile (375 and 360 widths). On `/performance`:
-  - Page never produces horizontal scroll in Overview/People/Products/Alerts tabs.
-  - Custom-range date pickers stack cleanly with no off-edge.
-  - All currency chips remain on one line beside truncated names.
-- On `/command`:
-  - KPI hero numbers stay on one line down to 360 px.
-  - All ranked rows (leaderboard, aging, credit-at-risk) truncate names instead of pushing chips off-screen.
-- Desktop (≥768 px) renders identically to today.
-- `tsc --noEmit` clean.
+- All three pages render the same `EntityCard` primitive — one visual family.
+- Each card has exactly one Playfair hero number, one secondary insight, ≤3 footer cells.
+- No more than one icon-button visible in the header (the `···` menu); destructive actions live inside the menu.
+- Compact density and mobile (360px) viewports: hero never clips, footer cells stay on one row, `tabular-nums` everywhere.
+- Targets card is editable without showing a single visible `<input>` until the user clicks a value.
