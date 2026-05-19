@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,11 @@ import { PeopleTab } from "@/components/command/tabs/PeopleTab";
 import { ProductsTab } from "@/components/command/tabs/ProductsTab";
 import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
 import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
+import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
+import { PrintButton } from "@/components/command/PrintButton";
+import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
+import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
+import { useDensityPreference } from "@/hooks/useDensityPreference";
 import { useSignalAcks, useTeammates, activeAcksMap, shouldHideSignal } from "@/lib/command-acks";
 import {
   deriveSignals,
@@ -20,6 +25,7 @@ import {
   ordersInPeriod,
   type CommandPeriod,
 } from "@/lib/command-signals";
+import "@/styles/command-print.css";
 
 type TabId = "overview" | "people" | "products" | "drill";
 
@@ -138,7 +144,7 @@ export default function Command() {
     return null;
   }, [blastSignalId, orders, distributors, range]);
 
-  const updateParam = (next: Partial<{ tab: TabId; period: CommandPeriod; from?: string; to?: string }>) => {
+  const updateParam = useCallback((next: Partial<{ tab: TabId; period: CommandPeriod; from?: string; to?: string }>) => {
     const params = new URLSearchParams(search);
     if (next.tab !== undefined) params.set("tab", next.tab);
     if (next.period !== undefined) {
@@ -149,33 +155,76 @@ export default function Command() {
       }
     }
     if (next.from !== undefined) {
-      if (next.from) params.set("from", next.from);
-      else params.delete("from");
+      if (next.from) params.set("from", next.from); else params.delete("from");
     }
     if (next.to !== undefined) {
-      if (next.to) params.set("to", next.to);
-      else params.delete("to");
+      if (next.to) params.set("to", next.to); else params.delete("to");
     }
     setSearch(params, { replace: false });
-  };
+  }, [search, setSearch]);
 
   const companyName = api.companyInfo?.name?.trim() || "My Business";
 
+  // Density + shortcuts + cheat sheet
+  const { density, toggle: toggleDensity } = useDensityPreference();
+  const [cheatOpen, setCheatOpen] = useState(false);
+
+  useCommandShortcuts({
+    onGoOverview: () => updateParam({ tab: "overview" }),
+    onGoPeople: () => !isAccountant && updateParam({ tab: "people" }),
+    onGoProducts: () => !isAccountant && updateParam({ tab: "products" }),
+    onGoReports: () => updateParam({ tab: "drill" }),
+    onPeriod: (p) => updateParam({ period: p as CommandPeriod }),
+    onPrint: () => window.print(),
+    onToggleCheatSheet: () => setCheatOpen((v) => !v),
+    onToggleDensity: toggleDensity,
+  });
+
+  const currentParams = { period, from: customFrom, to: customTo, tab: safeTab };
+  const currentParamString = new URLSearchParams(
+    Object.entries(currentParams).filter(([, v]) => v != null) as [string, string][],
+  ).toString();
+
   return (
     <AppLayout>
-      <div className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6">
+      <main
+        data-command-root
+        data-density={density}
+        className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6"
+        aria-label="My Business"
+      >
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="h1-display">{companyName}</h1>
+            <p data-print-only className="mt-1 text-xs text-muted-foreground">
+              Period: {range.from.toLocaleDateString()} – {range.to.toLocaleDateString()} · Generated {new Date().toLocaleString()}
+            </p>
           </div>
-          <PeriodSelector
-            period={period}
-            customFrom={customFrom}
-            customTo={customTo}
-            range={range}
-            onChange={(p, f, t) => updateParam({ period: p, from: f, to: t })}
-          />
+          <div className="command-no-print flex flex-wrap items-end gap-2" aria-label="View controls">
+            <SavedViewsMenu currentParams={currentParams} />
+            <button
+              type="button"
+              onClick={toggleDensity}
+              aria-label={density === "dense" ? "Switch to comfortable density" : "Switch to compact density"}
+              title="Toggle density (D)"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {density === "dense" ? "Compact" : "Comfortable"}
+            </button>
+            <PrintButton />
+            <nav aria-label="Period" className="contents">
+              <PeriodSelector
+                period={period}
+                customFrom={customFrom}
+                customTo={customTo}
+                range={range}
+                onChange={(p, f, t) => updateParam({ period: p, from: f, to: t })}
+              />
+            </nav>
+          </div>
         </div>
+
+        <PinnedViewChips currentParamString={currentParamString} />
 
         {safeTab === "overview" && (
           <CommandMemoryStrip
@@ -238,7 +287,8 @@ export default function Command() {
           {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
           <TabsContent value="drill"><DrillDownTab /></TabsContent>
         </Tabs>
-      </div>
+      </main>
+      <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />
     </AppLayout>
   );
 }
