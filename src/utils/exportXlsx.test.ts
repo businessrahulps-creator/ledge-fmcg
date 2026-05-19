@@ -13,7 +13,7 @@ describe("xlsxFilename", () => {
     expect(xlsxFilename("dealers")).toBe("dealers_2025-06-15.xlsx");
   });
 
-  it("xlsxFilename is an alias", () => {
-    expect(xlsxFilename("orders")).toBe(xlsxFilename("orders"));
+  it("ends with .xlsx extension", () => {
+    expect(xlsxFilename("orders")).toMatch(/\.xlsx$/);
   });
 });
