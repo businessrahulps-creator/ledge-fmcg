@@ -81,7 +81,7 @@ export function RunRatePill({ actualRevenue, actualCollections, periodTarget, da
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Projected revenue
           </p>
-          <p className="num mt-1 text-lg font-semibold text-foreground">
+          <p className="num mt-1 text-lg font-semibold text-foreground tabular-nums truncate">
             {formatCurrency(projectedRevenue)}
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -92,7 +92,7 @@ export function RunRatePill({ actualRevenue, actualCollections, periodTarget, da
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Projected collections
           </p>
-          <p className="num mt-1 text-lg font-semibold text-foreground">
+          <p className="num mt-1 text-lg font-semibold text-foreground tabular-nums truncate">
             {formatCurrency(projectedCollections)}
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
