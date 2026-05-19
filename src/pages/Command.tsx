@@ -305,7 +305,7 @@ export default function Command() {
     onGoReports: () => updateParam({ tab: "drill" }),
     onPeriod: (p) => updateParam({ period: p as CommandPeriod }),
     onPrint: () => exportPdfRef.current?.click(),
-    onPrintBrowser: () => window.print(),
+    onPrintBrowser: () => setPrintPreviewOpen(true),
     onToggleCheatSheet: () => setCheatOpen((v) => !v),
     onToggleDensity: toggleDensity,
   });
