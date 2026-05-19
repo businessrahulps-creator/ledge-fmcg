@@ -136,34 +136,28 @@ export function PaymentReport() {
           )
         }
         onPdf={() => setPdfOpen(true)}
-        extra={
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 px-4"
-            title="Export aging summary for current filters (XLSX)"
-            onClick={() => {
-              const aging = sortByRisk(computeDealerAging(filtered, distributors));
-              exportXlsx(
-                xlsxFilename("payment-aging-summary"),
-                ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
-                aging.map((r) => [
-                  r.distributorName,
-                  r.bucket_0_30.toFixed(0),
-                  r.bucket_31_60.toFixed(0),
-                  r.bucket_61_90.toFixed(0),
-                  r.bucket_90_plus.toFixed(0),
-                  r.totalOutstanding.toFixed(0),
-                  r.creditLimit > 0 ? r.creditLimit.toFixed(0) : "—",
-                  r.creditLimit > 0 ? ((r.totalOutstanding / r.creditLimit) * 100).toFixed(0) : "—",
-                ]),
-              );
-            }}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span>Aging Summary</span>
-          </Button>
-        }
+        extraAction={{
+          label: "Aging Summary",
+          icon: BarChart3,
+          title: "Export aging summary for current filters (XLSX)",
+          onClick: () => {
+            const aging = sortByRisk(computeDealerAging(filtered, distributors));
+            exportXlsx(
+              xlsxFilename("payment-aging-summary"),
+              ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
+              aging.map((r) => [
+                r.distributorName,
+                r.bucket_0_30.toFixed(0),
+                r.bucket_31_60.toFixed(0),
+                r.bucket_61_90.toFixed(0),
+                r.bucket_90_plus.toFixed(0),
+                r.totalOutstanding.toFixed(0),
+                r.creditLimit > 0 ? r.creditLimit.toFixed(0) : "—",
+                r.creditLimit > 0 ? ((r.totalOutstanding / r.creditLimit) * 100).toFixed(0) : "—",
+              ]),
+            );
+          },
+        }}
       />
 
 
