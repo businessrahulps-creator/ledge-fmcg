@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EntityPicker } from "@/components/ui/entity-picker";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -412,32 +413,38 @@ export default function NewOrder() {
                 </div>
                 <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
-                   <Select value={selectedDealer} onValueChange={setSelectedDealer}>
-                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dealer ? "border-destructive" : ""}`}>
-                      <SelectValue placeholder="Select dealer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {distributors.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntityPicker
+                    value={selectedDealer}
+                    onChange={setSelectedDealer}
+                    placeholder="Search dealer by name, city or phone"
+                    searchPlaceholder="Type to filter dealers…"
+                    emptyHint="No dealers match."
+                    className={attemptedSave && errors.dealer ? "[&_button[role=combobox]]:border-destructive" : ""}
+                    options={distributors.map((d: any) => ({
+                      value: d.id,
+                      label: d.name,
+                      hint: [d.city, d.phone].filter(Boolean).join(" · ") || undefined,
+                    }))}
+                  />
                   {attemptedSave && errors.dealer && (
                     <p className="text-xs text-destructive">Please select a dealer.</p>
                   )}
                 </div>
                 <div ref={salespersonFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Sales Person *</Label>
-                  <Select value={selectedSalesperson} onValueChange={setSelectedSalesperson}>
-                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.salesperson ? "border-destructive" : ""}`}>
-                      <SelectValue placeholder="Select sales person" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {salespersons.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntityPicker
+                    value={selectedSalesperson}
+                    onChange={setSelectedSalesperson}
+                    placeholder="Search sales person"
+                    searchPlaceholder="Type to filter…"
+                    emptyHint="No sales people match."
+                    className={attemptedSave && errors.salesperson ? "[&_button[role=combobox]]:border-destructive" : ""}
+                    options={salespersons.map((s: any) => ({
+                      value: s.id,
+                      label: s.name,
+                      hint: s.phone || undefined,
+                    }))}
+                  />
                   {attemptedSave && errors.salesperson && (
                     <p className="text-xs text-destructive">Please select a sales person.</p>
                   )}
@@ -482,21 +489,20 @@ export default function NewOrder() {
                       <div className="grid gap-3 sm:grid-cols-12 sm:items-end">
                         <div className="space-y-1 sm:col-span-4">
                           <Label className="text-xs text-muted-foreground">Product</Label>
-                          <Select
+                          <EntityPicker
                             value={line.productId}
-                            onValueChange={(v) => updateLine(line.id, "productId", v)}
-                          >
-                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-10 rounded-lg md:h-12">
-                              <SelectValue placeholder="Select product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products
-                                .filter((p) => p.id === line.productId || !lines.some((l) => l.id !== line.id && l.productId === p.id))
-                                .map((p) => (
-                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            onChange={(v) => updateLine(line.id, "productId", v)}
+                            placeholder="Search product"
+                            searchPlaceholder="Type product name or SKU…"
+                            emptyHint="All products already added or none match."
+                            options={products
+                              .filter((p) => p.id === line.productId || !lines.some((l) => l.id !== line.id && l.productId === p.id))
+                              .map((p: any) => ({
+                                value: p.id,
+                                label: p.name,
+                                hint: p.sku || undefined,
+                              }))}
+                          />
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
