@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Download, FileText, Loader2, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { logError } from "@/lib/logger";
+import { logError } from "@/utils/errorLog";
 
 interface ExtraAction {
   label: string;
