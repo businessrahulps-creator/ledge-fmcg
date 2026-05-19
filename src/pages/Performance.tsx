@@ -386,7 +386,7 @@ export default function Performance() {
           </div>
 
           {/* Time period pills + Export */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 min-w-0 w-full sm:w-auto">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               <TooltipProvider delayDuration={300}>
                 <UITooltip>
