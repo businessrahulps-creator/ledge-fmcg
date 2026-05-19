@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Download, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ReportExportFooter } from "./ReportExportFooter";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { netTotal } from "@/lib/revenue";
@@ -58,27 +57,6 @@ export function DistributorReport() {
           <span className="whitespace-nowrap text-muted-foreground">{data.length} dealers</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
         </div>
-        <div className="sm:ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-            onClick={() => {
-              exportCsv(
-                csvFilename("dealer-report"),
-                ["Dealer", "Location", "Contact", "Orders", "Revenue"],
-                data.map((d) => [d.name, d.location, d.contact, String(d.orderCount), formatCurrency(d.revenue)])
-              );
-            }}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-          <Button variant="outline" size="sm" className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4" onClick={() => setPdfOpen(true)}>
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </Button>
-        </div>
       </div>
       <div className="glass-card overflow-hidden">
         <div className="hidden md:block">
@@ -121,6 +99,18 @@ export function DistributorReport() {
           ))}
         </div>
       </div>
+
+      <ReportExportFooter
+        onExcel={() =>
+          exportCsv(
+            csvFilename("dealer-report"),
+            ["Dealer", "Location", "Contact", "Orders", "Revenue"],
+            data.map((d) => [d.name, d.location, d.contact, String(d.orderCount), formatCurrency(d.revenue)])
+          )
+        }
+        onPdf={() => setPdfOpen(true)}
+      />
+
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
