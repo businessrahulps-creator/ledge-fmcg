@@ -1,87 +1,74 @@
+## Phase D — Enterprise polish for "My Business"
 
-# Phase C — Workflow & Forecasting
+Goal: turn `/command` from a power-user dashboard into a surface that fits how owners and managers actually run their week — saved slices, an email that lands every Monday morning, a clean printout for the office wall, and the keyboard shortcuts an operator expects.
 
-Turn the `/command` surface from a read-only dashboard into a working tool: act on signals, forecast where the period lands, slice by territory/rep, and pin saved views.
-
-## What ships
-
-### 1. Signal actions (ack / snooze / assign)
-Every `SignalBar` card gets a small action menu next to its CTA:
-- **Primary CTA** stays (Chase / Open / Review).
-- **Ack for 7 days** — hides the signal until `snooze_until`, re-surfaces automatically.
-- **Assign to teammate** — picker of company members; assignee sees it badged on their Dashboard.
-- **Mark resolved** — clears it for everyone in the workspace.
-
-Persisted to a new table `signal_acknowledgements (company_id, signal_key, snoozed_until, assigned_to, resolved_at, actor)`. `deriveSignals()` filters by active acks. Realtime so multi-user stays in sync.
-
-### 2. Bulk WhatsApp blast
-For two signals — **Dormant** and **Silent & Owing** — add a "Send WhatsApp to all N" button. Opens a sheet:
-- Templated message with `{dealer_name}`, `{last_order_date}`, `{outstanding_amount}` merge fields.
-- Preview of first 3 rendered messages.
-- "Send" opens WhatsApp web/app per dealer (rate-limited via batched `wa.me` links, same pattern as `shareWhatsApp.ts`).
-- Logged to `activityLog` so it shows up in Recent activity.
-
-### 3. Run-rate forecast
-A new compact strip on the Overview header (under `HeroBand`):
-- **Projected close** — current run-rate × days remaining in period.
-- **Target hit probability** — `clamp((actual + projected_remainder) / target)` rendered as a 0–100% pill.
-- **Collections forecast** — same model for collections.
-Pure-function helper `projectClose()` in `command-signals.ts`. Renders inline on `CommandLineChart` as a faint forward-projected dashed segment.
-
-### 4. Segmentation slicer
-Persistent filter chips above the Tabs row:
-- **Territory** (dealer location)
-- **Rep** (salesperson)
-- **Channel** (dealer-side metadata; falls back to "All" if not modelled)
-- **SKU category** (product metadata; falls back to "All")
-
-State lives in URL (`?territory=…&rep=…`) so it survives tab change, refresh, share. Filters apply to: KPI cards, charts, leaderboards, aging strip, pipeline, activity feed. Signal engine respects the slice.
-
-### 5. Saved views
-Top-right of `/command`: a "Views" dropdown.
-- Default views: "All business", "My territory", "At-risk only".
-- "Save current view as…" — captures `{period, tab, territory, rep, channel, sku_category}`.
-- "Pin to top" — promoted views render as chips on Overview.
-Persisted to `command_saved_views (user_id, company_id, name, params jsonb, is_pinned)`. RLS by company.
+A `dashboard-digest` edge function already exists in the repo, so the email piece is mostly wiring + a cron + a settings UI rather than greenfield.
 
 ---
 
-## Technical notes
+### 1. Saved views (was deferred from Phase C)
+- New table `command_saved_views (id, user_id, company_id, name, params jsonb, is_pinned, created_at)`. RLS: read = same company, write = own rows.
+- New component `SavedViewsMenu` in the page header (right of the period selector): dropdown of views + "Save current as…" + pin toggle.
+- `params` captures `{period, from, to, tab}` (URL-derivable today — slicer chips land later if/when we ship C3).
+- Pinned views render as 1–3 small chips above the SignalBar so an owner can flip between "All business" and "At-risk only" with one click.
 
-**New tables (migration):**
-- `signal_acknowledgements` — RLS via `company_id = get_company_id()`. Realtime ADD TABLE.
-- `command_saved_views` — RLS scoped to `user_id = auth.uid()` for writes, `company_id = get_company_id()` for read.
+### 2. Scheduled weekly digest
+- New table `digest_subscriptions (id, user_id, company_id, frequency, day_of_week, hour_local, timezone, enabled, last_sent_at)`. RLS = own row.
+- `digest-cron` edge function (new, hourly): finds subscriptions whose local time matches now, calls existing `dashboard-digest` per subscriber, writes `last_sent_at`.
+- pg_cron job hits `digest-cron` hourly.
+- New page section in Settings → "Weekly digest" — toggle, day-of-week, time. Plus a "Send me a test now" button.
+- Digest email uses Lovable transactional email (`weekly-business-digest` template) with: net position, top 3 signals, top dealer, biggest at-risk dealer, link to `/command`.
+
+### 3. Print layout
+- New `print.css` (loaded only on `/command`): hides AppLayout chrome, sidebar, tabs, period selector controls; expands all KPI / leaderboard / chart cards full-width; forces light tokens; page-breaks between Overview sections so a 1–2 page A4 prints cleanly.
+- "Print" button in the page header (icon-only on mobile).
+- `CommandLineChart` gets a print-specific stroke width + a static caption ("Period: …, Generated: …") so the printout is self-explanatory.
+
+### 4. Density toggle + keyboard shortcuts
+- Add `dense` preference (localStorage, no DB): toggles a `data-density="dense"` attribute on the `/command` root; KPI cards shrink padding, leaderboards switch to 8-row, chart height drops from 280 → 220.
+- Shortcuts (only when no input is focused):
+  - `g o / g p / g s / g r` → Overview / People / Products / Reports tabs.
+  - `1 / 2 / 3 / 4 / 5` → period 7d / 30d / 90d / YTD / custom.
+  - `s` → focus SavedViews menu, `p` → print, `?` → cheat-sheet sheet.
+- Small `KeyboardCheatSheet` component, opened by `?`.
+
+### 5. Targeted a11y pass
+- Add proper landmarks: `<nav aria-label="Period">`, `<section aria-labelledby>` on each Overview block.
+- Every interactive icon-only button gets an `aria-label` (audit `SignalActions`, `RunRatePill`, `KpiCard` already do — fill the gaps).
+- Focus rings on the new `SignalBar` button wrapper (lost when we converted from `<Link>` to nested button).
+- Run a quick contrast check on warning/destructive pills against tinted backgrounds; bump opacity where it fails AA.
+
+---
+
+### Technical notes
+
+**Migrations (one):**
+- `command_saved_views` + RLS + index on `(company_id, user_id)`.
+- `digest_subscriptions` + RLS + unique `(user_id)` + index on `(enabled, hour_local)`.
 
 **New files:**
-- `src/components/command/SignalActions.tsx` — popover with Ack / Assign / Resolve.
-- `src/components/command/WhatsAppBlastSheet.tsx` — templated message composer.
-- `src/components/command/RunRatePill.tsx` — projected-close + probability strip.
-- `src/components/command/SegmentationBar.tsx` — chip filter row, URL-synced.
-- `src/components/command/SavedViewsMenu.tsx` — dropdown + save dialog.
-- `src/context/CommandFiltersContext.tsx` — single source of truth for slicer state (reads from URL, exposes typed values + setters).
+- `src/components/command/SavedViewsMenu.tsx`
+- `src/components/command/KeyboardCheatSheet.tsx`
+- `src/components/command/PrintButton.tsx`
+- `src/hooks/useCommandShortcuts.ts`
+- `src/hooks/useDensityPreference.ts`
+- `src/styles/command-print.css` (imported only in `Command.tsx`)
+- `src/lib/saved-views.ts` (CRUD + realtime hook, mirrors `command-acks.ts` pattern)
+- `src/pages/SettingsDigest.tsx` (or section in existing Settings)
+- `supabase/functions/digest-cron/index.ts`
+- `supabase/functions/_shared/transactional-email-templates/weekly-business-digest.tsx`
 
-**Modified files:**
-- `src/lib/command-signals.ts` — add `applySegmentation()`, `projectClose()`, plumb ack-aware `deriveSignals()`.
-- `src/components/command/SignalBar.tsx` — slot for `<SignalActions />` per card.
-- `src/components/command/CommandLineChart.tsx` — render projected segment.
-- `src/components/command/tabs/OverviewTab.tsx` — wrap derivations in segmentation, mount `RunRatePill`.
-- `src/pages/Command.tsx` — mount `SegmentationBar` + `SavedViewsMenu`.
+**Modified:**
+- `src/pages/Command.tsx` — mount `SavedViewsMenu`, `PrintButton`, density toggle, shortcut hook, print stylesheet, pinned-view chips.
+- `src/components/command/SignalBar.tsx` — restore focus ring on the converted button.
+- Settings route — add "Weekly digest" card.
+- `_shared/transactional-email-templates/registry.ts` — register new template.
 
-**Deferred to Phase D (so we don't bloat C):**
-- Scheduled email digest
-- Share/snapshot URL
-- Annotations / comments
-- Density toggle + keyboard shortcuts
-- Print stylesheet
-- Full a11y pass
+**Out of scope (kept for a possible Phase E):**
+- Segmentation slicer (territory/rep/channel) — depends on dealer + product metadata we haven't modelled.
+- Annotations / comments on signals.
+- Share/snapshot URL (signed read-only link).
 
 ---
 
-## Suggested split
-
-If C feels too big in one go, ship in this order:
-1. **C1** — Signal actions + WhatsApp blast (highest "this is a tool not a chart" payoff).
-2. **C2** — Run-rate forecast (cheapest, instantly credible).
-3. **C3** — Segmentation slicer + Saved views (largest surface change; URL contract update).
-
-Say **go** to execute end-to-end, or **C1 / C2 / C3** to pick a slice.
+Say **go** to ship all five, or pick a slice: **D1** (saved views), **D2** (digest), **D3** (print), **D4** (density+shortcuts), **D5** (a11y).
