@@ -542,7 +542,7 @@ export default function Billing() {
 
         {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative w-full sm:flex-1 sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by number or buyer..."
@@ -551,38 +551,41 @@ export default function Billing() {
               className="pl-9 h-10"
             />
           </div>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px] h-10">
-              <Filter className="h-3.5 w-3.5 mr-1.5" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="gst_invoice">GST Invoice</SelectItem>
-              <SelectItem value="estimate">Estimate</SelectItem>
-              <SelectItem value="proforma">Proforma</SelectItem>
-              <SelectItem value="credit_note">Credit Note</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
-            <SelectTrigger className="w-[180px] h-10">
-              <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="daily">Today</SelectItem>
-              <SelectItem value="weekly">Last 7 days</SelectItem>
-              <SelectItem value="monthly">Last 30 days</SelectItem>
-              <SelectItem value="yearly">Last 365 days</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-full sm:w-[180px] h-10">
+                <Filter className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="gst_invoice">GST Invoice</SelectItem>
+                <SelectItem value="estimate">Estimate</SelectItem>
+                <SelectItem value="proforma">Proforma</SelectItem>
+                <SelectItem value="credit_note">Credit Note</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
+              <SelectTrigger className="w-full sm:w-[180px] h-10">
+                <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="daily">Today</SelectItem>
+                <SelectItem value="weekly">Last 7 days</SelectItem>
+                <SelectItem value="monthly">Last 30 days</SelectItem>
+                <SelectItem value="yearly">Last 365 days</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {timePeriod !== "all" && (
             <span className="whitespace-nowrap text-[11px] text-muted-foreground/70 sm:ml-1">
               Showing {periodRangeLabel(timePeriod)}
             </span>
           )}
         </div>
+
 
         {/* Invoice List */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", damping: 26, stiffness: 200 }} className={filtered.length === 0 ? "" : "glass-card overflow-hidden"}>
