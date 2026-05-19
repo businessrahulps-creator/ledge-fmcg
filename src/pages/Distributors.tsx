@@ -239,89 +239,91 @@ export default function Distributors() {
             const outstanding = d.outstandingAmount || 0;
             const hasCredit = limit > 0 || outstanding > 0;
             const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
-            const tone =
-              limit === 0 ? "muted" : pct >= 100 ? "destructive" : pct >= 70 ? "warning" : "success";
+            const tier: "destructive" | "warning" | "success" | "muted" =
+              limit === 0 && outstanding === 0 ? "muted"
+              : pct >= 100 ? "destructive"
+              : pct >= 70 ? "warning"
+              : "success";
             const barColor =
-              tone === "destructive" ? "bg-destructive" :
-              tone === "warning" ? "bg-warning" :
-              tone === "success" ? "bg-success" : "bg-muted-foreground/40";
-            const dotColor = barColor;
-            return (
-              <div
-                key={d.id}
-                onClick={() => navigate(`/distributors/${d.id}`)}
-                className="cursor-pointer glass-card card-hover p-5 md:p-6"
+              tier === "destructive" ? "bg-destructive" :
+              tier === "warning" ? "bg-warning" :
+              tier === "success" ? "bg-success" : "bg-muted-foreground/40";
+            const utilLabel = limit > 0 ? `${Math.round(pct)}%` : outstanding > 0 ? "—" : "0%";
+
+            const heroIsOutstanding = outstanding > 0;
+            const hero = {
+              value: formatCurrency(heroIsOutstanding ? outstanding : d.totalValue),
+              label: heroIsOutstanding ? "Outstanding" : "Lifetime revenue",
+            };
+
+            const cells = [
+              {
+                label: "Orders",
+                value: d.totalOrders,
+                zero: d.totalOrders === 0,
+              },
+              {
+                label: heroIsOutstanding ? "Lifetime" : "Outstanding",
+                value: formatCurrency(heroIsOutstanding ? d.totalValue : outstanding),
+                zero: (heroIsOutstanding ? d.totalValue : outstanding) === 0,
+              },
+              {
+                label: limit > 0 ? "Utilization" : "Credit limit",
+                value: limit > 0 ? utilLabel : "—",
+                zero: limit === 0,
+                hint: limit > 0 ? (
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                    <div
+                      className={`h-full transition-all ${barColor}`}
+                      style={{ width: `${Math.min(pct, 100)}%` }}
+                    />
+                  </div>
+                ) : undefined,
+              },
+            ];
+
+            const primaryAction = hasCredit && outstanding > 0 && d.contact ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
+                  const amount = formatCurrency(outstanding);
+                  const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
+                  const url = phone
+                    ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
+                    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+                className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium text-success transition-colors hover:bg-success/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-success"
+                aria-label={`Send payment reminder to ${d.name} on WhatsApp`}
               >
-                <div className="flex items-start gap-3">
-                  <EntityAvatar name={d.name} size="md" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-semibold md:text-base">{d.name}</h3>
-                    {d.location && (
-                      <p className="mt-0.5 truncate text-xs text-muted-foreground">{d.location}</p>
-                    )}
-                    {d.contact && (
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground/80">{d.contact}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-0.5 shrink-0">
-                    {d.contact && outstanding > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-success active:scale-95"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
-                          const amount = formatCurrency(outstanding);
-                          const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
-                          const url = phone
-                            ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
-                            : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                          window.open(url, "_blank", "noopener,noreferrer");
-                        }}
-                        aria-label={`Send payment reminder to ${d.name} on WhatsApp`}
-                        title="Send payment reminder on WhatsApp"
-                      >
-                        <WhatsAppIcon className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => openEdit(d, e)} aria-label={`Edit ${d.name}`}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground active:scale-95" onClick={(e) => { e.stopPropagation(); setDeleteId(d.id); }} aria-label={`Delete ${d.name}`}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-4 flex flex-col gap-2.5 border-t border-border/30 pt-4">
-                  <div className="flex items-center justify-between text-xs md:text-sm">
-                    <span className="text-muted-foreground">{d.totalOrders} {d.totalOrders === 1 ? "order" : "orders"}</span>
-                    <span className="num font-semibold">{formatCurrency(d.totalValue)}</span>
-                  </div>
-                  {hasCredit && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
-                          Outstanding
-                        </span>
-                        <span className="num">{formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}</span>
-                      </div>
-                      {limit > 0 && (
-                        <div className="h-1 w-full overflow-hidden rounded-full bg-muted/50">
-                          <div
-                            className={`h-full transition-all ${barColor}`}
-                            style={{ width: `${Math.min(pct, 100)}%` }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+                <WhatsAppIcon className="h-3 w-3" />
+                Send reminder
+              </button>
+            ) : undefined;
+
+            return (
+              <EntityCard
+                key={d.id}
+                tier={tier}
+                avatar={<EntityAvatar name={d.name} size="md" />}
+                title={d.name}
+                subtitle={d.location || undefined}
+                tertiary={d.contact || undefined}
+                hero={hero}
+                cells={cells}
+                primaryAction={primaryAction}
+                menu={[
+                  { label: "Edit dealer", icon: Pencil, onSelect: () => openEdit(d, { stopPropagation: () => {} } as React.MouseEvent) },
+                  { label: "Remove dealer", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(d.id) },
+                ]}
+                onClick={() => navigate(`/distributors/${d.id}`)}
+              />
             );
           })}
         </div>
+
 
         {filtered.length > 0 ? (
           <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
