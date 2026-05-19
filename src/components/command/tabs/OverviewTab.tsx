@@ -160,7 +160,11 @@ export function OverviewTab({ range }: Props) {
             value={formatCurrency(computed.outstanding)}
             pct={null}
             inverse
-            hint="From all dealers"
+            hint={
+              computed.collections > 0
+                ? `−${formatCurrency(computed.collections)} collected this period`
+                : "From all dealers"
+            }
             href="/distributors?filter=outstanding"
           />
         </div>
