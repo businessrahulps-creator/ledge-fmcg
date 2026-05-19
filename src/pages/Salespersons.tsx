@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import { Plus, Search, Pencil, Trash2, UserCheck, Download } from "lucide-react";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Button } from "@/components/ui/button";

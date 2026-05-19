@@ -5,7 +5,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
