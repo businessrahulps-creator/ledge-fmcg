@@ -663,7 +663,7 @@ export default function Performance() {
                       <p className="text-[11px] text-muted-foreground">{activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}</p>
                     </div>
                     {totalSavings > 0 && (
-                      <span className="ml-auto text-lg font-bold text-success">{formatCurrency(totalSavings)}</span>
+                      <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums text-lg font-bold text-success">{formatCurrency(totalSavings)}</span>
                     )}
                   </div>
                   {totalSavings > 0 && (
