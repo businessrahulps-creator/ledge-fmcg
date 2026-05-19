@@ -447,19 +447,19 @@ export default function Performance() {
             </div>
 
             {period === "custom" && (
-              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+              <div className="flex flex-wrap items-center gap-2 min-w-0 animate-in fade-in slide-in-from-top-1">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
+                        "h-9 min-w-0 flex-1 sm:flex-none sm:w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customFrom && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                      {customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -472,19 +472,19 @@ export default function Performance() {
                     />
                   </PopoverContent>
                 </Popover>
-                <span className="text-sm text-muted-foreground">to</span>
+                <span className="shrink-0 text-sm text-muted-foreground">to</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
+                        "h-9 min-w-0 flex-1 sm:flex-none sm:w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customTo && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                      {customTo ? format(customTo, "dd/MM/yyyy") : "To"}
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{customTo ? format(customTo, "dd/MM/yyyy") : "To"}</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -500,7 +500,7 @@ export default function Performance() {
                 </Popover>
               </div>
             )}
-            <p className="text-[11px] text-muted-foreground/70 sm:text-right">
+            <p className="text-[11px] text-muted-foreground/70 truncate max-w-full sm:text-right">
               Showing {period === "custom"
                 ? (customFrom || customTo)
                   ? `${customFrom ? formatIndianDate(customFrom) : "—"} – ${customTo ? formatIndianDate(customTo) : "today"}`
