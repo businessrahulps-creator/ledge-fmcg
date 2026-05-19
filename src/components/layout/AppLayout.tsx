@@ -2,13 +2,11 @@ import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link } from "react-router-dom";
-import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, TrendingUp, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, BookOpen, History, Wallet, LogOut, CircleDot } from "lucide-react";
+import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, Wallet, LogOut, CircleDot } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
-import { RefreshAppButton } from "./RefreshAppButton";
 import { LiveClock } from "./LiveClock";
-import { ActivityLog } from "./ActivityLog";
 import { useAuth } from "@/context/AuthContext";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
@@ -35,17 +33,20 @@ const primaryMobileNav = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Insights", url: "/reports", icon: ChartNoAxesCombined },
+  { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
 ];
 
 type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
 
+// V2 unified palette — neutral Bone chip backgrounds, semantic color reserved for the
+// icon stroke only. This removes the "tinted-quilt" feel users called out on mobile
+// and keeps the surface feeling premium and consistent across groups.
 const TONE_STYLES: Record<MoreTone, { iconBg: string; iconFg: string; activeBg: string; activeFg: string }> = {
-  warning: { iconBg: "bg-warning/10", iconFg: "text-warning", activeBg: "bg-warning/15", activeFg: "text-warning" },
-  primary: { iconBg: "bg-primary/10", iconFg: "text-primary", activeBg: "bg-primary/15", activeFg: "text-primary" },
-  success: { iconBg: "bg-success/10", iconFg: "text-success", activeBg: "bg-success/15", activeFg: "text-success" },
-  accent:  { iconBg: "bg-accent/15",  iconFg: "text-accent-foreground", activeBg: "bg-accent/25", activeFg: "text-accent-foreground" },
-  muted:   { iconBg: "bg-muted",      iconFg: "text-foreground/70", activeBg: "bg-primary/10",  activeFg: "text-primary" },
+  warning: { iconBg: "bg-muted/60",  iconFg: "text-warning",            activeBg: "bg-warning/12",  activeFg: "text-warning" },
+  primary: { iconBg: "bg-muted/60",  iconFg: "text-primary",            activeBg: "bg-primary/10",  activeFg: "text-primary" },
+  success: { iconBg: "bg-muted/60",  iconFg: "text-success",            activeBg: "bg-success/12",  activeFg: "text-success" },
+  accent:  { iconBg: "bg-muted/60",  iconFg: "text-accent-foreground",  activeBg: "bg-accent/15",   activeFg: "text-accent-foreground" },
+  muted:   { iconBg: "bg-muted/60",  iconFg: "text-foreground/70",      activeBg: "bg-primary/10",  activeFg: "text-primary" },
 };
 
 const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
@@ -78,7 +79,7 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
     label: "Insights",
     tone: "accent",
     items: [
-      { title: "Performance", url: "/performance", icon: TrendingUp },
+      { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
     ],
   },
   {
@@ -192,7 +193,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -287,15 +287,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   )}
                 </div>
               )}
-              <RefreshAppButton />
-              <button
-                type="button"
-                onClick={() => setActivityOpen(true)}
-                aria-label="Recent activity"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-              >
-                <History className="h-[18px] w-[18px]" strokeWidth={1.7} />
-              </button>
+              {/* PWA "Check for updates" + Activity log entry-points removed in Phase 1 polish.
+                  PWA offline mode is paused (mem://features/offline-mode-paused);
+                  Activity log route remains reachable directly via /activity. */}
               <NotificationCenter />
             </div>
           </header>
@@ -477,16 +471,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                   <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 transition-transform group-active:translate-x-0.5" />
                                 </>
                               );
-                              return item.url === "/activity" ? (
-                                <button
-                                  key={item.title}
-                                  type="button"
-                                  onClick={() => { setMoreOpen(false); setActivityOpen(true); }}
-                                  className={rowCls}
-                                >
-                                  {inner}
-                                </button>
-                              ) : (
+                              return (
                                 <Link
                                   key={item.title}
                                   to={item.url}
@@ -532,7 +517,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </div>
                 </SheetContent>
               </Sheet>
-              <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
             </div>
           </nav>
         </div>
