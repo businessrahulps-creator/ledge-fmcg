@@ -190,7 +190,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -524,7 +523,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </div>
                 </SheetContent>
               </Sheet>
-              <ActivityLog open={activityOpen} onOpenChange={setActivityOpen} />
             </div>
           </nav>
         </div>
