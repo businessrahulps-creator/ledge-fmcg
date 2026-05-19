@@ -39,11 +39,12 @@ export function buildWorksheet(XLSX: typeof XLSXType, headers: string[], rows: s
 }
 
 /**
- * Generate and download an Excel file from headers + rows.
- * xlsx (~430KB) is dynamically imported so it's only fetched when users
- * actually click an Export button — not on every page load.
+ * Generate and download a true .xlsx workbook from headers + rows.
+ * Output is a native Excel binary (not CSV) with autofilter on the header row
+ * and auto-sized columns. xlsx (~430KB) is dynamically imported so it's only
+ * fetched when users actually click an Export button — not on every page load.
  */
-export async function exportCsv(filename: string, headers: string[], rows: string[][]) {
+export async function exportXlsx(filename: string, headers: string[], rows: string[][]) {
   if (rows.length === 0) {
     toast.error("Nothing to export", { description: "No data matches the current filters." });
     return;
@@ -71,6 +72,3 @@ export function xlsxFilename(entity: string): string {
   const today = new Date().toISOString().slice(0, 10);
   return `${entity}_${today}.xlsx`;
 }
-
-/** @deprecated Use xlsxFilename instead */
-export const csvFilename = xlsxFilename;

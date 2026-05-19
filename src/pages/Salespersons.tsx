@@ -7,7 +7,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, UserCheck, Download } from "lucide-react";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -115,8 +115,8 @@ export default function Salespersons() {
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               aria-label="Export CSV"
               onClick={() => {
-                exportCsv(
-                  csvFilename("sales-team"),
+                exportXlsx(
+                  xlsxFilename("sales-team"),
                   ["Name", "Phone", "Email", "Region", "Total Orders", "Total Value"],
                   filtered.map((s) => [s.name, s.phone, s.email, s.region, String(s.totalOrders), formatCurrency(s.totalValue)])
                 );

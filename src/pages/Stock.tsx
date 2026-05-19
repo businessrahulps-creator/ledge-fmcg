@@ -7,7 +7,7 @@ import { usePageLoading } from "@/hooks/use-loading";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, Trash2, Package, Warehouse, MapPin, AlertTriangle, PackagePlus, Download } from "lucide-react";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -420,8 +420,8 @@ export default function Stock() {
                     className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
                     aria-label="Export CSV"
                     onClick={() => {
-                      exportCsv(
-                        csvFilename("products"),
+                      exportXlsx(
+                        xlsxFilename("products"),
                         ["Product Name", "SKU", "Unit", "Base Price", "Total Sold", "Total Stock"],
                         filteredProducts.map((p) => [
                           p.name,
@@ -637,8 +637,8 @@ export default function Stock() {
                             className="shrink-0"
                             onClick={() => {
                               const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "warehouse";
-                              exportCsv(
-                                csvFilename(`inventory-${whName.toLowerCase().replace(/\s+/g, "-")}`),
+                              exportXlsx(
+                                xlsxFilename(`inventory-${whName.toLowerCase().replace(/\s+/g, "-")}`),
                                 ["Product Name", "SKU", "Unit", "Quantity", "Threshold", "Health", "Base Price", "Stock Value"],
                                 warehouseInventory.map((si) => {
                                   const health = getStockHealth(si.quantity, si.threshold);

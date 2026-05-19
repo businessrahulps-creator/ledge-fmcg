@@ -1,7 +1,7 @@
 import type * as XLSXType from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { buildWorksheet } from "./exportCsv";
+import { buildWorksheet } from "./exportXlsx";
 import { fetchAllChunked } from "@/context/data-utils";
 
 const s = (v: unknown) => String(v ?? "");

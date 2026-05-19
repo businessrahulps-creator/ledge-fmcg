@@ -8,7 +8,7 @@ import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./Reve
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatIndianDate } from "@/utils/formatDate";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
@@ -102,8 +102,8 @@ export function DistributorReport() {
 
       <ReportExportFooter
         onExcel={() =>
-          exportCsv(
-            csvFilename("dealer-report"),
+          exportXlsx(
+            xlsxFilename("dealer-report"),
             ["Dealer", "Location", "Contact", "Orders", "Revenue"],
             data.map((d) => [d.name, d.location, d.contact, String(d.orderCount), formatCurrency(d.revenue)])
           )

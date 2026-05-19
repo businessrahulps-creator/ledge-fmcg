@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
-import { exportCsv, csvFilename } from "@/utils/exportCsv";
+import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
@@ -97,8 +97,8 @@ export function DispatchReport() {
 
       <ReportExportFooter
         onExcel={() =>
-          exportCsv(
-            csvFilename("dispatch-report"),
+          exportXlsx(
+            xlsxFilename("dispatch-report"),
             ["Order", "Dealer", "Date", "Dispatch Date", "Vehicle", "Driver", "Delivery Status", "Amount"],
             filtered.map((o) => [
               o.orderNumber,
