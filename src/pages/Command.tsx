@@ -287,7 +287,8 @@ export default function Command() {
           {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
           <TabsContent value="drill"><DrillDownTab /></TabsContent>
         </Tabs>
-      </div>
+      </main>
+      <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />
     </AppLayout>
   );
 }
