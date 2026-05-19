@@ -132,8 +132,21 @@ export function OverviewTab({ range, period = "30d" }: Props) {
     };
   }, [orders, distributors, products, targets, range]);
 
+  const periodLabel = PERIOD_LABELS[period] ?? "Period";
+
   return (
     <div className="space-y-4 md:space-y-6">
+      {loading ? (
+        <CardSkeleton height={140} />
+      ) : (
+        <HeroBand
+          collected={computed.collections}
+          newInvoiced={computed.revenue}
+          prevCollected={computed.prevCollections}
+          periodLabel={periodLabel}
+        />
+      )}
+
       {loading ? (
         <KpiRowSkeleton />
       ) : (
@@ -178,6 +191,20 @@ export function OverviewTab({ range, period = "30d" }: Props) {
         </div>
       )}
 
+      <div className="grid gap-4 md:grid-cols-2">
+        {loading ? (
+          <>
+            <CardSkeleton height={200} />
+            <CardSkeleton height={200} />
+          </>
+        ) : (
+          <>
+            <AgingStrip orders={orders} distributors={distributors} />
+            <PipelineFunnel orders={orders} />
+          </>
+        )}
+      </div>
+
       <Card className="p-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Revenue trend</h3>
@@ -189,9 +216,10 @@ export function OverviewTab({ range, period = "30d" }: Props) {
         {loading ? <ChartSkeleton /> : <CommandLineChart data={computed.trend} />}
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         {loading ? (
           <>
+            <CardSkeleton height={260} />
             <CardSkeleton height={260} />
             <CardSkeleton height={260} />
           </>
@@ -212,6 +240,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
               emptyTitle="No SKU revenue yet this period"
               viewAllHref="/stock"
             />
+            <ActivityFeed orders={orders} claims={claims} />
           </>
         )}
       </div>
