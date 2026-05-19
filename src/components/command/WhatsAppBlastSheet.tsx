@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +36,15 @@ function render(template: string, vars: Record<string, string>): string {
 
 export function WhatsAppBlastSheet({ open, onClose, title, description, dealers, orders, defaultTemplate }: Props) {
   const [template, setTemplate] = useState(defaultTemplate);
+
+  // Re-seed the textarea whenever the parent swaps the default template
+  // (e.g. switching from a "dormant chase" signal to a "credit-blocked" one
+  // without unmounting the sheet) or when the sheet is reopened. Without
+  // this, the sheet keeps the previously edited copy and the merge fields
+  // no longer match the active signal.
+  useEffect(() => {
+    setTemplate(defaultTemplate);
+  }, [defaultTemplate, open]);
 
   const rendered = useMemo(() => {
     return dealers.map((d) => {

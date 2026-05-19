@@ -11,7 +11,7 @@ interface CompanyInfo {
   logoUrl: string;
 }
 
-function buildOrderSummary(order: Order, companyName: string): string {
+export function buildOrderSummary(order: Order, companyName: string): string {
   const lines = order.lines
     .map((l) => `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.lineTotal)}`)
     .join("\n");
@@ -131,7 +131,7 @@ export interface InvoiceShareData {
   driverName?: string;
 }
 
-function buildInvoiceSummary(inv: InvoiceShareData): string {
+export function buildInvoiceSummary(inv: InvoiceShareData): string {
   const docLabel: Record<string, string> = {
     gst_invoice: "Tax Invoice",
     estimate: "Estimate",
