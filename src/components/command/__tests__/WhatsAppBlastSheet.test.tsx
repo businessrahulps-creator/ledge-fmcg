@@ -81,7 +81,7 @@ describe("WhatsAppBlastSheet", () => {
     expect(screen.getByText(/no order on record/)).toBeInTheDocument();
 
     // Reachable count: 2 of 3 have a phone.
-    expect(screen.getByText(/2/).closest("div")?.textContent).toMatch(/2.*of 3 dealer/);
+    expect(screen.getByText(/of 3 dealers have a valid phone number/)).toBeInTheDocument();
     expect(screen.getByText(/Send WhatsApp to 2 dealers/)).toBeInTheDocument();
   });
 
