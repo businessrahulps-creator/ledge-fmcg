@@ -869,9 +869,9 @@ export default function Performance() {
                     <div className="space-y-1.5">
                       <p className="text-[10px] text-muted-foreground font-medium">Top Retailers</p>
                       {topRetailers.map(([name, qty]) => (
-                        <div key={name} className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground truncate mr-2">{name}</span>
-                          <span className="font-medium shrink-0">{qty} units</span>
+                        <div key={name} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-muted-foreground truncate">{name}</span>
+                          <span className="font-medium shrink-0 tabular-nums whitespace-nowrap">{qty} units</span>
                         </div>
                       ))}
                     </div>
