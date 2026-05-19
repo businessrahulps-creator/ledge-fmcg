@@ -157,14 +157,9 @@ export function CommandPalette() {
     { label: "Settings", to: "/settings", icon: Settings },
   ];
 
-  return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput
-        value={query}
-        onValueChange={setQuery}
-        placeholder="Search orders, dealers, products, or jump to a page…"
-      />
-      <CommandList>
+  const listContent = (
+    <CommandList className={isMobile ? "max-h-none flex-1 overflow-y-auto" : undefined}>
+
         <CommandEmpty>No matches. Try a different search.</CommandEmpty>
 
         {!q && recent.length > 0 && (
