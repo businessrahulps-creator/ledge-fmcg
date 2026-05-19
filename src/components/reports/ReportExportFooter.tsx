@@ -53,7 +53,7 @@ export function ReportExportFooter({
         toast.success(opts.successTitle, opts.successDesc ? { description: opts.successDesc } : undefined);
       }
     } catch (err) {
-      logError(`[ReportExportFooter] ${opts.context} failed`, err);
+      logError({ source: `report-export-footer:${opts.context}`, error: err });
       const description = err instanceof Error ? err.message : "Please try again.";
       toast.error(opts.errorTitle, { description });
     } finally {
