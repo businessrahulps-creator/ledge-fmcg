@@ -186,27 +186,114 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
     });
   }
 
-  // 4. Wins — top dealer if any.
-  if (periodOrders.length > 0) {
-    const revByDealer = new Map<string, number>();
-    for (const o of periodOrders) revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + (o.total || 0));
-    const top = [...revByDealer.entries()].sort((a, b) => b[1] - a[1])[0];
-    if (top) {
-      const dealer = distributors.find((d) => d.id === top[0]);
-      if (dealer) {
-        out.push({
-          id: "top-dealer",
-          tier: "success",
-          label: "TOP DEALER",
-          message: `${dealer.name} leads this period`,
-          href: `/distributors/${dealer.id}`,
-          cta: "View",
-        });
-      }
+  // Build per-dealer revenue this period (used by combined signals + winner).
+  const revByDealer = new Map<string, number>();
+  for (const o of periodOrders) revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + (o.total || 0));
+
+  // 4. COMBINED: Dormant + Outstanding — silent and still owes money.
+  const dormantOwing = dormant.filter((d) => (d.outstandingAmount || 0) > 0);
+  if (dormantOwing.length > 0) {
+    const exposure = dormantOwing.reduce((s, d) => s + (d.outstandingAmount || 0), 0);
+    out.push({
+      id: "dormant-owing",
+      tier: "destructive",
+      label: "SILENT & OWING",
+      message: `${dormantOwing.length} dormant dealer${dormantOwing.length === 1 ? "" : "s"} owe ₹${Math.round(exposure).toLocaleString("en-IN")}`,
+      href: "/distributors?filter=dormant-owing",
+      cta: "Chase",
+      value: dormantOwing.length,
+    });
+  }
+
+  // 5. COMBINED: Credit-blocked top dealer — best customer is maxed out.
+  const topEntry = [...revByDealer.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (topEntry) {
+    const topDealer = distributors.find((d) => d.id === topEntry[0]);
+    if (topDealer && topDealer.creditLimit > 0 && topDealer.outstandingAmount / topDealer.creditLimit >= 0.9) {
+      out.push({
+        id: "top-blocked",
+        tier: "destructive",
+        label: "TOP DEALER BLOCKED",
+        message: `${topDealer.name} leads sales but is over 90% credit`,
+        href: `/distributors/${topDealer.id}`,
+        cta: "Resolve",
+      });
     }
   }
 
-  return out.slice(0, 5);
+  // 6. COMBINED: Declining territory — salesperson revenue dropped >30% vs prev window.
+  const prevRange: PeriodRange = {
+    from: range.prevFrom,
+    to: range.prevTo,
+    prevFrom: range.prevFrom,
+    prevTo: range.prevTo,
+  };
+  const prevOrders = ordersInPeriod(orders, prevRange);
+  const prevBySp = new Map<string, number>();
+  for (const o of prevOrders) prevBySp.set(o.salespersonId, (prevBySp.get(o.salespersonId) || 0) + (o.total || 0));
+  const declining = salespersons
+    .map((s) => {
+      const prev = prevBySp.get(s.id) || 0;
+      const curr = revBySp.get(s.id) || 0;
+      if (prev < 1) return null;
+      const drop = (prev - curr) / prev;
+      return drop > 0.3 ? { sp: s, drop } : null;
+    })
+    .filter((x): x is { sp: Salesperson; drop: number } => !!x)
+    .sort((a, b) => b.drop - a.drop);
+  if (declining.length > 0) {
+    const worst = declining[0];
+    out.push({
+      id: "declining-territory",
+      tier: "warning",
+      label: "TERRITORY DECLINING",
+      message:
+        declining.length === 1
+          ? `${worst.sp.name}'s territory is down ${Math.round(worst.drop * 100)}%`
+          : `${declining.length} territories down vs last period`,
+      href:
+        declining.length === 1
+          ? `/salespersons/${worst.sp.id}#targets`
+          : "/salespersons?status=declining",
+      cta: "Open",
+      value: declining.length,
+    });
+  }
+
+  // 7. COMBINED: Scheme cannibalisation — discounts eating >25% of gross.
+  const periodRevenue = periodOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const periodSavings = periodOrders.reduce((s, o) => s + (o.schemeSavings || 0), 0);
+  if (periodRevenue > 0 && periodSavings / (periodRevenue + periodSavings) > 0.25) {
+    const pct = Math.round((periodSavings / (periodRevenue + periodSavings)) * 100);
+    out.push({
+      id: "scheme-cannibalisation",
+      tier: "warning",
+      label: "SCHEMES TOO DEEP",
+      message: `Discounts ate ${pct}% of gross sales this period`,
+      href: "/schemes",
+      cta: "Review",
+      value: `${pct}%`,
+    });
+  }
+
+  // 8. Wins — top dealer (only if not already flagged as blocked).
+  if (topEntry && !out.some((s) => s.id === "top-blocked")) {
+    const dealer = distributors.find((d) => d.id === topEntry[0]);
+    if (dealer) {
+      out.push({
+        id: "top-dealer",
+        tier: "success",
+        label: "TOP DEALER",
+        message: `${dealer.name} leads this period`,
+        href: `/distributors/${dealer.id}`,
+        cta: "View",
+      });
+    }
+  }
+
+  // Sort: destructive → warning → success → neutral. Cap to 6.
+  const tierWeight: Record<SignalTier, number> = { destructive: 0, warning: 1, success: 2, neutral: 3 };
+  return out.sort((a, b) => tierWeight[a.tier] - tierWeight[b.tier]).slice(0, 6);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
