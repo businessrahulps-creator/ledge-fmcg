@@ -14,6 +14,7 @@ import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
 import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
 import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
 import { PrintButton } from "@/components/command/PrintButton";
+import { PrintPreviewOverlay } from "@/components/command/PrintPreviewOverlay";
 import { ExportPdfButton } from "@/components/command/ExportPdfButton";
 import { KeyboardCheatSheet } from "@/components/command/KeyboardCheatSheet";
 import { useCommandShortcuts } from "@/hooks/useCommandShortcuts";
