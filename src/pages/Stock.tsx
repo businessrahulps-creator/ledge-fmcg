@@ -45,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EntityPicker } from "@/components/ui/entity-picker";
 import { toast } from "sonner";
 
 function HealthBadge({ health }: { health: string }) {
