@@ -22,7 +22,7 @@ interface Props {
   height?: number;
 }
 
-export function CommandLineChart({ data, height = 240 }: Props) {
+function CommandLineChartInner({ data, height = 240 }: Props) {
   const hasAny = data.some((p) => p.actual > 0 || p.target > 0);
 
   const { peak, zeroRuns, maxActual, perBucketTarget, targetUnreachable, projectedClose, periodTarget, paceLabel } = useMemo(() => {
@@ -204,4 +204,6 @@ export function CommandLineChart({ data, height = 240 }: Props) {
     </div>
   );
 }
+export const CommandLineChart = memo(CommandLineChartInner);
+
 export const CommandLineChart = memo(CommandLineChartInner);

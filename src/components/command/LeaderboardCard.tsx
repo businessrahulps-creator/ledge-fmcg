@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, type LucideIcon } from "lucide-react";
@@ -20,7 +21,7 @@ interface Props {
   viewAllHref?: string;
 }
 
-export function LeaderboardCard({ title, icon: Icon, rows, emptyTitle, emptyHint, viewAllHref }: Props) {
+function LeaderboardCardInner({ title, icon: Icon, rows, emptyTitle, emptyHint, viewAllHref }: Props) {
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -68,3 +69,5 @@ export function LeaderboardCard({ title, icon: Icon, rows, emptyTitle, emptyHint
     </Card>
   );
 }
+
+export const LeaderboardCard = memo(LeaderboardCardInner);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
@@ -21,7 +22,7 @@ interface Props {
   index?: number;
 }
 
-export function CommandKpiCard({ label, value, pct, inverse, hint, spark, href, index = 0 }: Props) {
+function CommandKpiCardInner({ label, value, pct, inverse, hint, spark, href, index = 0 }: Props) {
   const sparkData = (spark && spark.length > 1 ? spark : []).map((v, i) => ({ i, v }));
   // Gate: drop the sparkline when the series is effectively flat (variance < 5%
   // of peak) or when peak is zero — those renders are visual noise, not signal.
@@ -92,3 +93,5 @@ export function CommandKpiCard({ label, value, pct, inverse, hint, spark, href, 
     </motion.div>
   );
 }
+
+export const CommandKpiCard = memo(CommandKpiCardInner);

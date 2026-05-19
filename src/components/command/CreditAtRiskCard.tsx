@@ -53,7 +53,7 @@ function whatsappReminder(d: Distributor) {
   toast.success(phone ? "WhatsApp opened" : "WhatsApp opened — no number on file");
 }
 
-export function CreditAtRiskCard({ distributors, orders }: Props) {
+function CreditAtRiskCardInner({ distributors, orders }: Props) {
   const { rows, all, exposure, criticalCount } = useMemo(() => {
     const aging = computeDealerAging(orders, distributors);
     const dpoBy = new Map(aging.map((a) => [a.distributorId, a.oldestAgeDays]));
@@ -162,4 +162,6 @@ export function CreditAtRiskCard({ distributors, orders }: Props) {
     </Card>
   );
 }
+export const CreditAtRiskCard = memo(CreditAtRiskCardInner);
+
 export const CreditAtRiskCard = memo(CreditAtRiskCardInner);
