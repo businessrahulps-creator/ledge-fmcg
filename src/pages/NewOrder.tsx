@@ -489,21 +489,20 @@ export default function NewOrder() {
                       <div className="grid gap-3 sm:grid-cols-12 sm:items-end">
                         <div className="space-y-1 sm:col-span-4">
                           <Label className="text-xs text-muted-foreground">Product</Label>
-                          <Select
+                          <EntityPicker
                             value={line.productId}
-                            onValueChange={(v) => updateLine(line.id, "productId", v)}
-                          >
-                            <SelectTrigger ref={line === lines[0] ? firstProductRef : undefined} className="h-10 rounded-lg md:h-12">
-                              <SelectValue placeholder="Select product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products
-                                .filter((p) => p.id === line.productId || !lines.some((l) => l.id !== line.id && l.productId === p.id))
-                                .map((p) => (
-                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            onChange={(v) => updateLine(line.id, "productId", v)}
+                            placeholder="Search product"
+                            searchPlaceholder="Type product name or SKU…"
+                            emptyHint="All products already added or none match."
+                            options={products
+                              .filter((p) => p.id === line.productId || !lines.some((l) => l.id !== line.id && l.productId === p.id))
+                              .map((p: any) => ({
+                                value: p.id,
+                                label: p.name,
+                                hint: p.sku || undefined,
+                              }))}
+                          />
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
