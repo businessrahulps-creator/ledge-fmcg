@@ -101,6 +101,18 @@ export function SalesTeamReport() {
         </div>
       </div>
 
+      <ReportExportFooter
+        onExcel={() =>
+          exportCsv(
+            csvFilename("sales-team-report"),
+            ["Name", "Region", "Phone", "Orders", "Revenue"],
+            data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
+          )
+        }
+        onPdf={() => setPdfOpen(true)}
+      />
+
+
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl p-4 md:p-6 sm:max-w-2xl">
           {selected && (
