@@ -375,7 +375,7 @@ export default function Performance() {
         </div>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Performance
@@ -386,7 +386,7 @@ export default function Performance() {
           </div>
 
           {/* Time period pills + Export */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 min-w-0 w-full sm:w-auto">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               <TooltipProvider delayDuration={300}>
                 <UITooltip>
@@ -447,19 +447,19 @@ export default function Performance() {
             </div>
 
             {period === "custom" && (
-              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+              <div className="flex flex-wrap items-center gap-2 min-w-0 animate-in fade-in slide-in-from-top-1">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
+                        "h-9 min-w-0 flex-1 sm:flex-none sm:w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customFrom && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                      {customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{customFrom ? format(customFrom, "dd/MM/yyyy") : "From"}</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -472,19 +472,19 @@ export default function Performance() {
                     />
                   </PopoverContent>
                 </Popover>
-                <span className="text-sm text-muted-foreground">to</span>
+                <span className="shrink-0 text-sm text-muted-foreground">to</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-9 w-[140px] justify-start text-left text-sm font-normal rounded-full",
+                        "h-9 min-w-0 flex-1 sm:flex-none sm:w-[140px] justify-start text-left text-sm font-normal rounded-full",
                         !customTo && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                      {customTo ? format(customTo, "dd/MM/yyyy") : "To"}
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{customTo ? format(customTo, "dd/MM/yyyy") : "To"}</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -500,7 +500,7 @@ export default function Performance() {
                 </Popover>
               </div>
             )}
-            <p className="text-[11px] text-muted-foreground/70 sm:text-right">
+            <p className="text-[11px] text-muted-foreground/70 truncate max-w-full sm:text-right">
               Showing {period === "custom"
                 ? (customFrom || customTo)
                   ? `${customFrom ? formatIndianDate(customFrom) : "—"} – ${customTo ? formatIndianDate(customTo) : "today"}`
@@ -663,7 +663,7 @@ export default function Performance() {
                       <p className="text-[11px] text-muted-foreground">{activeSchemes.length} active scheme{activeSchemes.length !== 1 ? "s" : ""}</p>
                     </div>
                     {totalSavings > 0 && (
-                      <span className="ml-auto text-lg font-bold text-success">{formatCurrency(totalSavings)}</span>
+                      <span className="ml-auto shrink-0 whitespace-nowrap tabular-nums text-lg font-bold text-success">{formatCurrency(totalSavings)}</span>
                     )}
                   </div>
                   {totalSavings > 0 && (
@@ -672,9 +672,9 @@ export default function Performance() {
                   {topSchemes.length > 0 && (
                     <div className="space-y-1.5">
                       {topSchemes.map(ts => (
-                        <div key={ts.name} className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground truncate mr-2">{ts.name}</span>
-                          <div className="flex items-center gap-2 shrink-0">
+                        <div key={ts.name} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-muted-foreground truncate">{ts.name}</span>
+                          <div className="flex items-center gap-2 shrink-0 whitespace-nowrap tabular-nums">
                             <span className="text-muted-foreground">{ts.hits} order{ts.hits !== 1 ? "s" : ""}</span>
                             <span className="font-medium text-success">{formatCurrency(ts.savings)}</span>
                           </div>
@@ -720,7 +720,7 @@ export default function Performance() {
                         <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/distributors")}>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{d.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                            <p className="text-[10px] text-muted-foreground truncate tabular-nums">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
                           </div>
                           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rc.color} ${rc.bg} shrink-0`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${rc.dot}`} />
@@ -784,7 +784,7 @@ export default function Performance() {
                         <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/salespersons")}>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{d.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
+                            <p className="text-[10px] text-muted-foreground truncate tabular-nums">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
                           </div>
                           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${hc.color} ${hc.bg} shrink-0`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${hc.dot}`} />
@@ -869,9 +869,9 @@ export default function Performance() {
                     <div className="space-y-1.5">
                       <p className="text-[10px] text-muted-foreground font-medium">Top Retailers</p>
                       {topRetailers.map(([name, qty]) => (
-                        <div key={name} className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground truncate mr-2">{name}</span>
-                          <span className="font-medium shrink-0">{qty} units</span>
+                        <div key={name} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-muted-foreground truncate">{name}</span>
+                          <span className="font-medium shrink-0 tabular-nums whitespace-nowrap">{qty} units</span>
                         </div>
                       ))}
                     </div>
@@ -889,14 +889,14 @@ export default function Performance() {
               if (atRisk.length === 0) return null;
               return (
                 <div className="glass-card rounded-md p-4 flex items-center gap-3 border-l-[3px] border-l-destructive cursor-pointer card-hover" onClick={() => navigate("/distributors")}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-destructive/10">
                     <AlertTriangle className="h-4 w-4 text-destructive" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-destructive">Credit at Risk</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-destructive truncate">Credit at Risk</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{atRisk.length} dealer{atRisk.length > 1 ? "s" : ""} at or over credit limit</p>
                   </div>
-                  <span className="text-lg font-bold text-destructive">{atRisk.length}</span>
+                  <span className="shrink-0 tabular-nums text-lg font-bold text-destructive">{atRisk.length}</span>
                 </div>
               );
             })()}
@@ -944,12 +944,12 @@ export default function Performance() {
                         <p className="text-xs font-medium text-success mb-2">⭐ Top Performers</p>
                         <div className="space-y-2">
                           {topPerformers.map(t => (
-                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-success/30 bg-success/5 px-3 py-2">
-                              <div>
-                                <p className="text-xs font-semibold">{t.entityName}</p>
-                                <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
+                            <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold truncate">{t.entityName}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                               </div>
-                              <span className="text-sm font-bold text-success">{t.pct}%</span>
+                              <span className="shrink-0 tabular-nums text-sm font-bold text-success">{t.pct}%</span>
                             </div>
                           ))}
                         </div>
@@ -960,12 +960,12 @@ export default function Performance() {
                         <p className="text-xs font-medium text-destructive mb-2">⚠️ Needs Attention</p>
                         <div className="space-y-2">
                           {behindTarget.map(t => (
-                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
-                              <div>
-                                <p className="text-xs font-semibold">{t.entityName}</p>
-                                <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
+                            <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold truncate">{t.entityName}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                               </div>
-                              <span className="text-sm font-bold text-destructive">{t.pct}%</span>
+                              <span className="shrink-0 tabular-nums text-sm font-bold text-destructive">{t.pct}%</span>
                             </div>
                           ))}
                         </div>

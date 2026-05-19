@@ -89,8 +89,8 @@ function PipelineFunnelInner({ orders }: Props) {
                 className="group block rounded-md px-2 py-1 transition-colors hover:bg-muted/40"
               >
                 <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="font-medium text-foreground">{s.label}</span>
-                  <span className="num shrink-0 text-muted-foreground">
+                  <span className="min-w-0 flex-1 truncate font-medium text-foreground">{s.label}</span>
+                  <span className="num shrink-0 tabular-nums whitespace-nowrap text-muted-foreground">
                     {s.count} · {formatCurrency(s.value)}
                   </span>
                 </div>

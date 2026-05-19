@@ -99,7 +99,7 @@ function AgingStripInner({ orders, distributors }: Props) {
                     </span>
                     <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
-                  <span className="num mt-1 text-base font-semibold text-foreground">
+                  <span className="num mt-1 text-base font-semibold text-foreground tabular-nums truncate">
                     {formatCurrency(v)}
                   </span>
                   <span className="text-[11px] text-muted-foreground">

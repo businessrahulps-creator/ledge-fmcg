@@ -75,16 +75,16 @@ const SignalCardImpl = React.forwardRef<HTMLDivElement, SignalCardProps>(
         <div className="flex items-center">
           <Icon className={cn("icon-signal", s.text)} fill={s.fill} />
         </div>
-        <div className="flex-1 flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <p className={cn("text-[10px] uppercase tracking-[0.18em] font-semibold", s.textSoft)}>{label}</p>
-            <p className="text-sm text-foreground mt-0.5">{caption}</p>
-            {subCaption && <p className="text-[11px] text-muted-foreground mt-0.5 num">{subCaption}</p>}
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className={cn("text-[10px] uppercase tracking-[0.18em] font-semibold truncate", s.textSoft)}>{label}</p>
+            <p className="text-sm text-foreground mt-0.5 truncate">{caption}</p>
+            {subCaption && <p className="text-[11px] text-muted-foreground mt-0.5 num truncate">{subCaption}</p>}
           </div>
           <div className="text-right shrink-0">
-            <p className={cn("font-heading text-[32px] num leading-none", s.text)}>{value}</p>
+            <p className={cn("font-heading text-[26px] sm:text-[32px] num tabular-nums leading-none whitespace-nowrap", s.text)}>{value}</p>
             {valueSuffix && (
-              <p className={cn("text-[10px] uppercase tracking-[0.16em] mt-1.5", s.textSoft)}>{valueSuffix}</p>
+              <p className={cn("text-[10px] uppercase tracking-[0.16em] mt-1.5 whitespace-nowrap", s.textSoft)}>{valueSuffix}</p>
             )}
           </div>
         </div>
