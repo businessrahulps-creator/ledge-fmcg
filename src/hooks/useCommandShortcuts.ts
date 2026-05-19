@@ -42,6 +42,12 @@ export function useCommandShortcuts(h: Handlers, enabled: boolean = true) {
       if (isTyping(e.target)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
+      // Shift+P → browser print fallback
+      if (e.shiftKey && (e.key === "P" || e.key === "p")) {
+        if (h.onPrintBrowser) { h.onPrintBrowser(); e.preventDefault(); return; }
+      }
+      if (e.shiftKey) return;
+
       // Two-key sequences: g + letter
       if (pendingG) {
         if (e.key === "o") { h.onGoOverview(); clearG(); e.preventDefault(); return; }
