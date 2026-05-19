@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Download, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { netTotal } from "@/lib/revenue";
@@ -11,6 +9,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { exportCsv, csvFilename } from "@/utils/exportCsv";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
+import { ReportExportFooter } from "./ReportExportFooter";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
 export function SalesTeamReport() {
