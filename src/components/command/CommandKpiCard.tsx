@@ -53,8 +53,8 @@ export function CommandKpiCard({ label, value, pct, inverse, hint, spark, href, 
           <DeltaPill pct={pct} inverse={inverse} />
           {hint && <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{hint}</p>}
         </div>
-        {sparkData.length > 1 && (
-          <div className="h-8 w-20 shrink-0 opacity-80">
+        {showSpark && (
+          <div className="h-8 w-20 shrink-0 opacity-80" aria-hidden>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={sparkData} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
                 <Line
