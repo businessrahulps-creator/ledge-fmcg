@@ -8,7 +8,6 @@ import {
   UserRound,
   Package,
   ChartNoAxesCombined,
-  TrendingUp,
   Settings,
   UserCheck,
   Gift,
@@ -76,10 +75,9 @@ export function AppSidebar() {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
 
-  // Insights group — Reports + Performance. (Activity lives in the top bar.)
+  // Insights group — unified Command surface (replaces Reports + Performance).
   const insightsNav: NavItem[] = [
-    { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
-    { title: "Performance", url: "/performance", icon: TrendingUp },
+    { title: "Command", url: "/command", icon: ChartNoAxesCombined },
   ];
 
   const effectiveFooter: NavItem[] = footerNav;
