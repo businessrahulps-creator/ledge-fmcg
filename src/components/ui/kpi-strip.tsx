@@ -50,7 +50,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
             </div>
             <p
               className={cn(
-                "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                "font-heading text-[20px] sm:text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num tabular-nums mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                 c.zero && "text-muted-foreground/35",
               )}
             >
