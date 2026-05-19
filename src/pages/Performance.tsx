@@ -375,7 +375,7 @@ export default function Performance() {
         </div>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Performance
