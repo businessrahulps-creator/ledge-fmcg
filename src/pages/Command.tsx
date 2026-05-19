@@ -185,9 +185,16 @@ export default function Command() {
     Object.entries(currentParams).filter(([, v]) => v != null) as [string, string][],
   ).toString();
 
+  // Keep last non-null blast payload so the Sheet has data to render during its
+  // close animation. Unmounting Radix's Sheet while it's still open leaks
+  // `body { pointer-events: none }` and breaks page scrolling.
+  const lastBlastPayloadRef = useRef(blastPayload);
+  if (blastPayload) lastBlastPayloadRef.current = blastPayload;
+  const renderedBlast = blastPayload ?? lastBlastPayloadRef.current;
+
   return (
     <AppLayout>
-      <main
+      <section
         data-command-root
         data-density={density}
         className="w-full min-w-0 space-y-4 overflow-x-hidden md:space-y-6"
