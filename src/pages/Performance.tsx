@@ -960,12 +960,12 @@ export default function Performance() {
                         <p className="text-xs font-medium text-destructive mb-2">⚠️ Needs Attention</p>
                         <div className="space-y-2">
                           {behindTarget.map(t => (
-                            <div key={t.id} className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
-                              <div>
-                                <p className="text-xs font-semibold">{t.entityName}</p>
-                                <p className="text-[10px] text-muted-foreground">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
+                            <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold truncate">{t.entityName}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{t.entityType === "salesperson" ? "Sales Team" : "Dealer"} · {t.periodLabel}</p>
                               </div>
-                              <span className="text-sm font-bold text-destructive">{t.pct}%</span>
+                              <span className="shrink-0 tabular-nums text-sm font-bold text-destructive">{t.pct}%</span>
                             </div>
                           ))}
                         </div>
