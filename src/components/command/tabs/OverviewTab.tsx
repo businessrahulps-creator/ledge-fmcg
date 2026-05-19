@@ -5,6 +5,10 @@ import { CommandKpiCard } from "../CommandKpiCard";
 import { CommandLineChart } from "../CommandLineChart";
 import { LeaderboardCard } from "../LeaderboardCard";
 import { CreditAtRiskCard } from "../CreditAtRiskCard";
+import { HeroBand } from "../HeroBand";
+import { AgingStrip } from "../AgingStrip";
+import { ActivityFeed } from "../ActivityFeed";
+import { PipelineFunnel } from "../PipelineFunnel";
 import { KpiRowSkeleton, ChartSkeleton, CardSkeleton } from "../CommandSkeleton";
 import { Card } from "@/components/ui/card";
 import { Users, Package } from "lucide-react";
@@ -15,11 +19,14 @@ import {
   ordersInPeriod,
   outstandingTotal,
   pctDelta,
+  PERIOD_LABELS,
+  type CommandPeriod,
   type PeriodRange,
 } from "@/lib/command-signals";
 
 interface Props {
   range: PeriodRange;
+  period?: CommandPeriod;
 }
 
 export function OverviewTab({ range }: Props) {
