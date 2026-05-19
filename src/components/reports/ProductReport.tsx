@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Download, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ReportExportFooter } from "./ReportExportFooter";
 import { formatCurrency, formatNumber } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
