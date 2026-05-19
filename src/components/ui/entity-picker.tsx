@@ -113,107 +113,143 @@ export function EntityPicker({
     el?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
+  const isMobile = useIsMobile();
+
+  const rows = (
+    <>
+      {filtered.length === 0 ? (
+        <p className="px-3 py-10 text-center text-xs text-muted-foreground">{emptyHint}</p>
+      ) : (
+        filtered.map((opt, i) => {
+          const isActive = i === active;
+          const isSelected = opt.value === value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              data-row-index={i}
+              disabled={opt.disabled}
+              onMouseEnter={() => setActive(i)}
+              onClick={() => commit(opt)}
+              className={cn(
+                "flex w-full items-center gap-2 px-3 text-left text-sm transition-colors",
+                isMobile ? "min-h-[52px] py-2.5 border-b border-border/40 last:border-b-0" : "min-h-[44px] py-2",
+                isActive && !opt.disabled && "bg-muted/60",
+                "active:bg-muted/70",
+                isSelected && "text-foreground",
+                !isSelected && "text-foreground/90",
+                opt.disabled && "opacity-50 cursor-not-allowed",
+              )}
+            >
+              <Check
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0 transition-opacity",
+                  isSelected ? "opacity-100 text-primary" : "opacity-0",
+                )}
+              />
+              <span className="min-w-0 flex-1">
+                <span className={cn("block truncate", isMobile && "text-[15px]")}>{opt.label}</span>
+                {opt.hint && (
+                  <span className="block truncate text-[11px] text-muted-foreground">{opt.hint}</span>
+                )}
+              </span>
+              {opt.meta && (
+                <span className="ml-2 shrink-0 text-[11px] text-muted-foreground num">{opt.meta}</span>
+              )}
+            </button>
+          );
+        })
+      )}
+    </>
+  );
+
+  const trigger = (
+    <Button
+      id={inputId}
+      type="button"
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      disabled={disabled}
+      onClick={isMobile ? () => !disabled && setOpen(true) : undefined}
+      className={cn(
+        "w-full justify-between h-10 px-3 font-normal text-left",
+        !selected && "text-muted-foreground/80",
+      )}
+    >
+      <span className="truncate">{selected ? selected.label : placeholder}</span>
+      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+  );
+
+  const footer =
+    filtered.length > 0 && options.length > filtered.length
+      ? `Showing ${filtered.length} of ${options.length}`
+      : null;
+
   return (
     <div className={cn("w-full", className)}>
-      <Popover open={open} onOpenChange={(o) => !disabled && setOpen(o)}>
-        <PopoverTrigger asChild>
-          <Button
-            id={inputId}
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            disabled={disabled}
-            className={cn(
-              "w-full justify-between h-10 px-3 font-normal text-left",
-              !selected && "text-muted-foreground/80",
-            )}
+      {isMobile ? (
+        <>
+          {trigger}
+          <MobileSearchSheet
+            open={open}
+            onOpenChange={(o) => !disabled && setOpen(o)}
+            query={query}
+            onQueryChange={setQuery}
+            placeholder={searchPlaceholder}
+            title={placeholder}
+            footer={footer}
           >
-            <span className="truncate">{selected ? selected.label : placeholder}</span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          sideOffset={4}
-          className="p-0 w-[--radix-popover-trigger-width] min-w-[260px]"
-          onOpenAutoFocus={(e) => {
-            // Focus the search input on open.
-            e.preventDefault();
-            const target = e.currentTarget as HTMLElement | null;
-            target?.querySelector<HTMLInputElement>("input")?.focus();
-          }}
-        >
-          <div className="flex items-center gap-2 border-b border-border/60 px-2.5 py-2">
-            <Search className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder={searchPlaceholder}
-              className="h-7 border-0 shadow-none px-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
-              autoComplete="off"
-            />
-          </div>
-          <div
-            ref={listRef}
-            role="listbox"
-            className="overflow-y-auto py-1"
-            style={{ maxHeight }}
-          >
-            {filtered.length === 0 ? (
-              <p className="px-3 py-6 text-center text-xs text-muted-foreground">{emptyHint}</p>
-            ) : (
-              filtered.map((opt, i) => {
-                const isActive = i === active;
-                const isSelected = opt.value === value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    data-row-index={i}
-                    disabled={opt.disabled}
-                    onMouseEnter={() => setActive(i)}
-                    onClick={() => commit(opt)}
-                    className={cn(
-                      "flex w-full items-center gap-2 px-2.5 py-2 text-left text-sm transition-colors",
-                      "min-h-[44px]",
-                      isActive && !opt.disabled && "bg-muted/60",
-                      isSelected && "text-foreground",
-                      !isSelected && "text-foreground/90",
-                      opt.disabled && "opacity-50 cursor-not-allowed",
-                    )}
-                  >
-                    <Check
-                      className={cn(
-                        "h-3.5 w-3.5 shrink-0 transition-opacity",
-                        isSelected ? "opacity-100 text-primary" : "opacity-0",
-                      )}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{opt.label}</span>
-                      {opt.hint && (
-                        <span className="block truncate text-[11px] text-muted-foreground">{opt.hint}</span>
-                      )}
-                    </span>
-                    {opt.meta && (
-                      <span className="ml-2 shrink-0 text-[11px] text-muted-foreground num">{opt.meta}</span>
-                    )}
-                  </button>
-                );
-              })
-            )}
-          </div>
-          {filtered.length > 0 && options.length > filtered.length && (
-            <div className="border-t border-border/60 px-2.5 py-1.5 text-[10.5px] text-muted-foreground/70">
-              Showing {filtered.length} of {options.length}
+            <div ref={listRef} role="listbox" className="py-1">
+              {rows}
             </div>
-          )}
-        </PopoverContent>
-      </Popover>
+          </MobileSearchSheet>
+        </>
+      ) : (
+        <Popover open={open} onOpenChange={(o) => !disabled && setOpen(o)}>
+          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+          <PopoverContent
+            align="start"
+            sideOffset={4}
+            className="p-0 w-[--radix-popover-trigger-width] min-w-[260px]"
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+              const target = e.currentTarget as HTMLElement | null;
+              target?.querySelector<HTMLInputElement>("input")?.focus();
+            }}
+          >
+            <div className="flex items-center gap-2 border-b border-border/60 px-2.5 py-2">
+              <Search className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder={searchPlaceholder}
+                className="h-7 border-0 shadow-none px-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+                autoComplete="off"
+              />
+            </div>
+            <div
+              ref={listRef}
+              role="listbox"
+              className="overflow-y-auto py-1"
+              style={{ maxHeight }}
+            >
+              {rows}
+            </div>
+            {footer && (
+              <div className="border-t border-border/60 px-2.5 py-1.5 text-[10.5px] text-muted-foreground/70">
+                {footer}
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      )}
       {helperText && <p className="mt-1 text-[11px] text-muted-foreground">{helperText}</p>}
     </div>
   );
 }
+
