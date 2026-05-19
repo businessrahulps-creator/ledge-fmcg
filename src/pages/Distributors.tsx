@@ -18,6 +18,7 @@ import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
+import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
