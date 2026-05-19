@@ -49,7 +49,7 @@ function LeaderboardCardInner({ title, icon: Icon, rows, emptyTitle, emptyHint, 
                     {r.secondary && <p className="truncate text-[11px] text-muted-foreground">{r.secondary}</p>}
                   </div>
                 </div>
-                <span className="num shrink-0 text-sm font-medium text-foreground">{r.primary}</span>
+                <span className="num shrink-0 tabular-nums whitespace-nowrap text-sm font-medium text-foreground">{r.primary}</span>
               </div>
             );
             return (
