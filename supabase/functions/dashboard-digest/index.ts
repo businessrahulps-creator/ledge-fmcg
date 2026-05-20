@@ -3,10 +3,24 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGIN_PATTERNS: RegExp[] = [
+  /^https:\/\/getledge\.in$/,
+  /^https:\/\/www\.getledge\.in$/,
+  /^https:\/\/ledge-fmcg\.lovable\.app$/,
+  /^https:\/\/[a-z0-9-]+\.lovableproject\.com$/,
+  /^https:\/\/[a-z0-9-]+\.lovable\.app$/,
+  /^http:\/\/localhost(:\d+)?$/,
+];
+
+function resolveCors(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed = ALLOWED_ORIGIN_PATTERNS.some((re) => re.test(origin)) ? origin : "*";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Vary": "Origin",
+  };
+}
 
 interface DigestInput {
   context: {
@@ -22,7 +36,7 @@ interface DigestInput {
   };
 }
 
-function jsonRes(body: unknown, status = 200) {
+function jsonRes(body: unknown, corsHeaders: Record<string, string>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -30,11 +44,12 @@ function jsonRes(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = resolveCors(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // Require authenticated user
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return jsonRes({ error: "Unauthorized" }, 401);
+  if (!authHeader?.startsWith("Bearer ")) return jsonRes({ error: "Unauthorized" }, corsHeaders, 401);
 
   try {
     const supabase = createClient(
@@ -44,11 +59,11 @@ Deno.serve(async (req) => {
     );
     const token = authHeader.replace("Bearer ", "");
     const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims?.sub) return jsonRes({ error: "Unauthorized" }, 401);
+    if (claimsErr || !claims?.claims?.sub) return jsonRes({ error: "Unauthorized" }, corsHeaders, 401);
 
     const { context } = (await req.json()) as DigestInput;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) return jsonRes({ error: "AI not configured" }, 500);
+    if (!LOVABLE_API_KEY) return jsonRes({ error: "AI not configured" }, corsHeaders, 500);
 
     const currency = context.currency ?? "₹";
     const fmt = (n: number) => {
@@ -89,14 +104,14 @@ Lead with the most important signal (revenue trend, overdue risk, or stock risk)
       const code = aiRes.status === 429 ? 429 : aiRes.status === 402 ? 402 : 500;
       const msg = code === 429 ? "Rate limited" : code === 402 ? "AI credits exhausted" : "AI request failed";
       console.error("dashboard-digest AI error", aiRes.status, await aiRes.text().catch(() => ""));
-      return jsonRes({ error: msg }, code);
+      return jsonRes({ error: msg }, corsHeaders, code);
     }
 
     const data = await aiRes.json();
     const summary: string = data?.choices?.[0]?.message?.content?.trim() ?? "";
-    return jsonRes({ summary });
+    return jsonRes({ summary }, corsHeaders);
   } catch (err) {
     console.error("dashboard-digest error", err);
-    return jsonRes({ error: "Internal error" }, 500);
+    return jsonRes({ error: "Internal error" }, corsHeaders, 500);
   }
 });
