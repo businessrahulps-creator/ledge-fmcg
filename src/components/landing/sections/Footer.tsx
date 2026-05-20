@@ -59,7 +59,7 @@ export function Footer() {
           className="mb-14 md:mb-16 max-w-md"
         >
           <Link to="/" aria-label="Ledge home" className="inline-flex items-center">
-            <img src={ledgeLogo} alt="Ledge" className="h-16 w-auto" decoding="async" loading="lazy" />
+            <img src={ledgeLogo} alt="Ledge" width={220} height={64} className="h-16 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
             Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.
@@ -167,7 +167,7 @@ export function Footer() {
 
               {/* AWS infrastructure line */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <img src={awsLogo} alt="AWS" className="h-3.5 w-auto grayscale opacity-50 shrink-0" />
+                <img src={awsLogo} alt="AWS" width={36} height={14} className="h-3.5 w-auto grayscale opacity-50 shrink-0" />
                 <span className="font-body text-[12px] text-muted-foreground">
                   Hosted on AWS · Mumbai
                 </span>
