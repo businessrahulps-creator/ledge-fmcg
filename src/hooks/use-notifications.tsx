@@ -3,7 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { cacheData, getCachedData } from "@/lib/offline-store";
 
-export type NotificationType = "order_placed" | "stock_alert" | "team_update" | "general";
+export type NotificationType = "order_placed" | "stock_alert" | "stock_low" | "team_update" | "credit_risk" | "order_pending" | "general";
+
+const notificationTypes = new Set<NotificationType>([
+  "order_placed",
+  "stock_alert",
+  "stock_low",
+  "team_update",
+  "credit_risk",
+  "order_pending",
+  "general",
+]);
 
 export interface Notification {
   id: string;
@@ -38,7 +48,7 @@ interface DbNotification {
 function mapDbToNotif(row: DbNotification): Notification {
   return {
     id: row.id,
-    type: (row.type as NotificationType) || "general",
+    type: notificationTypes.has(row.type as NotificationType) ? (row.type as NotificationType) : "general",
     title: row.title,
     description: row.message,
     timestamp: new Date(row.created_at),
