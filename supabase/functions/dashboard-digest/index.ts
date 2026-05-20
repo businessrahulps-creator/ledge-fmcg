@@ -36,7 +36,7 @@ interface DigestInput {
   };
 }
 
-function jsonRes(body: unknown, status = 200) {
+function jsonRes(body: unknown, corsHeaders: Record<string, string>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -44,11 +44,12 @@ function jsonRes(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = resolveCors(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // Require authenticated user
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return jsonRes({ error: "Unauthorized" }, 401);
+  if (!authHeader?.startsWith("Bearer ")) return jsonRes({ error: "Unauthorized" }, corsHeaders, 401);
 
   try {
     const supabase = createClient(
