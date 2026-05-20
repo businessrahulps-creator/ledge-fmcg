@@ -80,6 +80,8 @@ export function Founder() {
                     src={ashaPhotoBlur}
                     alt=""
                     aria-hidden
+                    width={800}
+                    height={1200}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ filter: "blur(20px) saturate(1.2)", transform: "scale(1.1)" }}
                   />
