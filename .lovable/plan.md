@@ -1,41 +1,65 @@
-# Mobile Bottom Nav Polish
 
-## Problem
+# Surgical Resolution Plan
 
-In `src/components/layout/AppLayout.tsx`:
+After investigating the codebase, **most of the previously-listed "blockers" were overstated or false**. Here's the real picture and a non-breaking path through it.
 
-1. **Duplication** — `/command` appears as a primary slot ("My Business") AND inside the More-sheet "Insights" group. Both can light up "active" at once, and the same destination has two different names.
-2. **Label drift** — Home / Orders / Stock are one word; "My Business" is two words and visually heavier than its neighbors, so the 4th slot looks cramped on 320–375 px widths.
-3. **Optical polish** — 2 px top-bar active indicator sits flush against the border-t (hard to read), tap row is only ~52 px (below 44 px guideline once safe-area is small), stroke weights jump 1.6 → 2 on activation (jitter), and there's no press feedback beyond a CSS `active:scale`.
+## Reality check (what I actually found)
 
-## Decision
+| Was listed as | Reality |
+|---|---|
+| 🔴 Mock data still in DataContext | **False.** `mock-data.ts` only exports TypeScript types. All domain hooks (`useDealersDomain`, `useOrdersDomain`, `useStockDomain`, `useBillingDomain`, `useCatalogDomain`, `useTargetsDomain`) already query Supabase. Memory `mem://project/technical-status` is stale. |
+| 🔴 PWA `/sw.js` redirect error | **Fixed last turn** — shipped `public/sw.js` kill-switch twin. |
+| 🟠 Stabilisation PR-C/E/F pending | Memory says pending, but plan.md no longer references them. Need to confirm before touching anything. |
+| 🟠 Billion-dollar roadmap 10/12 open | **False.** Per `mem://roadmap/billion-dollar`, PRs 1-12e are shipped. Only autosave-wiring + DataTable rollout to Orders/Billing/Stock + virtualization remain — all optional. |
+| 🟠 Landing rebrand pending | Tracked in its own plan, not a build blocker. |
+| 🟡 AI roadmap not started | Future work, not a blocker. |
+| 🟡 No email domain (D2 digest blocked) | External dependency. |
+| 🟡 Stock auto-deduction | Already implemented via `dispatch_order_atomic` RPC (saw it in DB functions). Memory is stale. |
 
-- **Rename** the 4th bottom-bar slot from "My Business" → **Insights**. This matches the existing group name and uses the same one-word rhythm as Home/Orders/Stock/Menu.
-- **Remove** the now-redundant "Insights" group from `moreGroups` (its only item was `/command`). The More sheet keeps Work / Catalog / Relationships / Account.
-- Update `ROUTE_TITLES["/command"]` from "My Business" to "Insights" so the header title matches.
+So the actual "blocker" count is **1 real bug, already fixed**. The rest is stale memory + optional polish.
 
-## Refit (bottom nav only)
+## Plan — three small, isolated passes
 
-- Replace the 2 px top hairline indicator with a **soft pill behind the icon** (rounded-full `bg-primary/10`, height 32 px, width 44 px) plus the existing top hairline kept as a 1.5 px Midnight accent that sits just inside the border. Active label switches to `text-primary` semibold; inactive stays `text-foreground/60`.
-- **Tap target** raised to **56 px** (`min-h-[56px]`) per slot, with the icon+label group vertically centered. Keeps `safe-area-inset-bottom` padding.
-- **Unified stroke** at 1.75 for all states (no jitter on activation; weight shift comes from the pill, not the glyph).
-- **Press feedback** via Framer Motion: `whileTap={{ scale: 0.94 }}` with `ease-fluent` spring, respecting `useReducedMotion` (already imported).
-- **Equal width** slots using `grid grid-cols-5` instead of `flex justify-around` — guarantees mathematically equal columns at every viewport so "Insights" can never push neighbors.
-- **Icon size** standardized to 22 px; label `text-[10.5px]` with `tracking-[-0.005em]` and `tabular-nums` removed (not numeric).
-- The Menu slot uses the same pill treatment when its corresponding routes are active.
+### Pass 1 — Refresh stale memory (zero code risk)
+Update memory index so future-me stops chasing ghosts.
+- `mem://project/technical-status`: rewrite to "Supabase-backed via domain hooks; DataContext is the session-state composer".
+- `mem://logic/stock-management-logic`: note that auto-deduction shipped via `dispatch_order_atomic`.
+- `mem://roadmap/billion-dollar`: mark complete; list the 3 optional remaining items.
+- `mem://perf/stabilisation-pass`: verify PR-C/E/F status before claiming anything (read-only check first).
 
-## Files
+**Files:** memory only. No app code touched.
 
-- `src/components/layout/AppLayout.tsx` — only file touched. Edits:
-  - `primaryMobileNav[3].title`: "My Business" → "Insights".
-  - Delete the `Insights` entry from `moreGroups`.
-  - `ROUTE_TITLES["/command"]`: "My Business" → "Insights".
-  - Rewrite the `<nav data-mobile-nav>` block (lines 348–395) to the grid-5 + pill + motion treatment above. Sheet body untouched.
+### Pass 2 — Verify the `sw.js` fix actually landed (5-minute sanity check)
+- Confirm `public/sw.js` matches `public/service-worker.js`.
+- Watch console after a hard refresh; the redirect error should be gone within one navigation.
+- If any client is still wedged, document the manual "DevTools → Application → Service Workers → Unregister" workaround in the offline-mode memory.
 
-No tokens added; reuses `bg-primary/10`, `text-primary`, `ease-fluent`, `shadow-depth-2`. No business-logic or routing changes.
+**Files:** none (verification only). Memory note if needed.
 
-## Verification
+### Pass 3 — Optional polish (only if you want it; each is independently revertible)
+Pick zero, one, or all. Each ≤ 1 file, ≤ 30 LOC, no shared-state changes.
 
-- Visual check at 320, 375, 414, 768 widths via preview.
-- Confirm `tsc --noEmit` clean.
-- Confirm More sheet no longer shows the redundant Insights group.
+- **3a. DataTable rollout to Orders** — drop-in replacement of the table block, keep all filters/handlers. Highest visible win, lowest risk because `DataTable` is already used elsewhere.
+- **3b. Wire `useAutosave` into Settings → Company form** — toast-less background save with `<SaveIndicator>`. Pure additive.
+- **3c. Virtualize Orders list when count > 200** — `@tanstack/react-virtual` already in deps if used; if not, skip.
+
+## What I will NOT touch (explicit safety rails)
+
+- `DataContext.tsx` orchestration — works, performant, leave alone.
+- Domain hooks — already shipping correct Supabase calls + `handleSupabaseError`.
+- Auth flow, RLS policies, RPC functions — battle-tested.
+- Design tokens, Fluent 2 primitives, brand pages — frozen per memory.
+- Landing page — separate rebrand plan owns it.
+- Mobile bottom nav — just refit last turn, leave alone.
+
+## Recommended order
+
+1. **Pass 1** (memory refresh) — 5 min, zero risk, prevents future false alarms.
+2. **Pass 2** (sw.js verification) — 2 min.
+3. **Pass 3a** only if you want a visible polish win — otherwise stop.
+
+Total realistic scope: **memory hygiene + one verification + optionally one table swap**. Nothing that can break what we built.
+
+## Question for you
+
+Do you want me to run **just Pass 1 + Pass 2** (pure cleanup, no app code changes), or include **Pass 3a** (DataTable on Orders)?
