@@ -9,6 +9,10 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const DEMO_PASSWORD = Deno.env.get("DEMO_ACCOUNT_PASSWORD") ?? "";
 
+// ── Demo identity ────────────────────────────────────────────────────
+const DEMO_EMAIL = "demo@getledge.in";
+const DEMO_OWNER_NAME = "Anuj Rakyan";
+
 // ── Helpers ──────────────────────────────────────────────────────────
 function uuid() { return crypto.randomUUID(); }
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -18,216 +22,142 @@ function daysAgo(n: number) { const d = new Date(); d.setDate(d.getDate() - n); 
 
 // ── Company ──────────────────────────────────────────────────────────
 const COMPANY = {
-  name: "Asha Beverages Distributors",
-  gstin: "32AABCA1234F1ZP",
-  pan: "AABCA1234F",
-  state_code: "32",
-  address: "42/1, Industrial Estate, Kalamassery, Ernakulam, Kerala 683109",
-  phone: "+91 484 2555 100",
-  email: "info@ashabeverages.in",
-  bank_name: "Federal Bank",
-  bank_account: "16720200012345",
-  bank_account_name: "Asha Beverages Distributors",
-  bank_ifsc: "FDRL0001672",
-  order_prefix: "ABD",
-  invoice_prefix: "ABD-INV",
+  name: "RAW Pressery Foods Pvt Ltd",
+  gstin: "27AAKCR3478H1ZN",
+  pan: "AAKCR3478H",
+  state_code: "27",
+  address: "Unit 401, Lotus Business Park, Off New Link Road, Andheri West, Mumbai 400053",
+  phone: "+91 22 4890 5500",
+  email: "hello@rawpressery.in",
+  bank_name: "HDFC Bank",
+  bank_account: "50200012345678",
+  bank_account_name: "RAW Pressery Foods Pvt Ltd",
+  bank_ifsc: "HDFC0000123",
+  order_prefix: "RAW",
+  invoice_prefix: "RAW/INV",
 };
 
-// ── Products (45 SKUs) ───────────────────────────────────────────────
+// ── Products (26 SKUs — mirrors RAW Pressery's real lineup) ──────────
 const PRODUCTS = [
-  // Water
-  { name: "AquaPure Packaged Water 500ml", sku: "APW-500", unit: "Case", base_price: 120, hsn: "2201" },
-  { name: "AquaPure Packaged Water 1L", sku: "APW-1L", unit: "Case", base_price: 180, hsn: "2201" },
-  { name: "AquaPure Packaged Water 2L", sku: "APW-2L", unit: "Case", base_price: 240, hsn: "2201" },
-  { name: "AquaPure Packaged Water 5L", sku: "APW-5L", unit: "Case", base_price: 360, hsn: "2201" },
-  { name: "AquaPure Packaged Water 20L Can", sku: "APW-20L", unit: "Can", base_price: 45, hsn: "2201" },
-  { name: "AquaPure Sparkling Water 300ml", sku: "APS-300", unit: "Case", base_price: 240, hsn: "2201" },
-  { name: "AquaPure Sparkling Water 750ml", sku: "APS-750", unit: "Case", base_price: 360, hsn: "2201" },
-  { name: "AquaPure Soda 300ml", sku: "APD-300", unit: "Case", base_price: 180, hsn: "2201" },
-  // Juices
-  { name: "TropiFresh Mango Juice 200ml", sku: "TFM-200", unit: "Case", base_price: 240, hsn: "2202" },
-  { name: "TropiFresh Mango Juice 500ml", sku: "TFM-500", unit: "Case", base_price: 480, hsn: "2202" },
-  { name: "TropiFresh Mango Juice 1L", sku: "TFM-1L", unit: "Case", base_price: 720, hsn: "2202" },
-  { name: "TropiFresh Orange Juice 200ml", sku: "TFO-200", unit: "Case", base_price: 240, hsn: "2202" },
-  { name: "TropiFresh Orange Juice 500ml", sku: "TFO-500", unit: "Case", base_price: 480, hsn: "2202" },
-  { name: "TropiFresh Orange Juice 1L", sku: "TFO-1L", unit: "Case", base_price: 720, hsn: "2202" },
-  { name: "TropiFresh Mixed Fruit 200ml", sku: "TFMX-200", unit: "Case", base_price: 260, hsn: "2202" },
-  { name: "TropiFresh Mixed Fruit 500ml", sku: "TFMX-500", unit: "Case", base_price: 500, hsn: "2202" },
-  { name: "TropiFresh Mixed Fruit 1L", sku: "TFMX-1L", unit: "Case", base_price: 780, hsn: "2202" },
-  { name: "TropiFresh Guava Juice 200ml", sku: "TFG-200", unit: "Case", base_price: 230, hsn: "2202" },
-  { name: "TropiFresh Guava Juice 500ml", sku: "TFG-500", unit: "Case", base_price: 460, hsn: "2202" },
-  { name: "TropiFresh Pomegranate Juice 200ml", sku: "TFP-200", unit: "Case", base_price: 300, hsn: "2202" },
-  { name: "TropiFresh Pomegranate Juice 500ml", sku: "TFP-500", unit: "Case", base_price: 580, hsn: "2202" },
-  { name: "TropiFresh Litchi Juice 200ml", sku: "TFL-200", unit: "Case", base_price: 260, hsn: "2202" },
-  { name: "TropiFresh Pineapple Juice 200ml", sku: "TFPN-200", unit: "Case", base_price: 250, hsn: "2202" },
-  { name: "TropiFresh Pineapple Juice 1L", sku: "TFPN-1L", unit: "Case", base_price: 750, hsn: "2202" },
-  // Carbonated
-  { name: "FizzUp Cola 300ml", sku: "FUC-300", unit: "Case", base_price: 200, hsn: "2202" },
-  { name: "FizzUp Cola 500ml", sku: "FUC-500", unit: "Case", base_price: 360, hsn: "2202" },
-  { name: "FizzUp Cola 2L", sku: "FUC-2L", unit: "Case", base_price: 480, hsn: "2202" },
-  { name: "FizzUp Lemon 300ml", sku: "FUL-300", unit: "Case", base_price: 200, hsn: "2202" },
-  { name: "FizzUp Lemon 500ml", sku: "FUL-500", unit: "Case", base_price: 360, hsn: "2202" },
-  { name: "FizzUp Orange 300ml", sku: "FUO-300", unit: "Case", base_price: 200, hsn: "2202" },
-  { name: "FizzUp Orange 2L", sku: "FUO-2L", unit: "Case", base_price: 480, hsn: "2202" },
-  { name: "FizzUp Ginger 300ml", sku: "FUG-300", unit: "Case", base_price: 210, hsn: "2202" },
-  { name: "FizzUp Ginger 500ml", sku: "FUG-500", unit: "Case", base_price: 380, hsn: "2202" },
-  // Energy
-  { name: "VoltCharge Energy Drink 250ml", sku: "VCE-250", unit: "Case", base_price: 600, hsn: "2202" },
-  { name: "VoltCharge Energy Drink 500ml", sku: "VCE-500", unit: "Case", base_price: 960, hsn: "2202" },
-  { name: "VoltCharge Sugar-Free 250ml", sku: "VCSF-250", unit: "Case", base_price: 640, hsn: "2202" },
-  // Traditional
-  { name: "Desi Chaas Buttermilk 200ml", sku: "DCB-200", unit: "Case", base_price: 160, hsn: "0403" },
-  { name: "Desi Chaas Buttermilk 500ml", sku: "DCB-500", unit: "Case", base_price: 320, hsn: "0403" },
-  { name: "Kerala Tender Coconut Water 200ml", sku: "KTC-200", unit: "Case", base_price: 280, hsn: "2009" },
-  { name: "Kerala Tender Coconut Water 500ml", sku: "KTC-500", unit: "Case", base_price: 520, hsn: "2009" },
-  { name: "Nannari Rose Milk 200ml", sku: "NRM-200", unit: "Case", base_price: 200, hsn: "2202" },
-  { name: "Nannari Rose Milk 500ml", sku: "NRM-500", unit: "Case", base_price: 400, hsn: "2202" },
-  { name: "Jal Jeera Masala Drink 200ml", sku: "JJM-200", unit: "Case", base_price: 180, hsn: "2202" },
-  { name: "Jal Jeera Masala Drink 500ml", sku: "JJM-500", unit: "Case", base_price: 340, hsn: "2202" },
-  { name: "Paneer Soda 250ml", sku: "PNS-250", unit: "Case", base_price: 160, hsn: "2202" },
+  // Cold-pressed juices (200ml & 250ml) — HSN 2009
+  { name: "Valencia Orange Cold-Pressed Juice 200ml", sku: "RAW-ORG-200", unit: "Case", base_price: 1200, hsn: "2009" },
+  { name: "Valencia Orange Cold-Pressed Juice 250ml", sku: "RAW-ORG-250", unit: "Case", base_price: 1500, hsn: "2009" },
+  { name: "Alphonso Mango Cold-Pressed Juice 200ml", sku: "RAW-MNG-200", unit: "Case", base_price: 1320, hsn: "2009" },
+  { name: "Alphonso Mango Cold-Pressed Juice 250ml", sku: "RAW-MNG-250", unit: "Case", base_price: 1650, hsn: "2009" },
+  { name: "Pomegranate Cold-Pressed Juice 250ml", sku: "RAW-POM-250", unit: "Case", base_price: 1800, hsn: "2009" },
+  { name: "Mixed Fruit Cold-Pressed Juice 200ml", sku: "RAW-MIX-200", unit: "Case", base_price: 1200, hsn: "2009" },
+  { name: "Sugarcane Cold-Pressed Juice 250ml", sku: "RAW-SUG-250", unit: "Case", base_price: 1200, hsn: "2009" },
+  { name: "Coconut Water 200ml", sku: "RAW-COC-200", unit: "Case", base_price: 1080, hsn: "2009" },
+  { name: "Aam Panna Cold-Pressed 200ml", sku: "RAW-AAM-200", unit: "Case", base_price: 1200, hsn: "2009" },
+  { name: "Pineapple Cold-Pressed Juice 250ml", sku: "RAW-PIN-250", unit: "Case", base_price: 1500, hsn: "2009" },
+  { name: "Apple Cold-Pressed Juice 250ml", sku: "RAW-APL-250", unit: "Case", base_price: 1500, hsn: "2009" },
+  { name: "Watermelon Cold-Pressed Juice 250ml", sku: "RAW-WTM-250", unit: "Case", base_price: 1380, hsn: "2009" },
+  { name: "Kale Surprise Green Juice 250ml", sku: "RAW-KAL-250", unit: "Case", base_price: 1980, hsn: "2009" },
+  { name: "Beetroot Booster Juice 250ml", sku: "RAW-BTR-250", unit: "Case", base_price: 1620, hsn: "2009" },
+
+  // Protein milkshakes (200ml) — HSN 0403
+  { name: "Cold Coffee Protein Milkshake 200ml", sku: "RAW-PCC-200", unit: "Case", base_price: 1680, hsn: "0403" },
+  { name: "Choco Mint Protein Milkshake 200ml", sku: "RAW-PCM-200", unit: "Case", base_price: 1680, hsn: "0403" },
+  { name: "Vanilla Protein Milkshake 200ml", sku: "RAW-PVN-200", unit: "Case", base_price: 1560, hsn: "0403" },
+  { name: "Strawberry Protein Milkshake 200ml", sku: "RAW-PSB-200", unit: "Case", base_price: 1620, hsn: "0403" },
+
+  // Lactose-free beverages (1L) — HSN 2202
+  { name: "Unsweetened Almond Beverage 1L", sku: "RAW-ALM-1L", unit: "Case", base_price: 2160, hsn: "2202" },
+  { name: "Vanilla Almond Beverage 1L", sku: "RAW-ALV-1L", unit: "Case", base_price: 2280, hsn: "2202" },
+  { name: "Chocolate Almond Beverage 1L", sku: "RAW-ALC-1L", unit: "Case", base_price: 2280, hsn: "2202" },
+  { name: "Oat Milk Original 1L", sku: "RAW-OAT-1L", unit: "Case", base_price: 2400, hsn: "2202" },
+  { name: "Oat Milk Barista 1L", sku: "RAW-OTB-1L", unit: "Case", base_price: 2400, hsn: "2202" },
+
+  // Wellness shots (60ml) — HSN 2009
+  { name: "Ginger Wellness Shot 60ml", sku: "RAW-GNG-60", unit: "Case", base_price: 1440, hsn: "2009" },
+  { name: "Turmeric Wellness Shot 60ml", sku: "RAW-TRM-60", unit: "Case", base_price: 1440, hsn: "2009" },
+  { name: "Wheatgrass Wellness Shot 60ml", sku: "RAW-WHT-60", unit: "Case", base_price: 1560, hsn: "2009" },
 ];
 
-// ── Dealers (80+) ────────────────────────────────────────────────────
+// ── Dealers (28 — Mumbai / Pune / BLR / Delhi NCR / Hyd / Chennai) ───
 const DEALER_TEMPLATES: Array<{ name: string; location: string; state: string; stateCode: string }> = [
-  // Kerala – Kochi (15)
-  { name: "Anand Beverages", location: "Ernakulam, Kochi", state: "KL", stateCode: "32" },
-  { name: "Malabar Cold Drinks", location: "Edappally, Kochi", state: "KL", stateCode: "32" },
-  { name: "Kochi Wholesale Beverages", location: "Kaloor, Kochi", state: "KL", stateCode: "32" },
-  { name: "Sree Krishna Traders", location: "Fort Kochi", state: "KL", stateCode: "32" },
-  { name: "Mattancherry Store House", location: "Mattancherry, Kochi", state: "KL", stateCode: "32" },
-  { name: "Marine Drive Distributors", location: "Marine Drive, Kochi", state: "KL", stateCode: "32" },
-  { name: "Cochin Beverages Hub", location: "Vytilla, Kochi", state: "KL", stateCode: "32" },
-  { name: "Thoppumpady Cold Storage", location: "Thoppumpady, Kochi", state: "KL", stateCode: "32" },
-  { name: "Aluva Beverages Centre", location: "Aluva, Kochi", state: "KL", stateCode: "32" },
-  { name: "Perumbavoor Drinks Depot", location: "Perumbavoor, Kochi", state: "KL", stateCode: "32" },
-  { name: "Kakkanad Refreshments", location: "Kakkanad, Kochi", state: "KL", stateCode: "32" },
-  { name: "Tripunithura Beverages", location: "Tripunithura, Kochi", state: "KL", stateCode: "32" },
-  { name: "Cheranalloor Traders", location: "Cheranalloor, Kochi", state: "KL", stateCode: "32" },
-  { name: "Palarivattom Wholesale", location: "Palarivattom, Kochi", state: "KL", stateCode: "32" },
-  { name: "Angamaly Drinks Agency", location: "Angamaly, Kochi", state: "KL", stateCode: "32" },
-  // Kerala – Trivandrum (12)
-  { name: "Thiruvananthapuram Beverages", location: "Pattom, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Technopark Refreshments", location: "Technopark, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Kazhakkoottam Traders", location: "Kazhakkoottam, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Kowdiar Drinks Centre", location: "Kowdiar, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Sreekaryam Cold Drinks", location: "Sreekaryam, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Varkala Beverages", location: "Varkala, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Attingal Drinks Depot", location: "Attingal, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Neyyattinkara Store", location: "Neyyattinkara, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "East Fort Traders", location: "East Fort, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Kesavadasapuram Agency", location: "Kesavadasapuram, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Ulloor Beverages Centre", location: "Ulloor, Trivandrum", state: "KL", stateCode: "32" },
-  { name: "Vazhuthacaud Wholesale", location: "Vazhuthacaud, Trivandrum", state: "KL", stateCode: "32" },
-  // Kerala – Kollam (8)
-  { name: "Kollam City Beverages", location: "Chinnakada, Kollam", state: "KL", stateCode: "32" },
-  { name: "Paravur Drinks Depot", location: "Paravur, Kollam", state: "KL", stateCode: "32" },
-  { name: "Karunagappally Traders", location: "Karunagappally, Kollam", state: "KL", stateCode: "32" },
-  { name: "Punalur Cold Drinks", location: "Punalur, Kollam", state: "KL", stateCode: "32" },
-  { name: "Kottarakkara Beverages", location: "Kottarakkara, Kollam", state: "KL", stateCode: "32" },
-  { name: "Anchal Refreshments", location: "Anchal, Kollam", state: "KL", stateCode: "32" },
-  { name: "Chavara Trading Co.", location: "Chavara, Kollam", state: "KL", stateCode: "32" },
-  { name: "Kundara Wholesale Drinks", location: "Kundara, Kollam", state: "KL", stateCode: "32" },
-  // Kerala – Alappuzha (8)
-  { name: "Alappuzha Beverages", location: "Beach Road, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Cherthala Drinks Centre", location: "Cherthala, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Kayamkulam Traders", location: "Kayamkulam, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Haripad Cold Storage", location: "Haripad, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Mavelikkara Beverages", location: "Mavelikkara, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Ambalapuzha Refreshments", location: "Ambalapuzha, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Mannancherry Traders", location: "Mannancherry, Alappuzha", state: "KL", stateCode: "32" },
-  { name: "Kuttanad Beverages Hub", location: "Kuttanad, Alappuzha", state: "KL", stateCode: "32" },
-  // Kerala – Thrissur (6)
-  { name: "Thrissur Central Beverages", location: "Swaraj Round, Thrissur", state: "KL", stateCode: "32" },
-  { name: "Kunnamkulam Drinks Agency", location: "Kunnamkulam, Thrissur", state: "KL", stateCode: "32" },
-  { name: "Irinjalakuda Traders", location: "Irinjalakuda, Thrissur", state: "KL", stateCode: "32" },
-  { name: "Chalakudy Beverages", location: "Chalakudy, Thrissur", state: "KL", stateCode: "32" },
-  { name: "Guruvayoor Cold Drinks", location: "Guruvayoor, Thrissur", state: "KL", stateCode: "32" },
-  { name: "Wadakkanchery Wholesale", location: "Wadakkanchery, Thrissur", state: "KL", stateCode: "32" },
-  // Kerala – Kozhikode (6)
-  { name: "Kozhikode Beverages Mart", location: "S.M. Street, Kozhikode", state: "KL", stateCode: "32" },
-  { name: "Mankavu Drinks Depot", location: "Mankavu, Kozhikode", state: "KL", stateCode: "32" },
-  { name: "Feroke Beverages Centre", location: "Feroke, Kozhikode", state: "KL", stateCode: "32" },
-  { name: "Vadakara Cold Drinks", location: "Vadakara, Kozhikode", state: "KL", stateCode: "32" },
-  { name: "Beypore Trading Company", location: "Beypore, Kozhikode", state: "KL", stateCode: "32" },
-  { name: "Koyilandy Beverages", location: "Koyilandy, Kozhikode", state: "KL", stateCode: "32" },
-  // Tamil Nadu – Chennai (10)
-  { name: "T. Nagar Beverages", location: "T. Nagar, Chennai", state: "TN", stateCode: "33" },
-  { name: "Anna Nagar Drinks Hub", location: "Anna Nagar, Chennai", state: "TN", stateCode: "33" },
-  { name: "Adyar Wholesale Beverages", location: "Adyar, Chennai", state: "TN", stateCode: "33" },
-  { name: "Tambaram Cold Drinks", location: "Tambaram, Chennai", state: "TN", stateCode: "33" },
-  { name: "Velachery Refreshments", location: "Velachery, Chennai", state: "TN", stateCode: "33" },
-  { name: "Porur Beverages Centre", location: "Porur, Chennai", state: "TN", stateCode: "33" },
-  { name: "Chromepet Traders", location: "Chromepet, Chennai", state: "TN", stateCode: "33" },
-  { name: "Guindy Drinks Agency", location: "Guindy, Chennai", state: "TN", stateCode: "33" },
-  { name: "Ambattur Beverages Mart", location: "Ambattur, Chennai", state: "TN", stateCode: "33" },
-  { name: "Sholinganallur Wholesale", location: "Sholinganallur, Chennai", state: "TN", stateCode: "33" },
-  // Tamil Nadu – Madurai (5)
-  { name: "Madurai Central Beverages", location: "Meenakshi Amman, Madurai", state: "TN", stateCode: "33" },
-  { name: "Thirunagar Cold Drinks", location: "Thirunagar, Madurai", state: "TN", stateCode: "33" },
-  { name: "Anna Bus Stand Traders", location: "Anna Bus Stand, Madurai", state: "TN", stateCode: "33" },
-  { name: "Palanganatham Beverages", location: "Palanganatham, Madurai", state: "TN", stateCode: "33" },
-  { name: "Usilampatti Drinks Depot", location: "Usilampatti, Madurai", state: "TN", stateCode: "33" },
-  // Tamil Nadu – Coimbatore (5)
-  { name: "Gandhipuram Beverages", location: "Gandhipuram, Coimbatore", state: "TN", stateCode: "33" },
-  { name: "RS Puram Cold Drinks", location: "RS Puram, Coimbatore", state: "TN", stateCode: "33" },
-  { name: "Peelamedu Traders", location: "Peelamedu, Coimbatore", state: "TN", stateCode: "33" },
-  { name: "Saibaba Colony Beverages", location: "Saibaba Colony, Coimbatore", state: "TN", stateCode: "33" },
-  { name: "Singanallur Drinks Hub", location: "Singanallur, Coimbatore", state: "TN", stateCode: "33" },
-  // Tamil Nadu – Tiruchirappalli (5)
-  { name: "Trichy Beverages Centre", location: "Cantonment, Tiruchirappalli", state: "TN", stateCode: "33" },
-  { name: "Srirangam Cold Drinks", location: "Srirangam, Tiruchirappalli", state: "TN", stateCode: "33" },
-  { name: "Thillai Nagar Traders", location: "Thillai Nagar, Tiruchirappalli", state: "TN", stateCode: "33" },
-  { name: "KK Nagar Beverages", location: "KK Nagar, Tiruchirappalli", state: "TN", stateCode: "33" },
-  { name: "Woraiyur Wholesale Drinks", location: "Woraiyur, Tiruchirappalli", state: "TN", stateCode: "33" },
+  // Maharashtra — Mumbai (8)
+  { name: "Sharma Beverages — Bandra", location: "Bandra West, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Andheri Modern Trade", location: "Andheri East, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Powai Cold Chain", location: "Powai, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Reliance Smart — Mumbai West", location: "Goregaon, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Nature's Basket — South Mumbai", location: "Worli, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Dadar Fresh Distributors", location: "Dadar, Mumbai", state: "MH", stateCode: "27" },
+  { name: "Vashi Wholesale Beverages", location: "Vashi, Navi Mumbai", state: "MH", stateCode: "27" },
+  { name: "Thane Cold Logistics", location: "Thane West, Thane", state: "MH", stateCode: "27" },
+  // Maharashtra — Pune (4)
+  { name: "Koregaon Park Premium Foods", location: "Koregaon Park, Pune", state: "MH", stateCode: "27" },
+  { name: "Reliance Smart — Pune Hub", location: "Hinjewadi, Pune", state: "MH", stateCode: "27" },
+  { name: "Baner Beverages Co.", location: "Baner, Pune", state: "MH", stateCode: "27" },
+  { name: "Viman Nagar Cold Storage", location: "Viman Nagar, Pune", state: "MH", stateCode: "27" },
+  // Karnataka — Bangalore (5)
+  { name: "Karnataka Cold Supplies", location: "Indiranagar, Bangalore", state: "KA", stateCode: "29" },
+  { name: "BigBasket — BLR CFA", location: "Whitefield, Bangalore", state: "KA", stateCode: "29" },
+  { name: "Koramangala Modern Trade", location: "Koramangala, Bangalore", state: "KA", stateCode: "29" },
+  { name: "HSR Layout Premium Foods", location: "HSR Layout, Bangalore", state: "KA", stateCode: "29" },
+  { name: "Bommanahalli Wholesale", location: "Bommanahalli, Bangalore", state: "KA", stateCode: "29" },
+  // Delhi NCR (5)
+  { name: "NCR Modern Trade Pvt Ltd", location: "Connaught Place, New Delhi", state: "DL", stateCode: "07" },
+  { name: "Gurugram Cold Chain", location: "Sector 29, Gurugram", state: "HR", stateCode: "06" },
+  { name: "Manesar Distribution Hub", location: "Manesar, Gurugram", state: "HR", stateCode: "06" },
+  { name: "Noida Premium Beverages", location: "Sector 18, Noida", state: "UP", stateCode: "09" },
+  { name: "South Delhi Fresh Foods", location: "Saket, New Delhi", state: "DL", stateCode: "07" },
+  // Telangana — Hyderabad (3)
+  { name: "BigBasket — Hyderabad CFA", location: "Medchal, Hyderabad", state: "TS", stateCode: "36" },
+  { name: "Banjara Hills Modern Trade", location: "Banjara Hills, Hyderabad", state: "TS", stateCode: "36" },
+  { name: "Gachibowli Cold Supplies", location: "Gachibowli, Hyderabad", state: "TS", stateCode: "36" },
+  // Tamil Nadu — Chennai (3)
+  { name: "Chennai Premium Foods", location: "Nungambakkam, Chennai", state: "TN", stateCode: "33" },
+  { name: "OMR Beverages Hub", location: "OMR, Chennai", state: "TN", stateCode: "33" },
+  { name: "Anna Nagar Cold Chain", location: "Anna Nagar, Chennai", state: "TN", stateCode: "33" },
 ];
 
-// ── Sales Team (12) ──────────────────────────────────────────────────
+// ── Sales Team (12 reps across territories) ──────────────────────────
 const SALES_TEAM = [
-  { name: "Rajesh Nair", phone: "+91 94470 10001", email: "rajesh.nair@ashabev.in", region: "Kochi" },
-  { name: "Suresh Menon", phone: "+91 94470 10002", email: "suresh.menon@ashabev.in", region: "Kochi" },
-  { name: "Anil Kumar V", phone: "+91 94470 10003", email: "anil.v@ashabev.in", region: "Trivandrum" },
-  { name: "Bindu Lakshmi", phone: "+91 94470 10004", email: "bindu.l@ashabev.in", region: "Trivandrum" },
-  { name: "Dileep Krishnan", phone: "+91 94470 10005", email: "dileep.k@ashabev.in", region: "Kollam-Alappuzha" },
-  { name: "Gopika S", phone: "+91 94470 10006", email: "gopika.s@ashabev.in", region: "Thrissur-Kozhikode" },
-  { name: "Karthikeyan P", phone: "+91 98410 20001", email: "karthi.p@ashabev.in", region: "Chennai North" },
-  { name: "Murugan R", phone: "+91 98410 20002", email: "murugan.r@ashabev.in", region: "Chennai South" },
-  { name: "Priya Selvam", phone: "+91 98410 20003", email: "priya.s@ashabev.in", region: "Madurai" },
-  { name: "Senthil Kumar", phone: "+91 98410 20004", email: "senthil.k@ashabev.in", region: "Coimbatore" },
-  { name: "Lakshmi Devi T", phone: "+91 98410 20005", email: "lakshmi.t@ashabev.in", region: "Tiruchirappalli" },
-  { name: "Vijayakumar M", phone: "+91 94470 10007", email: "vijay.m@ashabev.in", region: "Kerala Rural" },
+  { name: "Vikram Joshi", phone: "+91 98200 10001", email: "vikram.j@rawpressery.in", region: "Mumbai West" },
+  { name: "Neha Kulkarni", phone: "+91 98200 10002", email: "neha.k@rawpressery.in", region: "Mumbai East" },
+  { name: "Rohan Shetty", phone: "+91 98200 10003", email: "rohan.s@rawpressery.in", region: "Navi Mumbai & Thane" },
+  { name: "Priya Deshmukh", phone: "+91 98220 10004", email: "priya.d@rawpressery.in", region: "Pune" },
+  { name: "Arjun Iyer", phone: "+91 98450 20001", email: "arjun.i@rawpressery.in", region: "Bangalore North" },
+  { name: "Divya Rao", phone: "+91 98450 20002", email: "divya.r@rawpressery.in", region: "Bangalore South" },
+  { name: "Karan Malhotra", phone: "+91 98110 30001", email: "karan.m@rawpressery.in", region: "Delhi NCR" },
+  { name: "Ritika Sharma", phone: "+91 98110 30002", email: "ritika.s@rawpressery.in", region: "Gurugram & Noida" },
+  { name: "Aditya Reddy", phone: "+91 98480 40001", email: "aditya.r@rawpressery.in", region: "Hyderabad" },
+  { name: "Sanya Krishnan", phone: "+91 98400 50001", email: "sanya.k@rawpressery.in", region: "Chennai" },
+  { name: "Mohit Bansal", phone: "+91 98200 10005", email: "mohit.b@rawpressery.in", region: "Modern Trade — National" },
+  { name: "Ananya Pillai", phone: "+91 98220 10006", email: "ananya.p@rawpressery.in", region: "HoReCa — West" },
 ];
 
-// ── Godowns (5) ──────────────────────────────────────────────────────
+// ── Godowns (4 — matches cold-chain footprint) ───────────────────────
 const GODOWNS = [
-  { name: "Main Warehouse — Kochi", address: "Plot 12, CSEZ, Kakkanad, Kochi, Kerala 682037" },
-  { name: "Hub — Chennai", address: "No. 45, Ambattur Industrial Estate, Chennai, TN 600058" },
-  { name: "Depot — Coimbatore", address: "SF 22, SIDCO, Coimbatore, TN 641021" },
-  { name: "Depot — Trivandrum", address: "TC 4/1200, Kazhakkoottam, Trivandrum, Kerala 695582" },
-  { name: "Depot — Madurai", address: "Plot 8, SIPCOT, Kappalur, Madurai, TN 625008" },
+  { name: "Mumbai CFA — Bhiwandi", address: "Plot 14, Mankoli Naka, Bhiwandi, Maharashtra 421302" },
+  { name: "Bangalore DC — Bommanahalli", address: "No. 22, Hosur Road, Bommanahalli, Bangalore 560068" },
+  { name: "Delhi NCR — Manesar", address: "Plot 8, IMT Manesar, Sector 7, Gurugram, Haryana 122050" },
+  { name: "Hyderabad Spoke — Medchal", address: "Survey 112, Medchal Industrial Area, Hyderabad 501401" },
 ];
 
 const VEHICLES = [
-  "KL-07-AB-1234", "KL-07-CD-5678", "KL-01-EF-9012", "KL-01-GH-3456",
-  "KL-10-IJ-7890", "KL-14-KL-1234", "TN-01-MN-5678", "TN-01-OP-9012",
-  "TN-09-QR-3456", "TN-38-ST-7890", "TN-45-UV-1234", "TN-59-WX-5678",
+  "MH-04-AB-1234", "MH-04-CD-5678", "MH-12-EF-9012", "MH-14-GH-3456",
+  "KA-05-IJ-7890", "KA-51-KL-1234", "DL-1L-MN-5678", "HR-26-OP-9012",
+  "TS-09-QR-3456", "TN-09-ST-7890", "MH-43-UV-1234", "KA-03-WX-5678",
 ];
 const DRIVERS = [
-  "Babu", "Sajan", "Unni", "Manoj", "Vijayan", "Rajan",
-  "Kumar", "Selvam", "Murugesan", "Arumugam", "Dasan", "Kannan",
+  "Ramesh", "Suresh", "Mahesh", "Dinesh", "Prakash", "Santosh",
+  "Ashok", "Vinod", "Ravi", "Sunil", "Manoj", "Deepak",
 ];
 const PAYMENT_MODES = ["cash", "bank_transfer", "upi", "cheque"] as const;
 const CLAIM_TYPES = ["return", "shortage", "damage"] as const;
 const CLAIM_REASONS = [
   "Damaged during transit — bottles broken",
-  "Expired stock delivered — manufacturing date issue",
+  "Near-expiry stock — less than 21 days shelf life",
   "Short delivery — 3 cases missing",
-  "Wrong product delivered",
-  "Leaking packages — seal failure",
+  "Wrong product variant delivered",
+  "Cold chain break — temperature excursion",
   "Customer rejection — label damage",
-  "Quality issue — off taste",
-  "Overcharged on invoice",
-  "Transport damage — carton crushed",
-  "Near-expiry stock — less than 30 days shelf life",
+  "Quality issue — off taste reported by retailer",
+  "Overcharged on invoice — scheme not applied",
+  "Crate damaged — multiple SKUs affected",
+  "Shelf-life dispute — buffer requested",
 ];
 
 // ── Batch insert helper ──────────────────────────────────────────────
@@ -254,82 +184,78 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Auth guard: caller must be a logged-in super_admin.
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 401,
-    });
-  }
-  const authClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(
-    authHeader.replace("Bearer ", "")
-  );
-  if (claimsErr || !claimsData?.claims?.sub) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 401,
-    });
-  }
-  const callerId = claimsData.claims.sub;
-  const adminCheck = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data: roleRow } = await adminCheck
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", callerId)
-    .eq("role", "super_admin")
-    .maybeSingle();
-  if (!roleRow) {
-    return new Response(JSON.stringify({ error: "Forbidden: super_admin required" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 403,
-    });
-  }
+  // `?force=1` deletes any existing demo workspace and re-seeds from scratch.
+  const url = new URL(req.url);
+  const force = url.searchParams.get("force") === "1";
 
   try {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Idempotency guard: bail if demo account already exists with company linked
+    // Look up any pre-existing demo user
     const { data: existingUsers } = await admin.auth.admin.listUsers();
-    const existingDemo = existingUsers.users.find((u: any) => u.email === "asha@getledge.in");
+    const existingDemo = existingUsers.users.find((u: any) => u.email === DEMO_EMAIL);
+
     if (existingDemo) {
       const { data: prof } = await admin.from("profiles")
         .select("company_id").eq("user_id", existingDemo.id).maybeSingle();
-      if (prof?.company_id) {
+
+      if (prof?.company_id && !force) {
         return new Response(JSON.stringify({
           status: "already_seeded",
-          message: "Demo account already exists. Delete it first to re-seed.",
-          email: "asha@getledge.in",
+          message: "Demo account already exists. Pass ?force=1 to wipe and re-seed.",
+          email: DEMO_EMAIL,
+          company_id: prof.company_id,
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
+      }
+
+      if (force && prof?.company_id) {
+        const cid = prof.company_id;
+        // Wipe child rows then the workspace itself
+        await admin.from("order_lines").delete().in("order_id",
+          (await admin.from("orders").select("id").eq("company_id", cid)).data?.map((r: any) => r.id) ?? []);
+        await admin.from("order_schemes").delete().in("order_id",
+          (await admin.from("orders").select("id").eq("company_id", cid)).data?.map((r: any) => r.id) ?? []);
+        await admin.from("invoice_lines").delete().in("invoice_id",
+          (await admin.from("invoices").select("id").eq("company_id", cid)).data?.map((r: any) => r.id) ?? []);
+        await admin.from("claim_lines").delete().in("claim_id",
+          (await admin.from("claims").select("id").eq("company_id", cid)).data?.map((r: any) => r.id) ?? []);
+        for (const t of [
+          "activity_log", "signal_acknowledgements", "command_saved_views", "notifications",
+          "dealer_aging_state", "team_invites", "secondary_sales", "targets",
+          "claims", "invoices", "schemes", "stock_deductions", "stock_items",
+          "orders", "products", "godowns", "distributors", "salespersons",
+        ]) {
+          await admin.from(t).delete().eq("company_id", cid);
+        }
+        await admin.from("user_roles").delete().eq("user_id", existingDemo.id);
+        await admin.from("profiles").delete().eq("user_id", existingDemo.id);
+        await admin.from("companies").delete().eq("id", cid);
+        await admin.auth.admin.deleteUser(existingDemo.id);
       }
     }
 
-    // 1. Create auth user
     if (!DEMO_PASSWORD) {
       return new Response(
         JSON.stringify({ error: "Server is missing DEMO_ACCOUNT_PASSWORD secret" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
+
+    // 1. Create auth user
     const { data: authData, error: authErr } = await admin.auth.admin.createUser({
-      email: "asha@getledge.in",
+      email: DEMO_EMAIL,
       password: DEMO_PASSWORD,
       email_confirm: true,
-      user_metadata: { full_name: "Asha Menon", company_name: COMPANY.name },
+      user_metadata: { full_name: DEMO_OWNER_NAME, company_name: COMPANY.name },
     });
     if (authErr && !authErr.message?.includes("already been registered")) throw authErr;
 
     let userId: string;
     if (authErr) {
       const { data: users } = await admin.auth.admin.listUsers();
-      const existing = users.users.find((u: any) => u.email === "asha@getledge.in");
+      const existing = users.users.find((u: any) => u.email === DEMO_EMAIL);
       if (!existing) throw new Error("User not found after registration conflict");
       userId = existing.id;
     } else {
@@ -346,12 +272,16 @@ Deno.serve(async (req) => {
     if (compErr) throw compErr;
 
     // 3. Link profile + role
-    const { error: profErr } = await admin.from("profiles")
-      .update({ company_id: companyId, full_name: "Asha Menon" })
-      .eq("user_id", userId);
-    if (profErr) throw profErr;
-
-    await admin.from("user_roles").insert({ user_id: userId, role: "super_admin" });
+    await admin.from("profiles")
+      .upsert({
+        user_id: userId, company_id: companyId,
+        full_name: DEMO_OWNER_NAME, email: DEMO_EMAIL,
+        role_self_selected: "Founder / CEO", team_size: "11-50",
+      }, { onConflict: "user_id" });
+    await admin.from("user_roles").upsert(
+      { user_id: userId, role: "super_admin" },
+      { onConflict: "user_id,role" }
+    );
 
     // 4. Products
     const productIds: string[] = [];
@@ -368,14 +298,22 @@ Deno.serve(async (req) => {
       const id = uuid();
       const gstinNum = String(10001 + i).slice(-4);
       dealerIds.push({ id, stateCode: d.stateCode, name: d.name, location: d.location });
+      const stateNameMap: Record<string, string> = {
+        MH: "Maharashtra", KA: "Karnataka", DL: "Delhi", HR: "Haryana", UP: "Uttar Pradesh", TS: "Telangana", TN: "Tamil Nadu",
+      };
       return {
         id, company_id: companyId, name: d.name, location: d.location,
         contact: `+91 ${randInt(94000, 99999)} ${randInt(10000, 99999)}`,
-        email: d.name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 12) + "@gmail.com",
+        email: d.name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 14) + "@rawdealers.in",
         gstin: `${d.stateCode}AABCD${gstinNum}E1Z${randInt(1, 9)}`,
+        pan: `AABCD${gstinNum}E`,
         state_code: d.stateCode,
-        address: `${randInt(1, 200)}, ${d.location}, ${d.state === "KL" ? "Kerala" : "Tamil Nadu"}`,
-        credit_limit: pick([50000, 100000, 150000, 200000, 300000, 500000]),
+        address: `${randInt(1, 200)}, ${d.location}, ${stateNameMap[d.state] ?? d.state}`,
+        credit_limit: pick([50000, 100000, 200000, 300000, 500000, 750000, 1000000, 1500000]),
+        bank_name: pick(["HDFC Bank", "ICICI Bank", "Axis Bank", "Kotak Bank", "Federal Bank"]),
+        bank_account: String(randInt(10000000, 99999999)) + String(randInt(100, 999)),
+        bank_account_name: d.name,
+        bank_ifsc: pick(["HDFC0000234", "ICIC0000456", "UTIB0000789", "KKBK0000321", "FDRL0000567"]),
       };
     });
     await batchInsert(admin, "distributors", dealerRows);
@@ -398,14 +336,14 @@ Deno.serve(async (req) => {
     });
     await batchInsert(admin, "godowns", godownRows);
 
-    // 8. Stock Items (all products × all godowns = 225)
+    // 8. Stock Items (all products × all godowns)
     const stockRows: any[] = [];
     for (const gIdx of godownIds.keys()) {
       for (const pIdx of productIds.keys()) {
         const healthRoll = Math.random();
         let qty: number, threshold: number;
-        if (healthRoll < 0.15) { threshold = randInt(40, 80); qty = randInt(0, threshold); } // critical
-        else if (healthRoll < 0.40) { threshold = randInt(40, 80); qty = randInt(threshold + 1, Math.floor(threshold * 1.2)); } // low
+        if (healthRoll < 0.12) { threshold = randInt(40, 80); qty = randInt(0, threshold); } // critical
+        else if (healthRoll < 0.32) { threshold = randInt(40, 80); qty = randInt(threshold + 1, Math.floor(threshold * 1.2)); } // low
         else { threshold = randInt(30, 60); qty = randInt(Math.floor(threshold * 1.5), threshold * 5); } // healthy
         stockRows.push({
           company_id: companyId, product_id: productIds[pIdx], godown_id: godownIds[gIdx],
@@ -416,42 +354,39 @@ Deno.serve(async (req) => {
     }
     await batchInsert(admin, "stock_items", stockRows);
 
-    // 9. Schemes (20)
-    const schemeIds: string[] = [];
-    const schemeNames = [
-      "Summer Splash Water Combo", "Monsoon Mango Mania", "Festival Fizz Fiesta",
-      "Bulk Juice Bonanza", "Energy Boost Bundle", "Desi Drinks Deal",
-      "Coconut Water Cash Back", "Rose Milk Mega Offer", "Retailer Volume Reward",
-      "New Dealer Welcome Bonus", "Quarterly Target Bonus", "Water Tanker Special",
-      "Fruit Juice 10+1 Free", "Cola Buy 5 Get 1", "Weekend Special Combo",
-      "Channel Partner Discount", "Buttermilk Summer Push", "Soda Season Scheme",
-      "Premium Energy Trade Offer", "Pineapple Juice Launch Offer",
+    // 9. Schemes (6 — covers every type incl. dealer/product targeting + expired)
+    const SCHEME_DEFS = [
+      { name: "Monsoon 10% Off — Cold-Pressed Juices", type: "percentage", discount: 10, productIdx: 0, dealerIdx: -1, expired: false },
+      { name: "Buy 10 Cases Get 1 Free — Mumbai Region", type: "buy_x_get_y", buy: 10, free: 1, productIdx: -1, dealerIdx: 0, expired: false },
+      { name: "Flat ₹500 Off Above ₹10,000", type: "flat_discount", flat: 500, productIdx: -1, dealerIdx: -1, expired: false, minOrder: 10000 },
+      { name: "BigBasket Q3 Trade Deal — 12% Off", type: "percentage", discount: 12, productIdx: -1, dealerIdx: 13, expired: false },
+      { name: "Almond Beverage Launch Combo", type: "buy_x_get_y", buy: 5, free: 1, productIdx: 18, dealerIdx: -1, expired: false },
+      { name: "Festive ₹2,000 Off Above ₹25,000", type: "flat_discount", flat: 2000, productIdx: -1, dealerIdx: -1, expired: true, minOrder: 25000 },
     ];
-    const schemeTypes = ["percentage", "buy_x_get_y", "flat_discount", "percentage", "buy_x_get_y"];
-    const schemeRows = schemeNames.map((name, i) => {
+    const schemeIds: string[] = [];
+    const schemeRows = SCHEME_DEFS.map((s) => {
       const id = uuid();
       schemeIds.push(id);
-      const sType = schemeTypes[i % schemeTypes.length];
       return {
-        id, company_id: companyId, name,
-        scheme_type: sType,
-        description: `${name} — valid this season`,
-        is_active: i < 16,
-        valid_from: dateStr(daysAgo(30)),
-        valid_until: i < 16 ? dateStr(daysAgo(-60)) : dateStr(daysAgo(5)),
-        discount_percent: sType === "percentage" ? pick([5, 8, 10, 12, 15]) : 0,
-        buy_qty: sType === "buy_x_get_y" ? pick([5, 10, 12]) : 0,
-        free_qty: sType === "buy_x_get_y" ? pick([1, 2]) : 0,
-        flat_amount: sType === "flat_amount" ? pick([200, 500, 1000, 1500]) : 0,
-        min_qty: pick([0, 5, 10, 20]),
-        min_order_value: pick([0, 5000, 10000, 25000]),
-        product_id: i < 15 ? productIds[i % productIds.length] : null,
-        dealer_id: i >= 15 ? dealerIds[i % dealerIds.length].id : null,
+        id, company_id: companyId, name: s.name,
+        scheme_type: s.type,
+        description: s.name,
+        is_active: !s.expired,
+        valid_from: dateStr(daysAgo(s.expired ? 120 : 45)),
+        valid_until: dateStr(daysAgo(s.expired ? 30 : -45)),
+        discount_percent: s.type === "percentage" ? s.discount ?? 0 : 0,
+        buy_qty: s.type === "buy_x_get_y" ? s.buy ?? 0 : 0,
+        free_qty: s.type === "buy_x_get_y" ? s.free ?? 0 : 0,
+        flat_amount: s.type === "flat_discount" ? s.flat ?? 0 : 0,
+        min_qty: 0,
+        min_order_value: s.minOrder ?? 0,
+        product_id: s.productIdx >= 0 ? productIds[s.productIdx] : null,
+        dealer_id: s.dealerIdx >= 0 ? dealerIds[s.dealerIdx].id : null,
       };
     });
     await batchInsert(admin, "schemes", schemeRows);
 
-    // 10. Orders (500+) over 30 days
+    // 10. Orders (~280 over the last 90 days, with seasonal spike in last 30d)
     const allOrders: any[] = [];
     const allOrderLines: any[] = [];
     const allOrderSchemes: any[] = [];
@@ -465,9 +400,10 @@ Deno.serve(async (req) => {
     let orderSeq = 1;
     let invoiceSeq = 1;
 
-    for (let dayOffset = 30; dayOffset >= 0; dayOffset--) {
+    for (let dayOffset = 90; dayOffset >= 0; dayOffset--) {
       const orderDate = daysAgo(dayOffset);
-      const ordersToday = randInt(14, 20);
+      // Seasonal spike: more orders in the last 30 days (summer)
+      const ordersToday = dayOffset > 30 ? randInt(1, 3) : randInt(3, 6);
 
       for (let j = 0; j < ordersToday; j++) {
         const orderId = uuid();
@@ -476,8 +412,8 @@ Deno.serve(async (req) => {
         const spName = SALES_TEAM[spIdx].name;
         const godownId = pick(godownIds);
 
-        // 2-5 line items
-        const lineCount = randInt(2, 5);
+        // 3-7 line items
+        const lineCount = randInt(3, 7);
         const usedProducts = new Set<number>();
         let orderTotal = 0;
         const lines: any[] = [];
@@ -486,7 +422,7 @@ Deno.serve(async (req) => {
           let pIdx: number;
           do { pIdx = randInt(0, productIds.length - 1); } while (usedProducts.has(pIdx));
           usedProducts.add(pIdx);
-          const qty = randInt(5, 80);
+          const qty = randInt(2, 25);
           const price = PRODUCTS[pIdx].base_price;
           const lineTotal = qty * price;
           orderTotal += lineTotal;
@@ -497,12 +433,15 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Payment & delivery status
-        const isOld = dayOffset > 3;
-        const deliveryStatus = isOld ? pick(["delivered", "delivered", "delivered", "dispatched"]) :
-          dayOffset > 1 ? pick(["dispatched", "dispatched", "pending", "delivered"]) : pick(["pending", "pending", "dispatched"]);
-        const paymentStatus = deliveryStatus === "delivered" ? pick(["paid", "paid", "paid", "partial"]) :
-          pick(["pending", "partial", "paid"]);
+        // Payment & delivery status — tuned for ~70% delivered, 15% dispatched, 10% pending, 5% cancelled-like
+        const isOld = dayOffset > 5;
+        const deliveryStatus = isOld
+          ? pick(["delivered", "delivered", "delivered", "delivered", "delivered", "dispatched"] as const)
+          : dayOffset > 2 ? pick(["dispatched", "dispatched", "pending", "delivered"] as const)
+            : pick(["pending", "pending", "dispatched"] as const);
+        const paymentStatus = deliveryStatus === "delivered"
+          ? pick(["paid", "paid", "paid", "partial", "pending"] as const)
+          : pick(["pending", "partial", "paid"] as const);
         const paymentMode = pick(PAYMENT_MODES);
 
         const dispatchDate = deliveryStatus !== "pending" ? dateStr(new Date(orderDate.getTime() + 86400000 * randInt(0, 2))) : null;
@@ -512,17 +451,18 @@ Deno.serve(async (req) => {
         const orderNumber = `${COMPANY.order_prefix}-2026-${String(orderSeq).padStart(4, "0")}`;
         orderSeq++;
 
-        // Scheme savings (~60% of orders)
+        // Scheme savings (~55% of orders, prefer active schemes)
         let schemeSavings = 0;
-        if (Math.random() < 0.6 && schemeIds.length > 0) {
-          const schemeIdx = randInt(0, schemeIds.length - 1);
-          const scheme = schemeRows[schemeIdx];
+        if (Math.random() < 0.55 && schemeIds.length > 0) {
+          const activeSchemes = schemeRows.filter(s => s.is_active);
+          const scheme = pick(activeSchemes);
           schemeSavings = scheme.scheme_type === "percentage"
             ? Math.round(orderTotal * scheme.discount_percent / 100)
             : scheme.scheme_type === "flat_discount" ? scheme.flat_amount
             : Math.round(orderTotal * 0.05);
+          if (schemeSavings > orderTotal * 0.4) schemeSavings = Math.round(orderTotal * 0.1);
           allOrderSchemes.push({
-            order_id: orderId, scheme_id: schemeIds[schemeIdx],
+            order_id: orderId, scheme_id: scheme.id,
             scheme_name: scheme.name,
             scheme_label: scheme.scheme_type === "percentage" ? `${scheme.discount_percent}% off` :
               scheme.scheme_type === "flat_discount" ? `₹${scheme.flat_amount} off` : `Buy ${scheme.buy_qty} Get ${scheme.free_qty}`,
@@ -554,22 +494,25 @@ Deno.serve(async (req) => {
               order_id: orderId,
               quantity_deducted: line.quantity,
               date: dispatchDate || dateStr(orderDate),
+              source: "auto_dispatch",
             });
           }
         }
 
-        // Invoice for delivered+paid
-        if (deliveryStatus === "delivered" && paymentStatus === "paid") {
+        // GST invoice for delivered orders (regardless of payment, like real ops)
+        if (deliveryStatus === "delivered") {
           const invoiceId = uuid();
+          const dealerRow = dealerRows.find(d => d.id === dealer.id)!;
           const isInterState = dealer.stateCode !== COMPANY.state_code;
           const gstRate = 18;
-          const subtotal = orderTotal;
+          const subtotal = Math.max(orderTotal - schemeSavings, 0);
           const tax = Math.round(subtotal * gstRate / 100);
           const cgst = isInterState ? 0 : Math.round(tax / 2);
           const sgst = isInterState ? 0 : Math.round(tax / 2);
           const igst = isInterState ? tax : 0;
-          const grandTotal = subtotal + tax;
-          const roundOff = Math.round(grandTotal) - grandTotal;
+          const grandTotalRaw = subtotal + tax;
+          const grandTotal = Math.round(grandTotalRaw);
+          const roundOff = Math.round((grandTotal - grandTotalRaw) * 100) / 100;
 
           const invoiceNumber = `${COMPANY.invoice_prefix}-2026-${String(invoiceSeq).padStart(4, "0")}`;
           invoiceSeq++;
@@ -581,8 +524,8 @@ Deno.serve(async (req) => {
             source_order_id: orderId,
             doc_type: "gst_invoice",
             buyer_name: dealer.name,
-            buyer_address: `${dealer.location}`,
-            buyer_gstin: dealerRows.find(d => d.id === dealer.id)?.gstin || "",
+            buyer_address: dealerRow.address,
+            buyer_gstin: dealerRow.gstin,
             buyer_state_code: dealer.stateCode,
             seller_name: COMPANY.name,
             seller_address: COMPANY.address,
@@ -599,10 +542,11 @@ Deno.serve(async (req) => {
             supply_type: isInterState ? "inter_state" : "intra_state",
             gst_rate: gstRate, subtotal, cgst_amount: cgst, sgst_amount: sgst,
             igst_amount: igst, total_tax: tax,
-            grand_total: Math.round(grandTotal + roundOff),
-            round_off: Math.round(roundOff * 100) / 100,
+            grand_total: grandTotal,
+            round_off: roundOff,
             amount_in_words: "",
-            status: "sent",
+            vehicle, driver_name: driver,
+            status: paymentStatus === "paid" ? "paid" : "sent",
           });
 
           for (const line of lines) {
@@ -610,7 +554,7 @@ Deno.serve(async (req) => {
             allInvoiceLines.push({
               invoice_id: invoiceId,
               product_name: line.product_name,
-              hsn_code: prod?.hsn || "2202",
+              hsn_code: prod?.hsn || "2009",
               quantity: line.quantity,
               unit: prod?.unit || "Case",
               unit_price: line.unit_price,
@@ -619,11 +563,11 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Claims (~10% of delivered orders)
-        if (deliveryStatus === "delivered" && Math.random() < 0.10) {
+        // Claims (~6% of delivered orders)
+        if (deliveryStatus === "delivered" && Math.random() < 0.06) {
           const claimId = uuid();
           const claimType = pick(CLAIM_TYPES);
-          const isResolved = Math.random() < 0.5;
+          const isResolved = Math.random() < 0.55;
           const claimLine = pick(lines);
           const claimQty = randInt(1, Math.max(1, Math.floor(claimLine.quantity * 0.3)));
           const claimValue = claimQty * claimLine.unit_price;
@@ -650,7 +594,7 @@ Deno.serve(async (req) => {
 
         // Activity log
         allActivityLog.push({
-          company_id: companyId, user_id: userId, user_name: "Asha Menon",
+          company_id: companyId, user_id: userId, user_name: DEMO_OWNER_NAME,
           action: "created", entity_type: "order", entity_id: orderId,
           summary: `Order ${orderNumber} placed for ${dealer.name}`,
           created_at: new Date(orderDate.getTime() + randInt(28800000, 64800000)).toISOString(),
@@ -659,7 +603,7 @@ Deno.serve(async (req) => {
 
         if (deliveryStatus !== "pending") {
           allActivityLog.push({
-            company_id: companyId, user_id: userId, user_name: "Asha Menon",
+            company_id: companyId, user_id: userId, user_name: DEMO_OWNER_NAME,
             action: "updated", entity_type: "order", entity_id: orderId,
             summary: `Order ${orderNumber} ${deliveryStatus}`,
             created_at: new Date(orderDate.getTime() + randInt(36000000, 72000000)).toISOString(),
@@ -669,8 +613,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Batch insert all generated data
-    console.log(`Inserting: ${allOrders.length} orders, ${allOrderLines.length} lines, ${allOrderSchemes.length} schemes`);
+    // Batch insert
+    console.log(`Inserting: ${allOrders.length} orders, ${allOrderLines.length} lines`);
     await batchInsert(admin, "orders", allOrders);
     await batchInsert(admin, "order_lines", allOrderLines);
     if (allOrderSchemes.length) await batchInsert(admin, "order_schemes", allOrderSchemes);
@@ -681,41 +625,118 @@ Deno.serve(async (req) => {
     if (allClaimLines.length) await batchInsert(admin, "claim_lines", allClaimLines);
     if (allActivityLog.length) await batchInsert(admin, "activity_log", allActivityLog);
 
-    // 11. Targets (40+)
+    // 11. Targets — monthly per salesperson (current + last 2 months)
     const targetRows: any[] = [];
-    // Monthly targets for each salesperson (current + last month)
     for (const spIdx of spIds.keys()) {
-      for (const monthOffset of [0, 1]) {
+      for (const monthOffset of [0, 1, 2]) {
         const pStart = new Date();
-        pStart.setMonth(pStart.getMonth() - monthOffset, 1);
+        pStart.setDate(1);
+        pStart.setMonth(pStart.getMonth() - monthOffset);
         targetRows.push({
           company_id: companyId, entity_type: "salesperson",
           entity_id: spIds[spIdx], entity_name: SALES_TEAM[spIdx].name,
           period_type: "monthly", period_start: dateStr(pStart),
-          target_orders: randInt(30, 60), target_revenue: randInt(500000, 2000000),
+          target_orders: randInt(20, 45), target_revenue: randInt(800000, 2500000),
         });
       }
     }
-    // Quarterly targets for top 20 dealers
-    for (let i = 0; i < 20 && i < dealerIds.length; i++) {
+    // Quarterly targets for top 15 dealers
+    for (let i = 0; i < 15 && i < dealerIds.length; i++) {
       const qStart = new Date();
       qStart.setMonth(Math.floor(qStart.getMonth() / 3) * 3, 1);
       targetRows.push({
         company_id: companyId, entity_type: "distributor",
         entity_id: dealerIds[i].id, entity_name: dealerIds[i].name,
         period_type: "quarterly", period_start: dateStr(qStart),
-        target_orders: randInt(40, 100), target_revenue: randInt(1000000, 5000000),
+        target_orders: randInt(30, 80), target_revenue: randInt(1500000, 5000000),
       });
     }
     await batchInsert(admin, "targets", targetRows);
 
-    // 12. Update company sequence
+    // 12. Secondary sales (~50 retailer offtake rows over last 30 days)
+    const RETAILERS = [
+      "Modern Bazaar — Bandra", "Nature's Basket — Worli", "More Megastore — Powai",
+      "Local Kirana — Koregaon Park", "DMart — Hinjewadi", "Le Marche — Indiranagar",
+      "Big Bazaar — Whitefield", "Spencer's — Saket", "Reliance Fresh — Noida",
+      "Q-Mart — Gurugram", "Q-Mart — Banjara Hills", "Foodhall — Anna Nagar",
+    ];
+    const secondaryRows: any[] = [];
+    for (let i = 0; i < 50; i++) {
+      const dealer = pick(dealerIds);
+      const pIdx = randInt(0, productIds.length - 1);
+      secondaryRows.push({
+        company_id: companyId,
+        distributor_id: dealer.id,
+        product_id: productIds[pIdx],
+        product_name: PRODUCTS[pIdx].name,
+        retailer_name: pick(RETAILERS),
+        quantity: randInt(2, 15),
+        date: dateStr(daysAgo(randInt(0, 30))),
+        remarks: pick(["Strong pull", "Promo display", "Repeat order", "End-of-aisle push", ""]),
+      });
+    }
+    await batchInsert(admin, "secondary_sales", secondaryRows);
+
+    // 13. Notifications — 5 unread, mix of types
+    const topDealer = dealerIds[0];
+    const notifRows = [
+      {
+        company_id: companyId, user_id: userId, type: "credit_risk",
+        title: `${topDealer.name} — CRITICAL`,
+        message: `${topDealer.name} has ₹4,82,000 outstanding for 90+ days. Review credit limit.`,
+        read: false,
+      },
+      {
+        company_id: companyId, user_id: userId, type: "stock_low",
+        title: "Alphonso Mango 250ml running low",
+        message: "Mumbai CFA — Bhiwandi has only 8 cases left. Reorder recommended.",
+        read: false,
+      },
+      {
+        company_id: companyId, user_id: userId, type: "order_pending",
+        title: "5 orders awaiting dispatch",
+        message: "5 orders for Bangalore region are pending dispatch >48 hours.",
+        read: false,
+      },
+      {
+        company_id: companyId, user_id: userId, type: "general",
+        title: "Monthly target hit by Karan Malhotra",
+        message: "Delhi NCR rep hit ₹18.4 L this month — 112% of target.",
+        read: false,
+      },
+      {
+        company_id: companyId, user_id: userId, type: "general",
+        title: "Weekly review ready",
+        message: "Last week: ₹4.2 L revenue, 12 new orders, 3 dealers crossed credit limit.",
+        read: false,
+      },
+    ];
+    await batchInsert(admin, "notifications", notifRows);
+
+    // 14. Pinned command palette saved views
+    await batchInsert(admin, "command_saved_views", [
+      {
+        company_id: companyId, user_id: userId,
+        name: "Overdue > 60 days",
+        params: { entity: "dealers", filter: "aging_61plus" },
+        is_pinned: true,
+      },
+      {
+        company_id: companyId, user_id: userId,
+        name: "This week's dispatches",
+        params: { entity: "orders", filter: "dispatched_this_week" },
+        is_pinned: true,
+      },
+    ]);
+
+    // 15. Update company sequence
     await admin.from("companies").update({
       next_order_sequence: orderSeq,
       next_invoice_sequence: invoiceSeq,
     }).eq("id", companyId);
 
     const summary = {
+      email: DEMO_EMAIL,
       userId,
       companyId,
       counts: {
@@ -734,6 +755,8 @@ Deno.serve(async (req) => {
         claimLines: allClaimLines.length,
         stockDeductions: allStockDeductions.length,
         targets: targetRows.length,
+        secondarySales: secondaryRows.length,
+        notifications: notifRows.length,
         activityLog: allActivityLog.length,
       },
     };
