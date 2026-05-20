@@ -1,65 +1,46 @@
 
-# Surgical Resolution Plan
+# Fix: Logo upload fails during onboarding
 
-After investigating the codebase, **most of the previously-listed "blockers" were overstated or false**. Here's the real picture and a non-breaking path through it.
+## Root cause (one line)
 
-## Reality check (what I actually found)
+`src/pages/Welcome.tsx` uploads to **`{companyId}/logo-{ts}.{ext}`** but the storage RLS policy requires **`logos/{companyId}/...`** — the `logos/` prefix is missing, so the INSERT policy denies every onboarding upload.
 
-| Was listed as | Reality |
-|---|---|
-| 🔴 Mock data still in DataContext | **False.** `mock-data.ts` only exports TypeScript types. All domain hooks (`useDealersDomain`, `useOrdersDomain`, `useStockDomain`, `useBillingDomain`, `useCatalogDomain`, `useTargetsDomain`) already query Supabase. Memory `mem://project/technical-status` is stale. |
-| 🔴 PWA `/sw.js` redirect error | **Fixed last turn** — shipped `public/sw.js` kill-switch twin. |
-| 🟠 Stabilisation PR-C/E/F pending | Memory says pending, but plan.md no longer references them. Need to confirm before touching anything. |
-| 🟠 Billion-dollar roadmap 10/12 open | **False.** Per `mem://roadmap/billion-dollar`, PRs 1-12e are shipped. Only autosave-wiring + DataTable rollout to Orders/Billing/Stock + virtualization remain — all optional. |
-| 🟠 Landing rebrand pending | Tracked in its own plan, not a build blocker. |
-| 🟡 AI roadmap not started | Future work, not a blocker. |
-| 🟡 No email domain (D2 digest blocked) | External dependency. |
-| 🟡 Stock auto-deduction | Already implemented via `dispatch_order_atomic` RPC (saw it in DB functions). Memory is stale. |
+## Evidence
 
-So the actual "blocker" count is **1 real bug, already fixed**. The rest is stale memory + optional polish.
+- Storage policy `Company members can upload logos` (INSERT on `storage.objects`) checks:
+  ```
+  bucket_id = 'company-logos'
+  AND (storage.foldername(name))[1] = 'logos'
+  AND (storage.foldername(name))[2] = get_company_id()::text
+  ```
+- `src/pages/Welcome.tsx:139`:
+  ```ts
+  const path = `${companyId}/logo-${Date.now()}.${ext}`;   // ❌ folder[1] = companyId, no 'logos/' prefix
+  ```
+- `src/pages/Company.tsx:124` (Settings page) already uses the correct path: `logos/${companyId}/logo.${ext}` ✅ — that's why Settings works but onboarding doesn't.
 
-## Plan — three small, isolated passes
+Bucket exists and is public; column `companies.logo_url` exists; only the path shape is wrong.
 
-### Pass 1 — Refresh stale memory (zero code risk)
-Update memory index so future-me stops chasing ghosts.
-- `mem://project/technical-status`: rewrite to "Supabase-backed via domain hooks; DataContext is the session-state composer".
-- `mem://logic/stock-management-logic`: note that auto-deduction shipped via `dispatch_order_atomic`.
-- `mem://roadmap/billion-dollar`: mark complete; list the 3 optional remaining items.
-- `mem://perf/stabilisation-pass`: verify PR-C/E/F status before claiming anything (read-only check first).
+## Fix (surgical, 2 lines)
 
-**Files:** memory only. No app code touched.
+`src/pages/Welcome.tsx`:
+- Line 139: `` `logos/${companyId}/logo-${Date.now()}.${ext}` ``
+- (Public URL fetch on line 145 already uses the same `path` variable, so it auto-corrects.)
 
-### Pass 2 — Verify the `sw.js` fix actually landed (5-minute sanity check)
-- Confirm `public/sw.js` matches `public/service-worker.js`.
-- Watch console after a hard refresh; the redirect error should be gone within one navigation.
-- If any client is still wedged, document the manual "DevTools → Application → Service Workers → Unregister" workaround in the offline-mode memory.
+That's it. One file, one line of meaningful change.
 
-**Files:** none (verification only). Memory note if needed.
+## What I will NOT touch
 
-### Pass 3 — Optional polish (only if you want it; each is independently revertible)
-Pick zero, one, or all. Each ≤ 1 file, ≤ 30 LOC, no shared-state changes.
+- Storage RLS policies (they're correct and consistent with Company.tsx).
+- The bucket configuration.
+- Company.tsx logo flow (already correct).
+- Any onboarding navigation, validation, or the `finish()` flow.
 
-- **3a. DataTable rollout to Orders** — drop-in replacement of the table block, keep all filters/handlers. Highest visible win, lowest risk because `DataTable` is already used elsewhere.
-- **3b. Wire `useAutosave` into Settings → Company form** — toast-less background save with `<SaveIndicator>`. Pure additive.
-- **3c. Virtualize Orders list when count > 200** — `@tanstack/react-virtual` already in deps if used; if not, skip.
+## Verification
 
-## What I will NOT touch (explicit safety rails)
+1. Sign up → reach Welcome step 3 (logo).
+2. Upload a <2MB image → expect "Logo saved" toast → redirect to /dashboard.
+3. Visit Settings → Company → logo preview appears.
+4. Reload Settings → logo persists.
 
-- `DataContext.tsx` orchestration — works, performant, leave alone.
-- Domain hooks — already shipping correct Supabase calls + `handleSupabaseError`.
-- Auth flow, RLS policies, RPC functions — battle-tested.
-- Design tokens, Fluent 2 primitives, brand pages — frozen per memory.
-- Landing page — separate rebrand plan owns it.
-- Mobile bottom nav — just refit last turn, leave alone.
-
-## Recommended order
-
-1. **Pass 1** (memory refresh) — 5 min, zero risk, prevents future false alarms.
-2. **Pass 2** (sw.js verification) — 2 min.
-3. **Pass 3a** only if you want a visible polish win — otherwise stop.
-
-Total realistic scope: **memory hygiene + one verification + optionally one table swap**. Nothing that can break what we built.
-
-## Question for you
-
-Do you want me to run **just Pass 1 + Pass 2** (pure cleanup, no app code changes), or include **Pass 3a** (DataTable on Orders)?
+If the user reports any pre-existing onboarding accounts had partially-failed uploads, no cleanup is needed — failed uploads never created a `storage.objects` row.
