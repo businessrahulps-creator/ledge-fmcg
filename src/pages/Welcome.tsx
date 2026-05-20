@@ -136,7 +136,7 @@ export default function Welcome() {
     setLogoUploading(true);
     try {
       const ext = file.name.split(".").pop() || "png";
-      const path = `${companyId}/logo-${Date.now()}.${ext}`;
+      const path = `logos/${companyId}/logo-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("company-logos").upload(path, file, { upsert: true });
       if (upErr) {
         handleSupabaseError(upErr, { source: "storage.upload:company-logos", title: "Couldn't upload logo" });
