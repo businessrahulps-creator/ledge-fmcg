@@ -59,7 +59,7 @@ export function Footer() {
           className="mb-14 md:mb-16 max-w-md"
         >
           <Link to="/" aria-label="Ledge home" className="inline-flex items-center">
-            <img src={ledgeLogo} alt="Ledge" className="h-16 w-auto" decoding="async" loading="lazy" />
+            <img src={ledgeLogo} alt="Ledge" width={220} height={64} className="h-16 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
             Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.
