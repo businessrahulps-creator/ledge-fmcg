@@ -1,4 +1,4 @@
-import { Bell, Package, AlertTriangle, Users, Info, CheckCheck } from "lucide-react";
+import { Bell, Package, AlertTriangle, Users, Info, CheckCheck, Wallet, Clock3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,7 +8,10 @@ import { SmartTime } from "@/components/ui/smart-time";
 const typeConfig: Record<NotificationType, { icon: typeof Bell; colorClass: string }> = {
   order_placed: { icon: Package, colorClass: "border-l-success" },
   stock_alert: { icon: AlertTriangle, colorClass: "border-l-warning" },
+  stock_low: { icon: AlertTriangle, colorClass: "border-l-warning" },
   team_update: { icon: Users, colorClass: "border-l-primary" },
+  credit_risk: { icon: Wallet, colorClass: "border-l-warning" },
+  order_pending: { icon: Clock3, colorClass: "border-l-primary" },
   general: { icon: Info, colorClass: "border-l-muted-foreground" },
 };
 
