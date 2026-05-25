@@ -1,98 +1,68 @@
+# Handover via Your Existing GitHub Repo — Clean Swap Approach
 
-# Ledge → Complete Hand-Off Bundle (Zero Comeback)
+Smart move. We use the GitHub repo Lovable already syncs to as the handover vehicle. You hand it over, then cut yourself free and re-bind a fresh repo to Lovable for our Ledge. Zero data loss on our side, zero questions from them.
 
-Our Ledge stays exactly as-is on Lovable Cloud. We ship them a self-contained clone they run on their own infra. The bar: they should never need to message us again — every question answered inside the zip.
+## The swap, in order
 
-## The "zero comeback" principle
+### Phase 1 — Prep the repo for handover (while it's still yours, still synced to Lovable)
 
-Every doc must answer not just "how" but also "what is this", "why does it exist", "what breaks if I touch it", and "what do I do when X happens". We over-document on purpose. Three doc tiers:
+We push the handover scaffolding (already staged in `/tmp/handover/`) **as a new branch** called `handover/v1` on your existing repo. This way:
+- Your `main` keeps tracking Lovable as usual — no disruption to our Ledge.
+- The handover branch carries the cleaned source, docs, CI, scripts, etc.
+- When ready, we merge `handover/v1` into `main` (or rename it to `main`) in one shot, right before the transfer.
 
-1. **Runbooks** — copy-paste step-by-step (setup, deploy, restore)
-2. **Reference** — what every table/function/secret/env var means
-3. **Troubleshooting** — top 30 things that will go wrong + exact fix
+What gets added on top of what's already in `/tmp/handover/`:
+- `README.md` (repo-grade, with quickstart + screenshot + badges)
+- `LICENSE`, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`
+- `.gitignore`, `.gitattributes`, `.editorconfig`, `.nvmrc`
+- `.github/ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md`, `dependabot.yml`
+- `.github/workflows/ci.yml` (lint + typecheck + vitest + playwright smoke)
+- `.github/workflows/codeql.yml` (free SAST)
+- `.github/workflows/deploy.yml` (optional Render/Vercel auto-deploy)
+- Tag `v1.0.0` + GitHub Release with `ledge-handover.zip` attached as the offline copy
+- Branch protection on `main`: require PR + CI green, no force-push, linear history
 
-## Deliverable: `ledge-handover.zip`
+### Phase 2 — Disconnect Lovable from your repo
 
-```
-ledge-handover/
-├── START-HERE.md                    ← single entry point, 10-min read
-├── app/                             ← full source, ready to build
-│   ├── .env.example
-│   ├── README.md                    ← dev workflow, scripts, structure
-│   ├── render.yaml                  ← one-click Render deploy
-│   ├── vercel.json + public/_redirects   ← SPA fallback for any host
-│   └── (entire repo, Lovable-specific bits stripped)
-├── supabase/
-│   ├── migrations/                  ← every migration, ordered
-│   ├── functions/                   ← all 5 edge functions
-│   ├── seed.sql                     ← role_capabilities_default + enums
-│   ├── schema-dump.sql              ← pg_dump --schema-only (safety net)
-│   ├── data-dump.sql                ← pg_dump --data-only (optional)
-│   ├── cron-jobs.sql                ← pg_cron schedules to recreate
-│   └── storage/company-logos/       ← every object from the bucket
-├── docs/
-│   ├── 00-architecture.md           ← system diagram, data flow, tech stack
-│   ├── 01-supabase-setup.md         ← create project → migrations → seed → storage
-│   ├── 02-edge-functions.md         ← what each does, deploy cmd, secrets
-│   ├── 03-auth-setup.md             ← email + Google OAuth, redirect URLs, HIBP
-│   ├── 04-hosting.md                ← Render (recommended) + Vercel/Netlify/AWS
-│   ├── 05-custom-domain.md          ← DNS records, SSL, Supabase Site URL update
-│   ├── 06-secrets-reference.md      ← every secret: what, where to get, who uses it
-│   ├── 07-database-reference.md     ← every table, every column, every RLS policy explained
-│   ├── 08-rbac-and-roles.md         ← roles, capabilities, how to grant/revoke
-│   ├── 09-ai-features.md            ← Gemini setup, swap to OpenAI, disable AI
-│   ├── 10-monitoring.md             ← error_log, Supabase logs, uptime checks
-│   ├── 11-backups.md                ← pg_dump cron, storage backup, restore drill
-│   ├── 12-glossary.md               ← every UI term in plain English (from prior bundle)
-│   ├── 13-troubleshooting.md        ← top 30 issues + exact fixes
-│   ├── 14-faq.md                    ← 50 questions they will ask
-│   └── 15-handover-checklist.md     ← signed checklist they tick off as they go
-├── audits/
-│   ├── ledge-hardening-audit.md
-│   ├── ledge-hardening-summary.md
-│   └── ledge-plain-language-glossary.zip
-└── scripts/
-    ├── export-storage.sh            ← we run this once to populate storage/
-    ├── verify-install.sh            ← they run this post-deploy to sanity-check
-    └── rotate-secrets.sh            ← rotate Google OAuth, cron secret, etc.
-```
+In Lovable: project settings → GitHub → **Disconnect**. This stops the auto-sync. Our live Ledge inside Lovable Cloud is **untouched** — code, database, storage, edge functions, secrets all stay put. Only the GitHub mirror stops updating.
 
-## Code changes needed before we zip
+### Phase 3 — Hand the repo over
 
-These are the only edits to a copy of the repo (our live Ledge is untouched):
+Two options, pick one (open question below):
 
-1. **AI edge functions** — rewrite `dashboard-digest`, `explain-metric`, any other Lovable-gateway call to hit Google AI Studio directly using `GEMINI_API_KEY`. (Free key from aistudio.google.com.)
-2. **Strip Lovable bits** — remove `lovable-tagger` from `vite.config.ts` + `package.json`, delete `.lovable/`, remove edit-badge wiring.
-3. **Generalise client** — confirm `src/integrations/supabase/client.ts` reads only from env vars (no hardcoded project ref fallback).
-4. **SPA fallback files** — add `render.yaml`, `vercel.json`, `public/_redirects` so deep links work on every host.
-5. **Verify script** — `scripts/verify-install.sh` curls the deployed URL, checks `/auth`, runs a SELECT against their Supabase via REST, prints PASS/FAIL.
+- **A. GitHub repo transfer** — you transfer ownership to their GitHub user/org via Settings → Transfer ownership. Preserves history, issues, Actions, releases. Cleanest. Requires their GitHub handle at transfer time.
+- **B. Push-to-their-repo** — they create an empty repo on their side, you push your repo's contents there (`git push --mirror`). Slightly less clean (no automated Actions secrets carry-over), but you don't need anything from them upfront and can do it any time.
 
-## What each doc covers (so nothing comes back)
+Recommendation: **A**. Only thing you need from them: their GitHub username/org, once.
 
-- **00-architecture** — React SPA + Supabase (Postgres + Auth + Storage + Edge Functions + pg_cron). Diagram. "If you change X, Y breaks."
-- **01-supabase-setup** — exact CLI commands, expected output, screenshot of dashboard at each step.
-- **06-secrets-reference** — every secret currently in our project, marked **REQUIRED / OPTIONAL / DEV-ONLY (skip)**. For each: what it does, where to get it, format, rotation steps.
-- **07-database-reference** — auto-generated from live schema. All 28 tables, every column with type + purpose, every RLS policy translated to English ("Only members of the same company can read this row").
-- **08-rbac-and-roles** — `super_admin`, `sales_manager`, `accountant`, `viewer`, capability matrix, how to promote/demote a user via SQL.
-- **13-troubleshooting** — "Login redirects to localhost" → fix Site URL. "RLS error on insert" → check capability. "Cron job not firing" → check `cron_secret`. "AI feature returns 500" → check `GEMINI_API_KEY`. 30 entries minimum.
-- **14-faq** — "Can we change the logo?", "How do we add a new role?", "Can we white-label?", "How do we export all data?", "What's the monthly cost?", "Can we self-host Supabase?", etc.
-- **15-handover-checklist** — printable list. They tick: Supabase created ✓, migrations run ✓, storage restored ✓, auth configured ✓, edge functions deployed ✓, cron jobs created ✓, app deployed ✓, custom domain live ✓, verify-install passes ✓, test order placed end-to-end ✓.
+### Phase 4 — Wipe and reset your side
 
-## Recommended target stack for them (in START-HERE.md)
+After they confirm receipt:
+1. Delete the repo from your GitHub account (Settings → Delete this repository).
+2. (Optional, only if you want a totally fresh GitHub identity) create a new GitHub account.
+3. In Lovable: project settings → GitHub → **Connect** → create a brand-new repo (e.g. `ledge`) under your account.
+4. Lovable pushes our current Ledge codebase to the new repo as the initial commit. Done.
 
-- **Hosting**: Render static site (5-min setup, $0–7/mo, auto-deploys from their Git)
-- **Backend**: their own Supabase project (Pro tier, ~$25/mo recommended for production)
-- **AI**: Google AI Studio (Gemini free tier covers normal usage)
-- **Domain**: their existing registrar → Render CNAME
-- **Monitoring**: Supabase built-in dashboard + UptimeRobot (free) hitting their domain
+End state: they have a self-contained repo with everything. You have a fresh GitHub repo synced to the same live Lovable Ledge. No shared history, no shared anything.
 
-Total monthly: ~$25–35 vs. our Lovable setup. We mention this explicitly so they don't ping us asking.
+## Why this is better than the zip-only approach
 
-## Open questions before I build
+- They get **history, issues, PRs, Actions, Dependabot, CodeQL, Releases** — not just files.
+- One-click clone, fork, deploy.
+- The zip still rides along as a Release asset, so they have an offline backup inside the repo itself.
+- Branch protection + CI templates mean their first contributor PR is sane from day one.
 
-1. **Data dump**: ship **schema-only + seed** (clean start, no customer data), or **include current production data**? Default = schema-only; safer + no PII handover concerns.
-2. **AI features at handover**: rewrite to direct Gemini calls now so they work day-1, **or** ship them disabled with a "to enable, do X" doc? Default = rewrite now.
-3. **Storage bucket**: ship our current `company-logos` contents or empty? Default = ship contents (small, gives them realistic state).
-4. **Code repo format**: just zipped files, or initialised as a fresh git repo with one initial commit? Default = fresh git repo (easier for them to push to GitHub).
+## What stays untouched on our side
 
-Answer those four and I'll generate the full bundle in one pass — every doc, every script, every dump — and hand back `ledge-handover.zip` ready to email.
+- Our Ledge in Lovable Cloud (Supabase project, data, edge functions, secrets, auth config) — all of it.
+- The `getledge.in` custom domain and Lovable publish — all of it.
+- All `.lovable/memory/` files (we re-sync them when we connect the fresh repo).
+
+## Open questions
+
+1. **Transfer method** — GitHub repo transfer (need their GH handle) or push-mirror to their empty repo (need nothing)?
+2. **License** — MIT, Apache 2.0, or "All rights reserved" proprietary?
+3. **CI/CD on the handover repo** — wire up auto-deploy to Render/Vercel on push to `main`, or leave deploys manual?
+4. **Auto-apply Supabase migrations** via Actions on merge to `main`, or manual `supabase db push`?
+
+Answer those four and I'll execute Phase 1: build the full scaffolding on top of `/tmp/handover/`, commit it cleanly as `handover/v1` branch, ready for you to push and hand over.
