@@ -1,86 +1,62 @@
+## What's wrong
+
+The screenshot is GitHub rendering the **root** `README.md`, which is still the Lovable default:
+
+```
+# Welcome to your Lovable project
+TODO: Document your project here
+```
+
+The polished 434-line README we built earlier lives inside the handover bundle at `app/README.md` — recipient-facing, not what visitors see on GitHub. The repo landing page needs its own world-class README.
+
 ## Goal
 
-Add a single `scripts/setup.sh` (plus a Node fallback `scripts/setup.mjs`) to the handover bundle that takes the recipient from a fresh clone to a fully provisioned backend in **one command**:
+Replace the root `README.md` with a hero-led, GitHub-optimised landing page that signals seriousness within the first scroll. Modeled on top-tier OSS readmes (Supabase, Linear, Cal.com, Resend) — heavy on visual hierarchy, light on prose.
 
-```bash
-./scripts/setup.sh
-```
-
-It should restore the database schema, apply all migrations, create storage buckets, seed the cron secret, deploy edge functions, and write the project `.env` — idempotently, so re-runs are safe.
-
-## What the script does (in order)
-
-1. **Preflight**
-   - Verify `node >= 22`, `bun`, `supabase` CLI, `psql` (optional, only needed for raw restore) and `git` are on PATH. Fail with a clear install hint if missing.
-   - Load `.env.setup` if present (see below); otherwise prompt interactively for: `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ACCESS_TOKEN`, `CRON_SECRET` (auto-generate if blank), `ALLOWED_ORIGIN`.
-   - Confirm target ref with the user before any destructive step.
-
-2. **Link the Supabase project**
-   - `supabase login --token "$SUPABASE_ACCESS_TOKEN"` (no-op if already logged in).
-   - `supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"`.
-
-3. **Restore / apply schema**
-   - If `supabase/seed/schema.sql` exists (full pg_dump snapshot we ship in the bundle), run it first via `psql "$SUPABASE_DB_URL" -f supabase/seed/schema.sql` for a clean baseline.
-   - Then `supabase db push` to apply every file under `supabase/migrations/` (idempotent — already-applied migrations are skipped).
-   - Run `supabase db lint` and surface any warnings.
-
-4. **Storage buckets**
-   - Apply `supabase/seed/storage.sql` which `INSERT … ON CONFLICT DO NOTHING` for each bucket the app needs (currently `company-logos`, public) plus the RLS policies. Generated once from the live project; kept in source.
-
-5. **Secrets & cron**
-   - Push runtime secrets via `supabase secrets set` from `.env.setup`: `CRON_SECRET`, `ALLOWED_ORIGIN`, `LOVABLE_API_KEY` (optional), `DEMO_ACCOUNT_PASSWORD` / `TEST_ACCOUNT_PASSWORD` (optional).
-   - Insert the cron secret into Vault via a small SQL helper so `public.get_cron_secret()` works.
-
-6. **Edge functions**
-   - `supabase functions deploy aging-check dashboard-digest explain-metric seed-demo-account seed-test-accounts --no-verify-jwt` (per-function `verify_jwt` is honoured from `supabase/config.toml`).
-
-7. **Frontend wiring**
-   - Write `.env` at project root with `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` derived from the linked project (fetched via `supabase projects api-keys`).
-   - `bun install`.
-   - `bun run build` as a smoke test.
-
-8. **Post-setup report**
-   - Print a checklist: project ref, anon key fingerprint, bucket count, function count, migration count applied, next manual steps (configure Google OAuth in dashboard, set custom domain, enable email confirmations).
-
-## Files added to the bundle
+## Structure
 
 ```text
-app/
-  scripts/
-    setup.sh              # main entrypoint (bash, ~250 lines)
-    setup.mjs             # Node fallback for Windows users
-    lib/
-      preflight.sh        # version checks
-      prompt.sh           # interactive prompt helpers
-      supabase.sh         # wrappers around supabase CLI
-  supabase/
-    seed/
-      schema.sql          # full pg_dump of public schema (generated)
-      storage.sql         # bucket + policy seed
-      vault.sql           # cron_secret insert template
-  .env.setup.example      # commented template the recipient copies to .env.setup
+1.  Hero band            Logo · one-line tagline · 5 status badges
+2.  Demo callout         "Try it" link · screenshot grid (3 panels)
+3.  What is Ledge?       2-3 sentence elevator pitch + bullet list of who it's for
+4.  Feature matrix       4-column emoji grid (Orders · Dealers · Stock · Billing)
+                         with sub-bullets per cell
+5.  Architecture         Mermaid diagram: React/Vite ⇄ Supabase ⇄ Edge Functions ⇄ pg_cron
+6.  Tech stack           Compact table (Layer · Tech · Why)
+7.  Quick start (60s)    git clone → cp env → ./scripts/setup.sh
+8.  Docs index           Linked list pointing at app/README.md, HANDOVER.md,
+                         SECURITY.md, CONTRIBUTING.md, supabase/seed/README.md
+9.  Project status       Version badge, roadmap callout, "Built with Lovable" line
+10. License & contact    Proprietary notice + WhatsApp/email contact
 ```
 
-## Idempotency & safety rules
+## Visual elements (markdown-only, no external services)
 
-- Every SQL seed uses `IF NOT EXISTS` / `ON CONFLICT DO NOTHING`.
-- Migrations are applied via `supabase db push`, which tracks applied versions in `supabase_migrations.schema_migrations` — re-runs skip already-applied files.
-- The script refuses to run against a project whose ref doesn't match `.env.setup` unless `--force` is passed.
-- Destructive steps (schema restore) are gated behind an explicit `--with-schema-restore` flag; default re-runs only do migrations + secrets + functions.
-- All output is colourised, each step is `[1/8] …` prefixed, failures abort with the exact command to retry.
+- **Shields.io badges**: License · Node · React · TypeScript · Supabase · Last commit · Stars
+- **Logo**: reuse `public/striped-square-mark.svg` (or current Ledge mark), centred at 96px
+- **Hero screenshot strip**: 3 PNGs in a single row — Dashboard, Orders, Mobile new-order flow. Pulled from `src/assets/` if available; otherwise placeholder boxes with a TODO note for you to drop screenshots later.
+- **Mermaid architecture diagram**: renders natively on GitHub, no image hosting needed
+- **Centred HTML blocks**: `<p align="center">` for the hero, tagline, badges, and CTA buttons (GitHub renders inline HTML safely)
+- **Collapsible `<details>` blocks**: for long sections (full feature list, environment variables) so the page stays scannable
 
-## Docs updates
+## What it omits (deliberately)
 
-- Replace step 3–6 of `HANDOVER.md` with a single line: `./scripts/setup.sh`.
-- Add a **Setup script** section to `README.md` documenting flags (`--with-schema-restore`, `--skip-functions`, `--force`, `--non-interactive`).
-- Add a short troubleshooting block (CLI not installed, wrong ref, DB password rejected, function deploy timeout).
+- No long setup walkthrough — that lives in `app/README.md` and is linked from the docs index
+- No marketing fluff (no testimonials, no pricing) — that's `getledge.in`
+- No internal architecture deep-dives — those go in a future `docs/` folder
 
-## Out of scope
+## Files touched
 
-- No auto-deploy to hosting (Vercel/Netlify) — recipient still wires that manually, per the earlier decision.
-- No automatic Google OAuth setup — requires dashboard action.
-- No data seed — the recipient starts with an empty workspace by design.
+| File | Action |
+|---|---|
+| `README.md` (root) | **Rewrite** from 3 lines to ~180 lines |
+| `public/og-image.png` | Add a 1200×630 OG card so link previews look polished (generate via imagegen, premium quality) |
+| `.lovable/plan.md` | Updated with completion status |
 
-## After approval
+## Open questions (answer inline or I'll pick reasonable defaults)
 
-I'll rebuild `ledge-handover.zip` with these files included, regenerate `schema.sql` / `storage.sql` from the current live project, and update `HANDOVER-RUNBOOK.md` so Phase 1 instructions point at the new script.
+1. **Demo URL** — link to `https://www.getledge.in`, `https://ledge-fmcg.lovable.app`, or omit?
+2. **Screenshots** — do you want me to generate stylised placeholder images via imagegen, or leave clear `TODO: drop screenshot here` blocks for you to fill in with real captures?
+3. **Contact line** — what email / WhatsApp number should I put under "Get in touch"? Or omit entirely?
+
+If you reply "go", I'll default to: `getledge.in` for the demo link, generate 3 stylised hero screenshots via imagegen, and omit the contact line.
