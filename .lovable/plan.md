@@ -1,76 +1,98 @@
-# Pre-Handover Hardening Audit
 
-A full sweep across the backend, business logic, and runtime to make sure nothing embarrassing ships with the handover ZIP. Read-only investigation — no code changes in this pass. Output is a single prioritised report (`/mnt/documents/ledge-hardening-audit.md`) with severity, file:line, and recommended fix for every finding. After you read it, we decide what to actually fix.
+# Ledge → Complete Hand-Off Bundle (Zero Comeback)
 
-## Scope — 8 audit tracks
+Our Ledge stays exactly as-is on Lovable Cloud. We ship them a self-contained clone they run on their own infra. The bar: they should never need to message us again — every question answered inside the zip.
 
-### 1. Security (highest priority)
-- Run the Supabase security scanner + linter.
-- Manually review every RLS policy on all 28 tables — confirm tenant isolation (`company_id = get_company_id()`) is enforced for SELECT/INSERT/UPDATE/DELETE.
-- Check every `SECURITY DEFINER` function for: search_path set, caller authorization checks, no SQL injection surface.
-- Audit edge functions: JWT validation, CORS, input validation (Zod), secrets usage, no service-role leakage to clients.
-- Confirm no anon-key writes possible to sensitive tables (orders, invoices, profiles, user_roles).
-- Storage: `company-logos` bucket policies — only own-company write, public read OK.
+## The "zero comeback" principle
 
-### 2. Money math (zero tolerance for bugs)
-- `src/lib/order-pricing.ts` — re-verify scheme calculations, GST splits, rounding (paise drift), free-goods stock impact.
-- `dispatch_order_atomic` RPC — re-confirm idempotency, reversal correctness, negative-stock handling.
-- `refresh_entity_aggregates` trigger — verify totals match raw sums under concurrent writes.
-- Aging buckets (`computeDealerAging`) — boundary checks (exactly 30/60/90 days).
-- Revenue scope (delivered vs booked) — confirm UI labels match what's actually computed.
-- Run `bunx vitest run` and audit any failing or skipped pricing/aging tests.
+Every doc must answer not just "how" but also "what is this", "why does it exist", "what breaks if I touch it", and "what do I do when X happens". We over-document on purpose. Three doc tiers:
 
-### 3. Data integrity
-- Check for orphaned rows (order_lines without orders, invoices without orders, stock_deductions without orders) via read-only SQL.
-- Foreign-key cascade behavior — confirm deleting a dealer/product doesn't silently nuke history.
-- Unique constraints on critical fields (order_number, invoice_number, email per company).
-- Trial-period + multi-tenant boundary: no cross-company leakage in any RPC.
+1. **Runbooks** — copy-paste step-by-step (setup, deploy, restore)
+2. **Reference** — what every table/function/secret/env var means
+3. **Troubleshooting** — top 30 things that will go wrong + exact fix
 
-### 4. Auth & RBAC
-- Confirm `has_capability` and `has_role` actually block at DB level, not just UI.
-- Verify capability-gated UI (`<Can>`, `<RequireCapability>`) wraps every dangerous action.
-- Invite flow: token expiry, email match, no role escalation.
-- Google OAuth callback hardening.
+## Deliverable: `ledge-handover.zip`
 
-### 5. Edge functions
-- `aging-check`, `dashboard-digest`, `explain-metric`, `seed-demo-account`, `seed-test-accounts` — review each for: auth, input validation, rate-limit risk, log/PII leakage, secret handling.
-- Tail recent edge-function logs for unhandled errors.
+```
+ledge-handover/
+├── START-HERE.md                    ← single entry point, 10-min read
+├── app/                             ← full source, ready to build
+│   ├── .env.example
+│   ├── README.md                    ← dev workflow, scripts, structure
+│   ├── render.yaml                  ← one-click Render deploy
+│   ├── vercel.json + public/_redirects   ← SPA fallback for any host
+│   └── (entire repo, Lovable-specific bits stripped)
+├── supabase/
+│   ├── migrations/                  ← every migration, ordered
+│   ├── functions/                   ← all 5 edge functions
+│   ├── seed.sql                     ← role_capabilities_default + enums
+│   ├── schema-dump.sql              ← pg_dump --schema-only (safety net)
+│   ├── data-dump.sql                ← pg_dump --data-only (optional)
+│   ├── cron-jobs.sql                ← pg_cron schedules to recreate
+│   └── storage/company-logos/       ← every object from the bucket
+├── docs/
+│   ├── 00-architecture.md           ← system diagram, data flow, tech stack
+│   ├── 01-supabase-setup.md         ← create project → migrations → seed → storage
+│   ├── 02-edge-functions.md         ← what each does, deploy cmd, secrets
+│   ├── 03-auth-setup.md             ← email + Google OAuth, redirect URLs, HIBP
+│   ├── 04-hosting.md                ← Render (recommended) + Vercel/Netlify/AWS
+│   ├── 05-custom-domain.md          ← DNS records, SSL, Supabase Site URL update
+│   ├── 06-secrets-reference.md      ← every secret: what, where to get, who uses it
+│   ├── 07-database-reference.md     ← every table, every column, every RLS policy explained
+│   ├── 08-rbac-and-roles.md         ← roles, capabilities, how to grant/revoke
+│   ├── 09-ai-features.md            ← Gemini setup, swap to OpenAI, disable AI
+│   ├── 10-monitoring.md             ← error_log, Supabase logs, uptime checks
+│   ├── 11-backups.md                ← pg_dump cron, storage backup, restore drill
+│   ├── 12-glossary.md               ← every UI term in plain English (from prior bundle)
+│   ├── 13-troubleshooting.md        ← top 30 issues + exact fixes
+│   ├── 14-faq.md                    ← 50 questions they will ask
+│   └── 15-handover-checklist.md     ← signed checklist they tick off as they go
+├── audits/
+│   ├── ledge-hardening-audit.md
+│   ├── ledge-hardening-summary.md
+│   └── ledge-plain-language-glossary.zip
+└── scripts/
+    ├── export-storage.sh            ← we run this once to populate storage/
+    ├── verify-install.sh            ← they run this post-deploy to sanity-check
+    └── rotate-secrets.sh            ← rotate Google OAuth, cron secret, etc.
+```
 
-### 6. Error handling & observability
-- Confirm every Supabase mutation routes through `handleSupabaseError`.
-- Audit `errorLog` table — recent errors, patterns, unhandled categories.
-- Check `ErrorBoundary` coverage on every route.
-- Toast hygiene — no dev diagnostics leaking to users.
+## Code changes needed before we zip
 
-### 7. Performance & runtime
-- DataContext: confirm two-phase fetch, debounced realtime, no O(N×M) recomputes per memory note.
-- Bundle size + vendor chunks.
-- Largest tables (orders, order_lines, stock_deductions) — confirm appropriate indexes exist.
-- DB health snapshot (connections, WAL, deadlocks).
+These are the only edits to a copy of the repo (our live Ledge is untouched):
 
-### 8. Handover-package sanity
-- Verify exported migrations in `/tmp/handoff/migrations/` actually replay cleanly on a blank schema (dry-run validation, not execution).
-- Confirm `_db_functions.csv` includes every function currently live.
-- README restore steps are accurate.
+1. **AI edge functions** — rewrite `dashboard-digest`, `explain-metric`, any other Lovable-gateway call to hit Google AI Studio directly using `GEMINI_API_KEY`. (Free key from aistudio.google.com.)
+2. **Strip Lovable bits** — remove `lovable-tagger` from `vite.config.ts` + `package.json`, delete `.lovable/`, remove edit-badge wiring.
+3. **Generalise client** — confirm `src/integrations/supabase/client.ts` reads only from env vars (no hardcoded project ref fallback).
+4. **SPA fallback files** — add `render.yaml`, `vercel.json`, `public/_redirects` so deep links work on every host.
+5. **Verify script** — `scripts/verify-install.sh` curls the deployed URL, checks `/auth`, runs a SELECT against their Supabase via REST, prints PASS/FAIL.
 
-## Deliverable
+## What each doc covers (so nothing comes back)
 
-`/mnt/documents/ledge-hardening-audit.md` with:
+- **00-architecture** — React SPA + Supabase (Postgres + Auth + Storage + Edge Functions + pg_cron). Diagram. "If you change X, Y breaks."
+- **01-supabase-setup** — exact CLI commands, expected output, screenshot of dashboard at each step.
+- **06-secrets-reference** — every secret currently in our project, marked **REQUIRED / OPTIONAL / DEV-ONLY (skip)**. For each: what it does, where to get it, format, rotation steps.
+- **07-database-reference** — auto-generated from live schema. All 28 tables, every column with type + purpose, every RLS policy translated to English ("Only members of the same company can read this row").
+- **08-rbac-and-roles** — `super_admin`, `sales_manager`, `accountant`, `viewer`, capability matrix, how to promote/demote a user via SQL.
+- **13-troubleshooting** — "Login redirects to localhost" → fix Site URL. "RLS error on insert" → check capability. "Cron job not firing" → check `cron_secret`. "AI feature returns 500" → check `GEMINI_API_KEY`. 30 entries minimum.
+- **14-faq** — "Can we change the logo?", "How do we add a new role?", "Can we white-label?", "How do we export all data?", "What's the monthly cost?", "Can we self-host Supabase?", etc.
+- **15-handover-checklist** — printable list. They tick: Supabase created ✓, migrations run ✓, storage restored ✓, auth configured ✓, edge functions deployed ✓, cron jobs created ✓, app deployed ✓, custom domain live ✓, verify-install passes ✓, test order placed end-to-end ✓.
 
-- **Executive summary** — counts by severity (Critical / High / Medium / Low / Info)
-- **Per-finding entry** — title, severity, track, file:line or table/function, what's wrong, why it matters, recommended fix, effort estimate
-- **Quick-win list** — anything fixable in <15 min
-- **Must-fix-before-handover list** — anything that would embarrass us in a code review
-- **Accepted-risk list** — known limitations the recipient should be told about (e.g. offline mode paused, dark mode archived)
+## Recommended target stack for them (in START-HERE.md)
 
-Plus a one-pager `/mnt/documents/ledge-hardening-summary.md` you can paste to anyone in 30 seconds.
+- **Hosting**: Render static site (5-min setup, $0–7/mo, auto-deploys from their Git)
+- **Backend**: their own Supabase project (Pro tier, ~$25/mo recommended for production)
+- **AI**: Google AI Studio (Gemini free tier covers normal usage)
+- **Domain**: their existing registrar → Render CNAME
+- **Monitoring**: Supabase built-in dashboard + UptimeRobot (free) hitting their domain
 
-## What I will NOT do in this pass
+Total monthly: ~$25–35 vs. our Lovable setup. We mention this explicitly so they don't ping us asking.
 
-- No code edits — purely diagnostic. After you read the report we pick what to fix.
-- No load-testing or pen-testing (out of scope for a static audit).
-- No re-litigation of product decisions already locked (V2 brand, paused offline, etc.).
+## Open questions before I build
 
-## Estimated runtime
+1. **Data dump**: ship **schema-only + seed** (clean start, no customer data), or **include current production data**? Default = schema-only; safer + no PII handover concerns.
+2. **AI features at handover**: rewrite to direct Gemini calls now so they work day-1, **or** ship them disabled with a "to enable, do X" doc? Default = rewrite now.
+3. **Storage bucket**: ship our current `company-logos` contents or empty? Default = ship contents (small, gives them realistic state).
+4. **Code repo format**: just zipped files, or initialised as a fresh git repo with one initial commit? Default = fresh git repo (easier for them to push to GitHub).
 
-~10–15 minutes of tool calls (security scan + linter + read_queries + file reads across ~40 files + edge-function log tails). Single report at the end.
+Answer those four and I'll generate the full bundle in one pass — every doc, every script, every dump — and hand back `ledge-handover.zip` ready to email.
