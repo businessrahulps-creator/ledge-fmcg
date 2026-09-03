@@ -107,7 +107,7 @@ export function HowItWorks() {
                   {step.description}
                 </p>
 
-                <div className="mt-6">
+                <div className="mt-6 flex-1 flex">
                   <step.Visual />
                 </div>
               </motion.div>
