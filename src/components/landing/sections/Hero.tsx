@@ -34,7 +34,7 @@ export function Hero() {
       <ShaderBackdrop preset="hero" />
 
       {/* Soft dot grid, masked — subtle parallax */}
-      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
+      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft lp-parallax pointer-events-none" />
 
       {/* Motion v3 — single pointer-reactive ambient gradient. Replaces per-button magnetic noise. */}
       <CursorAura tint="hsl(var(--primary) / 0.10)" size={640} />

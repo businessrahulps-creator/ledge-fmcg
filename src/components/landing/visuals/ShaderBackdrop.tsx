@@ -36,7 +36,7 @@ float noise(vec2 p) {
 }
 float fbm(vec2 p) {
   float v = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) { v += a * noise(p); p *= 2.02; a *= 0.5; }
+  for (int i = 0; i < 3; i++) { v += a * noise(p); p *= 2.02; a *= 0.5; }
   return v;
 }
 
@@ -148,11 +148,18 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     gl.uniform1f(uEnergy, cfg.energy);
     gl.uniform1f(uBloom, cfg.bloom);
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Static single frame when motion is unwanted, on small viewports, or on
+    // low-core devices — the animated ground is the most expensive per-frame
+    // work on the landing page.
+    const lowPower =
+      window.innerWidth < 768 ||
+      (navigator.hardwareConcurrency ?? 8) <= 4;
+    const reduce =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches || lowPower;
 
-    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let dpr = Math.min(window.devicePixelRatio || 1, 1) * 0.65;
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      dpr = Math.min(window.devicePixelRatio || 1, 1) * 0.65;
       const w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
       const h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
       if (canvas.width !== w || canvas.height !== h) {
@@ -175,6 +182,19 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", resize);
 
+    // Pause the shader while the page is actively scrolling — the GPU work
+    // competes with layout/paint and is invisible in motion anyway.
+    let scrolling = false;
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      scrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        scrolling = false;
+      }, 160);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     let raf = 0;
     let visible = true;
     let last = 0;
@@ -182,9 +202,10 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
 
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
-      if (!visible || document.hidden) return;
-      if (now - last < 33) return; // ~30fps cap
+      if (!visible || document.hidden || scrolling) return;
+      if (now - last < 40) return; // ~25fps cap
       last = now;
+
       resize();
       const t = (now - start) / 1000;
       // idle drift when the pointer never moves (mobile)
@@ -215,7 +236,10 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
       if (raf) cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
+
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [preset]);

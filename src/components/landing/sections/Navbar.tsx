@@ -19,14 +19,42 @@ const isMac =
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [onDark, setOnDark] = useState(true);
   const [open, setOpen] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
-    onScroll();
+    // One rAF-throttled read per frame, with the hero height cached so the
+    // scroll handler never forces layout mid-scroll.
+    let heroBottom = 0;
+    let ticking = false;
+    const measure = () => {
+      const hero = document.querySelector<HTMLElement>(".lp-block-graphite");
+      heroBottom = hero ? hero.offsetTop + hero.offsetHeight : 0;
+    };
+    const read = () => {
+      ticking = false;
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      setOnDark(y + 96 < heroBottom);
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(read);
+    };
+    const onResize = () => {
+      measure();
+      read();
+    };
+    measure();
+    read();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (
@@ -35,9 +63,10 @@ export function Navbar() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={spring.default}
-        className="fixed top-0 left-0 right-0 z-50 pt-3 md:pt-4 pointer-events-none"
+        className={`fixed top-0 left-0 right-0 z-50 pt-3 md:pt-4 pointer-events-none ${onDark ? "lp-nav--on-dark" : ""}`}
         aria-label="Primary"
       >
+
         {/* ===== Desktop: split → merged capsules ===== */}
         <motion.div
           className="hidden md:flex items-center justify-center mx-auto px-4 pointer-events-none"
