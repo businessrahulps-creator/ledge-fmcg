@@ -19,6 +19,15 @@ interface LandingCardProps {
   /** Min height of the visual well, in px. */
   wellMinHeight?: number;
 }
+/** Explicit map — Tailwind must see full class names to keep these rules. */
+const variantClass: Record<LandingCardVariant, string> = {
+  neutral: "lp-vcard--neutral",
+  midnight: "lp-vcard--midnight",
+  forest: "lp-vcard--forest",
+  terracotta: "lp-vcard--terracotta",
+  bone: "lp-vcard--bone",
+};
+
 
 /**
  * Landing-only visual-first card: a soft 32px shell, a rounded visual well on
