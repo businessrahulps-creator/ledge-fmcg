@@ -70,19 +70,28 @@ describe("Landing section brand placements", () => {
     expect(src).not.toContain("lp-card-electric");
   });
 
-  it("WhyLedge section: electric on the hero card only", () => {
+  it("WhyLedge section: ink on the hero card only (V3.2 blue budget)", () => {
     const src = sectionFile("WhyLedge");
-    expect(countMatches(src, "lp-card-electric")).toBe(1);
-    expect(src).not.toContain("lp-card-ink");
+    expect(countMatches(src, "lp-card-ink")).toBe(1);
+    expect(src).not.toContain("lp-card-electric");
   });
 
-  it("Features section: electric (dealers) + ink (claims)", () => {
+  it("Hero and Final CTA use the graphite anchor, not a full-bleed blue block", () => {
+    expect(sectionFile("Hero")).toContain("lp-block-graphite");
+    expect(sectionFile("FinalCTA")).toContain("lp-block-graphite");
+    expect(sectionFile("FinalCTA")).not.toContain("lp-block-electric");
+    expect(read("src/index.css")).toContain(".lp-block-graphite");
+  });
+
+
+  it("Features section: no full-bleed blue card, ink on claims only (V3.2)", () => {
     // Features uses the LandingCard visual-first primitive, so tints are
     // declared as variant names rather than lp-card-* classes.
     const src = sectionFile("Features");
-    expect(countMatches(src, 'variant: "electric"')).toBe(1);
+    expect(countMatches(src, 'variant: "electric"')).toBe(0);
     expect(countMatches(src, 'variant: "ink"')).toBe(1);
   });
+
 
   it("Outcome section: electric on the hero card only", () => {
     const src = sectionFile("Outcome");

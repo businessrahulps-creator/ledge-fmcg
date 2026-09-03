@@ -26,7 +26,7 @@ const cards: Card[] = [
     visual: <DealerRosterVisual />,
     lede: "Know every dealer.",
     caption: "Full history, credit and behaviour in one profile — no digging.",
-    variant: "electric",
+    variant: "mist",
     span: "lg:col-span-3",
     wellMinHeight: 208,
   },

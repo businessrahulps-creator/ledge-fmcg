@@ -2501,3 +2501,81 @@
   border-top: 1px solid hsl(var(--border));
 }
 .lp-theme .lp-footer .bg-card { background: hsl(var(--brand-mist)); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LANDING V3.2 — Graphite anchors, monochrome first, blue as punctuation
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Soft graphite gradient + film grain. Used by Hero and Final CTA. */
+.lp-theme .lp-block-graphite {
+  position: relative;
+  background-color: #0B0B0C;
+  background-image:
+    radial-gradient(ellipse 120% 90% at 62% 18%, #6B6E73 0%, #3A3C40 34%, #1B1C1E 66%, #0B0B0C 100%),
+    linear-gradient(200deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.55) 62%, #000 100%);
+  background-blend-mode: normal, multiply;
+}
+.lp-theme .lp-block-graphite::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+.lp-theme .lp-block-graphite > * { position: relative; z-index: 1; }
+/* No stripes, no grid, no blue glow on the graphite anchors */
+.lp-theme .lp-block-graphite .lp-grid-soft,
+.lp-theme .lp-block-graphite .lp-mesh-glow,
+.lp-theme .lp-block-graphite .lp-hero-glow { display: none; }
+.lp-theme .lp-block-graphite { background-attachment: scroll; }
+
+/* Mockup floats on the graphite ground */
+.lp-theme .lp-block-graphite img {
+  border-radius: 18px;
+  box-shadow: 0 40px 90px -30px rgba(0,0,0,0.85);
+}
+
+/* CTA inversion inside graphite blocks: white capsule, ink text */
+.lp-theme .lp-block-graphite .lp-capsule-cta,
+.lp-theme .lp-block-graphite .lp-capsule-cta .lp-capsule-cta__inner {
+  background: hsl(0 0% 100%);
+  color: hsl(var(--brand-ink));
+  border-color: transparent;
+}
+.lp-theme .lp-block-graphite .lp-capsule-cta .lp-capsule-cta__label,
+.lp-theme .lp-block-graphite .lp-capsule-cta .lp-capsule-cta__arrow { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-graphite .bg-primary { background: hsl(0 0% 100%); color: hsl(var(--brand-ink)); }
+
+/* Softer paper ground (Problem) */
+.lp-theme .lp-section-soft { background: #FAFAFB; }
+
+/* ── Blue budget: demote filled-blue chrome to ink-on-mist ────────────── */
+.lp-theme .lp-icon-tile,
+.lp-theme .lp-vcard__icon,
+.lp-theme .lp-feature-icon {
+  background: hsl(var(--brand-mist));
+  color: hsl(var(--brand-ink));
+}
+.lp-theme .lp-pill--success .lp-pill__tile {
+  background: hsl(var(--brand-ink));
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-pill--success .lp-pill__label { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-eyebrow::before,
+.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-graphite .lp-eyebrow::before,
+.lp-theme .lp-block-ink .lp-eyebrow::before,
+.lp-theme .lp-block-graphite .lp-eyebrow-dark::before,
+.lp-theme .lp-block-ink .lp-eyebrow-dark::before { background: hsl(0 0% 100% / 0.7); }
+/* Live dot keeps the one true blue */
+.lp-theme .lp-live-dot,
+.lp-theme .lp-nav-status-dot { background: hsl(var(--brand-electric)); }
+
+/* V3.2 — accent marks are ink on light, white on dark */
+.lp-theme .text-accent { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .text-accent,
+.lp-theme .lp-block-graphite .text-accent,
+.lp-theme .lp-card-ink .text-accent { color: hsl(0 0% 100%); }

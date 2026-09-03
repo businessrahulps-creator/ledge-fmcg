@@ -32,7 +32,7 @@ export function Problem() {
   const noiseY = useParallaxY(sectionRef, 15);
 
   return (
-    <section ref={sectionRef} className="relative lp-section-paper py-20 md:py-28 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-section-soft py-20 md:py-28 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
