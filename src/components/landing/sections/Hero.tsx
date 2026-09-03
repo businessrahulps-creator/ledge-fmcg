@@ -136,7 +136,7 @@ export function Hero() {
                     <img
                       src={heroDashboard}
                       alt="Ledge dashboard showing revenue, KPIs, and recent orders"
-                      width={1600}
+                      width={1536}
                       height={1024}
                       fetchPriority="high"
                       decoding="async"

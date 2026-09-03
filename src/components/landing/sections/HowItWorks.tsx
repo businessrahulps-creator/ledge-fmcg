@@ -18,8 +18,8 @@ function ProductShot({ src, alt }: { src: string; alt: string }) {
         <img
           src={src}
           alt={alt}
-          width={1280}
-          height={896}
+          width={768}
+          height={1024}
           loading="lazy"
           className="block w-full h-auto rounded-[4px]"
         />
