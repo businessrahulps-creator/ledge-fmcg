@@ -76,8 +76,6 @@
 
     /* Brand "moments" tokens kept for backward compat with existing utilities,
        but rationing is RETIRED — Midnight/Terracotta now used semantically everywhere. */
-    --brand-purple: 218 60% 14%;
-    --brand-coral: 19 56% 40%;
     --brand-gradient: linear-gradient(90deg, hsl(218 60% 14%) 0%, hsl(19 56% 40%) 100%);
     --brand-gradient-soft: linear-gradient(90deg, hsl(218 60% 14% / 0.08) 0%, hsl(19 56% 40% / 0.08) 100%);
 
@@ -152,8 +150,6 @@
     --surface-border: 30 4% 17%;
 
     /* Brand moments — same hues, slightly lifted for dark backgrounds */
-    --brand-purple: 262 83% 68%;
-    --brand-coral: 22 100% 68%;
     --brand-gradient: linear-gradient(90deg, hsl(262 83% 68%) 0%, hsl(22 100% 68%) 100%);
     --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 68% / 0.14) 0%, hsl(22 100% 68% / 0.14) 100%);
   }
@@ -382,17 +378,7 @@
   /* Warm Bone tint — alternating section rhythm */
   .lp-section-paper {
     background-color: hsl(34 35% 91%);
-  }
-
-  /* Hero — Bone with a soft Terracotta + Midnight haze */
-  .lp-mesh-soft-warm {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(ellipse 90% 55% at 50% -10%, hsl(var(--accent) / 0.10) 0%, transparent 65%),
-      radial-gradient(ellipse 100% 40% at 50% 110%, hsl(var(--primary) / 0.06) 0%, transparent 70%);
-  }
-
-  /* Final CTA — deeper warm Bone close */
+  }  /* Final CTA — deeper warm Bone close */
   .lp-mesh-dark {
     background-color: hsl(34 30% 88%);
     background-image:
@@ -495,20 +481,7 @@
       inset 0 1px 0 hsl(var(--background) / 0.9),
       0 8px 32px -8px hsl(var(--primary) / 0.10),
       0 24px 60px -20px hsl(var(--primary) / 0.14);
-  }
-
-  /* Solid card variant — FinalCTA / Outcome on paper bg */
-  .lp-card-dark {
-    @apply relative rounded-md;
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    box-shadow:
-      inset 0 1px 0 hsl(var(--background) / 0.9),
-      0 1px 2px hsl(var(--primary) / 0.04),
-      0 8px 24px -16px hsl(var(--primary) / 0.12);
-  }
-
-  /* Eyebrow chip — Bone, with a tiny Terracotta dot */
+  }  /* Eyebrow chip — Bone, with a tiny Terracotta dot */
   .lp-eyebrow {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
@@ -1039,84 +1012,6 @@
     z-index: 0;
   }
 
-  /* ─── MIDNIGHT (authority) ─── */
-  .lp-card-midnight {
-    background:
-      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(218 50% 22%) 0%, transparent 55%),
-      linear-gradient(165deg, hsl(218 60% 16%) 0%, hsl(218 65% 11%) 100%);
-    border: 1px solid hsl(218 50% 22%);
-  }
-  .lp-card-midnight::after { filter: invert(1) brightness(2); opacity: 0.08; }
-  .lp-card-midnight,
-  .lp-card-midnight .text-foreground,
-  .lp-card-midnight h1, .lp-card-midnight h2, .lp-card-midnight h3, .lp-card-midnight h4 {
-    color: hsl(var(--primary-foreground));
-  }
-  .lp-card-midnight .text-muted-foreground,
-  .lp-card-midnight p { color: hsl(var(--primary-foreground) / 0.72); }
-  .lp-card-midnight .text-accent { color: hsl(34 60% 78%); }
-  .lp-card-midnight .lp-icon-tile {
-    background: hsl(0 0% 100% / 0.08);
-    border-color: hsl(0 0% 100% / 0.16);
-    color: hsl(var(--primary-foreground));
-  }
-  .lp-card-midnight .lp-icon-tile svg { color: hsl(var(--primary-foreground)); }
-
-  /* ─── FOREST (growth, recovery) ─── */
-  .lp-card-forest {
-    background:
-      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(165 45% 30%) 0%, transparent 55%),
-      linear-gradient(165deg, hsl(165 50% 22%) 0%, hsl(165 55% 16%) 100%);
-    border: 1px solid hsl(165 45% 30%);
-  }
-  .lp-card-forest::after { filter: invert(1) brightness(2); opacity: 0.08; }
-  .lp-card-forest,
-  .lp-card-forest .text-foreground,
-  .lp-card-forest h1, .lp-card-forest h2, .lp-card-forest h3, .lp-card-forest h4 {
-    color: hsl(var(--success-foreground));
-  }
-  .lp-card-forest .text-muted-foreground,
-  .lp-card-forest p { color: hsl(var(--success-foreground) / 0.78); }
-  .lp-card-forest .text-accent { color: hsl(34 60% 80%); }
-  .lp-card-forest .lp-icon-tile {
-    background: hsl(0 0% 100% / 0.10);
-    border-color: hsl(0 0% 100% / 0.18);
-    color: hsl(var(--success-foreground));
-  }
-  .lp-card-forest .lp-icon-tile svg { color: hsl(var(--success-foreground)); }
-
-  /* ─── TERRACOTTA (warmth, alarm, recovery) ─── */
-  .lp-card-terracotta {
-    background:
-      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(19 60% 50%) 0%, transparent 55%),
-      linear-gradient(165deg, hsl(19 56% 42%) 0%, hsl(19 60% 32%) 100%);
-    border: 1px solid hsl(19 60% 50%);
-  }
-  .lp-card-terracotta::after { filter: invert(1) brightness(2); opacity: 0.08; }
-  .lp-card-terracotta,
-  .lp-card-terracotta .text-foreground,
-  .lp-card-terracotta h1, .lp-card-terracotta h2, .lp-card-terracotta h3, .lp-card-terracotta h4 {
-    color: hsl(var(--accent-foreground));
-  }
-  .lp-card-terracotta .text-muted-foreground,
-  .lp-card-terracotta p { color: hsl(var(--accent-foreground) / 0.82); }
-  .lp-card-terracotta .text-accent { color: hsl(34 60% 92%); }
-  .lp-card-terracotta .lp-icon-tile {
-    background: hsl(0 0% 100% / 0.14);
-    border-color: hsl(0 0% 100% / 0.22);
-    color: hsl(var(--accent-foreground));
-  }
-  .lp-card-terracotta .lp-icon-tile svg { color: hsl(var(--accent-foreground)); }
-
-  /* ─── BONE (warm pause, calm) ─── */
-  .lp-card-bone {
-    background:
-      radial-gradient(ellipse 90% 60% at 30% 0%, hsl(34 45% 95%) 0%, transparent 55%),
-      linear-gradient(165deg, hsl(34 38% 90%) 0%, hsl(34 30% 84%) 100%);
-    border: 1px solid hsl(34 30% 82%);
-  }
-  .lp-card-bone::after { opacity: 0.10; }
-  /* Bone keeps existing dark foreground tokens — no overrides needed */
 
   /* Headlines inside tinted cards: bump to Playfair editorial weight */
   .lp-card-tinted h3 {
@@ -1131,6 +1026,7 @@
      Large radii + borderless pillowy shadows + visual-first cards.
      ═══════════════════════════════════════════════════════════════ */
   :root {
+    --lp-r-xs: 8px;
     --lp-r-sm: 12px;
     --lp-r-md: 18px;
     --lp-r-lg: 24px;
@@ -1157,14 +1053,12 @@
   }
 
   /* ── Soften the existing shells (borderless, pillowy) ── */
-  .lp-card,
-  .lp-card-dark {
+  .lp-card {
     border-radius: var(--lp-r-lg);
     border-color: transparent;
     box-shadow: var(--lp-shadow-soft);
   }
-  .lp-card:hover,
-  .lp-card-dark:hover {
+  .lp-card:hover {
     border-color: transparent;
     box-shadow: var(--lp-shadow-lift);
   }
@@ -1174,34 +1068,7 @@
     border-color: transparent;
     box-shadow: var(--lp-shadow-soft-dark);
   }
-  .lp-card-tinted:hover { box-shadow: var(--lp-shadow-lift-dark); }
-  .lp-card-bone { box-shadow: var(--lp-shadow-soft); }
-  .lp-card-bone:hover { box-shadow: var(--lp-shadow-lift); }
-  .lp-icon-tile { border-radius: var(--lp-r-sm); }
-
-  /* ── Softer tonal gradients (derived from brand anchors only) ── */
-  .lp-card-midnight {
-    background:
-      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(218 46% 27%) 0%, transparent 62%),
-      linear-gradient(158deg, hsl(218 55% 19%) 0%, hsl(218 62% 13%) 55%, hsl(218 66% 10%) 100%);
-  }
-  .lp-card-forest {
-    background:
-      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(165 40% 32%) 0%, transparent 62%),
-      linear-gradient(158deg, hsl(165 46% 25%) 0%, hsl(165 52% 18%) 55%, hsl(165 56% 14%) 100%);
-  }
-  .lp-card-terracotta {
-    background:
-      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(19 62% 55%) 0%, transparent 62%),
-      linear-gradient(158deg, hsl(19 58% 47%) 0%, hsl(19 58% 38%) 55%, hsl(19 60% 31%) 100%);
-  }
-  .lp-card-bone {
-    background:
-      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(0 0% 100%) 0%, transparent 65%),
-      linear-gradient(158deg, hsl(34 44% 94%) 0%, hsl(34 34% 88%) 100%);
-  }
-
-  /* ── Visual-first card primitive ── */
+  .lp-card-tinted:hover { box-shadow: var(--lp-shadow-lift-dark); }  .lp-icon-tile { border-radius: var(--lp-r-sm); }  /* ── Visual-first card primitive ── */
   .lp-vcard {
     position: relative;
     display: flex;
@@ -1221,36 +1088,7 @@
     background:
       radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 70%),
       linear-gradient(160deg, hsl(34 30% 97%) 0%, hsl(34 24% 93%) 100%);
-  }
-  .lp-vcard--midnight,
-  .lp-vcard--forest,
-  .lp-vcard--terracotta { box-shadow: var(--lp-shadow-soft-dark); }
-  .lp-vcard--midnight:hover,
-  .lp-vcard--forest:hover,
-  .lp-vcard--terracotta:hover { box-shadow: var(--lp-shadow-lift-dark); }
-
-  .lp-vcard--midnight {
-    background:
-      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(218 46% 28%) 0%, transparent 65%),
-      linear-gradient(158deg, hsl(218 55% 19%) 0%, hsl(218 64% 11%) 100%);
-  }
-  .lp-vcard--forest {
-    background:
-      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(165 40% 33%) 0%, transparent 65%),
-      linear-gradient(158deg, hsl(165 46% 25%) 0%, hsl(165 55% 15%) 100%);
-  }
-  .lp-vcard--terracotta {
-    background:
-      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(19 62% 56%) 0%, transparent 65%),
-      linear-gradient(158deg, hsl(19 58% 47%) 0%, hsl(19 60% 32%) 100%);
-  }
-  .lp-vcard--bone {
-    background:
-      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 68%),
-      linear-gradient(158deg, hsl(34 44% 94%) 0%, hsl(34 32% 87%) 100%);
-  }
-
-  /* Visual well — the graphic half of the card */
+  }  /* Visual well — the graphic half of the card */
   .lp-well {
     position: relative;
     border-radius: var(--lp-r-md);
@@ -1262,21 +1100,7 @@
       0 1px 2px hsl(var(--primary) / 0.04);
   }
   /* Small meta line under a visual (labels, ids, totals) */
-  .lp-well-meta { color: hsl(var(--muted-foreground)); }
-  .lp-vcard--midnight .lp-well-meta,
-  .lp-vcard--forest .lp-well-meta,
-  .lp-vcard--terracotta .lp-well-meta { color: hsl(0 0% 100% / 0.78); }
-  .lp-vcard--midnight .lp-well-meta b,
-  .lp-vcard--forest .lp-well-meta b,
-  .lp-vcard--terracotta .lp-well-meta b { color: hsl(0 0% 100%); }
-  .lp-vcard--midnight .lp-well,
-  .lp-vcard--forest .lp-well,
-  .lp-vcard--terracotta .lp-well {
-    background: hsl(0 0% 100% / 0.10);
-    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.14);
-  }
-
-  /* Caption block — bold lede + muted continuation, reference-style */
+  .lp-well-meta { color: hsl(var(--muted-foreground)); }  /* Caption block — bold lede + muted continuation, reference-style */
   .lp-caption {
     padding: 18px 12px 10px;
     font-family: var(--font-sans);
@@ -1288,15 +1112,7 @@
   .lp-caption b, .lp-caption strong {
     font-weight: 600;
     color: hsl(var(--foreground));
-  }
-  .lp-vcard--midnight .lp-caption,
-  .lp-vcard--forest .lp-caption,
-  .lp-vcard--terracotta .lp-caption { color: hsl(0 0% 100% / 0.74); }
-  .lp-vcard--midnight .lp-caption b,
-  .lp-vcard--forest .lp-caption b,
-  .lp-vcard--terracotta .lp-caption b { color: hsl(0 0% 100%); }
-
-  /* Nested chips inside wells pick up the small radius */
+  }  /* Nested chips inside wells pick up the small radius */
   .lp-well .rounded-xl { border-radius: var(--lp-r-sm); }
 
 
@@ -2066,10 +1882,12 @@
   --accent: var(--brand-lime);
   --accent-foreground: var(--brand-ink);
 
-  --success: var(--brand-electric);
+  /* Honest status colours — independent of the brand accent so a
+     "healthy" state can never render the same as an "at risk" one. */
+  --success: 152 52% 34%;
   --success-foreground: 0 0% 100%;
-  --warning: var(--brand-lime);
-  --warning-foreground: var(--brand-ink);
+  --warning: 34 92% 46%;
+  --warning-foreground: 0 0% 100%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
@@ -2080,10 +1898,22 @@
   --surface: 0 0% 100%;
   --surface-border: 244 18% 88%;
 
-  --brand-purple: var(--brand-electric);
-  --brand-coral: var(--brand-lime);
+  /* ── Surface roles (Material 3 tonal thinking, Apple restraint) ── */
+  --lp-surface:        0 0% 100%;      /* default card            */
+  --lp-surface-sunken: 244 24% 96%;    /* wells, inset panels     */
+  --lp-surface-ink:    var(--brand-ink);
+  --lp-surface-accent: var(--brand-electric);
+
+  /* ── Shape scale — the only radii allowed on the landing page ── */
+  --lp-r-xs: 8px;
+  --lp-r-sm: 12px;
+  --lp-r-md: 18px;
+  --lp-r-lg: 24px;
+  --lp-r-xl: 32px;
+
   --brand-gradient: linear-gradient(90deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-ink)) 100%);
   --brand-gradient-soft: linear-gradient(90deg, hsl(var(--brand-electric) / 0.10) 0%, hsl(var(--brand-ink) / 0.06) 100%);
+
 
   /* Cool Ink-tinted depth (replaces the warm Midnight-on-Bone shadows) */
   --shadow-2:  0 1px 2px hsl(var(--brand-ink) / 0.05);
@@ -2101,7 +1931,6 @@
 /* ── Section grounds: flat, confident colour instead of warm mesh ── */
 .lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
 .lp-theme .lp-section-paper   { background-color: hsl(0 0% 100%); }
-.lp-theme .lp-mesh-soft-warm  { background-color: hsl(var(--brand-mist)); background-image: none; }
 .lp-theme .lp-mesh-dark       { background-color: hsl(var(--brand-mist)); background-image: none; }
 .lp-theme .lp-noise           { display: none; }
 .lp-theme .lp-vignette-top    { background: linear-gradient(to bottom, hsl(var(--brand-ink) / 0.04) 0%, transparent 100%); }
@@ -2273,16 +2102,23 @@
 .lp-theme .lp-pill-accent::after { display: none; }
 
 /* Status pills inside visuals */
-.lp-theme .lp-pill--warn .lp-pill__tile {
-  background: hsl(var(--brand-lime));
-  color: hsl(var(--brand-ink));
-}
-.lp-theme .lp-pill--warn .lp-pill__label { color: hsl(var(--brand-ink)); }
+/* Status pills read honestly: green = healthy, amber = attention,
+   red = overdue. Brand blue is reserved for actions, never for state. */
 .lp-theme .lp-pill--success .lp-pill__tile {
-  background: hsl(var(--brand-electric));
-  color: hsl(0 0% 100%);
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
 }
-.lp-theme .lp-pill--success .lp-pill__label { color: hsl(var(--brand-electric)); }
+.lp-theme .lp-pill--success .lp-pill__label { color: hsl(var(--success)); }
+.lp-theme .lp-pill--warn .lp-pill__tile {
+  background: hsl(var(--warning));
+  color: hsl(var(--warning-foreground));
+}
+.lp-theme .lp-pill--warn .lp-pill__label { color: hsl(28 74% 34%); }
+.lp-theme .lp-pill--bad .lp-pill__tile {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+.lp-theme .lp-pill--bad .lp-pill__label { color: hsl(var(--destructive)); }
 
 /* Eyebrow dots: electric on light, lime on dark blocks */
 .lp-theme .lp-eyebrow::before,
@@ -2325,10 +2161,8 @@
 
 /* Surfaces sitting on a colour block */
 .lp-theme .lp-block-ink .lp-card,
-.lp-theme .lp-block-ink .lp-card-dark,
 .lp-theme .lp-block-ink .lp-glass-frost,
 .lp-theme .lp-block-electric .lp-card,
-.lp-theme .lp-block-electric .lp-card-dark,
 .lp-theme .lp-block-electric .lp-glass-frost {
   background: hsl(0 0% 100% / 0.08);
   border: 1px solid hsl(0 0% 100% / 0.16);
@@ -2456,8 +2290,9 @@
   color: hsl(0 0% 100%);
 }
 .lp-theme .lp-block-ink-hero .lp-pill--success .lp-pill__tile {
-  background: hsl(var(--brand-electric)); color: hsl(0 0% 100%);
+  background: hsl(var(--success)); color: hsl(var(--success-foreground));
 }
+.lp-theme .lp-block-ink-hero .lp-pill--success .lp-pill__label { color: hsl(152 46% 62%); }
 
 /* Primary CTA on the black slab = white capsule with ink text */
 .lp-theme .lp-block-ink-hero .lp-capsule-cta,
@@ -2470,24 +2305,18 @@
 .lp-theme .lp-block-ink-hero .lp-capsule-cta .lp-capsule-cta__arrow { color: hsl(var(--brand-ink)); }
 
 /* ── 2. Lime law: punctuation only ────────────────────────────────────── */
-.lp-theme .lp-pill--warn .lp-pill__tile {
-  background: hsl(var(--brand-ink) / 0.08);
-  color: hsl(var(--brand-ink));
-}
-.lp-theme .lp-pill--warn .lp-pill__label { color: hsl(224 13% 38%); }
 .lp-theme .lp-block-ink-hero .lp-pill--warn .lp-pill__tile {
   background: hsl(0 0% 100% / 0.12); color: hsl(0 0% 100%);
 }
-.lp-theme .lp-live-dot,
-.lp-theme .lp-nav-status-dot { background: hsl(var(--brand-electric)); }
+/* "All systems operational" is a status, so it reads green, not brand blue. */
+.lp-theme .lp-nav-status-dot { background: hsl(var(--success)); }
+.lp-theme .lp-live-dot { background: hsl(var(--brand-electric)); }
 .lp-theme .lp-block-ink .lp-live-dot { background: hsl(var(--brand-lime)); }
 
 /* ── 3. Warm purge — every legacy Bone / Terracotta surface ───────────── */
-.lp-theme .lp-section-paper,
 .lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
 .lp-theme .lp-icon-tile,
 .lp-theme .lp-icon-premium,
-.lp-theme .lp-chip-warm,
 .lp-theme .lp-proof-chip      { background: hsl(var(--brand-mist)); border-color: hsl(var(--border)); color: hsl(var(--brand-ink)); }
 .lp-theme .lp-card-premium    { background: hsl(0 0% 100%); }
 .lp-theme .lp-glass-frost     { background: hsl(0 0% 100% / 0.72); border-color: hsl(var(--border)); }
@@ -2565,8 +2394,6 @@
 .lp-theme .lp-block-graphite:has(.lp-shader-canvas)::before { display: none; }
 .lp-theme .lp-block-graphite:has(.lp-shader-canvas) .lp-grid-soft { opacity: 0.35; }
 
-/* Softer paper ground (Problem) */
-.lp-theme .lp-section-soft { background: #FAFAFB; }
 
 /* ── Blue budget: demote filled-blue chrome to ink-on-mist ────────────── */
 .lp-theme .lp-icon-tile,
@@ -2587,11 +2414,96 @@
 .lp-theme .lp-block-graphite .lp-eyebrow-dark::before,
 .lp-theme .lp-block-ink .lp-eyebrow-dark::before { background: hsl(0 0% 100% / 0.7); }
 /* Live dot keeps the one true blue */
-.lp-theme .lp-live-dot,
-.lp-theme .lp-nav-status-dot { background: hsl(var(--brand-electric)); }
+/* "All systems operational" is a status, so it reads green, not brand blue. */
+.lp-theme .lp-nav-status-dot { background: hsl(var(--success)); }
+.lp-theme .lp-live-dot { background: hsl(var(--brand-electric)); }
 
 /* V3.2 — accent marks are ink on light, white on dark */
 .lp-theme .text-accent { color: hsl(var(--brand-ink)); }
 .lp-theme .lp-block-ink .text-accent,
 .lp-theme .lp-block-graphite .text-accent,
 .lp-theme .lp-card-ink .text-accent { color: hsl(0 0% 100%); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LANDING DESIGN SYSTEM v4 — surfaces, shape, rhythm
+   Apple HIG restraint (one accent, elevation by layering, concentric
+   corners) + Material 3 tonal surface roles. Scoped to .lp-theme only.
+   This block is authoritative: nothing below it may redefine these.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Section grounds — one class family, three grounds ───────────────── */
+.lp-theme .lp-section-paper { background-color: hsl(var(--lp-surface)); background-image: none; }
+.lp-theme .lp-section-soft  { background-color: hsl(var(--lp-surface-sunken)); background-image: none; }
+.lp-theme .lp-section-ink   { background-color: hsl(var(--lp-surface-ink)); background-image: none; }
+
+/* ── Vertical rhythm — exactly two steps ─────────────────────────────── */
+.lp-theme .lp-rhythm-sm { padding-block: 56px; }
+.lp-theme .lp-rhythm    { padding-block: 80px; }
+.lp-theme .lp-rhythm-lg { padding-block: 96px; }
+@media (min-width: 768px) {
+  .lp-theme .lp-rhythm-sm { padding-block: 64px; }
+  .lp-theme .lp-rhythm    { padding-block: 112px; }
+  .lp-theme .lp-rhythm-lg { padding-block: 128px; }
+}
+
+/* ── Card contract ───────────────────────────────────────────────────── */
+.lp-theme .lp-card {
+  position: relative;
+  border-radius: var(--lp-r-lg);
+  background: hsl(var(--lp-surface));
+  border: 1px solid transparent;
+  box-shadow: var(--lp-shadow-soft);
+  transition: box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lp-theme .lp-card:hover { box-shadow: var(--lp-shadow-lift); transform: translateY(-2px); }
+.lp-theme .lp-card--xl { border-radius: var(--lp-r-xl); }
+.lp-theme .lp-card--flat { box-shadow: none; border-color: hsl(var(--border)); }
+.lp-theme .lp-card--flat:hover { transform: none; box-shadow: var(--lp-shadow-soft); }
+.lp-theme .lp-card--sunken {
+  background: hsl(var(--lp-surface-sunken));
+  box-shadow: none;
+  border-color: hsl(var(--border));
+}
+.lp-theme .lp-card--ink    { background: hsl(var(--lp-surface-ink)); color: hsl(0 0% 100%); }
+.lp-theme .lp-card--accent { background: hsl(var(--lp-surface-accent)); color: hsl(0 0% 100%); }
+
+/* On a dark block the same card primitive becomes a lifted translucent panel
+   instead of a white slab — one contract, two grounds. */
+.lp-theme .lp-block-ink .lp-card:not(.lp-card--ink):not(.lp-card--accent) {
+  background: hsl(0 0% 100% / 0.055);
+  border-color: hsl(0 0% 100% / 0.10);
+  color: hsl(0 0% 100%);
+  box-shadow: none;
+}
+.lp-theme .lp-block-ink .lp-card:not(.lp-card--ink):not(.lp-card--accent):hover {
+  background: hsl(0 0% 100% / 0.085);
+  box-shadow: none;
+}
+
+/* Interior padding steps — 20 / 24 / 32 by card size */
+.lp-theme .lp-pad-sm { padding: 20px; }
+.lp-theme .lp-pad-md { padding: 24px; }
+.lp-theme .lp-pad-lg { padding: 32px; }
+
+/* ── Shape normalisation — concentric corners, no stray radii ────────── */
+.lp-theme .lp-card > .lp-well,
+.lp-theme .lp-vcard > .lp-well { border-radius: var(--lp-r-md); }
+.lp-theme .lp-well .rounded-xl,
+.lp-theme .lp-well .rounded-2xl { border-radius: var(--lp-r-sm); }
+.lp-theme .lp-icon-tile,
+.lp-theme .lp-icon-premium,
+.lp-theme .lp-feature-icon { border-radius: var(--lp-r-sm); }
+.lp-theme .lp-card-premium,
+.lp-theme .lp-bento-hero { border-radius: var(--lp-r-xl); }
+.lp-theme .lp-glass-frost { border-radius: var(--lp-r-lg); }
+
+/* ── Equal-height rows for card grids ────────────────────────────────── */
+.lp-theme .lp-grid-stretch { align-items: stretch; }
+.lp-theme .lp-grid-stretch > * { height: 100%; }
+
+/* ── Honest status colour on the landing page ────────────────────────── */
+.lp-theme .lp-status-ok   { color: hsl(var(--success)); }
+.lp-theme .lp-status-warn { color: hsl(var(--warning)); }
+.lp-theme .lp-status-bad  { color: hsl(var(--destructive)); }

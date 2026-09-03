@@ -132,7 +132,7 @@ export function Hero() {
                 }}
               />
               {/* Layer 2 — Bone-tinted glass stage */}
-              <div className="relative lp-card-glass p-3 md:p-4 rounded-md">
+              <div className="relative lp-card-glass p-3 md:p-4 rounded-lp-xs">
                 {/* Layer 3 — browser frame with real product UI */}
                 <BrowserFrame url="app.ledge.in/dashboard">
                   <div className="relative">

@@ -37,10 +37,10 @@ export function MobileStickyCtaBar() {
           transition={{ type: "spring", stiffness: 240, damping: 26 }}
           className="md:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-3 pt-2 pointer-events-none"
         >
-          <div className="pointer-events-auto flex items-center gap-2 rounded-md bg-background/90 backdrop-blur-xl border border-border px-2 py-2 shadow-depth-8">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lp-xs bg-background/90 backdrop-blur-xl border border-border px-2 py-2 shadow-depth-8">
             <Link
               to="/signup"
-              className="flex-1 lp-btn-primary-dark rounded-md py-3 text-center font-body font-semibold text-[14px]"
+              className="flex-1 lp-btn-primary-dark rounded-lp-xs py-3 text-center font-body font-semibold text-[14px]"
             >
               Start free
             </Link>
@@ -48,7 +48,7 @@ export function MobileStickyCtaBar() {
               href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 rounded-md py-3 text-center font-body font-semibold text-[14px]"
+              className="flex-1 rounded-lp-xs py-3 text-center font-body font-semibold text-[14px]"
               style={{ backgroundColor: `${WA_GREEN}1a`, borderColor: `${WA_GREEN}4d`, color: WA_TEXT, borderWidth: 1, borderStyle: "solid" }}
               aria-label="WhatsApp Sales"
             >

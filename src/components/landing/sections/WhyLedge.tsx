@@ -17,9 +17,9 @@ const insetCardStyle = {
 function InstallPreview() {
   return (
     <div className="mt-auto pt-6">
-      <div className="px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+      <div className="px-3.5 py-3 rounded-lp-sm bg-card" style={insetCardStyle}>
         <div className="flex items-center gap-2.5 mb-2">
-          <span className="w-7 h-7 rounded-md bg-foreground/[0.06] flex items-center justify-center shrink-0">
+          <span className="w-7 h-7 rounded-lp-xs bg-foreground/[0.06] flex items-center justify-center shrink-0">
             <Download size={13} strokeWidth={2} className="text-foreground" />
           </span>
           <div className="flex-1 min-w-0">
@@ -44,8 +44,8 @@ function ModulesPreview() {
   return (
     <div className="mt-auto pt-6 space-y-1.5">
       {modules.map((m) => (
-        <div key={m.label} className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-card" style={insetCardStyle}>
-          <span className="w-6 h-6 rounded-md bg-foreground/[0.06] flex items-center justify-center shrink-0">
+        <div key={m.label} className="flex items-center gap-2.5 px-3 py-2 rounded-lp-sm bg-card" style={insetCardStyle}>
+          <span className="w-6 h-6 rounded-lp-xs bg-foreground/[0.06] flex items-center justify-center shrink-0">
             <m.icon size={11} strokeWidth={2} className="text-foreground" />
           </span>
           <span className="font-body text-[12.5px] font-medium text-foreground flex-1">{m.label}</span>
@@ -64,7 +64,7 @@ function OnboardPreview() {
   ];
   return (
     <div className="mt-auto pt-6">
-      <div className="px-3.5 py-3 rounded-xl bg-card" style={insetCardStyle}>
+      <div className="px-3.5 py-3 rounded-lp-sm bg-card" style={insetCardStyle}>
         <div className="relative">
           <span className="absolute left-[5px] top-2 bottom-2 w-px bg-border" aria-hidden />
           <div className="space-y-2.5">
@@ -86,7 +86,7 @@ const blockPreviews: Array<(() => JSX.Element) | null> = [InstallPreview, null, 
 
 export function WhyLedge() {
   return (
-    <section className="lp-section-paper py-20 md:py-28">
+    <section className="lp-section-soft lp-rhythm">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
@@ -116,12 +116,12 @@ export function WhyLedge() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 lp-grid-stretch" staggerTime={0.05}>
           {blocks.map((block, i) => {
             const isHero = i === 1; // "Works when the network doesn't" → Midnight
             return (
               <StaggerItem key={block.title}>
-                <div className={`${isHero ? "lp-card-tinted lp-card-ink" : "lp-card lp-card-premium"} p-7 h-full flex flex-col relative`}>
+                <div className={`${isHero ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col relative`}>
                   {isHero && (
                     <div className="flex justify-end mb-5">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/10 px-2.5 py-1 rounded-full border border-white/20">

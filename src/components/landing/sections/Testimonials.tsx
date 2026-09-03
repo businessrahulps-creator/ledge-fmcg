@@ -37,7 +37,7 @@ export function Testimonials() {
   const _reduce = useReducedMotion();
 
   return (
-    <section className="relative bg-white py-20 md:py-28 overflow-hidden">
+    <section className="relative lp-section-paper lp-rhythm overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
@@ -49,7 +49,7 @@ export function Testimonials() {
         </AnimateIn>
 
         {/* Motion v3 — cards are still on entrance. Hover = unified 120ms intent. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto lp-grid-stretch">
           {testimonials.map((t, i) => {
             const isFeatured = i === 0;
             return (
@@ -62,7 +62,7 @@ export function Testimonials() {
                   </>
                 )}
                 {/* Front card */}
-                <div className={`relative ${isFeatured ? "lp-card-tinted lp-card-mist" : "lp-glass-frost"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
+                <div className={`relative ${isFeatured ? "lp-card lp-card--sunken" : "lp-card"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
                   <span
                     aria-hidden
                     className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"

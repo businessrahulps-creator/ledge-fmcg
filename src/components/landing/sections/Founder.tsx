@@ -13,7 +13,7 @@ export function Founder() {
   const auraY = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-30, 30]);
 
   return (
-    <section ref={sectionRef} className="relative bg-white py-20 md:py-28 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-section-soft lp-rhythm overflow-hidden">
       {/* Soft section ambient wash */}
       <motion.div
         aria-hidden
@@ -43,7 +43,7 @@ export function Founder() {
             <br /><br />
             Your team is in the field right now. Your floor is running. Your business deserves a system that keeps up. Built in India. Designed for the way you actually work.
             <br /><br />
-            <span className="text-accent font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
+            <span className="text-primary font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
           </motion.p>
 
           <div className="mt-8">

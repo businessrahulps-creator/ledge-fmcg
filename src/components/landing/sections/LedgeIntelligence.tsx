@@ -99,7 +99,7 @@ function LiveRoute() {
       </svg>
 
       {/* Telemetry strip — grounds the abstract route in product specifics */}
-      <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-2xl flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
+      <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-lp-lg flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <span className="font-body text-muted-foreground">Photo → Order</span>
           <span className="font-heading font-semibold tracking-tight">~6 sec</span>
@@ -153,7 +153,7 @@ export function LedgeIntelligence() {
     <section
       id="intelligence"
       ref={sectionRef}
-      className="relative lp-block-ink py-20 md:py-28 overflow-hidden"
+      className="relative lp-block-ink lp-rhythm overflow-hidden"
       aria-label="Ledge Intelligence"
     >
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
@@ -205,7 +205,7 @@ export function LedgeIntelligence() {
             if (c.hero) {
               return (
                 <StaggerItem key={c.title}>
-                  <div className="lp-bento-hero lp-card-premium p-7 h-full flex flex-col">
+                  <div className="lp-card lp-card--xl p-7 h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-5">
                       <span className="lp-live-dot" />
                       <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
@@ -233,7 +233,7 @@ export function LedgeIntelligence() {
             }
             return (
               <StaggerItem key={c.title}>
-                <div className="lp-card lp-card-premium p-7 h-full flex flex-col">
+                <div className="lp-card p-7 h-full flex flex-col">
                   <div className="lp-icon-tile lp-icon-premium mb-5" style={{ width: 36, height: 36 }}>
                     <Icon size={17} strokeWidth={1.75} className="text-foreground" />
                   </div>
@@ -255,7 +255,7 @@ export function LedgeIntelligence() {
             <motion.div
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 280, damping: 22 }}
-              className="lp-glass-frost lp-card-premium p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
+              className="lp-card p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-3">

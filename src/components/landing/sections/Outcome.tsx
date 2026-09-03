@@ -41,7 +41,7 @@ export function Outcome() {
   const meshY = useParallaxY(sectionRef, 30);
 
   return (
-    <section ref={sectionRef} className="relative lp-mesh-light py-24 md:py-28 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-section-soft lp-rhythm-lg overflow-hidden">
       <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
@@ -62,17 +62,17 @@ export function Outcome() {
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.05}>
-          <div className="md:rounded-[32px] md:bg-card/60 md:p-4">
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" staggerTime={0.06}>
+          <div className="md:rounded-lp-xl md:bg-card/60 md:p-4">
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lp-grid-stretch" staggerTime={0.06}>
               {outcomes.map((o, idx) => {
                 const Icon = o.icon;
                 const isHero = idx === 1;
                 if (isHero) {
                   return (
                     <StaggerItem key={o.value} variant="scaleUp">
-                      <div className="lp-card-tinted lp-card-electric h-full p-6 flex flex-col">
+                      <div className="lp-card lp-card--accent h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-white/12 border border-white/20 text-foreground shadow-sm">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lp-sm bg-white/12 border border-white/20 text-foreground shadow-sm">
                             <Icon className="h-4 w-4" strokeWidth={2} />
                           </span>
                           <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
@@ -104,9 +104,9 @@ export function Outcome() {
                 }
                 return (
                   <StaggerItem key={o.value} variant="scaleUp">
-                    <div className="group lp-card-premium relative h-full rounded-[24px] bg-card p-6">
+                    <div className="group lp-card relative h-full p-6">
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-secondary border border-border text-foreground lp-icon-premium">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-lp-sm bg-secondary border border-border text-foreground lp-icon-premium">
                           <Icon className="h-4 w-4" strokeWidth={2} />
                         </span>
                         <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground)/0.7)] font-medium">
