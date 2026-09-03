@@ -30,19 +30,16 @@ export default defineConfig(({ mode }) => {
     // VitePWA(...) intentionally removed while offline mode is paused.
     // See mem://features/offline-mode-paused for the full config + revival recipe.
   ].filter(Boolean),
-  // Recharts/d3 hit a Rollup inter-chunk init bug when manually chunked, so
-  // we leave charts in their default chunk. Everything else heavy that's safe
-  // to isolate gets its own chunk so the entry stays lean.
+  // Manual chunking is deliberately minimal. Rollup strands shared interop
+  // helpers inside whichever manual chunk it creates first, and the entry then
+  // imports that chunk wholesale — which is how @react-pdf (502 KB) ended up
+  // downloading on the landing page. Heavy libraries are already behind
+  // dynamic imports at their call sites, so we let Rollup chunk them itself.
   build: {
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes("node_modules")) {
-            if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("@react-pdf"))
-              return "vendor-pdf";
-            if (id.includes("framer-motion") || id.includes("/motion/"))
-              return "vendor-motion";
-            if (id.includes("@radix-ui")) return "vendor-radix";
             if (id.includes("lucide-react")) return "vendor-icons";
             if (id.includes("date-fns")) return "vendor-datefns";
           }
@@ -50,6 +47,7 @@ export default defineConfig(({ mode }) => {
       },
     },
   },
+
   esbuild: mode === "production" ? { drop: ["console", "debugger"] } : {},
   resolve: {
     alias: {
