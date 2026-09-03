@@ -137,10 +137,10 @@ export function Hero() {
                 <BrowserFrame url="app.ledge.in/dashboard">
                   <div className="relative">
                     <img
-                      src={heroDashboard}
-                      alt="Ledge dashboard showing revenue, KPIs, and recent orders"
-                      width={1536}
-                      height={1024}
+                      src={heroFlow}
+                      alt="Orders, invoices, payments and stock flowing into the Ledge mobile app"
+                      width={1440}
+                      height={1080}
                       fetchPriority="high"
                       decoding="async"
                       className="block w-full h-auto"
