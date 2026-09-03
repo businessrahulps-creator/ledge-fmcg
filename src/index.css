@@ -2399,3 +2399,13 @@
   box-shadow: none;
 }
 .lp-theme .lp-progress-glass::after { display: none; }
+
+/* Anything explicitly painted white inside a colour block gets Ink text */
+.lp-theme .lp-block-ink .bg-card,
+.lp-theme .lp-block-electric .bg-card,
+.lp-theme .lp-block-ink .bg-white,
+.lp-theme .lp-block-electric .bg-white { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .bg-card .text-foreground,
+.lp-theme .lp-block-electric .bg-card .text-foreground,
+.lp-theme .lp-block-ink .bg-white .text-foreground,
+.lp-theme .lp-block-electric .bg-white .text-foreground { color: hsl(var(--brand-ink)); }
