@@ -2,10 +2,9 @@ import type { ReactNode } from "react";
 
 export type LandingCardVariant =
   | "neutral"
-  | "midnight"
-  | "forest"
-  | "terracotta"
-  | "bone";
+  | "electric"
+  | "ink"
+  | "mist";
 
 interface LandingCardProps {
   /** The graphic that fills the top well of the card. */
@@ -22,10 +21,9 @@ interface LandingCardProps {
 /** Explicit map — Tailwind must see full class names to keep these rules. */
 const variantClass: Record<LandingCardVariant, string> = {
   neutral: "lp-vcard--neutral",
-  midnight: "lp-vcard--midnight",
-  forest: "lp-vcard--forest",
-  terracotta: "lp-vcard--terracotta",
-  bone: "lp-vcard--bone",
+  electric: "lp-vcard--electric",
+  ink: "lp-vcard--ink",
+  mist: "lp-vcard--mist",
 };
 
 

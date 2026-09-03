@@ -17,7 +17,7 @@ export function FinalCTA() {
   const gridY = useParallaxY(sectionRef, 30);
 
   return (
-    <section ref={sectionRef} className="relative lp-mesh-dark py-20 md:py-28 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-block-electric py-20 md:py-28 overflow-hidden">
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
       {/* Motion v3 — the one ambient pointer layer outside the hero. */}
       <CursorAura tint="hsl(var(--accent) / 0.12)" size={560} />
