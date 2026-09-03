@@ -80,7 +80,7 @@ describe("Landing section brand placements", () => {
     expect(sectionFile("Hero")).toContain("lp-block-graphite");
     expect(sectionFile("FinalCTA")).toContain("lp-block-graphite");
     expect(sectionFile("FinalCTA")).not.toContain("lp-block-electric");
-    expect(css).toContain(".lp-block-graphite");
+    expect(read("src/index.css")).toContain(".lp-block-graphite");
   });
 
 
