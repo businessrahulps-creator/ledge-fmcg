@@ -1,26 +1,27 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-// V2 brand: Midnight / Terracotta / Forest / Bone — Midnight-tinted neutrals.
-const C = "#0F1F3A";              // Midnight (foreground)
-const C_MUTED = "#5B6478";        // Midnight-tinted muted
-const C_FAINT = "#A3A8B3";        // Midnight-tinted faint
-const FILL_BG = "rgba(15,31,58,0.025)";
-const FILL_ACCENT = "rgba(15,31,58,0.06)";
-const ZEBRA = "#F5EFE6";          // Bone
+// V3 brand: Electric / Ink / Lime / Mist — no warm tones.
+const C = "#1B2130";              // Ink (foreground)
+const C_MUTED = "#5C6479";        // Ink-tinted muted
+const C_FAINT = "#A6AABB";        // Ink-tinted faint
+const FILL_BG = "rgba(27,33,48,0.025)";
+const FILL_ACCENT = "rgba(27,33,48,0.06)";
+const ZEBRA = "#F3F3F8";          // Mist tint
 const SURFACE = "#FFFFFF";        // card surface (kept literal — paper)
-const HAIRLINE = "#E8E1D4";       // Bone-tinted hairline (replaces #E8E1D4)
-const INDIGO = "#A0522D";         // Terracotta accent
-const INDIGO_SOFT = "rgba(160,82,45,0.08)";
-const EMERALD = "#0E2A22";        // Forest
-const EMERALD_SOFT = "#E6EDE9";
-const EMERALD_BORDER = "#CFDBD4";
-const AMBER = "#A0522D";
-const AMBER_SOFT = "#FBEFE6";
-const AMBER_BORDER = "#F0DBC8";
-const INDIGO_TEXT = "#7A3E22";    // Deep Terracotta
-const INDIGO_PILL_BG = "#FBEFE6";
-const INDIGO_PILL_BORDER = "#F0DBC8";
+const HAIRLINE = "#E3E3EE";       // Mist hairline
+const INDIGO = "#1B57F5";         // Electric accent
+const INDIGO_SOFT = "rgba(27,87,245,0.08)";
+const EMERALD = "#1B57F5";        // Electric (was Forest)
+const EMERALD_SOFT = "#E7EDFE";
+const EMERALD_BORDER = "#CBD9FC";
+const AMBER = "#1B2130";          // Ink (was Amber)
+const AMBER_SOFT = "#EFEFF6";
+const AMBER_BORDER = "#DFDFEC";
+const INDIGO_TEXT = "#1443C9";    // Deep Electric
+const INDIGO_PILL_BG = "#E7EDFE";
+const INDIGO_PILL_BORDER = "#CBD9FC";
+
 const STROKE_W = 1;
 
 function useSvgInView() {
