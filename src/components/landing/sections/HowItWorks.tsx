@@ -76,11 +76,11 @@ export function HowItWorks() {
           </div>
 
 
-          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-10">
+          <div className="relative grid grid-cols-1 md:grid-cols-3 items-stretch gap-10 md:gap-8 lg:gap-10">
             {steps.map((step, i) => (
               <motion.div
                 key={step.badge}
-                className="relative pl-14 md:pl-0"
+                className="relative pl-14 md:pl-0 flex flex-col h-full"
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
@@ -107,7 +107,7 @@ export function HowItWorks() {
                   {step.description}
                 </p>
 
-                <div className="mt-6">
+                <div className="mt-6 flex-1 flex">
                   <step.Visual />
                 </div>
               </motion.div>
