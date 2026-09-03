@@ -2553,7 +2553,15 @@
 /* V3.3 — live shader ground on the dark anchors.
    The CSS graphite gradient stays as the no-WebGL fallback; the static
    grain tile and dot grid step aside when the canvas is mounted. */
-.lp-theme .lp-shader-canvas { z-index: 0; display: block; }
+.lp-theme .lp-block-graphite > canvas.lp-shader-canvas,
+.lp-theme canvas.lp-shader-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
 .lp-theme .lp-block-graphite:has(.lp-shader-canvas)::before { display: none; }
 .lp-theme .lp-block-graphite:has(.lp-shader-canvas) .lp-grid-soft { opacity: 0.35; }
 
