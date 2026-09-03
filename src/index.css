@@ -2573,3 +2573,9 @@
 /* Live dot keeps the one true blue */
 .lp-theme .lp-live-dot,
 .lp-theme .lp-nav-status-dot { background: hsl(var(--brand-electric)); }
+
+/* V3.2 — accent marks are ink on light, white on dark */
+.lp-theme .text-accent { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .text-accent,
+.lp-theme .lp-block-graphite .text-accent,
+.lp-theme .lp-card-ink .text-accent { color: hsl(0 0% 100%); }
