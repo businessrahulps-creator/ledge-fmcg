@@ -132,13 +132,9 @@ export function StockHealthVisual() {
       </div>
 
       {!still && (
-        <motion.span
+        <span
           aria-hidden
-          className="absolute right-4 bottom-4 w-2 h-2 rounded-full bg-foreground"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: [0, 1, 0.35, 1] }}
-          viewport={viewport}
-          transition={{ duration: 1.4, delay: 0.7, ease: ease.standard }}
+          className="absolute right-4 bottom-4 w-2 h-2 rounded-full bg-foreground animate-pulse"
         />
       )}
     </div>

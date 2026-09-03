@@ -92,19 +92,9 @@ export function HowItWorks() {
               >
                 {/* Node */}
                 <div className="absolute left-0 top-0 md:relative md:mb-6">
-                  <motion.span
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-secondary border border-border text-foreground"
-                    initial={{ scale: 0.85, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true, margin: "-80px" }}
-                    transition={{
-                      duration: duration.short,
-                      ease: ease.emphasized,
-                      delay: 0.18 + i * 0.12,
-                    }}
-                  >
+                  <span className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-secondary border border-border text-foreground">
                     <step.icon size={17} strokeWidth={2} />
-                  </motion.span>
+                  </span>
                 </div>
 
                 <span className="font-heading font-semibold text-[11.5px] text-muted-foreground tracking-[0.18em] block">
