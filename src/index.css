@@ -12,147 +12,9 @@
     --cream: #F5EFE6;
     --lp-white: #FFFFFF;
 
-    /* ═══════════════════════════════════════════════════════════════
-       LEDGE V2 — Brand identity wins, Fluent 2 = methodology only
-       Palette: Midnight / Forest / Terracotta / Bone + neutrals
-       Type: Playfair Display (H1/H2 only) + Inter (everything else)
-       ═══════════════════════════════════════════════════════════════ */
-
-    /* Brand anchors (raw HSL for reference) */
-    --ledge-midnight: 218 60% 14%;   /* #0F1F3A */
-    --ledge-forest:   165 50% 11%;   /* #0E2A22 */
-    --ledge-terracotta: 19 56% 40%;  /* #A0522D */
-    --ledge-bone:     34 47% 93%;    /* #F5EFE6 */
-
-    /* Surfaces */
-    --background: 34 47% 93%;        /* Bone */
-    --foreground: 220 22% 8%;        /* Near-black, slight cool */
-
-    --card: 0 0% 100%;               /* Pure white card on Bone */
-    --card-foreground: 220 22% 8%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 22% 8%;
-
-    /* Primary = Midnight */
-    --primary: 218 60% 14%;
-    --primary-foreground: 34 47% 96%;
-
-    --secondary: 34 25% 88%;         /* Warm bone tint */
-    --secondary-foreground: 220 22% 14%;
-
-    --muted: 34 20% 90%;
-    --muted-foreground: 220 10% 38%;
-
-    --accent: 19 56% 40%;            /* Terracotta */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 65% 42%;        /* Deep red, enterprise-grade */
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 165 50% 22%;          /* Forest, lifted for legibility */
-    --success-foreground: 0 0% 100%;
-
-    --warning: 19 56% 40%;           /* Terracotta doubles as warning */
-    --warning-foreground: 0 0% 100%;
-
-    --border: 30 8% 84%;             /* Quiet warm gray */
-    --input: 30 8% 84%;
-    --ring: 218 60% 14%;             /* Focus = Midnight */
-
-    --radius: 0.375rem;              /* 6px — Fluent 2 default */
-
-    --sidebar-background: 34 47% 93%;
-    --sidebar-foreground: 220 22% 14%;
-    --sidebar-primary: 218 60% 14%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 34 30% 87%;
-    --sidebar-accent-foreground: 218 60% 14%;
-    --sidebar-border: 30 8% 82%;
-    --sidebar-ring: 218 60% 14%;
-
-    --surface: 0 0% 100%;
-    --surface-border: 30 8% 86%;
-
-    /* Brand "moments" tokens kept for backward compat with existing utilities,
-       but rationing is RETIRED — Midnight/Terracotta now used semantically everywhere. */
-    --brand-gradient: linear-gradient(90deg, hsl(218 60% 14%) 0%, hsl(19 56% 40%) 100%);
-    --brand-gradient-soft: linear-gradient(90deg, hsl(218 60% 14% / 0.08) 0%, hsl(19 56% 40% / 0.08) 100%);
-
-    /* ── Fluent 2 methodology: depth, motion, density ──
-       Warm shadows tuned to Midnight on Bone for an editorial paper feel. */
-    --shadow-2:  0 1px 2px hsl(218 40% 14% / 0.05);
-    --shadow-4:  0 2px 6px hsl(218 40% 14% / 0.06), 0 1px 2px hsl(218 40% 14% / 0.04);
-    --shadow-8:  0 6px 14px hsl(218 40% 14% / 0.08), 0 2px 4px hsl(218 40% 14% / 0.04);
-    --shadow-16: 0 10px 24px hsl(218 40% 14% / 0.10), 0 3px 6px hsl(218 40% 14% / 0.05);
-    --shadow-28: 0 18px 40px hsl(218 40% 14% / 0.14), 0 6px 12px hsl(218 40% 14% / 0.06);
-    --shadow-focus: 0 0 0 3px hsl(var(--ring) / 0.18);
-
-    --motion-fast:    100ms;
-    --motion-normal:  200ms;
-    --motion-slow:    300ms;
-    --motion-ease:    cubic-bezier(0.33, 0, 0.67, 1);  /* Fluent standard */
-    --motion-decel:   cubic-bezier(0.1, 0.9, 0.2, 1);
-    --motion-accel:   cubic-bezier(0.7, 0, 1, 0.5);
-
-    --control-h-compact: 32px;
-    --control-h-default: 40px;
-
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-heading: 'Playfair Display', Georgia, serif;
-  }
-
   .dark {
     --background: 30 6% 7%;
     --foreground: 30 5% 93%;
-
-    --card: 30 5% 10%;
-    --card-foreground: 30 5% 93%;
-
-    --popover: 30 5% 10%;
-    --popover-foreground: 30 5% 93%;
-
-    --primary: 222 75% 65%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 30 4% 14%;
-    --secondary-foreground: 30 5% 93%;
-
-    --muted: 30 4% 14%;
-    --muted-foreground: 30 4% 52%;
-
-    --accent: 222 60% 55%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 90% 68%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 172 70% 48%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 100% 50%;
-    --warning-foreground: 30 10% 10%;
-
-    --border: 30 4% 17%;
-    --input: 30 4% 17%;
-    --ring: 222 75% 65%;
-
-    --sidebar-background: 30 6% 7%;
-    --sidebar-foreground: 30 5% 93%;
-    --sidebar-primary: 160 40% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 4% 12%;
-    --sidebar-accent-foreground: 30 5% 93%;
-    --sidebar-border: 30 4% 17%;
-    --sidebar-ring: 222 75% 65%;
-
-    --surface: 30 5% 10%;
-    --surface-border: 30 4% 17%;
-
-    /* Brand moments — same hues, slightly lifted for dark backgrounds */
-    --brand-gradient: linear-gradient(90deg, hsl(262 83% 68%) 0%, hsl(22 100% 68%) 100%);
-    --brand-gradient-soft: linear-gradient(90deg, hsl(262 83% 68% / 0.14) 0%, hsl(22 100% 68% / 0.14) 100%);
-  }
 }
 
 @layer base {
@@ -1032,26 +894,6 @@
     --lp-r-lg: 24px;
     --lp-r-xl: 32px;
 
-    --lp-shadow-soft:
-      inset 0 1px 0 hsl(0 0% 100% / 0.65),
-      0 1px 2px hsl(var(--primary) / 0.04),
-      0 10px 24px -14px hsl(var(--primary) / 0.14),
-      0 32px 64px -40px hsl(var(--primary) / 0.22);
-    --lp-shadow-lift:
-      inset 0 1px 0 hsl(0 0% 100% / 0.7),
-      0 2px 6px hsl(var(--primary) / 0.05),
-      0 18px 36px -16px hsl(var(--primary) / 0.18),
-      0 48px 88px -44px hsl(var(--primary) / 0.28);
-    --lp-shadow-soft-dark:
-      inset 0 1px 0 hsl(0 0% 100% / 0.10),
-      0 12px 28px -16px hsl(var(--primary) / 0.30),
-      0 40px 72px -44px hsl(var(--primary) / 0.45);
-    --lp-shadow-lift-dark:
-      inset 0 1px 0 hsl(0 0% 100% / 0.14),
-      0 20px 40px -18px hsl(var(--primary) / 0.36),
-      0 56px 96px -48px hsl(var(--primary) / 0.52);
-  }
-
   /* ── Soften the existing shells (borderless, pillowy) ── */
   .lp-card {
     border-radius: var(--lp-r-lg);
@@ -1126,19 +968,6 @@
   --ease-standard:   cubic-bezier(0.8, 0, 0.2, 1);
   --ease-accelerate: cubic-bezier(0.7, 0, 1, 0.5);
   --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
-
-  /* Durations (ms) */
-  --duration-micro:  180ms;
-  --duration-short:  280ms;
-  --duration-medium: 420ms;
-  --duration-long:   720ms;
-  --duration-hero:  1000ms;
-
-  /* Depth/blur tiers — chips=1, cards=2, navbar=3 */
-  --blur-1:  8px;
-  --blur-2: 16px;
-  --blur-3: 24px;
-}
 
   /* ═══════════════════════════════════════════════════════════════
      PREMIUM INTERACTION LAYER — cards, icons, buttons
@@ -1865,69 +1694,6 @@
   --background: var(--brand-mist);
   --foreground: var(--brand-ink);
 
-  --card: 0 0% 100%;
-  --card-foreground: var(--brand-ink);
-  --popover: 0 0% 100%;
-  --popover-foreground: var(--brand-ink);
-
-  --primary: var(--brand-electric);
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 244 24% 88%;
-  --secondary-foreground: var(--brand-ink);
-
-  --muted: 244 22% 90%;
-  --muted-foreground: 224 13% 42%;
-
-  --accent: var(--brand-lime);
-  --accent-foreground: var(--brand-ink);
-
-  /* Honest status colours — independent of the brand accent so a
-     "healthy" state can never render the same as an "at risk" one. */
-  --success: 152 52% 34%;
-  --success-foreground: 0 0% 100%;
-  --warning: 34 92% 46%;
-  --warning-foreground: 0 0% 100%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
-
-  --border: 244 18% 86%;
-  --input: 244 18% 86%;
-  --ring: var(--brand-electric);
-
-  --surface: 0 0% 100%;
-  --surface-border: 244 18% 88%;
-
-  /* ── Surface roles (Material 3 tonal thinking, Apple restraint) ── */
-  --lp-surface:        0 0% 100%;      /* default card            */
-  --lp-surface-sunken: 244 24% 96%;    /* wells, inset panels     */
-  --lp-surface-ink:    var(--brand-ink);
-  --lp-surface-accent: var(--brand-electric);
-
-  /* ── Shape scale — the only radii allowed on the landing page ── */
-  --lp-r-xs: 8px;
-  --lp-r-sm: 12px;
-  --lp-r-md: 18px;
-  --lp-r-lg: 24px;
-  --lp-r-xl: 32px;
-
-  --brand-gradient: linear-gradient(90deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-ink)) 100%);
-  --brand-gradient-soft: linear-gradient(90deg, hsl(var(--brand-electric) / 0.10) 0%, hsl(var(--brand-ink) / 0.06) 100%);
-
-
-  /* Cool Ink-tinted depth (replaces the warm Midnight-on-Bone shadows) */
-  --shadow-2:  0 1px 2px hsl(var(--brand-ink) / 0.05);
-  --shadow-4:  0 2px 6px hsl(var(--brand-ink) / 0.06), 0 1px 2px hsl(var(--brand-ink) / 0.04);
-  --shadow-8:  0 6px 14px hsl(var(--brand-ink) / 0.08), 0 2px 4px hsl(var(--brand-ink) / 0.04);
-  --shadow-16: 0 10px 24px hsl(var(--brand-ink) / 0.10), 0 3px 6px hsl(var(--brand-ink) / 0.05);
-  --shadow-28: 0 18px 40px hsl(var(--brand-ink) / 0.14), 0 6px 12px hsl(var(--brand-ink) / 0.06);
-
-  --lp-shadow-soft: 0 1px 2px hsl(var(--brand-ink) / 0.04), 0 12px 28px -18px hsl(var(--brand-ink) / 0.20);
-  --lp-shadow-lift: 0 2px 6px hsl(var(--brand-ink) / 0.06), 0 22px 46px -22px hsl(var(--brand-ink) / 0.26);
-  --lp-shadow-soft-dark: 0 2px 8px hsl(var(--brand-ink) / 0.16), 0 24px 48px -26px hsl(var(--brand-ink) / 0.40);
-  --lp-shadow-lift-dark: 0 4px 12px hsl(var(--brand-ink) / 0.20), 0 34px 64px -30px hsl(var(--brand-ink) / 0.48);
-}
-
 /* ── Section grounds: flat, confident colour instead of warm mesh ── */
 .lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
 .lp-theme .lp-section-paper   { background-color: hsl(0 0% 100%); }
@@ -1966,62 +1732,27 @@
 .lp-theme .lp-shimmer::after { opacity: 0; }
 .lp-theme .lp-bento-hero {
   background: linear-gradient(135deg, hsl(244 26% 94%) 0%, hsl(244 24% 90%) 60%, hsl(224 40% 88%) 100%);
-}
-
-/* ── Tinted blocks: Electric / Ink / Mist ── */
-.lp-theme .lp-card-electric,
-.lp-theme .lp-vcard--electric {
+}.lp-theme .lp-vcard--electric {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 92% 60%) 0%, transparent 65%),
     linear-gradient(158deg, hsl(224 91% 55%) 0%, hsl(224 88% 48%) 100%);
-}
-.lp-theme .lp-card-ink,
-.lp-theme .lp-vcard--ink {
+}.lp-theme .lp-vcard--ink {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 26% 22%) 0%, transparent 65%),
     linear-gradient(158deg, hsl(224 27% 18%) 0%, hsl(224 30% 12%) 100%);
-}
-.lp-theme .lp-card-mist,
-.lp-theme .lp-vcard--mist {
+}.lp-theme .lp-vcard--mist {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 68%),
     linear-gradient(158deg, hsl(244 30% 95%) 0%, hsl(244 24% 89%) 100%);
 }
 .lp-theme .lp-vcard--neutral {
   background: linear-gradient(160deg, hsl(0 0% 100%) 0%, hsl(244 26% 96%) 100%);
-}
-
-/* Dark-block typography + inner surfaces */
-.lp-theme .lp-card-electric,
-.lp-theme .lp-card-ink,
-.lp-theme .lp-vcard--electric,
-.lp-theme .lp-vcard--ink,
-.lp-theme .lp-card-electric .text-foreground,
-.lp-theme .lp-card-ink .text-foreground,
-.lp-theme .lp-card-electric h1, .lp-theme .lp-card-electric h2,
-.lp-theme .lp-card-electric h3, .lp-theme .lp-card-electric h4,
-.lp-theme .lp-card-ink h1, .lp-theme .lp-card-ink h2,
-.lp-theme .lp-card-ink h3, .lp-theme .lp-card-ink h4 { color: hsl(0 0% 100%); }
-
-.lp-theme .lp-card-electric p, .lp-theme .lp-card-ink p,
-.lp-theme .lp-card-electric .text-muted-foreground,
-.lp-theme .lp-card-ink .text-muted-foreground,
-.lp-theme .lp-vcard--electric .lp-well-meta,
-.lp-theme .lp-vcard--ink .lp-well-meta { color: hsl(0 0% 100% / 0.76); }
-
-/* Lime reads only on Ink — on Electric use white */
-.lp-theme .lp-card-ink .text-accent,
-.lp-theme .lp-vcard--ink .text-accent { color: hsl(var(--brand-lime)); }
-.lp-theme .lp-card-electric .text-accent,
-.lp-theme .lp-vcard--electric .text-accent { color: hsl(0 0% 100%); }
-
-.lp-theme .lp-card-electric .lp-icon-tile,
-.lp-theme .lp-card-ink .lp-icon-tile {
+}.lp-theme .lp-vcard--electric,
+.lp-theme .lp-vcard--ink { color: hsl(0 0% 100%); }.lp-theme .lp-vcard--electric .lp-well-meta,
+.lp-theme .lp-vcard--ink .lp-well-meta { color: hsl(0 0% 100% / 0.76); }.lp-theme .lp-vcard--ink .text-accent { color: hsl(var(--brand-lime)); }.lp-theme .lp-vcard--electric .text-accent { color: hsl(0 0% 100%); }
   background: hsl(0 0% 100% / 0.14);
   border-color: hsl(0 0% 100% / 0.22);
-}
-.lp-theme .lp-card-electric .lp-icon-tile svg,
-.lp-theme .lp-card-ink .lp-icon-tile svg { color: hsl(0 0% 100%); }
+} color: hsl(0 0% 100%); }
 
 .lp-theme .lp-vcard--electric,
 .lp-theme .lp-vcard--ink { box-shadow: var(--lp-shadow-soft-dark); }
@@ -2122,9 +1853,7 @@
 
 /* Eyebrow dots: electric on light, lime on dark blocks */
 .lp-theme .lp-eyebrow::before,
-.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-electric)); }
-.lp-theme .lp-card-ink .lp-eyebrow::before,
-.lp-theme .lp-card-ink .lp-eyebrow-dark::before { background: hsl(var(--brand-lime)); }
+.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-electric)); } background: hsl(var(--brand-lime)); }
 
 /* Live status dot stays lime — it reads as "on" */
 .lp-theme .lp-nav-status-dot,
@@ -2419,10 +2148,8 @@
 .lp-theme .lp-live-dot { background: hsl(var(--brand-electric)); }
 
 /* V3.2 — accent marks are ink on light, white on dark */
-.lp-theme .text-accent { color: hsl(var(--brand-ink)); }
-.lp-theme .lp-block-ink .text-accent,
-.lp-theme .lp-block-graphite .text-accent,
-.lp-theme .lp-card-ink .text-accent { color: hsl(0 0% 100%); }
+.lp-theme .text-accent { color: hsl(var(--brand-ink)); }.lp-theme .lp-block-ink .text-accent,
+.lp-theme .lp-block-graphite .text-accent { color: hsl(0 0% 100%); }
 
 
 /* ═══════════════════════════════════════════════════════════════════════
