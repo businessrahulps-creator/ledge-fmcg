@@ -20,13 +20,14 @@ import { Footer } from "@/components/landing/sections/Footer";
 export default function Index() {
   const { user, loading, authReady } = useAuth();
 
-  if (loading || !authReady) {
-    return <SplashScreen />;
-  }
-
-  if (user) {
+  // The landing page is public: never gate first paint on the session lookup.
+  // Inside the Lovable preview the session is brokered over postMessage and can
+  // take seconds to resolve — visitors would just see a splash screen.
+  // We only redirect once auth has actually resolved and a user exists.
+  if (!loading && authReady && user) {
     return <Navigate to="/dashboard" replace />;
   }
+
 
   return (
     <div className="font-body antialiased light" data-theme="light" style={{ colorScheme: "light", scrollBehavior: "smooth" }}>
