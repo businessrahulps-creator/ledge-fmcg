@@ -9,7 +9,7 @@ import { ease, duration } from "@/lib/motion";
    ═══════════════════════════════════════════════════════════════ */
 
 const well =
-  "relative w-full rounded-lp-lg bg-secondary/60 border border-border/70 p-4 overflow-hidden";
+  "relative w-full h-full rounded-lp-lg bg-secondary/60 border border-border/70 p-4 overflow-hidden";
 
 const rowClass =
   "flex items-center justify-between gap-3 px-3 py-2 rounded-lp-sm bg-card";
