@@ -7,7 +7,7 @@ export function SplashScreen() {
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-3xl"
-        style={{ background: "radial-gradient(circle, hsl(19 56% 40% / 0.35), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, hsl(224 91% 53% / 0.28), transparent 70%)" }}
       />
       <img
         src={ledgeLogo}

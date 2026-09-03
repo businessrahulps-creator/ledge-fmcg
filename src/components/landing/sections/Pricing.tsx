@@ -166,7 +166,7 @@ export function Pricing() {
                         <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${
                           plan.highlighted ? "bg-white border-white" :
                           tintMidnight ? "bg-white/15 border-white/25" :
-                          "bg-[hsl(34_30%_90%)] border-border"
+                          "bg-secondary border-border"
                         }`}>
                           <Check size={10} className={plan.highlighted ? "text-accent" : tintMidnight ? "text-primary-foreground" : "text-foreground"} strokeWidth={3} />
                         </span>

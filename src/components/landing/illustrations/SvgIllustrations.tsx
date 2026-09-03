@@ -1,26 +1,27 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-// V2 brand: Midnight / Terracotta / Forest / Bone — Midnight-tinted neutrals.
-const C = "#0F1F3A";              // Midnight (foreground)
-const C_MUTED = "#5B6478";        // Midnight-tinted muted
-const C_FAINT = "#A3A8B3";        // Midnight-tinted faint
-const FILL_BG = "rgba(15,31,58,0.025)";
-const FILL_ACCENT = "rgba(15,31,58,0.06)";
-const ZEBRA = "#F5EFE6";          // Bone
+// V3 brand: Electric / Ink / Lime / Mist — no warm tones.
+const C = "#1B2130";              // Ink (foreground)
+const C_MUTED = "#5C6479";        // Ink-tinted muted
+const C_FAINT = "#A6AABB";        // Ink-tinted faint
+const FILL_BG = "rgba(27,33,48,0.025)";
+const FILL_ACCENT = "rgba(27,33,48,0.06)";
+const ZEBRA = "#F3F3F8";          // Mist tint
 const SURFACE = "#FFFFFF";        // card surface (kept literal — paper)
-const HAIRLINE = "#E8E1D4";       // Bone-tinted hairline (replaces #E8E1D4)
-const INDIGO = "#A0522D";         // Terracotta accent
-const INDIGO_SOFT = "rgba(160,82,45,0.08)";
-const EMERALD = "#0E2A22";        // Forest
-const EMERALD_SOFT = "#E6EDE9";
-const EMERALD_BORDER = "#CFDBD4";
-const AMBER = "#A0522D";
-const AMBER_SOFT = "#FBEFE6";
-const AMBER_BORDER = "#F0DBC8";
-const INDIGO_TEXT = "#7A3E22";    // Deep Terracotta
-const INDIGO_PILL_BG = "#FBEFE6";
-const INDIGO_PILL_BORDER = "#F0DBC8";
+const HAIRLINE = "#E3E3EE";       // Mist hairline
+const INDIGO = "#1B57F5";         // Electric accent
+const INDIGO_SOFT = "rgba(27,87,245,0.08)";
+const EMERALD = "#1B57F5";        // Electric (was Forest)
+const EMERALD_SOFT = "#E7EDFE";
+const EMERALD_BORDER = "#CBD9FC";
+const AMBER = "#1B2130";          // Ink (was Amber)
+const AMBER_SOFT = "#EFEFF6";
+const AMBER_BORDER = "#DFDFEC";
+const INDIGO_TEXT = "#1443C9";    // Deep Electric
+const INDIGO_PILL_BG = "#E7EDFE";
+const INDIGO_PILL_BORDER = "#CBD9FC";
+
 const STROKE_W = 1;
 
 function useSvgInView() {
@@ -134,7 +135,7 @@ export function DashboardSvg() {
         <g key={`kpi-${i}`}>
           <motion.rect
             x={card.x} y={16} width={card.w} height={56} rx={6}
-            fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+            fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
             {...fadeRect(inView, 0.1 + i * 0.1)}
           />
           <motion.text
@@ -165,7 +166,7 @@ export function DashboardSvg() {
       {/* Bar chart area */}
       <motion.rect
         x={16} y={88} width={408} height={120} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.3)}
       />
       <motion.text
@@ -176,7 +177,7 @@ export function DashboardSvg() {
         This Week
       </motion.text>
       {/* baseline */}
-      <line x1={chartLeft - 8} y1={chartBaseline + 0.5} x2={408} y2={chartBaseline + 0.5} stroke="#E8E1D4" strokeWidth={0.5} />
+      <line x1={chartLeft - 8} y1={chartBaseline + 0.5} x2={408} y2={chartBaseline + 0.5} stroke="#E3E3EE" strokeWidth={0.5} />
 
       {/* Vertical bars */}
       {days.map((d, i) => {
@@ -186,7 +187,7 @@ export function DashboardSvg() {
           <g key={`bar-${i}`}>
             <motion.rect
               x={x} y={chartBaseline - d.h} width={barW} height={d.h} rx={3}
-              fill={isToday ? INDIGO : "#E8E1D4"}
+              fill={isToday ? INDIGO : "#E3E3EE"}
               style={{ transformOrigin: `${x + barW / 2}px ${chartBaseline}px` }}
               {...growBar(inView, 0.4 + i * 0.06)}
             />
@@ -206,7 +207,7 @@ export function DashboardSvg() {
       {/* Order rows area */}
       <motion.rect
         x={16} y={224} width={408} height={124} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.6)}
       />
       {/* Header */}
@@ -233,7 +234,7 @@ export function DashboardSvg() {
         Live
       </motion.text>
 
-      <line x1={28} y1={250} x2={412} y2={250} stroke="#E8E1D4" strokeWidth={0.5} />
+      <line x1={28} y1={250} x2={412} y2={250} stroke="#E3E3EE" strokeWidth={0.5} />
 
       {/* Rows */}
       {orders.map((order, i) => {
@@ -317,10 +318,10 @@ export function OrderFormSvg() {
 
   // Each product gets a real qty + a category dot color
   const products = [
-    { name: "Maggi 2-Min 12pk", price: "₹168", qty: "12", dot: "#A0522D" },
-    { name: "Surf Excel 1kg",   price: "₹245", qty: "6",  dot: "#0F1F3A" },
-    { name: "Parle-G 800g",     price: "₹52",  qty: "24", dot: "#0E2A22" },
-    { name: "Vim Bar 200g",     price: "₹30",  qty: "8",  dot: "#7A1F12" },
+    { name: "Maggi 2-Min 12pk", price: "₹168", qty: "12", dot: "#1B57F5" },
+    { name: "Surf Excel 1kg",   price: "₹245", qty: "6",  dot: "#1B2130" },
+    { name: "Parle-G 800g",     price: "₹52",  qty: "24", dot: "#1B57F5" },
+    { name: "Vim Bar 200g",     price: "₹30",  qty: "8",  dot: "#1B2130" },
   ];
 
   const radios = [
@@ -341,7 +342,7 @@ export function OrderFormSvg() {
       {/* Dropdown */}
       <motion.rect
         x={20} y={20} width={220} height={36} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.1)}
       />
       <motion.text
@@ -354,7 +355,7 @@ export function OrderFormSvg() {
       <motion.path d="M218 34 L224 40 L230 34" stroke={C_MUTED} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" fill="none" {...drawLine(inView, 0.25)} />
 
       {/* Divider */}
-      <motion.line x1={20} y1={72} x2={240} y2={72} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.3)} />
+      <motion.line x1={20} y1={72} x2={240} y2={72} stroke="#E3E3EE" strokeWidth={0.5} {...drawLine(inView, 0.3)} />
 
       {/* Product lines */}
       {products.map((prod, i) => {
@@ -377,7 +378,7 @@ export function OrderFormSvg() {
             {/* Qty box — real number */}
             <motion.rect
               x={155} y={y + 8} width={28} height={18} rx={4}
-              fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={0.75}
+              fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={0.75}
               {...fadeRect(inView, 0.4 + i * 0.12)}
             />
             <motion.text
@@ -400,7 +401,7 @@ export function OrderFormSvg() {
       })}
 
       {/* Divider */}
-      <motion.line x1={20} y1={270} x2={240} y2={270} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.6)} />
+      <motion.line x1={20} y1={270} x2={240} y2={270} stroke="#E3E3EE" strokeWidth={0.5} {...drawLine(inView, 0.6)} />
 
       {/* Subtotal */}
       <motion.text
@@ -458,7 +459,7 @@ export function OrderFormSvg() {
       ))}
 
       {/* Divider */}
-      <motion.line x1={20} y1={375} x2={240} y2={375} stroke="#E8E1D4" strokeWidth={0.5} {...drawLine(inView, 0.8)} />
+      <motion.line x1={20} y1={375} x2={240} y2={375} stroke="#E3E3EE" strokeWidth={0.5} {...drawLine(inView, 0.8)} />
 
       {/* Submit button — solid terracotta, breathes */}
       <motion.rect
@@ -526,7 +527,7 @@ export function DashboardMiniSvg() {
         <g key={`kpi-${i}`}>
           <motion.rect
             x={card.x} y={16} width={card.w} height={56} rx={6}
-            fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+            fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
             {...fadeRect(inView, 0.1 + i * 0.12)}
           />
           <motion.text
@@ -568,7 +569,7 @@ export function DashboardMiniSvg() {
       {/* Orders list */}
       <motion.rect
         x={16} y={88} width={388} height={180} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.4)}
       />
       {/* Header */}
@@ -594,7 +595,7 @@ export function DashboardMiniSvg() {
         Live
       </motion.text>
 
-      <line x1={28} y1={118} x2={388} y2={118} stroke="#E8E1D4" strokeWidth={0.5} />
+      <line x1={28} y1={118} x2={388} y2={118} stroke="#E3E3EE" strokeWidth={0.5} />
 
       {/* Column headers */}
       {[{ x: 28, t: "Order" }, { x: 100, t: "Dealer" }, { x: 248, t: "Amount" }, { x: 336, t: "Status" }].map((col, i) => (
@@ -731,7 +732,7 @@ export function InvoiceStockSvg() {
       {/* Table area */}
       <motion.rect
         x={16} y={30} width={388} height={170} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.1)}
       />
       {/* Header band */}
@@ -751,7 +752,7 @@ export function InvoiceStockSvg() {
           {h.label}
         </motion.text>
       ))}
-      <line x1={16} y1={58} x2={404} y2={58} stroke="#E8E1D4" strokeWidth={0.5} />
+      <line x1={16} y1={58} x2={404} y2={58} stroke="#E3E3EE" strokeWidth={0.5} />
 
       {/* 5 data rows — zebra striped */}
       {rows.map((row, i) => {
@@ -783,12 +784,12 @@ export function InvoiceStockSvg() {
       })}
 
       {/* Divider between table and GST */}
-      <line x1={16} y1={206} x2={404} y2={206} stroke="#E8E1D4" strokeWidth={0.5} />
+      <line x1={16} y1={206} x2={404} y2={206} stroke="#E3E3EE" strokeWidth={0.5} />
 
       {/* GST breakdown area */}
       <motion.rect
         x={16} y={214} width={388} height={72} rx={6}
-        fill="#FFFFFF" stroke="#E8E1D4" strokeWidth={STROKE_W}
+        fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={STROKE_W}
         {...fadeRect(inView, 0.6)}
       />
       {/* GST rows */}

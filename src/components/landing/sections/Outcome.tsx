@@ -106,7 +106,7 @@ export function Outcome() {
                   <StaggerItem key={o.value} variant="scaleUp">
                     <div className="group lp-card-premium relative h-full rounded-[24px] bg-card p-6">
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-[hsl(34_30%_90%)] border border-border text-foreground lp-icon-premium">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-secondary border border-border text-foreground lp-icon-premium">
                           <Icon className="h-4 w-4" strokeWidth={2} />
                         </span>
                         <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground)/0.7)] font-medium">
@@ -143,7 +143,7 @@ export function Outcome() {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="flex justify-center mt-14 md:mt-16"
         >
-          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[hsl(34_30%_91%)] border border-border font-body text-[14px] md:text-[15px] text-muted-foreground">
+          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-secondary border border-border font-body text-[14px] md:text-[15px] text-muted-foreground">
             <span>Same factory. Same field.</span>
             <span className="text-foreground font-semibold">More throughput. Better cash flow.</span>
             <ArrowRight className="h-3.5 w-3.5 text-[hsl(var(--muted-foreground)/0.7)]" strokeWidth={2.2} />
