@@ -60,10 +60,10 @@ void main() {
   vec2 pool = vec2(0.66 + 0.05 * sin(uTime * 0.07), 0.24 + 0.04 * cos(uTime * 0.05));
   pool.x *= uRes.x / uRes.y;
   float d = distance(st, pool);
-  float glow = smoothstep(1.05, 0.02, d);
+  float glow = smoothstep(1.15, 0.02, d);
   glow = pow(glow, 1.35);
 
-  float shade = clamp(glow * (0.55 + 0.55 * f) + f * 0.13, 0.0, 1.0);
+  float shade = clamp(glow * (0.72 + 0.6 * f) + f * 0.16, 0.0, 1.0);
   vec3 col = mix(black, mid, smoothstep(0.0, 0.55, shade));
   col = mix(col, light, smoothstep(0.5, 1.0, shade) * 0.85);
 
@@ -76,7 +76,7 @@ void main() {
 
   // vignette so the headline sits on the darkest ground
   float vig = smoothstep(1.25, 0.25, length((uv - 0.5) * vec2(1.15, 1.0)));
-  col *= mix(0.42, 1.0, vig);
+  col *= mix(0.5, 1.0, vig);
 
   // animated film grain, in-shader
   float g = hash(gl_FragCoord.xy + fract(uTime) * 91.7);
@@ -89,8 +89,8 @@ void main() {
 type Preset = "hero" | "cta";
 
 const PRESETS: Record<Preset, { energy: number; bloom: number }> = {
-  hero: { energy: 1.0, bloom: 0.5 },
-  cta: { energy: 0.6, bloom: 0.3 },
+  hero: { energy: 1.0, bloom: 0.26 },
+  cta: { energy: 0.6, bloom: 0.16 },
 };
 
 interface Props {
@@ -163,8 +163,8 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     resize();
 
     // pointer target (0..1), smoothed toward on each frame
-    const target = { x: 0.68, y: 0.3 };
-    const cur = { x: 0.68, y: 0.3 };
+    const target = { x: 0.72, y: 0.66 };
+    const cur = { x: 0.72, y: 0.66 };
     const onPointer = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect();
       target.x = (e.clientX - r.left) / Math.max(1, r.width);
