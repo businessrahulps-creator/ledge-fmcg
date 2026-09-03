@@ -2393,3 +2393,9 @@
 .lp-theme .lp-progress-fill {
   background: linear-gradient(95deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-lime)) 100%);
 }
+
+.lp-theme .lp-progress-glass {
+  background: linear-gradient(95deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-lime)) 100%);
+  box-shadow: none;
+}
+.lp-theme .lp-progress-glass::after { display: none; }
