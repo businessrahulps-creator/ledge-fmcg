@@ -182,6 +182,19 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", resize);
 
+    // Pause the shader while the page is actively scrolling — the GPU work
+    // competes with layout/paint and is invisible in motion anyway.
+    let scrolling = false;
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      scrolling = true;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        scrolling = false;
+      }, 160);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     let raf = 0;
     let visible = true;
     let last = 0;
@@ -189,9 +202,10 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
 
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
-      if (!visible || document.hidden) return;
-      if (now - last < 33) return; // ~30fps cap
+      if (!visible || document.hidden || scrolling) return;
+      if (now - last < 40) return; // ~25fps cap
       last = now;
+
       resize();
       const t = (now - start) / 1000;
       // idle drift when the pointer never moves (mobile)
