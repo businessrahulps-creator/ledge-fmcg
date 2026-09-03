@@ -5,7 +5,7 @@ import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/moti
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
 import { CursorAura } from "../CursorAura";
-import heroDashboard from "@/assets/landing/hero-dashboard.webp";
+import heroFlow from "@/assets/landing/hero-flow.webp";
 import { ShaderBackdrop } from "@/components/landing/visuals/ShaderBackdrop";
 
 /** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
