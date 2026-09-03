@@ -1,32 +1,12 @@
 import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { AnimateIn } from "../AnimateIn";
-import { spring } from "@/lib/motion";
-import stepOrders from "@/assets/landing/step-orders.webp";
-import stepStock from "@/assets/landing/step-stock.webp";
-import stepBilling from "@/assets/landing/step-billing.webp";
-
-function ProductShot({ src, alt }: { src: string; alt: string }) {
-  return (
-    <div className="relative">
-      <div
-        aria-hidden
-        className="absolute -inset-6 rounded-md blur-3xl opacity-25 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 50%, hsl(var(--accent) / 0.18) 0%, transparent 65%)" }}
-      />
-      <div className="relative lp-glass-frost p-2 md:p-3 rounded-md overflow-hidden">
-        <img
-          src={src}
-          alt={alt}
-          width={768}
-          height={1024}
-          loading="lazy"
-          className="block w-full h-auto rounded-[4px]"
-        />
-      </div>
-    </div>
-  );
-}
+import { ease, duration } from "@/lib/motion";
+import {
+  OrderBuildVisual,
+  StockHealthVisual,
+  DispatchInvoiceVisual,
+} from "../visuals/StepMicroVisuals";
 
 const steps = [
   {
@@ -34,27 +14,21 @@ const steps = [
     icon: Smartphone,
     title: "Field team places an order in 60 seconds.",
     description: "Pick dealer, add products, submit. Sequential order number, instantly.",
-    image: stepOrders,
-    alt: "Mobile order capture screen with auto-saved status and Save Order action",
-    reversed: false,
+    Visual: OrderBuildVisual,
   },
   {
     badge: "02",
     icon: LayoutDashboard,
     title: "Your stock health stays in the green.",
     description: "Per-SKU, per-godown health bars. Low stock surfaces before the dealer call.",
-    image: stepStock,
-    alt: "Stock health table with color-coded badges per SKU",
-    reversed: true,
+    Visual: StockHealthVisual,
   },
   {
     badge: "03",
     icon: Truck,
     title: "Dispatch → stock deducts → GST invoice generates.",
     description: "One tap. Accountant skips Tally. CGST/SGST/IGST calculated automatically.",
-    image: stepBilling,
-    alt: "GST invoice page with itemized breakdown and Paid status",
-    reversed: false,
+    Visual: DispatchInvoiceVisual,
   },
 ];
 
@@ -63,7 +37,7 @@ export function HowItWorks() {
     <section id="how-it-works" className="relative bg-white py-20 md:py-28 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
+          <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
             <span className="lp-eyebrow">How it works</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Three things happen.
@@ -73,44 +47,72 @@ export function HowItWorks() {
           </div>
         </AnimateIn>
 
-        <div className="relative space-y-24 md:space-y-28">
-          {/* Vertical hairline connector — desktop only */}
+        <div className="relative">
+          {/* Progress rail — horizontal on desktop, vertical on mobile.
+              The one Electric accent this section gets. */}
           <div
             aria-hidden
-            className="hidden lg:block absolute left-1/2 top-12 bottom-12 w-px -translate-x-1/2 pointer-events-none bg-border"
-          />
+            className="pointer-events-none hidden md:block absolute left-0 right-0 top-[22px] h-px bg-border"
+          >
+            <motion.div
+              className="h-px w-full bg-primary origin-left"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: duration.hero, ease: ease.emphasized }}
+            />
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none md:hidden absolute left-[21px] top-0 bottom-0 w-px bg-border"
+          >
+            <motion.div
+              className="w-px h-full bg-primary origin-top"
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: duration.hero, ease: ease.emphasized }}
+            />
+          </div>
 
-          {steps.map((step, i) => (
-            <AnimateIn key={step.badge} delay={i * 0.08}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                <div className={step.reversed ? "lg:order-2" : ""}>
-                  <span className="inline-flex items-center gap-2.5 mb-5 group">
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-secondary border border-border lp-icon-premium">
-                      <step.icon size={16} strokeWidth={2} className="text-foreground" />
-                    </span>
-                    <span className="font-heading font-semibold text-[12px] text-muted-foreground tracking-[0.18em]">
-                      STEP {step.badge}
-                    </span>
+
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-10">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.badge}
+                className="relative pl-14 md:pl-0"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{
+                  duration: duration.medium,
+                  ease: ease.decelerate,
+                  delay: 0.12 + i * 0.12,
+                }}
+              >
+                {/* Node */}
+                <div className="absolute left-0 top-0 md:relative md:mb-6">
+                  <span className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-secondary border border-border text-foreground">
+                    <step.icon size={17} strokeWidth={2} />
                   </span>
-                  <h3 className="font-heading font-semibold text-[24px] md:text-[28px] text-foreground tracking-[-0.022em] leading-[1.18]">
-                    {step.title}
-                  </h3>
-                  <p className="font-body text-[16px] text-muted-foreground leading-[1.55] mt-4 max-w-md">
-                    {step.description}
-                  </p>
                 </div>
-                <motion.div
-                  className={step.reversed ? "lg:order-1" : ""}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-120px" }}
-                  transition={spring.gentle}
-                >
-                  <ProductShot src={step.image} alt={step.alt} />
-                </motion.div>
-              </div>
-            </AnimateIn>
-          ))}
+
+                <span className="font-heading font-semibold text-[11.5px] text-muted-foreground tracking-[0.18em] block">
+                  STEP {step.badge}
+                </span>
+                <h3 className="font-heading font-semibold text-[20px] md:text-[22px] text-foreground tracking-[-0.02em] leading-[1.22] mt-2.5">
+                  {step.title}
+                </h3>
+                <p className="font-body text-[14.5px] text-muted-foreground leading-[1.55] mt-2.5">
+                  {step.description}
+                </p>
+
+                <div className="mt-6">
+                  <step.Visual />
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

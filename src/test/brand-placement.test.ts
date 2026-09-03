@@ -83,6 +83,10 @@ describe("Landing section brand placements", () => {
     expect(read("src/index.css")).toContain(".lp-block-graphite");
   });
 
+  it("How It Works ships no screenshot assets (motion-only steps)", () => {
+    expect(sectionFile("HowItWorks")).not.toMatch(/\.webp|\.png|\.jpg/);
+  });
+
 
   it("Features section: no full-bleed blue card, ink on claims only (V3.2)", () => {
     // Features uses the LandingCard visual-first primitive, so tints are
