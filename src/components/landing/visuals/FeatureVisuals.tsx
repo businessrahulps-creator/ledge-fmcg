@@ -113,11 +113,9 @@ export function SchemeArcVisual() {
           {pct}%
         </text>
       </svg>
-      <div className="mt-3 w-full flex items-center justify-between px-1">
-        <span className="font-body text-[12px] text-muted-foreground">Monsoon Scheme</span>
-        <span className="font-body text-[12px] num-tabular text-foreground font-semibold">
-          ₹1.24L / ₹2.00L
-        </span>
+      <div className="lp-well-meta mt-3 w-full flex items-center justify-between px-1">
+        <span className="font-body text-[12px]">Monsoon Scheme</span>
+        <b className="font-body text-[12px] num-tabular font-semibold">₹1.24L / ₹2.00L</b>
       </div>
     </div>
   );
@@ -219,11 +217,9 @@ export function ClaimTimelineVisual() {
           </Fragment>
         ))}
       </div>
-      <div className="mt-3 flex items-center justify-between px-1">
-        <span className="font-body text-[12px] text-muted-foreground">Claim #4821</span>
-        <span className="font-body text-[13px] font-semibold num-tabular text-foreground">
-          ₹38,400
-        </span>
+      <div className="lp-well-meta mt-3 flex items-center justify-between px-1">
+        <span className="font-body text-[12px]">Claim #4821</span>
+        <b className="font-body text-[13px] font-semibold num-tabular">₹38,400</b>
       </div>
     </div>
   );
@@ -252,8 +248,8 @@ export function RevenueChartVisual() {
         <path d={line} fill="none" stroke="hsl(var(--success))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx={coords[coords.length - 1][0]} cy={coords[coords.length - 1][1]} r="4.5" fill="hsl(var(--success))" />
       </svg>
-      <div className="mt-3 flex items-center justify-between px-1">
-        <span className="font-body text-[12px] text-muted-foreground">Last 8 months</span>
+      <div className="lp-well-meta mt-3 flex items-center justify-between px-1">
+        <span className="font-body text-[12px]">Last 8 months</span>
         <span className="lp-pill lp-pill--success" style={{ padding: "3px 9px 3px 3px", boxShadow: "none" }}>
           <span className="lp-pill__tile" style={{ width: 16, height: 16, borderRadius: 5 }}>
             <TrendingUp size={9} strokeWidth={2.5} />

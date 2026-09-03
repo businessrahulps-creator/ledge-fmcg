@@ -70,7 +70,7 @@ const cards: Card[] = [
     caption: "A full paper trail from submitted to paid — no arguments.",
     variant: "terracotta",
     span: "lg:col-span-6",
-    wellMinHeight: 140,
+    wellMinHeight: 0,
   },
 ];
 
