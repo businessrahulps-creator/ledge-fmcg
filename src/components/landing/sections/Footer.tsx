@@ -25,9 +25,6 @@ const columns = [
   { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Refund Policy"] },
 ];
 
-const socials = [
-  { icon: Linkedin, href: "https://www.linkedin.com/in/asha-ps-6b0673207/", label: "LinkedIn" },
-];
 
 export function Footer() {
   return (
