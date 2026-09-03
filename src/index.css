@@ -2028,3 +2028,384 @@
   .scrollbar-thin-hover:focus-within::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.35);
   }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LEDGE V3 PALETTE — Electric / Ink / Lime / Mist
+   Scoped to `.lp-theme` (the landing root) so /app keeps V2 untouched.
+   To promote V3 app-wide later: move the token block into :root.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root,
+.lp-theme {
+  /* Brand anchors (raw HSL) */
+  --brand-electric: 224 91% 53%;   /* #1B57F5 */
+  --brand-ink:      224 28% 15%;   /* #1B2130 */
+  --brand-lime:      75 85% 63%;   /* #C8F250 */
+  --brand-mist:     244 26% 92%;   /* #E5E4F0 */
+}
+
+.lp-theme {
+  /* ── Semantic remap ── */
+  --background: var(--brand-mist);
+  --foreground: var(--brand-ink);
+
+  --card: 0 0% 100%;
+  --card-foreground: var(--brand-ink);
+  --popover: 0 0% 100%;
+  --popover-foreground: var(--brand-ink);
+
+  --primary: var(--brand-electric);
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 244 24% 88%;
+  --secondary-foreground: var(--brand-ink);
+
+  --muted: 244 22% 90%;
+  --muted-foreground: 224 13% 42%;
+
+  --accent: var(--brand-lime);
+  --accent-foreground: var(--brand-ink);
+
+  --success: var(--brand-electric);
+  --success-foreground: 0 0% 100%;
+  --warning: var(--brand-lime);
+  --warning-foreground: var(--brand-ink);
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 244 18% 86%;
+  --input: 244 18% 86%;
+  --ring: var(--brand-electric);
+
+  --surface: 0 0% 100%;
+  --surface-border: 244 18% 88%;
+
+  --brand-purple: var(--brand-electric);
+  --brand-coral: var(--brand-lime);
+  --brand-gradient: linear-gradient(90deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-ink)) 100%);
+  --brand-gradient-soft: linear-gradient(90deg, hsl(var(--brand-electric) / 0.10) 0%, hsl(var(--brand-ink) / 0.06) 100%);
+
+  /* Cool Ink-tinted depth (replaces the warm Midnight-on-Bone shadows) */
+  --shadow-2:  0 1px 2px hsl(var(--brand-ink) / 0.05);
+  --shadow-4:  0 2px 6px hsl(var(--brand-ink) / 0.06), 0 1px 2px hsl(var(--brand-ink) / 0.04);
+  --shadow-8:  0 6px 14px hsl(var(--brand-ink) / 0.08), 0 2px 4px hsl(var(--brand-ink) / 0.04);
+  --shadow-16: 0 10px 24px hsl(var(--brand-ink) / 0.10), 0 3px 6px hsl(var(--brand-ink) / 0.05);
+  --shadow-28: 0 18px 40px hsl(var(--brand-ink) / 0.14), 0 6px 12px hsl(var(--brand-ink) / 0.06);
+
+  --lp-shadow-soft: 0 1px 2px hsl(var(--brand-ink) / 0.04), 0 12px 28px -18px hsl(var(--brand-ink) / 0.20);
+  --lp-shadow-lift: 0 2px 6px hsl(var(--brand-ink) / 0.06), 0 22px 46px -22px hsl(var(--brand-ink) / 0.26);
+  --lp-shadow-soft-dark: 0 2px 8px hsl(var(--brand-ink) / 0.16), 0 24px 48px -26px hsl(var(--brand-ink) / 0.40);
+  --lp-shadow-lift-dark: 0 4px 12px hsl(var(--brand-ink) / 0.20), 0 34px 64px -30px hsl(var(--brand-ink) / 0.48);
+}
+
+/* ── Section grounds: flat, confident colour instead of warm mesh ── */
+.lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
+.lp-theme .lp-section-paper   { background-color: hsl(0 0% 100%); }
+.lp-theme .lp-mesh-soft-warm  { background-color: hsl(var(--brand-mist)); background-image: none; }
+.lp-theme .lp-mesh-dark       { background-color: hsl(var(--brand-mist)); background-image: none; }
+.lp-theme .lp-noise           { display: none; }
+.lp-theme .lp-vignette-top    { background: linear-gradient(to bottom, hsl(var(--brand-ink) / 0.04) 0%, transparent 100%); }
+.lp-theme .lp-grid-soft       { background-image: radial-gradient(circle, hsl(var(--brand-ink) / 0.08) 1px, transparent 1px); }
+.lp-theme .lp-mobile-menu-bg  { background-color: hsl(var(--brand-mist)); background-image: none; }
+
+/* Blue → Ink, never blue → lime (lime is a highlighter, not a gradient stop) */
+.lp-theme .lp-gradient-text-cool,
+.lp-theme .lp-gradient-bg-cool {
+  background-image: linear-gradient(100deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-ink)) 100%);
+}
+
+/* ── Neutral tints (were warm 34° bone) ── */
+.lp-theme .lp-eyebrow,
+.lp-theme .lp-eyebrow-dark,
+.lp-theme .lp-icon-tile,
+.lp-theme .lp-pricing-trust-chip { background: hsl(244 24% 94%); }
+.lp-theme .lp-well { background: hsl(244 24% 96%); }
+.lp-theme .lp-btn-primary-light,
+.lp-theme .lp-capsule-cta__inner { background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(244 24% 96%) 100%); }
+.lp-theme .lp-capsule-cta { background: linear-gradient(180deg, hsl(244 22% 92%) 0%, hsl(244 20% 86%) 100%); }
+.lp-theme .lp-btn-primary-dark,
+.lp-theme .lp-capsule-cta--dark,
+.lp-theme .lp-nav-cta {
+  background: linear-gradient(180deg, hsl(224 91% 58%) 0%, hsl(var(--brand-electric)) 100%);
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-icon-tile-accent {
+  background: hsl(var(--brand-lime) / 0.28);
+  border-color: hsl(var(--brand-lime) / 0.55);
+}
+.lp-theme .lp-progress-glass::after,
+.lp-theme .lp-shimmer::after { opacity: 0; }
+.lp-theme .lp-bento-hero {
+  background: linear-gradient(135deg, hsl(244 26% 94%) 0%, hsl(244 24% 90%) 60%, hsl(224 40% 88%) 100%);
+}
+
+/* ── Tinted blocks: Electric / Ink / Mist ── */
+.lp-theme .lp-card-electric,
+.lp-theme .lp-vcard--electric {
+  background:
+    radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 92% 60%) 0%, transparent 65%),
+    linear-gradient(158deg, hsl(224 91% 55%) 0%, hsl(224 88% 48%) 100%);
+}
+.lp-theme .lp-card-ink,
+.lp-theme .lp-vcard--ink {
+  background:
+    radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 26% 22%) 0%, transparent 65%),
+    linear-gradient(158deg, hsl(224 27% 18%) 0%, hsl(224 30% 12%) 100%);
+}
+.lp-theme .lp-card-mist,
+.lp-theme .lp-vcard--mist {
+  background:
+    radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 68%),
+    linear-gradient(158deg, hsl(244 30% 95%) 0%, hsl(244 24% 89%) 100%);
+}
+.lp-theme .lp-vcard--neutral {
+  background: linear-gradient(160deg, hsl(0 0% 100%) 0%, hsl(244 26% 96%) 100%);
+}
+
+/* Dark-block typography + inner surfaces */
+.lp-theme .lp-card-electric,
+.lp-theme .lp-card-ink,
+.lp-theme .lp-vcard--electric,
+.lp-theme .lp-vcard--ink,
+.lp-theme .lp-card-electric .text-foreground,
+.lp-theme .lp-card-ink .text-foreground,
+.lp-theme .lp-card-electric h1, .lp-theme .lp-card-electric h2,
+.lp-theme .lp-card-electric h3, .lp-theme .lp-card-electric h4,
+.lp-theme .lp-card-ink h1, .lp-theme .lp-card-ink h2,
+.lp-theme .lp-card-ink h3, .lp-theme .lp-card-ink h4 { color: hsl(0 0% 100%); }
+
+.lp-theme .lp-card-electric p, .lp-theme .lp-card-ink p,
+.lp-theme .lp-card-electric .text-muted-foreground,
+.lp-theme .lp-card-ink .text-muted-foreground,
+.lp-theme .lp-vcard--electric .lp-well-meta,
+.lp-theme .lp-vcard--ink .lp-well-meta { color: hsl(0 0% 100% / 0.76); }
+
+/* Lime reads only on Ink — on Electric use white */
+.lp-theme .lp-card-ink .text-accent,
+.lp-theme .lp-vcard--ink .text-accent { color: hsl(var(--brand-lime)); }
+.lp-theme .lp-card-electric .text-accent,
+.lp-theme .lp-vcard--electric .text-accent { color: hsl(0 0% 100%); }
+
+.lp-theme .lp-card-electric .lp-icon-tile,
+.lp-theme .lp-card-ink .lp-icon-tile {
+  background: hsl(0 0% 100% / 0.14);
+  border-color: hsl(0 0% 100% / 0.22);
+}
+.lp-theme .lp-card-electric .lp-icon-tile svg,
+.lp-theme .lp-card-ink .lp-icon-tile svg { color: hsl(0 0% 100%); }
+
+.lp-theme .lp-vcard--electric,
+.lp-theme .lp-vcard--ink { box-shadow: var(--lp-shadow-soft-dark); }
+.lp-theme .lp-vcard--electric:hover,
+.lp-theme .lp-vcard--ink:hover { box-shadow: var(--lp-shadow-lift-dark); }
+.lp-theme .lp-vcard--electric .lp-well,
+.lp-theme .lp-vcard--ink .lp-well { background: hsl(0 0% 100% / 0.10); }
+.lp-theme .lp-vcard--electric .lp-caption,
+.lp-theme .lp-vcard--ink .lp-caption { color: hsl(0 0% 100% / 0.76); }
+.lp-theme .lp-vcard--electric .lp-caption b,
+.lp-theme .lp-vcard--ink .lp-caption b { color: hsl(0 0% 100%); }
+
+/* ── Typographic accent kit ── */
+/* Lime swoosh under one emphasised word */
+.lp-swoosh {
+  position: relative;
+  display: inline-block;
+  font-style: italic;
+}
+.lp-swoosh::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  bottom: 0.02em;
+  height: 0.16em;
+  border-radius: 9999px;
+  background: hsl(var(--brand-lime));
+  z-index: -1;
+}
+/* Tiny all-caps lime eyebrow for dark / electric blocks */
+.lp-eyebrow-lime {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--brand-lime));
+}
+/* Oversized statistic on a dark block */
+.lp-stat {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-variant-numeric: tabular-nums;
+}
+/* Lime chip — badges only, never a CTA */
+.lp-chip-lime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: hsl(var(--brand-lime));
+  color: hsl(var(--brand-ink));
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Lime contrast law: lime only as a fill or on Ink, never as text on light ── */
+.lp-theme .text-accent { color: hsl(var(--brand-electric)); }
+.lp-theme .hover\:text-accent:hover,
+.lp-theme .group:hover .group-hover\:text-accent { color: hsl(var(--brand-electric)); }
+
+/* Highlighter pill — lime fill, ink text */
+.lp-theme .lp-pill-accent {
+  background: hsl(var(--brand-lime));
+  color: hsl(var(--brand-ink));
+  -webkit-text-fill-color: hsl(var(--brand-ink));
+  border-color: transparent;
+}
+.lp-theme .lp-pill-accent::after { display: none; }
+
+/* Status pills inside visuals */
+.lp-theme .lp-pill--warn .lp-pill__tile {
+  background: hsl(var(--brand-lime));
+  color: hsl(var(--brand-ink));
+}
+.lp-theme .lp-pill--warn .lp-pill__label { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-pill--success .lp-pill__tile {
+  background: hsl(var(--brand-electric));
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-pill--success .lp-pill__label { color: hsl(var(--brand-electric)); }
+
+/* Eyebrow dots: electric on light, lime on dark blocks */
+.lp-theme .lp-eyebrow::before,
+.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-electric)); }
+.lp-theme .lp-card-ink .lp-eyebrow::before,
+.lp-theme .lp-card-ink .lp-eyebrow-dark::before { background: hsl(var(--brand-lime)); }
+
+/* Live status dot stays lime — it reads as "on" */
+.lp-theme .lp-nav-status-dot,
+.lp-theme .lp-live-dot { background: hsl(var(--brand-lime)); }
+
+/* ── Full-bleed colour blocks: colour IS the section ── */
+.lp-theme .lp-block-ink,
+.lp-theme .lp-block-electric {
+  --card: 0 0% 100%;
+  --card-foreground: var(--brand-ink);
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-block-ink {
+  background: hsl(var(--brand-ink));
+  --background: 224 30% 12%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 224 14% 76%;
+  --secondary: 224 26% 21%;
+  --border: 224 20% 26%;
+  --input: 224 20% 26%;
+  --primary: var(--brand-electric);
+  --accent: var(--brand-lime);
+}
+.lp-theme .lp-block-electric {
+  background: hsl(var(--brand-electric));
+  --background: 224 91% 53%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 224 70% 92%;
+  --secondary: 224 80% 60%;
+  --border: 224 70% 66%;
+  --input: 224 70% 66%;
+  --accent: 0 0% 100%;
+}
+
+/* Surfaces sitting on a colour block */
+.lp-theme .lp-block-ink .lp-card,
+.lp-theme .lp-block-ink .lp-card-dark,
+.lp-theme .lp-block-ink .lp-glass-frost,
+.lp-theme .lp-block-electric .lp-card,
+.lp-theme .lp-block-electric .lp-card-dark,
+.lp-theme .lp-block-electric .lp-glass-frost {
+  background: hsl(0 0% 100% / 0.08);
+  border: 1px solid hsl(0 0% 100% / 0.16);
+  box-shadow: none;
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-block-ink .lp-eyebrow,
+.lp-theme .lp-block-electric .lp-eyebrow,
+.lp-theme .lp-block-ink .lp-eyebrow-dark,
+.lp-theme .lp-block-electric .lp-eyebrow-dark {
+  background: hsl(0 0% 100% / 0.12);
+  border-color: hsl(0 0% 100% / 0.20);
+  color: hsl(0 0% 100% / 0.86);
+}
+.lp-theme .lp-block-ink .lp-eyebrow::before { background: hsl(var(--brand-lime)); }
+.lp-theme .lp-block-electric .lp-eyebrow::before { background: hsl(0 0% 100%); }
+.lp-theme .lp-block-ink .lp-icon-tile,
+.lp-theme .lp-block-electric .lp-icon-tile {
+  background: hsl(0 0% 100% / 0.12);
+  border-color: hsl(0 0% 100% / 0.20);
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-block-ink .text-accent { color: hsl(var(--brand-lime)); }
+.lp-theme .lp-block-electric .text-accent { color: hsl(0 0% 100%); }
+
+/* Lime highlighter reads perfectly on both blocks */
+.lp-theme .lp-block-ink .lp-pill-accent,
+.lp-theme .lp-block-electric .lp-pill-accent {
+  background: hsl(var(--brand-lime));
+  color: hsl(var(--brand-ink));
+  -webkit-text-fill-color: hsl(var(--brand-ink));
+}
+
+/* CTAs invert on colour blocks */
+.lp-theme .lp-block-electric .lp-capsule-cta,
+.lp-theme .lp-block-ink .lp-capsule-cta { background: hsl(0 0% 100% / 0.22); }
+.lp-theme .lp-block-electric .lp-capsule-cta--dark,
+.lp-theme .lp-block-electric .lp-capsule-cta--dark .lp-capsule-cta__inner {
+  background: hsl(0 0% 100%);
+  color: hsl(var(--brand-ink));
+}
+.lp-theme .lp-block-electric .lp-capsule-cta--dark .lp-capsule-cta__label,
+.lp-theme .lp-block-electric .lp-capsule-cta--dark .lp-capsule-cta__arrow { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .lp-capsule-cta--dark,
+.lp-theme .lp-block-ink .lp-capsule-cta--dark .lp-capsule-cta__inner {
+  background: linear-gradient(180deg, hsl(224 91% 58%) 0%, hsl(var(--brand-electric)) 100%);
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-block-ink .lp-capsule-cta--dark .lp-capsule-cta__label,
+.lp-theme .lp-block-ink .lp-capsule-cta--dark .lp-capsule-cta__arrow { color: hsl(0 0% 100%); }
+
+/* Bento hero + progress on colour blocks */
+.lp-theme .lp-block-ink .lp-bento-hero,
+.lp-theme .lp-block-electric .lp-bento-hero {
+  background: hsl(0 0% 100% / 0.10);
+  border: 1px solid hsl(0 0% 100% / 0.18);
+  box-shadow: none;
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-progress-glass > span,
+.lp-theme .lp-progress-glass i,
+.lp-theme .lp-progress-fill {
+  background: linear-gradient(95deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-lime)) 100%);
+}
+
+.lp-theme .lp-progress-glass {
+  background: linear-gradient(95deg, hsl(var(--brand-electric)) 0%, hsl(var(--brand-lime)) 100%);
+  box-shadow: none;
+}
+.lp-theme .lp-progress-glass::after { display: none; }
+
+/* Anything explicitly painted white inside a colour block gets Ink text */
+.lp-theme .lp-block-ink .bg-card,
+.lp-theme .lp-block-electric .bg-card,
+.lp-theme .lp-block-ink .bg-white,
+.lp-theme .lp-block-electric .bg-white { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .bg-card .text-foreground,
+.lp-theme .lp-block-electric .bg-card .text-foreground,
+.lp-theme .lp-block-ink .bg-white .text-foreground,
+.lp-theme .lp-block-electric .bg-white .text-foreground { color: hsl(var(--brand-ink)); }

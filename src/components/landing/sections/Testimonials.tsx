@@ -62,7 +62,7 @@ export function Testimonials() {
                   </>
                 )}
                 {/* Front card */}
-                <div className={`relative ${isFeatured ? "lp-card-tinted lp-card-bone" : "lp-glass-frost"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
+                <div className={`relative ${isFeatured ? "lp-card-tinted lp-card-mist" : "lp-glass-frost"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
                   <span
                     aria-hidden
                     className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"

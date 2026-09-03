@@ -110,7 +110,7 @@ export function Pricing() {
             const cardClass = plan.highlighted
               ? "lp-bento-hero border border-primary/40 shadow-depth-8 lp-card-premium"
               : tintMidnight
-              ? "lp-card-tinted lp-card-midnight"
+              ? "lp-card-tinted lp-card-ink"
               : "lp-card lp-card-premium";
             return (
               <PressableCard key={plan.name} className="relative h-full">

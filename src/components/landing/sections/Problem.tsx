@@ -51,7 +51,7 @@ export function Problem() {
             const isFeatured = i === 3; // "Excel Nights" — emotional peak
             return (
               <StaggerItem key={card.title}>
-                <div className={`${isFeatured ? "lp-card-tinted lp-card-terracotta" : "lp-card"} p-7 h-full flex flex-col`}>
+                <div className={`${isFeatured ? "lp-card-tinted lp-card-ink" : "lp-card"} p-7 h-full flex flex-col`}>
                   {isFeatured ? (
                     <div className="mb-5">
                       <span className="lp-pill lp-pill--warn">

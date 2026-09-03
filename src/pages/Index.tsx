@@ -30,7 +30,7 @@ export default function Index() {
 
 
   return (
-    <div className="font-body antialiased light" data-theme="light" style={{ colorScheme: "light", scrollBehavior: "smooth" }}>
+    <div className="lp-theme bg-background text-foreground font-body antialiased light" data-theme="light" style={{ colorScheme: "light", scrollBehavior: "smooth" }}>
       <SeoHead
         title="Ledge — The Operating System for India's FMCG Businesses"
         description="Orders, payments, stock, invoices and reports — one mobile app for India's FMCG super-stockists. Mobile-first, works offline. Start free for 30 days."

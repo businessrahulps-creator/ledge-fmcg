@@ -70,7 +70,7 @@ export function Outcome() {
                 if (isHero) {
                   return (
                     <StaggerItem key={o.value} variant="scaleUp">
-                      <div className="lp-card-tinted lp-card-forest h-full p-6 flex flex-col">
+                      <div className="lp-card-tinted lp-card-electric h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
                           <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-white/12 border border-white/20 text-foreground shadow-sm">
                             <Icon className="h-4 w-4" strokeWidth={2} />

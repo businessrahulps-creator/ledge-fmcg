@@ -153,7 +153,7 @@ export function LedgeIntelligence() {
     <section
       id="intelligence"
       ref={sectionRef}
-      className="relative lp-section-paper py-20 md:py-28 overflow-hidden"
+      className="relative lp-block-ink py-20 md:py-28 overflow-hidden"
       aria-label="Ledge Intelligence"
     >
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
