@@ -76,7 +76,7 @@ export default function PrivacyPolicy() {
             <li>Raise a grievance about how we handle your data</li>
           </ul>
           <p className="mt-4">
-            To exercise any of these rights, email us at <strong>ashaoviyaps@gmail.com</strong>. We will respond within 30 days.
+            To exercise any of these rights, email us at <strong>hello@getledge.in</strong>. We will respond within 30 days.
           </p>
         </Section>
 
@@ -94,7 +94,7 @@ export default function PrivacyPolicy() {
 
         <Section title="Contact" last>
           <p><strong>Ledge (India)</strong></p>
-          <p>Email: ashaoviyaps@gmail.com</p>
+          <p>Email: hello@getledge.in</p>
           <p>Website: getledge.in</p>
         </Section>
       </main>

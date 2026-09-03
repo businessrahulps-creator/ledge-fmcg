@@ -36,7 +36,7 @@ export default function TermsOfService() {
 
         <Section title="Your Account">
           <p>
-            You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. If you suspect unauthorised access, notify us immediately at <strong>ashaoviyaps@gmail.com</strong>.
+            You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. If you suspect unauthorised access, notify us immediately at <strong>hello@getledge.in</strong>.
           </p>
           <p>
             Each company on Ledge gets an isolated workspace. Sharing credentials across organisations or attempting to access another company's data is not permitted.
@@ -110,7 +110,7 @@ export default function TermsOfService() {
             We may suspend or terminate your account if you breach these Terms, fail to pay your subscription fees after reasonable notice, or engage in fraudulent activity.
           </p>
           <p>
-            You may cancel your account at any time through the platform settings or by emailing <strong>ashaoviyaps@gmail.com</strong>. After termination, your data is retained for 60 days so you can export it, after which it is permanently deleted.
+            You may cancel your account at any time through the platform settings or by emailing <strong>hello@getledge.in</strong>. After termination, your data is retained for 60 days so you can export it, after which it is permanently deleted.
           </p>
         </Section>
 
@@ -128,7 +128,7 @@ export default function TermsOfService() {
 
         <Section title="Contact" last>
           <p><strong>Ledge (India)</strong></p>
-          <p>Email: ashaoviyaps@gmail.com</p>
+          <p>Email: hello@getledge.in</p>
           <p>Website: getledge.in</p>
         </Section>
       </main>

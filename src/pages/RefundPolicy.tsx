@@ -36,7 +36,7 @@ export default function RefundPolicy() {
 
         <Section title="Cancellation">
           <p>
-            You can cancel your subscription at any time through the platform settings or by emailing <strong>ashaoviyaps@gmail.com</strong>.
+            You can cancel your subscription at any time through the platform settings or by emailing <strong>hello@getledge.in</strong>.
           </p>
           <p>When you cancel:</p>
           <ul className="list-disc pl-5 space-y-2">
@@ -59,7 +59,7 @@ export default function RefundPolicy() {
 
         <Section title="How to Request a Refund">
           <p>
-            To raise a refund request, email us at <strong>ashaoviyaps@gmail.com</strong> with the subject line <strong>Refund Request — [your account email]</strong>. Include a brief description of the issue and the charge date.
+            To raise a refund request, email us at <strong>hello@getledge.in</strong> with the subject line <strong>Refund Request — [your account email]</strong>. Include a brief description of the issue and the charge date.
           </p>
           <p>
             We will acknowledge your request and open a support ticket. Approved refunds are processed within <strong>15 working days</strong> of approval and returned to your original payment method.
@@ -76,7 +76,7 @@ export default function RefundPolicy() {
 
         <Section title="Contact" last>
           <p><strong>Ledge (India)</strong></p>
-          <p>Email: ashaoviyaps@gmail.com</p>
+          <p>Email: hello@getledge.in</p>
           <p>Website: getledge.in</p>
         </Section>
       </main>

@@ -138,8 +138,8 @@ export default function AboutUs() {
               <div className="font-body text-[15px] text-[#52525B] space-y-1">
                 <p>
                   Email:{" "}
-                  <a href="mailto:ashaoviyaps@gmail.com" className="text-[#1A1A1A] underline underline-offset-2">
-                    ashaoviyaps@gmail.com
+                  <a href="mailto:hello@getledge.in" className="text-[#1A1A1A] underline underline-offset-2">
+                    hello@getledge.in
                   </a>
                 </p>
                 <p>
@@ -150,7 +150,7 @@ export default function AboutUs() {
                 </p>
               </div>
               <a
-                href="mailto:ashaoviyaps@gmail.com"
+                href="mailto:hello@getledge.in"
                 className="inline-flex items-center bg-[#27272A] text-white px-8 py-3 rounded-full font-body font-semibold text-sm hover:bg-[#1A1A1A] transition-colors duration-200 mt-2"
               >
                 Get in Touch

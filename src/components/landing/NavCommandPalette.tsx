@@ -102,13 +102,13 @@ export function NavCommandPalette({ open, onOpenChange }: NavCommandPaletteProps
         <CommandSeparator />
 
         <CommandGroup heading="Contact">
-          <CommandItem onSelect={() => go("tel:+918138084689")}>
+          <CommandItem onSelect={() => go("tel:+918714249485")}>
             <Phone className="mr-2 h-4 w-4" />
-            <span>Call sales · +91 81380 84689</span>
+            <span>Call sales · +91 87142 49485</span>
           </CommandItem>
           <CommandItem
             onSelect={() =>
-              go("https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more")
+              go("https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more")
             }
           >
             <MessageCircle className="mr-2 h-4 w-4" />

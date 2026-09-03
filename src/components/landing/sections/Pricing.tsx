@@ -197,7 +197,7 @@ export function Pricing() {
 
         <div className="text-center mt-14 md:mt-16">
           <a
-            href="https://wa.me/918138084689?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20Ledge%20plan%20for%20my%20business."
+            href="https://wa.me/918714249485?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20Ledge%20plan%20for%20my%20business."
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-[14px] text-foreground font-medium hover:text-primary transition-colors inline-block"

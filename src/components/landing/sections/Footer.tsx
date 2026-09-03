@@ -78,17 +78,17 @@ export function Footer() {
           {/* Talk to Sales — Phone + WhatsApp dual CTA */}
           <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
             <a
-              href="tel:+918138084689"
+              href="tel:+918714249485"
               className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-all duration-200"
               aria-label="Call Ledge sales"
             >
               <Phone size={13} className="text-foreground" strokeWidth={2.2} />
               <span className="font-body text-[13px] font-medium text-foreground tracking-[-0.005em]">
-                +91 81380 84689
+                +91 87142 49485
               </span>
             </a>
             <a
-              href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
+              href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-200"

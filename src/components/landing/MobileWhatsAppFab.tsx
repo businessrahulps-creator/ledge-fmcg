@@ -22,7 +22,7 @@ export function MobileWhatsAppFab() {
     <AnimatePresence>
       {visible && (
         <motion.a
-          href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20platform"
+          href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20platform"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with Ledge sales on WhatsApp"
