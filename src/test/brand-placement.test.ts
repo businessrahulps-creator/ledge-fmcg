@@ -84,13 +84,14 @@ describe("Landing section brand placements", () => {
   });
 
 
-  it("Features section: electric (dealers) + ink (claims)", () => {
+  it("Features section: no full-bleed blue card, ink on claims only (V3.2)", () => {
     // Features uses the LandingCard visual-first primitive, so tints are
     // declared as variant names rather than lp-card-* classes.
     const src = sectionFile("Features");
-    expect(countMatches(src, 'variant: "electric"')).toBe(1);
+    expect(countMatches(src, 'variant: "electric"')).toBe(0);
     expect(countMatches(src, 'variant: "ink"')).toBe(1);
   });
+
 
   it("Outcome section: electric on the hero card only", () => {
     const src = sectionFile("Outcome");
