@@ -48,9 +48,9 @@ describe("Brand token contract (index.css)", () => {
   });
 
   it.each([
-    ".lp-card-electric",
-    ".lp-card-ink",
-    ".lp-card-mist",
+    ".lp-card--accent",
+    ".lp-card--ink",
+    ".lp-card--sunken",
     ".lp-vcard--electric",
     ".lp-vcard--ink",
     ".lp-vcard--mist",
@@ -66,14 +66,14 @@ describe("Brand token contract (index.css)", () => {
 describe("Landing section brand placements", () => {
   it("Problem section: ink on the featured card only", () => {
     const src = sectionFile("Problem");
-    expect(countMatches(src, "lp-card-ink")).toBe(1);
-    expect(src).not.toContain("lp-card-electric");
+    expect(countMatches(src, "lp-card--ink")).toBe(1);
+    expect(src).not.toContain("lp-card--accent");
   });
 
   it("WhyLedge section: ink on the hero card only (V3.2 blue budget)", () => {
     const src = sectionFile("WhyLedge");
-    expect(countMatches(src, "lp-card-ink")).toBe(1);
-    expect(src).not.toContain("lp-card-electric");
+    expect(countMatches(src, "lp-card--ink")).toBe(1);
+    expect(src).not.toContain("lp-card--accent");
   });
 
   it("Hero and Final CTA use the graphite anchor, not a full-bleed blue block", () => {
@@ -99,19 +99,19 @@ describe("Landing section brand placements", () => {
 
   it("Outcome section: electric on the hero card only", () => {
     const src = sectionFile("Outcome");
-    expect(countMatches(src, "lp-card-electric")).toBe(1);
-    expect(src).not.toContain("lp-card-ink");
+    expect(countMatches(src, "lp-card--accent")).toBe(1);
+    expect(src).not.toContain("lp-card--ink");
   });
 
   it("Pricing section: ink on the recommended tier only", () => {
     const src = sectionFile("Pricing");
-    expect(countMatches(src, "lp-card-ink")).toBe(1);
-    expect(src).not.toContain("lp-card-electric");
+    expect(countMatches(src, "lp-card--ink")).toBe(1);
+    expect(src).not.toContain("lp-card--accent");
   });
 
   it("Testimonials section: mist on the featured quote only", () => {
     const src = sectionFile("Testimonials");
-    expect(countMatches(src, "lp-card-mist")).toBe(1);
+    expect(countMatches(src, "lp-card--sunken")).toBe(1);
   });
 });
 
@@ -138,9 +138,9 @@ describe("Retired V2 tints are gone from the landing page", () => {
     for (const name of sections) {
       const src = sectionFile(name);
       const total =
-        countMatches(src, "lp-card-electric") +
-        countMatches(src, "lp-card-ink") +
-        countMatches(src, "lp-card-mist");
+        countMatches(src, "lp-card--accent") +
+        countMatches(src, "lp-card--ink") +
+        countMatches(src, "lp-card--sunken");
       expect(total, `${name} uses too many tinted cards`).toBeLessThanOrEqual(2);
     }
   });
