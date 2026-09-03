@@ -11,10 +11,12 @@
     --snow: #F5EFE6;
     --cream: #F5EFE6;
     --lp-white: #FFFFFF;
+  }
 
   .dark {
     --background: 30 6% 7%;
     --foreground: 30 5% 93%;
+  }
 }
 
 @layer base {
