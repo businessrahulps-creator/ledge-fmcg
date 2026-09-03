@@ -20,6 +20,8 @@ const rowShadow = {
 
 const viewport = { once: true, margin: "-80px" } as const;
 
+const wellMin = 176;
+
 /** Step 01 — an order assembling itself, then stamped saved. */
 export function OrderBuildVisual() {
   const still = useReducedMotion();
@@ -29,7 +31,7 @@ export function OrderBuildVisual() {
   ];
 
   return (
-    <div className={well} style={{ minHeight: 168 }}>
+    <div className={well} style={{ minHeight: wellMin }}>
       <div className="space-y-2">
         <motion.div
           className={rowClass}
@@ -97,7 +99,7 @@ export function StockHealthVisual() {
   ];
 
   return (
-    <div className={well} style={{ minHeight: 168 }}>
+    <div className={well} style={{ minHeight: wellMin }}>
       <div className="space-y-3.5">
         {bars.map((b, i) => (
           <div key={b.sku}>
@@ -148,7 +150,7 @@ export function DispatchInvoiceVisual() {
   const still = useReducedMotion();
 
   return (
-    <div className={well} style={{ minHeight: 168 }}>
+    <div className={well} style={{ minHeight: wellMin }}>
       <motion.div
         className={rowClass}
         style={rowShadow}
@@ -165,15 +167,15 @@ export function DispatchInvoiceVisual() {
       </motion.div>
 
       <motion.svg
-        viewBox="0 0 200 24"
-        className="w-full h-5 my-1"
+        viewBox="0 0 200 28"
+        className="w-full h-7 my-1.5 block"
         aria-hidden
         initial={still ? false : "hidden"}
         whileInView="shown"
         viewport={viewport}
       >
         <motion.path
-          d="M14 4 V12 Q14 20 100 20 Q186 20 186 12 V4"
+          d="M22 2 V10 Q22 22 100 22 Q178 22 178 10 V2"
           fill="none"
           stroke="hsl(var(--border))"
           strokeWidth="1.5"
