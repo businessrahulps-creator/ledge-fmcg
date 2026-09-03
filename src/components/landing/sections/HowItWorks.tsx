@@ -52,16 +52,29 @@ export function HowItWorks() {
               The one Electric accent this section gets. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute md:left-0 md:right-0 md:top-[22px] md:h-px left-[21px] top-0 bottom-0 w-px md:w-auto bg-border"
+            className="pointer-events-none hidden md:block absolute left-0 right-0 top-[22px] h-px bg-border"
           >
             <motion.div
-              className="bg-primary md:h-px md:w-full h-full w-px origin-top md:origin-left"
-              initial={{ scaleX: 0, scaleY: 0 }}
-              whileInView={{ scaleX: 1, scaleY: 1 }}
+              className="h-px w-full bg-primary origin-left"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: duration.hero, ease: ease.emphasized }}
             />
           </div>
+          <div
+            aria-hidden
+            className="pointer-events-none md:hidden absolute left-[21px] top-0 bottom-0 w-px bg-border"
+          >
+            <motion.div
+              className="w-px h-full bg-primary origin-top"
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: duration.hero, ease: ease.emphasized }}
+            />
+          </div>
+
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-10">
             {steps.map((step, i) => (
