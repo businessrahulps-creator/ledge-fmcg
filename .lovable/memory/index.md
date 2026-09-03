@@ -9,6 +9,7 @@ Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (acce
 - [Command surface](mem://style/command-surface) — Unified /command merging old /reports + /performance. URL state contract, signal engine, deep-link contract.
 
 ### Design system (read these for any visual work)
+- [Landing soft cards](mem://style/landing-soft-cards) — Landing-only 12/18/24/32px radii, borderless pillowy shadows, visual-first LandingCard + FeatureVisuals
 - [Landing pill system](mem://style/landing-pill-system) — lp-pill/lp-pill-metric/lp-insight primitives; one pill cluster per section.
 - [Design system tokens (V2)](mem://style/design-system) — Live token reference: palette, type, radius, shadow, motion, density. Source of truth.
 - [App visual language](mem://style/app-visual-language) — Primitives (SignalCard/KpiStrip/InsightLine/StatusBadge), utilities (`.h1-display`, `.num`, `.card-hover`, `.glass-card`, `.status-*`), composition rules.
