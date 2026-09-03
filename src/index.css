@@ -893,6 +893,7 @@
     --lp-r-md: 18px;
     --lp-r-lg: 24px;
     --lp-r-xl: 32px;
+  }
 
   /* ── Soften the existing shells (borderless, pillowy) ── */
   .lp-card {
