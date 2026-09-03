@@ -45,7 +45,7 @@ export function MobileStickyCtaBar() {
               Start free
             </Link>
             <a
-              href="https://wa.me/918138084689?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
+              href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 rounded-lp-xs py-3 text-center font-body font-semibold text-[14px]"

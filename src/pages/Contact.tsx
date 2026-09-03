@@ -18,7 +18,7 @@ export default function Contact() {
     <div className="min-h-screen flex flex-col bg-white">
       <SeoHead
         title="Contact Ledge — Talk to Sales for Indian FMCG"
-        description="Reach the Ledge team for demos, onboarding help, or partnership questions. Call or WhatsApp +91 81380 84689, or email hello@getledge.in."
+        description="Reach the Ledge team for demos, onboarding help, or partnership questions. Call or WhatsApp +91 87142 49485, or email hello@getledge.in."
         path="/contact"
       />
       <Navbar />
@@ -66,10 +66,10 @@ export default function Contact() {
                 <div>
                   <h3 className="font-heading font-bold text-[16px] text-[#1A1A1A] mb-1">Email</h3>
                   <a
-                    href="mailto:ashaoviyaps@gmail.com"
+                    href="mailto:hello@getledge.in"
                     className="font-body text-[15px] text-[#52525B] underline underline-offset-2 hover:text-[#1A1A1A] transition-colors"
                   >
-                    ashaoviyaps@gmail.com
+                    hello@getledge.in
                   </a>
                 </div>
               </div>
@@ -95,7 +95,7 @@ export default function Contact() {
             </div>
 
             <a
-              href="mailto:ashaoviyaps@gmail.com"
+              href="mailto:hello@getledge.in"
               className="mt-8 w-full bg-[#27272A] text-white py-3.5 rounded-full font-body font-semibold text-sm hover:bg-[#1A1A1A] transition-colors duration-200 inline-flex items-center justify-center"
             >
               Send us an email

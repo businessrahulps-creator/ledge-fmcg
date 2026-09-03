@@ -57,7 +57,7 @@ export function FinalCTA() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <CapsuleCTA to="/signup" variant="dark">Start Free Trial</CapsuleCTA>
             <a
-              href="https://wa.me/918138084689?text=Hi%20Asha%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
+              href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-all"
