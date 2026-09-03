@@ -74,15 +74,16 @@ describe("Landing section brand placements", () => {
     expect(src).not.toContain("lp-card-bone");
   });
 
-  it("Features section: forest (growth) + terracotta (recovery), no others", () => {
+  it("Features section: forest (growth) + terracotta (recovery), no midnight", () => {
+    // Features now uses the LandingCard visual-first primitive, so tints are
+    // declared as variant names rather than lp-card-* classes.
     const src = sectionFile("Features");
-    expect(src).toContain("lp-card-forest");
-    expect(src).toContain("lp-card-terracotta");
-    expect(countMatches(src, "lp-card-forest")).toBe(1);
-    expect(countMatches(src, "lp-card-terracotta")).toBe(1);
+    expect(countMatches(src, 'variant: "forest"')).toBe(1);
+    expect(countMatches(src, 'variant: "terracotta"')).toBe(1);
+    expect(src).not.toContain('variant: "midnight"');
     expect(src).not.toContain("lp-card-midnight");
-    expect(src).not.toContain("lp-card-bone");
   });
+
 
   it("Outcome section: forest on the hero card only", () => {
     const src = sectionFile("Outcome");

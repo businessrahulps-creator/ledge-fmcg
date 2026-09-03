@@ -1126,6 +1126,180 @@
     line-height: 1.15;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     LANDING SOFT-SURFACE SYSTEM  (landing page ONLY — /app keeps 6px)
+     Large radii + borderless pillowy shadows + visual-first cards.
+     ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --lp-r-sm: 12px;
+    --lp-r-md: 18px;
+    --lp-r-lg: 24px;
+    --lp-r-xl: 32px;
+
+    --lp-shadow-soft:
+      inset 0 1px 0 hsl(0 0% 100% / 0.65),
+      0 1px 2px hsl(var(--primary) / 0.04),
+      0 10px 24px -14px hsl(var(--primary) / 0.14),
+      0 32px 64px -40px hsl(var(--primary) / 0.22);
+    --lp-shadow-lift:
+      inset 0 1px 0 hsl(0 0% 100% / 0.7),
+      0 2px 6px hsl(var(--primary) / 0.05),
+      0 18px 36px -16px hsl(var(--primary) / 0.18),
+      0 48px 88px -44px hsl(var(--primary) / 0.28);
+    --lp-shadow-soft-dark:
+      inset 0 1px 0 hsl(0 0% 100% / 0.10),
+      0 12px 28px -16px hsl(var(--primary) / 0.30),
+      0 40px 72px -44px hsl(var(--primary) / 0.45);
+    --lp-shadow-lift-dark:
+      inset 0 1px 0 hsl(0 0% 100% / 0.14),
+      0 20px 40px -18px hsl(var(--primary) / 0.36),
+      0 56px 96px -48px hsl(var(--primary) / 0.52);
+  }
+
+  /* ── Soften the existing shells (borderless, pillowy) ── */
+  .lp-card,
+  .lp-card-dark {
+    border-radius: var(--lp-r-lg);
+    border-color: transparent;
+    box-shadow: var(--lp-shadow-soft);
+  }
+  .lp-card:hover,
+  .lp-card-dark:hover {
+    border-color: transparent;
+    box-shadow: var(--lp-shadow-lift);
+  }
+  .lp-card-glass { border-radius: var(--lp-r-xl); }
+  .lp-card-tinted {
+    border-radius: var(--lp-r-lg);
+    border-color: transparent;
+    box-shadow: var(--lp-shadow-soft-dark);
+  }
+  .lp-card-tinted:hover { box-shadow: var(--lp-shadow-lift-dark); }
+  .lp-card-bone { box-shadow: var(--lp-shadow-soft); }
+  .lp-card-bone:hover { box-shadow: var(--lp-shadow-lift); }
+  .lp-icon-tile { border-radius: var(--lp-r-sm); }
+
+  /* ── Softer tonal gradients (derived from brand anchors only) ── */
+  .lp-card-midnight {
+    background:
+      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(218 46% 27%) 0%, transparent 62%),
+      linear-gradient(158deg, hsl(218 55% 19%) 0%, hsl(218 62% 13%) 55%, hsl(218 66% 10%) 100%);
+  }
+  .lp-card-forest {
+    background:
+      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(165 40% 32%) 0%, transparent 62%),
+      linear-gradient(158deg, hsl(165 46% 25%) 0%, hsl(165 52% 18%) 55%, hsl(165 56% 14%) 100%);
+  }
+  .lp-card-terracotta {
+    background:
+      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(19 62% 55%) 0%, transparent 62%),
+      linear-gradient(158deg, hsl(19 58% 47%) 0%, hsl(19 58% 38%) 55%, hsl(19 60% 31%) 100%);
+  }
+  .lp-card-bone {
+    background:
+      radial-gradient(ellipse 120% 70% at 50% -10%, hsl(0 0% 100%) 0%, transparent 65%),
+      linear-gradient(158deg, hsl(34 44% 94%) 0%, hsl(34 34% 88%) 100%);
+  }
+
+  /* ── Visual-first card primitive ── */
+  .lp-vcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--lp-r-xl);
+    overflow: hidden;
+    isolation: isolate;
+    padding: 14px;
+    background: hsl(var(--card));
+    box-shadow: var(--lp-shadow-soft);
+    transition: box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lp-vcard:hover { box-shadow: var(--lp-shadow-lift); transform: translateY(-2px); }
+
+  .lp-vcard--neutral {
+    background:
+      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 70%),
+      linear-gradient(160deg, hsl(34 30% 97%) 0%, hsl(34 24% 93%) 100%);
+  }
+  .lp-vcard--midnight,
+  .lp-vcard--forest,
+  .lp-vcard--terracotta { box-shadow: var(--lp-shadow-soft-dark); }
+  .lp-vcard--midnight:hover,
+  .lp-vcard--forest:hover,
+  .lp-vcard--terracotta:hover { box-shadow: var(--lp-shadow-lift-dark); }
+
+  .lp-vcard--midnight {
+    background:
+      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(218 46% 28%) 0%, transparent 65%),
+      linear-gradient(158deg, hsl(218 55% 19%) 0%, hsl(218 64% 11%) 100%);
+  }
+  .lp-vcard--forest {
+    background:
+      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(165 40% 33%) 0%, transparent 65%),
+      linear-gradient(158deg, hsl(165 46% 25%) 0%, hsl(165 55% 15%) 100%);
+  }
+  .lp-vcard--terracotta {
+    background:
+      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(19 62% 56%) 0%, transparent 65%),
+      linear-gradient(158deg, hsl(19 58% 47%) 0%, hsl(19 60% 32%) 100%);
+  }
+  .lp-vcard--bone {
+    background:
+      radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 68%),
+      linear-gradient(158deg, hsl(34 44% 94%) 0%, hsl(34 32% 87%) 100%);
+  }
+
+  /* Visual well — the graphic half of the card */
+  .lp-well {
+    position: relative;
+    border-radius: var(--lp-r-md);
+    padding: 18px;
+    overflow: hidden;
+    background: hsl(34 34% 95%);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.9),
+      0 1px 2px hsl(var(--primary) / 0.04);
+  }
+  /* Small meta line under a visual (labels, ids, totals) */
+  .lp-well-meta { color: hsl(var(--muted-foreground)); }
+  .lp-vcard--midnight .lp-well-meta,
+  .lp-vcard--forest .lp-well-meta,
+  .lp-vcard--terracotta .lp-well-meta { color: hsl(0 0% 100% / 0.78); }
+  .lp-vcard--midnight .lp-well-meta b,
+  .lp-vcard--forest .lp-well-meta b,
+  .lp-vcard--terracotta .lp-well-meta b { color: hsl(0 0% 100%); }
+  .lp-vcard--midnight .lp-well,
+  .lp-vcard--forest .lp-well,
+  .lp-vcard--terracotta .lp-well {
+    background: hsl(0 0% 100% / 0.10);
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.14);
+  }
+
+  /* Caption block — bold lede + muted continuation, reference-style */
+  .lp-caption {
+    padding: 18px 12px 10px;
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: hsl(var(--muted-foreground));
+    letter-spacing: -0.005em;
+  }
+  .lp-caption b, .lp-caption strong {
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+  .lp-vcard--midnight .lp-caption,
+  .lp-vcard--forest .lp-caption,
+  .lp-vcard--terracotta .lp-caption { color: hsl(0 0% 100% / 0.74); }
+  .lp-vcard--midnight .lp-caption b,
+  .lp-vcard--forest .lp-caption b,
+  .lp-vcard--terracotta .lp-caption b { color: hsl(0 0% 100%); }
+
+  /* Nested chips inside wells pick up the small radius */
+  .lp-well .rounded-xl { border-radius: var(--lp-r-sm); }
+
+
 /* ════════════════════════════════════════════════════════════════════
    Motion System v2 tokens (consumed by Tailwind arbitrary values).
    Match `src/lib/motion.ts` — keep in sync.
