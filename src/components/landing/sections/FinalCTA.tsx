@@ -4,6 +4,7 @@ import { spring, useParallaxY } from "@/lib/motion";
 import { CapsuleCTA } from "../CapsuleCTA";
 import { CursorAura } from "../CursorAura";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { ShaderBackdrop } from "@/components/landing/visuals/ShaderBackdrop";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20, filter: "blur(4px)" },
@@ -18,6 +19,7 @@ export function FinalCTA() {
 
   return (
     <section ref={sectionRef} className="relative lp-block-ink lp-block-graphite py-20 md:py-28 overflow-hidden">
+      <ShaderBackdrop preset="cta" />
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
       {/* Motion v3 — the one ambient pointer layer outside the hero. */}
       <CursorAura tint="hsl(var(--accent) / 0.12)" size={560} />

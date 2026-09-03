@@ -6,6 +6,7 @@ import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
 import { CursorAura } from "../CursorAura";
 import heroDashboard from "@/assets/landing/hero-dashboard.webp";
+import { ShaderBackdrop } from "@/components/landing/visuals/ShaderBackdrop";
 
 /** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
 const fadeUp = (delay: number) => ({
@@ -30,6 +31,8 @@ export function Hero() {
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-block-ink lp-block-graphite pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
+      <ShaderBackdrop preset="hero" />
+
       {/* Soft dot grid, masked — subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
 

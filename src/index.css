@@ -2549,6 +2549,14 @@
 .lp-theme .lp-block-graphite .lp-capsule-cta .lp-capsule-cta__arrow { color: hsl(var(--brand-ink)); }
 .lp-theme .lp-block-graphite .bg-primary { background: hsl(0 0% 100%); color: hsl(var(--brand-ink)); }
 
+
+/* V3.3 — live shader ground on the dark anchors.
+   The CSS graphite gradient stays as the no-WebGL fallback; the static
+   grain tile and dot grid step aside when the canvas is mounted. */
+.lp-theme .lp-shader-canvas { z-index: 0; display: block; }
+.lp-theme .lp-block-graphite:has(.lp-shader-canvas)::before { display: none; }
+.lp-theme .lp-block-graphite:has(.lp-shader-canvas) .lp-grid-soft { opacity: 0.35; }
+
 /* Softer paper ground (Problem) */
 .lp-theme .lp-section-soft { background: #FAFAFB; }
 
