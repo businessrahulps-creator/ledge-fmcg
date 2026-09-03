@@ -1732,27 +1732,37 @@
 .lp-theme .lp-shimmer::after { opacity: 0; }
 .lp-theme .lp-bento-hero {
   background: linear-gradient(135deg, hsl(244 26% 94%) 0%, hsl(244 24% 90%) 60%, hsl(224 40% 88%) 100%);
-}.lp-theme .lp-vcard--electric {
+}
+.lp-theme .lp-vcard--electric {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 92% 60%) 0%, transparent 65%),
     linear-gradient(158deg, hsl(224 91% 55%) 0%, hsl(224 88% 48%) 100%);
-}.lp-theme .lp-vcard--ink {
+}
+.lp-theme .lp-vcard--ink {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(224 26% 22%) 0%, transparent 65%),
     linear-gradient(158deg, hsl(224 27% 18%) 0%, hsl(224 30% 12%) 100%);
-}.lp-theme .lp-vcard--mist {
+}
+.lp-theme .lp-vcard--mist {
   background:
     radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 68%),
     linear-gradient(158deg, hsl(244 30% 95%) 0%, hsl(244 24% 89%) 100%);
 }
 .lp-theme .lp-vcard--neutral {
   background: linear-gradient(160deg, hsl(0 0% 100%) 0%, hsl(244 26% 96%) 100%);
-}.lp-theme .lp-vcard--electric,
-.lp-theme .lp-vcard--ink { color: hsl(0 0% 100%); }.lp-theme .lp-vcard--electric .lp-well-meta,
-.lp-theme .lp-vcard--ink .lp-well-meta { color: hsl(0 0% 100% / 0.76); }.lp-theme .lp-vcard--ink .text-accent { color: hsl(var(--brand-lime)); }.lp-theme .lp-vcard--electric .text-accent { color: hsl(0 0% 100%); }
+}
+.lp-theme .lp-vcard--electric,
+.lp-theme .lp-vcard--ink { color: hsl(0 0% 100%); }
+.lp-theme .lp-vcard--electric .lp-well-meta,
+.lp-theme .lp-vcard--ink .lp-well-meta { color: hsl(0 0% 100% / 0.76); }
+.lp-theme .lp-vcard--ink .text-accent { color: hsl(var(--brand-lime)); }
+.lp-theme .lp-vcard--electric .text-accent { color: hsl(0 0% 100%); }
+.lp-theme .lp-vcard--electric .lp-icon-tile,
+.lp-theme .lp-vcard--ink .lp-icon-tile {
   background: hsl(0 0% 100% / 0.14);
   border-color: hsl(0 0% 100% / 0.22);
-} color: hsl(0 0% 100%); }
+  color: hsl(0 0% 100%);
+}
 
 .lp-theme .lp-vcard--electric,
 .lp-theme .lp-vcard--ink { box-shadow: var(--lp-shadow-soft-dark); }
@@ -2148,7 +2158,8 @@
 .lp-theme .lp-live-dot { background: hsl(var(--brand-electric)); }
 
 /* V3.2 — accent marks are ink on light, white on dark */
-.lp-theme .text-accent { color: hsl(var(--brand-ink)); }.lp-theme .lp-block-ink .text-accent,
+.lp-theme .text-accent { color: hsl(var(--brand-ink)); }
+.lp-theme .lp-block-ink .text-accent,
 .lp-theme .lp-block-graphite .text-accent { color: hsl(0 0% 100%); }
 
 
