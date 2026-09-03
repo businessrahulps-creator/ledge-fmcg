@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Clock, TrendingUp, LineChart, Wallet, ArrowRight } from "lucide-react";
 import { useParallaxY } from "@/lib/motion";
 import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { RevenueChartVisual } from "../visuals/FeatureVisuals";
 
 const outcomes = [
   {
@@ -61,7 +62,7 @@ export function Outcome() {
         </AnimateIn>
 
         <AnimateIn variant="blurFadeUp" delay={0.05}>
-          <div className="md:rounded-[24px] md:border md:border-border md:bg-white md:p-4">
+          <div className="md:rounded-[32px] md:bg-card/60 md:p-4">
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" staggerTime={0.06}>
               {outcomes.map((o, idx) => {
                 const Icon = o.icon;
@@ -71,7 +72,7 @@ export function Outcome() {
                     <StaggerItem key={o.value} variant="scaleUp">
                       <div className="lp-card-tinted lp-card-forest h-full p-6 flex flex-col">
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/12 border border-white/20 text-foreground shadow-sm">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-white/12 border border-white/20 text-foreground shadow-sm">
                             <Icon className="h-4 w-4" strokeWidth={2} />
                           </span>
                           <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
@@ -95,14 +96,7 @@ export function Outcome() {
                         </p>
 
                         <div className="mt-5">
-                          <span className="lp-pill-metric">
-                            <span className="lp-pill-metric__tile">
-                              <TrendingUp size={13} strokeWidth={2.2} />
-                            </span>
-                            <span className="lp-pill-metric__label">This quarter</span>
-                            <span className="lp-pill-metric__value">₹14.2L</span>
-                            <span className="lp-pill-metric__delta lp-pill-metric__delta--up">↑ 18%</span>
-                          </span>
+                          <RevenueChartVisual />
                         </div>
                       </div>
                     </StaggerItem>
@@ -110,9 +104,9 @@ export function Outcome() {
                 }
                 return (
                   <StaggerItem key={o.value} variant="scaleUp">
-                    <div className="group lp-card-premium relative h-full rounded-[18px] border border-border bg-white p-6 hover:border-[hsl(var(--primary)/0.18)]">
+                    <div className="group lp-card-premium relative h-full rounded-[24px] bg-card p-6">
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[hsl(34_30%_90%)] border border-border text-foreground lp-icon-premium">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-[hsl(34_30%_90%)] border border-border text-foreground lp-icon-premium">
                           <Icon className="h-4 w-4" strokeWidth={2} />
                         </span>
                         <span className="font-body text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground)/0.7)] font-medium">
@@ -129,7 +123,7 @@ export function Outcome() {
                         </div>
                       </div>
 
-                      <div className="h-px bg-[#ECEEF2] my-5" />
+                      <div className="h-px bg-border my-5" />
 
                       <p className="font-body text-[13.5px] leading-[1.5] text-muted-foreground">
                         {o.label}
