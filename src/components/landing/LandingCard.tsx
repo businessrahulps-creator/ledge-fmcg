@@ -43,7 +43,7 @@ export function LandingCard({
   wellMinHeight = 176,
 }: LandingCardProps) {
   return (
-    <div className={`lp-vcard lp-vcard--${variant} h-full ${className}`}>
+    <div className={`lp-vcard ${variantClass[variant]} h-full ${className}`}>
       <div
         className="lp-well flex-1 flex flex-col justify-center"
         style={{ minHeight: wellMinHeight }}
