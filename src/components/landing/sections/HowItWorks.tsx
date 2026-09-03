@@ -85,7 +85,7 @@ export function HowItWorks() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 <div className={step.reversed ? "lg:order-2" : ""}>
                   <span className="inline-flex items-center gap-2.5 mb-5 group">
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[hsl(34_30%_90%)] border border-border lp-icon-premium">
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-secondary border border-border lp-icon-premium">
                       <step.icon size={16} strokeWidth={2} className="text-foreground" />
                     </span>
                     <span className="font-heading font-semibold text-[12px] text-muted-foreground tracking-[0.18em]">

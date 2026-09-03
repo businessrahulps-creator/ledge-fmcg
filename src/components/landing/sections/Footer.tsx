@@ -31,7 +31,7 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-secondary pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
+    <footer className="relative lp-footer bg-white pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
       {/* Layered ambient wash — Midnight + Terracotta */}
       <div
         aria-hidden
