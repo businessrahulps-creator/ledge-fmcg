@@ -175,7 +175,7 @@ export function DispatchInvoiceVisual() {
         viewport={viewport}
       >
         <motion.path
-          d="M22 2 V10 Q22 22 100 22 Q178 22 178 10 V2"
+          d="M100 1 V9 Q100 15 94 15 H56 Q50 15 50 21 V26 M100 9 Q100 15 106 15 H144 Q150 15 150 21 V26"
           fill="none"
           stroke="hsl(var(--border))"
           strokeWidth="1.5"
@@ -183,6 +183,7 @@ export function DispatchInvoiceVisual() {
           variants={{ hidden: { pathLength: 0 }, shown: { pathLength: 1 } }}
           transition={{ duration: duration.long, ease: ease.standard, delay: 0.18 }}
         />
+
       </motion.svg>
 
       <div className="grid grid-cols-2 gap-2">
