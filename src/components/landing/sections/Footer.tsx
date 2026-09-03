@@ -1,4 +1,4 @@
-import { Linkedin, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
