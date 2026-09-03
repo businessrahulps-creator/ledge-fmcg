@@ -70,11 +70,19 @@ describe("Landing section brand placements", () => {
     expect(src).not.toContain("lp-card-electric");
   });
 
-  it("WhyLedge section: electric on the hero card only", () => {
+  it("WhyLedge section: ink on the hero card only (V3.2 blue budget)", () => {
     const src = sectionFile("WhyLedge");
-    expect(countMatches(src, "lp-card-electric")).toBe(1);
-    expect(src).not.toContain("lp-card-ink");
+    expect(countMatches(src, "lp-card-ink")).toBe(1);
+    expect(src).not.toContain("lp-card-electric");
   });
+
+  it("Hero and Final CTA use the graphite anchor, not a full-bleed blue block", () => {
+    expect(sectionFile("Hero")).toContain("lp-block-graphite");
+    expect(sectionFile("FinalCTA")).toContain("lp-block-graphite");
+    expect(sectionFile("FinalCTA")).not.toContain("lp-block-electric");
+    expect(css).toContain(".lp-block-graphite");
+  });
+
 
   it("Features section: electric (dealers) + ink (claims)", () => {
     // Features uses the LandingCard visual-first primitive, so tints are
