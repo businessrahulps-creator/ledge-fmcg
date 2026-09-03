@@ -42,7 +42,7 @@ export function Outcome() {
 
   return (
     <section ref={sectionRef} className="relative lp-section-soft lp-rhythm-lg overflow-hidden">
-      <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft pointer-events-none" />
+      <motion.div style={{ y: meshY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft lp-parallax pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">

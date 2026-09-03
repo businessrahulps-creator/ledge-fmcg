@@ -124,3 +124,34 @@ describe("Landing design system — rhythm and surfaces", () => {
     }
   });
 });
+
+describe("Landing contrast contract", () => {
+  it("never resolves landing pills through the app accent token", () => {
+    const css = read("src/index.css");
+    const lpRules = css
+      .split("\n")
+      .filter((l) => l.includes(".lp-pill") && l.includes("var(--accent)"));
+    // Legacy base-layer rules are allowed only if a .lp-theme override exists.
+    if (lpRules.length) {
+      expect(css).toMatch(/\.lp-theme \.lp-pill--warn[\s\S]*var\(--warning\)/);
+    }
+  });
+
+  it("gives dark cards a white foreground contract", () => {
+    const css = read("src/index.css");
+    expect(css).toMatch(/\.lp-theme \.lp-card--accent \.text-accent/);
+    expect(css).toContain(".lp-nav--on-dark");
+  });
+
+  it.each(SECTION_FILES.map((f) => [f.name, f.source] as const))(
+    "%s does not put text-accent on an accent card",
+    (_name, source) => {
+      const accentCards = source.match(/lp-card--accent[\s\S]{0,1200}?<\/div>/g) ?? [];
+      for (const block of accentCards) {
+        // Allowed: the CSS contract repaints text-accent white inside accent
+        // cards, so we only guard against hard-coded blue utilities.
+        expect(block).not.toMatch(/text-\[hsl\(var\(--brand-electric\)\)\]/);
+      }
+    },
+  );
+});

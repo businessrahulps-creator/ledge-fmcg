@@ -148,7 +148,14 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     gl.uniform1f(uEnergy, cfg.energy);
     gl.uniform1f(uBloom, cfg.bloom);
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Static single frame when motion is unwanted, on small viewports, or on
+    // low-core devices — the animated ground is the most expensive per-frame
+    // work on the landing page.
+    const lowPower =
+      window.innerWidth < 768 ||
+      (navigator.hardwareConcurrency ?? 8) <= 4;
+    const reduce =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches || lowPower;
 
     let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const resize = () => {
