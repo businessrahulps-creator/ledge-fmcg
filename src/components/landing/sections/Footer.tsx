@@ -187,21 +187,6 @@ export function Footer() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {socials.map(({ icon: Icon, href, label }) => (
-              <MagneticWrapper key={href} strength={6} radius={60}>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors duration-200 shadow-depth-2"
-                  aria-label={label}
-                >
-                  <Icon size={16} />
-                </a>
-              </MagneticWrapper>
-            ))}
-          </div>
         </div>
       </div>
     </footer>
