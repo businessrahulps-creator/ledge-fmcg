@@ -60,7 +60,9 @@ void main() {
   vec2 pool = vec2(0.66 + 0.05 * sin(uTime * 0.07), 0.24 + 0.04 * cos(uTime * 0.05));
   pool.x *= uRes.x / uRes.y;
   float d = distance(st, pool);
-  float glow = smoothstep(1.15, 0.02, d);
+  float ar = uRes.x / uRes.y;
+  float rad = mix(0.66, 1.15, clamp((ar - 0.45) / 1.35, 0.0, 1.0));
+  float glow = smoothstep(rad, 0.02, d);
   glow = pow(glow, 1.35);
 
   float shade = clamp(glow * (0.72 + 0.6 * f) + f * 0.16, 0.0, 1.0);
@@ -71,12 +73,12 @@ void main() {
   vec2 ptr = uPointer;
   ptr.x *= uRes.x / uRes.y;
   float pd = distance(st, ptr);
-  float bloom = smoothstep(0.62, 0.0, pd);
+  float bloom = smoothstep(mix(0.34, 0.62, clamp((ar - 0.45) / 1.35, 0.0, 1.0)), 0.0, pd);
   col += vec3(0.106, 0.341, 0.961) * bloom * bloom * uBloom;
 
   // vignette so the headline sits on the darkest ground
   float vig = smoothstep(1.25, 0.25, length((uv - 0.5) * vec2(1.15, 1.0)));
-  col *= mix(0.5, 1.0, vig);
+  col *= mix(mix(0.34, 0.5, clamp((ar - 0.45) / 1.35, 0.0, 1.0)), 1.0, vig);
 
   // animated film grain, in-shader
   float g = hash(gl_FragCoord.xy + fract(uTime) * 91.7);
