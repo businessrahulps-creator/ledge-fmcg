@@ -2,7 +2,6 @@ import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { spring, staggerContainer, fadeUp } from "@/lib/motion";
-import { MagneticWrapper } from "@/components/landing/MagneticWrapper";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
