@@ -2177,7 +2177,17 @@
    This block is authoritative: nothing below it may redefine these.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ── Surface roles — five grounds, nothing else ──────────────────────── */
+.lp-theme {
+  --lp-surface:          0 0% 100%;      /* paper — default card + section */
+  --lp-surface-sunken:   244 26% 96%;    /* recessed panel / alt section   */
+  --lp-surface-raised:   0 0% 100%;      /* lifted card on a sunken ground */
+  --lp-surface-ink:      224 27% 15%;    /* full-bleed dark block          */
+  --lp-surface-accent:   224 91% 53%;    /* electric block, used sparingly */
+}
+
 /* ── Section grounds — one class family, three grounds ───────────────── */
+
 .lp-theme .lp-section-paper { background-color: hsl(var(--lp-surface)); background-image: none; }
 .lp-theme .lp-section-soft  { background-color: hsl(var(--lp-surface-sunken)); background-image: none; }
 .lp-theme .lp-section-ink   { background-color: hsl(var(--lp-surface-ink)); background-image: none; }
