@@ -1694,6 +1694,7 @@
   /* ── Semantic remap ── */
   --background: var(--brand-mist);
   --foreground: var(--brand-ink);
+}
 
 /* ── Section grounds: flat, confident colour instead of warm mesh ── */
 .lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
