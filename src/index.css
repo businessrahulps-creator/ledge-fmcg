@@ -1866,11 +1866,13 @@
 
 /* Eyebrow dots: electric on light, lime on dark blocks */
 .lp-theme .lp-eyebrow::before,
-.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-electric)); } background: hsl(var(--brand-lime)); }
+.lp-theme .lp-eyebrow-dark::before { background: hsl(var(--brand-electric)); }
+.lp-theme .lp-card--ink .lp-eyebrow::before,
+.lp-theme .lp-card--ink .lp-eyebrow-dark::before { background: hsl(var(--brand-lime)); }
 
-/* Live status dot stays lime — it reads as "on" */
-.lp-theme .lp-nav-status-dot,
-.lp-theme .lp-live-dot { background: hsl(var(--brand-lime)); }
+/* Status dot reads green; the live-data dot stays brand blue. */
+.lp-theme .lp-nav-status-dot { background: hsl(var(--success)); }
+.lp-theme .lp-live-dot { background: hsl(var(--brand-electric)); }
 
 /* ── Full-bleed colour blocks: colour IS the section ── */
 .lp-theme .lp-block-ink,
