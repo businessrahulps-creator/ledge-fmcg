@@ -2466,8 +2466,20 @@
   box-shadow: none;
   border-color: hsl(var(--border));
 }
-.lp-theme .lp-card--ink    { background: hsl(var(--lp-surface-ink)); color: hsl(0 0% 100%); }
-.lp-theme .lp-card--accent { background: hsl(var(--lp-surface-accent)); color: hsl(0 0% 100%); }
+/* Dark card variants invert the local token scope so any child using
+   text-foreground / text-muted-foreground / border stays readable. */
+.lp-theme .lp-card--ink,
+.lp-theme .lp-card--accent {
+  color: hsl(0 0% 100%);
+  --foreground: 0 0% 100%;
+  --card-foreground: 0 0% 100%;
+  --muted-foreground: 220 16% 76%;
+  --border: 0 0% 100% / 0.16;
+  --secondary: 0 0% 100% / 0.10;
+  --secondary-foreground: 0 0% 100%;
+}
+.lp-theme .lp-card--ink    { background: hsl(var(--lp-surface-ink)); }
+.lp-theme .lp-card--accent { background: hsl(var(--lp-surface-accent)); }
 
 /* On a dark block the same card primitive becomes a lifted translucent panel
    instead of a white slab — one contract, two grounds. */
