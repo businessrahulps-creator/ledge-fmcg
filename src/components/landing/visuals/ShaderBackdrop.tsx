@@ -236,7 +236,10 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
       if (raf) cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
+
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [preset]);
