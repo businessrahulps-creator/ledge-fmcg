@@ -79,8 +79,6 @@ export function StockHealthVisual() {
 /** Scheme progress arc + amounts. */
 export function SchemeArcVisual() {
   const pct = 62;
-  const r = 44;
-  const c = Math.PI * r; // half circle
   return (
     <div className="w-full flex flex-col items-center">
       <svg viewBox="0 0 120 68" className="w-[168px] h-auto" role="img" aria-label="Scheme progress 62 percent">
@@ -121,7 +119,6 @@ export function SchemeArcVisual() {
           ₹1.24L / ₹2.00L
         </span>
       </div>
-      <span className="sr-only">{c}</span>
     </div>
   );
 }
