@@ -2409,3 +2409,95 @@
 .lp-theme .lp-block-electric .bg-card .text-foreground,
 .lp-theme .lp-block-ink .bg-white .text-foreground,
 .lp-theme .lp-block-electric .bg-white .text-foreground { color: hsl(var(--brand-ink)); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LANDING V3.1 — Ink-first. Warm purge, lime demotion, black hero.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Hero: fluted black slab ───────────────────────────────────────── */
+.lp-theme .lp-block-ink-hero {
+  background-color: hsl(224 32% 8%);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      hsl(0 0% 100% / 0.055) 0px,
+      hsl(0 0% 100% / 0.055) 1px,
+      transparent 1px,
+      transparent 46px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      hsl(0 0% 100% / 0.035) 0px,
+      hsl(0 0% 100% / 0.000) 26px,
+      hsl(0 0% 100% / 0.030) 46px
+    ),
+    radial-gradient(ellipse 90% 70% at 78% 40%, hsl(224 70% 40% / 0.35) 0%, transparent 62%),
+    linear-gradient(180deg, hsl(224 34% 6%) 0%, hsl(224 30% 11%) 62%, hsl(224 26% 15%) 100%);
+}
+.lp-theme .lp-block-ink-hero .lp-grid-soft { opacity: 0.25; }
+.lp-theme .lp-block-ink-hero .lp-eyebrow {
+  background: hsl(0 0% 100% / 0.08);
+  border-color: hsl(0 0% 100% / 0.16);
+  color: hsl(0 0% 100% / 0.82);
+}
+
+/* Hero pills read as hairline glass on black */
+.lp-theme .lp-block-ink .lp-pill,
+.lp-theme .lp-block-ink-hero .lp-pill {
+  background: hsl(0 0% 100% / 0.07);
+  border: 1px solid hsl(0 0% 100% / 0.16);
+  box-shadow: none;
+}
+.lp-theme .lp-block-ink .lp-pill .lp-pill__label,
+.lp-theme .lp-block-ink-hero .lp-pill .lp-pill__label { color: hsl(0 0% 100% / 0.90); }
+.lp-theme .lp-block-ink .lp-pill .lp-pill__tile,
+.lp-theme .lp-block-ink-hero .lp-pill .lp-pill__tile {
+  background: hsl(0 0% 100% / 0.12);
+  color: hsl(0 0% 100%);
+}
+.lp-theme .lp-block-ink-hero .lp-pill--success .lp-pill__tile {
+  background: hsl(var(--brand-electric)); color: hsl(0 0% 100%);
+}
+
+/* Primary CTA on the black slab = white capsule with ink text */
+.lp-theme .lp-block-ink-hero .lp-capsule-cta,
+.lp-theme .lp-block-ink-hero .lp-capsule-cta .lp-capsule-cta__inner {
+  background: hsl(0 0% 100%);
+  color: hsl(var(--brand-ink));
+  border-color: transparent;
+}
+.lp-theme .lp-block-ink-hero .lp-capsule-cta .lp-capsule-cta__label,
+.lp-theme .lp-block-ink-hero .lp-capsule-cta .lp-capsule-cta__arrow { color: hsl(var(--brand-ink)); }
+
+/* ── 2. Lime law: punctuation only ────────────────────────────────────── */
+.lp-theme .lp-pill--warn .lp-pill__tile {
+  background: hsl(var(--brand-ink) / 0.08);
+  color: hsl(var(--brand-ink));
+}
+.lp-theme .lp-pill--warn .lp-pill__label { color: hsl(224 13% 38%); }
+.lp-theme .lp-block-ink-hero .lp-pill--warn .lp-pill__tile {
+  background: hsl(0 0% 100% / 0.12); color: hsl(0 0% 100%);
+}
+.lp-theme .lp-live-dot,
+.lp-theme .lp-nav-status-dot { background: hsl(var(--brand-electric)); }
+.lp-theme .lp-block-ink .lp-live-dot { background: hsl(var(--brand-lime)); }
+
+/* ── 3. Warm purge — every legacy Bone / Terracotta surface ───────────── */
+.lp-theme .lp-section-paper,
+.lp-theme .lp-mesh-light      { background-color: hsl(var(--brand-mist)); background-image: none; }
+.lp-theme .lp-icon-tile,
+.lp-theme .lp-icon-premium,
+.lp-theme .lp-chip-warm,
+.lp-theme .lp-proof-chip      { background: hsl(var(--brand-mist)); border-color: hsl(var(--border)); color: hsl(var(--brand-ink)); }
+.lp-theme .lp-card-premium    { background: hsl(0 0% 100%); }
+.lp-theme .lp-glass-frost     { background: hsl(0 0% 100% / 0.72); border-color: hsl(var(--border)); }
+.lp-theme .lp-hairline,
+.lp-theme .lp-divider         { background: hsl(var(--border)); }
+.lp-theme [class*="lp-"][style*="34 3"] { background: hsl(var(--brand-mist)) !important; }
+
+/* ── 4. Footer: white ─────────────────────────────────────────────────── */
+.lp-theme .lp-footer {
+  background: hsl(0 0% 100%);
+  border-top: 1px solid hsl(var(--border));
+}
+.lp-theme .lp-footer .bg-card { background: hsl(var(--brand-mist)); }
