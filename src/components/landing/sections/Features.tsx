@@ -35,7 +35,7 @@ const cards: Card[] = [
     visual: <StockHealthVisual />,
     lede: "See stock before it hurts.",
     caption: "Green, amber, red — per SKU, per godown, updated live.",
-    variant: "neutral",
+    variant: "mist",
     span: "lg:col-span-3",
     wellMinHeight: 208,
   },
@@ -52,7 +52,7 @@ const cards: Card[] = [
     visual: <TeamBarsVisual />,
     lede: "Watch the team, live.",
     caption: "Every rep's orders and targets against plan.",
-    variant: "neutral",
+    variant: "mist",
     span: "lg:col-span-2",
   },
   {
@@ -60,7 +60,7 @@ const cards: Card[] = [
     visual: <GstInvoiceVisual />,
     lede: "GST in one tap.",
     caption: "Invoices, estimates and credit notes — CGST, SGST, IGST done.",
-    variant: "neutral",
+    variant: "mist",
     span: "lg:col-span-2",
   },
   {
@@ -76,7 +76,7 @@ const cards: Card[] = [
 
 export function Features() {
   return (
-    <section id="features" className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
+    <section id="features" className="relative lp-section-paper lp-rhythm-lg overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
@@ -90,7 +90,7 @@ export function Features() {
         </AnimateIn>
 
         <StaggerContainer
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 lp-grid-stretch"
           staggerTime={0.05}
         >
           {cards.map((c) => (

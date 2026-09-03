@@ -32,7 +32,7 @@ export function Problem() {
   const noiseY = useParallaxY(sectionRef, 15);
 
   return (
-    <section ref={sectionRef} className="relative lp-section-soft py-20 md:py-28 overflow-hidden">
+    <section ref={sectionRef} className="relative lp-section-soft lp-rhythm overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
@@ -46,12 +46,12 @@ export function Problem() {
           </div>
         </AnimateIn>
 
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto" staggerTime={0.05}>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto lp-grid-stretch" staggerTime={0.05}>
           {cards.map((card, i) => {
             const isFeatured = i === 3; // "Excel Nights" — emotional peak
             return (
               <StaggerItem key={card.title}>
-                <div className={`${isFeatured ? "lp-card-tinted lp-card-ink" : "lp-card"} p-7 h-full flex flex-col`}>
+                <div className={`${isFeatured ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col`}>
                   {isFeatured ? (
                     <div className="mb-5">
                       <span className="lp-pill lp-pill--warn">

@@ -18,7 +18,7 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="py-16 md:py-20 bg-white border-b border-border">
+    <section className="lp-section-paper lp-rhythm-sm border-b border-border">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         {/* Logo Marquee — soft pill chips */}
         <div

@@ -114,7 +114,14 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
         pill: "9999px",
+        // Landing shape scale (only meaningful under .lp-theme)
+        "lp-xs": "var(--lp-r-xs)",
+        "lp-sm": "var(--lp-r-sm)",
+        "lp-md": "var(--lp-r-md)",
+        "lp-lg": "var(--lp-r-lg)",
+        "lp-xl": "var(--lp-r-xl)",
       },
+
       boxShadow: {
         "depth-2": "var(--shadow-2)",
         "depth-4": "var(--shadow-4)",

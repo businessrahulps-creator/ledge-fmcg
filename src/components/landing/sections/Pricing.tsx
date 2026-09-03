@@ -64,7 +64,7 @@ const plans = [
 export function Pricing() {
   const reduce = useReducedMotion();
   return (
-    <section id="pricing" className="relative bg-white py-24 md:py-32 lg:py-36 overflow-hidden">
+    <section id="pricing" className="relative lp-section-paper lp-rhythm-lg overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-12 md:mb-14 max-w-3xl mx-auto">
@@ -84,17 +84,17 @@ export function Pricing() {
             <div className="flex justify-center mt-6">
               <span className="lp-pricing-trust-chip">
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-accent" />
+                  <Check size={12} strokeWidth={3} className="text-success" />
                   30-day free trial
                 </span>
                 <span className="lp-pricing-trust-chip__divider" />
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-accent" />
+                  <Check size={12} strokeWidth={3} className="text-success" />
                   No card
                 </span>
                 <span className="lp-pricing-trust-chip__divider" />
                 <span className="lp-pricing-trust-chip__item">
-                  <Check size={12} strokeWidth={3} className="text-accent" />
+                  <Check size={12} strokeWidth={3} className="text-success" />
                   Cancel anytime
                 </span>
               </span>
@@ -104,14 +104,14 @@ export function Pricing() {
 
         {/* Motion v3 — cards are still on entrance; presence over performance.
             Hover/tap = unified 120ms intent. Highlighted card gets the only ambient delight on the page. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4 lp-grid-stretch">
           {plans.map((plan, i) => {
             const tintMidnight = i === 2;     // Scale → Midnight authority
             const cardClass = plan.highlighted
-              ? "lp-bento-hero border border-primary/40 shadow-depth-8 lp-card-premium"
+              ? "lp-card lp-card--xl border border-primary/40 shadow-depth-8"
               : tintMidnight
-              ? "lp-card-tinted lp-card-ink"
-              : "lp-card lp-card-premium";
+              ? "lp-card lp-card--ink"
+              : "lp-card";
             return (
               <PressableCard key={plan.name} className="relative h-full">
                 <div
@@ -140,7 +140,7 @@ export function Pricing() {
                     className={`lp-icon-tile lp-icon-premium mb-5 ${plan.highlighted ? "lp-icon-tile-accent" : ""}`}
                     style={plan.highlighted ? { background: "rgba(255,255,255,0.85)", borderColor: "rgba(255,255,255,0.95)" } : undefined}
                   >
-                    <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-accent" : "text-foreground"} />
+                    <plan.icon size={20} strokeWidth={1.75} className={plan.highlighted ? "text-primary" : "text-foreground"} />
                   </div>
 
                   <h3 className="font-heading font-semibold text-[19px] text-foreground tracking-tight">{plan.name}</h3>
@@ -168,7 +168,7 @@ export function Pricing() {
                           tintMidnight ? "bg-white/15 border-white/25" :
                           "bg-secondary border-border"
                         }`}>
-                          <Check size={10} className={plan.highlighted ? "text-accent" : tintMidnight ? "text-primary-foreground" : "text-foreground"} strokeWidth={3} />
+                          <Check size={10} className={plan.highlighted ? "text-primary" : tintMidnight ? "text-primary-foreground" : "text-foreground"} strokeWidth={3} />
                         </span>
                         <span className="font-body text-[13.5px] text-foreground leading-[1.45]">{f}</span>
                       </div>
@@ -200,7 +200,7 @@ export function Pricing() {
             href="https://wa.me/918138084689?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20Ledge%20plan%20for%20my%20business."
             target="_blank"
             rel="noopener noreferrer"
-            className="font-body text-[14px] text-foreground font-medium hover:text-accent transition-colors inline-block"
+            className="font-body text-[14px] text-foreground font-medium hover:text-primary transition-colors inline-block"
           >
             Need something custom — Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
           </a>

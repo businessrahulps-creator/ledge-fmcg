@@ -31,7 +31,7 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="relative lp-footer bg-white pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
+    <footer className="relative lp-footer lp-section-paper pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
       {/* Layered ambient wash — Midnight + Terracotta */}
       <div
         aria-hidden
@@ -153,7 +153,7 @@ export function Footer() {
               Status
             </h4>
 
-            <div className="rounded-md border border-border bg-card/70 backdrop-blur-sm p-3.5 sm:p-4 flex flex-col gap-3 shadow-depth-2 min-w-0">
+            <div className="rounded-lp-xs border border-border bg-card/70 backdrop-blur-sm p-3.5 sm:p-4 flex flex-col gap-3 shadow-depth-2 min-w-0">
               {/* Animated status badge */}
               <div className="relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-card border border-border shadow-depth-2 w-fit max-w-full overflow-hidden">
                 <span className="relative flex h-1.5 w-1.5 shrink-0">

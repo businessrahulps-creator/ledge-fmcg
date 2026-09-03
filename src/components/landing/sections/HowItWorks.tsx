@@ -34,7 +34,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative bg-white py-20 md:py-28 overflow-hidden">
+    <section id="how-it-works" className="relative lp-section-paper lp-rhythm overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">

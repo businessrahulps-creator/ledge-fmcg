@@ -9,10 +9,10 @@ import { ease, duration } from "@/lib/motion";
    ═══════════════════════════════════════════════════════════════ */
 
 const well =
-  "relative w-full rounded-2xl bg-secondary/60 border border-border/70 p-4 overflow-hidden";
+  "relative w-full rounded-lp-lg bg-secondary/60 border border-border/70 p-4 overflow-hidden";
 
 const rowClass =
-  "flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-card";
+  "flex items-center justify-between gap-3 px-3 py-2 rounded-lp-sm bg-card";
 
 const rowShadow = {
   boxShadow: "inset 0 1px 0 hsl(0 0% 100%), 0 1px 2px hsl(220 30% 15% / 0.05)",
@@ -184,7 +184,7 @@ export function DispatchInvoiceVisual() {
 
       <div className="grid grid-cols-2 gap-2">
         <motion.div
-          className="rounded-xl bg-card px-3 py-2.5"
+          className="rounded-lp-sm bg-card px-3 py-2.5"
           style={rowShadow}
           initial={still ? false : { opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -199,7 +199,7 @@ export function DispatchInvoiceVisual() {
           </p>
         </motion.div>
         <motion.div
-          className="rounded-xl bg-foreground px-3 py-2.5"
+          className="rounded-lp-sm bg-foreground px-3 py-2.5"
           initial={still ? false : { opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={viewport}

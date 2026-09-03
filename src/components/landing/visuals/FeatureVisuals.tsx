@@ -15,14 +15,14 @@ const chip = {
 } as const;
 
 const rowClass =
-  "flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-card";
+  "flex items-center justify-between gap-3 px-3 py-2.5 rounded-lp-sm bg-card";
 
 /** Dealer roster — three dealers with health pills. */
 export function DealerRosterVisual() {
   const rows = [
     { name: "Aryan Beverages", status: "Active", variant: "success" as const, icon: CheckCircle2 },
     { name: "Nova Retail Co.", status: "Slow", variant: "warn" as const, icon: Clock },
-    { name: "Coastal Naturals", status: "At risk", variant: "neutral" as const, icon: AlertCircle },
+    { name: "Coastal Naturals", status: "At risk", variant: "bad" as const, icon: AlertCircle },
   ];
   return (
     <div className="space-y-2 w-full">
@@ -50,8 +50,8 @@ export function DealerRosterVisual() {
 export function StockHealthVisual() {
   const rows = [
     { sku: "Surf Excel 1kg", count: "48", label: "in stock", dot: "hsl(var(--success))" },
-    { sku: "Maggi 70g", count: "12", label: "reorder", dot: "hsl(var(--accent))" },
-    { sku: "Dabur Honey 250g", count: "0", label: "out", dot: "hsl(var(--muted-foreground))" },
+    { sku: "Maggi 70g", count: "12", label: "reorder", dot: "hsl(var(--warning))" },
+    { sku: "Dabur Honey 250g", count: "0", label: "out", dot: "hsl(var(--destructive))" },
   ];
   return (
     <div className="space-y-2 w-full">
@@ -158,7 +158,7 @@ export function TeamBarsVisual() {
 /** GST invoice receipt. */
 export function GstInvoiceVisual() {
   return (
-    <div className="w-full px-3.5 py-3 rounded-xl bg-card" style={chip}>
+    <div className="w-full px-3.5 py-3 rounded-lp-sm bg-card" style={chip}>
       <div className="flex items-baseline justify-between mb-2 pb-2 border-b border-dashed border-border">
         <span className="font-heading font-semibold text-[12px] text-foreground tracking-tight">
           INV-2641
@@ -197,7 +197,7 @@ export function ClaimTimelineVisual() {
   return (
     <div className="w-full">
       <div
-        className="flex items-center gap-1.5 px-2.5 py-3 rounded-xl bg-card"
+        className="flex items-center gap-1.5 px-2.5 py-3 rounded-lp-sm bg-card"
         style={chip}
       >
         {steps.map((s, idx) => (
