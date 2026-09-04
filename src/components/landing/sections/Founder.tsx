@@ -13,7 +13,7 @@ export function Founder() {
   const auraY = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [-30, 30]);
 
   return (
-    <section ref={sectionRef} className="relative lp-section-soft lp-rhythm overflow-hidden">
+    <section id="founder" ref={sectionRef} className="relative lp-section-soft lp-rhythm overflow-hidden">
       {/* Soft section ambient wash */}
       <motion.div
         aria-hidden
