@@ -2256,12 +2256,41 @@ export type Database = {
     Functions: {
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
       aging_bucket_rank: { Args: { b: string }; Returns: number }
+      book_order_atomic: {
+        Args: {
+          p_applied_schemes?: Json
+          p_date: string
+          p_distributor_id: string
+          p_godown_id?: string
+          p_lines: Json
+          p_remarks?: string
+          p_salesperson_id: string
+          p_scheme_savings?: number
+        }
+        Returns: Json
+      }
+      cancel_order_atomic: {
+        Args: { p_order_id: string; p_reason: string }
+        Returns: Json
+      }
       check_aging_transitions: { Args: never; Returns: Json }
       delete_member_atomic: {
         Args: { member_id: string }
         Returns: {
           success: boolean
         }[]
+      }
+      dispatch_and_bill_order_atomic: {
+        Args: {
+          p_dispatch_date?: string
+          p_dispatch_remarks?: string
+          p_driver_name?: string
+          p_godown_id?: string
+          p_order_id: string
+          p_override_credit?: boolean
+          p_vehicle?: string
+        }
+        Returns: Json
       }
       dispatch_order_atomic: {
         Args: {
@@ -2273,6 +2302,7 @@ export type Database = {
         }
         Returns: Json
       }
+      fy_of: { Args: { p_date: string }; Returns: string }
       get_company_id: { Args: never; Returns: string }
       get_cron_secret: { Args: never; Returns: string }
       get_invite_by_token: {
