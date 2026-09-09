@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X, AlertTriangle } from "lucide-react";
-import { SignalCard } from "@/components/ui/signal-card";
-import { KpiStrip } from "@/components/ui/kpi-strip";
+import { HeroBand } from "@/components/ui/hero-band";
+import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
@@ -109,6 +109,8 @@ export default function OrderDetail() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
+  const [money, setMoney] = useState({ received: 0, balance: 0 });
+  const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
   type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
   const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
@@ -344,32 +346,101 @@ export default function OrderDetail() {
     );
   }
 
+  const netTotal = editTotal - totalSchemeSavings;
+  const hasBill = !!finalInvoice;
+  const received = hasBill ? money.received : 0;
+  const balance = hasBill ? money.balance : netTotal;
+  const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
+  const delivered = order.deliveryStatus === "delivered";
+  const settled = hasBill && balance <= 0;
+
+  const journey: JourneyStep[] = [
+    { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
+    {
+      label: "Dispatched",
+      detail: dispatched ? formatIndianDate(order.dispatchDate) : undefined,
+      state: dispatched ? "done" : "current",
+    },
+    { label: "Billed", detail: finalInvoice?.invoiceNumber, state: hasBill ? "done" : "todo" },
+    { label: "Delivered", state: delivered ? "done" : dispatched ? "current" : "todo" },
+    {
+      label: "Paid",
+      detail: settled ? "Fully received" : received > 0 ? `${formatCurrency(received)} received` : undefined,
+      state: settled ? "done" : received > 0 ? "current" : "todo",
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-4 md:space-y-6 pb-4 md:pb-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => navigate("/orders")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="relative pl-3">
-              {/* Brand placement (PR-C): Midnight rule — record of truth. */}
-              <span aria-hidden className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-primary" />
-              <h1 className="h1-display">{order.orderNumber}</h1>
-              <p className="text-xs text-muted-foreground md:text-sm">{formatIndianDate(order.date)}</p>
-            </div>
+        <Button variant="ghost" size="sm" className="-ml-2 h-9 text-muted-foreground" onClick={() => navigate("/orders")}>
+          <ArrowLeft className="h-4 w-4" /> Back to orders
+        </Button>
+
+        {/* The one loud block: the money on this order */}
+        <HeroBand
+          eyebrow="Order"
+          title={order.orderNumber}
+          subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
+          aside={
+            <>
+              <StatusBadge status={order.paymentStatus} />
+              <StatusBadge status={order.deliveryStatus} kind="delivery" />
+            </>
+          }
+          figures={[
+            {
+              label: totalSchemeSavings > 0 ? "Order total (after schemes)" : "Order total",
+              value: formatCurrency(netTotal),
+              primary: true,
+              note: totalSchemeSavings > 0 ? `Saved ${formatCurrency(totalSchemeSavings)} on schemes` : undefined,
+            },
+            {
+              label: "Money received",
+              value: formatCurrency(received),
+              tone: received > 0 ? "good" : "default",
+              note: hasBill ? `Against bill ${finalInvoice?.invoiceNumber}` : "Recorded once the bill is made",
+            },
+            {
+              label: "Balance to collect",
+              value: formatCurrency(balance),
+              tone: balance > 0 ? "attention" : "good",
+              note: balance > 0 ? "Still to be collected" : "Nothing pending",
+            },
+          ]}
+        />
+
+        {/* Where this order stands */}
+        <JourneyTrack steps={journey} />
+
+        {/* Plain facts — read, don't hunt */}
+        <div className="fact-strip">
+          <div className="min-w-0">
+            <p className="fact-label">Dealer</p>
+            <p className="fact-value truncate">{order.distributorName}</p>
           </div>
-          <div className="flex items-center gap-1.5 ml-13 sm:ml-0">
-            <StatusBadge status={order.paymentStatus} />
-            <StatusBadge status={order.deliveryStatus} />
+          <div className="min-w-0">
+            <p className="fact-label">Sales person</p>
+            <p className="fact-value truncate">{order.salesperson}</p>
+          </div>
+          <div>
+            <p className="fact-label">Payment mode</p>
+            <p className="fact-value capitalize">{editPaymentMode.replace("_", " ")}</p>
+          </div>
+          <div>
+            <p className="fact-label">Items</p>
+            <p className="fact-value">{editLines.length}</p>
+          </div>
+          <div>
+            <p className="fact-label">Order date</p>
+            <p className="fact-value">{formatIndianDate(order.date)}</p>
           </div>
         </div>
 
         {/* Editable Dealer & Salesperson */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
           <div className="glass-card p-3 md:p-4 space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Dealer</Label>
+            <Label className="text-xs text-muted-foreground">Change dealer</Label>
             <Select value={editDealerId} onValueChange={setEditDealerId}>
               <SelectTrigger className="h-10 rounded-lg">
                 <SelectValue placeholder="Select dealer" />
@@ -382,7 +453,7 @@ export default function OrderDetail() {
             </Select>
           </div>
           <div className="glass-card p-3 md:p-4 space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Sales Person</Label>
+            <Label className="text-xs text-muted-foreground">Change sales person</Label>
             <Select value={editSalespersonId} onValueChange={setEditSalespersonId}>
               <SelectTrigger className="h-10 rounded-lg">
                 <SelectValue placeholder="Select sales person" />
@@ -396,44 +467,6 @@ export default function OrderDetail() {
           </div>
         </div>
 
-        {/* Awaiting payment — promoted surface when balance is owed */}
-        {(order.paymentStatus === "pending" || order.paymentStatus === "partial") && (
-          <SignalCard
-            tier={order.paymentStatus === "pending" ? "destructive" : "warning"}
-            icon={AlertTriangle}
-            label={order.paymentStatus === "pending" ? "Awaiting payment" : "Part-paid"}
-            caption={order.paymentStatus === "pending"
-              ? "Full balance is still due against this order"
-              : "Order has a partial payment recorded — balance pending"}
-            subCaption={`${editPaymentMode.replace("_", " ")} · ${formatIndianDate(order.date)}`}
-            value={formatCurrency(editTotal - totalSchemeSavings)}
-          />
-        )}
-
-        {/* Totals strip — hairline-divided */}
-        <KpiStrip
-          cells={[
-            {
-              label: totalSchemeSavings > 0 ? "Effective total" : "Total",
-              value: formatCurrency(editTotal - totalSchemeSavings),
-              insight: totalSchemeSavings > 0
-                ? <span className="insight-line insight-up">Saved {formatCurrency(totalSchemeSavings)} via schemes</span>
-                : undefined,
-            },
-            {
-              label: "Payment mode",
-              value: <span className="capitalize">{editPaymentMode.replace("_", " ")}</span>,
-            },
-            {
-              label: "Items",
-              value: editLines.length,
-            },
-            {
-              label: "Date",
-              value: <span className="text-[16px] font-medium">{formatIndianDate(order.date)}</span>,
-            },
-          ]}
-        />
 
         {/* Editable Items */}
         <div className="glass-card overflow-hidden">
@@ -571,6 +604,7 @@ export default function OrderDetail() {
               invoiceNumber={finalInvoice.invoiceNumber}
               invoiceTotal={finalInvoice.grandTotal}
               canRecord={canSeeMoney}
+              onTotals={handleMoneyTotals}
               onChanged={() => api.refreshAll()}
             />
           </>
@@ -702,7 +736,8 @@ export default function OrderDetail() {
               </Button>
               <Button
                 size="sm"
-                className="bg-[#25D366] hover:bg-[#1ebe57] text-white"
+                variant="outline"
+                className="text-[#128C4B] hover:text-[#128C4B]"
                 onClick={() => shareOrderOnWhatsApp(order, companyInfo)}
               >
                 <WhatsAppIcon className="h-3.5 w-3.5" />

@@ -59,6 +59,7 @@ function StatusBadgeImpl({ status, className, kind = "payment" }: StatusBadgePro
   return (
     <motion.span
       key={pulseKey}
+      data-status-badge
       initial={false}
       animate={pulseKey > 0 && !reduce ? { scale: [1, 1.08, 1] } : { scale: 1 }}
       transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.4, 1] }}

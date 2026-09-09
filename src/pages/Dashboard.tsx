@@ -280,6 +280,8 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", damping: 26, stiffness: 200 }}
         >
+          <div className="hero-band">
+          <div className="hero-band-inner hero-plain">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
             <div>
               <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">
@@ -487,6 +489,8 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+          </div>
+          </div>
           </div>
         </motion.section>
 

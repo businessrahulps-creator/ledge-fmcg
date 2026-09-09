@@ -2645,3 +2645,173 @@
 /* Kill the 300ms double-tap delay on landing tap targets. */
 .lp-theme a,
 .lp-theme button { touch-action: manipulation; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HIERARCHY LAYER — app only (never .lp-theme)
+   One loud block per screen, three levels of type, colour with meaning.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Midnight base with a slow, low-contrast wash. Deepest at the far edge,
+     never under the figures on the left. */
+  --gradient-hero: linear-gradient(
+    100deg,
+    hsl(218 60% 14%) 0%,
+    hsl(218 58% 16%) 46%,
+    hsl(212 44% 20%) 76%,
+    hsl(19 30% 22%) 100%
+  );
+  --surface-quiet: 34 30% 96%;
+  /* Figure tones that stay above 4.5:1 on the band. */
+  --hero-good: 158 52% 66%;
+  --hero-attention: 22 82% 72%;
+}
+
+@layer components {
+  /* ── The one loud block ───────────────────────────────────────── */
+  .hero-band {
+    @apply relative overflow-hidden rounded-lg text-primary-foreground shadow-[var(--shadow-8)];
+    background-image: var(--gradient-hero);
+    background-color: hsl(var(--primary));
+  }
+  .hero-band-inner {
+    @apply relative space-y-5 px-4 py-5 md:px-7 md:py-7;
+  }
+  /* Badges and chips placed on the dark band stay legible. */
+  .hero-band [data-status-badge] {
+    @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
+  }
+  /* Wraps existing markup inside the dark band without rewriting each colour. */
+  .hero-plain,
+  .hero-plain * {
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  .hero-plain [class*="text-muted"],
+  .hero-plain [class*="text-foreground/"],
+  .hero-plain [class*="text-primary"]:not([class*="text-primary-foreground"]) {
+    color: hsl(var(--primary-foreground) / 0.78) !important;
+  }
+  .hero-plain [class*="text-destructive"],
+  .hero-plain [class*="text-warning"] {
+    color: hsl(var(--hero-attention)) !important;
+  }
+  .hero-plain [class*="text-success"] {
+    color: hsl(var(--hero-good)) !important;
+  }
+  .hero-plain .timeframe-pill {
+    @apply border-primary-foreground/25 bg-primary-foreground/10;
+  }
+  .hero-plain [class*="border-"],
+  .hero-plain [class*="divide-"] > * {
+    border-color: hsl(var(--primary-foreground) / 0.18) !important;
+  }
+  .hero-plain [class*="bg-success"] {
+    background-color: hsl(var(--hero-good)) !important;
+  }
+  .hero-plain [class*="bg-warning"] {
+    background-color: hsl(var(--hero-attention)) !important;
+  }
+  .hero-band-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
+  }
+  .hero-band-title {
+    @apply font-heading text-2xl leading-tight text-primary-foreground md:text-3xl;
+  }
+  .hero-band-subtitle {
+    @apply mt-1 text-sm text-primary-foreground/80;
+  }
+  .hero-band-figures {
+    @apply grid grid-cols-2 gap-x-6 gap-y-4 border-t border-primary-foreground/15 pt-4 sm:grid-cols-3;
+  }
+  .hero-band-figure {
+    @apply min-w-0 first:col-span-2 sm:first:col-span-1;
+  }
+  .hero-band-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
+  }
+  .hero-band-value {
+    @apply mt-1 text-xl font-semibold leading-none [font-variant-numeric:tabular-nums] md:text-2xl;
+  }
+  .hero-band-value-primary {
+    @apply font-heading text-[34px] font-normal md:text-[44px];
+  }
+  .hero-band-note {
+    @apply mt-1.5 text-xs text-primary-foreground/70;
+  }
+
+  /* ── Type ranks ───────────────────────────────────────────────── */
+  .rank-hero {
+    @apply font-heading text-[28px] leading-none text-foreground [font-variant-numeric:tabular-nums] md:text-[36px];
+  }
+  .rank-section {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+  .rank-quiet {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Read-only facts: label over value, no box. */
+  .fact-strip {
+    @apply flex flex-wrap gap-x-8 gap-y-3 rounded-lg bg-[hsl(var(--surface-quiet))] px-4 py-3;
+  }
+  .fact-label {
+    @apply text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+  }
+  .fact-value {
+    @apply mt-0.5 text-sm font-medium text-foreground;
+  }
+
+  /* Quiet supporting surface — sits below the hero without competing. */
+  .surface-quiet {
+    @apply rounded-lg border border-border/60 bg-[hsl(var(--surface-quiet))];
+  }
+
+  /* ── Journey track ────────────────────────────────────────────── */
+  .journey-step {
+    @apply flex min-w-[132px] flex-1 items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2.5;
+  }
+  .journey-step-marker {
+    @apply flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground;
+  }
+  .journey-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-current;
+  }
+  .journey-step-label {
+    @apply block truncate text-sm font-medium text-foreground;
+  }
+  .journey-step-detail {
+    @apply block truncate text-[11px] text-muted-foreground;
+  }
+  .journey-step-done .journey-step-marker {
+    @apply border-transparent bg-success text-success-foreground;
+  }
+  .journey-step-current {
+    @apply border-primary/40 bg-primary/[0.06];
+  }
+  .journey-step-current .journey-step-marker {
+    @apply border-transparent bg-primary text-primary-foreground;
+  }
+  .journey-step-current .journey-step-label {
+    @apply font-semibold text-primary;
+  }
+  .journey-step-todo {
+    @apply bg-muted/40;
+  }
+  .journey-step-todo .journey-step-label {
+    @apply text-muted-foreground;
+  }
+}
+
+/* Print: the band flattens to a rule so exports stay legible and ink-light. */
+@media print {
+  .hero-band {
+    background-image: none !important;
+    background-color: transparent !important;
+    color: hsl(var(--foreground)) !important;
+    border-top: 2px solid hsl(var(--foreground));
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+  .hero-band * {
+    color: hsl(var(--foreground)) !important;
+  }
+}

@@ -40,10 +40,12 @@ interface Props {
   /** Called after money moves so the page can refresh order/dealer figures. */
   onChanged?: () => void;
   canRecord?: boolean;
+  /** Reports money received / balance up to the page so the hero band can show it. */
+  onTotals?: (t: { received: number; balance: number }) => void;
 }
 
 /** Money actually received against one GST bill. Receipts are never edited or deleted — only cancelled. */
-export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChanged, canRecord = true }: Props) {
+export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChanged, canRecord = true, onTotals }: Props) {
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -78,6 +80,8 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
     [rows],
   );
   const balance = Math.max(0, Math.round((invoiceTotal - received) * 100) / 100);
+
+  useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
 
   const recordPayment = async () => {
     const value = Number(amount || 0);
