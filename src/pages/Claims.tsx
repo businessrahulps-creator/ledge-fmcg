@@ -15,14 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/data/mock-data";
 import { formatIndianDate } from "@/utils/formatDate";
 import { toast } from "sonner";
-import type { Claim, ClaimLine } from "@/context/DataContext";
+import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
@@ -388,6 +385,7 @@ export default function Claims() {
   const api = useApi();
   const claims = api.claims.list();
   const orders = api.orders.list();
+  const invoices = api.invoices.list();
   const isLoading = usePageLoading(api.loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [resolveNotes, setResolveNotes] = useState("");
@@ -450,7 +448,7 @@ export default function Claims() {
             </p>
           </div>
           <Button size="sm" onClick={() => setNewClaimOpen(true)}>
-            <Plus className="h-4 w-4 mr-1" /> New Claim
+            <Plus className="h-4 w-4 mr-1" /> Record return
           </Button>
         </div>
 
@@ -520,6 +518,7 @@ export default function Claims() {
         open={newClaimOpen}
         onOpenChange={setNewClaimOpen}
         orders={orders}
+        invoices={invoices}
         api={api}
       />
     </AppLayout>
