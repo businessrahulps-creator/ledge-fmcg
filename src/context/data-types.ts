@@ -141,6 +141,18 @@ export interface DataContextType {
   addOrder: (order: Order) => Promise<AddOrderResult>;
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => Promise<boolean>;
+  dispatchAndBill: (
+    orderId: string,
+    opts?: {
+      godownId?: string | null;
+      dispatchDate?: string | null;
+      vehicle?: string;
+      driverName?: string;
+      remarks?: string;
+      overrideCredit?: boolean;
+    },
+  ) => Promise<{ success: boolean; invoiceNumber?: string; alreadyDone?: boolean; error?: string }>;
+  cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
 
   addDistributor: (d: Distributor) => void;
   updateDistributor: (d: Distributor) => void;
