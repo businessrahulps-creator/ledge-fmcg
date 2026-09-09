@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X, AlertTriangle } from "lucide-react";
-import { SignalCard } from "@/components/ui/signal-card";
-import { KpiStrip } from "@/components/ui/kpi-strip";
+import { HeroBand } from "@/components/ui/hero-band";
+import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareOrderOnWhatsApp } from "@/utils/shareWhatsApp";
@@ -109,6 +109,8 @@ export default function OrderDetail() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
+  const [money, setMoney] = useState({ received: 0, balance: 0 });
+  const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
   type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
   const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
@@ -602,6 +604,7 @@ export default function OrderDetail() {
               invoiceNumber={finalInvoice.invoiceNumber}
               invoiceTotal={finalInvoice.grandTotal}
               canRecord={canSeeMoney}
+              onTotals={handleMoneyTotals}
               onChanged={() => api.refreshAll()}
             />
           </>
