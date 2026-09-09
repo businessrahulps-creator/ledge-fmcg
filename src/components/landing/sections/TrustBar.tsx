@@ -1,4 +1,5 @@
-// Motion v3 — stillness for stats. Logos still marquee; stats are simply present.
+// Motion v3 - stillness for stats. Logos still marquee; stats are simply present.
+import { WifiOff, FileCheck2, MapPin } from "lucide-react";
 
 const companies = [
   "Aryan Beverages",
