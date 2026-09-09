@@ -61,7 +61,7 @@ function StatusBadgeImpl({ status, className }: StatusBadgeProps) {
       animate={pulseKey > 0 && !reduce ? { scale: [1, 1.08, 1] } : { scale: 1 }}
       transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.4, 1] }}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] leading-[1.4] origin-center",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] leading-[1.4] origin-center",
         statusStyles[status],
         className,
       )}

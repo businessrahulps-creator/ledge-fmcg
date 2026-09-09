@@ -386,7 +386,7 @@ export default function Orders() {
                         onFocus={() => prefetchRoute(`/orders/${order.id}`)}
                         className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
                       >
-                        <td className="px-6 py-4 font-medium text-foreground">{order.orderNumber}</td>
+                        <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
