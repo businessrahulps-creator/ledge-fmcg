@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Motion v3 — the only hover/tap pattern for cards across the landing page.
+ * Motion v3 - the only hover/tap pattern for cards across the landing page.
  * 120ms standard-ease 1px lift + 1% scale + 1.5% press. Cubic-bezier (not spring) so
  * a grid of cards lands in unison instead of each bouncing on its own timeline.
  *

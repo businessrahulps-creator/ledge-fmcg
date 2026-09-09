@@ -9,7 +9,7 @@ export type LandingCardVariant =
 interface LandingCardProps {
   /** The graphic that fills the top well of the card. */
   visual: ReactNode;
-  /** Short bold lede — the one thing the card says. */
+  /** Short bold lede - the one thing the card says. */
   lede: string;
   /** Muted continuation sentence. */
   caption: string;
@@ -18,7 +18,7 @@ interface LandingCardProps {
   /** Min height of the visual well, in px. */
   wellMinHeight?: number;
 }
-/** Explicit map — Tailwind must see full class names to keep these rules. */
+/** Explicit map - Tailwind must see full class names to keep these rules. */
 const variantClass: Record<LandingCardVariant, string> = {
   neutral: "lp-vcard--neutral",
   electric: "lp-vcard--electric",
@@ -30,7 +30,7 @@ const variantClass: Record<LandingCardVariant, string> = {
 /**
  * Landing-only visual-first card: a soft 32px shell, a rounded visual well on
  * top, and a caption underneath (bold lede + muted continuation).
- * Never used inside /app — the product keeps the 6px Fluent surface.
+ * Never used inside /app - the product keeps the 6px Fluent surface.
  */
 export function LandingCard({
   visual,

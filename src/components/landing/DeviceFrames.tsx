@@ -94,7 +94,7 @@ export function GradientStage({
       className={`relative rounded-3xl p-6 md:p-10 ${className}`}
       style={{ background: gradients[variant] }}
     >
-      {/* Ambient glow — subtle spotlight behind the mockup */}
+      {/* Ambient glow - subtle spotlight behind the mockup */}
       <div
         className="absolute inset-0 rounded-3xl pointer-events-none z-0 animate-[ambientGlow_1.8s_ease-out_0.8s_forwards]"
         style={{

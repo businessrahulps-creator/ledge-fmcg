@@ -25,7 +25,7 @@ interface Ripple {
 }
 
 /**
- * Premium capsule CTA — neumorphic pill with magnetic pointer pull,
+ * Premium capsule CTA - neumorphic pill with magnetic pointer pull,
  * cursor-following light bloom, and elegant click ripple. Apple/Framer-grade.
  */
 export function CapsuleCTA({ to, href, children, variant = "light", className = "", external }: Props) {

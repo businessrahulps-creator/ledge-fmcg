@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Motion v3 — one pointer-reactive ambient gradient per viewport.
+ * Motion v3 - one pointer-reactive ambient gradient per viewport.
  * Sits behind content, ignores pointer events, no-op on touch + reduced motion.
  * Cheaper than per-button magnetic effects; gives the page a single "alive" layer.
  */
@@ -29,7 +29,7 @@ export function CursorAura({
   // Center-default so first paint isn’t off-screen.
   const x = useMotionValue(50);
   const y = useMotionValue(40);
-  // Soft spring — buttery follow, no snapping.
+  // Soft spring - buttery follow, no snapping.
   const sx = useSpring(x, { stiffness: 80, damping: 20, mass: 0.6 });
   const sy = useSpring(y, { stiffness: 80, damping: 20, mass: 0.6 });
 

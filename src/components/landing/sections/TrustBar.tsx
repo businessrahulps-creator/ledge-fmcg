@@ -11,7 +11,7 @@ const companies = [
 ];
 
 const stats = [
-  { value: "2–3 hrs", label: "Wasted daily per salesperson — on paperwork, not selling" },
+  { value: "2–3 hrs", label: "Wasted daily per salesperson - on paperwork, not selling" },
   { value: "5–10%", label: "Revenue lost to missed orders, wrong schemes, late collections" },
   { value: "₹10L–₹1Cr", label: "Quietly gone every year. Silent. Invisible. Until it’s too late." },
   { value: "80%", label: "Admin work eliminated once Ledge is live" },
@@ -21,7 +21,7 @@ export function TrustBar() {
   return (
     <section className="lp-section-paper lp-rhythm-sm border-b border-border">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        {/* Logo Marquee — soft pill chips */}
+        {/* Logo Marquee - soft pill chips */}
         <div
           className="overflow-hidden group relative"
           style={{
@@ -57,7 +57,7 @@ export function TrustBar() {
           </span>
         </div>
 
-        {/* Stat Row — with hairline dividers + gradient numbers */}
+        {/* Stat Row - with hairline dividers + gradient numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
           {stats.map((stat, i) => (
             <div

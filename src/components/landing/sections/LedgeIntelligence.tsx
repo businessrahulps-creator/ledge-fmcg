@@ -19,17 +19,17 @@ const capabilities = [
   {
     icon: Sparkles,
     title: "Smart Scheme Suggestions",
-    desc: "AI tells you who’ll buy — before you pitch. The right scheme, every time.",
+    desc: "AI tells you who’ll buy - before you pitch. The right scheme, every time.",
   },
   {
     icon: Sunrise,
     title: "Natural Language Queries",
-    desc: "Ask in English or Hindi. Get instant answers — no reports needed.",
+    desc: "Ask in English or Hindi. Get instant answers - no reports needed.",
   },
 ];
 
 /**
- * LiveRoute — FMCG-native motion: a route line draws itself left→right
+ * LiveRoute - FMCG-native motion: a route line draws itself left→right
  * through 5 dealer stops, with a delivery pulse traveling the path on loop.
  */
 function LiveRoute() {
@@ -98,7 +98,7 @@ function LiveRoute() {
         )}
       </svg>
 
-      {/* Telemetry strip — grounds the abstract route in product specifics */}
+      {/* Telemetry strip - grounds the abstract route in product specifics */}
       <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-lp-lg flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <span className="font-body text-muted-foreground">Photo → Order</span>
@@ -245,7 +245,7 @@ export function LedgeIntelligence() {
           })}
         </StaggerContainer>
 
-        {/* Founding 100 — demoted to glass-frost (single bento-hero per section rule) */}
+        {/* Founding 100 - demoted to glass-frost (single bento-hero per section rule) */}
         <AnimateIn variant="blurFadeUp" delay={0.3}>
           <div className="mt-14 md:mt-16 max-w-4xl mx-auto">
             <motion.div
@@ -259,13 +259,13 @@ export function LedgeIntelligence() {
                   </span>
                 </div>
                 <p className="font-heading font-semibold text-foreground text-[18px] md:text-[20px] tracking-[-0.012em] leading-[1.3]">
-                  Founding 100 — lock in <span className="text-accent">6 months free</span>.
+                  Founding 100 - lock in <span className="text-accent">6 months free</span>.
                 </p>
                 <p className="font-body text-[13.5px] md:text-[14px] text-muted-foreground leading-[1.55] mt-1.5">
                   Today’s customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
                 </p>
 
-                {/* Progress — uses existing lp-progress-glass primitive */}
+                {/* Progress - uses existing lp-progress-glass primitive */}
                 <div className="mt-4 max-w-md">
                   <div className="relative h-1.5 rounded-full bg-border overflow-hidden">
                     <motion.div

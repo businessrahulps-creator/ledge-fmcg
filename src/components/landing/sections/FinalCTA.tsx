@@ -21,7 +21,7 @@ export function FinalCTA() {
     <section ref={sectionRef} className="relative lp-block-ink lp-block-graphite lp-rhythm overflow-hidden">
       <ShaderBackdrop preset="cta" />
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft lp-parallax pointer-events-none" />
-      {/* Motion v3 — the one ambient pointer layer outside the hero. */}
+      {/* Motion v3 - the one ambient pointer layer outside the hero. */}
       <CursorAura tint="hsl(var(--accent) / 0.12)" size={560} />
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-8 lg:px-10 text-center">
@@ -47,7 +47,7 @@ export function FinalCTA() {
         >
           Start free for 30&nbsp;days. No card needed. Setup in 30&nbsp;minutes.
           <br />
-          Owner, manager, accountant, salesperson — one screen, one truth.
+          Owner, manager, accountant, salesperson - one screen, one truth.
         </motion.p>
 
         <motion.div

@@ -102,7 +102,7 @@ export function Pricing() {
           </div>
         </AnimateIn>
 
-        {/* Motion v3 — cards are still on entrance; presence over performance.
+        {/* Motion v3 - cards are still on entrance; presence over performance.
             Hover/tap = unified 120ms intent. Highlighted card gets the only ambient delight on the page. */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto pt-4 lp-grid-stretch">
           {plans.map((plan, i) => {
@@ -120,7 +120,7 @@ export function Pricing() {
                 >
                   {plan.highlighted && (
                     <>
-                      {/* Slow breathing glow — the one "delight" moment on the page. */}
+                      {/* Slow breathing glow - the one "delight" moment on the page. */}
                       <motion.span
                         aria-hidden
                         className="pointer-events-none absolute -inset-px rounded-[inherit]"
@@ -202,7 +202,7 @@ export function Pricing() {
             rel="noopener noreferrer"
             className="font-body text-[14px] text-foreground font-medium hover:text-primary transition-colors inline-block"
           >
-            Need something custom — Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
+            Need something custom - Tally/SAP, on-prem, multi-brand? Chat on WhatsApp →
           </a>
         </div>
       </div>

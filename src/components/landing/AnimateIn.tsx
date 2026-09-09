@@ -11,7 +11,7 @@ const variantMap: Record<AnimateVariant, Variants> = {
   fadeIn,
 };
 
-/** Motion v2 rank mapping — every variant resolves to a ranked entrance. */
+/** Motion v2 rank mapping - every variant resolves to a ranked entrance. */
 const variantRank: Record<AnimateVariant, keyof typeof rank> = {
   blurFadeUp: "lead",     // hero / section headings
   scaleUp:    "support",  // cards
@@ -34,7 +34,7 @@ export const AnimateIn = forwardRef<HTMLDivElement, AnimateInProps>(
     const variants = variantMap[variant];
     const r = rank[variantRank[variant]];
 
-    // Motion v3 — reduced motion collapses to 120ms opacity-only.
+    // Motion v3 - reduced motion collapses to 120ms opacity-only.
     const transition = reduce
       ? { duration: 0.12, ease: ease.standard, delay }
       : { duration: r.duration, ease: r.ease, delay };

@@ -3,7 +3,7 @@ import { Check, PackageCheck } from "lucide-react";
 import { ease, duration } from "@/lib/motion";
 
 /* ═══════════════════════════════════════════════════════════════
-   How It Works — image-free micro-visuals.
+   How It Works - image-free micro-visuals.
    Pure HTML/CSS/SVG. Each plays once on scroll-in and collapses
    to its final state under prefers-reduced-motion.
    ═══════════════════════════════════════════════════════════════ */
@@ -22,7 +22,7 @@ const viewport = { once: true, margin: "-80px" } as const;
 
 const wellMin = 176;
 
-/** Step 01 — an order assembling itself, then stamped saved. */
+/** Step 01 - an order assembling itself, then stamped saved. */
 export function OrderBuildVisual() {
   const still = useReducedMotion();
   const lines = [
@@ -89,7 +89,7 @@ export function OrderBuildVisual() {
   );
 }
 
-/** Step 02 — stock health bars filling; one lands low and pulses. */
+/** Step 02 - stock health bars filling; one lands low and pulses. */
 export function StockHealthVisual() {
   const still = useReducedMotion();
   const bars = [
@@ -141,7 +141,7 @@ export function StockHealthVisual() {
   );
 }
 
-/** Step 03 — dispatch tick → stock counts down → GST total counts up. */
+/** Step 03 - dispatch tick → stock counts down → GST total counts up. */
 export function DispatchInvoiceVisual() {
   const still = useReducedMotion();
 

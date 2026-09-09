@@ -8,7 +8,7 @@ import { CursorAura } from "../CursorAura";
 import heroFlow from "@/assets/landing/hero-flow.webp";
 import { ShaderBackdrop } from "@/components/landing/visuals/ShaderBackdrop";
 
-/** Hero entrances — Motion v2: emphasized decelerate, ranked distances. */
+/** Hero entrances - Motion v2: emphasized decelerate, ranked distances. */
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 16, filter: "blur(4px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -19,7 +19,7 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const gridY = useParallaxY(sectionRef, 30);
-  /** Scroll-scrubbed progress through the hero — drives device lift + ambient light drift. */
+  /** Scroll-scrubbed progress through the hero - drives device lift + ambient light drift. */
   const scrub = useScrollScrub(sectionRef, ["start start", "end start"]);
   const deviceY = useTransform(scrub, [0, 1], reduce ? [0, 0] : [0, -64]);
   const deviceScale = useTransform(scrub, [0, 1], reduce ? [1, 1] : [1, 0.96]);
@@ -33,13 +33,13 @@ export function Hero() {
     <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-block-ink lp-block-graphite pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
       <ShaderBackdrop preset="hero" />
 
-      {/* Soft dot grid, masked — subtle parallax */}
+      {/* Soft dot grid, masked - subtle parallax */}
       <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft lp-parallax pointer-events-none" />
 
-      {/* Motion v3 — single pointer-reactive ambient gradient. Replaces per-button magnetic noise. */}
+      {/* Motion v3 - single pointer-reactive ambient gradient. Replaces per-button magnetic noise. */}
       <CursorAura tint="hsl(var(--primary) / 0.10)" size={640} />
 
-      {/* Scroll-decay ambient light overlay — drifts as you leave the hero. */}
+      {/* Scroll-decay ambient light overlay - drifts as you leave the hero. */}
       <motion.div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
@@ -105,7 +105,7 @@ export function Hero() {
               className="relative"
             >
 
-              {/* Layer 1 — neutral graphite ambient shadow */}
+              {/* Layer 1 - neutral graphite ambient shadow */}
               <div
                 aria-hidden
                 className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
@@ -114,9 +114,9 @@ export function Hero() {
                     "radial-gradient(ellipse at 50% 50%, hsl(var(--primary) / 0.18) 0%, transparent 65%)",
                 }}
               />
-              {/* Layer 2 — Bone-tinted glass stage */}
+              {/* Layer 2 - Bone-tinted glass stage */}
               <div className="relative lp-card-glass p-3 md:p-4 rounded-lp-xs">
-                {/* Layer 3 — browser frame with real product UI */}
+                {/* Layer 3 - browser frame with real product UI */}
                 <BrowserFrame url="app.ledge.in/dashboard">
                   <div className="relative">
                     <img
@@ -128,7 +128,7 @@ export function Hero() {
                       decoding="async"
                       className="block w-full h-auto"
                     />
-                    {/* Proof chip — anchored inside the frame like a real product notification */}
+                    {/* Proof chip - anchored inside the frame like a real product notification */}
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}

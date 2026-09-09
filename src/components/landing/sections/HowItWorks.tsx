@@ -47,7 +47,7 @@ export function HowItWorks() {
         </AnimateIn>
 
         <div className="relative">
-          {/* Progress rail — horizontal on desktop, vertical on mobile.
+          {/* Progress rail - horizontal on desktop, vertical on mobile.
               The one Electric accent this section gets. */}
           <div
             aria-hidden

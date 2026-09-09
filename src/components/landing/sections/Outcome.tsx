@@ -55,7 +55,7 @@ export function Outcome() {
               <span className="ml-[-2px]">.</span>
             </h2>
             <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55] max-w-2xl mx-auto">
-              Live dashboard. Five reports ready instantly. Any report in 60 seconds. Full visibility — zero chasing.
+              Live dashboard. Five reports ready instantly. Any report in 60 seconds. Full visibility - zero chasing.
             </p>
           </div>
         </AnimateIn>

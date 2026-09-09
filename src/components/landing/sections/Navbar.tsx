@@ -108,7 +108,7 @@ export function Navbar() {
               </span>
             </motion.div>
 
-            {/* Spacer — collapses to 0 on scroll, merging capsules into one pill */}
+            {/* Spacer - collapses to 0 on scroll, merging capsules into one pill */}
             <motion.div
               className="flex-1"
               animate={{ flexGrow: scrolled ? 0 : 1, width: scrolled ? 0 : "auto" }}

@@ -1,14 +1,14 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-// V3 brand: Electric / Ink / Lime / Mist — no warm tones.
+// V3 brand: Electric / Ink / Lime / Mist - no warm tones.
 const C = "#1B2130";              // Ink (foreground)
 const C_MUTED = "#5C6479";        // Ink-tinted muted
 const C_FAINT = "#A6AABB";        // Ink-tinted faint
 const FILL_BG = "rgba(27,33,48,0.025)";
 const FILL_ACCENT = "rgba(27,33,48,0.06)";
 const ZEBRA = "#F3F3F8";          // Mist tint
-const SURFACE = "#FFFFFF";        // card surface (kept literal — paper)
+const SURFACE = "#FFFFFF";        // card surface (kept literal - paper)
 const HAIRLINE = "#E3E3EE";       // Mist hairline
 const INDIGO = "#1B57F5";         // Electric accent
 const INDIGO_SOFT = "rgba(27,87,245,0.08)";
@@ -67,7 +67,7 @@ const textStyle = {
   letterSpacing: "0.01em",
 };
 
-// Status pill renderer — semantic color tokens
+// Status pill renderer - semantic color tokens
 type StatusKind = "Delivered" | "Pending" | "Dispatched";
 function statusPalette(s: StatusKind) {
   if (s === "Delivered") return { fill: EMERALD_SOFT, stroke: EMERALD_BORDER, text: EMERALD };
@@ -75,7 +75,7 @@ function statusPalette(s: StatusKind) {
   return { fill: INDIGO_PILL_BG, stroke: INDIGO_PILL_BORDER, text: INDIGO_TEXT };
 }
 
-/* ─── 1. Hero Dashboard — alive, real product feel ─── */
+/* ─── 1. Hero Dashboard - alive, real product feel ─── */
 export function DashboardSvg() {
   const { ref, inView } = useSvgInView();
 
@@ -86,7 +86,7 @@ export function DashboardSvg() {
     { x: 328, w: 96, label: "Delivery", value: "94%", delta: "+2%" },
   ];
 
-  // Vertical bar chart — 7 weekdays, "Today" highlighted
+  // Vertical bar chart - 7 weekdays, "Today" highlighted
   const days = [
     { label: "Mon", h: 38 },
     { label: "Tue", h: 26 },
@@ -296,7 +296,7 @@ export function DashboardSvg() {
         );
       })}
 
-      {/* Scanline shimmer — one-shot sweep on view */}
+      {/* Scanline shimmer - one-shot sweep on view */}
       {inView && (
         <g clipPath="url(#ds-clip)">
           <motion.rect
@@ -312,7 +312,7 @@ export function DashboardSvg() {
   );
 }
 
-/* ─── 2. Order Form (Phone) — real qty values, alive button ─── */
+/* ─── 2. Order Form (Phone) - real qty values, alive button ─── */
 export function OrderFormSvg() {
   const { ref, inView } = useSvgInView();
 
@@ -375,7 +375,7 @@ export function OrderFormSvg() {
             >
               {prod.name}
             </motion.text>
-            {/* Qty box — real number */}
+            {/* Qty box - real number */}
             <motion.rect
               x={155} y={y + 8} width={28} height={18} rx={4}
               fill="#FFFFFF" stroke="#E3E3EE" strokeWidth={0.75}
@@ -419,7 +419,7 @@ export function OrderFormSvg() {
         ₹2,340
       </motion.text>
 
-      {/* Scheme tag pill — terracotta accent */}
+      {/* Scheme tag pill - terracotta accent */}
       <motion.rect
         x={20} y={300} width={90} height={22} rx={11}
         fill={INDIGO_PILL_BG} stroke={INDIGO_PILL_BORDER} strokeWidth={STROKE_W}
@@ -461,7 +461,7 @@ export function OrderFormSvg() {
       {/* Divider */}
       <motion.line x1={20} y1={375} x2={240} y2={375} stroke="#E3E3EE" strokeWidth={0.5} {...drawLine(inView, 0.8)} />
 
-      {/* Submit button — solid terracotta, breathes */}
+      {/* Submit button - solid terracotta, breathes */}
       <motion.rect
         x={50} y={390} width={160} height={36} rx={8}
         fill={INDIGO}
@@ -503,7 +503,7 @@ export function DashboardMiniSvg() {
     { id: "#243", name: "Jain Agency",        amount: "₹14,250", status: "Pending" },
   ];
 
-  // Sparkline path — 8 points across the top
+  // Sparkline path - 8 points across the top
   const sparkPath = "M 24 64 L 60 50 L 96 56 L 132 38 L 168 44 L 204 28 L 240 34 L 276 18";
 
   return (
@@ -754,7 +754,7 @@ export function InvoiceStockSvg() {
       ))}
       <line x1={16} y1={58} x2={404} y2={58} stroke="#E3E3EE" strokeWidth={0.5} />
 
-      {/* 5 data rows — zebra striped */}
+      {/* 5 data rows - zebra striped */}
       {rows.map((row, i) => {
         const y = 74 + i * 24;
         return (
@@ -831,7 +831,7 @@ export function InvoiceStockSvg() {
         );
       })}
 
-      {/* Download PDF button — terracotta */}
+      {/* Download PDF button - terracotta */}
       <motion.rect
         x={130} y={300} width={160} height={28} rx={8}
         fill={INDIGO}

@@ -47,7 +47,7 @@ export function Testimonials() {
           </div>
         </AnimateIn>
 
-        {/* Motion v3 — cards are still on entrance. Hover = unified 120ms intent. */}
+        {/* Motion v3 - cards are still on entrance. Hover = unified 120ms intent. */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto lp-grid-stretch">
           {testimonials.map((t, i) => {
             const isFeatured = i === 0;

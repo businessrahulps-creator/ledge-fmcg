@@ -18,7 +18,7 @@ const cards = [
   {
     icon: Compass,
     title: "Blind Stock",
-    description: "Empty shelf? You find out last — when the dealer calls to complain.",
+    description: "Empty shelf? You find out last - when the dealer calls to complain.",
   },
   {
     icon: Laptop,
@@ -47,7 +47,7 @@ export function Problem() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto lp-grid-stretch" staggerTime={0.05}>
           {cards.map((card, i) => {
-            const isFeatured = i === 3; // "Excel Nights" — emotional peak
+            const isFeatured = i === 3; // "Excel Nights" - emotional peak
             return (
               <StaggerItem key={card.title}>
                 <div className={`${isFeatured ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col`}>

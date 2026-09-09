@@ -17,7 +17,7 @@ const chip = {
 const rowClass =
   "flex items-center justify-between gap-3 px-3 py-2.5 rounded-lp-sm bg-card";
 
-/** Dealer roster — three dealers with health pills. */
+/** Dealer roster - three dealers with health pills. */
 export function DealerRosterVisual() {
   const rows = [
     { name: "Aryan Beverages", status: "Active", variant: "success" as const, icon: CheckCircle2 },
@@ -46,7 +46,7 @@ export function DealerRosterVisual() {
   );
 }
 
-/** Stock health — SKU rows with a traffic-light dot. */
+/** Stock health - SKU rows with a traffic-light dot. */
 export function StockHealthVisual() {
   const rows = [
     { sku: "Surf Excel 1kg", count: "48", label: "in stock", dot: "hsl(var(--success))" },
@@ -121,7 +121,7 @@ export function SchemeArcVisual() {
   );
 }
 
-/** Team performance — three reps as horizontal bars. */
+/** Team performance - three reps as horizontal bars. */
 export function TeamBarsVisual() {
   const reps = [
     { name: "Anjali R.", orders: 42, pct: 100 },
@@ -187,7 +187,7 @@ export function GstInvoiceVisual() {
   );
 }
 
-/** Claim lifecycle — submitted → approved → paid. */
+/** Claim lifecycle - submitted → approved → paid. */
 export function ClaimTimelineVisual() {
   const steps = [
     { label: "Submitted", variant: "info" as const, icon: ArrowUpRight },
@@ -225,7 +225,7 @@ export function ClaimTimelineVisual() {
   );
 }
 
-/** Revenue recovered — soft area chart with a highlighted last month. */
+/** Revenue recovered - soft area chart with a highlighted last month. */
 export function RevenueChartVisual() {
   const pts = [22, 30, 27, 38, 44, 41, 56, 62];
   const w = 260;
