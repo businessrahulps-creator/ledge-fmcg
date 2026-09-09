@@ -33,9 +33,11 @@ const statusIcons: Record<StatusType, LucideIcon> = {
 interface StatusBadgeProps {
   status: StatusType;
   className?: string;
+  /** "pending" means different things for money vs goods — say which. */
+  kind?: "payment" | "delivery";
 }
 
-function StatusBadgeImpl({ status, className }: StatusBadgeProps) {
+function StatusBadgeImpl({ status, className, kind = "payment" }: StatusBadgeProps) {
   const Icon = statusIcons[status];
   const reduce = useReducedMotion();
   const prevRef = useRef(status);
@@ -67,7 +69,7 @@ function StatusBadgeImpl({ status, className }: StatusBadgeProps) {
       )}
     >
       <Icon className="h-[10px] w-[10px] shrink-0" strokeWidth={2.4} aria-hidden />
-      {statusLabels[status]}
+      {status === "pending" && kind === "delivery" ? "Not sent yet" : statusLabels[status]}
     </motion.span>
   );
 }
