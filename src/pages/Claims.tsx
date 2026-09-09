@@ -153,24 +153,35 @@ function ClaimCard({
 }
 
 function NewClaimDialog({
-  open, onOpenChange, orders, api,
+  open, onOpenChange, orders, invoices, api,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   orders: Order[];
+  invoices: Invoice[];
   api: ReturnType<typeof useApi>;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [claimType, setClaimType] = useState<"return" | "damage">("return");
   const [reason, setReason] = useState("");
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [good, setGood] = useState<Record<string, number>>({});
+  const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const billByOrderId = useMemo(() => {
+    const map = new Map<string, Invoice>();
+    invoices.forEach(inv => {
+      if (inv.docType === "gst_invoice" && inv.status === "final" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
+    });
+    return map;
+  }, [invoices]);
+
+  const selectedBill = selectedOrder ? billByOrderId.get(selectedOrder.id) ?? null : null;
+
   const eligibleOrders = useMemo(() =>
-    orders.filter(o => o.deliveryStatus === "dispatched" || o.deliveryStatus === "delivered"),
-    [orders]
+    orders.filter(o => billByOrderId.has(o.id)),
+    [orders, billByOrderId]
   );
 
   const filteredOrders = useMemo(() => {
@@ -186,65 +197,50 @@ function NewClaimDialog({
     setStep(1);
     setSearch("");
     setSelectedOrder(null);
-    setClaimType("return");
     setReason("");
-    setQuantities({});
+    setGood({});
+    setDamaged({});
     onOpenChange(false);
   };
 
   const selectOrder = (order: Order) => {
     setSelectedOrder(order);
-    const qtys: Record<number, number> = {};
-    order.lines.forEach((_, i) => { qtys[i] = order.lines[i].quantity; });
-    setQuantities(qtys);
-    setClaimType("return");
+    setGood({});
+    setDamaged({});
     setReason("");
     setStep(2);
   };
 
+  const returnLines = (selectedBill?.lines ?? []).map(l => ({
+    invoiceLineId: l.id,
+    productName: l.productName,
+    billedQty: l.quantity,
+    unitPrice: l.unitPrice,
+    goodQty: good[l.id] ?? 0,
+    damagedQty: damaged[l.id] ?? 0,
+  }));
+
+  const returnValue = returnLines.reduce(
+    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice, 0
+  );
+
   const handleSubmit = async () => {
-    if (!selectedOrder) return;
-    setSubmitting(true);
-
-    const claimLines: ClaimLine[] = selectedOrder.lines
-      .map((line, i) => ({
-        productId: line.productId,
-        productName: line.productName,
-        quantity: quantities[i] || 0,
-        unitPrice: line.unitPrice,
-        lineTotal: (quantities[i] || 0) * line.unitPrice,
-      }))
-      .filter(l => l.quantity > 0);
-
-    if (claimLines.length === 0) {
-      toast.error("Select at least one product with quantity > 0");
-      setSubmitting(false);
+    if (!selectedOrder || !selectedBill) return;
+    const payload = returnLines.filter(l => l.goodQty + l.damagedQty > 0);
+    if (payload.length === 0) {
+      toast.error("Enter how many pieces are coming back");
       return;
     }
-
-    const totalClaimValue = claimLines.reduce((s, l) => s + l.lineTotal, 0);
-    const claim: Claim = {
-      id: "",
-      orderId: selectedOrder.id,
-      orderNumber: selectedOrder.orderNumber,
-      distributorId: selectedOrder.distributorId,
-      distributorName: selectedOrder.distributorName,
-      claimType,
-      status: "open",
+    setSubmitting(true);
+    const res = await api.claims.recordReturn(
+      selectedOrder.id,
+      payload.map(l => ({ invoiceLineId: l.invoiceLineId, goodQty: l.goodQty, damagedQty: l.damagedQty })),
       reason,
-      resolutionNotes: "",
-      restoreStock: claimType === "return",
-      totalClaimValue,
-      lines: claimLines,
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-    };
-
-    const ok = await api.claims.create(claim);
+    );
     setSubmitting(false);
-    if (ok) {
-      toast.success(claimType === "return" ? "Return recorded — stock restored" : "Damage claim recorded", {
-        description: `${formatCurrency(totalClaimValue)} claim for ${selectedOrder.orderNumber}`,
+    if (res) {
+      toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
+        description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
       });
       resetAndClose();
     }
