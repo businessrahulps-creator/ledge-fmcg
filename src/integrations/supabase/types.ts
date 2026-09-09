@@ -180,6 +180,13 @@ export type Database = {
             foreignKeyName: "claims_distributor_id_fkey"
             columns: ["distributor_id"]
             isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "claims_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
             referencedRelation: "distributors"
             referencedColumns: ["id"]
           },
@@ -240,7 +247,9 @@ export type Database = {
           bank_ifsc: string
           bank_name: string
           created_at: string
+          default_gst_rate: number
           email: string
+          gst_price_basis: string
           gstin: string
           id: string
           invoice_prefix: string
@@ -262,7 +271,9 @@ export type Database = {
           bank_ifsc?: string
           bank_name?: string
           created_at?: string
+          default_gst_rate?: number
           email?: string
+          gst_price_basis?: string
           gstin?: string
           id?: string
           invoice_prefix?: string
@@ -284,7 +295,9 @@ export type Database = {
           bank_ifsc?: string
           bank_name?: string
           created_at?: string
+          default_gst_rate?: number
           email?: string
+          gst_price_basis?: string
           gstin?: string
           id?: string
           invoice_prefix?: string
@@ -300,6 +313,214 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      credit_note_lines: {
+        Row: {
+          cgst_amount: number
+          created_at: string
+          credit_note_id: string
+          gst_rate: number
+          hsn_code: string
+          id: string
+          igst_amount: number
+          invoice_line_id: string | null
+          line_total: number
+          product_id: string | null
+          product_name: string
+          quantity: number
+          restocked_quantity: number
+          sgst_amount: number
+          taxable_value: number
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          cgst_amount?: number
+          created_at?: string
+          credit_note_id: string
+          gst_rate?: number
+          hsn_code?: string
+          id?: string
+          igst_amount?: number
+          invoice_line_id?: string | null
+          line_total?: number
+          product_id?: string | null
+          product_name: string
+          quantity: number
+          restocked_quantity?: number
+          sgst_amount?: number
+          taxable_value?: number
+          unit?: string
+          unit_price?: number
+        }
+        Update: {
+          cgst_amount?: number
+          created_at?: string
+          credit_note_id?: string
+          gst_rate?: number
+          hsn_code?: string
+          id?: string
+          igst_amount?: number
+          invoice_line_id?: string | null
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          restocked_quantity?: number
+          sgst_amount?: number
+          taxable_value?: number
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_note_lines_credit_note_id_fkey"
+            columns: ["credit_note_id"]
+            isOneToOne: false
+            referencedRelation: "credit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_note_lines_invoice_line_id_fkey"
+            columns: ["invoice_line_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_note_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_notes: {
+        Row: {
+          amount_in_words: string
+          cgst_amount: number
+          company_id: string
+          created_at: string
+          credit_note_number: string
+          distributor_id: string
+          fy: string
+          grand_total: number
+          id: string
+          igst_amount: number
+          invoice_id: string
+          note_date: string
+          order_id: string | null
+          posted_at: string
+          posted_by: string | null
+          reason: string
+          round_off: number
+          sgst_amount: number
+          subtotal: number
+          total_tax: number
+        }
+        Insert: {
+          amount_in_words?: string
+          cgst_amount?: number
+          company_id: string
+          created_at?: string
+          credit_note_number: string
+          distributor_id: string
+          fy?: string
+          grand_total?: number
+          id?: string
+          igst_amount?: number
+          invoice_id: string
+          note_date?: string
+          order_id?: string | null
+          posted_at?: string
+          posted_by?: string | null
+          reason?: string
+          round_off?: number
+          sgst_amount?: number
+          subtotal?: number
+          total_tax?: number
+        }
+        Update: {
+          amount_in_words?: string
+          cgst_amount?: number
+          company_id?: string
+          created_at?: string
+          credit_note_number?: string
+          distributor_id?: string
+          fy?: string
+          grand_total?: number
+          id?: string
+          igst_amount?: number
+          invoice_id?: string
+          note_date?: string
+          order_id?: string | null
+          posted_at?: string
+          posted_by?: string | null
+          reason?: string
+          round_off?: number
+          sgst_amount?: number
+          subtotal?: number
+          total_tax?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "credit_notes_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "credit_notes_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_balances"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "credit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "credit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dealer_aging_state: {
         Row: {
@@ -402,6 +623,47 @@ export type Database = {
           },
         ]
       }
+      document_sequences: {
+        Row: {
+          company_id: string
+          created_at: string
+          doc_type: string
+          fy: string
+          id: string
+          next_seq: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          doc_type: string
+          fy: string
+          id?: string
+          next_seq?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          doc_type?: string
+          fy?: string
+          id?: string
+          next_seq?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       error_log: {
         Row: {
           company_id: string | null
@@ -481,34 +743,58 @@ export type Database = {
       }
       invoice_lines: {
         Row: {
+          cgst_amount: number
           created_at: string
+          discount_amount: number
+          gross_amount: number | null
+          gst_rate: number | null
           hsn_code: string
           id: string
+          igst_amount: number
           invoice_id: string
+          line_total: number | null
+          product_id: string | null
           product_name: string
           quantity: number
+          sgst_amount: number
           taxable_value: number
           unit: string
           unit_price: number
         }
         Insert: {
+          cgst_amount?: number
           created_at?: string
+          discount_amount?: number
+          gross_amount?: number | null
+          gst_rate?: number | null
           hsn_code?: string
           id?: string
+          igst_amount?: number
           invoice_id: string
+          line_total?: number | null
+          product_id?: string | null
           product_name?: string
           quantity?: number
+          sgst_amount?: number
           taxable_value?: number
           unit?: string
           unit_price?: number
         }
         Update: {
+          cgst_amount?: number
           created_at?: string
+          discount_amount?: number
+          gross_amount?: number | null
+          gst_rate?: number | null
           hsn_code?: string
           id?: string
+          igst_amount?: number
           invoice_id?: string
+          line_total?: number | null
+          product_id?: string | null
           product_name?: string
           quantity?: number
+          sgst_amount?: number
           taxable_value?: number
           unit?: string
           unit_price?: number
@@ -516,6 +802,116 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_balances"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          distributor_id: string
+          id: string
+          idempotency_key: string | null
+          invoice_id: string
+          mode: Database["public"]["Enums"]["payment_mode"]
+          note: string
+          paid_on: string
+          posted_at: string
+          posted_by: string | null
+          reference: string
+          status: string
+          void_reason: string
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          distributor_id: string
+          id?: string
+          idempotency_key?: string | null
+          invoice_id: string
+          mode: Database["public"]["Enums"]["payment_mode"]
+          note?: string
+          paid_on?: string
+          posted_at?: string
+          posted_by?: string | null
+          reference?: string
+          status?: string
+          void_reason?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          distributor_id?: string
+          id?: string
+          idempotency_key?: string | null
+          invoice_id?: string
+          mode?: Database["public"]["Enums"]["payment_mode"]
+          note?: string
+          paid_on?: string
+          posted_at?: string
+          posted_by?: string | null
+          reference?: string
+          status?: string
+          void_reason?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_balances"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
@@ -535,6 +931,7 @@ export type Database = {
           created_at: string
           doc_type: string
           driver_name: string
+          fy: string
           grand_total: number
           gst_rate: number
           id: string
@@ -542,6 +939,9 @@ export type Database = {
           invoice_date: string
           invoice_number: string
           notes: string
+          place_of_supply_state_code: string
+          posted_at: string | null
+          posted_by: string | null
           round_off: number
           seller_address: string
           seller_bank_account: string
@@ -575,6 +975,7 @@ export type Database = {
           created_at?: string
           doc_type?: string
           driver_name?: string
+          fy?: string
           grand_total?: number
           gst_rate?: number
           id?: string
@@ -582,6 +983,9 @@ export type Database = {
           invoice_date?: string
           invoice_number: string
           notes?: string
+          place_of_supply_state_code?: string
+          posted_at?: string | null
+          posted_by?: string | null
           round_off?: number
           seller_address?: string
           seller_bank_account?: string
@@ -615,6 +1019,7 @@ export type Database = {
           created_at?: string
           doc_type?: string
           driver_name?: string
+          fy?: string
           grand_total?: number
           gst_rate?: number
           id?: string
@@ -622,6 +1027,9 @@ export type Database = {
           invoice_date?: string
           invoice_number?: string
           notes?: string
+          place_of_supply_state_code?: string
+          posted_at?: string | null
+          posted_by?: string | null
           round_off?: number
           seller_address?: string
           seller_bank_account?: string
@@ -711,33 +1119,72 @@ export type Database = {
       }
       order_lines: {
         Row: {
+          booked_quantity: number | null
+          cancelled_short_quantity: number
+          cgst_amount: number
           created_at: string
+          discount_amount: number
+          free_quantity: number
+          gross_amount: number | null
+          gst_rate: number | null
           id: string
+          igst_amount: number
           line_total: number
+          loaded_quantity: number | null
           order_id: string
+          price_basis: string
           product_id: string
           product_name: string
           quantity: number
+          scheme_snapshot: Json
+          sgst_amount: number
+          taxable_amount: number | null
           unit_price: number
         }
         Insert: {
+          booked_quantity?: number | null
+          cancelled_short_quantity?: number
+          cgst_amount?: number
           created_at?: string
+          discount_amount?: number
+          free_quantity?: number
+          gross_amount?: number | null
+          gst_rate?: number | null
           id?: string
+          igst_amount?: number
           line_total: number
+          loaded_quantity?: number | null
           order_id: string
+          price_basis?: string
           product_id: string
           product_name: string
           quantity: number
+          scheme_snapshot?: Json
+          sgst_amount?: number
+          taxable_amount?: number | null
           unit_price: number
         }
         Update: {
+          booked_quantity?: number | null
+          cancelled_short_quantity?: number
+          cgst_amount?: number
           created_at?: string
+          discount_amount?: number
+          free_quantity?: number
+          gross_amount?: number | null
+          gst_rate?: number | null
           id?: string
+          igst_amount?: number
           line_total?: number
+          loaded_quantity?: number | null
           order_id?: string
+          price_basis?: string
           product_id?: string
           product_name?: string
           quantity?: number
+          scheme_snapshot?: Json
+          sgst_amount?: number
+          taxable_amount?: number | null
           unit_price?: number
         }
         Relationships: [
@@ -818,6 +1265,10 @@ export type Database = {
       }
       orders: {
         Row: {
+          booked_at: string | null
+          cancel_reason: string
+          cancelled_at: string | null
+          cancelled_by: string | null
           company_id: string
           created_at: string
           date: string
@@ -841,6 +1292,10 @@ export type Database = {
           vehicle: string
         }
         Insert: {
+          booked_at?: string | null
+          cancel_reason?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           company_id: string
           created_at?: string
           date?: string
@@ -864,6 +1319,10 @@ export type Database = {
           vehicle?: string
         }
         Update: {
+          booked_at?: string | null
+          cancel_reason?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           company_id?: string
           created_at?: string
           date?: string
@@ -905,6 +1364,13 @@ export type Database = {
             foreignKeyName: "orders_distributor_id_fkey"
             columns: ["distributor_id"]
             isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
             referencedRelation: "distributors"
             referencedColumns: ["id"]
           },
@@ -929,6 +1395,8 @@ export type Database = {
           base_price: number
           company_id: string
           created_at: string
+          gst_rate: number | null
+          gst_rate_confirmed: boolean
           hsn_code: string
           id: string
           name: string
@@ -941,6 +1409,8 @@ export type Database = {
           base_price?: number
           company_id: string
           created_at?: string
+          gst_rate?: number | null
+          gst_rate_confirmed?: boolean
           hsn_code?: string
           id?: string
           name: string
@@ -953,6 +1423,8 @@ export type Database = {
           base_price?: number
           company_id?: string
           created_at?: string
+          gst_rate?: number | null
+          gst_rate_confirmed?: boolean
           hsn_code?: string
           id?: string
           name?: string
@@ -1160,6 +1632,13 @@ export type Database = {
             foreignKeyName: "schemes_dealer_id_fkey"
             columns: ["dealer_id"]
             isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "schemes_dealer_id_fkey"
+            columns: ["dealer_id"]
+            isOneToOne: false
             referencedRelation: "distributors"
             referencedColumns: ["id"]
           },
@@ -1222,6 +1701,13 @@ export type Database = {
             columns: ["distributor_id"]
             isOneToOne: false
             referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "secondary_sales_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
             referencedColumns: ["distributor_id"]
           },
           {
@@ -1406,6 +1892,73 @@ export type Database = {
           },
         ]
       }
+      stock_movements: {
+        Row: {
+          actor: string | null
+          company_id: string
+          created_at: string
+          delta: number
+          godown_id: string
+          id: string
+          idempotency_key: string | null
+          movement_type: string
+          note: string
+          product_id: string
+          source_doc_id: string | null
+          source_doc_type: string
+        }
+        Insert: {
+          actor?: string | null
+          company_id: string
+          created_at?: string
+          delta: number
+          godown_id: string
+          id?: string
+          idempotency_key?: string | null
+          movement_type: string
+          note?: string
+          product_id: string
+          source_doc_id?: string | null
+          source_doc_type?: string
+        }
+        Update: {
+          actor?: string | null
+          company_id?: string
+          created_at?: string
+          delta?: number
+          godown_id?: string
+          id?: string
+          idempotency_key?: string | null
+          movement_type?: string
+          note?: string
+          product_id?: string
+          source_doc_id?: string | null
+          source_doc_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_godown_id_fkey"
+            columns: ["godown_id"]
+            isOneToOne: false
+            referencedRelation: "godowns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       targets: {
         Row: {
           company_id: string
@@ -1570,6 +2123,64 @@ export type Database = {
           },
         ]
       }
+      dealer_balances: {
+        Row: {
+          balance_due: number | null
+          billed_total: number | null
+          company_id: string | null
+          credit_limit: number | null
+          credited_total: number | null
+          distributor_id: string | null
+          distributor_name: string | null
+          received_total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_balances: {
+        Row: {
+          amount_credited: number | null
+          amount_received: number | null
+          balance_due: number | null
+          buyer_name: string | null
+          company_id: string | null
+          invoice_date: string | null
+          invoice_id: string | null
+          invoice_number: string | null
+          invoice_total: number | null
+          order_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_source_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "invoices_source_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_aging: {
         Row: {
           age_days: number | null
@@ -1623,6 +2234,13 @@ export type Database = {
             columns: ["distributor_id"]
             isOneToOne: false
             referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
             referencedColumns: ["distributor_id"]
           },
           {
