@@ -174,11 +174,12 @@ function EntityCardImpl({
 
       {children && <div className="mt-3">{children}</div>}
 
+
       {/* KpiStrip footer */}
       {trimmedCells.length > 0 && (
         <div
           className={cn(
-            "mt-3 grid border-t border-border/60 divide-x divide-border/60 pt-3",
+            "mt-auto grid border-t border-border/60 divide-x divide-border/60 pt-3",
             trimmedCells.length === 1 && "grid-cols-1",
             trimmedCells.length === 2 && "grid-cols-2",
             trimmedCells.length === 3 && "grid-cols-3",
@@ -213,7 +214,7 @@ function EntityCardImpl({
 
   const baseClass = cn(
     // Card base — Fluent depth + 6px radius (matches glass-card token)
-    "glass-card relative w-full text-left",
+    "glass-card relative flex h-full w-full flex-col text-left",
     compact ? "p-3.5" : "p-4 md:p-5",
     // 3px brand left bar via ::before so it stays inside the rounded corners
     "before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:rounded-r-sm",
@@ -225,13 +226,13 @@ function EntityCardImpl({
   if (interactive) {
     return (
       <button type="button" onClick={onClick} className={baseClass}>
-        <div className="pl-2">{inner}</div>
+        <div className="flex min-h-0 flex-1 flex-col pl-2">{inner}</div>
       </button>
     );
   }
   return (
     <div className={baseClass}>
-      <div className="pl-2">{inner}</div>
+      <div className="flex min-h-0 flex-1 flex-col pl-2">{inner}</div>
     </div>
   );
 }
