@@ -36,7 +36,7 @@ export function Problem() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em]">
               The old way is bleeding you dry.
             </h2>
             <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
