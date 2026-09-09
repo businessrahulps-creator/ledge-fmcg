@@ -192,8 +192,6 @@ export interface DataContextType {
   deleteTarget: (id: string) => Promise<boolean>;
 
   claims: Claim[];
-  addClaim: (claim: Claim) => Promise<boolean>;
-  updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
   recordReturn: (
     orderId: string,
     lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
@@ -202,9 +200,6 @@ export interface DataContextType {
   ) => Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null>;
 
   invoices: Invoice[];
-  addInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => Promise<Invoice | null>;
-  updateInvoice: (id: string, updates: Partial<Invoice>) => Promise<void>;
-  deleteInvoice: (id: string) => Promise<boolean>;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -274,13 +269,8 @@ export interface TransactionalContextType {
   updateTarget: DataContextType["updateTarget"];
   deleteTarget: DataContextType["deleteTarget"];
 
-  addClaim: DataContextType["addClaim"];
-  updateClaim: DataContextType["updateClaim"];
   recordReturn: DataContextType["recordReturn"];
 
-  addInvoice: DataContextType["addInvoice"];
-  updateInvoice: DataContextType["updateInvoice"];
-  deleteInvoice: DataContextType["deleteInvoice"];
 
   nextOrderNumber: DataContextType["nextOrderNumber"];
   previewOrderNumber: DataContextType["previewOrderNumber"];
