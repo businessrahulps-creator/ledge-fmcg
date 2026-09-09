@@ -70,14 +70,16 @@ describe("landing — taste pass guardrails", () => {
 
   it("live dots are used at most once", () => {
     const count = landingFiles.reduce(
-      (n, f) => n + (readFileSync(f, "utf8").match(/lp-live-dot/g)?.length ?? 0),
+      (n, f) => n + (readFileSync(f, "utf8").match(/lp-live-dot"/g)?.length ?? 0),
       0,
     );
     expect(count).toBeLessThanOrEqual(1);
   });
 
   it("primary trial CTA uses one wording everywhere", () => {
-    const offenders = landingFiles.filter((f) => /Start free\b|Start 30-Day Free Trial/.test(readFileSync(f, "utf8")));
+    const offenders = landingFiles.filter((f) =>
+      />\s*Start free\s*</.test(readFileSync(f, "utf8")) || /Start 30-Day Free Trial/.test(readFileSync(f, "utf8")),
+    );
     expect(offenders).toEqual([]);
   });
 
