@@ -370,10 +370,10 @@
 
   /* Warm Bone tint — alternating section rhythm */
   .lp-section-paper {
-    background-color: hsl(34 35% 91%);
+    background-color: hsl(220 13% 91%);
   }  /* Final CTA — deeper warm Bone close */
   .lp-mesh-dark {
-    background-color: hsl(34 30% 88%);
+    background-color: hsl(220 13% 88%);
     background-image:
       radial-gradient(ellipse 80% 50% at 50% 0%, hsl(var(--accent) / 0.10) 0%, transparent 65%);
   }
@@ -478,7 +478,7 @@
   .lp-eyebrow {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
-    background: hsl(34 30% 90%);
+    background: hsl(220 13% 90%);
     border: 1px solid hsl(var(--border));
     color: hsl(var(--muted-foreground));
   }
@@ -492,7 +492,7 @@
   .lp-eyebrow-dark {
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
-    background: hsl(34 30% 90%);
+    background: hsl(220 13% 90%);
     border: 1px solid hsl(var(--border));
     color: hsl(var(--muted-foreground));
   }
@@ -528,7 +528,7 @@
       0 8px 20px -6px hsl(var(--primary) / 0.34);
   }
   .lp-btn-primary-light {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(34 30% 92%) 100%);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(220 13% 92%) 100%);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.95),
       0 1px 2px hsl(var(--primary) / 0.08),
@@ -538,7 +538,7 @@
   /* Neutral icon tile — Bone default, Terracotta wash when opted-in */
   .lp-icon-tile {
     @apply w-11 h-11 rounded-md flex items-center justify-center;
-    background: hsl(34 30% 90%);
+    background: hsl(220 13% 90%);
     border: 1px solid hsl(var(--border));
     box-shadow: inset 0 1px 0 hsl(var(--background) / 0.6);
     transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -649,7 +649,7 @@
     padding: 6px;
     padding-right: 56px;
     border-radius: 9999px;
-    background: linear-gradient(180deg, hsl(34 35% 90%) 0%, hsl(34 28% 84%) 100%);
+    background: linear-gradient(180deg, hsl(220 13% 90%) 0%, hsl(220 13% 84%) 100%);
     box-shadow:
       inset 0 1px 1px hsl(0 0% 100% / 0.9),
       inset 0 -1px 2px hsl(var(--primary) / 0.06),
@@ -675,7 +675,7 @@
     align-items: center;
     padding: 12px 26px;
     border-radius: 9999px;
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(34 35% 95%) 100%);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(220 13% 95%) 100%);
     color: hsl(var(--foreground));
     font-weight: 600;
     font-size: 15px;
@@ -763,7 +763,7 @@
   /* Dark variant — Midnight shell, Bone inner */
   .lp-capsule-cta--dark { background: linear-gradient(180deg, hsl(218 60% 20%) 0%, hsl(var(--primary)) 100%); }
   .lp-capsule-cta--dark .lp-capsule-cta__inner {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(34 35% 95%) 100%);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(220 13% 95%) 100%);
   }
   .lp-capsule-cta--dark .lp-capsule-cta__arrow { color: hsl(var(--primary-foreground)); }
   .lp-capsule-cta--dark:hover .lp-capsule-cta__arrow {
@@ -867,7 +867,7 @@
     gap: 14px;
     padding: 9px 18px;
     border-radius: 9999px;
-    background: hsl(34 30% 90%);
+    background: hsl(220 13% 90%);
     border: 1px solid hsl(var(--border));
     flex-wrap: wrap;
     justify-content: center;
@@ -906,7 +906,7 @@
     border-radius: var(--radius);
     background:
       radial-gradient(ellipse 90% 70% at 30% 0%, hsl(var(--accent) / 0.14) 0%, transparent 65%),
-      linear-gradient(135deg, hsl(34 35% 92%) 0%, hsl(34 30% 88%) 60%, hsl(19 30% 84%) 100%);
+      linear-gradient(135deg, hsl(220 13% 92%) 0%, hsl(220 13% 88%) 60%, hsl(19 30% 84%) 100%);
     border: 1px solid hsl(var(--accent) / 0.25);
     box-shadow:
       inset 0 1px 0 hsl(var(--background) / 0.95),
@@ -1061,14 +1061,14 @@
   .lp-vcard--neutral {
     background:
       radial-gradient(ellipse 130% 80% at 50% -20%, hsl(0 0% 100%) 0%, transparent 70%),
-      linear-gradient(160deg, hsl(34 30% 97%) 0%, hsl(34 24% 93%) 100%);
+      linear-gradient(160deg, hsl(220 13% 97%) 0%, hsl(220 13% 93%) 100%);
   }  /* Visual well — the graphic half of the card */
   .lp-well {
     position: relative;
     border-radius: var(--lp-r-md);
     padding: 18px;
     overflow: hidden;
-    background: hsl(34 34% 95%);
+    background: hsl(220 13% 95%);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.9),
       0 1px 2px hsl(var(--primary) / 0.04);
@@ -1323,7 +1323,7 @@
     justify-content: center;
     width: 26px; height: 26px;
     border-radius: 8px;
-    background: hsl(34 30% 92%);
+    background: hsl(220 13% 92%);
     color: hsl(var(--foreground));
     flex-shrink: 0;
   }
