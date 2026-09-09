@@ -22,7 +22,6 @@ import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricin
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { useCan } from "@/hooks/useCan";
-import type { Claim, ClaimLine } from "@/context/DataContext";
 import {
   Select,
   SelectContent,
@@ -114,11 +113,6 @@ export default function OrderDetail() {
   type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
   const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
 
-  const [claimModalOpen, setClaimModalOpen] = useState(false);
-  const [claimType, setClaimType] = useState<"return" | "damage">("return");
-  const [claimReason, setClaimReason] = useState("");
-  const [claimQuantities, setClaimQuantities] = useState<Record<number, number>>({});
-  const [claimSubmitting, setClaimSubmitting] = useState(false);
 
   const order = orders.find(o => o.id === id);
 
@@ -325,63 +319,6 @@ export default function OrderDetail() {
       navigate("/orders");
     }
   };
-
-  const openClaimModal = useCallback(() => {
-    if (!order) return;
-    const qtys: Record<number, number> = {};
-    order.lines.forEach((_, i) => { qtys[i] = order.lines[i].quantity; });
-    setClaimQuantities(qtys);
-    setClaimType("return");
-    setClaimReason("");
-    setClaimModalOpen(true);
-  }, [order]);
-
-  const handleSubmitClaim = useCallback(async () => {
-    if (!order) return;
-    setClaimSubmitting(true);
-    const claimLines: ClaimLine[] = order.lines
-      .map((line, i) => ({
-        productId: line.productId,
-        productName: line.productName,
-        quantity: claimQuantities[i] || 0,
-        unitPrice: line.unitPrice,
-        lineTotal: (claimQuantities[i] || 0) * line.unitPrice,
-      }))
-      .filter(l => l.quantity > 0);
-
-    if (claimLines.length === 0) {
-      toast.error("Select at least one product with quantity > 0");
-      setClaimSubmitting(false);
-      return;
-    }
-
-    const totalClaimValue = claimLines.reduce((s, l) => s + l.lineTotal, 0);
-    const claim: Claim = {
-      id: "",
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      distributorId: order.distributorId,
-      distributorName: order.distributorName,
-      claimType,
-      status: "open",
-      reason: claimReason,
-      resolutionNotes: "",
-      restoreStock: claimType === "return",
-      totalClaimValue,
-      lines: claimLines,
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-    };
-
-    const ok = await api.claims.create(claim);
-    setClaimSubmitting(false);
-    if (ok) {
-      toast.success(claimType === "return" ? "Return recorded — stock restored" : "Damage claim recorded", {
-        description: `${formatCurrency(totalClaimValue)} claim for ${order.orderNumber}`,
-      });
-      setClaimModalOpen(false);
-    }
-  }, [order, claimQuantities, claimType, claimReason, api.claims]);
 
   if (!order) {
     // While data is still loading (cold start, two-phase fetch, or a
@@ -772,9 +709,9 @@ export default function OrderDetail() {
                 <span className="hidden sm:inline">WhatsApp</span>
               </Button>
               {(order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") && (
-                <Button size="sm" variant="outline" onClick={openClaimModal}>
+                <Button size="sm" variant="outline" onClick={() => navigate("/claims")}>
                   <RotateCcw className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Return / Claim</span>
+                  <span className="hidden sm:inline">Record return</span>
                 </Button>
               )}
             </div>
@@ -840,92 +777,6 @@ export default function OrderDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Claim / Return Modal */}
-      <Dialog open={claimModalOpen} onOpenChange={setClaimModalOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-base">Record Return / Claim</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              {order.orderNumber} · {order.distributorName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">What happened?</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setClaimType("return")}
-                  className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
-                    claimType === "return" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  <RotateCcw className="h-4 w-4 shrink-0" />
-                  <div className="text-left">
-                    <div className="font-semibold">Goods Returned</div>
-                    <div className="text-[10px] opacity-70">Stock will be restored</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setClaimType("damage")}
-                  className={`flex items-center gap-2 rounded-lg border p-3 text-xs font-medium transition-all ${
-                    claimType === "damage" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  <PackageX className="h-4 w-4 shrink-0" />
-                  <div className="text-left">
-                    <div className="font-semibold">Damaged / Claim Only</div>
-                    <div className="text-[10px] opacity-70">No stock change</div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Select products & quantities to claim</Label>
-              <div className="rounded-lg border border-border overflow-hidden">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
-                      <th className="px-3 py-2 text-left font-medium">Product</th>
-                      <th className="px-3 py-2 text-right font-medium">Ordered</th>
-                      <th className="px-3 py-2 text-right font-medium">Claim Qty</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.lines.map((line, i) => (
-                      <tr key={i} className="border-b border-border/50">
-                        <td className="px-3 py-2 font-medium">{line.productName}</td>
-                        <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
-                        <td className="px-3 py-2 text-right">
-                          <NumberInput
-                            allowEmpty={false}
-                            min={0}
-                            max={line.quantity}
-                            value={claimQuantities[i] ?? 0}
-                            onValueChange={v => setClaimQuantities(prev => ({ ...prev, [i]: v ?? 0 }))}
-                            className="h-8 w-16 text-right text-xs ml-auto"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Reason</Label>
-              <Input value={claimReason} onChange={e => setClaimReason(e.target.value)} placeholder="e.g. Damaged packaging, wrong items, expired goods…" className="h-10" />
-            </div>
-          </div>
-          <DialogFooter className="flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={() => setClaimModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitClaim} disabled={claimSubmitting}>
-              {claimSubmitting ? "Submitting…" : claimType === "return" ? "Record Return & Restore Stock" : "Record Damage Claim"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Dispatch preview & confirm */}
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
