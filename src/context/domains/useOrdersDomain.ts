@@ -195,6 +195,29 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
   }, [safeRefetch, deps.log]);
 
+  /** Proof of delivery only — moves no stock and no money. */
+  const markDelivered = useCallback(async (orderId: string, note = ""): Promise<boolean> => {
+    if (!navigator.onLine) {
+      toast.error("You need to be online to mark an order delivered");
+      return false;
+    }
+    try {
+      const { error } = await supabase.rpc("mark_order_delivered_atomic", {
+        p_order_id: orderId,
+        p_note: sanitizeInput(note || ""),
+      });
+      if (error) throw error;
+      await safeRefetch();
+      const order = ordersRef.current.find(o => o.id === orderId);
+      deps.log("order", orderId, "delivered", `Delivered ${order?.orderNumber || orderId}`);
+      return true;
+    } catch (err: any) {
+      handleSupabaseError(err, { source: "rpc:mark_order_delivered_atomic", title: "Couldn't mark this order delivered", context: { orderId } });
+      return false;
+    }
+  }, [safeRefetch, deps.log]);
+
+
 
   const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
     const currentOrder = ordersRef.current.find(o => o.id === id);
