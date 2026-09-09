@@ -490,6 +490,8 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+          </div>
+          </div>
         </motion.section>
 
         {/* Daily breakdown — anchored label + day rail + compact KPI row (NOT 4 separate cards) */}
