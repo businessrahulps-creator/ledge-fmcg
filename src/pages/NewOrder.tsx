@@ -45,25 +45,6 @@ interface OrderLineState {
   unitPrice: number;
 }
 
-const paymentModes = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cheque", label: "Cheque" },
-  { value: "upi", label: "UPI" },
-];
-
-const paymentStatuses = [
-  { value: "paid", label: "Paid" },
-  { value: "partial", label: "Partial" },
-  { value: "pending", label: "Pending" },
-];
-
-const deliveryStatuses = [
-  { value: "pending", label: "Pending" },
-  { value: "dispatched", label: "Dispatched" },
-  { value: "delivered", label: "Delivered" },
-];
-
 const statusColors: Record<string, string> = {
   paid: "border-success/40 bg-success/10 text-success",
   partial: "border-warning/40 bg-warning/10 text-warning",
@@ -91,9 +72,6 @@ export default function NewOrder() {
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
-  const [paymentMode, setPaymentMode] = useState("cash");
-  const [paymentStatus, setPaymentStatus] = useState("pending");
-  const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
@@ -102,16 +80,12 @@ export default function NewOrder() {
   const dealerFieldRef = useRef<HTMLDivElement>(null);
   const salespersonFieldRef = useRef<HTMLDivElement>(null);
   const warehouseFieldRef = useRef<HTMLDivElement>(null);
-  const dispatchDateFieldRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedDealer, setSelectedDealer] = useState("");
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
-  const [dispatchDate, setDispatchDate] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
 
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
@@ -167,7 +141,6 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
-  const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
   // (credit override capability resolved via useCan above)
 
   // --- Scheme auto-apply (centralized pricing engine) ---
@@ -180,20 +153,18 @@ export default function NewOrder() {
 
   // Credit guard (uses net total after scheme savings)
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? netOrderTotal : 0);
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + netOrderTotal;
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
   // --- Derived validation state (used for inline errors) ---
   const validLines = lines.filter((l) => l.productId && (l.quantity ?? 0) > 0);
-  const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
   const errors = {
     dealer: !selectedDealer,
     salesperson: !selectedSalesperson,
     products: validLines.length === 0,
     invalidPriceLine: validLines.find((l) => l.unitPrice <= 0),
     warehouse: !selectedGodown,
-    dispatchDate: dispatchDateRequired && !dispatchDate,
   };
 
   // Stock availability per line (warning only, not blocking)
@@ -225,7 +196,6 @@ export default function NewOrder() {
     else if (errors.salesperson) target = salespersonFieldRef.current;
     else if (errors.products || errors.invalidPriceLine) target = productsSectionRef.current;
     else if (errors.warehouse) target = warehouseFieldRef.current;
-    else if (errors.dispatchDate) target = dispatchDateFieldRef.current;
     target?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
@@ -268,13 +238,6 @@ export default function NewOrder() {
       return;
     }
 
-    // Dispatch date required when delivery status is dispatched or delivered
-    if (errors.dispatchDate) {
-      toast.error("Dispatch date required", { description: "Please select a dispatch date for dispatched/delivered orders." });
-      scrollToFirstError();
-      return;
-    }
-
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
@@ -300,17 +263,18 @@ export default function NewOrder() {
         };
       }),
       total: validLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0),
-      paymentMode: paymentMode as "cash" | "bank_transfer" | "cheque" | "upi",
-      paymentStatus: paymentStatus as "paid" | "partial" | "pending",
-      dispatchDate: dispatchDate || null,
-      vehicle,
-      driverName,
-      deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
+      paymentMode: "cash" as const,
+      paymentStatus: "pending" as const,
+      dispatchDate: null,
+      vehicle: "",
+      driverName: "",
+      deliveryStatus: "pending" as const,
       dispatchRemarks: remarks,
       godownId: selectedGodown || undefined,
       schemeSavings: totalSchemeSavings,
       appliedSchemes: serializeAppliedSchemes(appliedSchemes),
     };
+
 
     const isFirstEverOrder = existingOrders.length === 0;
     const result = await addOrder(order);
@@ -358,7 +322,7 @@ export default function NewOrder() {
     // Run base validation first so missing fields are surfaced before the credit-limit gate
     const hasBlockingError =
       errors.dealer || errors.salesperson || errors.products ||
-      !!errors.invalidPriceLine || errors.warehouse || errors.dispatchDate;
+      !!errors.invalidPriceLine || errors.warehouse;
     if (hasBlockingError) {
       executeSave();
       return;
@@ -567,12 +531,15 @@ export default function NewOrder() {
               </div>
             </section>
 
-            {/* Dispatch Details */}
+            {/* Where it ships from */}
             <section className="glass-card p-4 md:p-6">
-              <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
+              <h2 className="mb-1 text-sm font-semibold md:text-base">Warehouse &amp; notes</h2>
+              <p className="mb-3 text-xs text-muted-foreground md:mb-4">
+                Booking only holds the order. Stock and the GST bill happen later, when you dispatch it.
+              </p>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div ref={warehouseFieldRef} className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Source Warehouse *</Label>
+                  <Label className="text-xs md:text-sm">Ships from *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select warehouse" />
@@ -584,99 +551,20 @@ export default function NewOrder() {
                     </SelectContent>
                   </Select>
                   {attemptedSave && errors.warehouse && (
-                    <p className="text-xs text-destructive">Warehouse is required for every order.</p>
+                    <p className="text-xs text-destructive">Choose the warehouse this order ships from.</p>
                   )}
-                </div>
-                <div ref={dispatchDateFieldRef} className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dispatch Date {dispatchDateRequired ? "*" : ""}</Label>
-                  <Input
-                    type="date"
-                    value={dispatchDate}
-                    onChange={(e) => setDispatchDate(e.target.value)}
-                    className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dispatchDate ? "border-destructive" : ""}`}
-                  />
-                  {attemptedSave && errors.dispatchDate && (
-                    <p className="text-xs text-destructive">Dispatch date is required when delivery is set to Dispatched or Delivered.</p>
-                  )}
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
-                  <Input placeholder="e.g. MH-01-AB-1234" value={vehicle} onChange={(e) => setVehicle(e.target.value)} className="h-10 rounded-lg md:h-12" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Driver Name</Label>
-                  <Input placeholder="Optional" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="h-10 rounded-lg md:h-12" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Delivery Status</Label>
-                  <div className="flex gap-2">
-                    {deliveryStatuses.map((s) => (
-                      <button
-                        key={s.value}
-                        onClick={() => setDeliveryStatus(s.value)}
-                        className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
-                          deliveryStatus === s.value
-                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                            : "border-border text-muted-foreground hover:border-foreground/20"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
               <div className="mt-3 space-y-1.5 md:mt-4 md:space-y-2">
-                <Label className="text-xs md:text-sm">Dispatch Remarks</Label>
-                <Textarea placeholder="Any additional notes..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
+                <Label className="text-xs md:text-sm">Notes</Label>
+                <Textarea placeholder="Anything the warehouse should know..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
               </div>
             </section>
+
           </div>
 
           {/* Sidebar Summary */}
           <div className="space-y-4 pb-32 md:space-y-6 md:pb-0">
-            {/* Payment */}
-            <section className="glass-card p-4 md:p-6">
-              <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Payment</h2>
-              <div className="space-y-3 md:space-y-4">
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Payment Mode</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {paymentModes.map((m) => (
-                      <button
-                        key={m.value}
-                        onClick={() => setPaymentMode(m.value)}
-                        className={`rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
-                          paymentMode === m.value
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border text-muted-foreground hover:border-foreground/20"
-                        }`}
-                      >
-                        {m.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Payment Status</Label>
-                  <div className="flex gap-2">
-                    {paymentStatuses.map((s) => (
-                      <button
-                        key={s.value}
-                        onClick={() => setPaymentStatus(s.value)}
-                        className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
-                          paymentStatus === s.value
-                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                            : "border-border text-muted-foreground hover:border-foreground/20"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
 
             {/* Summary */}
             <section className="glass-card p-4 md:p-6">

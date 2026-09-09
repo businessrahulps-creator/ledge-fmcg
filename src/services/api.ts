@@ -17,6 +17,8 @@ export function useApi() {
       create: (order: Order): Promise<AddOrderResult> => data.addOrder(order),
       update: (id: string, updates: Partial<Order>) => data.updateOrder(id, updates),
       delete: (id: string) => data.deleteOrder(id),
+      dispatchAndBill: data.dispatchAndBill,
+      cancel: (id: string, reason: string) => data.cancelOrder(id, reason),
       updateStatus: (id: string, status: Partial<Pick<Order, "paymentStatus" | "deliveryStatus">>) =>
         data.updateOrder(id, status),
       nextNumber: () => data.nextOrderNumber(),

@@ -271,7 +271,11 @@ export default function OrderDetail() {
   const proceedAfterDispatchCheck = () => {
     if (!order) return;
     const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
-    if (movingToDispatched && editGodown && canManageStock) {
+    if (movingToDispatched) {
+      if (!editGodown) {
+        toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
+        return;
+      }
       setDispatchPreview({ open: true, rows: [], loading: true });
       supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
         if (error) {
@@ -286,12 +290,28 @@ export default function OrderDetail() {
     executeSaveOrder();
   };
 
+  /** One step: stock out + final GST bill + order marked dispatched. */
   const confirmDispatch = async () => {
+    if (!order) return;
     setDispatchPreview(p => ({ ...p, open: false }));
-    await executeSaveOrder();
+    setIsSaving(true);
+    const res = await api.orders.dispatchAndBill(order.id, {
+      godownId: editGodown || null,
+      dispatchDate: editDispatchDate || null,
+      vehicle: editVehicle,
+      driverName: editDriver,
+    });
+    setIsSaving(false);
+    if (!res.success) return;
     const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
-    toast.success(`Dispatched. Stock updated for ${dispatchPreview.rows.length} product${dispatchPreview.rows.length === 1 ? "" : "s"}.${negatives > 0 ? ` ${negatives} below zero — please reconcile.` : ""}`);
+    toast.success(
+      res.alreadyDone
+        ? "This order was already dispatched and billed."
+        : `Dispatched. Bill ${res.invoiceNumber} created and stock updated.`,
+      negatives > 0 ? { description: `${negatives} product${negatives === 1 ? "" : "s"} went below zero — please reconcile stock.` } : undefined,
+    );
   };
+
 
   const saveOrder = () => {
     if (!order) return;
@@ -590,17 +610,11 @@ export default function OrderDetail() {
 
         {/* Billing Documents */}
         <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold md:text-base">Documents</h2>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 text-xs gap-1.5"
-              onClick={() => navigate(`/billing?order=${order.id}`)}
-            >
-              <FileText className="h-3.5 w-3.5" />
-              Generate Invoice
-            </Button>
+            <p className="text-right text-xs text-muted-foreground">
+              The GST bill is created automatically when you dispatch this order.
+            </p>
           </div>
           {orderDocs.length > 0 ? (
             <div className="overflow-x-auto">
@@ -940,9 +954,9 @@ export default function OrderDetail() {
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Confirm dispatch &amp; deduct stock</DialogTitle>
+            <DialogTitle>Dispatch &amp; bill this order</DialogTitle>
             <DialogDescription>
-              Stock will be deducted from the selected warehouse for each product below. Rows highlighted in red will go below zero — dispatch is still allowed.
+              In one step: stock leaves the chosen warehouse and the final GST bill is created. Rows in red will go below zero — dispatch is still allowed.
             </DialogDescription>
           </DialogHeader>
           {dispatchPreview.loading ? (
@@ -986,8 +1000,8 @@ export default function OrderDetail() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDispatchPreview(p => ({ ...p, open: false }))}>Cancel</Button>
-            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0}>
-              Confirm dispatch &amp; deduct stock
+            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0 || isSaving}>
+              {isSaving ? "Working…" : "Dispatch & bill"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -61,19 +61,15 @@ describe("useOrdersDomain", () => {
     expect(preview).toMatch(/^ORD-\d{4}-0001$/);
   });
 
-  it("addOrder online — calls RPC and adds to state", async () => {
+  it("addOrder online — books atomically and adds to state", async () => {
     const deps = makeDeps();
     const insertedId = "uuid-new";
     const orderNumber = "ORD-2026-0001";
 
     mockRpc.mockResolvedValueOnce({
-      data: [{ id: insertedId, order_number: orderNumber, seq: 1 }],
+      data: { ok: true, order_id: insertedId, order_number: orderNumber, seq: 1 },
       error: null,
     });
-
-    // Mock order_lines insert
-    const linesChain = createChainMock({ data: null, error: null });
-    mockFrom.mockReturnValue(linesChain);
 
     const { result } = renderHook(() => useOrdersDomain(deps));
     let addResult: any;
@@ -83,14 +79,57 @@ describe("useOrdersDomain", () => {
 
     expect(addResult.success).toBe(true);
     expect(addResult.orderNumber).toBe(orderNumber);
-    expect(mockRpc).toHaveBeenCalledWith("insert_order_atomic", expect.objectContaining({
-      p_company_id: "company-1",
+    expect(mockRpc).toHaveBeenCalledWith("book_order_atomic", expect.objectContaining({
       p_distributor_id: "d1",
+      p_salesperson_id: "s1",
     }));
+    // Booking must never dispatch or bill
+    expect(mockRpc).toHaveBeenCalledTimes(1);
     expect(result.current.orders).toHaveLength(1);
     expect(result.current.orders[0].id).toBe(insertedId);
+    expect(result.current.orders[0].deliveryStatus).toBe("pending");
     expect(deps.log).toHaveBeenCalledWith("order", insertedId, "created", expect.stringContaining("ORD-2026-0001"));
   });
+
+  it("dispatchAndBill — calls the atomic dispatch-and-bill RPC", async () => {
+    const deps = makeDeps();
+    mockRpc.mockResolvedValueOnce({ data: { ok: true, invoice_number: "INV/2026-27/0001" }, error: null });
+    const chain = createChainMock({ data: [], error: null });
+    mockFrom.mockReturnValue(chain);
+
+    const { result } = renderHook(() => useOrdersDomain(deps));
+    let res: any;
+    await act(async () => {
+      res = await result.current.dispatchAndBill("order-1", { godownId: "g1" });
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.invoiceNumber).toBe("INV/2026-27/0001");
+    expect(mockRpc).toHaveBeenCalledWith("dispatch_and_bill_order_atomic", expect.objectContaining({
+      p_order_id: "order-1",
+      p_godown_id: "g1",
+    }));
+  });
+
+  it("cancelOrder — calls the cancel RPC", async () => {
+    const deps = makeDeps();
+    mockRpc.mockResolvedValueOnce({ data: { ok: true }, error: null });
+    const chain = createChainMock({ data: [], error: null });
+    mockFrom.mockReturnValue(chain);
+
+    const { result } = renderHook(() => useOrdersDomain(deps));
+    let ok: any;
+    await act(async () => {
+      ok = await result.current.cancelOrder("order-1", "Dealer changed their mind");
+    });
+
+    expect(ok).toBe(true);
+    expect(mockRpc).toHaveBeenCalledWith("cancel_order_atomic", {
+      p_order_id: "order-1",
+      p_reason: "Dealer changed their mind",
+    });
+  });
+
 
   it("addOrder online — RPC error returns failure", async () => {
     const deps = makeDeps();

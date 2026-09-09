@@ -87,71 +87,114 @@ export function useOrdersDomain(deps: OrdersDeps) {
     }
 
     try {
-      const { data: rpcData, error: rpcError } = await supabase.rpc("insert_order_atomic", {
-        p_company_id: deps.companyId, p_date: order.date,
-        p_distributor_id: order.distributorId, p_distributor_name: sanitizeInput(order.distributorName),
-        p_salesperson_id: order.salespersonId, p_salesperson_name: sanitizeInput(order.salesperson),
-        p_total: order.total, p_payment_mode: order.paymentMode, p_payment_status: order.paymentStatus,
-        p_dispatch_date: order.dispatchDate || null, p_vehicle: sanitizeInput(order.vehicle),
-        p_driver_name: sanitizeInput(order.driverName), p_delivery_status: order.deliveryStatus,
-        p_dispatch_remarks: sanitizeInput(order.dispatchRemarks), p_godown_id: order.godownId || null,
+      const { data: rpcData, error: rpcError } = await supabase.rpc("book_order_atomic", {
+        p_date: order.date,
+        p_distributor_id: order.distributorId,
+        p_salesperson_id: order.salespersonId,
+        p_lines: order.lines.map(l => ({
+          product_id: l.productId,
+          quantity: l.quantity,
+          unit_price: l.unitPrice,
+        })),
+        p_godown_id: order.godownId || null,
+        p_applied_schemes: (order.appliedSchemes || []).map(s => ({
+          scheme_id: s.schemeId || null,
+          scheme_name: s.schemeName,
+          scheme_label: s.schemeLabel || "",
+          savings: s.savings,
+        })),
         p_scheme_savings: order.schemeSavings || 0,
+        p_remarks: sanitizeInput(order.dispatchRemarks || ""),
       });
       if (rpcError) throw rpcError;
-      const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
-      if (!inserted) throw new Error("Atomic insert returned no data");
+      const booked = rpcData as { order_id: string; order_number: string; seq: number } | null;
+      if (!booked?.order_id) throw new Error("Booking returned no order");
 
-      const orderNumber = inserted.order_number;
-      setOrderSequence(inserted.seq + 1);
+      setOrderSequence(booked.seq + 1);
 
-      if (order.lines.length > 0) {
-        const { error: linesError } = await supabase.from("order_lines").insert(
-          order.lines.map(l => ({
-            order_id: inserted.id, product_id: l.productId, product_name: sanitizeInput(l.productName),
-            quantity: l.quantity, unit_price: l.unitPrice, line_total: l.lineTotal,
-          }))
-        );
-        if (linesError) throw linesError;
-      }
-
-      if (order.appliedSchemes && order.appliedSchemes.length > 0) {
-        await supabase.from("order_schemes").insert(
-          order.appliedSchemes.map(s => ({
-            order_id: inserted.id, scheme_id: s.schemeId || null,
-            scheme_name: s.schemeName, scheme_label: s.schemeLabel, savings: s.savings,
-          }))
-        );
-      }
-
-      if (order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") {
-        const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
-          p_order_id: inserted.id,
-          p_dispatch_date: order.dispatchDate || null,
-          p_vehicle: order.vehicle || null,
-          p_driver_name: order.driverName || null,
-          p_dispatch_remarks: order.dispatchRemarks || null,
-        });
-        if (dispErr) {
-          handleSupabaseError(dispErr, { source: "rpc:dispatch_order_atomic", title: "Order created but stock not deducted", context: { orderId: inserted.id } });
-        } else {
-          await deps.safeRefetchStockItems();
-        }
-      }
-
-      const newOrder: Order = { ...order, id: inserted.id, orderNumber };
+      const newOrder: Order = {
+        ...order,
+        id: booked.order_id,
+        orderNumber: booked.order_number,
+        deliveryStatus: "pending",
+        paymentStatus: "pending",
+        dispatchDate: null,
+      };
       setOrders(prev => [newOrder, ...prev]);
-      deps.log("order", inserted.id, "created", `Created order ${orderNumber} for ${order.distributorName} — ${fmtAmount(order.total)}`);
-      return { success: true, orderNumber };
+      deps.log("order", booked.order_id, "created", `Booked order ${booked.order_number} for ${order.distributorName} — ${fmtAmount(order.total)}`);
+      return { success: true, orderNumber: booked.order_number };
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
       handleSupabaseError(err, {
-        source: "rpc:insert_order_atomic",
-        title: "Failed to create order",
+        source: "rpc:book_order_atomic",
+        title: "Couldn't book this order",
         context: { distributorId: order.distributorId },
       });
       return { success: false, error: msg };
     }
-  }, [deps.companyId, deps.deductStockForOrder, orderPrefix, orderSequence, deps.persistEntityToCache, deps.log]);
+  }, [deps.companyId, orderPrefix, orderSequence, deps.persistEntityToCache, deps.log]);
+
+  /** One step: takes stock out, raises the final GST bill and marks the order dispatched. */
+  const dispatchAndBill = useCallback(async (
+    orderId: string,
+    opts: {
+      godownId?: string | null;
+      dispatchDate?: string | null;
+      vehicle?: string;
+      driverName?: string;
+      remarks?: string;
+      overrideCredit?: boolean;
+    } = {},
+  ): Promise<{ success: boolean; invoiceNumber?: string; alreadyDone?: boolean; error?: string }> => {
+    if (!navigator.onLine) {
+      toast.error("You need to be online to dispatch and bill an order");
+      return { success: false, error: "offline" };
+    }
+    try {
+      const { data, error } = await supabase.rpc("dispatch_and_bill_order_atomic", {
+        p_order_id: orderId,
+        p_godown_id: opts.godownId || null,
+        p_dispatch_date: opts.dispatchDate || null,
+        p_vehicle: sanitizeInput(opts.vehicle || ""),
+        p_driver_name: sanitizeInput(opts.driverName || ""),
+        p_dispatch_remarks: sanitizeInput(opts.remarks || ""),
+        p_override_credit: !!opts.overrideCredit,
+      });
+      if (error) throw error;
+      const res = data as { already_done?: boolean; invoice_number?: string } | null;
+      await Promise.all([safeRefetch(), deps.safeRefetchStockItems()]);
+      const order = ordersRef.current.find(o => o.id === orderId);
+      deps.log("order", orderId, "dispatched", `Dispatched & billed ${order?.orderNumber || orderId}${res?.invoice_number ? ` — bill ${res.invoice_number}` : ""}`);
+      return { success: true, invoiceNumber: res?.invoice_number, alreadyDone: res?.already_done };
+    } catch (err: any) {
+      handleSupabaseError(err, {
+        source: "rpc:dispatch_and_bill_order_atomic",
+        title: "Couldn't dispatch and bill this order",
+        context: { orderId },
+      });
+      return { success: false, error: err?.message || "Unknown error" };
+    }
+  }, [safeRefetch, deps.safeRefetchStockItems, deps.log]);
+
+  /** Cancels an order that has not left the warehouse yet. */
+  const cancelOrder = useCallback(async (orderId: string, reason: string): Promise<boolean> => {
+    if (!navigator.onLine) {
+      toast.error("You need to be online to cancel an order");
+      return false;
+    }
+    try {
+      const { error } = await supabase.rpc("cancel_order_atomic", { p_order_id: orderId, p_reason: reason });
+      if (error) throw error;
+      await safeRefetch();
+      const order = ordersRef.current.find(o => o.id === orderId);
+      deps.log("order", orderId, "cancelled", `Cancelled order ${order?.orderNumber || orderId}${reason ? ` — ${reason}` : ""}`);
+      return true;
+    } catch (err: any) {
+      handleSupabaseError(err, { source: "rpc:cancel_order_atomic", title: "Couldn't cancel this order", context: { orderId } });
+      return false;
+    }
+  }, [safeRefetch, deps.log]);
+
 
   const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
     const currentOrder = ordersRef.current.find(o => o.id === id);
@@ -312,7 +355,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
   return {
     orders, setOrders, orderPrefix, setOrderPrefixState, orderSequence, setOrderSequence,
-    addOrder, updateOrder, deleteOrder, setOrderPrefix,
+    addOrder, updateOrder, deleteOrder, setOrderPrefix, dispatchAndBill, cancelOrder,
     previewOrderNumber, nextOrderNumber, safeRefetch,
   };
 }
