@@ -97,7 +97,6 @@ export default function Billing() {
       sellerBankAccountName: inv.sellerBankAccountName,
       sellerBankAccount: inv.sellerBankAccount,
       sellerBankIfsc: inv.sellerBankIfsc,
-      sellerLogoUrl: inv.sellerLogoUrl,
       supplyType: inv.supplyType,
       gstRate: inv.gstRate,
       lines: inv.lines,
