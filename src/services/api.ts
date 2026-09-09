@@ -81,6 +81,7 @@ export function useApi() {
       list: () => data.claims,
       create: (c: Claim) => data.addClaim(c),
       update: (id: string, updates: Partial<Claim>) => data.updateClaim(id, updates),
+      recordReturn: data.recordReturn,
     },
     invoices: {
       list: () => data.invoices,

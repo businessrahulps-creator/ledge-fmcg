@@ -275,9 +275,38 @@ export function useBillingDomain(deps: BillingDeps) {
     setClaims(data.map(mapClaimRow));
   }, [deps.companyId]);
 
+  const recordReturn = useCallback(async (
+    orderId: string,
+    lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
+    reason: string,
+    godownId?: string | null,
+  ): Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null> => {
+    if (!navigator.onLine) {
+      toast.error("Cannot record returns offline", { description: "Please reconnect and try again." });
+      return null;
+    }
+    try {
+      const { data, error } = await supabase.rpc("record_return_and_credit_atomic", {
+        p_order_id: orderId,
+        p_lines: lines
+          .filter(l => (l.goodQty || 0) + (l.damagedQty || 0) > 0)
+          .map(l => ({ invoice_line_id: l.invoiceLineId, good_qty: l.goodQty || 0, damaged_qty: l.damagedQty || 0 })),
+        p_reason: sanitizeInput(reason || ""),
+        p_godown_id: godownId || null,
+      });
+      if (error) throw error;
+      const res = data as { credit_note_number: string; grand_total: number; restocked: boolean };
+      await Promise.all([safeRefetchClaims(), safeRefetchInvoices(), deps.safeRefetchStockItems()]);
+      return { creditNoteNumber: res.credit_note_number, grandTotal: Number(res.grand_total), restocked: !!res.restocked };
+    } catch (err: any) {
+      handleSupabaseError(err, { source: "rpc:record_return_and_credit_atomic", title: "Could not record this return", context: { orderId } });
+      return null;
+    }
+  }, [deps.safeRefetchStockItems]);
+
   return {
     invoices, setInvoices, claims, setClaims,
-    addInvoice, updateInvoice, deleteInvoice, addClaim, updateClaim,
+    addInvoice, updateInvoice, deleteInvoice, addClaim, updateClaim, recordReturn,
     safeRefetchInvoices, safeRefetchClaims,
   };
 }
