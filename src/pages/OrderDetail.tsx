@@ -353,6 +353,15 @@ export default function OrderDetail() {
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
   const settled = hasBill && balance <= 0;
+  /* Money chip comes from real receipts, so chip, balance and journey always agree.
+     Before a bill exists there is nothing to collect against — show goods only. */
+  const moneyStatus: "paid" | "partial" | "pending" | null = !hasBill
+    ? null
+    : settled
+      ? "paid"
+      : received > 0
+        ? "partial"
+        : "pending";
 
   const journey: JourneyStep[] = [
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
