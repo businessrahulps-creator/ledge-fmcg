@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/data/mock-data";
+import { formatIndianDate } from "@/utils/formatDate";
 import type { Scheme } from "@/data/mock-data";
 import { toast } from "sonner";
 import {
@@ -268,7 +269,7 @@ export default function Schemes() {
               <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80">
                 Active Schemes ({activeSchemes.length})
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {activeSchemes.map(s => (
                   <SchemeCard
                     key={s.id}
@@ -291,7 +292,7 @@ export default function Schemes() {
               <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80">
                 Inactive ({inactiveSchemes.length})
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {inactiveSchemes.map(s => (
                   <SchemeCard
                     key={s.id}
@@ -606,7 +607,7 @@ function SchemeCard({
         )}
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-[11px] text-muted-foreground [margin-top:auto]">
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
         <span className="money truncate">
           {formatIndianDate(s.validFrom)}{s.validUntil ? ` → ${formatIndianDate(s.validUntil)}` : " onwards"}
         </span>
