@@ -24,12 +24,15 @@ export interface CompanyInfo {
 }
 
 export interface InvoiceLine {
+  id?: string;
   productName: string;
   hsnCode: string;
   quantity: number;
   unit: string;
   unitPrice: number;
   taxableValue: number;
+  gstRate?: number | null;
+  lineTotal?: number | null;
 }
 
 export interface Invoice {
@@ -191,6 +194,12 @@ export interface DataContextType {
   claims: Claim[];
   addClaim: (claim: Claim) => Promise<boolean>;
   updateClaim: (id: string, updates: Partial<Claim>) => Promise<void>;
+  recordReturn: (
+    orderId: string,
+    lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
+    reason: string,
+    godownId?: string | null,
+  ) => Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null>;
 
   invoices: Invoice[];
   addInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => Promise<Invoice | null>;
@@ -267,6 +276,7 @@ export interface TransactionalContextType {
 
   addClaim: DataContextType["addClaim"];
   updateClaim: DataContextType["updateClaim"];
+  recordReturn: DataContextType["recordReturn"];
 
   addInvoice: DataContextType["addInvoice"];
   updateInvoice: DataContextType["updateInvoice"];

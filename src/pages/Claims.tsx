@@ -15,14 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/data/mock-data";
 import { formatIndianDate } from "@/utils/formatDate";
 import { toast } from "sonner";
-import type { Claim, ClaimLine } from "@/context/DataContext";
+import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
@@ -153,24 +150,35 @@ function ClaimCard({
 }
 
 function NewClaimDialog({
-  open, onOpenChange, orders, api,
+  open, onOpenChange, orders, invoices, api,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   orders: Order[];
+  invoices: Invoice[];
   api: ReturnType<typeof useApi>;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [claimType, setClaimType] = useState<"return" | "damage">("return");
   const [reason, setReason] = useState("");
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [good, setGood] = useState<Record<string, number>>({});
+  const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const billByOrderId = useMemo(() => {
+    const map = new Map<string, Invoice>();
+    invoices.forEach(inv => {
+      if (inv.docType === "gst_invoice" && inv.status === "final" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
+    });
+    return map;
+  }, [invoices]);
+
+  const selectedBill = selectedOrder ? billByOrderId.get(selectedOrder.id) ?? null : null;
+
   const eligibleOrders = useMemo(() =>
-    orders.filter(o => o.deliveryStatus === "dispatched" || o.deliveryStatus === "delivered"),
-    [orders]
+    orders.filter(o => billByOrderId.has(o.id)),
+    [orders, billByOrderId]
   );
 
   const filteredOrders = useMemo(() => {
@@ -186,65 +194,50 @@ function NewClaimDialog({
     setStep(1);
     setSearch("");
     setSelectedOrder(null);
-    setClaimType("return");
     setReason("");
-    setQuantities({});
+    setGood({});
+    setDamaged({});
     onOpenChange(false);
   };
 
   const selectOrder = (order: Order) => {
     setSelectedOrder(order);
-    const qtys: Record<number, number> = {};
-    order.lines.forEach((_, i) => { qtys[i] = order.lines[i].quantity; });
-    setQuantities(qtys);
-    setClaimType("return");
+    setGood({});
+    setDamaged({});
     setReason("");
     setStep(2);
   };
 
+  const returnLines = (selectedBill?.lines ?? []).map(l => ({
+    invoiceLineId: l.id as string,
+    productName: l.productName,
+    billedQty: l.quantity,
+    unitPrice: l.unitPrice,
+    goodQty: good[l.id] ?? 0,
+    damagedQty: damaged[l.id] ?? 0,
+  }));
+
+  const returnValue = returnLines.reduce(
+    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice, 0
+  );
+
   const handleSubmit = async () => {
-    if (!selectedOrder) return;
-    setSubmitting(true);
-
-    const claimLines: ClaimLine[] = selectedOrder.lines
-      .map((line, i) => ({
-        productId: line.productId,
-        productName: line.productName,
-        quantity: quantities[i] || 0,
-        unitPrice: line.unitPrice,
-        lineTotal: (quantities[i] || 0) * line.unitPrice,
-      }))
-      .filter(l => l.quantity > 0);
-
-    if (claimLines.length === 0) {
-      toast.error("Select at least one product with quantity > 0");
-      setSubmitting(false);
+    if (!selectedOrder || !selectedBill) return;
+    const payload = returnLines.filter(l => l.goodQty + l.damagedQty > 0);
+    if (payload.length === 0) {
+      toast.error("Enter how many pieces are coming back");
       return;
     }
-
-    const totalClaimValue = claimLines.reduce((s, l) => s + l.lineTotal, 0);
-    const claim: Claim = {
-      id: "",
-      orderId: selectedOrder.id,
-      orderNumber: selectedOrder.orderNumber,
-      distributorId: selectedOrder.distributorId,
-      distributorName: selectedOrder.distributorName,
-      claimType,
-      status: "open",
+    setSubmitting(true);
+    const res = await api.claims.recordReturn(
+      selectedOrder.id,
+      payload.map(l => ({ invoiceLineId: l.invoiceLineId, goodQty: l.goodQty, damagedQty: l.damagedQty })),
       reason,
-      resolutionNotes: "",
-      restoreStock: claimType === "return",
-      totalClaimValue,
-      lines: claimLines,
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-    };
-
-    const ok = await api.claims.create(claim);
+    );
     setSubmitting(false);
-    if (ok) {
-      toast.success(claimType === "return" ? "Return recorded — stock restored" : "Damage claim recorded", {
-        description: `${formatCurrency(totalClaimValue)} claim for ${selectedOrder.orderNumber}`,
+    if (res) {
+      toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
+        description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
       });
       resetAndClose();
     }
@@ -256,8 +249,8 @@ function NewClaimDialog({
         {step === 1 ? (
           <>
             <DialogHeader>
-              <DialogTitle>New Claim</DialogTitle>
-              <DialogDescription>Select an order to file a return or damage claim against.</DialogDescription>
+              <DialogTitle>Record a return</DialogTitle>
+              <DialogDescription>Pick the bill the goods are coming back against.</DialogDescription>
             </DialogHeader>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -272,8 +265,8 @@ function NewClaimDialog({
               {filteredOrders.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center">
                   <PackageX className="h-8 w-8 text-muted-foreground/50" strokeWidth={1.5} />
-                  <p className="mt-2 text-sm font-medium">No eligible orders</p>
-                  <p className="text-xs text-muted-foreground">Only dispatched or delivered orders can have claims.</p>
+                  <p className="mt-2 text-sm font-medium">Nothing to return yet</p>
+                  <p className="text-xs text-muted-foreground">Only orders that have been dispatched and billed can be returned.</p>
                 </div>
               ) : (
                 filteredOrders.map(order => (
@@ -300,32 +293,15 @@ function NewClaimDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Claim for {selectedOrder?.orderNumber}</DialogTitle>
+              <DialogTitle>Return against {selectedBill?.invoiceNumber ?? selectedOrder?.orderNumber}</DialogTitle>
               <DialogDescription>{selectedOrder?.distributorName}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">Claim Type</Label>
-                <Select value={claimType} onValueChange={v => setClaimType(v as "return" | "damage")}>
-                  <SelectTrigger className="text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="return">
-                      <span className="flex items-center gap-1.5"><RotateCcw className="h-3.5 w-3.5" /> Goods Returned</span>
-                    </SelectItem>
-                    <SelectItem value="damage">
-                      <span className="flex items-center gap-1.5"><PackageX className="h-3.5 w-3.5" /> Damaged / Claim Only</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Reason (optional)</Label>
+                <Label className="text-xs">Why is it coming back? (optional)</Label>
                 <Textarea
-                  placeholder="Why is this being returned or claimed?"
+                  placeholder="Short reason, e.g. leaking bottles, wrong item sent…"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   className="min-h-[60px] text-sm"
@@ -333,36 +309,58 @@ function NewClaimDialog({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Products & Quantities</Label>
+                <Label className="text-xs">How many pieces are coming back?</Label>
                 <div className="rounded-lg border border-border overflow-hidden">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-muted/30 text-left text-muted-foreground">
                         <th className="px-3 py-2 font-medium">Product</th>
-                        <th className="px-3 py-2 font-medium text-right w-20">Ordered</th>
-                        <th className="px-3 py-2 font-medium text-right w-24">Claim Qty</th>
+                        <th className="px-3 py-2 font-medium text-right w-16">Billed</th>
+                        <th className="px-3 py-2 font-medium text-right w-24">Good</th>
+                        <th className="px-3 py-2 font-medium text-right w-24">Damaged</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder?.lines.map((line, i) => (
-                        <tr key={i} className="border-b border-border/50">
-                          <td className="px-3 py-2 font-medium">{line.productName}</td>
-                          <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
-                          <td className="px-3 py-2 text-right">
-                            <NumberInput
-                              allowEmpty={false}
-                              min={0}
-                              max={line.quantity}
-                              value={quantities[i] ?? 0}
-                              onValueChange={v => setQuantities(prev => ({ ...prev, [i]: v ?? 0 }))}
-                              className="h-7 w-20 text-xs text-right ml-auto"
-                            />
-                          </td>
-                        </tr>
-                      ))}
+                      {returnLines.map(line => {
+                        const other = (k: "goodQty" | "damagedQty") => line.billedQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
+                        return (
+                          <tr key={line.invoiceLineId} className="border-b border-border/50">
+                            <td className="px-3 py-2 font-medium">{line.productName}</td>
+                            <td className="px-3 py-2 text-right text-muted-foreground">{line.billedQty}</td>
+                            <td className="px-3 py-2 text-right">
+                              <NumberInput
+                                allowEmpty={false}
+                                min={0}
+                                max={other("goodQty")}
+                                value={line.goodQty}
+                                onValueChange={v => setGood(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
+                                className="h-7 w-20 text-xs text-right ml-auto"
+                              />
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <NumberInput
+                                allowEmpty={false}
+                                min={0}
+                                max={other("damagedQty")}
+                                value={line.damagedQty}
+                                onValueChange={v => setDamaged(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
+                                className="h-7 w-20 text-xs text-right ml-auto"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Good pieces go back into the warehouse. Damaged pieces are credited but stay out of stock.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">Credit note value (before tax)</span>
+                <span className="font-semibold">{formatCurrency(returnValue)}</span>
               </div>
             </div>
 
@@ -372,9 +370,10 @@ function NewClaimDialog({
               </Button>
               <Button size="sm" onClick={handleSubmit} disabled={submitting}>
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
-                {submitting ? "Saving…" : "Submit Claim"}
+                {submitting ? "Saving…" : "Record return"}
               </Button>
             </DialogFooter>
+
           </>
         )}
       </DialogContent>
@@ -386,6 +385,7 @@ export default function Claims() {
   const api = useApi();
   const claims = api.claims.list();
   const orders = api.orders.list();
+  const invoices = api.invoices.list();
   const isLoading = usePageLoading(api.loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [resolveNotes, setResolveNotes] = useState("");
@@ -444,11 +444,11 @@ export default function Claims() {
             />
             <h1 className="h1-display">Returns & Claims</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
-              Track returned goods and damage claims against orders
+              Goods coming back and the credit notes raised for them
             </p>
           </div>
           <Button size="sm" onClick={() => setNewClaimOpen(true)}>
-            <Plus className="h-4 w-4 mr-1" /> New Claim
+            <Plus className="h-4 w-4 mr-1" /> Record return
           </Button>
         </div>
 
@@ -518,6 +518,7 @@ export default function Claims() {
         open={newClaimOpen}
         onOpenChange={setNewClaimOpen}
         orders={orders}
+        invoices={invoices}
         api={api}
       />
     </AppLayout>
