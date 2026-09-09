@@ -225,14 +225,7 @@ export function useBillingDomain(deps: BillingDeps) {
         if (linesErr) throw linesErr;
       }
 
-      if (claim.restoreStock) {
-        const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: claim.orderId });
-        if (revErr) {
-          handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Claim recorded but stock not restored", context: { orderId: claim.orderId } });
-        } else {
-          await deps.safeRefetchStockItems();
-        }
-      }
+      // Stock only moves when a return is accepted — see recordReturn().
 
       const newClaim: Claim = { ...claim, id: claimId, status: "open", createdAt: new Date().toISOString(), resolvedAt: null };
       setClaims(prev => [newClaim, ...prev]);
