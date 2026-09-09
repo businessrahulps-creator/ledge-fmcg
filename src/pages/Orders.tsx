@@ -424,30 +424,37 @@ export default function Orders() {
                 return (
                   <div
                     key={order.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(`/orders/${order.id}`)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/orders/${order.id}`); } }}
                     onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
-                    className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
+                    className="flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
-                      <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="truncate text-sm font-medium text-foreground">{order.orderNumber}</span>
+                        <span className="money shrink-0 text-sm font-semibold">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
+                      </div>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {order.distributorName} · {formatIndianDate(order.date)}
+                      </p>
+                      <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <StatusBadge status={order.paymentStatus} />
+                        <StatusBadge status={order.deliveryStatus} />
+                        {billingStatus && (
+                          <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                            {billingStatus.label}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {order.distributorName} · {formatIndianDate(order.date)}
-                    </p>
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <StatusBadge status={order.paymentStatus} />
-                      <StatusBadge status={order.deliveryStatus} />
-                      {billingStatus && (
-                        <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                          {billingStatus.label}
-                        </span>
-                      )}
-                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" aria-hidden />
                   </div>
                 );
               })}
             </div>
+
 
             <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
