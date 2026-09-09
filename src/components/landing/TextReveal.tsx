@@ -14,7 +14,7 @@ interface Props {
 /**
  * Splits text content into words and reveals them with a Framer-style
  * blur + y + opacity spring sweep on scroll-into-view. Renders <br /> children
- * untouched. Single-pass — never loops.
+ * untouched. Single-pass - never loops.
  */
 export function TextReveal({
   children,

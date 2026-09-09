@@ -18,7 +18,7 @@ const cards = [
   {
     icon: Compass,
     title: "Blind Stock",
-    description: "Empty shelf? You find out last — when the dealer calls to complain.",
+    description: "Empty shelf? You find out last - when the dealer calls to complain.",
   },
   {
     icon: Laptop,
@@ -36,8 +36,7 @@ export function Problem() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">The old way</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em]">
               The old way is bleeding you dry.
             </h2>
             <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
@@ -48,7 +47,7 @@ export function Problem() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto lp-grid-stretch" staggerTime={0.05}>
           {cards.map((card, i) => {
-            const isFeatured = i === 3; // "Excel Nights" — emotional peak
+            const isFeatured = i === 3; // "Excel Nights" - emotional peak
             return (
               <StaggerItem key={card.title}>
                 <div className={`${isFeatured ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col`}>

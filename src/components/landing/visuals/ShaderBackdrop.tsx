@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * ShaderBackdrop — a live WebGL2 fragment-shader ground for the dark
+ * ShaderBackdrop - a live WebGL2 fragment-shader ground for the dark
  * landing anchors (Hero, Final CTA).
  *
  * Same visual language as WebGPU shader sites, built on WebGL2 so it runs
@@ -47,7 +47,7 @@ void main() {
 
   float t = uTime * 0.045 * uEnergy;
 
-  // domain-warped flow — slow, felt rather than seen
+  // domain-warped flow - slow, felt rather than seen
   vec2 q = vec2(fbm(st * 1.6 + t), fbm(st * 1.6 + vec2(4.3, 1.7) - t));
   float f = fbm(st * 1.9 + q * 0.9 + vec2(0.0, t * 0.6));
 
@@ -149,7 +149,7 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     gl.uniform1f(uBloom, cfg.bloom);
 
     // Static single frame when motion is unwanted, on small viewports, or on
-    // low-core devices — the animated ground is the most expensive per-frame
+    // low-core devices - the animated ground is the most expensive per-frame
     // work on the landing page.
     const lowPower =
       window.innerWidth < 768 ||
@@ -182,7 +182,7 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", resize);
 
-    // Pause the shader while the page is actively scrolling — the GPU work
+    // Pause the shader while the page is actively scrolling - the GPU work
     // competes with layout/paint and is invisible in motion anyway.
     let scrolling = false;
     let scrollTimer: ReturnType<typeof setTimeout>;

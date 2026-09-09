@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
- * Nilavilakku — traditional Kerala brass oil lamp.
+ * Nilavilakku - traditional Kerala brass oil lamp.
  * Hand-drawn inline SVG (~18×22), warm brass body with a softly flickering
  * amber flame and a synced halo pulse. Respects prefers-reduced-motion.
  */

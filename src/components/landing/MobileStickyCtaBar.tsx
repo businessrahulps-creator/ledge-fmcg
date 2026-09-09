@@ -43,7 +43,7 @@ export function MobileStickyCtaBar() {
               to="/signup"
               className="flex-1 lp-btn-primary-dark rounded-lp-xs py-3 text-center font-body font-semibold text-[14px]"
             >
-              Start free
+              Start Free Trial
             </Link>
             <a
               href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"

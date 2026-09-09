@@ -41,14 +41,13 @@ export function Testimonials() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">From the field</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1]">
               Owners who stopped guessing.
             </h2>
           </div>
         </AnimateIn>
 
-        {/* Motion v3 — cards are still on entrance. Hover = unified 120ms intent. */}
+        {/* Motion v3 - cards are still on entrance. Hover = unified 120ms intent. */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto lp-grid-stretch">
           {testimonials.map((t, i) => {
             const isFeatured = i === 0;

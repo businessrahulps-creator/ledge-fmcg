@@ -4,7 +4,7 @@ import { rank, type Rank, duration as dur, ease } from "@/lib/motion";
 
 interface ChoreographProps {
   children: ReactNode;
-  /** Motion rank — controls distance, blur, duration, easing, stagger. */
+  /** Motion rank - controls distance, blur, duration, easing, stagger. */
   rank?: Rank;
   className?: string;
   delay?: number;
@@ -15,7 +15,7 @@ interface ChoreographProps {
 }
 
 /**
- * Choreograph — the only entrance primitive on the landing page.
+ * Choreograph - the only entrance primitive on the landing page.
  * Reads rank tokens; never accepts inline transform/spring overrides.
  * `prefers-reduced-motion` collapses to a 200ms opacity-only fade.
  *

@@ -4,7 +4,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 const blocks = [
   { icon: Smartphone, title: "Mobile-first. Any phone.", content: "PWA. No app store. No IT team. Installs from a link in 90 seconds." },
   { icon: WifiOff, title: "Works when the network doesn’t.", content: "Offline orders queue and sync the moment signal returns." },
-  { icon: ShieldCheck, title: "Schemes, warehouses, credit control.", content: "The whole distribution layer — built in. Not bolted on." },
+  { icon: ShieldCheck, title: "Schemes, warehouses, credit control.", content: "The whole distribution layer - built in. Not bolted on." },
   { icon: FileText, title: "Basics in 30 minutes. No trainer.", content: "Your team is live by lunch. No desktop. No IT. No excuses." },
 ];
 
@@ -90,8 +90,7 @@ export function WhyLedge() {
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">Built different</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
+            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1]">
               Every tool exists.
               <br />
               None built for you.
@@ -99,7 +98,7 @@ export function WhyLedge() {
           </div>
         </AnimateIn>
 
-        {/* Legacy comparison row — pill chips */}
+        {/* Legacy comparison row - pill chips */}
         <AnimateIn delay={0.1}>
           <div className="flex flex-wrap items-center justify-center gap-2.5 mb-14 md:mb-16">
             {legacy.map((name) => (
@@ -125,7 +124,7 @@ export function WhyLedge() {
                   {isHero && (
                     <div className="flex justify-end mb-5">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
-                        <span className="lp-live-dot" /> Offline-ready
+                        Offline-ready
                       </span>
                     </div>
                   )}

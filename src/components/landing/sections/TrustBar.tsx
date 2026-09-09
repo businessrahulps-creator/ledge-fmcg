@@ -1,4 +1,5 @@
-// Motion v3 — stillness for stats. Logos still marquee; stats are simply present.
+// Motion v3 - stillness for stats. Logos still marquee; stats are simply present.
+import { WifiOff, FileCheck2, MapPin } from "lucide-react";
 
 const companies = [
   "Aryan Beverages",
@@ -10,7 +11,7 @@ const companies = [
 ];
 
 const stats = [
-  { value: "2–3 hrs", label: "Wasted daily per salesperson — on paperwork, not selling" },
+  { value: "2–3 hrs", label: "Wasted daily per salesperson - on paperwork, not selling" },
   { value: "5–10%", label: "Revenue lost to missed orders, wrong schemes, late collections" },
   { value: "₹10L–₹1Cr", label: "Quietly gone every year. Silent. Invisible. Until it’s too late." },
   { value: "80%", label: "Admin work eliminated once Ledge is live" },
@@ -20,7 +21,7 @@ export function TrustBar() {
   return (
     <section className="lp-section-paper lp-rhythm-sm border-b border-border">
       <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        {/* Logo Marquee — soft pill chips */}
+        {/* Logo Marquee - soft pill chips */}
         <div
           className="overflow-hidden group relative"
           style={{
@@ -40,7 +41,23 @@ export function TrustBar() {
           </div>
         </div>
 
-        {/* Stat Row — with hairline dividers + gradient numbers */}
+        {/* Product-truth chips - moved out of the hero so the hero keeps one message. */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
+          <span className="lp-pill">
+            <span className="lp-pill__tile"><WifiOff size={12} strokeWidth={2.5} /></span>
+            <span className="lp-pill__label">Offline-ready</span>
+          </span>
+          <span className="lp-pill">
+            <span className="lp-pill__tile"><FileCheck2 size={12} strokeWidth={2.5} /></span>
+            <span className="lp-pill__label">GST-ready</span>
+          </span>
+          <span className="lp-pill">
+            <span className="lp-pill__tile"><MapPin size={12} strokeWidth={2.5} /></span>
+            <span className="lp-pill__label">Built in Kerala</span>
+          </span>
+        </div>
+
+        {/* Stat Row - with hairline dividers + gradient numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
           {stats.map((stat, i) => (
             <div
@@ -58,6 +75,10 @@ export function TrustBar() {
             </div>
           ))}
         </div>
+
+        <p className="font-body text-[11.5px] text-muted-foreground/80 text-center mt-8">
+          Figures from our own interviews with distributors and super-stockists across South India.
+        </p>
       </div>
     </section>
   );

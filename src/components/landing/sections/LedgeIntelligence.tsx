@@ -19,17 +19,17 @@ const capabilities = [
   {
     icon: Sparkles,
     title: "Smart Scheme Suggestions",
-    desc: "AI tells you who’ll buy — before you pitch. The right scheme, every time.",
+    desc: "AI tells you who’ll buy - before you pitch. The right scheme, every time.",
   },
   {
     icon: Sunrise,
     title: "Natural Language Queries",
-    desc: "Ask in English or Hindi. Get instant answers — no reports needed.",
+    desc: "Ask in English or Hindi. Get instant answers - no reports needed.",
   },
 ];
 
 /**
- * LiveRoute — FMCG-native motion: a route line draws itself left→right
+ * LiveRoute - FMCG-native motion: a route line draws itself left→right
  * through 5 dealer stops, with a delivery pulse traveling the path on loop.
  */
 function LiveRoute() {
@@ -98,7 +98,7 @@ function LiveRoute() {
         )}
       </svg>
 
-      {/* Telemetry strip — grounds the abstract route in product specifics */}
+      {/* Telemetry strip - grounds the abstract route in product specifics */}
       <div className="mt-6 max-w-2xl mx-auto lp-glass-frost px-4 py-3 rounded-lp-lg flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12.5px]">
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <span className="font-body text-muted-foreground">Photo → Order</span>
@@ -175,9 +175,7 @@ export function LedgeIntelligence() {
 
         <AnimateIn variant="blurFadeUp" delay={0.1}>
           <div className="mt-4 flex justify-center">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">
-              <span className="lp-live-dot" />
-              Launching in 3 months · Founding members get early access free
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">              Launching in 3 months · Founding members get early access free
             </span>
           </div>
         </AnimateIn>
@@ -206,9 +204,7 @@ export function LedgeIntelligence() {
               return (
                 <StaggerItem key={c.title}>
                   <div className="lp-card lp-card--xl p-7 h-full flex flex-col">
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="lp-live-dot" />
-                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
+                    <div className="flex items-center gap-2 mb-5">                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                         Featured
                       </span>
                     </div>
@@ -249,7 +245,7 @@ export function LedgeIntelligence() {
           })}
         </StaggerContainer>
 
-        {/* Founding 100 — demoted to glass-frost (single bento-hero per section rule) */}
+        {/* Founding 100 - demoted to glass-frost (single bento-hero per section rule) */}
         <AnimateIn variant="blurFadeUp" delay={0.3}>
           <div className="mt-14 md:mt-16 max-w-4xl mx-auto">
             <motion.div
@@ -258,20 +254,18 @@ export function LedgeIntelligence() {
               className="lp-card p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="lp-live-dot" />
-                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
+                <div className="flex items-center gap-2 mb-3">                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                     Limited · <ScrollCounter target={SPOTS_CLAIMED} /> / {SPOTS_TOTAL} spots claimed
                   </span>
                 </div>
                 <p className="font-heading font-semibold text-foreground text-[18px] md:text-[20px] tracking-[-0.012em] leading-[1.3]">
-                  Founding 100 — lock in <span className="text-accent">6 months free</span>.
+                  Founding 100 - lock in <span className="text-accent">6 months free</span>.
                 </p>
                 <p className="font-body text-[13.5px] md:text-[14px] text-muted-foreground leading-[1.55] mt-1.5">
                   Today’s customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
                 </p>
 
-                {/* Progress — uses existing lp-progress-glass primitive */}
+                {/* Progress - uses existing lp-progress-glass primitive */}
                 <div className="mt-4 max-w-md">
                   <div className="relative h-1.5 rounded-full bg-border overflow-hidden">
                     <motion.div

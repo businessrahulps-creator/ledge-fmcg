@@ -28,7 +28,7 @@ const columns = [
 export function Footer() {
   return (
     <footer className="relative lp-footer lp-section-paper pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
-      {/* Layered ambient wash — Midnight + Terracotta */}
+      {/* Layered ambient wash - Midnight + Terracotta */}
       <div
         aria-hidden
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] pointer-events-none opacity-70"
@@ -46,7 +46,7 @@ export function Footer() {
       <div className="lp-noise absolute inset-0 pointer-events-none opacity-40" aria-hidden />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-10">
-        {/* Brand block — top */}
+        {/* Brand block - top */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -58,7 +58,7 @@ export function Footer() {
             <img src={ledgeLogo} alt="Ledge" width={220} height={64} className="h-16 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
-            Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India’s FMCG super-stockists.
+            Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience - built for India’s FMCG super-stockists.
           </p>
           {/* Live now pulse */}
           <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border shadow-depth-2">
@@ -71,7 +71,7 @@ export function Footer() {
             </span>
           </div>
 
-          {/* Talk to Sales — Phone + WhatsApp dual CTA */}
+          {/* Talk to Sales - Phone + WhatsApp dual CTA */}
           <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
             <a
               href="tel:+918714249485"
