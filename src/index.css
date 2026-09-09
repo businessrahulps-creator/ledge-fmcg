@@ -2677,9 +2677,7 @@
     @apply relative space-y-5 px-4 py-5 md:px-7 md:py-7;
   }
   /* Badges and chips placed on the dark band stay legible. */
-  .hero-band [data-status-badge],
-  .hero-band .status-badge,
-  .hero-band [class*="status-"] {
+  .hero-band [data-status-badge] {
     @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
   }
   .hero-band-eyebrow {
