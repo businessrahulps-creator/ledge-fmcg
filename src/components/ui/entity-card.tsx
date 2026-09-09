@@ -174,12 +174,15 @@ function EntityCardImpl({
 
       {children && <div className="mt-3">{children}</div>}
 
+      {/* Spacer so the footer sits flush at the bottom of equal-height cards */}
+      {trimmedCells.length > 0 && <div aria-hidden className="mt-auto pt-3" />}
 
       {/* KpiStrip footer */}
       {trimmedCells.length > 0 && (
         <div
           className={cn(
-            "mt-auto grid border-t border-border/60 divide-x divide-border/60 pt-3",
+            "grid border-t border-border/60 divide-x divide-border/60 pt-3",
+
             trimmedCells.length === 1 && "grid-cols-1",
             trimmedCells.length === 2 && "grid-cols-2",
             trimmedCells.length === 3 && "grid-cols-3",
