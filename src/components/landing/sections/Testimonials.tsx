@@ -8,13 +8,13 @@ import rohan from "@/assets/landing/testimonial-rohan.webp";
 
 const testimonials = [
   {
-    quote: "I check the dashboard before I start my day. That's it. The whole operation used to live in my head.",
+    quote: "I check the dashboard before I start my day. That’s it. The whole operation used to live in my head.",
     name: "Arnav Sethi",
     role: "Owner, Aryan Beverages, Pune",
     avatar: arnav,
   },
   {
-    quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn't been opened once.",
+    quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn’t been opened once.",
     name: "Priya Anand",
     role: "Operations Head, Coastal Naturals, Kochi",
     avatar: priya,

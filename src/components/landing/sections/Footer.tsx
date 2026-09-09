@@ -58,7 +58,7 @@ export function Footer() {
             <img src={ledgeLogo} alt="Ledge" width={220} height={64} className="h-16 w-auto" decoding="async" loading="lazy" />
           </Link>
           <p className="font-body text-[14px] text-muted-foreground leading-[1.6] mt-3">
-            Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India's FMCG super-stockists.
+            Orders. Payments. Stock. Invoices. Reports. One effortless mobile experience — built for India’s FMCG super-stockists.
           </p>
           {/* Live now pulse */}
           <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border shadow-depth-2">

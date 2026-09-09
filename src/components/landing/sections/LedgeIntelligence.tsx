@@ -19,7 +19,7 @@ const capabilities = [
   {
     icon: Sparkles,
     title: "Smart Scheme Suggestions",
-    desc: "AI tells you who'll buy — before you pitch. The right scheme, every time.",
+    desc: "AI tells you who’ll buy — before you pitch. The right scheme, every time.",
   },
   {
     icon: Sunrise,
@@ -268,7 +268,7 @@ export function LedgeIntelligence() {
                   Founding 100 — lock in <span className="text-accent">6 months free</span>.
                 </p>
                 <p className="font-body text-[13.5px] md:text-[14px] text-muted-foreground leading-[1.55] mt-1.5">
-                  Today's customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
+                  Today’s customers are auto-enrolled. Only {SPOTS_LEFT} spots left before this offer closes forever.
                 </p>
 
                 {/* Progress — uses existing lp-progress-glass primitive */}

@@ -3,7 +3,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
 
 const blocks = [
   { icon: Smartphone, title: "Mobile-first. Any phone.", content: "PWA. No app store. No IT team. Installs from a link in 90 seconds." },
-  { icon: WifiOff, title: "Works when the network doesn't.", content: "Offline orders queue and sync the moment signal returns." },
+  { icon: WifiOff, title: "Works when the network doesn’t.", content: "Offline orders queue and sync the moment signal returns." },
   { icon: ShieldCheck, title: "Schemes, warehouses, credit control.", content: "The whole distribution layer — built in. Not bolted on." },
   { icon: FileText, title: "Basics in 30 minutes. No trainer.", content: "Your team is live by lunch. No desktop. No IT. No excuses." },
 ];
@@ -118,7 +118,7 @@ export function WhyLedge() {
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 lp-grid-stretch" staggerTime={0.05}>
           {blocks.map((block, i) => {
-            const isHero = i === 1; // "Works when the network doesn't" → Midnight
+            const isHero = i === 1; // "Works when the network doesn’t" → Midnight
             return (
               <StaggerItem key={block.title}>
                 <div className={`${isHero ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col relative`}>

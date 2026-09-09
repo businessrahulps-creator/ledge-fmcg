@@ -8,7 +8,7 @@ const cards = [
   {
     icon: MessageCircle,
     title: "Lost Orders",
-    description: "WhatsApp chits. Half get lost. You still don't know what sold today.",
+    description: "WhatsApp chits. Half get lost. You still don’t know what sold today.",
   },
   {
     icon: Table,
@@ -41,7 +41,7 @@ export function Problem() {
               The old way is bleeding you dry.
             </h2>
             <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
-              You're running on yesterday's data. Your competitors aren't.
+              You’re running on yesterday’s data. Your competitors aren’t.
             </p>
           </div>
         </AnimateIn>

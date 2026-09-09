@@ -156,7 +156,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
           <span aria-hidden>🪔</span>
-          <span>Built in God's Own Country · Kerala</span>
+          <span>Built in God’s Own Country · Kerala</span>
         </motion.div>
       </motion.div>
     </motion.div>

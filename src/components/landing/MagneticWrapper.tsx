@@ -6,7 +6,7 @@ interface Props {
   className?: string;
   /** Maximum pixels the element can be pulled toward the cursor */
   strength?: number;
-  /** Pixel radius beyond the element's box where pull begins */
+  /** Pixel radius beyond the element’s box where pull begins */
   radius?: number;
 }
 
