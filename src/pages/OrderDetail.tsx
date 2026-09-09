@@ -736,7 +736,8 @@ export default function OrderDetail() {
               </Button>
               <Button
                 size="sm"
-                className="bg-[#25D366] hover:bg-[#1ebe57] text-white"
+                variant="outline"
+                className="text-[#128C4B] hover:text-[#128C4B]"
                 onClick={() => shareOrderOnWhatsApp(order, companyInfo)}
               >
                 <WhatsAppIcon className="h-3.5 w-3.5" />
