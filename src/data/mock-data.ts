@@ -44,6 +44,10 @@ export interface Product {
   basePrice: number;
   hsnCode: string;
   totalSold: number;
+  /** GST rate applied when billing this product. */
+  gstRate?: number | null;
+  /** True once someone has confirmed the rate is right. Bills are blocked until then. */
+  gstRateConfirmed?: boolean;
 }
 
 export interface Salesperson {
