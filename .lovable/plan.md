@@ -110,6 +110,39 @@ Partial dispatch/backorders, advances and refunds, multi-bill payment allocation
 
 Get your GST practitioner to sign off the rate list, the bill numbering format, and one sample bill + credit note before you invoice a real customer.
 
+## Gap audit — what the brief missed
+
+I checked the plan against the live code. Nine things were not in the brief but will break the MVP if left out. All are now folded into the phases above.
+
+1. **Two versions of "what the dealer owes" already exist.** Each dealer row stores a running total that a database trigger keeps updated from order values. Nine screens read it, including Dashboard, Insights, dealer statements and the WhatsApp chase-up sheet. If we add the new calculated balance without retiring that stored number, two different figures appear side by side. Phase 3 redirects every one of those readers and switches the stored field off.
+2. **There is no Cancel order action today.** The brief lists `Cancelled` as a stage but no way to get there. Phase 2 adds it, allowed only before dispatch, with a reason.
+3. **Returns currently put stock back the moment the claim is raised**, before anyone accepts it — and rejecting it never takes the stock away again. Phase 4 rebuilds the Claims screen as Record return so only acceptance moves anything.
+4. **Credit limit is only checked in the browser.** Nothing stops the same order going through twice. Phase 2 moves the check inside the locked transaction.
+5. **Nothing forces a warehouse to exist before the first order.** Since warehouse is required at dispatch, onboarding now creates or prompts for one. Phase 2.
+6. **The demo workspace seeder writes the old shapes** — status pickers, invoice-level tax, no receipts. It gets rewritten in Phase 5 or the demo login breaks.
+7. **Bill PDFs, WhatsApp share text and Excel exports** all assume one tax rate per bill. They move to per-line rates in Phase 4.
+8. **Estimates and proformas** live inside the bill builder we are removing. Decision I am taking unless you object: keep them as a clearly separate "Estimate / Proforma" tool inside Invoices, untouched, so nothing you use today disappears — they just leave the daily order path.
+9. **The nightly overdue-alert job** reads the old stored total. Repointed in Phase 3.
+
+### Two honest limitations
+
+- **No throwaway test database.** The brief asks for concurrency tests on a disposable Postgres. I can't create one here. I will run them against an isolated scratch workspace inside the existing database and delete it afterwards — real transactions and real locks, but sharing one server. Good enough to prove correctness; I'll say so plainly in the results.
+- **Signing off tax treatment isn't mine to do.** Rate list, numbering format and a sample bill still need your GST practitioner.
+
+### Is it a solid MVP after this?
+
+Yes, for a distributor selling on credit: book, bill correctly under GST, know exactly who owes what to the paise, take money, prove delivery, take goods back with a proper credit note, and never be able to quietly alter a posted bill.
+
+What it deliberately still won't do — and none of these block onboarding:
+
+- Part-shipping an order (all or nothing, short quantity recorded as cancelled).
+- Advance payments, refunds, or one cheque covering several bills.
+- Purchases, expenses, or a full ledger — this is sales-side only.
+- E-invoice/IRN and e-way bills (only required above turnover thresholds).
+- Anything offline.
+
+If any of those five are day-one needs for your first customers, tell me now and we resize. Otherwise this is the right MVP line.
+
 ---
 
 Approve this and I start Phase 1.
