@@ -55,7 +55,7 @@
     --input: 30 8% 84%;
     --ring: 218 60% 14%;
 
-    --radius: 0.375rem;
+    --radius: 0.625rem;
 
     --sidebar-background: 34 47% 93%;
     --sidebar-foreground: 220 22% 14%;
@@ -264,7 +264,7 @@
   /* Fluent 2 surface — replaces glassmorphism. Same class name to keep
      consumer sites untouched during PR-by-PR rollout. */
   .glass-card {
-    @apply rounded-md bg-card border border-border/60 text-card-foreground;
+    @apply rounded-lg bg-card border border-border/60 text-card-foreground;
     box-shadow: var(--shadow-2), inset 0 1px 0 hsl(0 0% 100% / 0.6);
     transition: box-shadow var(--motion-normal) var(--motion-ease),
                 border-color var(--motion-normal) var(--motion-ease);
@@ -497,7 +497,7 @@
 
   /* V2 card surface — Bone card on Bone, Midnight-tinted shadows */
   .lp-card {
-    @apply relative rounded-md;
+    @apply relative rounded-[6px];
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     box-shadow:
@@ -519,7 +519,7 @@
 
   /* Glass card — kept ONLY for hero dashboard stage */
   .lp-card-glass {
-    @apply relative rounded-md;
+    @apply relative rounded-[6px];
     background: hsl(var(--card) / 0.72);
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
@@ -573,7 +573,7 @@
 
   /* Neutral icon tile — Bone default, Terracotta wash when opted-in */
   .lp-icon-tile {
-    @apply w-11 h-11 rounded-md flex items-center justify-center;
+    @apply w-11 h-11 rounded-[6px] flex items-center justify-center;
     background: hsl(220 13% 90%);
     border: 1px solid hsl(var(--border));
     box-shadow: inset 0 1px 0 hsl(var(--background) / 0.6);
@@ -810,7 +810,7 @@
   /* 2. Content frost — Bone tinted with warm Terracotta bloom */
   .lp-glass-frost {
     position: relative;
-    border-radius: var(--radius);
+    border-radius: 6px;
     background: hsl(var(--card) / 0.72);
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
@@ -939,7 +939,7 @@
   /* 5. Bento hero tile — ONE filled tile per multi-card section, Terracotta wash */
   .lp-bento-hero {
     position: relative;
-    border-radius: var(--radius);
+    border-radius: 6px;
     background:
       radial-gradient(ellipse 90% 70% at 30% 0%, hsl(var(--accent) / 0.14) 0%, transparent 65%),
       linear-gradient(135deg, hsl(220 13% 92%) 0%, hsl(220 13% 88%) 60%, hsl(220 13% 88%) 100%);
@@ -963,7 +963,7 @@
   /* Inner micro-card for use INSIDE bento-hero */
   .lp-glass-micro {
     position: relative;
-    border-radius: var(--radius);
+    border-radius: 6px;
     background: hsl(var(--card) / 0.88);
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);
@@ -995,7 +995,7 @@
   /* Shared base — applied via class composition with the four variants */
   .lp-card-tinted {
     position: relative;
-    border-radius: var(--radius);
+    border-radius: 6px;
     overflow: hidden;
     isolation: isolate;
     box-shadow:
