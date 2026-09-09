@@ -2369,6 +2369,10 @@ export type Database = {
           seq: number
         }[]
       }
+      mark_order_delivered_atomic: {
+        Args: { p_delivered_on?: string; p_note?: string; p_order_id: string }
+        Returns: Json
+      }
       preview_dispatch_impact: {
         Args: { p_order_id: string }
         Returns: {
@@ -2379,6 +2383,18 @@ export type Database = {
           required_qty: number
           will_go_negative: boolean
         }[]
+      }
+      record_invoice_payment_atomic: {
+        Args: {
+          p_amount: number
+          p_idempotency_key?: string
+          p_invoice_id: string
+          p_mode: Database["public"]["Enums"]["payment_mode"]
+          p_note?: string
+          p_paid_on?: string
+          p_reference?: string
+        }
+        Returns: Json
       }
       resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
       reverse_dispatch_for_order: {
@@ -2395,6 +2411,10 @@ export type Database = {
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
         Returns: string
+      }
+      void_invoice_payment_atomic: {
+        Args: { p_payment_id: string; p_reason: string }
+        Returns: Json
       }
     }
     Enums: {
