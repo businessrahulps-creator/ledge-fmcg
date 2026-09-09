@@ -444,7 +444,7 @@ export default function Claims() {
             />
             <h1 className="h1-display">Returns & Claims</h1>
             <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">
-              Track returned goods and damage claims against orders
+              Goods coming back and the credit notes raised for them
             </p>
           </div>
           <Button size="sm" onClick={() => setNewClaimOpen(true)}>
