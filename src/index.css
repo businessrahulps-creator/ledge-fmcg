@@ -1518,7 +1518,11 @@
     font-size: 12px;
     font-weight: 500;
     color: hsl(var(--muted-foreground));
-    transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
     cursor: pointer;
   }
   .lp-nav-kbd:hover {
