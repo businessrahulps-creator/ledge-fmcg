@@ -322,7 +322,7 @@ export default function NewOrder() {
     // Run base validation first so missing fields are surfaced before the credit-limit gate
     const hasBlockingError =
       errors.dealer || errors.salesperson || errors.products ||
-      !!errors.invalidPriceLine || errors.warehouse || errors.dispatchDate;
+      !!errors.invalidPriceLine || errors.warehouse;
     if (hasBlockingError) {
       executeSave();
       return;
