@@ -75,6 +75,10 @@ export function TrustBar() {
             </div>
           ))}
         </div>
+
+        <p className="font-body text-[11.5px] text-muted-foreground/80 text-center mt-8">
+          Figures from our own interviews with distributors and super-stockists across South India.
+        </p>
       </div>
     </section>
   );
