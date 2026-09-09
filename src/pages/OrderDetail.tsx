@@ -249,8 +249,7 @@ export default function OrderDetail() {
 
     await updateOrder(order.id, {
       paymentMode: editPaymentMode as Order["paymentMode"],
-      paymentStatus: editPayment as Order["paymentStatus"],
-      deliveryStatus: editDelivery as Order["deliveryStatus"],
+
       dispatchDate: editDispatchDate || null,
       vehicle: editVehicle,
       driverName: editDriver,
