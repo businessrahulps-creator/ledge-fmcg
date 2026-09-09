@@ -674,42 +674,22 @@ export default function OrderDetail() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Payment Status</Label>
-            <div className="flex gap-2">
-              {paymentStatuses.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setEditPayment(s.value)}
-                  className={`flex-1 rounded-lg border px-3 py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                    editPayment === s.value
-                      ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <Label className="text-xs md:text-sm">Delivery</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-lg border px-3 py-2 text-xs font-medium capitalize md:text-sm ${statusColors[order.deliveryStatus] || "border-border text-muted-foreground"}`}>
+                {order.deliveryStatus === "pending" ? "Not sent yet" : order.deliveryStatus}
+              </span>
+              {order.deliveryStatus === "dispatched" && (
+                <Button size="sm" variant="outline" disabled={isSaving} onClick={handleMarkDelivered}>
+                  Mark delivered
+                </Button>
+              )}
             </div>
+            <p className="text-[11px] text-muted-foreground">
+              Goods leave the warehouse only through Dispatch &amp; bill. Money received is recorded above.
+            </p>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Delivery Status</Label>
-            <div className="flex gap-2">
-              {deliveryStatuses.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setEditDelivery(s.value)}
-                  className={`flex-1 rounded-lg border px-3 py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                    editDelivery === s.value
-                      ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className="space-y-1.5">
             <Label className="text-xs md:text-sm">Source Warehouse {(editDelivery === "dispatched" || editDelivery === "delivered") ? "*" : ""}</Label>
