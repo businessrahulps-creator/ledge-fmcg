@@ -474,7 +474,9 @@
       inset 0 1px 0 hsl(var(--background) / 0.9),
       0 8px 32px -8px hsl(var(--primary) / 0.10),
       0 24px 60px -20px hsl(var(--primary) / 0.14);
-  }  /* Eyebrow chip — Bone, with a tiny Terracotta dot */
+  }
+
+  /* Eyebrow chip - neutral sunken pill, no decorative dot. */
   .lp-eyebrow,
   .lp-eyebrow-dark {
     @apply inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
