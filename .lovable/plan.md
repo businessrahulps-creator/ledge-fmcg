@@ -78,6 +78,23 @@ layouts, only re-ranking.
   the gradient.
 - No information, field, number or action removed anywhere.
 
+## Who is actually holding the phone
+
+- **The 18-year-old helper at the counter.** Fast, phone-only, taps before reading. Needs the
+  next action to be obvious and forgiving: one loud button per screen, big tap targets, and a
+  confirm step before anything that touches money or stock. Never punished for tapping around.
+- **The sales rep in their 20s.** On the road, one hand, patchy network, in a hurry. Needs the
+  money figures readable at a glance and the journey track to answer "where is this order?"
+  without opening anything. Slow screens read as broken screens, so nothing new is heavy.
+- **The owner in their 50s.** Reads carefully, often in daylight, may wear reading glasses,
+  trusts numbers more than icons. Needs larger type in the hero band, plain words next to every
+  colour, real rupee figures rather than abbreviations in the important places, and no reliance
+  on hover or keyboard shortcuts to reach anything.
+
+Practical consequences carried into every phase: minimum comfortable text size on body copy,
+44px tap targets, words beside every colour, full rupee amounts in the hero band, no
+hover-only information, and short familiar English rather than accounting vocabulary.
+
 ## What does not change
 
 Every field, number, button and action stays. No business logic, no data, no routes. The public
