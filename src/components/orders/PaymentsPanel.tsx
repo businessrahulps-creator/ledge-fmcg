@@ -45,7 +45,7 @@ interface Props {
 }
 
 /** Money actually received against one GST bill. Receipts are never edited or deleted — only cancelled. */
-export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChanged, canRecord = true }: Props) {
+export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChanged, canRecord = true, onTotals }: Props) {
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
