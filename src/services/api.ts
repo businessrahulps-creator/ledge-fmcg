@@ -19,6 +19,7 @@ export function useApi() {
       delete: (id: string) => data.deleteOrder(id),
       dispatchAndBill: data.dispatchAndBill,
       cancel: (id: string, reason: string) => data.cancelOrder(id, reason),
+      markDelivered: (id: string, note?: string) => data.markDelivered(id, note),
       updateStatus: (id: string, status: Partial<Pick<Order, "paymentStatus" | "deliveryStatus">>) =>
         data.updateOrder(id, status),
       nextNumber: () => data.nextOrderNumber(),

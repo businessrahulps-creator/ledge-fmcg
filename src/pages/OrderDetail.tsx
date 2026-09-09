@@ -20,6 +20,7 @@ import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
+import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { useCan } from "@/hooks/useCan";
 import type { Claim, ClaimLine } from "@/context/DataContext";
 import {
@@ -67,18 +68,6 @@ const paymentModes = [
   { value: "upi", label: "UPI" },
 ];
 
-const paymentStatuses = [
-  { value: "paid", label: "Paid" },
-  { value: "partial", label: "Partial" },
-  { value: "pending", label: "Pending" },
-];
-
-const deliveryStatuses = [
-  { value: "pending", label: "Pending" },
-  { value: "dispatched", label: "Dispatched" },
-  { value: "delivered", label: "Delivered" },
-];
-
 interface EditLineState {
   id: string;
   productId: string;
@@ -93,6 +82,7 @@ export default function OrderDetail() {
   const api = useApi();
   const canManageStock = useCan("manage_stock");
   const canOverrideCredit = useCan("override_credit_limit");
+  const canSeeMoney = useCan("see_money");
   const { companyInfo } = api;
 
   const orders = api.orders.list();
@@ -105,8 +95,6 @@ export default function OrderDetail() {
   const updateOrder = (oid: string, updates: Partial<Order>) => api.orders.update(oid, updates);
 
   const [editPaymentMode, setEditPaymentMode] = useState("");
-  const [editPayment, setEditPayment] = useState("");
-  const [editDelivery, setEditDelivery] = useState("");
   const [editDispatchDate, setEditDispatchDate] = useState("");
   const [editVehicle, setEditVehicle] = useState("");
   const [editDriver, setEditDriver] = useState("");
@@ -140,8 +128,6 @@ export default function OrderDetail() {
   useEffect(() => {
     if (order) {
       setEditPaymentMode(order.paymentMode);
-      setEditPayment(order.paymentStatus);
-      setEditDelivery(order.deliveryStatus);
       setEditDispatchDate(order.dispatchDate || "");
       setEditVehicle(order.vehicle || "");
       setEditDriver(order.driverName || "");
@@ -168,6 +154,7 @@ export default function OrderDetail() {
   }, [order?.id]);
 
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
+  const finalInvoice = orderDocs.find(doc => doc.docType === "gst_invoice");
 
   // Line editing helpers
   const addLine = () => {
@@ -209,11 +196,6 @@ export default function OrderDetail() {
 
   const executeSaveOrder = async () => {
     if (!order) return;
-    if ((editDelivery === "dispatched" || editDelivery === "delivered") && !editGodown) {
-      toast.error("Warehouse required", { description: "Please select a source warehouse for dispatch." });
-      return;
-    }
-
     const validLines = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0);
     if (validLines.length === 0) {
       toast.error("Products required", { description: "Add at least one product with quantity > 0." });
@@ -249,8 +231,7 @@ export default function OrderDetail() {
 
     await updateOrder(order.id, {
       paymentMode: editPaymentMode as Order["paymentMode"],
-      paymentStatus: editPayment as Order["paymentStatus"],
-      deliveryStatus: editDelivery as Order["deliveryStatus"],
+
       dispatchDate: editDispatchDate || null,
       vehicle: editVehicle,
       driverName: editDriver,
@@ -268,26 +249,30 @@ export default function OrderDetail() {
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
   };
 
-  const proceedAfterDispatchCheck = () => {
+  /** Opens the stock preview before goods leave the warehouse. */
+  const startDispatch = () => {
     if (!order) return;
-    const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
-    if (movingToDispatched) {
-      if (!editGodown) {
-        toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
-        return;
-      }
-      setDispatchPreview({ open: true, rows: [], loading: true });
-      supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
-        if (error) {
-          setDispatchPreview({ open: false, rows: [], loading: false });
-          handleSupabaseError(error, { source: "rpc:preview_dispatch_impact", title: "Couldn't load stock preview", context: { orderId: order.id } });
-          return;
-        }
-        setDispatchPreview({ open: true, rows: (data as DispatchImpactRow[]) || [], loading: false });
-      });
+    if (!editGodown) {
+      toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
       return;
     }
-    executeSaveOrder();
+    setDispatchPreview({ open: true, rows: [], loading: true });
+    supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
+      if (error) {
+        setDispatchPreview({ open: false, rows: [], loading: false });
+        handleSupabaseError(error, { source: "rpc:preview_dispatch_impact", title: "Couldn't load stock preview", context: { orderId: order.id } });
+        return;
+      }
+      setDispatchPreview({ open: true, rows: (data as DispatchImpactRow[]) || [], loading: false });
+    });
+  };
+
+  const handleMarkDelivered = async () => {
+    if (!order) return;
+    setIsSaving(true);
+    const ok = await api.orders.markDelivered(order.id);
+    setIsSaving(false);
+    if (ok) toast.success(`${order.orderNumber} marked delivered.`);
   };
 
   /** One step: stock out + final GST bill + order marked dispatched. */
@@ -316,25 +301,18 @@ export default function OrderDetail() {
   const saveOrder = () => {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
-    if (!dealer || dealer.creditLimit <= 0) { proceedAfterDispatchCheck(); return; }
-    const wasUnpaid = order.paymentStatus === "pending" || order.paymentStatus === "partial";
-    const willBeUnpaid = editPayment === "pending" || editPayment === "partial";
-    if (willBeUnpaid) {
-      const currentContribution = wasUnpaid ? order.total : 0;
-      const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s, l) => s + (l.quantity ?? 0) * l.unitPrice, 0);
-      const projected = dealer.outstandingAmount - currentContribution + newTotal;
-      if (projected > dealer.creditLimit) {
-        if (canOverrideCredit) {
-          setCreditOverrideOpen(true);
-          return;
-        }
-        toast.error("Credit limit exceeded", {
-          description: `${dealer.name}'s outstanding would exceed their credit limit. Ask someone with override permission.`,
-        });
-        return;
-      }
+    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+    const alreadyCounted = order.paymentStatus === "paid" ? 0 : order.total;
+    const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s2, l) => s2 + (l.quantity ?? 0) * l.unitPrice, 0);
+    const projected = dealer.outstandingAmount - alreadyCounted + newTotal;
+    if (projected > dealer.creditLimit) {
+      if (canOverrideCredit) { setCreditOverrideOpen(true); return; }
+      toast.error("Credit limit crossed", {
+        description: `${dealer.name} would owe more than their limit. Ask someone who can approve it.`,
+      });
+      return;
     }
-    proceedAfterDispatchCheck();
+    executeSaveOrder();
   };
 
   const handleDeleteOrder = async () => {
@@ -648,7 +626,21 @@ export default function OrderDetail() {
           )}
         </div>
 
+        {finalInvoice && (
+          <>
+            <Separator />
+            <PaymentsPanel
+              invoiceId={finalInvoice.id}
+              invoiceNumber={finalInvoice.invoiceNumber}
+              invoiceTotal={finalInvoice.grandTotal}
+              canRecord={canSeeMoney}
+              onChanged={() => api.refreshAll()}
+            />
+          </>
+        )}
+
         <Separator />
+
 
         {/* Status & Dispatch — Editable */}
         <div className="glass-card p-4 md:p-6 space-y-4 md:space-y-5">
@@ -674,45 +666,30 @@ export default function OrderDetail() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Payment Status</Label>
-            <div className="flex gap-2">
-              {paymentStatuses.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setEditPayment(s.value)}
-                  className={`flex-1 rounded-lg border px-3 py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                    editPayment === s.value
-                      ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <Label className="text-xs md:text-sm">Delivery</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-lg border px-3 py-2 text-xs font-medium capitalize md:text-sm ${statusColors[order.deliveryStatus] || "border-border text-muted-foreground"}`}>
+                {order.deliveryStatus === "pending" ? "Not sent yet" : order.deliveryStatus}
+              </span>
+              {order.deliveryStatus === "pending" && (
+                <Button size="sm" disabled={isSaving} onClick={startDispatch}>
+                  Dispatch &amp; bill
+                </Button>
+              )}
+              {order.deliveryStatus === "dispatched" && (
+                <Button size="sm" variant="outline" disabled={isSaving} onClick={handleMarkDelivered}>
+                  Mark delivered
+                </Button>
+              )}
             </div>
+            <p className="text-[11px] text-muted-foreground">
+              Goods leave the warehouse only through Dispatch &amp; bill. Money received is recorded above.
+            </p>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Delivery Status</Label>
-            <div className="flex gap-2">
-              {deliveryStatuses.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setEditDelivery(s.value)}
-                  className={`flex-1 rounded-lg border px-3 py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                    editDelivery === s.value
-                      ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Source Warehouse {(editDelivery === "dispatched" || editDelivery === "delivered") ? "*" : ""}</Label>
+            <Label className="text-xs md:text-sm">Source Warehouse *</Label>
             <Select value={editGodown} onValueChange={setEditGodown}>
               <SelectTrigger className="h-10 rounded-lg">
                 <SelectValue placeholder="Select warehouse" />
@@ -858,7 +835,7 @@ export default function OrderDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button onClick={() => { setCreditOverrideOpen(false); proceedAfterDispatchCheck(); }}>Override & Save</Button>
+            <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>Override & Save</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

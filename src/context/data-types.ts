@@ -153,6 +153,7 @@ export interface DataContextType {
     },
   ) => Promise<{ success: boolean; invoiceNumber?: string; alreadyDone?: boolean; error?: string }>;
   cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
+  markDelivered: (orderId: string, note?: string) => Promise<boolean>;
 
   addDistributor: (d: Distributor) => void;
   updateDistributor: (d: Distributor) => void;
@@ -242,6 +243,7 @@ export interface TransactionalContextType {
   deleteOrder: DataContextType["deleteOrder"];
   dispatchAndBill: DataContextType["dispatchAndBill"];
   cancelOrder: DataContextType["cancelOrder"];
+  markDelivered: DataContextType["markDelivered"];
 
   addSalesperson: DataContextType["addSalesperson"];
   updateSalesperson: DataContextType["updateSalesperson"];

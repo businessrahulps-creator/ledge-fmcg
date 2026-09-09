@@ -215,19 +215,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const { data: company } = await supabase
         .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
 
-      const [distRes, spRes, prodRes, godownRes, schemesRes] = await Promise.all([
+      const [distRes, spRes, prodRes, godownRes, schemesRes, balanceRes] = await Promise.all([
         fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
         fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name"), 1000, 200, "salespersons"),
         fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name"), 1000, 200, "products"),
         fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name"), 1000, 200, "godowns"),
         fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "schemes"),
+        // Canonical amount owed: billed − received − credited, straight from the database view.
+        fetchAllChunked(() => supabase.from("dealer_balances").select("distributor_id, balance_due").eq("company_id", cId).order("distributor_id"), 1000, 200, "dealer_balances"),
       ]);
 
-      const dists = (distRes as any[]).map(mapDistributor);
+      const balanceByDealer = new Map<string, number>(
+        (balanceRes as any[]).map((b: any) => [b.distributor_id as string, Number(b.balance_due ?? 0)]),
+      );
+      const dists = (distRes as any[]).map(mapDistributor).map(d => ({
+        ...d,
+        outstandingAmount: balanceByDealer.has(d.id) ? balanceByDealer.get(d.id)! : d.outstandingAmount,
+      }));
       const sps = (spRes as any[]).map(mapSalesperson);
       const prods = (prodRes as any[]).map(mapProduct);
       const gds = (godownRes as any[]).map(mapGodown);
       const mappedSchemes = (schemesRes as any[]).map((s: any) => mapScheme(s));
+
 
       return {
         company, dists, sps, prods, gds, mappedSchemes,
@@ -519,7 +528,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     targets: targets.targets,
     salespersons: computedSalespersons,
     addOrder: orders.addOrder, updateOrder: orders.updateOrder, deleteOrder: orders.deleteOrder,
-    dispatchAndBill: orders.dispatchAndBill, cancelOrder: orders.cancelOrder,
+    dispatchAndBill: orders.dispatchAndBill, cancelOrder: orders.cancelOrder, markDelivered: orders.markDelivered,
     addSalesperson: salespersons.add, updateSalesperson: salespersons.update, deleteSalesperson: salespersons.remove,
     addLocation: stock.addLocation, updateLocation: stock.updateLocation, deleteLocation: stock.deleteLocation,
     addStockItem: stock.addStockItem, updateStockItem: stock.updateStockItem, deleteStockItem: stock.deleteStockItem,
@@ -533,7 +542,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     orders.orders, billing.invoices, billing.claims,
     stock.locations, stock.stockItems,
     targets.secondarySales, targets.targets, computedSalespersons,
-    orders.addOrder, orders.updateOrder, orders.deleteOrder, orders.dispatchAndBill, orders.cancelOrder,
+    orders.addOrder, orders.updateOrder, orders.deleteOrder, orders.dispatchAndBill, orders.cancelOrder, orders.markDelivered,
     salespersons.add, salespersons.update, salespersons.remove,
     stock.addLocation, stock.updateLocation, stock.deleteLocation,
     stock.addStockItem, stock.updateStockItem, stock.deleteStockItem, stock.setStockItems,

@@ -175,7 +175,7 @@ export default function Stock() {
   const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
 
   const openNewProduct = () => {
-    setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, hsnCode: "", totalSold: 0 });
+    setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, hsnCode: "", totalSold: 0, gstRate: 18, gstRateConfirmed: false });
     setIsNewProduct(true);
   };
 
@@ -408,6 +408,13 @@ export default function Stock() {
           {/* PRODUCTS TAB */}
           <TabsContent value="products">
             <div className="space-y-4">
+              {products.some(p => !p.gstRateConfirmed) && (
+                <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-foreground md:text-sm">
+                  <strong>{products.filter(p => !p.gstRateConfirmed).length} products</strong> still need their GST rate confirmed.
+                  Open a product and pick its rate — bills can't be raised for them until you do.
+                </div>
+              )}
+
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -778,6 +785,31 @@ export default function Stock() {
                     <NumberInput allowDecimal allowEmpty={false} min={0} value={editProduct.basePrice} onValueChange={(v) => setEditProduct({ ...editProduct, basePrice: v ?? 0 })} className="h-10 rounded-lg" />
                   </div>
                 </div>
+                <div className="space-y-1.5 rounded-lg border border-border p-3 md:space-y-2">
+                  <Label className="text-xs md:text-sm">GST rate used on bills *</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 5, 12, 18, 28].map((rate) => (
+                      <button
+                        key={rate}
+                        type="button"
+                        onClick={() => setEditProduct({ ...editProduct, gstRate: rate, gstRateConfirmed: true })}
+                        className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors md:text-sm ${
+                          editProduct.gstRate === rate && editProduct.gstRateConfirmed
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:border-foreground/20"
+                        }`}
+                      >
+                        {rate}%
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {editProduct.gstRateConfirmed
+                      ? "Confirmed. This rate goes on every bill for this product."
+                      : "Not confirmed yet — bills for this product are blocked until you pick the rate."}
+                  </p>
+                </div>
+
               </div>
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
