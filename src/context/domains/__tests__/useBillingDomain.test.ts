@@ -175,3 +175,51 @@ describe("useBillingDomain", () => {
     expect(result.current.claims[0].resolvedAt).toBeTruthy();
   });
 });
+
+describe("useBillingDomain — record return", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("recordReturn — posts good and damaged quantities through the atomic RPC", async () => {
+    const deps = makeDeps();
+    mockRpc.mockResolvedValueOnce({
+      data: { ok: true, credit_note_number: "CN/2026-27/0001", grand_total: 1180, restocked: true },
+      error: null,
+    });
+    mockFrom.mockImplementation(() => createChainMock({ data: [], error: null }));
+
+    const { result } = renderHook(() => useBillingDomain(deps));
+    let res: any;
+    await act(async () => {
+      res = await result.current.recordReturn(
+        "order-1",
+        [
+          { invoiceLineId: "il-1", goodQty: 2, damagedQty: 1 },
+          { invoiceLineId: "il-2", goodQty: 0, damagedQty: 0 },
+        ],
+        "Leaking bottles",
+      );
+    });
+
+    expect(mockRpc).toHaveBeenCalledWith("record_return_and_credit_atomic", {
+      p_order_id: "order-1",
+      p_lines: [{ invoice_line_id: "il-1", good_qty: 2, damaged_qty: 1 }],
+      p_reason: "Leaking bottles",
+      p_godown_id: null,
+    });
+    expect(res).toEqual({ creditNoteNumber: "CN/2026-27/0001", grandTotal: 1180, restocked: true });
+    expect(deps.safeRefetchStockItems).toHaveBeenCalled();
+  });
+
+  it("recordReturn — returns null when the server rejects the return", async () => {
+    const deps = makeDeps();
+    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "You cannot return more than was billed" } });
+    mockFrom.mockImplementation(() => createChainMock({ data: [], error: null }));
+
+    const { result } = renderHook(() => useBillingDomain(deps));
+    let res: any = "unset";
+    await act(async () => {
+      res = await result.current.recordReturn("order-1", [{ invoiceLineId: "il-1", goodQty: 99, damagedQty: 0 }], "");
+    });
+    expect(res).toBeNull();
+  });
+});
