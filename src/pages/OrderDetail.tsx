@@ -648,7 +648,21 @@ export default function OrderDetail() {
           )}
         </div>
 
+        {finalInvoice && (
+          <>
+            <Separator />
+            <PaymentsPanel
+              invoiceId={finalInvoice.id}
+              invoiceNumber={finalInvoice.invoiceNumber}
+              invoiceTotal={finalInvoice.grandTotal}
+              canRecord={canSeeMoney}
+              onChanged={() => api.refreshAll()}
+            />
+          </>
+        )}
+
         <Separator />
+
 
         {/* Status & Dispatch — Editable */}
         <div className="glass-card p-4 md:p-6 space-y-4 md:space-y-5">
