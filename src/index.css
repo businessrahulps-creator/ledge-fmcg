@@ -2657,8 +2657,8 @@
     100deg,
     hsl(218 60% 14%) 0%,
     hsl(218 58% 16%) 46%,
-    hsl(212 46% 21%) 74%,
-    hsl(19 40% 26%) 100%
+    hsl(212 44% 20%) 76%,
+    hsl(19 30% 22%) 100%
   );
   --surface-quiet: 34 30% 96%;
   /* Figure tones that stay above 4.5:1 on the band. */
@@ -2675,6 +2675,12 @@
   }
   .hero-band-inner {
     @apply relative space-y-5 px-4 py-5 md:px-7 md:py-7;
+  }
+  /* Badges and chips placed on the dark band stay legible. */
+  .hero-band [data-status-badge],
+  .hero-band .status-badge,
+  .hero-band [class*="status-"] {
+    @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
   }
   .hero-band-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
