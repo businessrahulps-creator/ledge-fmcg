@@ -196,7 +196,6 @@ export default function NewOrder() {
     else if (errors.salesperson) target = salespersonFieldRef.current;
     else if (errors.products || errors.invalidPriceLine) target = productsSectionRef.current;
     else if (errors.warehouse) target = warehouseFieldRef.current;
-    else if (errors.dispatchDate) target = dispatchDateFieldRef.current;
     target?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
@@ -239,13 +238,6 @@ export default function NewOrder() {
       return;
     }
 
-    // Dispatch date required when delivery status is dispatched or delivered
-    if (errors.dispatchDate) {
-      toast.error("Dispatch date required", { description: "Please select a dispatch date for dispatched/delivered orders." });
-      scrollToFirstError();
-      return;
-    }
-
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
@@ -271,17 +263,18 @@ export default function NewOrder() {
         };
       }),
       total: validLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0),
-      paymentMode: paymentMode as "cash" | "bank_transfer" | "cheque" | "upi",
-      paymentStatus: paymentStatus as "paid" | "partial" | "pending",
-      dispatchDate: dispatchDate || null,
-      vehicle,
-      driverName,
-      deliveryStatus: deliveryStatus as "pending" | "dispatched" | "delivered",
+      paymentMode: "cash" as const,
+      paymentStatus: "pending" as const,
+      dispatchDate: null,
+      vehicle: "",
+      driverName: "",
+      deliveryStatus: "pending" as const,
       dispatchRemarks: remarks,
       godownId: selectedGodown || undefined,
       schemeSavings: totalSchemeSavings,
       appliedSchemes: serializeAppliedSchemes(appliedSchemes),
     };
+
 
     const isFirstEverOrder = existingOrders.length === 0;
     const result = await addOrder(order);
