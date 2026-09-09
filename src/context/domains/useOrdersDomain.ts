@@ -355,7 +355,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
   return {
     orders, setOrders, orderPrefix, setOrderPrefixState, orderSequence, setOrderSequence,
-    addOrder, updateOrder, deleteOrder, setOrderPrefix,
+    addOrder, updateOrder, deleteOrder, setOrderPrefix, dispatchAndBill, cancelOrder,
     previewOrderNumber, nextOrderNumber, safeRefetch,
   };
 }
