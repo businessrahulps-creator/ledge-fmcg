@@ -1823,7 +1823,7 @@
   --brand-electric: 224 91% 53%;   /* #1B57F5 */
   --brand-ink:      224 28% 15%;   /* #1B2130 */
   --brand-lime:      75 85% 63%;   /* #C8F250 */
-  --brand-mist:     244 26% 92%;   /* #E5E4F0 */
+  --brand-mist:     220 13% 93%;   /* #E5E4F0 */
 }
 
 .lp-theme {
@@ -1839,10 +1839,10 @@
   --primary: var(--brand-electric);
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 244 24% 88%;
+  --secondary: 220 13% 89%;
   --secondary-foreground: var(--brand-ink);
 
-  --muted: 244 22% 90%;
+  --muted: 220 12% 91%;
   --muted-foreground: 224 13% 42%;
 
   --accent: var(--brand-lime);
@@ -1857,16 +1857,16 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 244 18% 86%;
-  --input: 244 18% 86%;
+  --border: 220 13% 87%;
+  --input: 220 13% 87%;
   --ring: var(--brand-electric);
 
   --surface: 0 0% 100%;
-  --surface-border: 244 18% 88%;
+  --surface-border: 220 13% 89%;
 
   /* ── Surface roles ── */
   --lp-surface:        0 0% 100%;
-  --lp-surface-sunken: 244 24% 96%;
+  --lp-surface-sunken: 220 14% 96%;
   --lp-surface-ink:    var(--brand-ink);
   --lp-surface-accent: var(--brand-electric);
 
