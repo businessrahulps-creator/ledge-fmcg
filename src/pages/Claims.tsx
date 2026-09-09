@@ -34,16 +34,11 @@ const statusConfig: Record<string, { label: string; color: string; icon: typeof 
 };
 
 function ClaimCard({
-  claim, expandedId, setExpandedId, resolveNotes, setResolveNotes, resolvingId, onResolve, onReject,
+  claim, expandedId, setExpandedId,
 }: {
   claim: Claim;
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
-  resolveNotes: string;
-  setResolveNotes: (v: string) => void;
-  resolvingId: string | null;
-  onResolve: (id: string) => void;
-  onReject: (id: string) => void;
 }) {
   const typeInfo = claimTypeLabels[claim.claimType] || claimTypeLabels.return;
   const statusInfo = statusConfig[claim.status] || statusConfig.open;
@@ -123,26 +118,6 @@ function ClaimCard({
             </div>
           )}
 
-          {claim.status === "open" && (
-            <div className="space-y-2 pt-2 border-t border-border">
-              <Textarea
-                placeholder="Add resolution notes (optional)…"
-                value={expandedId === claim.id ? resolveNotes : ""}
-                onChange={e => setResolveNotes(e.target.value)}
-                className="min-h-[60px] text-xs"
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => onResolve(claim.id)} disabled={resolvingId === claim.id}>
-                  {resolvingId === claim.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-                  {resolvingId === claim.id ? "Saving…" : "Resolve"}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => onReject(claim.id)} disabled={resolvingId === claim.id}>
-                  {resolvingId === claim.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
-                  Reject
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -388,8 +363,6 @@ export default function Claims() {
   const invoices = api.invoices.list();
   const isLoading = usePageLoading(api.loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [resolveNotes, setResolveNotes] = useState("");
-  const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [tab, setTab] = useState("open");
   const [newClaimOpen, setNewClaimOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -412,23 +385,6 @@ export default function Claims() {
   const openValue = claims.filter(c => c.status === "open").reduce((s, c) => s + (c.totalClaimValue || 0), 0);
 
 
-  const handleResolve = async (id: string) => {
-    setResolvingId(id);
-    await api.claims.update(id, { status: "resolved", resolutionNotes: resolveNotes });
-    setResolvingId(null);
-    setResolveNotes("");
-    setExpandedId(null);
-    toast.success("Claim resolved");
-  };
-
-  const handleReject = async (id: string) => {
-    setResolvingId(id);
-    await api.claims.update(id, { status: "rejected", resolutionNotes: resolveNotes });
-    setResolvingId(null);
-    setResolveNotes("");
-    setExpandedId(null);
-    toast.success("Claim rejected");
-  };
 
   // Blocking page skeleton removed — empty-state handles first-paint.
 
@@ -501,11 +457,6 @@ export default function Claims() {
                     claim={claim}
                     expandedId={expandedId}
                     setExpandedId={setExpandedId}
-                    resolveNotes={resolveNotes}
-                    setResolveNotes={setResolveNotes}
-                    resolvingId={resolvingId}
-                    onResolve={handleResolve}
-                    onReject={handleReject}
                   />
                 ))}
               </div>

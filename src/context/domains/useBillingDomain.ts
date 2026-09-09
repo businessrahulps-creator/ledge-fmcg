@@ -3,10 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Order } from "@/data/mock-data";
 import { sanitizeInput } from "@/utils/sanitize";
 import type { DomainDeps, Invoice, Claim } from "@/context/data-types";
-import type { Database, TablesUpdate } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
-import { enqueueMutation } from "@/lib/offline-store";
-import { logError } from "@/utils/errorLog";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { fetchAllChunked } from "@/context/data-utils";
 
@@ -106,153 +104,6 @@ export function useBillingDomain(deps: BillingDeps) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
 
-  const addInvoice = useCallback(async (invoice: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">): Promise<Invoice | null> => {
-    if (!deps.companyId) return null;
-
-    // Block offline — invoice numbers require server-side sequence
-    if (!navigator.onLine) {
-      toast.error("Cannot create documents offline", { description: "Invoice numbering requires a server connection." });
-      return null;
-    }
-
-    try {
-      const { data: seqData, error: seqErr } = await supabase.rpc("get_next_invoice_number", { target_company_id: deps.companyId });
-      if (seqErr) throw seqErr;
-      const seq = Array.isArray(seqData) ? seqData[0] : seqData;
-      const invoiceNumber = `${seq.prefix}-${new Date().getFullYear()}-${String(seq.seq).padStart(4, "0")}`;
-
-      const { data, error } = await supabase.from("invoices").insert({
-        company_id: deps.companyId, doc_type: invoice.docType, invoice_number: invoiceNumber,
-        invoice_date: invoice.invoiceDate, source_order_id: invoice.sourceOrderId || null,
-        buyer_name: sanitizeInput(invoice.buyerName), buyer_address: sanitizeInput(invoice.buyerAddress),
-        buyer_gstin: sanitizeInput(invoice.buyerGstin), buyer_state_code: sanitizeInput(invoice.buyerStateCode),
-        seller_name: sanitizeInput(invoice.sellerName), seller_address: sanitizeInput(invoice.sellerAddress),
-        seller_gstin: sanitizeInput(invoice.sellerGstin), seller_pan: sanitizeInput(invoice.sellerPan),
-        seller_state_code: sanitizeInput(invoice.sellerStateCode), seller_phone: sanitizeInput(invoice.sellerPhone),
-        seller_email: sanitizeInput(invoice.sellerEmail), seller_bank_name: sanitizeInput(invoice.sellerBankName),
-        seller_bank_account_name: sanitizeInput(invoice.sellerBankAccountName),
-        seller_bank_account: sanitizeInput(invoice.sellerBankAccount),
-        seller_bank_ifsc: sanitizeInput(invoice.sellerBankIfsc), seller_logo_url: invoice.sellerLogoUrl || "",
-        supply_type: invoice.supplyType, gst_rate: invoice.gstRate, subtotal: invoice.subtotal,
-        cgst_amount: invoice.cgstAmount, sgst_amount: invoice.sgstAmount, igst_amount: invoice.igstAmount,
-        total_tax: invoice.totalTax, grand_total: invoice.grandTotal, round_off: invoice.roundOff,
-        amount_in_words: invoice.amountInWords, notes: sanitizeInput(invoice.notes), status: invoice.status,
-        vehicle: invoice.vehicle || "", driver_name: invoice.driverName || "",
-      }).select().single();
-      if (error) throw error;
-      const invId = (data as any).id;
-
-      if (invoice.lines.length > 0) {
-        const { error: lErr } = await supabase.from("invoice_lines").insert(
-          invoice.lines.map(l => ({
-            invoice_id: invId, product_name: sanitizeInput(l.productName), hsn_code: sanitizeInput(l.hsnCode),
-            quantity: l.quantity, unit: l.unit, unit_price: l.unitPrice, taxable_value: l.taxableValue,
-          }))
-        );
-        if (lErr) throw lErr;
-      }
-
-      const newInvoice: Invoice = { ...invoice, id: invId, invoiceNumber, createdAt: new Date().toISOString() };
-      setInvoices(prev => [newInvoice, ...prev]);
-      return newInvoice;
-    } catch (err: any) {
-      handleSupabaseError(err, { source: "crud:invoices.add", title: "Failed to create document", context: { docType: invoice.docType } });
-      return null;
-    }
-  }, [deps.companyId]);
-
-  const updateInvoice = useCallback(async (id: string, updates: Partial<Invoice>) => {
-    const dbUpdates: TablesUpdate<"invoices"> = {};
-    if (updates.status !== undefined) dbUpdates.status = updates.status;
-    if (updates.notes !== undefined) dbUpdates.notes = sanitizeInput(updates.notes);
-    if (updates.vehicle !== undefined) dbUpdates.vehicle = updates.vehicle;
-    if (updates.driverName !== undefined) dbUpdates.driver_name = updates.driverName;
-
-    if (!navigator.onLine) {
-      setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
-      await enqueueMutation({ type: "update", table: "invoices", payload: { id, ...dbUpdates } });
-      toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
-    }
-
-    const { error } = await supabase.from("invoices").update(dbUpdates).eq("id", id);
-    if (error) { handleSupabaseError(error, { source: "crud:invoices.update", title: "Failed to update document", context: { id } }); return; }
-    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
-  }, []);
-
-  const deleteInvoice = useCallback(async (id: string): Promise<boolean> => {
-    const inv = invoices.find(i => i.id === id);
-    if (inv?.status === "final") { toast.error("Cannot delete finalized document"); return false; }
-
-    // Block offline — deleting financial documents should only happen with server confirmation
-    if (!navigator.onLine) {
-      toast.error("Cannot delete documents offline", { description: "Please reconnect to delete." });
-      return false;
-    }
-
-    const { error } = await supabase.from("invoices").delete().eq("id", id);
-    if (error) { handleSupabaseError(error, { source: "crud:invoices.delete", title: "Failed to delete document", context: { id } }); return false; }
-    setInvoices(prev => prev.filter(i => i.id !== id));
-    return true;
-  }, [invoices]);
-
-  const addClaim = useCallback(async (claim: Claim): Promise<boolean> => {
-    if (!deps.companyId) return false;
-
-    // Block offline — claims involve stock restoration which needs server state
-    if (!navigator.onLine) {
-      toast.error("Cannot record claims offline", { description: "Stock restoration requires a server connection." });
-      return false;
-    }
-
-    try {
-      const { data, error } = await supabase.from("claims").insert({
-        company_id: deps.companyId, order_id: claim.orderId, order_number: claim.orderNumber,
-        distributor_id: claim.distributorId, distributor_name: sanitizeInput(claim.distributorName),
-        claim_type: claim.claimType, status: "open", reason: sanitizeInput(claim.reason),
-        restore_stock: claim.restoreStock, total_claim_value: claim.totalClaimValue,
-      }).select().single();
-      if (error) throw error;
-      const claimId = (data as any).id;
-
-      if (claim.lines.length > 0) {
-        const { error: linesErr } = await supabase.from("claim_lines").insert(
-          claim.lines.map(l => ({
-            claim_id: claimId, product_id: l.productId, product_name: sanitizeInput(l.productName),
-            quantity: l.quantity, unit_price: l.unitPrice, line_total: l.lineTotal,
-          }))
-        );
-        if (linesErr) throw linesErr;
-      }
-
-      // Stock only moves when a return is accepted — see recordReturn().
-
-      const newClaim: Claim = { ...claim, id: claimId, status: "open", createdAt: new Date().toISOString(), resolvedAt: null };
-      setClaims(prev => [newClaim, ...prev]);
-      return true;
-    } catch (err: any) {
-      handleSupabaseError(err, { source: "crud:claims.add", title: "Failed to record claim", context: { orderId: claim.orderId } });
-      return false;
-    }
-  }, [deps.companyId, deps.getOrders, deps.safeRefetchStockItems]);
-
-  const updateClaim = useCallback(async (id: string, updates: Partial<Claim>) => {
-    const dbUpdates: TablesUpdate<"claims"> = {};
-    if (updates.status !== undefined) dbUpdates.status = updates.status;
-    if (updates.resolutionNotes !== undefined) dbUpdates.resolution_notes = sanitizeInput(updates.resolutionNotes);
-    if (updates.status === "resolved") dbUpdates.resolved_at = new Date().toISOString();
-
-    if (!navigator.onLine) {
-      setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
-      await enqueueMutation({ type: "update", table: "claims", payload: { id, ...dbUpdates } });
-      toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
-    }
-
-    const { error } = await supabase.from("claims").update(dbUpdates).eq("id", id);
-    if (error) { handleSupabaseError(error, { source: "crud:claims.update", title: "Failed to update claim", context: { id } }); return; }
-    setClaims(prev => prev.map(c => c.id === id ? { ...c, ...updates, resolvedAt: updates.status === "resolved" ? new Date().toISOString() : c.resolvedAt } : c));
-  }, []);
 
   const safeRefetchInvoices = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
@@ -301,7 +152,7 @@ export function useBillingDomain(deps: BillingDeps) {
 
   return {
     invoices, setInvoices, claims, setClaims,
-    addInvoice, updateInvoice, deleteInvoice, addClaim, updateClaim, recordReturn,
+    recordReturn,
     safeRefetchInvoices, safeRefetchClaims,
   };
 }

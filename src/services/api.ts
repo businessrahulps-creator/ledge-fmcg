@@ -79,15 +79,10 @@ export function useApi() {
     },
     claims: {
       list: () => data.claims,
-      create: (c: Claim) => data.addClaim(c),
-      update: (id: string, updates: Partial<Claim>) => data.updateClaim(id, updates),
       recordReturn: data.recordReturn,
     },
     invoices: {
       list: () => data.invoices,
-      create: (inv: Omit<Invoice, "id" | "invoiceNumber" | "createdAt">) => data.addInvoice(inv),
-      update: (id: string, updates: Partial<Invoice>) => data.updateInvoice(id, updates),
-      remove: (id: string) => data.deleteInvoice(id),
     },
   };
 }
