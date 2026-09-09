@@ -209,7 +209,7 @@ function NewClaimDialog({
   };
 
   const returnLines = (selectedBill?.lines ?? []).map(l => ({
-    invoiceLineId: l.id,
+    invoiceLineId: l.id as string,
     productName: l.productName,
     billedQty: l.quantity,
     unitPrice: l.unitPrice,
