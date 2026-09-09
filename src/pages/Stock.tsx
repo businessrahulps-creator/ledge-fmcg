@@ -556,7 +556,7 @@ export default function Stock() {
                 )}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
+              <div className="grid items-stretch gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
                 {locations.map((loc, i) => {
                   const stats = getWarehouseStats(loc.id);
                   const isSelected = selectedWarehouse === loc.id;
