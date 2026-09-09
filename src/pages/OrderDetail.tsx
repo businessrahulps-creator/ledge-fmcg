@@ -353,6 +353,15 @@ export default function OrderDetail() {
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
   const settled = hasBill && balance <= 0;
+  /* Money chip comes from real receipts, so chip, balance and journey always agree.
+     Before a bill exists there is nothing to collect against — show goods only. */
+  const moneyStatus: "paid" | "partial" | "pending" | null = !hasBill
+    ? null
+    : settled
+      ? "paid"
+      : received > 0
+        ? "partial"
+        : "pending";
 
   const journey: JourneyStep[] = [
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
@@ -384,7 +393,7 @@ export default function OrderDetail() {
           subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
           aside={
             <>
-              <StatusBadge status={order.paymentStatus} />
+              {moneyStatus && <StatusBadge status={moneyStatus} />}
               <StatusBadge status={order.deliveryStatus} kind="delivery" />
             </>
           }
@@ -478,8 +487,9 @@ export default function OrderDetail() {
           </div>
           <div className="p-3 space-y-3">
             {editLines.map((line, i) => (
-              <div key={line.id} className="flex items-start gap-2">
-                <div className="flex-1 min-w-0">
+              <div key={line.id} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                {/* On a phone the product name gets the full width so it is never cut off. */}
+                <div className="min-w-0 sm:flex-1">
                   <Select value={line.productId} onValueChange={(v) => updateLine(line.id, "productId", v)}>
                     <SelectTrigger className="h-9 rounded-lg text-xs">
                       <SelectValue placeholder="Select product" />
@@ -491,7 +501,8 @@ export default function OrderDetail() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="w-20">
+                <div className="flex items-start gap-2 sm:contents">
+                <div className="w-20 shrink-0">
                   <NumberInput
                     allowEmpty
                     min={1}
@@ -501,7 +512,7 @@ export default function OrderDetail() {
                     className="h-9 text-xs text-right"
                   />
                 </div>
-                <div className="w-24 text-right">
+                <div className="w-24 shrink-0 text-right">
                   <NumberInput
                     allowDecimal
                     allowEmpty={false}
@@ -512,13 +523,14 @@ export default function OrderDetail() {
                     className="h-9 text-xs text-right"
                   />
                 </div>
-                <div className="w-20 flex items-center justify-end gap-1">
+                <div className="flex w-20 flex-1 items-center justify-end gap-1 sm:flex-none">
                   <span className="text-xs font-medium">{formatCurrency((line.quantity ?? 0) * line.unitPrice)}</span>
                   {editLines.length > 1 && (
                     <button onClick={() => removeLine(line.id)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
+                </div>
                 </div>
               </div>
             ))}
