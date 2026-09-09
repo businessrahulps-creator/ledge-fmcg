@@ -45,25 +45,6 @@ interface OrderLineState {
   unitPrice: number;
 }
 
-const paymentModes = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cheque", label: "Cheque" },
-  { value: "upi", label: "UPI" },
-];
-
-const paymentStatuses = [
-  { value: "paid", label: "Paid" },
-  { value: "partial", label: "Partial" },
-  { value: "pending", label: "Pending" },
-];
-
-const deliveryStatuses = [
-  { value: "pending", label: "Pending" },
-  { value: "dispatched", label: "Dispatched" },
-  { value: "delivered", label: "Delivered" },
-];
-
 const statusColors: Record<string, string> = {
   paid: "border-success/40 bg-success/10 text-success",
   partial: "border-warning/40 bg-warning/10 text-warning",
