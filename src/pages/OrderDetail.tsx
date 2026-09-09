@@ -271,7 +271,11 @@ export default function OrderDetail() {
   const proceedAfterDispatchCheck = () => {
     if (!order) return;
     const movingToDispatched = order.deliveryStatus === "pending" && editDelivery === "dispatched";
-    if (movingToDispatched && editGodown && canManageStock) {
+    if (movingToDispatched) {
+      if (!editGodown) {
+        toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
+        return;
+      }
       setDispatchPreview({ open: true, rows: [], loading: true });
       supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
         if (error) {
@@ -286,12 +290,28 @@ export default function OrderDetail() {
     executeSaveOrder();
   };
 
+  /** One step: stock out + final GST bill + order marked dispatched. */
   const confirmDispatch = async () => {
+    if (!order) return;
     setDispatchPreview(p => ({ ...p, open: false }));
-    await executeSaveOrder();
+    setIsSaving(true);
+    const res = await api.orders.dispatchAndBill(order.id, {
+      godownId: editGodown || null,
+      dispatchDate: editDispatchDate || null,
+      vehicle: editVehicle,
+      driverName: editDriver,
+    });
+    setIsSaving(false);
+    if (!res.success) return;
     const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
-    toast.success(`Dispatched. Stock updated for ${dispatchPreview.rows.length} product${dispatchPreview.rows.length === 1 ? "" : "s"}.${negatives > 0 ? ` ${negatives} below zero — please reconcile.` : ""}`);
+    toast.success(
+      res.alreadyDone
+        ? "This order was already dispatched and billed."
+        : `Dispatched. Bill ${res.invoiceNumber} created and stock updated.`,
+      negatives > 0 ? { description: `${negatives} product${negatives === 1 ? "" : "s"} went below zero — please reconcile stock.` } : undefined,
+    );
   };
+
 
   const saveOrder = () => {
     if (!order) return;
