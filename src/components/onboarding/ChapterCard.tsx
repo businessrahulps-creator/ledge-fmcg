@@ -56,46 +56,41 @@ export function ChapterCard({ chapter, state, celebrating, onClick, index }: Pro
       aria-current={state === "active" ? "step" : undefined}
     >
       <motion.div
+        key={isComplete ? "complete" : "todo"}
         className="relative"
-        animate={reduce ? undefined : { rotateY: isComplete ? 180 : 0 }}
-        transition={reduce ? undefined : { duration: 0.6, ease: [0.1, 0.9, 0.2, 1] }}
-        style={{ transformStyle: "preserve-3d" }}
+        initial={reduce ? false : { opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduce ? undefined : { duration: 0.35, ease: [0.1, 0.9, 0.2, 1] }}
       >
-        {/* FRONT */}
-        <div
-          className="flex items-center gap-3.5"
-          style={reduce ? undefined : { backfaceVisibility: "hidden" }}
-        >
-          <div
-            className={[
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors duration-normal",
-              state === "active" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground",
-            ].join(" ")}
-          >
-            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+        {!isComplete ? (
+          /* TO DO */
+          <div className="flex items-center gap-3.5">
+            <div
+              className={[
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors duration-normal",
+                state === "active" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground",
+              ].join(" ")}
+            >
+              <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-foreground truncate">
+                {chapter.title}
+              </p>
+              <p className="text-[12px] text-muted-foreground truncate mt-0.5">
+                {chapter.why}
+              </p>
+            </div>
+            {state === "active" && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-medium text-accent shrink-0">
+                {chapter.cta}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-normal group-hover:translate-x-0.5" strokeWidth={2} />
+              </span>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate">
-              {chapter.title}
-            </p>
-            <p className="text-[12px] text-muted-foreground truncate mt-0.5">
-              {chapter.why}
-            </p>
-          </div>
-          {state === "active" && (
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-medium text-accent shrink-0">
-              {chapter.cta}
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-normal group-hover:translate-x-0.5" strokeWidth={2} />
-            </span>
-          )}
-        </div>
-
-        {/* BACK (revealed after flip) */}
-        {!reduce && (
-          <div
-            className="absolute inset-0 flex items-center gap-3.5"
-            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-          >
+        ) : (
+          /* DONE */
+          <div className="flex items-center gap-3.5">
             <div
               className={[
                 "flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-success/10 text-success transition-shadow duration-normal",
@@ -112,14 +107,8 @@ export function ChapterCard({ chapter, state, celebrating, onClick, index }: Pro
             </div>
           </div>
         )}
-
-        {/* Reduced-motion: simple inline checkmark */}
-        {reduce && isComplete && (
-          <div className="absolute inset-0 flex items-center justify-end pr-1 bg-card">
-            <Check className="h-4 w-4 text-success" strokeWidth={2.5} />
-          </div>
-        )}
       </motion.div>
+
     </motion.button>
   );
 }

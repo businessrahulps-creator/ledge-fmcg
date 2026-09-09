@@ -234,7 +234,7 @@ export default function Distributors() {
           />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
+        <div className="grid items-stretch gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {paginatedDealers.map((d) => {
             const limit = d.creditLimit || 0;
             const outstanding = d.outstandingAmount || 0;

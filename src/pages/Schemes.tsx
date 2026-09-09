@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/data/mock-data";
+import { formatIndianDate } from "@/utils/formatDate";
 import type { Scheme } from "@/data/mock-data";
 import { toast } from "sonner";
 import {
@@ -199,12 +200,12 @@ export default function Schemes() {
           />
         </div>
 
-        <div className="space-y-5">
+        <div className="page-stack">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Schemes</h1>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="h1-display">Schemes</h1>
+              <p className="h1-subtitle">
                 Create offers and discounts that automatically apply to orders
               </p>
             </div>
@@ -268,7 +269,7 @@ export default function Schemes() {
               <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80">
                 Active Schemes ({activeSchemes.length})
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {activeSchemes.map(s => (
                   <SchemeCard
                     key={s.id}
@@ -291,7 +292,7 @@ export default function Schemes() {
               <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80">
                 Inactive ({inactiveSchemes.length})
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {inactiveSchemes.map(s => (
                   <SchemeCard
                     key={s.id}
@@ -555,21 +556,28 @@ function SchemeCard({
   const isExpired = s.validUntil && s.validUntil < today;
   const isUpcoming = s.validFrom > today;
 
+  // Skip a description that just repeats the scheme name — it adds noise, not information.
+  const description = s.description?.trim();
+  const showDescription =
+    !!description &&
+    description.toLowerCase() !== s.name.trim().toLowerCase() &&
+    !description.toLowerCase().startsWith(`${s.name.trim().toLowerCase()} —`);
+
   return (
     <div className={cn(
-      "glass-card rounded-md p-4 transition-all",
+      "glass-card flex h-full flex-col rounded-md p-4 transition-all",
       !s.isActive && "opacity-60",
     )}>
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
           <div className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
             s.isActive ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
           )}>
             <Icon className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{s.name}</p>
+            <p className="truncate text-sm font-semibold">{s.name}</p>
             <p className="text-xs text-muted-foreground">{getSchemeLabel(s)}</p>
           </div>
         </div>
@@ -578,8 +586,8 @@ function SchemeCard({
         )}
       </div>
 
-      {s.description && (
-        <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{s.description}</p>
+      {showDescription && (
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">{description}</p>
       )}
 
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -599,17 +607,25 @@ function SchemeCard({
         )}
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>
-          {s.validFrom}{s.validUntil ? ` → ${s.validUntil}` : " onwards"}
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
+        <span className="money truncate">
+          {formatIndianDate(s.validFrom)}{s.validUntil ? ` → ${formatIndianDate(s.validUntil)}` : " onwards"}
         </span>
         {canManageSchemes && (
-          <div className="flex gap-1">
-            <button onClick={onEdit} className="rounded p-1 hover:bg-muted transition-colors">
-              <Pencil className="h-3 w-3" />
+          <div className="flex shrink-0 gap-1">
+            <button
+              onClick={onEdit}
+              aria-label={`Edit ${s.name}`}
+              className="rounded-md p-1.5 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Pencil className="h-3.5 w-3.5" />
             </button>
-            <button onClick={onDelete} className="rounded p-1 hover:bg-destructive/10 hover:text-destructive transition-colors">
-              <Trash2 className="h-3 w-3" />
+            <button
+              onClick={onDelete}
+              aria-label={`Delete ${s.name}`}
+              className="rounded-md p-1.5 transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
@@ -617,3 +633,4 @@ function SchemeCard({
     </div>
   );
 }
+
