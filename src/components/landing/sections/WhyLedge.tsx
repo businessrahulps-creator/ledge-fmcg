@@ -124,7 +124,7 @@ export function WhyLedge() {
                   {isHero && (
                     <div className="flex justify-end mb-5">
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
-                        <span className="lp-live-dot" /> Offline-ready
+                        Offline-ready
                       </span>
                     </div>
                   )}

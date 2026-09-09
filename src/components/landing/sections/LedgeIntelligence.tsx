@@ -175,9 +175,7 @@ export function LedgeIntelligence() {
 
         <AnimateIn variant="blurFadeUp" delay={0.1}>
           <div className="mt-4 flex justify-center">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">
-              <span className="lp-live-dot" />
-              Launching in 3 months · Founding members get early access free
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-[11.5px] font-medium text-muted-foreground shadow-depth-2">              Launching in 3 months · Founding members get early access free
             </span>
           </div>
         </AnimateIn>
@@ -206,9 +204,7 @@ export function LedgeIntelligence() {
               return (
                 <StaggerItem key={c.title}>
                   <div className="lp-card lp-card--xl p-7 h-full flex flex-col">
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="lp-live-dot" />
-                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
+                    <div className="flex items-center gap-2 mb-5">                      <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                         Featured
                       </span>
                     </div>
@@ -258,9 +254,7 @@ export function LedgeIntelligence() {
               className="lp-card p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5 md:gap-6"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="lp-live-dot" />
-                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
+                <div className="flex items-center gap-2 mb-3">                  <span className="font-body text-[11px] uppercase tracking-[0.14em] text-accent font-semibold">
                     Limited · <ScrollCounter target={SPOTS_CLAIMED} /> / {SPOTS_TOTAL} spots claimed
                   </span>
                 </div>
