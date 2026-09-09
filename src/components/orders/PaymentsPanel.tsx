@@ -40,6 +40,8 @@ interface Props {
   /** Called after money moves so the page can refresh order/dealer figures. */
   onChanged?: () => void;
   canRecord?: boolean;
+  /** Reports money received / balance up to the page so the hero band can show it. */
+  onTotals?: (t: { received: number; balance: number }) => void;
 }
 
 /** Money actually received against one GST bill. Receipts are never edited or deleted — only cancelled. */
