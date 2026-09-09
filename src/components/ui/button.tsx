@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Fluent 2 button anatomy
- * - Radius: 6px (rounded-md → var(--radius))
+ * - Radius: 8px (rounded-md → calc(var(--radius) - 2px))
  * - Heights: 32px compact, 40px default, 48px lg
  * - Depth: rest depth-2 on filled, depth-4 on hover, none on ghost/link/outline
  * - Motion: 100ms fluent ease (decel on hover-in)
