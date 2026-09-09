@@ -81,6 +81,8 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
   );
   const balance = Math.max(0, Math.round((invoiceTotal - received) * 100) / 100);
 
+  useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
+
   const recordPayment = async () => {
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
