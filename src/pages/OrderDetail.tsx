@@ -82,6 +82,7 @@ export default function OrderDetail() {
   const api = useApi();
   const canManageStock = useCan("manage_stock");
   const canOverrideCredit = useCan("override_credit_limit");
+  const canSeeMoney = useCan("see_money");
   const { companyInfo } = api;
 
   const orders = api.orders.list();
@@ -670,6 +671,11 @@ export default function OrderDetail() {
               <span className={`rounded-lg border px-3 py-2 text-xs font-medium capitalize md:text-sm ${statusColors[order.deliveryStatus] || "border-border text-muted-foreground"}`}>
                 {order.deliveryStatus === "pending" ? "Not sent yet" : order.deliveryStatus}
               </span>
+              {order.deliveryStatus === "pending" && (
+                <Button size="sm" disabled={isSaving} onClick={startDispatch}>
+                  Dispatch &amp; bill
+                </Button>
+              )}
               {order.deliveryStatus === "dispatched" && (
                 <Button size="sm" variant="outline" disabled={isSaving} onClick={handleMarkDelivered}>
                   Mark delivered
