@@ -2682,18 +2682,29 @@
   }
   /* Wraps existing markup inside the dark band without rewriting each colour. */
   .hero-plain,
-  .hero-plain :where(h1, h2, h3, p, span, a, button, div) {
+  .hero-plain :where(h1, h2, h3, p, span, a, button, div, svg) {
     color: hsl(var(--primary-foreground));
   }
-  .hero-plain [class*="text-muted"],
-  .hero-plain [class*="foreground/"] {
-    opacity: 0.78;
+  .hero-plain :where([class*="text-muted"], [class*="text-foreground/"]) {
+    color: hsl(var(--primary-foreground) / 0.75);
+  }
+  .hero-plain :where([class*="text-destructive"], [class*="text-warning"]) {
+    color: hsl(var(--hero-attention));
+  }
+  .hero-plain :where([class*="text-success"]) {
+    color: hsl(var(--hero-good));
   }
   .hero-plain .timeframe-pill {
-    @apply border-primary-foreground/25 bg-primary-foreground/10;
+    @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
   }
-  .hero-plain [class*="border-"] {
+  .hero-plain :where([class*="border-"], [class*="divide-"]) {
     border-color: hsl(var(--primary-foreground) / 0.18);
+  }
+  .hero-plain :where(.bg-success, .bg-success\/80) {
+    background-color: hsl(var(--hero-good));
+  }
+  .hero-plain :where(.bg-warning\/60) {
+    background-color: hsl(var(--hero-attention));
   }
   .hero-band-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
