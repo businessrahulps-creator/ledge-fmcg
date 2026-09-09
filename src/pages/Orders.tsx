@@ -361,53 +361,62 @@ export default function Orders() {
           )
         ) : (
           <div className="glass-card overflow-hidden">
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
-                    <th className="px-6 py-3 font-semibold">Order #</th>
-                    <th className="px-6 py-3 font-semibold">Date</th>
-                    <th className="px-6 py-3 font-semibold">Dealer</th>
-                    <th className="px-6 py-3 font-semibold">Sales Person</th>
-                    <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                    <th className="px-6 py-3 font-semibold">Payment</th>
-                    <th className="px-6 py-3 font-semibold">Delivery</th>
-                    <th className="px-6 py-3 font-semibold">Billing</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedOrders.map((order) => {
-                    const billingStatus = getOrderBillingStatus(order.id);
-                    return (
-                      <tr
-                        key={order.id}
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                        onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
-                        onFocus={() => prefetchRoute(`/orders/${order.id}`)}
-                        className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
-                      >
-                        <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
-                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
-                        <td className="px-6 py-4">{order.distributorName}</td>
-                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{order.salesperson}</td>
-                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                        <td className="px-6 py-4">
-                          {billingStatus ? (
-                            <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                              {billingStatus.label}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/50">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Desktop table — six columns so a 1280px laptop needs no sideways scrolling.
+                On genuinely narrow windows it still scrolls, with a fade hinting at more. */}
+            <div className="relative hidden md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm [font-variant-numeric:tabular-nums]">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                      <th className="px-4 py-3 font-semibold">Order #</th>
+                      <th className="px-4 py-3 font-semibold">Date</th>
+                      <th className="px-4 py-3 font-semibold">Dealer</th>
+                      <th className="px-4 py-3 font-semibold text-right">Amount</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Billing</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.map((order) => {
+                      const billingStatus = getOrderBillingStatus(order.id);
+                      return (
+                        <tr
+                          key={order.id}
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                          onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
+                          onFocus={() => prefetchRoute(`/orders/${order.id}`)}
+                          className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
+                        >
+                          <td className="px-4 py-3.5 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
+                          <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
+                          <td className="px-4 py-3.5">
+                            <span className="block max-w-[220px] truncate text-foreground">{order.distributorName}</span>
+                            <span className="block max-w-[220px] truncate text-xs text-muted-foreground">{order.salesperson}</span>
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                          <td className="px-4 py-3.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <StatusBadge status={order.paymentStatus} />
+                              <StatusBadge status={order.deliveryStatus} />
+                            </div>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            {billingStatus ? (
+                              <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                                {billingStatus.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/50">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
 
             <div className="divide-y divide-border/50 md:hidden">
               {paginatedOrders.map((order) => {
