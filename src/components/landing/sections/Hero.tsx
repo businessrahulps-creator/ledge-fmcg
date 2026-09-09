@@ -52,8 +52,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              <span className="hidden sm:inline">The Operating System for India's FMCG Businesses</span>
-              <span className="sm:hidden">OS for India's FMCG</span>
+              <span className="hidden sm:inline">The Operating System for India’s FMCG Businesses</span>
+              <span className="sm:hidden">OS for India’s FMCG</span>
             </span>
           </motion.div>
 
@@ -154,7 +154,7 @@ export function Hero() {
                     >
                       <span className="lp-proof-chip">
                         <span className="lp-proof-chip__dot" />
-                        ₹2.4Cr tracked this week
+                        ₹2.4Cr tracked this&nbsp;week
                       </span>
                     </motion.div>
                   </div>

@@ -30,8 +30,12 @@ export function MobileWhatsAppFab() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.6, y: 20 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
-          className="md:hidden fixed bottom-5 right-5 z-40 flex items-center justify-center w-[52px] h-[52px] rounded-full text-white active:scale-95 transition-transform"
-          style={{ backgroundColor: WA_GREEN, boxShadow: "0 8px 28px -6px rgba(37,211,102,0.55), 0 2px 6px rgba(0,0,0,0.12)" }}
+          className="md:hidden fixed right-5 z-40 flex items-center justify-center w-[52px] h-[52px] rounded-full text-white active:scale-95 transition-transform"
+          style={{
+            bottom: "calc(1.25rem + env(safe-area-inset-bottom))",
+            backgroundColor: WA_GREEN,
+            boxShadow: "0 8px 28px -6px rgba(37,211,102,0.55), 0 2px 6px rgba(0,0,0,0.12)",
+          }}
         >
           <span
             aria-hidden

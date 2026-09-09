@@ -57,7 +57,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Main navigation"
-      className="md:hidden fixed inset-0 z-[60] overflow-hidden"
+      className="md:hidden fixed inset-0 z-[60] overflow-hidden [overscroll-behavior:contain]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, pointerEvents: "none" }}
@@ -156,7 +156,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
           exit={{ opacity: 0, y: -16, filter: "blur(6px)", transition: childExit }}
         >
           <span aria-hidden>🪔</span>
-          <span>Built in God's Own Country · Kerala</span>
+          <span>Built in God’s Own Country · Kerala</span>
         </motion.div>
       </motion.div>
     </motion.div>

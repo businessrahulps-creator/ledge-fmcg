@@ -26,7 +26,7 @@ export function CursorAura({
     typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches;
   const disabled = reduce || isTouch;
 
-  // Center-default so first paint isn't off-screen.
+  // Center-default so first paint isn’t off-screen.
   const x = useMotionValue(50);
   const y = useMotionValue(40);
   // Soft spring — buttery follow, no snapping.

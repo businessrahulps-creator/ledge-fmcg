@@ -32,7 +32,7 @@ export function BrowserFrame({
           </div>
         </div>
       </div>
-      {/* Inner radius matches frame so the screenshot doesn't square-off the corners */}
+      {/* Inner radius matches frame so the screenshot doesn’t square-off the corners */}
       <div className="rounded-[4px] overflow-hidden">{children}</div>
     </div>
   );

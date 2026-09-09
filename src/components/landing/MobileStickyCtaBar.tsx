@@ -35,7 +35,8 @@ export function MobileStickyCtaBar() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 240, damping: 26 }}
-          className="md:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-3 pt-2 pointer-events-none"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pt-2 pointer-events-none"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
         >
           <div className="pointer-events-auto flex items-center gap-2 rounded-lp-xs bg-background/90 backdrop-blur-xl border border-border px-2 py-2 shadow-depth-8">
             <Link

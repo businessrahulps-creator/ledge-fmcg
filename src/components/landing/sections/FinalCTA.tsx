@@ -45,7 +45,7 @@ export function FinalCTA() {
           className="font-body text-[17px] md:text-[19px] text-muted-foreground max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
-          Start free for 30 days. No card needed. Setup in 30 minutes.
+          Start free for 30&nbsp;days. No card needed. Setup in 30&nbsp;minutes.
           <br />
           Owner, manager, accountant, salesperson — one screen, one truth.
         </motion.p>
@@ -60,7 +60,7 @@ export function FinalCTA() {
               href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20about%20Ledge"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-[color,background-color,border-color,box-shadow] duration-200"
               aria-label="Chat with Ledge sales on WhatsApp"
             >
               <WhatsAppIcon className="w-4 h-4 text-[#128C7E]" />

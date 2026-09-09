@@ -51,7 +51,7 @@ const cards: Card[] = [
     key: "team",
     visual: <TeamBarsVisual />,
     lede: "Watch the team, live.",
-    caption: "Every rep's orders and targets against plan.",
+    caption: "Every rep’s orders and targets against plan.",
     variant: "mist",
     span: "lg:col-span-2",
   },

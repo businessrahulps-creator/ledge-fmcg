@@ -12,7 +12,7 @@ const companies = [
 const stats = [
   { value: "2–3 hrs", label: "Wasted daily per salesperson — on paperwork, not selling" },
   { value: "5–10%", label: "Revenue lost to missed orders, wrong schemes, late collections" },
-  { value: "₹10L–₹1Cr", label: "Quietly gone every year. Silent. Invisible. Until it's too late." },
+  { value: "₹10L–₹1Cr", label: "Quietly gone every year. Silent. Invisible. Until it’s too late." },
   { value: "80%", label: "Admin work eliminated once Ledge is live" },
 ];
 

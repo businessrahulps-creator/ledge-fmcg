@@ -39,11 +39,11 @@ export function Founder() {
             transition={{ duration: 0.6 }}
             className="font-heading font-medium text-[20px] md:text-[24px] text-foreground leading-[1.5] tracking-[-0.01em] mt-6"
           >
-            "I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
+            &ldquo;I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
             <br /><br />
             Your team is in the field right now. Your floor is running. Your business deserves a system that keeps up. Built in India. Designed for the way you actually work.
             <br /><br />
-            <span className="text-primary font-semibold">Start free. If it's not running your business in 30 days, walk away.</span>"
+            <span className="text-primary font-semibold">Start free. If it&rsquo;s not running your business in 30&nbsp;days, walk away.&rdquo;</span>
           </motion.p>
 
           <div className="mt-8">
