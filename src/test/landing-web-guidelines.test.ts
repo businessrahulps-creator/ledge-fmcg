@@ -50,3 +50,39 @@ describe("landing — web interface guidelines", () => {
     expect(index).toContain('id="main-content"');
   });
 });
+
+describe("landing — taste pass guardrails", () => {
+  it("no em dashes in landing copy", () => {
+    const offenders = landingFiles.filter((f) => /\u2014/.test(readFileSync(f, "utf8")));
+    expect(offenders).toEqual([]);
+  });
+
+  it("eyebrow labels stay rationed to at most four sections", () => {
+    const withEyebrow = landingFiles.filter((f) =>
+      /className="[^"]*\blp-eyebrow\b/.test(readFileSync(f, "utf8")),
+    );
+    expect(withEyebrow.length).toBeLessThanOrEqual(4);
+  });
+
+  it("the eyebrow chip carries no decorative dot", () => {
+    expect(css).not.toMatch(/\.lp-eyebrow[^{]*\{[^}]*content:\s*""/);
+  });
+
+  it("live dots are used at most once", () => {
+    const count = landingFiles.reduce(
+      (n, f) => n + (readFileSync(f, "utf8").match(/lp-live-dot/g)?.length ?? 0),
+      0,
+    );
+    expect(count).toBeLessThanOrEqual(1);
+  });
+
+  it("primary trial CTA uses one wording everywhere", () => {
+    const offenders = landingFiles.filter((f) => /Start free\b|Start 30-Day Free Trial/.test(readFileSync(f, "utf8")));
+    expect(offenders).toEqual([]);
+  });
+
+  it("no warm brown tints remain in the landing palette", () => {
+    expect(css).not.toMatch(/hsl\(3[0-9] /);
+    expect(css).not.toMatch(/hsl\(244 /);
+  });
+});
