@@ -36,8 +36,9 @@ export default function Index() {
         description="Orders, payments, stock, invoices and reports — one mobile app for India's FMCG super-stockists. Mobile-first, works offline. Start free for 30 days."
         path="/"
       />
+      <a href="#main-content" className="lp-skip-link">Skip to Content</a>
       <Navbar />
-      <main>
+      <main id="main-content">
         <Hero />
         <TrustBar />
         <Problem />
