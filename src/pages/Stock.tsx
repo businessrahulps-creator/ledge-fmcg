@@ -778,6 +778,31 @@ export default function Stock() {
                     <NumberInput allowDecimal allowEmpty={false} min={0} value={editProduct.basePrice} onValueChange={(v) => setEditProduct({ ...editProduct, basePrice: v ?? 0 })} className="h-10 rounded-lg" />
                   </div>
                 </div>
+                <div className="space-y-1.5 rounded-lg border border-border p-3 md:space-y-2">
+                  <Label className="text-xs md:text-sm">GST rate used on bills *</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 5, 12, 18, 28].map((rate) => (
+                      <button
+                        key={rate}
+                        type="button"
+                        onClick={() => setEditProduct({ ...editProduct, gstRate: rate, gstRateConfirmed: true })}
+                        className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors md:text-sm ${
+                          editProduct.gstRate === rate && editProduct.gstRateConfirmed
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:border-foreground/20"
+                        }`}
+                      >
+                        {rate}%
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {editProduct.gstRateConfirmed
+                      ? "Confirmed. This rate goes on every bill for this product."
+                      : "Not confirmed yet — bills for this product are blocked until you pick the rate."}
+                  </p>
+                </div>
+
               </div>
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
