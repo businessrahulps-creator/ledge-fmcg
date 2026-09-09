@@ -252,8 +252,8 @@ function NewClaimDialog({
         {step === 1 ? (
           <>
             <DialogHeader>
-              <DialogTitle>New Claim</DialogTitle>
-              <DialogDescription>Select an order to file a return or damage claim against.</DialogDescription>
+              <DialogTitle>Record a return</DialogTitle>
+              <DialogDescription>Pick the bill the goods are coming back against.</DialogDescription>
             </DialogHeader>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -268,8 +268,8 @@ function NewClaimDialog({
               {filteredOrders.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center">
                   <PackageX className="h-8 w-8 text-muted-foreground/50" strokeWidth={1.5} />
-                  <p className="mt-2 text-sm font-medium">No eligible orders</p>
-                  <p className="text-xs text-muted-foreground">Only dispatched or delivered orders can have claims.</p>
+                  <p className="mt-2 text-sm font-medium">Nothing to return yet</p>
+                  <p className="text-xs text-muted-foreground">Only orders that have been dispatched and billed can be returned.</p>
                 </div>
               ) : (
                 filteredOrders.map(order => (
@@ -296,32 +296,15 @@ function NewClaimDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Claim for {selectedOrder?.orderNumber}</DialogTitle>
+              <DialogTitle>Return against {selectedBill?.invoiceNumber ?? selectedOrder?.orderNumber}</DialogTitle>
               <DialogDescription>{selectedOrder?.distributorName}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">Claim Type</Label>
-                <Select value={claimType} onValueChange={v => setClaimType(v as "return" | "damage")}>
-                  <SelectTrigger className="text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="return">
-                      <span className="flex items-center gap-1.5"><RotateCcw className="h-3.5 w-3.5" /> Goods Returned</span>
-                    </SelectItem>
-                    <SelectItem value="damage">
-                      <span className="flex items-center gap-1.5"><PackageX className="h-3.5 w-3.5" /> Damaged / Claim Only</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Reason (optional)</Label>
+                <Label className="text-xs">Why is it coming back? (optional)</Label>
                 <Textarea
-                  placeholder="Why is this being returned or claimed?"
+                  placeholder="Short reason, e.g. leaking bottles, wrong item sent…"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   className="min-h-[60px] text-sm"
@@ -329,36 +312,58 @@ function NewClaimDialog({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Products & Quantities</Label>
+                <Label className="text-xs">How many pieces are coming back?</Label>
                 <div className="rounded-lg border border-border overflow-hidden">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-border bg-muted/30 text-left text-muted-foreground">
                         <th className="px-3 py-2 font-medium">Product</th>
-                        <th className="px-3 py-2 font-medium text-right w-20">Ordered</th>
-                        <th className="px-3 py-2 font-medium text-right w-24">Claim Qty</th>
+                        <th className="px-3 py-2 font-medium text-right w-16">Billed</th>
+                        <th className="px-3 py-2 font-medium text-right w-24">Good</th>
+                        <th className="px-3 py-2 font-medium text-right w-24">Damaged</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder?.lines.map((line, i) => (
-                        <tr key={i} className="border-b border-border/50">
-                          <td className="px-3 py-2 font-medium">{line.productName}</td>
-                          <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
-                          <td className="px-3 py-2 text-right">
-                            <NumberInput
-                              allowEmpty={false}
-                              min={0}
-                              max={line.quantity}
-                              value={quantities[i] ?? 0}
-                              onValueChange={v => setQuantities(prev => ({ ...prev, [i]: v ?? 0 }))}
-                              className="h-7 w-20 text-xs text-right ml-auto"
-                            />
-                          </td>
-                        </tr>
-                      ))}
+                      {returnLines.map(line => {
+                        const other = (k: "goodQty" | "damagedQty") => line.billedQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
+                        return (
+                          <tr key={line.invoiceLineId} className="border-b border-border/50">
+                            <td className="px-3 py-2 font-medium">{line.productName}</td>
+                            <td className="px-3 py-2 text-right text-muted-foreground">{line.billedQty}</td>
+                            <td className="px-3 py-2 text-right">
+                              <NumberInput
+                                allowEmpty={false}
+                                min={0}
+                                max={other("goodQty")}
+                                value={line.goodQty}
+                                onValueChange={v => setGood(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
+                                className="h-7 w-20 text-xs text-right ml-auto"
+                              />
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <NumberInput
+                                allowEmpty={false}
+                                min={0}
+                                max={other("damagedQty")}
+                                value={line.damagedQty}
+                                onValueChange={v => setDamaged(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
+                                className="h-7 w-20 text-xs text-right ml-auto"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Good pieces go back into the warehouse. Damaged pieces are credited but stay out of stock.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">Credit note value (before tax)</span>
+                <span className="font-semibold">{formatCurrency(returnValue)}</span>
               </div>
             </div>
 
@@ -368,9 +373,10 @@ function NewClaimDialog({
               </Button>
               <Button size="sm" onClick={handleSubmit} disabled={submitting}>
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
-                {submitting ? "Saving…" : "Submit Claim"}
+                {submitting ? "Saving…" : "Record return"}
               </Button>
             </DialogFooter>
+
           </>
         )}
       </DialogContent>
