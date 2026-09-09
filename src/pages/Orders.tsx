@@ -7,7 +7,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-react";
+import { Plus, Search, Filter, Download, FileText, ShoppingCart, ChevronRight } from "lucide-react";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
@@ -206,9 +206,8 @@ export default function Orders() {
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
-              size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-              aria-label="Export CSV"
+              className="h-10 px-3 sm:px-4"
+              aria-label="Download Excel file"
               onClick={() => {
                 const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
                 exportXlsx(
@@ -232,16 +231,17 @@ export default function Orders() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">Excel</span>
+              <span className="hidden sm:inline">Export Excel</span>
             </Button>
             <Button
               variant="outline"
-              size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              className="h-10 px-3 sm:px-4"
               aria-label="Export PDF"
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
+              <span className="sm:hidden">PDF</span>
               <span className="hidden sm:inline">Export PDF</span>
             </Button>
             <Can do="place_orders">
@@ -361,53 +361,62 @@ export default function Orders() {
           )
         ) : (
           <div className="glass-card overflow-hidden">
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
-                    <th className="px-6 py-3 font-semibold">Order #</th>
-                    <th className="px-6 py-3 font-semibold">Date</th>
-                    <th className="px-6 py-3 font-semibold">Dealer</th>
-                    <th className="px-6 py-3 font-semibold">Sales Person</th>
-                    <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                    <th className="px-6 py-3 font-semibold">Payment</th>
-                    <th className="px-6 py-3 font-semibold">Delivery</th>
-                    <th className="px-6 py-3 font-semibold">Billing</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedOrders.map((order) => {
-                    const billingStatus = getOrderBillingStatus(order.id);
-                    return (
-                      <tr
-                        key={order.id}
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                        onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
-                        onFocus={() => prefetchRoute(`/orders/${order.id}`)}
-                        className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
-                      >
-                        <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
-                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
-                        <td className="px-6 py-4">{order.distributorName}</td>
-                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{order.salesperson}</td>
-                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
-                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
-                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
-                        <td className="px-6 py-4">
-                          {billingStatus ? (
-                            <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                              {billingStatus.label}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/50">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Desktop table — six columns so a 1280px laptop needs no sideways scrolling.
+                On genuinely narrow windows it still scrolls, with a fade hinting at more. */}
+            <div className="relative hidden md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm [font-variant-numeric:tabular-nums]">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
+                      <th className="px-4 py-3 font-semibold">Order #</th>
+                      <th className="px-4 py-3 font-semibold">Date</th>
+                      <th className="px-4 py-3 font-semibold">Dealer</th>
+                      <th className="px-4 py-3 font-semibold text-right">Amount</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Billing</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOrders.map((order) => {
+                      const billingStatus = getOrderBillingStatus(order.id);
+                      return (
+                        <tr
+                          key={order.id}
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                          onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
+                          onFocus={() => prefetchRoute(`/orders/${order.id}`)}
+                          className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
+                        >
+                          <td className="px-4 py-3.5 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
+                          <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
+                          <td className="px-4 py-3.5">
+                            <span className="block max-w-[220px] truncate text-foreground">{order.distributorName}</span>
+                            <span className="block max-w-[220px] truncate text-xs text-muted-foreground">{order.salesperson}</span>
+                          </td>
+                          <td className="px-4 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
+                          <td className="px-4 py-3.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <StatusBadge status={order.paymentStatus} />
+                              <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                            </div>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            {billingStatus ? (
+                              <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                                {billingStatus.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/50">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
 
             <div className="divide-y divide-border/50 md:hidden">
               {paginatedOrders.map((order) => {
@@ -415,30 +424,37 @@ export default function Orders() {
                 return (
                   <div
                     key={order.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(`/orders/${order.id}`)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/orders/${order.id}`); } }}
                     onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
-                    className="border-b border-border/50 px-4 py-3.5 card-hover cursor-pointer"
+                    className="flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">{order.orderNumber}</span>
-                      <span className="text-sm font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="truncate text-sm font-medium text-foreground">{order.orderNumber}</span>
+                        <span className="money shrink-0 text-sm font-semibold">{formatCurrency(order.total - (order.schemeSavings || 0))}</span>
+                      </div>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {order.distributorName} · {formatIndianDate(order.date)}
+                      </p>
+                      <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <StatusBadge status={order.paymentStatus} />
+                        <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                        {billingStatus && (
+                          <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                            {billingStatus.label}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {order.distributorName} · {formatIndianDate(order.date)}
-                    </p>
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <StatusBadge status={order.paymentStatus} />
-                      <StatusBadge status={order.deliveryStatus} />
-                      {billingStatus && (
-                        <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
-                          {billingStatus.label}
-                        </span>
-                      )}
-                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" aria-hidden />
                   </div>
                 );
               })}
             </div>
+
 
             <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>

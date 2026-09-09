@@ -36,23 +36,9 @@ const primaryMobileNav = [
   { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
 ];
 
-type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
-
-// V2 unified palette — neutral Bone chip backgrounds, semantic color reserved for the
-// icon stroke only. This removes the "tinted-quilt" feel users called out on mobile
-// and keeps the surface feeling premium and consistent across groups.
-const TONE_STYLES: Record<MoreTone, { iconBg: string; iconFg: string; activeBg: string; activeFg: string }> = {
-  warning: { iconBg: "bg-muted/60",  iconFg: "text-warning",            activeBg: "bg-warning/12",  activeFg: "text-warning" },
-  primary: { iconBg: "bg-muted/60",  iconFg: "text-primary",            activeBg: "bg-primary/10",  activeFg: "text-primary" },
-  success: { iconBg: "bg-muted/60",  iconFg: "text-success",            activeBg: "bg-success/12",  activeFg: "text-success" },
-  accent:  { iconBg: "bg-muted/60",  iconFg: "text-accent-foreground",  activeBg: "bg-accent/15",   activeFg: "text-accent-foreground" },
-  muted:   { iconBg: "bg-muted/60",  iconFg: "text-foreground/70",      activeBg: "bg-primary/10",  activeFg: "text-primary" },
-};
-
-const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
+const moreGroups: Array<{ label: string; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
   {
     label: "Work",
-    tone: "warning",
     items: [
       { title: "Money to Collect", url: "/billing", icon: Wallet },
       { title: "Returns", url: "/claims", icon: RotateCcw },
@@ -60,7 +46,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Catalog",
-    tone: "primary",
     items: [
       { title: "Schemes", url: "/schemes", icon: Gift },
       { title: "Targets", url: "/targets", icon: Target },
@@ -68,7 +53,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Relationships",
-    tone: "success",
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
@@ -77,7 +61,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Account",
-    tone: "muted",
     items: [
       { title: "Settings", url: "/settings", icon: Settings },
     ],
@@ -407,7 +390,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
 
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-                <SheetContent side="bottom" className="rounded-t-[24px] px-0 pt-2 pb-0 h-[92vh] flex flex-col bg-card border-t border-border/60">
+                <SheetContent side="bottom" className="rounded-t-[24px] px-0 pt-2 pb-0 h-[88dvh] max-h-[88dvh] flex flex-col bg-card border-t border-border/60">
                   {/* Drag handle */}
                   <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-3 shrink-0" />
 
@@ -456,10 +439,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
                   {/* Scrollable sectioned list */}
                   <div className="relative flex-1 min-h-0">
-                    <div className="absolute inset-0 overflow-y-auto px-5 pb-8">
-                      {moreGroups.map((group, gIdx) => {
-                        const tone = TONE_STYLES[group.tone];
-                        return (
+                    <div className="absolute inset-0 overflow-y-auto overscroll-contain px-5 pb-6">
+                      {moreGroups.map((group, gIdx) => (
                         <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
                           <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1.5 px-1">
                             {group.label}
@@ -467,66 +448,64 @@ export function AppLayout({ children }: { children: ReactNode }) {
                           <div className="rounded-xl border border-border/50 bg-background/60 overflow-hidden divide-y divide-border/40 shadow-depth-2">
                             {group.items.map((item) => {
                               const active = location.pathname.startsWith(item.url);
-                              const rowCls = `group flex w-full items-center gap-3 px-3.5 h-[52px] text-left transition-colors ${active ? "bg-primary/[0.05]" : "hover:bg-muted/40 active:bg-muted/60"}`;
                               const Icon = item.icon;
-                              const inner = (
-                                <>
-                                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${active ? tone.activeBg + " " + tone.activeFg : tone.iconBg + " " + tone.iconFg}`}>
-                                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-                                  </span>
-                                  <span className={`flex-1 text-[15px] tracking-[-0.005em] ${active ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
-                                    {item.title}
-                                  </span>
-                                  {active && (
-                                    <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-                                  )}
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 transition-transform group-active:translate-x-0.5" />
-                                </>
-                              );
                               return (
                                 <Link
                                   key={item.title}
                                   to={item.url}
                                   onClick={() => setMoreOpen(false)}
-                                  className={rowCls}
+                                  className={`group flex w-full items-center gap-3 px-3.5 min-h-[52px] text-left transition-colors duration-150 ${active ? "bg-primary/[0.05]" : "hover:bg-muted/40 active:bg-muted/60"}`}
                                 >
-                                  {inner}
+                                  {/* One accent, locked: neutral tile everywhere, primary only when active. */}
+                                  <span
+                                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                                      active ? "bg-primary/10 text-primary" : "bg-muted/60 text-foreground/70"
+                                    }`}
+                                  >
+                                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
+                                  </span>
+                                  <span className={`flex-1 text-[15px] tracking-[-0.005em] ${active ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
+                                    {item.title}
+                                  </span>
+                                  {active && <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />}
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 transition-transform group-active:translate-x-0.5" />
                                 </Link>
                               );
                             })}
                           </div>
                         </div>
-                        );
-                      })}
-
-                      {/* Sign out */}
-                      {profile && (
-                        <button
-                          type="button"
-                          onClick={async () => { setMoreOpen(false); await signOut(); }}
-                          className="mt-5 flex w-full items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background text-[14px] font-medium text-foreground/80 hover:bg-muted/40 active:bg-muted/60 transition-colors"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sign out
-                        </button>
-                      )}
-
-                      {/* Footer status strip */}
-                      <div className="mt-4 flex items-center justify-between px-1 text-[11px] text-muted-foreground/70">
-                        <span className="inline-flex items-center gap-1.5">
-                          <CircleDot className={`h-3 w-3 ${online ? "text-success" : "text-muted-foreground/50"}`} />
-                          {online ? "Online" : "Offline"}
-                        </span>
-                        <span className="tracking-[-0.005em]">Ledge · v2</span>
-                      </div>
-
-                      <div style={{ height: "calc(env(safe-area-inset-bottom) + 1.5rem)" }} />
+                      ))}
                     </div>
                     {/* Top fade */}
                     <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-card to-transparent" aria-hidden />
-                    {/* Bottom fade */}
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent" aria-hidden />
+                    {/* Bottom fade — signals there is more below */}
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent" aria-hidden />
                   </div>
+
+                  {/* Pinned footer — Sign out is always reachable without scrolling */}
+                  <div
+                    className="shrink-0 border-t border-border/60 bg-card px-5 pt-3"
+                    style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+                  >
+                    {profile && (
+                      <button
+                        type="button"
+                        onClick={async () => { setMoreOpen(false); await signOut(); }}
+                        className="flex w-full items-center justify-center gap-2 h-11 rounded-lg border border-border/60 bg-background text-[14px] font-medium text-foreground/80 transition-colors hover:bg-muted/40 active:bg-muted/60"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    )}
+                    <div className="mt-2.5 flex items-center justify-between px-1 text-[11px] text-muted-foreground/70">
+                      <span className="inline-flex items-center gap-1.5">
+                        <CircleDot className={`h-3 w-3 ${online ? "text-success" : "text-muted-foreground/50"}`} />
+                        {online ? "Online" : "Offline"}
+                      </span>
+                      <span className="tracking-[-0.005em]">Ledge · v2</span>
+                    </div>
+                  </div>
+
                 </SheetContent>
               </Sheet>
             </div>

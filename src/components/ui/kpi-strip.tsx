@@ -38,7 +38,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
           <ReconcileStamp updatedAt={reconciledAt} />
         </div>
       )}
-      <div className={cn("grid border-y border-border/60 divide-x divide-border/60", gridCols)}>
+      <div className={cn("grid items-stretch border-y border-border/60 divide-x divide-border/60", gridCols)}>
       {cells.map((c, i) => {
         const Inner = (
           <>
@@ -51,7 +51,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
             <p
               className={cn(
                 "font-heading text-[20px] sm:text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num tabular-nums mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
-                c.zero && "text-muted-foreground/35",
+                c.zero && "text-muted-foreground/55",
               )}
             >
               <AnimatedNumber value={c.value} />
@@ -59,7 +59,15 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
             {c.insight && <div className="mt-0">{c.insight}</div>}
           </>
         );
-        const base = cn("py-4 px-4 text-left", i === 0 && "md:pl-0", i === cols - 1 && "md:pr-0");
+        // On phones the strip wraps to two rows: give the second row a top hairline
+        // so the block reads as a grid, not as stray vertical lines.
+        const wrapsOnMobile = cols > 2 && i >= 2;
+        const base = cn(
+          "flex h-full flex-col py-4 px-4 text-left",
+          wrapsOnMobile && "border-t border-border/60 md:border-t-0",
+          i === 0 && "md:pl-0",
+          i === cols - 1 && "md:pr-0",
+        );
         return c.onClick ? (
           <button key={c.label + i} type="button" onClick={c.onClick} className={cn(base, "hover:bg-muted/20 transition-colors")}>
             {Inner}
@@ -71,6 +79,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
         );
       })}
       </div>
+
     </div>
   );
 }
