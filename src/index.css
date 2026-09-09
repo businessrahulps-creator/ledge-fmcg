@@ -475,33 +475,13 @@
       0 8px 32px -8px hsl(var(--primary) / 0.10),
       0 24px 60px -20px hsl(var(--primary) / 0.14);
   }  /* Eyebrow chip — Bone, with a tiny Terracotta dot */
-  .lp-eyebrow {
-    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
-    letter-spacing: 0.16em;
-    background: hsl(220 13% 90%);
-    border: 1px solid hsl(var(--border));
-    color: hsl(var(--muted-foreground));
-  }
-  .lp-eyebrow::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 9999px;
-    background: hsl(var(--accent));
-  }
+  .lp-eyebrow,
   .lp-eyebrow-dark {
-    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold uppercase;
     letter-spacing: 0.16em;
-    background: hsl(220 13% 90%);
+    background: hsl(var(--lp-surface-sunken));
     border: 1px solid hsl(var(--border));
     color: hsl(var(--muted-foreground));
-  }
-  .lp-eyebrow-dark::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 9999px;
-    background: hsl(var(--accent));
   }
 
   @media (max-width: 480px) {
