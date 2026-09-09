@@ -68,7 +68,7 @@ export function Testimonials() {
                     className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"
                     style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                   >
-                    "
+                    &ldquo;
                   </span>
 
                   <p className="relative font-body text-[16px] md:text-[17px] text-foreground leading-[1.6] tracking-[-0.005em] flex-1">

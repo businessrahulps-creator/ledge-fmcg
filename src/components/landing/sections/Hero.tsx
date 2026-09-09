@@ -154,7 +154,7 @@ export function Hero() {
                     >
                       <span className="lp-proof-chip">
                         <span className="lp-proof-chip__dot" />
-                        ₹2.4Cr tracked this week
+                        ₹2.4Cr tracked this&nbsp;week
                       </span>
                     </motion.div>
                   </div>

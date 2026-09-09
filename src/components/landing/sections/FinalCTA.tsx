@@ -45,7 +45,7 @@ export function FinalCTA() {
           className="font-body text-[17px] md:text-[19px] text-muted-foreground max-w-2xl mx-auto mt-7 leading-[1.55]"
           {...fadeUp(0.12)}
         >
-          Start free for 30 days. No card needed. Setup in 30 minutes.
+          Start free for 30&nbsp;days. No card needed. Setup in 30&nbsp;minutes.
           <br />
           Owner, manager, accountant, salesperson — one screen, one truth.
         </motion.p>
