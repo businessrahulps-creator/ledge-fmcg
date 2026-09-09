@@ -393,7 +393,7 @@ export default function OrderDetail() {
           subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
           aside={
             <>
-              <StatusBadge status={order.paymentStatus} />
+              {moneyStatus && <StatusBadge status={moneyStatus} />}
               <StatusBadge status={order.deliveryStatus} kind="delivery" />
             </>
           }
