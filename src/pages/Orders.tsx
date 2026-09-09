@@ -7,7 +7,7 @@ import { ListPagination } from "@/components/ui/list-pagination";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, Download, FileText, ShoppingCart } from "lucide-react";
+import { Plus, Search, Filter, Download, FileText, ShoppingCart, ChevronRight } from "lucide-react";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
@@ -206,9 +206,8 @@ export default function Orders() {
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
-              size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-              aria-label="Export CSV"
+              className="h-10 px-3 sm:px-4"
+              aria-label="Download Excel file"
               onClick={() => {
                 const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
                 exportXlsx(
@@ -232,16 +231,17 @@ export default function Orders() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">Excel</span>
+              <span className="hidden sm:inline">Export Excel</span>
             </Button>
             <Button
               variant="outline"
-              size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
+              className="h-10 px-3 sm:px-4"
               aria-label="Export PDF"
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
+              <span className="sm:hidden">PDF</span>
               <span className="hidden sm:inline">Export PDF</span>
             </Button>
             <Can do="place_orders">
