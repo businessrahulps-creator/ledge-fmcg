@@ -72,9 +72,6 @@ export default function NewOrder() {
   const [lines, setLines] = useState<OrderLineState[]>([
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
-  const [paymentMode, setPaymentMode] = useState("cash");
-  const [paymentStatus, setPaymentStatus] = useState("pending");
-  const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
@@ -83,16 +80,12 @@ export default function NewOrder() {
   const dealerFieldRef = useRef<HTMLDivElement>(null);
   const salespersonFieldRef = useRef<HTMLDivElement>(null);
   const warehouseFieldRef = useRef<HTMLDivElement>(null);
-  const dispatchDateFieldRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedDealer, setSelectedDealer] = useState("");
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
-  const [dispatchDate, setDispatchDate] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [driverName, setDriverName] = useState("");
   const [remarks, setRemarks] = useState("");
 
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
