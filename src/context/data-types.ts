@@ -243,6 +243,7 @@ export interface TransactionalContextType {
   deleteOrder: DataContextType["deleteOrder"];
   dispatchAndBill: DataContextType["dispatchAndBill"];
   cancelOrder: DataContextType["cancelOrder"];
+  markDelivered: DataContextType["markDelivered"];
 
   addSalesperson: DataContextType["addSalesperson"];
   updateSalesperson: DataContextType["updateSalesperson"];
