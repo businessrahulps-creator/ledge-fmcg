@@ -373,14 +373,14 @@ export default function Performance() {
             }}
           />
         </div>
-      <div className="space-y-5">
+      <div className="page-stack">
         {/* Header */}
         <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          <div className="min-w-0">
+            <h1 className="h1-display">
               Performance
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="h1-subtitle">
               Real-time business intelligence · <span className="text-foreground/80">{revenueMode === "delivered" ? "Delivered Revenue" : "Booked Revenue"}</span>
             </p>
           </div>

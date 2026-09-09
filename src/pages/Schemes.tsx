@@ -199,12 +199,12 @@ export default function Schemes() {
           />
         </div>
 
-        <div className="space-y-5">
+        <div className="page-stack">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Schemes</h1>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="h1-display">Schemes</h1>
+              <p className="h1-subtitle">
                 Create offers and discounts that automatically apply to orders
               </p>
             </div>
