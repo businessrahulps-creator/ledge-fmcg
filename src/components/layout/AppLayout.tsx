@@ -36,23 +36,9 @@ const primaryMobileNav = [
   { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
 ];
 
-type MoreTone = "warning" | "primary" | "success" | "accent" | "muted";
-
-// V2 unified palette — neutral Bone chip backgrounds, semantic color reserved for the
-// icon stroke only. This removes the "tinted-quilt" feel users called out on mobile
-// and keeps the surface feeling premium and consistent across groups.
-const TONE_STYLES: Record<MoreTone, { iconBg: string; iconFg: string; activeBg: string; activeFg: string }> = {
-  warning: { iconBg: "bg-muted/60",  iconFg: "text-warning",            activeBg: "bg-warning/12",  activeFg: "text-warning" },
-  primary: { iconBg: "bg-muted/60",  iconFg: "text-primary",            activeBg: "bg-primary/10",  activeFg: "text-primary" },
-  success: { iconBg: "bg-muted/60",  iconFg: "text-success",            activeBg: "bg-success/12",  activeFg: "text-success" },
-  accent:  { iconBg: "bg-muted/60",  iconFg: "text-accent-foreground",  activeBg: "bg-accent/15",   activeFg: "text-accent-foreground" },
-  muted:   { iconBg: "bg-muted/60",  iconFg: "text-foreground/70",      activeBg: "bg-primary/10",  activeFg: "text-primary" },
-};
-
-const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
+const moreGroups: Array<{ label: string; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
   {
     label: "Work",
-    tone: "warning",
     items: [
       { title: "Money to Collect", url: "/billing", icon: Wallet },
       { title: "Returns", url: "/claims", icon: RotateCcw },
@@ -60,7 +46,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Catalog",
-    tone: "primary",
     items: [
       { title: "Schemes", url: "/schemes", icon: Gift },
       { title: "Targets", url: "/targets", icon: Target },
@@ -68,7 +53,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Relationships",
-    tone: "success",
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
@@ -77,7 +61,6 @@ const moreGroups: Array<{ label: string; tone: MoreTone; items: Array<{ title: s
   },
   {
     label: "Account",
-    tone: "muted",
     items: [
       { title: "Settings", url: "/settings", icon: Settings },
     ],
