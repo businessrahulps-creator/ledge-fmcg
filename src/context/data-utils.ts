@@ -151,9 +151,11 @@ export function mapInvoice(inv: any, invoiceLines: any[]): Invoice {
     lines: invoiceLines
       .filter((l: any) => l.invoice_id === inv.id)
       .map((l: any) => ({
-        productName: l.product_name || "", hsnCode: l.hsn_code || "",
+        id: l.id, productName: l.product_name || "", hsnCode: l.hsn_code || "",
         quantity: l.quantity || 0, unit: l.unit || "Pack",
         unitPrice: Number(l.unit_price || 0), taxableValue: Number(l.taxable_value || 0),
+        gstRate: l.gst_rate != null ? Number(l.gst_rate) : null,
+        lineTotal: l.line_total != null ? Number(l.line_total) : null,
       })),
     createdAt: inv.created_at,
   };
