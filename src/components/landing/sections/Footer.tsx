@@ -75,19 +75,19 @@ export function Footer() {
           <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
             <a
               href="tel:+918714249485"
-              className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-all duration-200"
+              className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card border border-border hover:border-primary/30 shadow-depth-2 transition-[color,background-color,border-color,box-shadow] duration-200"
               aria-label="Call Ledge sales"
             >
-              <Phone size={13} className="text-foreground" strokeWidth={2.2} />
-              <span className="font-body text-[13px] font-medium text-foreground tracking-[-0.005em]">
-                +91 87142 49485
+              <Phone size={13} className="text-foreground" strokeWidth={2.2} aria-hidden="true" />
+              <span className="font-body text-[13px] font-medium text-foreground tracking-[-0.005em]" translate="no">
+                +91&nbsp;87142&nbsp;49485
               </span>
             </a>
             <a
               href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-200"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-[color,background-color,border-color,box-shadow] duration-200"
               style={{ backgroundColor: `${WA_GREEN}1a`, borderColor: `${WA_GREEN}4d`, borderWidth: 1, borderStyle: "solid" }}
               aria-label="Chat with Ledge on WhatsApp"
             >
