@@ -567,12 +567,15 @@ export default function NewOrder() {
               </div>
             </section>
 
-            {/* Dispatch Details */}
+            {/* Where it ships from */}
             <section className="glass-card p-4 md:p-6">
-              <h2 className="mb-3 text-sm font-semibold md:mb-4 md:text-base">Dispatch Details</h2>
+              <h2 className="mb-1 text-sm font-semibold md:text-base">Warehouse &amp; notes</h2>
+              <p className="mb-3 text-xs text-muted-foreground md:mb-4">
+                Booking only holds the order. Stock and the GST bill happen later, when you dispatch it.
+              </p>
               <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
                 <div ref={warehouseFieldRef} className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Source Warehouse *</Label>
+                  <Label className="text-xs md:text-sm">Ships from *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select warehouse" />
@@ -584,53 +587,16 @@ export default function NewOrder() {
                     </SelectContent>
                   </Select>
                   {attemptedSave && errors.warehouse && (
-                    <p className="text-xs text-destructive">Warehouse is required for every order.</p>
+                    <p className="text-xs text-destructive">Choose the warehouse this order ships from.</p>
                   )}
-                </div>
-                <div ref={dispatchDateFieldRef} className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Dispatch Date {dispatchDateRequired ? "*" : ""}</Label>
-                  <Input
-                    type="date"
-                    value={dispatchDate}
-                    onChange={(e) => setDispatchDate(e.target.value)}
-                    className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.dispatchDate ? "border-destructive" : ""}`}
-                  />
-                  {attemptedSave && errors.dispatchDate && (
-                    <p className="text-xs text-destructive">Dispatch date is required when delivery is set to Dispatched or Delivered.</p>
-                  )}
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Vehicle / Transporter</Label>
-                  <Input placeholder="e.g. MH-01-AB-1234" value={vehicle} onChange={(e) => setVehicle(e.target.value)} className="h-10 rounded-lg md:h-12" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Driver Name</Label>
-                  <Input placeholder="Optional" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="h-10 rounded-lg md:h-12" />
-                </div>
-                <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Delivery Status</Label>
-                  <div className="flex gap-2">
-                    {deliveryStatuses.map((s) => (
-                      <button
-                        key={s.value}
-                        onClick={() => setDeliveryStatus(s.value)}
-                        className={`flex-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-all md:px-3 md:py-3 md:text-sm ${
-                          deliveryStatus === s.value
-                            ? statusColors[s.value] || "border-primary bg-primary/10 text-primary"
-                            : "border-border text-muted-foreground hover:border-foreground/20"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
               <div className="mt-3 space-y-1.5 md:mt-4 md:space-y-2">
-                <Label className="text-xs md:text-sm">Dispatch Remarks</Label>
-                <Textarea placeholder="Any additional notes..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
+                <Label className="text-xs md:text-sm">Notes</Label>
+                <Textarea placeholder="Anything the warehouse should know..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
               </div>
             </section>
+
           </div>
 
           {/* Sidebar Summary */}
