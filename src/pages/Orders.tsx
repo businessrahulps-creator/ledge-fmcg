@@ -387,15 +387,15 @@ export default function Orders() {
                         className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
                       >
                         <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
-                        <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
+                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4">{order.distributorName}</td>
-                        <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
+                        <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{order.salesperson}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                         <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                         <td className="px-6 py-4">
                           {billingStatus ? (
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                            <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
                               {billingStatus.label}
                             </span>
                           ) : (
@@ -430,7 +430,7 @@ export default function Orders() {
                       <StatusBadge status={order.paymentStatus} />
                       <StatusBadge status={order.deliveryStatus} />
                       {billingStatus && (
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
+                        <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
                           {billingStatus.label}
                         </span>
                       )}
