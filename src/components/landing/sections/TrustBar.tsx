@@ -43,15 +43,15 @@ export function TrustBar() {
 
         {/* Product-truth chips - moved out of the hero so the hero keeps one message. */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
-          <span className="lp-pill lp-pill--success">
+          <span className="lp-pill">
             <span className="lp-pill__tile"><WifiOff size={12} strokeWidth={2.5} /></span>
             <span className="lp-pill__label">Offline-ready</span>
           </span>
-          <span className="lp-pill lp-pill--info">
+          <span className="lp-pill">
             <span className="lp-pill__tile"><FileCheck2 size={12} strokeWidth={2.5} /></span>
             <span className="lp-pill__label">GST-ready</span>
           </span>
-          <span className="lp-pill lp-pill--warn">
+          <span className="lp-pill">
             <span className="lp-pill__tile"><MapPin size={12} strokeWidth={2.5} /></span>
             <span className="lp-pill__label">Built in Kerala</span>
           </span>
