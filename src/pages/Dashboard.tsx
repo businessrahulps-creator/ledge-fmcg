@@ -352,7 +352,7 @@ export default function Dashboard() {
                 </button>
               </p>
             </div>
-            <span className="timeframe-pill md:self-end">
+            <span className="timeframe-pill self-start md:self-end">
               This Month · {monthLabel}
             </span>
           </div>
