@@ -1,68 +1,66 @@
-# Take money any time — one simple Money box on every order
+# App design pass — consistency, hierarchy, and calm
 
-Right now money can only be recorded after the bill is raised, and it lives in a separate panel below the order. Real life is the other way round: the dealer sends ₹2,000 on UPI today, you dispatch three days later, the rest comes a week after that. This plan makes the app follow that reality.
+## Design read
 
-## The rule we are building
+Reading this as: a **redesign–overhaul of a working product UI** (order desk, bills, dealers, stock, insights) for **distributor owners and their office/field staff**, with a **quiet, confident, data-first** language, leaning on the existing Ledge V2 / Fluent 2 system rather than a new one.
 
-**Every order has one Money box. You can put money in at any time — before dispatch, at dispatch, or weeks later. The app always shows three numbers: Total, Received, Balance.**
+Honest note on the taste skill: it states up front that it is for landing pages, portfolios and redesigns — *not* dashboards, data tables or multi-step product UI. So we take its transferable parts (audit-first, anti-default discipline, one system per project, honest tokens, restrained motion, real hierarchy) and ignore its marketing-page playbook. The landing page keeps its own `.lp-theme`; nothing here touches it.
 
-Nothing else changes about how orders, bills or stock work.
+Dials for the app: variance 4 (structure over flair), motion 3 (feedback only), density 5 (real work screens).
 
-```text
-Book order  ₹3,200        Money box:  Total 3,200 · Received 0 · Balance 3,200
-   |
-Dealer sends ₹2,000 UPI → tap "Record payment" → Received 2,000 · Balance 1,200
-   |
-(2-3 days later) Dispatch & bill → bill is raised for ₹3,200
-   |               the ₹2,000 already received is carried onto the bill automatically
-   |               bill shows "Part paid — ₹1,200 due"
-Dealer sends ₹1,200 → tap "Record payment" → Balance 0 · order marked Paid
-```
+## What the audit found
 
-## What you will see
+- **No shared page header.** A `PageHeader` primitive exists but no page uses it, so every screen invents its own title, subtitle and action row.
+- **Radius soup.** Five different corner sizes in daily use (`rounded-md`, `lg`, `xl`, `2xl`, `sm`) with no rule for which belongs to what.
+- **221 hardcoded colour classes** still in app screens and components (emerald/amber/slate/gray/white/hex), bypassing the brand palette and breaking colour meaning.
+- **No spacing rhythm.** Nineteen different padding/gap values in play; cards range from `p-3` to `p-8` for the same kind of content.
+- **Cluttered heavy screens.** Stock (1081 lines), Insights/Performance (1086), Order detail (839), Dashboard (765) each stack too many equal-weight boxes with no clear first thing to look at.
+- **Card mismatch.** `glass-card` is used 1–22 times per page with inconsistent internal structure, so similar information looks different from screen to screen.
 
-**On an order (before or after dispatch)**
-- A single green Money box at the top of the order, with the three numbers and one big button: **Record payment**.
-- The payment form asks only: how much, how (Cash / UPI / Bank / Cheque), on what date, and an optional reference number. Amount is pre-filled with the balance, so full payment is two taps.
-- Underneath, every receipt is listed with date, mode and amount. A receipt is never edited or deleted — if it was a mistake you cancel it with a reason, and the cancelled line stays visible.
-- The old "payment status" dropdown disappears. Paid / Part paid / Unpaid is decided by the money actually received — you never set it by hand.
+## The plan
 
-**When you dispatch and bill**
-- Money already collected against the order is automatically attached to the new bill. No re-entry, no double counting.
-- If the whole amount was already paid, the bill is created as Paid.
+### 1. Lock the foundations (invisible to users, fixes everything downstream)
+- One radius rule: controls 6px, cards 10px, sheets/modals 14px, pills full. Everything else retired.
+- One spacing rhythm: 4 / 8 / 12 / 16 / 24 / 32 only. Card padding standard 16px, dense tables 12px.
+- One type scale: page title, section title, body, label, number. Numbers always tabular so columns line up.
+- Colour discipline: colour only means something (money owed, low stock, success, danger). Everything else is ink on paper. Replace all 221 raw colour classes with the brand tokens.
 
-**On the Orders list**
-- A "Balance" figure on each row and a **Collect** button that opens the same payment form without leaving the list.
-- A filter chip: **Money to collect** — every order with a balance, biggest and oldest first.
+### 2. One header, one card, one table everywhere
+- Adopt the existing `PageHeader` on all 20+ screens: title, one-line context, primary action right, filters below. Same position on every screen.
+- Standardise the card: optional label, one hero value or content block, optional footer row. Equal heights in any grid.
+- Standardise the table: same header band, same row height, same alignment (text left, numbers right), same empty state, same loading skeleton.
 
-**On the dealer page and WhatsApp**
-- The dealer's balance already exists; it will now include pre-dispatch money too, so it stays correct.
-- The WhatsApp message for an order/bill ends with a plain line: `Paid ₹2,000 · Balance ₹1,200`.
+### 3. Rework the four busiest screens
+- **Dashboard** — one clear "here's your day" band on top, then at most four supporting blocks. Cut duplicate numbers.
+- **Orders** — the working queue: strong status column, money to collect visible, filters as chips, bulk actions in one bar.
+- **Order detail** — three clear zones: what was ordered, the money, the timeline. Actions stop competing with each other.
+- **Stock** — split the wall of controls into Products and Warehouses with a calm toolbar; the add flow gets breathing room.
+- **Insights** — reduce card count, one headline signal per section, charts get consistent height and axis treatment.
 
-**Wording changes (plain English)**
-- "Record payment" instead of payment status editing
-- "Received" and "Balance" instead of outstanding / partial / settled
-- "Cancel this receipt" instead of void
+### 4. Second-tier screens
+Bills, Dealers, Dealer detail, Sales team, Salesperson detail, Targets, Schemes, Claims, Reports, Settings, Company, Help — apply the header, card, table and empty-state standards. Layout structure stays; density and hierarchy improve.
 
-## Safety
+### 5. Motion and feedback (restrained)
+- Buttons and rows press; sheets and modals ease in; nothing loops, nothing bounces.
+- Every action has a visible state: loading, saved, failed. No silent buttons.
+- Full support for reduced-motion.
 
-- The app never lets you record more than the balance, and never a future date.
-- Recording money is one server action, so a double tap or a dropped connection cannot create two receipts.
-- Cancelling a receipt is logged with who and why; the money history is a permanent record.
-- Only people allowed to see money can record or cancel it. Everyone else sees the numbers read-only.
+### 6. Verify
+- Desktop screenshots of every screen before and after, plus a mobile check so nothing breaks on phones.
+- Contrast check on all text and status colours.
+- Existing test suite plus new checks: no raw colour classes in app screens, every page uses the shared header.
+
+Desktop leads the decisions; mobile stays functional and uncut.
 
 ## Technical notes
 
-- `invoice_payments` gains a nullable `order_id` and its `invoice_id` becomes nullable, so a receipt can exist against an order before a bill exists. A check constraint requires at least one of the two. `order_id` is backfilled from each invoice's `source_order_id`.
-- New RPC `record_order_payment_atomic(p_order_id, p_amount, p_mode, p_paid_on, p_reference, p_note, p_idempotency_key)`: tenant + `see_money` capability check, locks the order, rejects amounts above the order balance (order total minus posted receipts) and future dates, inserts a posted receipt, recomputes `orders.payment_status`.
-- `record_invoice_payment_atomic` keeps working; both paths recompute status from posted receipts minus credit notes.
-- `void_invoice_payment_atomic` is extended to handle order-level receipts and recompute the order status.
-- `dispatch_and_bill_order_atomic` gains a final step: attach the order's unlinked posted receipts to the new invoice (`invoice_id = v_invoice_id`), then set the invoice status to `paid` / `partial` from the received total. Credit-limit maths subtracts money already received.
-- Canonical balance helper used by dealer aging and the dealer page is updated to count order-level receipts.
-- `PaymentsPanel` is generalised into a `MoneyBox` component taking `{ orderId, invoiceId?, total }`, rendered on `OrderDetail` for every order, and reused in a sheet from the Orders list.
-- `OrderDetail` loses the manual payment-status select and the credit-limit override tied to it; `NewOrder` keeps booking-only behaviour (no money field at booking — the Money box is one tap away on the order that was just created).
-- Tests: RPC unit tests for over-payment, future date, idempotency, void recompute; a lifecycle test covering pay-part → dispatch → pay-rest → Paid; existing WhatsApp share tests extended with the balance line.
+- Scope: `src/pages/**` (excluding landing/marketing routes), `src/components/{ui,dashboard,command,orders,reports,layout,settings}`, and the `:root` app token block in `src/index.css`. `.lp-theme` and `src/components/landing/**` are untouched.
+- No new UI library. shadcn + Tailwind v3 + existing Fluent 2 tokens only — one system per project.
+- Token additions are additive (`--radius-*`, `--space-*`, text scale utilities); existing semantic tokens are not renamed, to avoid the earlier `index.css` breakage.
+- New/updated primitives: `PageHeader` (adopt), `AppCard` (canonicalise `glass-card`), table wrapper, `EmptyState`, `SectionHeading`.
+- Behaviour is out of scope: no changes to order/billing/payment logic, RPCs, or data flow. Presentation only.
+- Rollout in reviewable stages: foundations → primitives → four busy screens → remaining screens → verification.
 
-## Not in this change
+## Not included
 
-- Advances not tied to any order (dealer wallet), refunds, and splitting one payment across several bills. Each payment belongs to one order.
+- Landing page changes, dark mode revival, mobile-first restructuring, copy simplification (tracked separately), and any backend or business-logic change.
