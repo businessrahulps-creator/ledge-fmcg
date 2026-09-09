@@ -2682,32 +2682,33 @@
   }
   /* Wraps existing markup inside the dark band without rewriting each colour. */
   .hero-plain,
-  .hero-plain :where(h1, h2, h3, p, span, a, button, div, svg) {
-    color: hsl(var(--primary-foreground));
+  .hero-plain * {
+    color: hsl(var(--primary-foreground)) !important;
   }
-  .hero-plain :where([class*="text-muted"], [class*="text-foreground/"]) {
-    color: hsl(var(--primary-foreground) / 0.75);
+  .hero-plain [class*="text-muted"],
+  .hero-plain [class*="text-foreground/"],
+  .hero-plain [class*="text-primary"]:not([class*="text-primary-foreground"]) {
+    color: hsl(var(--primary-foreground) / 0.78) !important;
   }
-  .hero-plain :where([class*="text-destructive"], [class*="text-warning"]) {
-    color: hsl(var(--hero-attention));
+  .hero-plain [class*="text-destructive"],
+  .hero-plain [class*="text-warning"] {
+    color: hsl(var(--hero-attention)) !important;
   }
-  .hero-plain :where([class*="text-success"]) {
-    color: hsl(var(--hero-good));
-  }
-  .hero-plain :where([class*="text-primary"]:not([class*="text-primary-foreground"])) {
-    color: hsl(var(--primary-foreground) / 0.85);
+  .hero-plain [class*="text-success"] {
+    color: hsl(var(--hero-good)) !important;
   }
   .hero-plain .timeframe-pill {
-    @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
+    @apply border-primary-foreground/25 bg-primary-foreground/10;
   }
-  .hero-plain :where([class*="border-"], [class*="divide-"]) {
-    border-color: hsl(var(--primary-foreground) / 0.18);
+  .hero-plain [class*="border-"],
+  .hero-plain [class*="divide-"] > * {
+    border-color: hsl(var(--primary-foreground) / 0.18) !important;
   }
-  .hero-plain :where(.bg-success, .bg-success\/80) {
-    background-color: hsl(var(--hero-good));
+  .hero-plain [class*="bg-success"] {
+    background-color: hsl(var(--hero-good)) !important;
   }
-  .hero-plain :where(.bg-warning\/60) {
-    background-color: hsl(var(--hero-attention));
+  .hero-plain [class*="bg-warning"] {
+    background-color: hsl(var(--hero-attention)) !important;
   }
   .hero-band-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
