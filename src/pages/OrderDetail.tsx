@@ -610,17 +610,11 @@ export default function OrderDetail() {
 
         {/* Billing Documents */}
         <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold md:text-base">Documents</h2>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 text-xs gap-1.5"
-              onClick={() => navigate(`/billing?order=${order.id}`)}
-            >
-              <FileText className="h-3.5 w-3.5" />
-              Generate Invoice
-            </Button>
+            <p className="text-right text-xs text-muted-foreground">
+              The GST bill is created automatically when you dispatch this order.
+            </p>
           </div>
           {orderDocs.length > 0 ? (
             <div className="overflow-x-auto">
@@ -960,9 +954,9 @@ export default function OrderDetail() {
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Confirm dispatch &amp; deduct stock</DialogTitle>
+            <DialogTitle>Dispatch &amp; bill this order</DialogTitle>
             <DialogDescription>
-              Stock will be deducted from the selected warehouse for each product below. Rows highlighted in red will go below zero — dispatch is still allowed.
+              In one step: stock leaves the chosen warehouse and the final GST bill is created. Rows in red will go below zero — dispatch is still allowed.
             </DialogDescription>
           </DialogHeader>
           {dispatchPreview.loading ? (
