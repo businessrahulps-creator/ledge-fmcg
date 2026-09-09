@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useTransform, useReducedMotion, useMotionTemplate } from "framer-motion";
-import { ArrowRight, WifiOff, FileCheck2, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
 import { BrowserFrame } from "../DeviceFrames";
 import { CapsuleCTA } from "../CapsuleCTA";
@@ -75,7 +75,7 @@ export function Hero() {
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>
-            <CapsuleCTA to="/signup">Start 30-Day Free Trial</CapsuleCTA>
+            <CapsuleCTA to="/signup">Start Free Trial</CapsuleCTA>
             <motion.a
               href="#how-it-works"
               whileHover={{ x: 2 }}
