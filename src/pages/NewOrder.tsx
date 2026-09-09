@@ -141,7 +141,6 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
-  const isUnpaidOrder = paymentStatus === "pending" || paymentStatus === "partial";
   // (credit override capability resolved via useCan above)
 
   // --- Scheme auto-apply (centralized pricing engine) ---
@@ -154,20 +153,18 @@ export default function NewOrder() {
 
   // Credit guard (uses net total after scheme savings)
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + (isUnpaidOrder ? netOrderTotal : 0);
+  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + netOrderTotal;
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
   // --- Derived validation state (used for inline errors) ---
   const validLines = lines.filter((l) => l.productId && (l.quantity ?? 0) > 0);
-  const dispatchDateRequired = deliveryStatus === "dispatched" || deliveryStatus === "delivered";
   const errors = {
     dealer: !selectedDealer,
     salesperson: !selectedSalesperson,
     products: validLines.length === 0,
     invalidPriceLine: validLines.find((l) => l.unitPrice <= 0),
     warehouse: !selectedGodown,
-    dispatchDate: dispatchDateRequired && !dispatchDate,
   };
 
   // Stock availability per line (warning only, not blocking)
