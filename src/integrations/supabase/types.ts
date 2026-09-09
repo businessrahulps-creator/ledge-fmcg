@@ -2396,6 +2396,16 @@ export type Database = {
         }
         Returns: Json
       }
+      record_return_and_credit_atomic: {
+        Args: {
+          p_godown_id?: string
+          p_lines: Json
+          p_note_date?: string
+          p_order_id: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
       reverse_dispatch_for_order: {
         Args: { p_order_id: string }
