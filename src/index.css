@@ -292,6 +292,60 @@
     @apply text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70 px-3 pt-6 pb-2;
   }
 
+  /* ── App composition primitives (V2 rhythm) ─────────────────────────
+     One page stack, one toolbar, one card padding, one grid.
+     Additive only: nothing here overrides existing tokens. */
+
+  /* Vertical rhythm between the header and each block of a page. */
+  .page-stack {
+    @apply space-y-4 md:space-y-6;
+  }
+
+  /* Section heading inside a page (below the H1). */
+  .section-title {
+    @apply text-[15px] font-semibold tracking-[-0.01em] text-foreground;
+  }
+  .section-subtitle {
+    @apply mt-0.5 text-[12px] leading-relaxed text-muted-foreground;
+  }
+
+  /* Filter / search bar that sits above a list or table. */
+  .app-toolbar {
+    @apply flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center;
+  }
+  .app-toolbar-search {
+    @apply relative w-full sm:max-w-xs;
+  }
+
+  /* Canonical card padding — compact on mobile, roomy on desktop. */
+  .card-pad {
+    @apply p-4 md:p-5;
+  }
+  .card-pad-tight {
+    @apply p-3 md:p-4;
+  }
+
+  /* Card grids: children stretch so neighbours always match height. */
+  .card-grid {
+    @apply grid gap-3 md:gap-4 items-stretch;
+  }
+  .card-grid > * {
+    @apply h-full;
+  }
+
+  /* Money and counts: always tabular, never wrapped mid-figure. */
+  .money {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "lnum";
+    white-space: nowrap;
+  }
+
+  /* Small form/meta label used above values in detail panels. */
+  .field-label {
+    @apply text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80;
+  }
+
+
   .status-paid {
     @apply bg-success/10 text-success;
   }
