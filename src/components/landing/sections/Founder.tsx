@@ -36,7 +36,7 @@ export function Founder() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="font-heading font-medium text-[20px] md:text-[24px] text-foreground leading-[1.5] tracking-[-0.01em] mt-6"
+            className="font-heading font-medium text-[20px] md:text-[24px] text-foreground leading-[1.5] tracking-[-0.01em]"
           >
             &ldquo;I built Ledge because I watched too many Indian business owners juggle a factory on one side and a field team on the other. The software ignored both.
             <br /><br />
