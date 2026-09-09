@@ -31,6 +31,8 @@ export interface InvoiceLine {
   unit: string;
   unitPrice: number;
   taxableValue: number;
+  gstRate?: number | null;
+  lineTotal?: number | null;
 }
 
 export interface Invoice {

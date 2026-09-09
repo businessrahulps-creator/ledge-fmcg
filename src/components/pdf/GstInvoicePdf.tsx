@@ -43,6 +43,8 @@ export interface InvoicePdfData {
     unit: string;
     unitPrice: number;
     taxableValue: number;
+    gstRate?: number | null;
+    lineTotal?: number | null;
   }[];
   subtotal: number;
   cgstAmount: number;
@@ -58,7 +60,12 @@ export interface InvoicePdfData {
 export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
   const isGst = data.docType === "gst_invoice" || data.docType === "credit_note";
   const isIntraState = data.supplyType === "intra_state";
-  const halfRate = Math.round((data.gstRate / 2) * 100) / 100;
+  const lineRates = Array.from(new Set(
+    data.lines.map(l => (l.gstRate ?? null)).filter((r): r is number => r !== null)
+  ));
+  const mixedRates = lineRates.length > 1;
+  const headerRate = lineRates.length === 1 ? lineRates[0] : data.gstRate;
+  const halfRate = Math.round((headerRate / 2) * 100) / 100;
 
   return (
     <Document>
@@ -102,7 +109,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
               {isGst && (
                 <View style={s.metaRow}>
                   <Text style={s.metaLabel}>GST Rate</Text>
-                  <Text style={s.metaValue}>{data.gstRate}%</Text>
+                  <Text style={s.metaValue}>{mixedRates ? "Multiple (see line items)" : `${headerRate}%`}</Text>
                 </View>
               )}
               {data.vehicle ? (
@@ -126,24 +133,26 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
         <View style={s.table}>
           <View style={s.tableHeader}>
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
-            <Text style={[s.tableHeaderCell, { width: isGst ? "30%" : "40%" }]}>Item</Text>
+            <Text style={[s.tableHeaderCell, { width: isGst ? "24%" : "40%" }]}>Item</Text>
             {isGst && <Text style={[s.tableHeaderCell, { width: "10%" }]}>HSN</Text>}
             <Text style={[s.tableHeaderCell, { width: "8%", textAlign: "right" }]}>Qty</Text>
             <Text style={[s.tableHeaderCell, { width: "8%" }]}>Unit</Text>
-            <Text style={[s.tableHeaderCell, { width: "14%", textAlign: "right" }]}>Rate</Text>
+            <Text style={[s.tableHeaderCell, { width: isGst ? "13%" : "14%", textAlign: "right" }]}>Rate</Text>
+            {isGst && <Text style={[s.tableHeaderCell, { width: "7%", textAlign: "right" }]}>GST%</Text>}
             <Text style={[s.tableHeaderCell, { width: isGst ? "12%" : "15%", textAlign: "right" }]}>Taxable</Text>
             <Text style={[s.tableHeaderCell, { width: "13%", textAlign: "right" }]}>Amount</Text>
           </View>
           {data.lines.map((line, i) => (
             <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
-              <Text style={[s.tableCellBold, { width: isGst ? "30%" : "40%" }]}>{line.productName}</Text>
+              <Text style={[s.tableCellBold, { width: isGst ? "24%" : "40%" }]}>{line.productName}</Text>
               {isGst && <Text style={[s.tableCell, { width: "10%" }]}>{line.hsnCode || "-"}</Text>}
               <Text style={[s.tableCellRight, { width: "8%" }]}>{line.quantity}</Text>
               <Text style={[s.tableCell, { width: "8%" }]}>{line.unit}</Text>
-              <Text style={[s.tableCellRight, { width: "14%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
+              {isGst && <Text style={[s.tableCellRight, { width: "7%" }]}>{line.gstRate != null ? `${line.gstRate}%` : "-"}</Text>}
               <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatCurrencyPdf(line.taxableValue)}</Text>
-              <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatCurrencyPdf(line.taxableValue)}</Text>
+              <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatCurrencyPdf(line.lineTotal ?? line.taxableValue)}</Text>
             </View>
           ))}
         </View>
@@ -159,11 +168,11 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             {isGst && isIntraState && (
               <>
                 <View style={s.totalsRow}>
-                  <Text style={s.totalsLabel}>CGST @ {halfRate}%</Text>
+                  <Text style={s.totalsLabel}>{mixedRates ? "CGST" : `CGST @ ${halfRate}%`}</Text>
                   <Text style={s.totalsValue}>{formatCurrencyPdf(data.cgstAmount)}</Text>
                 </View>
                 <View style={s.totalsRow}>
-                  <Text style={s.totalsLabel}>SGST @ {halfRate}%</Text>
+                  <Text style={s.totalsLabel}>{mixedRates ? "SGST" : `SGST @ ${halfRate}%`}</Text>
                   <Text style={s.totalsValue}>{formatCurrencyPdf(data.sgstAmount)}</Text>
                 </View>
               </>
@@ -171,7 +180,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
 
             {isGst && !isIntraState && (
               <View style={s.totalsRow}>
-                <Text style={s.totalsLabel}>IGST @ {data.gstRate}%</Text>
+                <Text style={s.totalsLabel}>{mixedRates ? "IGST" : `IGST @ ${headerRate}%`}</Text>
                 <Text style={s.totalsValue}>{formatCurrencyPdf(data.igstAmount)}</Text>
               </View>
             )}

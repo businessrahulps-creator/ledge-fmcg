@@ -64,6 +64,8 @@ function mapInvoiceRow(inv: InvoiceRow): Invoice {
       unit: l.unit,
       unitPrice: l.unit_price,
       taxableValue: l.taxable_value,
+      gstRate: l.gst_rate,
+      lineTotal: l.line_total,
     })),
   } as Invoice;
 }
