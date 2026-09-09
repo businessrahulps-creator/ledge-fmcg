@@ -38,7 +38,6 @@ export function HowItWorks() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">How it works</span>
             <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               Three things happen.
               <br />

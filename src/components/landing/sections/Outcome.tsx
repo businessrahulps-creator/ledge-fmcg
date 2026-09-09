@@ -47,7 +47,6 @@ export function Outcome() {
       <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn variant="blurFadeUp">
           <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">Before & After Ledge</span>
             <h2 className="font-heading font-semibold text-[32px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
               What changes in the first{" "}
               <span className="lp-pill-accent font-semibold">

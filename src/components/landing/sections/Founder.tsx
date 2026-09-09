@@ -31,7 +31,6 @@ export function Founder() {
 
       <div className="relative max-w-3xl mx-auto px-6 md:px-8 lg:px-10">
         <AnimateIn>
-          <span className="lp-eyebrow">From the founder</span>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
