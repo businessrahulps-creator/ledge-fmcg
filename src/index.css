@@ -2680,6 +2680,21 @@
   .hero-band [data-status-badge] {
     @apply border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground;
   }
+  /* Wraps existing markup inside the dark band without rewriting each colour. */
+  .hero-plain,
+  .hero-plain :where(h1, h2, h3, p, span, a, button, div) {
+    color: hsl(var(--primary-foreground));
+  }
+  .hero-plain [class*="text-muted"],
+  .hero-plain [class*="foreground/"] {
+    opacity: 0.78;
+  }
+  .hero-plain .timeframe-pill {
+    @apply border-primary-foreground/25 bg-primary-foreground/10;
+  }
+  .hero-plain [class*="border-"] {
+    border-color: hsl(var(--primary-foreground) / 0.18);
+  }
   .hero-band-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70;
   }
