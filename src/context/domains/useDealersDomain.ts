@@ -25,14 +25,24 @@ export function useDealersDomain(deps: DomainDeps) {
   const safeRefetch = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const { data } = await supabase.from("distributors").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999);
+      const [{ data }, { data: balances }] = await Promise.all([
+        supabase.from("distributors").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
+        supabase.from("dealer_balances").select("distributor_id, balance_due").eq("company_id", deps.companyId).range(0, 9999),
+      ]);
       if (data) {
-        const mapped = data.map(mapDistributor);
+        const byDealer = new Map<string, number>(
+          (balances || []).map((b: any) => [b.distributor_id as string, Number(b.balance_due ?? 0)]),
+        );
+        const mapped = data.map(mapDistributor).map(d => ({
+          ...d,
+          outstandingAmount: byDealer.has(d.id) ? byDealer.get(d.id)! : d.outstandingAmount,
+        }));
         setDistributors(mapped);
         cacheData(deps.companyId, "distributors", mapped);
       }
     } catch { /* ignore */ }
   }, [deps.companyId]);
+
 
   return { rawDistributors, setDistributors, ...crud, safeRefetch };
 }
