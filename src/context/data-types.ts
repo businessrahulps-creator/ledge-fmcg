@@ -24,6 +24,7 @@ export interface CompanyInfo {
 }
 
 export interface InvoiceLine {
+  id?: string;
   productName: string;
   hsnCode: string;
   quantity: number;
