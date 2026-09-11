@@ -65,6 +65,7 @@ export function PaymentsPanel({
   const [note, setNote] = useState("");
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
+  const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
 
   const anchorColumn = invoiceId ? "invoice_id" : "order_id";
   const anchorId = invoiceId || orderId || "";
@@ -105,7 +106,9 @@ export function PaymentsPanel({
       p_paid_on: paidOn,
       p_reference: reference,
       p_note: note,
-      p_idempotency_key: `${anchorId}:${paidOn}:${value}:${reference || "-"}`,
+      // One key per open dialog: a double click can't double-post, but two
+      // genuine same-day payments of the same amount are still allowed.
+      p_idempotency_key: `${anchorId}:${submitKey}`,
     };
     const { error } = invoiceId
       ? await supabase.rpc("record_invoice_payment_atomic", { p_invoice_id: invoiceId, ...shared })
