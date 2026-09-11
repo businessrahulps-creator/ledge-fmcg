@@ -21,6 +21,8 @@ import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
+import { InvoicePreviewDialog } from "@/components/billing/InvoicePreviewDialog";
+import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
   Select,
@@ -96,6 +98,7 @@ export default function OrderDetail() {
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
   const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
 
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
@@ -931,6 +934,7 @@ export default function OrderDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <InvoicePreviewDialog invoice={previewInvoice} onClose={() => setPreviewInvoice(null)} />
     </AppLayout>
   );
 }
