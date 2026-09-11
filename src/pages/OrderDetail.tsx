@@ -613,19 +613,16 @@ export default function OrderDetail() {
           )}
         </div>
 
-        {finalInvoice && (
-          <>
-            <Separator />
-            <PaymentsPanel
-              invoiceId={finalInvoice.id}
-              invoiceNumber={finalInvoice.invoiceNumber}
-              invoiceTotal={finalInvoice.grandTotal}
-              canRecord={canSeeMoney}
-              onTotals={handleMoneyTotals}
-              onChanged={() => api.refreshAll()}
-            />
-          </>
-        )}
+        <Separator />
+        <PaymentsPanel
+          invoiceId={finalInvoice?.id ?? null}
+          orderId={finalInvoice ? null : order.id}
+          docLabel={finalInvoice?.invoiceNumber ?? order.orderNumber}
+          docTotal={finalInvoice?.grandTotal ?? netTotal}
+          canRecord={canSeeMoney && !order.cancelledAt}
+          onTotals={handleMoneyTotals}
+          onChanged={() => api.refreshAll()}
+        />
 
         <Separator />
 
