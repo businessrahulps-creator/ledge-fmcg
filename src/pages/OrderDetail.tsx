@@ -413,7 +413,7 @@ export default function OrderDetail() {
               label: "Money received",
               value: formatCurrency(received),
               tone: received > 0 ? "good" : "default",
-              note: hasBill ? `Against bill ${finalInvoice?.invoiceNumber}` : "Recorded once the bill is made",
+              note: hasBill ? `Against bill ${finalInvoice?.invoiceNumber}` : "Advance received on this order",
             },
             {
               label: "Balance to collect",
