@@ -357,20 +357,16 @@ export default function OrderDetail() {
 
   const netTotal = editTotal - totalSchemeSavings;
   const hasBill = !!finalInvoice;
-  const received = hasBill ? money.received : 0;
-  const balance = hasBill ? money.balance : netTotal;
+  const moneyTarget = hasBill ? finalInvoice.grandTotal : netTotal;
+  const received = money.received;
+  const balance = Math.max(0, Math.round((moneyTarget - received) * 100) / 100);
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
-  const settled = hasBill && balance <= 0;
+  const settled = balance <= 0 && received > 0;
   /* Money chip comes from real receipts, so chip, balance and journey always agree.
-     Before a bill exists there is nothing to collect against — show goods only. */
-  const moneyStatus: "paid" | "partial" | "pending" | null = !hasBill
-    ? null
-    : settled
-      ? "paid"
-      : received > 0
-        ? "partial"
-        : "pending";
+     Receipts can be taken from the moment the order is booked. */
+  const moneyStatus: "paid" | "partial" | "pending" =
+    settled ? "paid" : received > 0 ? "partial" : "pending";
 
   const journey: JourneyStep[] = [
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
