@@ -51,7 +51,7 @@ export function OrderInvoicePdf({
     <Document>
       <Page size="A4" style={s.page}>
         <PdfHeader
-          title={`Order Summary ${order.orderNumber}`}
+          title={`Order Confirmation ${order.orderNumber} — Not a tax invoice`}
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}

@@ -577,7 +577,15 @@ export default function OrderDetail() {
                   {orderDocs.map(doc => (
                     <tr key={doc.id} className="border-b border-border/50">
                       <td className="px-4 py-3 capitalize">{doc.docType.replace("_", " ")}</td>
-                      <td className="px-4 py-3 font-mono font-medium">{doc.invoiceNumber}</td>
+                      <td className="px-4 py-3 font-mono font-medium">
+                        <button
+                          type="button"
+                          className="text-primary underline-offset-2 hover:underline"
+                          onClick={() => setPreviewInvoice(doc)}
+                        >
+                          {doc.invoiceNumber}
+                        </button>
+                      </td>
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
