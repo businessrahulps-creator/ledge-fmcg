@@ -4,6 +4,8 @@ import type { GodownLocation, StockItem } from "@/data/godown-data";
 export interface AddOrderResult {
   success: boolean;
   orderNumber?: string;
+  /** Id of the booked order — used to attach an advance payment right after booking. */
+  orderId?: string;
   error?: string;
 }
 

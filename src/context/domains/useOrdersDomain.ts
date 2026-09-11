@@ -122,7 +122,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       };
       setOrders(prev => [newOrder, ...prev]);
       deps.log("order", booked.order_id, "created", `Booked order ${booked.order_number} for ${order.distributorName} — ${fmtAmount(order.total)}`);
-      return { success: true, orderNumber: booked.order_number };
+      return { success: true, orderNumber: booked.order_number, orderId: booked.order_id };
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
       handleSupabaseError(err, {
