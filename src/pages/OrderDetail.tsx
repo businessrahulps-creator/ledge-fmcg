@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, PackageX, Trash2, FileText, Plus, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck } from "lucide-react";
 import { HeroBand } from "@/components/ui/hero-band";
 import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
@@ -52,21 +52,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
 
-const statusColors: Record<string, string> = {
-  paid: "border-success/40 bg-success/10 text-success",
-  partial: "border-warning/40 bg-warning/10 text-warning",
-  pending: "border-destructive/40 bg-destructive/10 text-destructive",
-  dispatched: "border-primary/30 bg-primary/10 text-primary",
-  delivered: "border-success/40 bg-success/10 text-success",
-};
-
-const paymentModes = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cheque", label: "Cheque" },
-  { value: "upi", label: "UPI" },
-];
-
 interface EditLineState {
   id: string;
   productId: string;
@@ -79,7 +64,6 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
-  const canManageStock = useCan("manage_stock");
   const canOverrideCredit = useCan("override_credit_limit");
   const canSeeMoney = useCan("see_money");
   const { companyInfo } = api;
@@ -91,19 +75,20 @@ export default function OrderDetail() {
   const products = api.products.list();
   const allSchemes = api.schemes.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
-  const updateOrder = (oid: string, updates: Partial<Order>) => api.orders.update(oid, updates);
 
-  const [editPaymentMode, setEditPaymentMode] = useState("");
-  const [editDispatchDate, setEditDispatchDate] = useState("");
-  const [editVehicle, setEditVehicle] = useState("");
-  const [editDriver, setEditDriver] = useState("");
-  const [editGodown, setEditGodown] = useState("");
+  /* --- Edit order (pre-dispatch only) --- */
+  const [editOpen, setEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Editable dealer, salesperson, lines
   const [editDealerId, setEditDealerId] = useState("");
   const [editSalespersonId, setEditSalespersonId] = useState("");
+  const [editGodown, setEditGodown] = useState("");
   const [editLines, setEditLines] = useState<EditLineState[]>([]);
+
+  /* --- Dispatch details, asked only at dispatch time --- */
+  const [dispatchGodown, setDispatchGodown] = useState("");
+  const [dispatchDate, setDispatchDate] = useState("");
+  const [dispatchVehicle, setDispatchVehicle] = useState("");
+  const [dispatchDriver, setDispatchDriver] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -117,44 +102,41 @@ export default function OrderDetail() {
   type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
   const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
 
-
   const order = orders.find(o => o.id === id);
-
   const prevOrderId = useRef<string | undefined>();
 
-  // Sync status/dispatch fields when they change
+  // Keep dispatch inputs and edit fields in step with the order we're looking at.
   useEffect(() => {
-    if (order) {
-      setEditPaymentMode(order.paymentMode);
-      setEditDispatchDate(order.dispatchDate || "");
-      setEditVehicle(order.vehicle || "");
-      setEditDriver(order.driverName || "");
-      setEditGodown(order.godownId || "");
-      setEditDealerId(order.distributorId);
-      setEditSalespersonId(order.salespersonId);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.id, order?.paymentStatus, order?.deliveryStatus, order?.distributorId, order?.salespersonId]);
-
-  // Sync line items only when order ID changes (avoids regenerating UUIDs on status updates)
-  useEffect(() => {
-    if (order && order.id !== prevOrderId.current) {
+    if (!order) return;
+    if (order.id !== prevOrderId.current) {
       prevOrderId.current = order.id;
-      setEditLines(order.lines.map(l => ({
-        id: crypto.randomUUID(),
-        productId: l.productId,
-        productName: l.productName,
-        quantity: l.quantity,
-        unitPrice: l.unitPrice,
-      })));
+      setDispatchGodown(order.godownId || "");
+      setDispatchDate(order.dispatchDate || new Date().toISOString().slice(0, 10));
+      setDispatchVehicle(order.vehicle || "");
+      setDispatchDriver(order.driverName || "");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order?.id]);
 
+  const openEdit = () => {
+    if (!order) return;
+    setEditDealerId(order.distributorId);
+    setEditSalespersonId(order.salespersonId);
+    setEditGodown(order.godownId || "");
+    setEditLines(order.lines.map(l => ({
+      id: crypto.randomUUID(),
+      productId: l.productId,
+      productName: l.productName,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+    })));
+    setEditOpen(true);
+  };
+
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
   const finalInvoice = orderDocs.find(doc => doc.docType === "gst_invoice");
 
-  // Line editing helpers
+  /* --- Line editing helpers (edit dialog only) --- */
   const addLine = () => {
     setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitPrice: 0 }]);
   };
@@ -184,13 +166,10 @@ export default function OrderDetail() {
 
   const editTotal = editLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0);
 
-  // Scheme auto-apply (centralized pricing engine)
-  const pricing = useMemo(
+  const editPricing = useMemo(
     () => computeOrderPricing(editLines, allSchemes, editDealerId),
     [allSchemes, editDealerId, editLines],
   );
-  const appliedSchemes = pricing.appliedSchemes;
-  const totalSchemeSavings = pricing.totalSchemeSavings;
 
   const executeSaveOrder = async () => {
     if (!order) return;
@@ -227,12 +206,7 @@ export default function OrderDetail() {
 
     const newTotal = newLines.reduce((sum, l) => sum + l.lineTotal, 0);
 
-    await updateOrder(order.id, {
-      paymentMode: editPaymentMode as Order["paymentMode"],
-
-      dispatchDate: editDispatchDate || null,
-      vehicle: editVehicle,
-      driverName: editDriver,
+    await api.orders.update(order.id, {
       godownId: editGodown || undefined,
       distributorId: editDealerId,
       distributorName: dealer.name,
@@ -240,20 +214,34 @@ export default function OrderDetail() {
       salesperson: sp.name,
       lines: newLines,
       total: newTotal,
-      schemeSavings: totalSchemeSavings,
-      appliedSchemes: serializeAppliedSchemes(appliedSchemes),
+      schemeSavings: editPricing.totalSchemeSavings,
+      appliedSchemes: serializeAppliedSchemes(editPricing.appliedSchemes),
     });
     setIsSaving(false);
+    setEditOpen(false);
     toast.success("Order updated", { description: `${order.orderNumber} has been updated.` });
   };
 
-  /** Opens the stock preview before goods leave the warehouse. */
-  const startDispatch = () => {
+  const saveOrder = () => {
     if (!order) return;
-    if (!editGodown) {
-      toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
+    const dealer = distributors.find(d => d.id === editDealerId);
+    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+    const alreadyCounted = order.paymentStatus === "paid" ? 0 : order.total;
+    const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s2, l) => s2 + (l.quantity ?? 0) * l.unitPrice, 0);
+    const projected = dealer.outstandingAmount - alreadyCounted + newTotal;
+    if (projected > dealer.creditLimit) {
+      if (canOverrideCredit) { setCreditOverrideOpen(true); return; }
+      toast.error("Credit limit crossed", {
+        description: `${dealer.name} would owe more than their limit. Ask someone who can approve it.`,
+      });
       return;
     }
+    executeSaveOrder();
+  };
+
+  /** Opens the stock preview + dispatch details before goods leave the warehouse. */
+  const startDispatch = () => {
+    if (!order) return;
     setDispatchPreview({ open: true, rows: [], loading: true });
     supabase.rpc("preview_dispatch_impact" as any, { p_order_id: order.id }).then(({ data, error }) => {
       if (error) {
@@ -276,13 +264,17 @@ export default function OrderDetail() {
   /** One step: stock out + final GST bill + order marked dispatched. */
   const confirmDispatch = async (overrideCredit = false) => {
     if (!order) return;
+    if (!dispatchGodown) {
+      toast.error("Warehouse required", { description: "Choose the warehouse the goods leave from." });
+      return;
+    }
     setDispatchPreview(p => ({ ...p, open: false }));
     setIsSaving(true);
     const res = await api.orders.dispatchAndBill(order.id, {
-      godownId: editGodown || null,
-      dispatchDate: editDispatchDate || null,
-      vehicle: editVehicle,
-      driverName: editDriver,
+      godownId: dispatchGodown,
+      dispatchDate: dispatchDate || null,
+      vehicle: dispatchVehicle,
+      driverName: dispatchDriver,
       overrideCredit,
     });
     setIsSaving(false);
@@ -301,25 +293,6 @@ export default function OrderDetail() {
     );
   };
 
-
-
-  const saveOrder = () => {
-    if (!order) return;
-    const dealer = distributors.find(d => d.id === editDealerId);
-    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
-    const alreadyCounted = order.paymentStatus === "paid" ? 0 : order.total;
-    const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s2, l) => s2 + (l.quantity ?? 0) * l.unitPrice, 0);
-    const projected = dealer.outstandingAmount - alreadyCounted + newTotal;
-    if (projected > dealer.creditLimit) {
-      if (canOverrideCredit) { setCreditOverrideOpen(true); return; }
-      toast.error("Credit limit crossed", {
-        description: `${dealer.name} would owe more than their limit. Ask someone who can approve it.`,
-      });
-      return;
-    }
-    executeSaveOrder();
-  };
-
   const handleDeleteOrder = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -332,10 +305,7 @@ export default function OrderDetail() {
   };
 
   if (!order) {
-    // While data is still loading (cold start, two-phase fetch, or a
-    // transient empty-orders render) show a skeleton instead of flashing
-    // the "not found" empty state. Only show the real empty state once
-    // we're sure the order genuinely doesn't exist.
+    // While data is still loading show a skeleton instead of flashing "not found".
     if (api.loading || orders.length === 0) {
       return (
         <AppLayout>
@@ -355,7 +325,7 @@ export default function OrderDetail() {
     );
   }
 
-  const netTotal = editTotal - totalSchemeSavings;
+  const netTotal = Math.max(0, order.total - (order.schemeSavings || 0));
   const hasBill = !!finalInvoice;
   const moneyTarget = hasBill ? finalInvoice.grandTotal : netTotal;
   const received = money.received;
@@ -363,8 +333,11 @@ export default function OrderDetail() {
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
   const settled = balance <= 0 && received > 0;
-  /* Money chip comes from real receipts, so chip, balance and journey always agree.
-     Receipts can be taken from the moment the order is booked. */
+  const canEdit = !dispatched && !hasBill;
+  const warehouseName = godowns.find(g => g.id === order.godownId)?.name
+    || api.stock.locations.list().find(g => g.id === order.godownId)?.name
+    || "Not set";
+  /* Money chip comes from real receipts, so chip, balance and journey always agree. */
   const moneyStatus: "paid" | "partial" | "pending" =
     settled ? "paid" : received > 0 ? "partial" : "pending";
 
@@ -372,11 +345,11 @@ export default function OrderDetail() {
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
     {
       label: "Dispatched",
-      detail: dispatched ? formatIndianDate(order.dispatchDate) : undefined,
+      detail: dispatched ? formatIndianDate(order.dispatchDate) : "Not sent yet",
       state: dispatched ? "done" : "current",
     },
-    { label: "Billed", detail: finalInvoice?.invoiceNumber, state: hasBill ? "done" : "todo" },
-    { label: "Delivered", state: delivered ? "done" : dispatched ? "current" : "todo" },
+    { label: "Billed", detail: hasBill ? finalInvoice?.invoiceNumber : "On dispatch", state: hasBill ? "done" : "todo" },
+    { label: "Delivered", detail: delivered ? "Delivered" : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
     {
       label: "Paid",
       detail: settled ? "Fully received" : received > 0 ? `${formatCurrency(received)} received` : undefined,
@@ -398,16 +371,16 @@ export default function OrderDetail() {
           subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
           aside={
             <>
-              {moneyStatus && <StatusBadge status={moneyStatus} />}
+              <StatusBadge status={moneyStatus} />
               <StatusBadge status={order.deliveryStatus} kind="delivery" />
             </>
           }
           figures={[
             {
-              label: totalSchemeSavings > 0 ? "Order total (after schemes)" : "Order total",
+              label: (order.schemeSavings || 0) > 0 ? "Order total (after schemes)" : "Order total",
               value: formatCurrency(netTotal),
               primary: true,
-              note: totalSchemeSavings > 0 ? `Saved ${formatCurrency(totalSchemeSavings)} on schemes` : undefined,
+              note: (order.schemeSavings || 0) > 0 ? `Saved ${formatCurrency(order.schemeSavings)} on schemes` : undefined,
             },
             {
               label: "Money received",
@@ -427,6 +400,39 @@ export default function OrderDetail() {
         {/* Where this order stands */}
         <JourneyTrack steps={journey} />
 
+        {/* What to do next — one clear action */}
+        <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-4 md:p-5">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">
+              {!dispatched ? "Next: send the goods" : !delivered ? "Next: confirm it reached them" : "This order is complete"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {!dispatched
+                ? "Dispatch takes stock out and creates the final GST bill in one step."
+                : !delivered
+                  ? "Mark it delivered once the dealer confirms they got the goods."
+                  : "Goods delivered. Record a return if anything comes back."}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {!dispatched && (
+              <Button size="sm" disabled={isSaving} onClick={startDispatch}>
+                <Truck className="h-3.5 w-3.5" /> Dispatch &amp; bill
+              </Button>
+            )}
+            {dispatched && !delivered && (
+              <Button size="sm" disabled={isSaving} onClick={handleMarkDelivered}>
+                <PackageCheck className="h-3.5 w-3.5" /> Mark delivered
+              </Button>
+            )}
+            {dispatched && (
+              <Button size="sm" variant="outline" onClick={() => navigate("/claims")}>
+                <RotateCcw className="h-3.5 w-3.5" /> Record return
+              </Button>
+            )}
+          </div>
+        </div>
+
         {/* Plain facts — read, don't hunt */}
         <div className="fact-strip">
           <div className="min-w-0">
@@ -437,13 +443,13 @@ export default function OrderDetail() {
             <p className="fact-label">Sales person</p>
             <p className="fact-value truncate">{order.salesperson}</p>
           </div>
-          <div>
-            <p className="fact-label">Payment mode</p>
-            <p className="fact-value capitalize">{editPaymentMode.replace("_", " ")}</p>
+          <div className="min-w-0">
+            <p className="fact-label">Ships from</p>
+            <p className="fact-value truncate">{warehouseName}</p>
           </div>
           <div>
             <p className="fact-label">Items</p>
-            <p className="fact-value">{editLines.length}</p>
+            <p className="fact-value">{order.lines.length}</p>
           </div>
           <div>
             <p className="fact-label">Order date</p>
@@ -451,127 +457,91 @@ export default function OrderDetail() {
           </div>
         </div>
 
-        {/* Editable Dealer & Salesperson */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4">
-          <div className="glass-card p-3 md:p-4 space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Change dealer</Label>
-            <Select value={editDealerId} onValueChange={setEditDealerId}>
-              <SelectTrigger className="h-10 rounded-lg">
-                <SelectValue placeholder="Select dealer" />
-              </SelectTrigger>
-              <SelectContent>
-                {distributors.map(d => (
-                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Dispatch facts, only once the goods have left */}
+        {dispatched && (
+          <div className="fact-strip">
+            <div>
+              <p className="fact-label">Dispatched on</p>
+              <p className="fact-value">{formatIndianDate(order.dispatchDate)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="fact-label">Vehicle</p>
+              <p className="fact-value truncate">{order.vehicle || "—"}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="fact-label">Driver</p>
+              <p className="fact-value truncate">{order.driverName || "—"}</p>
+            </div>
           </div>
-          <div className="glass-card p-3 md:p-4 space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Change sales person</Label>
-            <Select value={editSalespersonId} onValueChange={setEditSalespersonId}>
-              <SelectTrigger className="h-10 rounded-lg">
-                <SelectValue placeholder="Select sales person" />
-              </SelectTrigger>
-              <SelectContent>
-                {salespersons.map(s => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
 
-
-        {/* Editable Items */}
+        {/* Items — read only */}
         <div className="glass-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold md:text-base">Items</h2>
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={addLine}>
-              <Plus className="h-3 w-3" /> Add Item
-            </Button>
+            {canEdit ? (
+              <Button variant="outline" size="sm" className="h-8 gap-1 text-xs" onClick={openEdit}>
+                <Pencil className="h-3 w-3" /> Edit order
+              </Button>
+            ) : (
+              <p className="text-right text-xs text-muted-foreground">
+                Locked — the bill is final. Use a return to correct it.
+              </p>
+            )}
           </div>
-          <div className="p-3 space-y-3">
-            {editLines.map((line, i) => (
-              <div key={line.id} className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                {/* On a phone the product name gets the full width so it is never cut off. */}
-                <div className="min-w-0 sm:flex-1">
-                  <Select value={line.productId} onValueChange={(v) => updateLine(line.id, "productId", v)}>
-                    <SelectTrigger className="h-9 rounded-lg text-xs">
-                      <SelectValue placeholder="Select product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name} — {formatCurrency(p.basePrice)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-start gap-2 sm:contents">
-                <div className="w-20 shrink-0">
-                  <NumberInput
-                    allowEmpty
-                    min={1}
-                    value={line.quantity}
-                    onValueChange={v => updateLine(line.id, "quantity", v)}
-                    placeholder="Qty"
-                    className="h-9 text-xs text-right"
-                  />
-                </div>
-                <div className="w-24 shrink-0 text-right">
-                  <NumberInput
-                    allowDecimal
-                    allowEmpty={false}
-                    min={0}
-                    value={line.unitPrice}
-                    onValueChange={v => updateLine(line.id, "unitPrice", v ?? 0)}
-                    placeholder="Price"
-                    className="h-9 text-xs text-right"
-                  />
-                </div>
-                <div className="flex w-20 flex-1 items-center justify-end gap-1 sm:flex-none">
-                  <span className="text-xs font-medium">{formatCurrency((line.quantity ?? 0) * line.unitPrice)}</span>
-                  {editLines.length > 1 && (
-                    <button onClick={() => removeLine(line.id)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-                </div>
-              </div>
+          <ul className="divide-y divide-border/60">
+            {order.lines.map((l, i) => (
+              <li key={`${l.productId}-${i}`} className="flex items-center gap-3 px-4 py-3 text-xs">
+                <span className="min-w-0 flex-1 truncate font-medium">{l.productName}</span>
+                <span className="w-14 shrink-0 text-right tabular-nums text-muted-foreground">× {l.quantity}</span>
+                <span className="w-24 shrink-0 text-right tabular-nums text-muted-foreground">{formatCurrency(l.unitPrice)}</span>
+                <span className="w-24 shrink-0 text-right tabular-nums font-semibold">{formatCurrency(l.lineTotal)}</span>
+              </li>
             ))}
-          </div>
+          </ul>
           <div className="px-4 py-3 border-t border-border flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">Subtotal</span>
-            <span className="text-sm font-semibold">{formatCurrency(editTotal)}</span>
+            <span className="text-sm font-semibold tabular-nums">{formatCurrency(order.total)}</span>
           </div>
         </div>
 
-        {/* Schemes Applied */}
-        {appliedSchemes.length > 0 && (
+        {/* Schemes applied */}
+        {order.appliedSchemes?.length > 0 && (
           <div className="rounded-md border border-success/30 bg-success/5 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Gift className="h-4 w-4 text-success" />
-              <span className="text-sm font-semibold text-success">Schemes Applied</span>
+              <span className="text-sm font-semibold text-success">Schemes applied</span>
             </div>
             <div className="space-y-1.5">
-              {appliedSchemes.map((a, i) => (
+              {order.appliedSchemes.map((s, i) => (
                 <div key={i} className="flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-medium text-success">{a.scheme.name}</span>
-                    {a.label && <span className="text-success/70 ml-1">({a.label})</span>}
+                    <span className="font-medium text-success">{s.schemeName}</span>
+                    {s.schemeLabel && <span className="text-success/70 ml-1">({s.schemeLabel})</span>}
                   </div>
-                  <span className="font-semibold text-success">-{formatCurrency(a.savings)}</span>
+                  <span className="font-semibold text-success">-{formatCurrency(s.savings)}</span>
                 </div>
               ))}
             </div>
-            {totalSchemeSavings > 0 && (
+            {(order.schemeSavings || 0) > 0 && (
               <div className="mt-2 pt-2 border-t border-success/20 flex items-center justify-between text-xs">
-                <span className="font-medium text-success">Total Savings</span>
-                <span className="font-bold text-success">-{formatCurrency(totalSchemeSavings)}</span>
+                <span className="font-medium text-success">Total savings</span>
+                <span className="font-bold text-success">-{formatCurrency(order.schemeSavings)}</span>
               </div>
             )}
           </div>
         )}
+
+        <Separator />
+        <PaymentsPanel
+          invoiceId={finalInvoice?.id ?? null}
+          orderId={finalInvoice ? null : order.id}
+          docLabel={finalInvoice?.invoiceNumber ?? order.orderNumber}
+          docTotal={finalInvoice?.grandTotal ?? netTotal}
+          canRecord={canSeeMoney}
+          onTotals={handleMoneyTotals}
+          onChanged={() => api.refreshAll()}
+        />
 
         {/* Billing Documents */}
         <div className="glass-card overflow-hidden">
@@ -613,159 +583,59 @@ export default function OrderDetail() {
           )}
         </div>
 
-        <Separator />
-        <PaymentsPanel
-          invoiceId={finalInvoice?.id ?? null}
-          orderId={finalInvoice ? null : order.id}
-          docLabel={finalInvoice?.invoiceNumber ?? order.orderNumber}
-          docTotal={finalInvoice?.grandTotal ?? netTotal}
-          canRecord={canSeeMoney}
-          onTotals={handleMoneyTotals}
-          onChanged={() => api.refreshAll()}
-        />
-
-        <Separator />
-
-
-        {/* Status & Dispatch — Editable */}
-        <div className="glass-card p-4 md:p-6 space-y-4 md:space-y-5">
-          <h2 className="text-sm font-semibold md:text-base">Status & Dispatch</h2>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Payment Mode</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {paymentModes.map((m) => (
-                <button
-                  key={m.value}
-                  onClick={() => setEditPaymentMode(m.value)}
-                  className={`rounded-lg border px-3 py-3 text-xs font-medium transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
-                    editPaymentMode === m.value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Delivery</Label>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-lg border px-3 py-2 text-xs font-medium capitalize md:text-sm ${statusColors[order.deliveryStatus] || "border-border text-muted-foreground"}`}>
-                {order.deliveryStatus === "pending" ? "Not sent yet" : order.deliveryStatus}
-              </span>
-              {order.deliveryStatus === "pending" && (
-                <Button size="sm" disabled={isSaving} onClick={startDispatch}>
-                  Dispatch &amp; bill
-                </Button>
-              )}
-              {order.deliveryStatus === "dispatched" && (
-                <Button size="sm" variant="outline" disabled={isSaving} onClick={handleMarkDelivered}>
-                  Mark delivered
-                </Button>
-              )}
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Goods leave the warehouse only through Dispatch &amp; bill. Money received is recorded above.
-            </p>
-          </div>
-
-
-          <div className="space-y-1.5">
-            <Label className="text-xs md:text-sm">Source Warehouse *</Label>
-            <Select value={editGodown} onValueChange={setEditGodown}>
-              <SelectTrigger className="h-10 rounded-lg">
-                <SelectValue placeholder="Select warehouse" />
-              </SelectTrigger>
-              <SelectContent>
-                {godowns.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs md:text-sm">Dispatch Date</Label>
-              <Input type="date" value={editDispatchDate} onChange={(e) => setEditDispatchDate(e.target.value)} className="h-11 rounded-lg" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs md:text-sm">Vehicle</Label>
-              <Input value={editVehicle} onChange={(e) => setEditVehicle(e.target.value)} placeholder="e.g. MH-01-AB-1234" className="h-11 rounded-lg" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs md:text-sm">Driver</Label>
-              <Input value={editDriver} onChange={(e) => setEditDriver(e.target.value)} placeholder="Driver name" className="h-11 rounded-lg" />
-            </div>
-          </div>
-        </div>
-
-        {/* Action bar */}
+        {/* Share / print / remove */}
         <div className="rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 mr-auto min-w-0 flex-shrink">
-              <Button
-                variant="destructive"
-                size="sm"
-                disabled={order.deliveryStatus === "delivered"}
-                onClick={() => { setDeleteTarget(order); setDeleteConfirmText(""); }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{order.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  const dealer = distributors.find(d => d.id === order.distributorId);
-                  const { OrderInvoicePdf } = await import("@/components/pdf/OrderInvoicePdf");
-                  downloadPdf(
-                    pdfFilename("invoice", order.orderNumber),
-                    <OrderInvoicePdf
-                      order={order}
-                      companyName={companyInfo.name}
-                      companyAddress={companyInfo.address}
-                      gstin={companyInfo.gstin}
-                      logoUrl={companyInfo.logoUrl}
-                      companyPhone={companyInfo.phone}
-                      companyEmail={companyInfo.email}
-                      companyPan={companyInfo.pan}
-                      companyStateCode={companyInfo.stateCode}
-                      bankName={companyInfo.bankName}
-                      bankAccountName={companyInfo.bankAccountName}
-                      bankAccount={companyInfo.bankAccount}
-                      bankIfsc={companyInfo.bankIfsc}
-                      distributorAddress={dealer?.address}
-                      distributorGstin={dealer?.gstin}
-                      distributorStateCode={dealer?.stateCode}
-                    />
-                  );
-                }}
-              >
-                <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Invoice</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-[#128C4B] hover:text-[#128C4B]"
-                onClick={() => shareOrderOnWhatsApp(order, companyInfo)}
-              >
-                <WhatsAppIcon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">WhatsApp</span>
-              </Button>
-              {(order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered") && (
-                <Button size="sm" variant="outline" onClick={() => navigate("/claims")}>
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Record return</span>
-                </Button>
-              )}
-            </div>
-            <Button onClick={saveOrder} disabled={isSaving} size="sm">
-              {isSaving ? "Saving…" : "Save Changes"}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const dealer = distributors.find(d => d.id === order.distributorId);
+                const { OrderInvoicePdf } = await import("@/components/pdf/OrderInvoicePdf");
+                downloadPdf(
+                  pdfFilename("invoice", order.orderNumber),
+                  <OrderInvoicePdf
+                    order={order}
+                    companyName={companyInfo.name}
+                    companyAddress={companyInfo.address}
+                    gstin={companyInfo.gstin}
+                    logoUrl={companyInfo.logoUrl}
+                    companyPhone={companyInfo.phone}
+                    companyEmail={companyInfo.email}
+                    companyPan={companyInfo.pan}
+                    companyStateCode={companyInfo.stateCode}
+                    bankName={companyInfo.bankName}
+                    bankAccountName={companyInfo.bankAccountName}
+                    bankAccount={companyInfo.bankAccount}
+                    bankIfsc={companyInfo.bankIfsc}
+                    distributorAddress={dealer?.address}
+                    distributorGstin={dealer?.gstin}
+                    distributorStateCode={dealer?.stateCode}
+                  />
+                );
+              }}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Invoice</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[#128C4B] hover:text-[#128C4B]"
+              onClick={() => shareOrderOnWhatsApp(order, companyInfo)}
+            >
+              <WhatsAppIcon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="ml-auto"
+              disabled={order.deliveryStatus === "delivered"}
+              onClick={() => { setDeleteTarget(order); setDeleteConfirmText(""); }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{order.deliveryStatus === "delivered" ? "Cannot delete" : "Delete"}</span>
             </Button>
           </div>
         </div>
@@ -775,6 +645,123 @@ export default function OrderDetail() {
           <EntityHistory entityType="order" entityId={order.id} />
         </div>
       </div>
+
+      {/* Edit order — only before the goods leave */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">Edit order {order.orderNumber}</DialogTitle>
+            <DialogDescription>
+              Change what was booked. Nothing moves in stock and no bill is raised until you dispatch.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Dealer</Label>
+                <Select value={editDealerId} onValueChange={setEditDealerId}>
+                  <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select dealer" /></SelectTrigger>
+                  <SelectContent>
+                    {distributors.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Sales person</Label>
+                <Select value={editSalespersonId} onValueChange={setEditSalespersonId}>
+                  <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select sales person" /></SelectTrigger>
+                  <SelectContent>
+                    {salespersons.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Ships from</Label>
+                <Select value={editGodown} onValueChange={setEditGodown}>
+                  <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
+                  <SelectContent>
+                    {godowns.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2">
+                <span className="text-xs font-semibold">Items</span>
+                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={addLine}>
+                  <Plus className="h-3 w-3" /> Add item
+                </Button>
+              </div>
+              <div className="space-y-3 p-3">
+                {editLines.map(line => (
+                  <div key={line.id} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                    <div className="min-w-0 sm:flex-1">
+                      <Select value={line.productId} onValueChange={(v) => updateLine(line.id, "productId", v)}>
+                        <SelectTrigger className="h-9 rounded-lg text-xs">
+                          <SelectValue placeholder="Select product" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {products.map(p => (
+                            <SelectItem key={p.id} value={p.id}>{p.name} — {formatCurrency(p.basePrice)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-start gap-2 sm:contents">
+                      <div className="w-20 shrink-0">
+                        <NumberInput
+                          allowEmpty
+                          min={1}
+                          value={line.quantity}
+                          onValueChange={v => updateLine(line.id, "quantity", v)}
+                          placeholder="Qty"
+                          className="h-9 text-xs text-right"
+                        />
+                      </div>
+                      <div className="w-24 shrink-0 text-right">
+                        <NumberInput
+                          allowDecimal
+                          allowEmpty={false}
+                          min={0}
+                          value={line.unitPrice}
+                          onValueChange={v => updateLine(line.id, "unitPrice", v ?? 0)}
+                          placeholder="Price"
+                          className="h-9 text-xs text-right"
+                        />
+                      </div>
+                      <div className="flex w-20 flex-1 items-center justify-end gap-1 sm:flex-none">
+                        <span className="text-xs font-medium tabular-nums">{formatCurrency((line.quantity ?? 0) * line.unitPrice)}</span>
+                        {editLines.length > 1 && (
+                          <button onClick={() => removeLine(line.id)} className="p-0.5 text-muted-foreground transition-colors hover:text-destructive">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between border-t border-border px-3 py-2">
+                <span className="text-xs font-medium text-muted-foreground">Subtotal</span>
+                <span className="text-sm font-semibold tabular-nums">{formatCurrency(editTotal)}</span>
+              </div>
+            </div>
+
+            {editPricing.totalSchemeSavings > 0 && (
+              <p className="text-xs text-success">
+                Schemes will save {formatCurrency(editPricing.totalSchemeSavings)} on this order.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={saveOrder} disabled={isSaving}>{isSaving ? "Saving…" : "Save changes"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteConfirmText(""); } }}>
@@ -810,13 +797,13 @@ export default function OrderDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Credit Override */}
+      {/* Credit Override on edit */}
       <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
         <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
             <AlertDialogDescription>
-              Changing payment status will push this dealer's outstanding above their credit limit. Do you want to proceed as Super Admin?
+              This change will push the dealer's outstanding above their credit limit. Do you want to proceed?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -847,22 +834,44 @@ export default function OrderDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-
-
-
-      {/* Dispatch preview & confirm */}
+      {/* Dispatch details, stock preview & confirm */}
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Dispatch &amp; bill this order</DialogTitle>
             <DialogDescription>
-              In one step: stock leaves the chosen warehouse and the final GST bill is created. Rows in red will go below zero — dispatch is still allowed.
+              In one step: stock leaves the chosen warehouse and the final GST bill is created.
             </DialogDescription>
           </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Ships from *</Label>
+              <Select value={dispatchGodown} onValueChange={setDispatchGodown}>
+                <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
+                <SelectContent>
+                  {godowns.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Dispatch date</Label>
+              <Input type="date" value={dispatchDate} onChange={e => setDispatchDate(e.target.value)} className="h-10 rounded-lg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Vehicle</Label>
+              <Input value={dispatchVehicle} onChange={e => setDispatchVehicle(e.target.value)} placeholder="e.g. MH-01-AB-1234" className="h-10 rounded-lg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Driver</Label>
+              <Input value={dispatchDriver} onChange={e => setDispatchDriver(e.target.value)} placeholder="Driver name" className="h-10 rounded-lg" />
+            </div>
+          </div>
+
           {dispatchPreview.loading ? (
             <div className="py-8 text-center text-sm text-muted-foreground">Loading stock impact…</div>
           ) : (
-            <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                   <tr>
@@ -895,7 +904,7 @@ export default function OrderDetail() {
           )}
           {dispatchPreview.rows.some(r => r.will_go_negative) && (
             <p className="text-xs text-destructive">
-              ⚠️ One or more products will go below zero after this dispatch. Please reconcile inventory afterwards.
+              One or more products will go below zero after this dispatch. Please reconcile inventory afterwards.
             </p>
           )}
           <DialogFooter>
