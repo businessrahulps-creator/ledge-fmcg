@@ -619,7 +619,7 @@ export default function OrderDetail() {
           orderId={finalInvoice ? null : order.id}
           docLabel={finalInvoice?.invoiceNumber ?? order.orderNumber}
           docTotal={finalInvoice?.grandTotal ?? netTotal}
-          canRecord={canSeeMoney && !order.cancelledAt}
+          canRecord={canSeeMoney}
           onTotals={handleMoneyTotals}
           onChanged={() => api.refreshAll()}
         />
