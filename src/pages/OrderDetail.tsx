@@ -109,6 +109,8 @@ export default function OrderDetail() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
+  const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
+
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
