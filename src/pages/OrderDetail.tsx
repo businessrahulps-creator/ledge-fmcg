@@ -884,7 +884,7 @@ export default function OrderDetail() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDispatchPreview(p => ({ ...p, open: false }))}>Cancel</Button>
-            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0 || isSaving}>
+            <Button onClick={() => confirmDispatch()} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0 || isSaving}>
               {isSaving ? "Working…" : "Dispatch & bill"}
             </Button>
           </DialogFooter>
