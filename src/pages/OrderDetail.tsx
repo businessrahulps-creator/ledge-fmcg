@@ -376,12 +376,20 @@ export default function OrderDetail() {
             </>
           }
           figures={[
-            {
-              label: (order.schemeSavings || 0) > 0 ? "Order total (after schemes)" : "Order total",
-              value: formatCurrency(netTotal),
-              primary: true,
-              note: (order.schemeSavings || 0) > 0 ? `Saved ${formatCurrency(order.schemeSavings)} on schemes` : undefined,
-            },
+            hasBill
+              ? {
+                  label: "Bill total",
+                  value: formatCurrency(finalInvoice.grandTotal),
+                  primary: true,
+                  note: `${formatCurrency(finalInvoice.subtotal)} + ${formatCurrency(finalInvoice.totalTax)} GST`,
+                }
+              : {
+                  label: (order.schemeSavings || 0) > 0 ? "Order total (after schemes)" : "Order total",
+                  value: formatCurrency(netTotal),
+                  primary: true,
+                  note: (order.schemeSavings || 0) > 0 ? `Saved ${formatCurrency(order.schemeSavings)} on schemes` : undefined,
+                },
+
             {
               label: "Money received",
               value: formatCurrency(received),
@@ -586,38 +594,46 @@ export default function OrderDetail() {
         {/* Share / print / remove */}
         <div className="rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const dealer = distributors.find(d => d.id === order.distributorId);
-                const { OrderInvoicePdf } = await import("@/components/pdf/OrderInvoicePdf");
-                downloadPdf(
-                  pdfFilename("invoice", order.orderNumber),
-                  <OrderInvoicePdf
-                    order={order}
-                    companyName={companyInfo.name}
-                    companyAddress={companyInfo.address}
-                    gstin={companyInfo.gstin}
-                    logoUrl={companyInfo.logoUrl}
-                    companyPhone={companyInfo.phone}
-                    companyEmail={companyInfo.email}
-                    companyPan={companyInfo.pan}
-                    companyStateCode={companyInfo.stateCode}
-                    bankName={companyInfo.bankName}
-                    bankAccountName={companyInfo.bankAccountName}
-                    bankAccount={companyInfo.bankAccount}
-                    bankIfsc={companyInfo.bankIfsc}
-                    distributorAddress={dealer?.address}
-                    distributorGstin={dealer?.gstin}
-                    distributorStateCode={dealer?.stateCode}
-                  />
-                );
-              }}
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Invoice</span>
-            </Button>
+            {finalInvoice ? (
+              <Button variant="outline" size="sm" onClick={() => setPreviewInvoice(finalInvoice)}>
+                <FileText className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Bill</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const dealer = distributors.find(d => d.id === order.distributorId);
+                  const { OrderInvoicePdf } = await import("@/components/pdf/OrderInvoicePdf");
+                  downloadPdf(
+                    pdfFilename("order-confirmation", order.orderNumber),
+                    <OrderInvoicePdf
+                      order={order}
+                      companyName={companyInfo.name}
+                      companyAddress={companyInfo.address}
+                      gstin={companyInfo.gstin}
+                      logoUrl={companyInfo.logoUrl}
+                      companyPhone={companyInfo.phone}
+                      companyEmail={companyInfo.email}
+                      companyPan={companyInfo.pan}
+                      companyStateCode={companyInfo.stateCode}
+                      bankName={companyInfo.bankName}
+                      bankAccountName={companyInfo.bankAccountName}
+                      bankAccount={companyInfo.bankAccount}
+                      bankIfsc={companyInfo.bankIfsc}
+                      distributorAddress={dealer?.address}
+                      distributorGstin={dealer?.gstin}
+                      distributorStateCode={dealer?.stateCode}
+                    />
+                  );
+                }}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Order confirmation</span>
+              </Button>
+            )}
+
             <Button
               size="sm"
               variant="outline"
