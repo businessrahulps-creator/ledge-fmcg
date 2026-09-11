@@ -25,6 +25,8 @@ import {
 import { EntityPicker } from "@/components/ui/entity-picker";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import confetti from "canvas-confetti";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
 import {
@@ -87,6 +89,12 @@ export default function NewOrder() {
   const [selectedDealer, setSelectedDealer] = useState("");
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Money taken at booking time (optional). It attaches itself to the GST bill on dispatch.
+  const canSeeMoney = useCan("see_money");
+  const [advanceAmount, setAdvanceAmount] = useState<number | null>(null);
+  const [advanceMode, setAdvanceMode] = useState("cash");
+  const [advanceRef, setAdvanceRef] = useState("");
 
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
@@ -281,6 +289,26 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
+      // Advance taken at the counter — recorded against the order, never blocking the booking.
+      const advance = Number(advanceAmount || 0);
+      if (advance > 0 && result.orderId) {
+        const { error: payErr } = await supabase.rpc("record_order_payment_atomic", {
+          p_order_id: result.orderId,
+          p_amount: advance,
+          p_mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
+          p_paid_on: orderDate,
+          p_reference: advanceRef,
+          p_note: "Advance received at booking",
+          p_idempotency_key: `${result.orderId}:booking-advance`,
+        });
+        if (payErr) {
+          handleSupabaseError(payErr, {
+            source: "rpc:record_order_payment_atomic",
+            title: "Order saved, but the advance wasn't recorded",
+            context: { orderId: result.orderId },
+          });
+        }
+      }
       trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
 
@@ -560,6 +588,55 @@ export default function NewOrder() {
                 <Textarea placeholder="Anything the warehouse should know..." value={remarks} onChange={(e) => setRemarks(e.target.value)} className="min-h-[80px] rounded-lg" />
               </div>
             </section>
+
+            {/* Money taken now (optional) */}
+            {canSeeMoney && (
+              <section className="glass-card p-4 md:p-6">
+                <h2 className="mb-1 text-sm font-semibold md:text-base">Advance received (optional)</h2>
+                <p className="mb-3 text-xs text-muted-foreground md:mb-4">
+                  If the dealer pays something now, put it here. It carries over to the GST bill when you dispatch.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Amount (₹)</Label>
+                    <NumberInput
+                      allowDecimal
+                      allowEmpty
+                      min={0}
+                      value={advanceAmount}
+                      onValueChange={setAdvanceAmount}
+                      className="h-10 rounded-lg md:h-12"
+                    />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Paid by</Label>
+                    <Select value={advanceMode} onValueChange={setAdvanceMode}>
+                      <SelectTrigger className="h-10 rounded-lg md:h-12"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="upi">UPI</SelectItem>
+                        <SelectItem value="bank_transfer">Bank transfer</SelectItem>
+                        <SelectItem value="cheque">Cheque</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label className="text-xs md:text-sm">Reference</Label>
+                    <Input
+                      value={advanceRef}
+                      onChange={(e) => setAdvanceRef(e.target.value)}
+                      placeholder="Cheque or UPI number"
+                      className="h-10 rounded-lg md:h-12"
+                    />
+                  </div>
+                </div>
+                {Number(advanceAmount || 0) > 0 && (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Still to collect after this: {formatCurrency(Math.max(0, netOrderTotal - Number(advanceAmount || 0)))}
+                  </p>
+                )}
+              </section>
+            )}
 
           </div>
 
