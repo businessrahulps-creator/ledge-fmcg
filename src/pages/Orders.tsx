@@ -371,7 +371,7 @@ export default function Orders() {
                       <th className="px-4 py-3 font-semibold">Order #</th>
                       <th className="px-4 py-3 font-semibold">Date</th>
                       <th className="px-4 py-3 font-semibold">Dealer</th>
-                      <th className="px-4 py-3 font-semibold text-right">Amount</th>
+                      <th className="px-4 py-3 font-semibold text-right">Order value</th>
                       <th className="px-4 py-3 font-semibold">Status</th>
                       <th className="px-4 py-3 font-semibold">Billing</th>
                     </tr>
