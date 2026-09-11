@@ -124,7 +124,7 @@ export function PaymentsPanel({
     }
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote("");
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
     await load();
     onChanged?.();
   };
@@ -158,7 +158,7 @@ export function PaymentsPanel({
           </p>
         </div>
         {canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
