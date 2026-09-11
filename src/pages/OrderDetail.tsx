@@ -109,6 +109,8 @@ export default function OrderDetail() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
+  const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
+
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
@@ -272,7 +274,7 @@ export default function OrderDetail() {
   };
 
   /** One step: stock out + final GST bill + order marked dispatched. */
-  const confirmDispatch = async () => {
+  const confirmDispatch = async (overrideCredit = false) => {
     if (!order) return;
     setDispatchPreview(p => ({ ...p, open: false }));
     setIsSaving(true);
@@ -281,9 +283,15 @@ export default function OrderDetail() {
       dispatchDate: editDispatchDate || null,
       vehicle: editVehicle,
       driverName: editDriver,
+      overrideCredit,
     });
     setIsSaving(false);
-    if (!res.success) return;
+    if (!res.success) {
+      if (!overrideCredit && canOverrideCredit && /credit limit/i.test(res.error || "")) {
+        setCreditDispatchOpen(true);
+      }
+      return;
+    }
     const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
     toast.success(
       res.alreadyDone
@@ -292,6 +300,7 @@ export default function OrderDetail() {
       negatives > 0 ? { description: `${negatives} product${negatives === 1 ? "" : "s"} went below zero — please reconcile stock.` } : undefined,
     );
   };
+
 
 
   const saveOrder = () => {
@@ -824,6 +833,29 @@ export default function OrderDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Credit limit reached while dispatching & billing */}
+      <AlertDialog open={creditDispatchOpen} onOpenChange={setCreditDispatchOpen}>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>This bill crosses their credit limit</AlertDialogTitle>
+            <AlertDialogDescription>
+              {order?.distributorName} will owe more than the limit you set for them. You can approve it and send the goods anyway.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              disabled={isSaving}
+              onClick={() => { setCreditDispatchOpen(false); confirmDispatch(true); }}
+            >
+              {isSaving ? "Working…" : "Approve & dispatch"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
+
 
       {/* Dispatch preview & confirm */}
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
@@ -875,7 +907,7 @@ export default function OrderDetail() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDispatchPreview(p => ({ ...p, open: false }))}>Cancel</Button>
-            <Button onClick={confirmDispatch} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0 || isSaving}>
+            <Button onClick={() => confirmDispatch()} disabled={dispatchPreview.loading || dispatchPreview.rows.length === 0 || isSaving}>
               {isSaving ? "Working…" : "Dispatch & bill"}
             </Button>
           </DialogFooter>
