@@ -833,6 +833,29 @@ export default function OrderDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Credit limit reached while dispatching & billing */}
+      <AlertDialog open={creditDispatchOpen} onOpenChange={setCreditDispatchOpen}>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>This bill crosses their credit limit</AlertDialogTitle>
+            <AlertDialogDescription>
+              {order?.distributorName} will owe more than the limit you set for them. You can approve it and send the goods anyway.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              disabled={isSaving}
+              onClick={() => { setCreditDispatchOpen(false); confirmDispatch(true); }}
+            >
+              {isSaving ? "Working…" : "Approve & dispatch"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
+
 
       {/* Dispatch preview & confirm */}
       <Dialog open={dispatchPreview.open} onOpenChange={(o) => setDispatchPreview(p => ({ ...p, open: o }))}>
