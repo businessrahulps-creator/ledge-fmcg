@@ -153,7 +153,7 @@ export default function Billing() {
   }, [invoices, inPeriod, matchesSearch, receivedByInvoice, payFilter]);
 
   const dealerName = useCallback((distributorId: string) =>
-    api.distributors.list().find(d => d.id === distributorId)?.name || "", [api.distributors]);
+    api.dealers.list().find(d => d.id === distributorId)?.name || "", [api.dealers]);
 
   const invoiceNumberById = useMemo(() => {
     const m = new Map<string, string>();
@@ -464,7 +464,14 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Money still to collect"
-                      headers={["Bill", "Dealer", "Date", "Total", "Received", "Still due"]}
+                      columns={[
+                        { header: "Bill", width: "18%" },
+                        { header: "Dealer", width: "22%" },
+                        { header: "Date", width: "14%" },
+                        { header: "Total", width: "15%", align: "right" },
+                        { header: "Received", width: "15%", align: "right" },
+                        { header: "Still due", width: "16%", align: "right" },
+                      ]}
                       rows={collections.map(r => [
                         r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
                         formatCurrency(r.inv.grandTotal), formatCurrency(r.received), formatCurrency(r.due),
@@ -586,7 +593,13 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Payments received"
-                      headers={["Date", "Dealer", "Against", "Paid by", "Amount"]}
+                      columns={[
+                        { header: "Date", width: "16%" },
+                        { header: "Dealer", width: "26%" },
+                        { header: "Against", width: "24%" },
+                        { header: "Paid by", width: "16%" },
+                        { header: "Amount", width: "18%", align: "right" },
+                      ]}
                       rows={paymentRows.map(r => [
                         formatIndianDate(r.paidOn),
                         dealerName(r.distributorId),
