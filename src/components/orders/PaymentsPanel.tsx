@@ -34,18 +34,26 @@ const modes = [
 ];
 
 interface Props {
-  invoiceId: string;
-  invoiceNumber: string;
-  invoiceTotal: number;
+  /** Anchor: the bill once it exists, otherwise the order it was booked on. */
+  invoiceId?: string | null;
+  orderId?: string | null;
+  /** Bill or order number, shown to the user. */
+  docLabel: string;
+  /** Total this money is being collected against. */
+  docTotal: number;
   /** Called after money moves so the page can refresh order/dealer figures. */
   onChanged?: () => void;
   canRecord?: boolean;
   /** Reports money received / balance up to the page so the hero band can show it. */
   onTotals?: (t: { received: number; balance: number }) => void;
+  /** Hide the surrounding card chrome when embedded in a sheet. */
+  bare?: boolean;
 }
 
-/** Money actually received against one GST bill. Receipts are never edited or deleted — only cancelled. */
-export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChanged, canRecord = true, onTotals }: Props) {
+/** Money actually received against one order or bill. Receipts are never edited or deleted — only cancelled. */
+export function PaymentsPanel({
+  invoiceId, orderId, docLabel, docTotal, onChanged, canRecord = true, onTotals, bare = false,
+}: Props) {
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -57,21 +65,26 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
   const [note, setNote] = useState("");
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
+  const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+
+  const anchorColumn = invoiceId ? "invoice_id" : "order_id";
+  const anchorId = invoiceId || orderId || "";
 
   const load = useCallback(async () => {
+    if (!anchorId) { setRows([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase
       .from("invoice_payments")
       .select("id, amount, mode, paid_on, reference, note, status, void_reason")
-      .eq("invoice_id", invoiceId)
+      .eq(anchorColumn, anchorId)
       .order("paid_on", { ascending: false });
     setLoading(false);
     if (error) {
-      handleSupabaseError(error, { source: "payments:list", title: "Couldn't load payments", context: { invoiceId } });
+      handleSupabaseError(error, { source: "payments:list", title: "Couldn't load payments", context: { anchorId } });
       return;
     }
     setRows((data || []) as PaymentRow[]);
-  }, [invoiceId]);
+  }, [anchorColumn, anchorId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -79,7 +92,7 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
     () => rows.filter(r => r.status === "posted").reduce((s, r) => s + Number(r.amount || 0), 0),
     [rows],
   );
-  const balance = Math.max(0, Math.round((invoiceTotal - received) * 100) / 100);
+  const balance = Math.max(0, Math.round((docTotal - received) * 100) / 100);
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
 
@@ -87,23 +100,31 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
     setSaving(true);
-    const { error } = await supabase.rpc("record_invoice_payment_atomic", {
-      p_invoice_id: invoiceId,
+    const shared = {
       p_amount: value,
       p_mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
       p_paid_on: paidOn,
       p_reference: reference,
       p_note: note,
-      p_idempotency_key: `${invoiceId}:${paidOn}:${value}:${reference || "-"}`,
-    });
+      // One key per open dialog: a double click can't double-post, but two
+      // genuine same-day payments of the same amount are still allowed.
+      p_idempotency_key: `${anchorId}:${submitKey}`,
+    };
+    const { error } = invoiceId
+      ? await supabase.rpc("record_invoice_payment_atomic", { p_invoice_id: invoiceId, ...shared })
+      : await supabase.rpc("record_order_payment_atomic", { p_order_id: orderId as string, ...shared });
     setSaving(false);
     if (error) {
-      handleSupabaseError(error, { source: "rpc:record_invoice_payment_atomic", title: "Couldn't record this payment", context: { invoiceId } });
+      handleSupabaseError(error, {
+        source: invoiceId ? "rpc:record_invoice_payment_atomic" : "rpc:record_order_payment_atomic",
+        title: "Couldn't record this payment",
+        context: { anchorId },
+      });
       return;
     }
-    toast.success(`${formatCurrency(value)} recorded against ${invoiceNumber}`);
+    toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote("");
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
     await load();
     onChanged?.();
   };
@@ -128,14 +149,16 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
   };
 
   return (
-    <div className="glass-card overflow-hidden">
+    <div className={bare ? "" : "glass-card overflow-hidden"}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold md:text-base">Money received</h2>
-          <p className="text-xs text-muted-foreground">Against bill {invoiceNumber}</p>
+          <p className="text-xs text-muted-foreground">
+            {invoiceId ? `Against bill ${docLabel}` : `Against order ${docLabel} — carries over to the bill`}
+          </p>
         </div>
         {canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
@@ -144,7 +167,7 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
 
       <div className="grid grid-cols-3 divide-x divide-border border-b border-border">
         {[
-          { label: "Billed", value: invoiceTotal },
+          { label: invoiceId ? "Billed" : "Order total", value: docTotal },
           { label: "Received", value: received },
           { label: "Still due", value: balance },
         ].map(cell => (
@@ -200,7 +223,7 @@ export function PaymentsPanel({ invoiceId, invoiceNumber, invoiceTotal, onChange
           <DialogHeader>
             <DialogTitle className="text-base">Record payment</DialogTitle>
             <DialogDescription>
-              {formatCurrency(balance)} is still due on bill {invoiceNumber}.
+              {formatCurrency(balance)} is still due on {invoiceId ? "bill" : "order"} {docLabel}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">

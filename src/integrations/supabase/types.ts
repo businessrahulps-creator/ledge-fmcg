@@ -824,9 +824,10 @@ export type Database = {
           distributor_id: string
           id: string
           idempotency_key: string | null
-          invoice_id: string
+          invoice_id: string | null
           mode: Database["public"]["Enums"]["payment_mode"]
           note: string
+          order_id: string | null
           paid_on: string
           posted_at: string
           posted_by: string | null
@@ -843,9 +844,10 @@ export type Database = {
           distributor_id: string
           id?: string
           idempotency_key?: string | null
-          invoice_id: string
+          invoice_id?: string | null
           mode: Database["public"]["Enums"]["payment_mode"]
           note?: string
+          order_id?: string | null
           paid_on?: string
           posted_at?: string
           posted_by?: string | null
@@ -862,9 +864,10 @@ export type Database = {
           distributor_id?: string
           id?: string
           idempotency_key?: string | null
-          invoice_id?: string
+          invoice_id?: string | null
           mode?: Database["public"]["Enums"]["payment_mode"]
           note?: string
+          order_id?: string | null
           paid_on?: string
           posted_at?: string
           posted_by?: string | null
@@ -915,6 +918,20 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order_aging"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2274,6 +2291,7 @@ export type Database = {
         Returns: Json
       }
       check_aging_transitions: { Args: never; Returns: Json }
+      dealer_outstanding: { Args: { p_dealer: string }; Returns: number }
       delete_member_atomic: {
         Args: { member_id: string }
         Returns: {
@@ -2396,6 +2414,18 @@ export type Database = {
         }
         Returns: Json
       }
+      record_order_payment_atomic: {
+        Args: {
+          p_amount: number
+          p_idempotency_key?: string
+          p_mode: Database["public"]["Enums"]["payment_mode"]
+          p_note?: string
+          p_order_id: string
+          p_paid_on?: string
+          p_reference?: string
+        }
+        Returns: Json
+      }
       record_return_and_credit_atomic: {
         Args: {
           p_godown_id?: string
@@ -2405,6 +2435,10 @@ export type Database = {
           p_reason?: string
         }
         Returns: Json
+      }
+      refresh_dealer_outstanding: {
+        Args: { p_dealer: string }
+        Returns: undefined
       }
       resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
       reverse_dispatch_for_order: {
