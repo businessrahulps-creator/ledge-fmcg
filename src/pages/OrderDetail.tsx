@@ -272,7 +272,7 @@ export default function OrderDetail() {
   };
 
   /** One step: stock out + final GST bill + order marked dispatched. */
-  const confirmDispatch = async () => {
+  const confirmDispatch = async (overrideCredit = false) => {
     if (!order) return;
     setDispatchPreview(p => ({ ...p, open: false }));
     setIsSaving(true);
@@ -281,9 +281,15 @@ export default function OrderDetail() {
       dispatchDate: editDispatchDate || null,
       vehicle: editVehicle,
       driverName: editDriver,
+      overrideCredit,
     });
     setIsSaving(false);
-    if (!res.success) return;
+    if (!res.success) {
+      if (!overrideCredit && canOverrideCredit && /credit limit/i.test(res.error || "")) {
+        setCreditDispatchOpen(true);
+      }
+      return;
+    }
     const negatives = dispatchPreview.rows.filter(r => r.will_go_negative).length;
     toast.success(
       res.alreadyDone
@@ -292,6 +298,7 @@ export default function OrderDetail() {
       negatives > 0 ? { description: `${negatives} product${negatives === 1 ? "" : "s"} went below zero — please reconcile stock.` } : undefined,
     );
   };
+
 
 
   const saveOrder = () => {
