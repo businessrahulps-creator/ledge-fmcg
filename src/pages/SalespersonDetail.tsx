@@ -217,7 +217,7 @@ export default function SalespersonDetail() {
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
                   {target.targetRevenue > 0 && (
                     <div>
-                      <span className="text-muted-foreground">Revenue</span>
+                      <span className="text-muted-foreground">Order value</span>
                       <p className="font-semibold">{formatCurrency(actualRev)} / {formatCurrency(target.targetRevenue)}</p>
                     </div>
                   )}

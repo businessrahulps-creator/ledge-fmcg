@@ -82,7 +82,7 @@ export function ProductReport() {
                 <th className="px-6 py-3 font-medium">Product</th>
                 <th className="px-6 py-3 font-medium">SKU</th>
                 <th className="px-6 py-3 font-medium text-right">Qty Sold</th>
-                <th className="px-6 py-3 font-medium text-right">Revenue</th>
+                <th className="px-6 py-3 font-medium text-right">Order value</th>
               </tr>
             </thead>
             <tbody>
@@ -150,7 +150,7 @@ export function ProductReport() {
                     <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatNumber(selected.qtySold)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Revenue</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Order value</span>
                     <p className="mt-0.5 text-xs font-semibold md:text-sm">{formatCurrency(selected.revenue)}</p>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export function ProductReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
+                { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
                 { label: "Units Sold", value: formatNumber(totalQty) },
               ]}
               columns={[

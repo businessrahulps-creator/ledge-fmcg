@@ -264,7 +264,7 @@ export default function Command() {
       fromDate: range.from.toLocaleDateString("en-IN"),
       toDate: range.to.toLocaleDateString("en-IN"),
       kpis: [
-        { label: "Revenue", value: formatCurrencyPdf(revenue) },
+        { label: "Order value", value: formatCurrencyPdf(revenue) },
         { label: "Orders", value: String(orderCount) },
         { label: "Avg Order", value: formatCurrencyPdf(aov) },
         { label: "Collections", value: formatCurrencyPdf(collections) },

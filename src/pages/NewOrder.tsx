@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
@@ -14,6 +14,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { formatCurrency } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
+import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { useApi } from "@/services/api";
 import {
   Select,
@@ -159,9 +160,21 @@ export default function NewOrder() {
   const appliedSchemes = pricing.appliedSchemes;
   const totalSchemeSavings = pricing.totalSchemeSavings;
 
-  // Credit guard (uses net total after scheme savings)
+  // Credit guard — projected against the bill this order will become (order value + GST),
+  // because the dealer's outstanding figure is itself GST-inclusive.
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + netOrderTotal;
+  const gstRateFor = useCallback(
+    (productId: string) => Number(products.find(p => p.id === productId)?.gstRate ?? 0),
+    [products],
+  );
+  const orderBillEquivalent = useMemo(
+    () => billEquivalentTotal(lines, gstRateFor, totalSchemeSavings),
+    [lines, gstRateFor, totalSchemeSavings],
+  );
+  const projectedOutstanding = projectedExposure(
+    selectedDealerObj?.outstandingAmount || 0,
+    orderBillEquivalent,
+  );
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
@@ -632,7 +645,8 @@ export default function NewOrder() {
                 </div>
                 {Number(advanceAmount || 0) > 0 && (
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Still to collect after this: {formatCurrency(Math.max(0, netOrderTotal - Number(advanceAmount || 0)))}
+                    Still to collect after this: {formatCurrency(Math.max(0, orderBillEquivalent - Number(advanceAmount || 0)))}
+                    <span className="ml-1 opacity-80">(bill with GST {formatCurrency(orderBillEquivalent)})</span>
                   </p>
                 )}
               </section>

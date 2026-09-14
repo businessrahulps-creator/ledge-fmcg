@@ -196,7 +196,7 @@ export default function Dashboard() {
   const { totalRevenue, totalOrders, pendingOrders, dispatchedOrders } = dayAgg;
 
   const kpis = [
-    { label: "Revenue", value: formatCurrency(totalRevenue) },
+    { label: "Order value", value: formatCurrency(totalRevenue) },
     { label: "Orders", value: totalOrders.toString() },
     { label: "Pending", value: pendingOrders.toString() },
     { label: "Dispatched", value: dispatchedOrders.toString() },
@@ -377,7 +377,7 @@ export default function Dashboard() {
               };
               const cells = [
                 {
-                  label: "Delivered Revenue",
+                  label: "Delivered order value",
                   value: formatCurrency(monthDeliveredRev),
                   zero: monthDeliveredRev === 0,
                   insight: (

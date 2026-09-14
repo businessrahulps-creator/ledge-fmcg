@@ -22,6 +22,7 @@ import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricin
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { InvoicePreviewDialog, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
+import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
@@ -234,9 +235,13 @@ export default function OrderDetail() {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
     if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
-    const alreadyCounted = order.paymentStatus === "paid" ? 0 : order.total;
-    const newTotal = editLines.filter(l => l.productId && (l.quantity ?? 0) > 0).reduce((s2, l) => s2 + (l.quantity ?? 0) * l.unitPrice, 0);
-    const projected = dealer.outstandingAmount - alreadyCounted + newTotal;
+    const gstRateFor = (productId: string) => Number(products.find(p => p.id === productId)?.gstRate ?? 0);
+    // The dealer's outstanding is GST-inclusive, so compare like with like.
+    const alreadyCounted = order.paymentStatus === "paid"
+      ? 0
+      : billEquivalentTotal(order.lines, gstRateFor, order.schemeSavings || 0);
+    const newBillEquivalent = billEquivalentTotal(editLines, gstRateFor, editPricing.totalSchemeSavings);
+    const projected = projectedExposure(dealer.outstandingAmount, newBillEquivalent, alreadyCounted);
     if (projected > dealer.creditLimit) {
       if (canOverrideCredit) { setCreditOverrideOpen(true); return; }
       toast.error("Credit limit crossed", {

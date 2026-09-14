@@ -74,7 +74,15 @@ export default function Billing() {
   const canSeeMoney = useCan("see_money");
   const invoices = api.invoices.list();
   const orders = api.orders.list();
-  const { receipts, receivedByInvoice, loading: moneyLoading, reload } = useCollections(companyId);
+  const {
+    receipts,
+    creditNotes,
+    receivedByInvoice,
+    receivedByOrder,
+    creditedByInvoice,
+    loading: moneyLoading,
+    reload,
+  } = useCollections(companyId);
 
   const isLoading = usePageLoading(api.loading);
 
@@ -135,15 +143,16 @@ export default function Billing() {
     return inv.invoiceNumber.toLowerCase().includes(q) || inv.buyerName.toLowerCase().includes(q);
   }, [search]);
 
-  /** Every GST bill with the money that has landed against it. */
+  /** Every GST bill with the money that has landed against it, less any credit note. */
   const collections = useMemo(() => {
     const bills = inPeriod(invoices.filter(i => i.docType === "gst_invoice" && matchesSearch(i)));
     return bills
       .map(inv => {
         const received = receivedByInvoice.get(inv.id) || 0;
-        const due = Math.max(0, Math.round((inv.grandTotal - received) * 100) / 100);
+        const credited = creditedByInvoice.get(inv.id) || 0;
+        const due = Math.max(0, Math.round((inv.grandTotal - received - credited) * 100) / 100);
         const age = daysOld(inv.invoiceDate);
-        return { inv, received, due, age, overdue: due > 0 && age > 30 };
+        return { inv, received, credited, due, age, overdue: due > 0 && age > 30 };
       })
       .filter(r => {
         if (payFilter === "unpaid") return r.received === 0 && r.due > 0;
@@ -153,7 +162,21 @@ export default function Billing() {
         return true;
       })
       .sort((a, b) => (b.due > 0 ? b.age : -1) - (a.due > 0 ? a.age : -1));
-  }, [invoices, inPeriod, matchesSearch, receivedByInvoice, payFilter]);
+  }, [invoices, inPeriod, matchesSearch, receivedByInvoice, creditedByInvoice, payFilter]);
+
+  /** Money already taken on orders that have not been billed yet (advances). */
+  const advancesHeld = useMemo(() => {
+    const billedOrderIds = new Set(
+      invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
+    );
+    const rows = orders
+      .filter(o => !billedOrderIds.has(o.id))
+      .map(o => ({ order: o, received: receivedByOrder.get(o.id) || 0 }))
+      .filter(r => r.received > 0)
+      .sort((a, b) => b.received - a.received);
+    return { rows, total: rows.reduce((s, r) => s + r.received, 0) };
+  }, [orders, invoices, receivedByOrder]);
+
 
   const dealerName = useCallback((distributorId: string) =>
     api.dealers.list().find(d => d.id === distributorId)?.name || "", [api.dealers]);
@@ -193,11 +216,20 @@ export default function Billing() {
 
   const collectionTotals = useMemo(() => {
     const billed = collections.reduce((s, r) => s + r.inv.grandTotal, 0);
-    const collected = collections.reduce((s, r) => s + r.received, 0);
+    const againstBills = collections.reduce((s, r) => s + r.received, 0);
+    const credited = collections.reduce((s, r) => s + r.credited, 0);
     const outstanding = collections.reduce((s, r) => s + r.due, 0);
     const overdue = collections.filter(r => r.overdue).reduce((s, r) => s + r.due, 0);
-    return { billed, collected, outstanding, overdue };
-  }, [collections]);
+    return {
+      billed,
+      collected: againstBills + advancesHeld.total,
+      credited,
+      advances: advancesHeld.total,
+      outstanding,
+      overdue,
+    };
+  }, [collections, advancesHeld]);
+
 
   /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
   const viewBill = useCallback(async (inv: Invoice) => {
@@ -229,10 +261,9 @@ export default function Billing() {
     );
   }
 
-  const notesCount = documents.filter(i => i.docType === "credit_note").length;
-  const creditedValue = documents
-    .filter(i => i.docType === "credit_note")
-    .reduce((s, i) => s + (i.grandTotal || 0), 0);
+  const notesCount = creditNotes.length;
+  const creditedValue = creditNotes.reduce((s, n) => s + n.grandTotal, 0);
+
 
   return (
     <AppLayout>
@@ -256,6 +287,8 @@ export default function Billing() {
           cells={[
             { label: "Billed", value: formatCurrency(collectionTotals.billed), zero: collectionTotals.billed === 0 },
             { label: "Collected", value: formatCurrency(collectionTotals.collected), zero: collectionTotals.collected === 0 },
+            { label: "Advance held", value: formatCurrency(collectionTotals.advances), zero: collectionTotals.advances === 0 },
+            { label: "Returns credited", value: formatCurrency(collectionTotals.credited), zero: collectionTotals.credited === 0 },
             { label: "Still to collect", value: formatCurrency(collectionTotals.outstanding), zero: collectionTotals.outstanding === 0 },
             { label: "Over 30 days", value: formatCurrency(collectionTotals.overdue), zero: collectionTotals.overdue === 0 },
           ]}
@@ -348,6 +381,42 @@ export default function Billing() {
 
           {/* ---------------- Collections ---------------- */}
           <TabsContent value="collections" className="space-y-4">
+            {advancesHeld.rows.length > 0 && (
+              <div className="glass-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold">Advance held on orders not yet billed</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      This money is already with you. It moves onto the bill automatically when the order is dispatched.
+                    </p>
+                  </div>
+                  <span className="font-mono text-sm font-semibold tabular-nums text-success">
+                    {formatCurrency(advancesHeld.total)}
+                  </span>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {advancesHeld.rows.slice(0, 5).map(({ order, received }) => (
+                    <button
+                      key={order.id}
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                      className="row-hover flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left"
+                    >
+                      <span className="truncate text-xs">
+                        <span className="font-mono font-medium">{order.orderNumber}</span>
+                        <span className="text-muted-foreground"> · {order.distributorName}</span>
+                      </span>
+                      <span className="font-mono text-xs tabular-nums text-success">{formatCurrency(received)}</span>
+                    </button>
+                  ))}
+                  {advancesHeld.rows.length > 5 && (
+                    <p className="px-2 pt-1 text-[11px] text-muted-foreground">
+                      and {advancesHeld.rows.length - 5} more — see the Payments tab for every receipt.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {collections.length === 0 ? (
               <EmptyCard
                 icon={FileText}
