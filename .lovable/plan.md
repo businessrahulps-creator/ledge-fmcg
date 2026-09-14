@@ -41,8 +41,9 @@ Two places break this picture:
    first time someone records a return.
 4. **"Revenue" means three different things.** Dashboard, My Business and Orders use order value
    before GST; Money uses the bill total with GST. Same word, numbers that can never match.
-5. **213 dispatched orders have no bill.** Stock left the warehouse, nothing is billed, nothing is
-   collectable, and the order page gives no way to fix it.
+5. **Orders can reach "dispatched" with no bill and no way back.** 213 seed orders sit in exactly that
+   state: stock gone, nothing billed, nothing collectable, and the order page offers only
+   "Mark delivered". We use those seed orders to prove the fix.
 
 ### Serious — data that cannot be trusted later
 
