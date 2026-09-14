@@ -652,9 +652,18 @@ export default function OrderDetail() {
                       </td>
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          doc.status === "final" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                        }`}>{doc.status}</span>
+                        {(() => {
+                          const view = billStatusView(doc.status);
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}
+                              title={view.locked ? "This document is final and cannot be edited." : "Not issued yet."}
+                            >
+                              {view.locked && <Lock className="h-2.5 w-2.5" />}
+                              {view.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
