@@ -74,7 +74,15 @@ export default function Billing() {
   const canSeeMoney = useCan("see_money");
   const invoices = api.invoices.list();
   const orders = api.orders.list();
-  const { receipts, receivedByInvoice, loading: moneyLoading, reload } = useCollections(companyId);
+  const {
+    receipts,
+    creditNotes,
+    receivedByInvoice,
+    receivedByOrder,
+    creditedByInvoice,
+    loading: moneyLoading,
+    reload,
+  } = useCollections(companyId);
 
   const isLoading = usePageLoading(api.loading);
 
