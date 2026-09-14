@@ -381,6 +381,42 @@ export default function Billing() {
 
           {/* ---------------- Collections ---------------- */}
           <TabsContent value="collections" className="space-y-4">
+            {advancesHeld.rows.length > 0 && (
+              <div className="glass-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold">Advance held on orders not yet billed</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      This money is already with you. It moves onto the bill automatically when the order is dispatched.
+                    </p>
+                  </div>
+                  <span className="font-mono text-sm font-semibold tabular-nums text-success">
+                    {formatCurrency(advancesHeld.total)}
+                  </span>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {advancesHeld.rows.slice(0, 5).map(({ order, received }) => (
+                    <button
+                      key={order.id}
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                      className="row-hover flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left"
+                    >
+                      <span className="truncate text-xs">
+                        <span className="font-mono font-medium">{order.orderNumber}</span>
+                        <span className="text-muted-foreground"> · {order.distributorName}</span>
+                      </span>
+                      <span className="font-mono text-xs tabular-nums text-success">{formatCurrency(received)}</span>
+                    </button>
+                  ))}
+                  {advancesHeld.rows.length > 5 && (
+                    <p className="px-2 pt-1 text-[11px] text-muted-foreground">
+                      and {advancesHeld.rows.length - 5} more — see the Payments tab for every receipt.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {collections.length === 0 ? (
               <EmptyCard
                 icon={FileText}
