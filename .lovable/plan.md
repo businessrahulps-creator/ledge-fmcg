@@ -21,8 +21,9 @@ NEW ORDER ──────► ORDER PAGE ──────► DISPATCH & BILL
 Two places break this picture:
 
 - Money taken **before** a bill exists (the advance we just added) never appears on Money to collect.
-- 213 orders in the database are marked dispatched but have **no bill at all** — the order page offers
-  them only "Mark delivered", so there is no way to ever bill them.
+- 213 orders in the database are marked dispatched but have **no bill at all**. This is seed data, so
+  it is not a customer problem — but it is the only real material we have to test with, so it is the
+  proof that the billing path has a gap.
 
 ## What is actually broken
 
@@ -40,8 +41,9 @@ Two places break this picture:
    first time someone records a return.
 4. **"Revenue" means three different things.** Dashboard, My Business and Orders use order value
    before GST; Money uses the bill total with GST. Same word, numbers that can never match.
-5. **213 dispatched orders have no bill.** Stock left the warehouse, nothing is billed, nothing is
-   collectable, and the order page gives no way to fix it.
+5. **Orders can reach "dispatched" with no bill and no way back.** 213 seed orders sit in exactly that
+   state: stock gone, nothing billed, nothing collectable, and the order page offers only
+   "Mark delivered". We use those seed orders to prove the fix.
 
 ### Serious — data that cannot be trusted later
 
@@ -67,7 +69,16 @@ Two places break this picture:
 - Whether saving two target fields quickly can create two rows for the same period.
 - Whether scheme saves show "Saved" before the server has actually accepted the change.
 
+## How we work through this
+
+One item at a time, in a loop: fix it → check the code builds and the tests pass → open the app signed
+in and prove it on the seed data → report that one item → move to the next. The seed account is the
+test bed, so every fix is verified against the real rows already there (819 orders, 452 bills,
+3,065 stock deductions, 41 returns). Nothing is batched up and declared done at the end.
+
 ## Fix order
+
+
 
 **Phase 1 — make the money agree with itself**
 - Credit checks use the same basis as the server: bill-equivalent value plus GST, minus credit notes.
