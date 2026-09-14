@@ -16,6 +16,17 @@ export type ReceiptRow = {
   distributorId: string;
 };
 
+export type CreditNoteRow = {
+  id: string;
+  number: string;
+  noteDate: string;
+  grandTotal: number;
+  reason: string;
+  invoiceId: string | null;
+  orderId: string | null;
+  distributorId: string;
+};
+
 /**
  * Every receipt in the workspace, plus how much has landed against each bill
  * and each order. One source for the money figures shown across Billing.
