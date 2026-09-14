@@ -9,7 +9,7 @@
 ## Phase 2 — stranded orders
 - [x] 5. "Raise the bill" for dispatched-but-unbilled orders (server bills without touching stock; order page shows the GST-rate blocker with a link to Stock). Money flag still to add.
 - [x] 6. Bill status badge reads real document state (Issued / Paid / Draft, shared helper in src/lib/bill-status.ts)
-- [ ] 7. Orders list delete guard matches order page
+- [x] 7. Orders list delete guard matches order page
 
 ## Phase 3 — stock trustworthy
 - [ ] 8. Stock movements written for every change; atomic manual adjust
