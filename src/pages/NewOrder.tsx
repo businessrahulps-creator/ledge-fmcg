@@ -645,7 +645,8 @@ export default function NewOrder() {
                 </div>
                 {Number(advanceAmount || 0) > 0 && (
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Still to collect after this: {formatCurrency(Math.max(0, netOrderTotal - Number(advanceAmount || 0)))}
+                    Still to collect after this: {formatCurrency(Math.max(0, orderBillEquivalent - Number(advanceAmount || 0)))}
+                    <span className="ml-1 opacity-80">(bill with GST {formatCurrency(orderBillEquivalent)})</span>
                   </p>
                 )}
               </section>
