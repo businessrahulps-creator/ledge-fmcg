@@ -89,7 +89,7 @@ export function OrderInvoicePdf({
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>Payment</Text>
                 <Text style={s.metaValue}>
-                  {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} · {order.paymentMode.replace("_", " ")}
+                  {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                 </Text>
               </View>
               <View style={s.metaRow}>
