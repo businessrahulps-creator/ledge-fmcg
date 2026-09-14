@@ -287,6 +287,8 @@ export default function Billing() {
           cells={[
             { label: "Billed", value: formatCurrency(collectionTotals.billed), zero: collectionTotals.billed === 0 },
             { label: "Collected", value: formatCurrency(collectionTotals.collected), zero: collectionTotals.collected === 0 },
+            { label: "Advance held", value: formatCurrency(collectionTotals.advances), zero: collectionTotals.advances === 0 },
+            { label: "Returns credited", value: formatCurrency(collectionTotals.credited), zero: collectionTotals.credited === 0 },
             { label: "Still to collect", value: formatCurrency(collectionTotals.outstanding), zero: collectionTotals.outstanding === 0 },
             { label: "Over 30 days", value: formatCurrency(collectionTotals.overdue), zero: collectionTotals.overdue === 0 },
           ]}
