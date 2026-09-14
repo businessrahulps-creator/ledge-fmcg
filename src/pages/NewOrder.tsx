@@ -159,9 +159,21 @@ export default function NewOrder() {
   const appliedSchemes = pricing.appliedSchemes;
   const totalSchemeSavings = pricing.totalSchemeSavings;
 
-  // Credit guard (uses net total after scheme savings)
+  // Credit guard — projected against the bill this order will become (order value + GST),
+  // because the dealer's outstanding figure is itself GST-inclusive.
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
-  const projectedOutstanding = (selectedDealerObj?.outstandingAmount || 0) + netOrderTotal;
+  const gstRateFor = useCallback(
+    (productId: string) => Number(products.find(p => p.id === productId)?.gstRate ?? 0),
+    [products],
+  );
+  const orderBillEquivalent = useMemo(
+    () => billEquivalentTotal(lines, gstRateFor, totalSchemeSavings),
+    [lines, gstRateFor, totalSchemeSavings],
+  );
+  const projectedOutstanding = projectedExposure(
+    selectedDealerObj?.outstandingAmount || 0,
+    orderBillEquivalent,
+  );
   const creditLimit = selectedDealerObj?.creditLimit || 0;
   const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
 
