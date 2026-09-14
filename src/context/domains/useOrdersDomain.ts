@@ -334,6 +334,19 @@ export function useOrdersDomain(deps: OrdersDeps) {
       return false;
     }
     try {
+      // Money guard: an order that holds receipts (even cancelled ones) can never be deleted.
+      // The database refuses it too — we check first so the person gets a plain explanation.
+      const { count: payCount, error: payErr } = await supabase
+        .from("invoice_payments")
+        .select("id", { count: "exact", head: true })
+        .eq("order_id", id);
+      if (payErr) throw payErr;
+      if ((payCount || 0) > 0) {
+        toast.error("This order has money recorded against it", {
+          description: "Cancel the payments on the order page first, then delete it.",
+        });
+        return false;
+      }
       const { error: sdErr } = await supabase.from("stock_deductions").delete().eq("order_id", id);
       if (sdErr) throw sdErr;
       const { error: osErr } = await supabase.from("order_schemes").delete().eq("order_id", id);
