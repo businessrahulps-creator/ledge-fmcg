@@ -2,8 +2,11 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText, Download, Lock, Search, Filter, Link2, CalendarDays,
-  Eye, IndianRupee, Ban,
+  Eye, IndianRupee, Ban, MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
 import { EmptyCard } from "@/components/ui/empty-card";
@@ -26,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
+import { InvoicePreviewDialog, buildInvoiceBlob, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -196,6 +199,15 @@ export default function Billing() {
     return { billed, collected, outstanding, overdue };
   }, [collections]);
 
+  /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
+  const viewBill = useCallback(async (inv: Invoice) => {
+    const ok = await openInvoiceInNewTab(inv);
+    if (!ok) {
+      toast.message("Your browser blocked the new tab — showing the bill here instead.");
+      setPreviewInvoice(inv);
+    }
+  }, []);
+
   const remind = (inv: Invoice, due: number) => {
     const msg = [
       `Hello ${inv.buyerName},`,
@@ -353,7 +365,7 @@ export default function Billing() {
                         <TableHead className="text-xs">Bill</TableHead>
                         <TableHead className="text-xs">Dealer</TableHead>
                         <TableHead className="text-xs">Date</TableHead>
-                        <TableHead className="text-xs text-right">Total</TableHead>
+                        <TableHead className="text-xs text-right">Bill total</TableHead>
                         <TableHead className="text-xs text-right">Received</TableHead>
                         <TableHead className="text-xs text-right">Still due</TableHead>
                         <TableHead className="text-xs">Age</TableHead>
@@ -383,23 +395,38 @@ export default function Billing() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                {canSeeMoney && due > 0 && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Record payment" onClick={() => setCollectTarget(inv)}>
-                                    <IndianRupee className="h-3.5 w-3.5" />
+                              <div className="flex items-center justify-end gap-1.5">
+                                {canSeeMoney && due > 0 ? (
+                                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={() => setCollectTarget(inv)}>
+                                    <IndianRupee className="h-3.5 w-3.5" /> Record payment
+                                  </Button>
+                                ) : (
+                                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={() => viewBill(inv)}>
+                                    <Eye className="h-3.5 w-3.5" /> View bill
                                   </Button>
                                 )}
-                                <Button variant="ghost" size="icon" className="h-8 w-8" title="Preview bill" onClick={() => setPreviewInvoice(inv)}>
-                                  <Eye className="h-3.5 w-3.5" />
-                                </Button>
-                                {linkedOrder && (
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Open order" onClick={() => navigate(`/orders/${linkedOrder.id}`)}>
-                                    <Link2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                )}
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-success" title="Remind on WhatsApp" onClick={() => remind(inv, due)}>
-                                  <WhatsAppIcon className="h-3.5 w-3.5" />
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More actions">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => viewBill(inv)}>
+                                      <Eye className="h-3.5 w-3.5" /> View bill
+                                    </DropdownMenuItem>
+                                    {linkedOrder && (
+                                      <DropdownMenuItem onClick={() => navigate(`/orders/${linkedOrder.id}`)}>
+                                        <Link2 className="h-3.5 w-3.5" /> Open order
+                                      </DropdownMenuItem>
+                                    )}
+                                    {due > 0 && (
+                                      <DropdownMenuItem onClick={() => remind(inv, due)}>
+                                        <WhatsAppIcon className="h-3.5 w-3.5" /> Remind on WhatsApp
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -411,7 +438,9 @@ export default function Billing() {
 
                 {/* Mobile cards */}
                 <div className="space-y-3 p-3 md:hidden">
-                  {collections.map(({ inv, received, due, age, overdue }) => (
+                  {collections.map(({ inv, received, due, age, overdue }) => {
+                    const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
+                    return (
                     <div key={inv.id} className="space-y-2 rounded-md border border-border/60 bg-card p-4">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
@@ -424,23 +453,44 @@ export default function Billing() {
                         {due > 0 && <span className={overdue ? " text-destructive" : ""}> · {age} day{age === 1 ? "" : "s"}</span>}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        Total {formatCurrency(inv.grandTotal)} · Received {formatCurrency(received)}
+                        Bill total {formatCurrency(inv.grandTotal)} · Received {formatCurrency(received)}
                       </p>
-                      <div className="flex items-center gap-1 border-t border-border/40 pt-1">
-                        {canSeeMoney && due > 0 && (
-                          <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => setCollectTarget(inv)}>
-                            <IndianRupee className="h-3.5 w-3.5" /> Payment
+                      <div className="flex items-center gap-2 border-t border-border/40 pt-2">
+                        {canSeeMoney && due > 0 ? (
+                          <Button variant="outline" size="sm" className="h-9 flex-1 text-xs" onClick={() => setCollectTarget(inv)}>
+                            <IndianRupee className="h-3.5 w-3.5" /> Record payment
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="h-9 flex-1 text-xs" onClick={() => viewBill(inv)}>
+                            <Eye className="h-3.5 w-3.5" /> View bill
                           </Button>
                         )}
-                        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => setPreviewInvoice(inv)}>
-                          <Eye className="h-3.5 w-3.5" /> Preview
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs text-success" onClick={() => remind(inv, due)}>
-                          <WhatsAppIcon className="h-3.5 w-3.5" /> Remind
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="More actions">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => viewBill(inv)}>
+                              <Eye className="h-3.5 w-3.5" /> View bill
+                            </DropdownMenuItem>
+                            {linkedOrder && (
+                              <DropdownMenuItem onClick={() => navigate(`/orders/${linkedOrder.id}`)}>
+                                <Link2 className="h-3.5 w-3.5" /> Open order
+                              </DropdownMenuItem>
+                            )}
+                            {due > 0 && (
+                              <DropdownMenuItem onClick={() => remind(inv, due)}>
+                                <WhatsAppIcon className="h-3.5 w-3.5" /> Remind on WhatsApp
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
@@ -519,7 +569,7 @@ export default function Billing() {
                       {paymentRows.map(r => {
                         const against = r.invoiceId
                           ? invoiceNumberById.get(r.invoiceId)
-                          : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} (advance)` : "—";
+                          : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} — advance, not billed yet` : "—";
                         return (
                           <TableRow key={r.id} className="row-hover">
                             <TableCell className="text-xs text-muted-foreground">{formatIndianDate(r.paidOn)}</TableCell>
@@ -558,7 +608,7 @@ export default function Billing() {
                         {r.reference ? ` · ${r.reference}` : ""}
                       </p>
                       <p className="font-mono text-[11px] text-muted-foreground">
-                        {r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} (advance)` : ""}
+                        {r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} — advance, not billed yet` : ""}
                       </p>
                       {r.status === "voided" && (
                         <p className="text-[11px] text-muted-foreground">Cancelled{r.voidReason ? ` — ${r.voidReason}` : ""}</p>
@@ -694,7 +744,7 @@ export default function Billing() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPreviewInvoice(inv)} title="Preview">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(inv)} title="View">
                                     <Eye className="h-3.5 w-3.5" />
                                   </Button>
                                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
@@ -736,7 +786,7 @@ export default function Billing() {
                         </div>
                         <p className="text-xs text-muted-foreground">{inv.buyerName} · {formatIndianDate(inv.invoiceDate)}</p>
                         <div className="flex items-center gap-1 pt-1 border-t border-border/40">
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setPreviewInvoice(inv)}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(inv)}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(inv)}>

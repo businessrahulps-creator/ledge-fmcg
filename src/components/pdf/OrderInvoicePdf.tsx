@@ -51,7 +51,7 @@ export function OrderInvoicePdf({
     <Document>
       <Page size="A4" style={s.page}>
         <PdfHeader
-          title={`Order Confirmation ${order.orderNumber} — Not a tax invoice`}
+          title={`Order Confirmation ${order.orderNumber} — NOT A TAX INVOICE`}
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}
@@ -89,7 +89,7 @@ export function OrderInvoicePdf({
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>Payment</Text>
                 <Text style={s.metaValue}>
-                  {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} · {order.paymentMode.replace("_", " ")}
+                  {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                 </Text>
               </View>
               <View style={s.metaRow}>
@@ -170,9 +170,10 @@ export function OrderInvoicePdf({
 
             {/* Grand / Effective Total */}
             <View style={s.totalsRowBorder}>
-              <Text style={s.totalsFinalLabel}>{hasSavings ? "Effective Total" : "Grand Total"}</Text>
+              <Text style={s.totalsFinalLabel}>{hasSavings ? "Effective order value" : "Order value"}</Text>
               <Text style={s.totalsFinalValue}>{formatCurrencyPdf(hasSavings ? effectiveTotal : order.total)}</Text>
             </View>
+            <Text style={[s.infoValue, { marginTop: 4 }]}>GST is added on the tax invoice raised at dispatch.</Text>
           </View>
         </View>
 

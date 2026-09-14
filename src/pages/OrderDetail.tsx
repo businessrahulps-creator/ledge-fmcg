@@ -21,7 +21,7 @@ import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog } from "@/components/billing/InvoicePreviewDialog";
+import { InvoicePreviewDialog, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
 import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
@@ -99,6 +99,11 @@ export default function OrderDetail() {
   const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
 
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  /** Opens a bill in the browser's own PDF viewer; falls back to the in-app window. */
+  const viewBill = useCallback(async (inv: Invoice) => {
+    const ok = await openInvoiceInNewTab(inv);
+    if (!ok) setPreviewInvoice(inv);
+  }, []);
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
@@ -581,7 +586,7 @@ export default function OrderDetail() {
                         <button
                           type="button"
                           className="text-primary underline-offset-2 hover:underline"
-                          onClick={() => setPreviewInvoice(doc)}
+                          onClick={() => viewBill(doc)}
                         >
                           {doc.invoiceNumber}
                         </button>
@@ -606,9 +611,9 @@ export default function OrderDetail() {
         <div className="rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             {finalInvoice ? (
-              <Button variant="outline" size="sm" onClick={() => setPreviewInvoice(finalInvoice)}>
+              <Button variant="outline" size="sm" onClick={() => viewBill(finalInvoice)}>
                 <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Bill</span>
+                <span className="hidden sm:inline">View GST bill</span>
               </Button>
             ) : (
               <Button
@@ -641,7 +646,7 @@ export default function OrderDetail() {
                 }}
               >
                 <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Order confirmation</span>
+                <span className="hidden sm:inline">Order confirmation (not a bill)</span>
               </Button>
             )}
 
@@ -668,6 +673,11 @@ export default function OrderDetail() {
               </span>
             </Button>
           </div>
+          {received > 0 && order.deliveryStatus !== "delivered" && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              This order cannot be deleted because money has been received against it. Cancel those payments first.
+            </p>
+          )}
         </div>
 
         {/* Activity History */}

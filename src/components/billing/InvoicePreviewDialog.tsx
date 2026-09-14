@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Download } from "lucide-react";
+import { Loader2, Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Invoice } from "@/context/DataContext";
@@ -92,6 +92,11 @@ export function InvoicePreviewDialog({ invoice, onClose }: Props) {
     a.click();
   };
 
+  const openInNewTab = () => {
+    if (!url) return;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Dialog open={!!invoice} onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-[calc(100vw-1.5rem)] rounded-md p-0 sm:max-w-3xl">
@@ -100,8 +105,8 @@ export function InvoicePreviewDialog({ invoice, onClose }: Props) {
         </DialogHeader>
         <div className="h-[70vh] bg-muted/30">
           {failed ? (
-            <p className="flex h-full items-center justify-center text-xs text-muted-foreground">
-              Could not open this bill. Try downloading it instead.
+            <p className="flex h-full items-center justify-center px-6 text-center text-xs text-muted-foreground">
+              This bill could not be shown here. Use Open in new tab or Download instead.
             </p>
           ) : url ? (
             <iframe title="Bill preview" src={url} className="h-full w-full" />
@@ -111,13 +116,39 @@ export function InvoicePreviewDialog({ invoice, onClose }: Props) {
             </div>
           )}
         </div>
-        <div className="flex justify-end gap-2 border-t border-border px-4 py-3">
-          <Button variant="outline" onClick={onClose}>Close</Button>
-          <Button onClick={download} disabled={!url}>
-            <Download className="h-3.5 w-3.5" /> Download
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
+          <p className="text-[11px] text-muted-foreground">
+            Not showing? Open it in a new tab.
+          </p>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" onClick={onClose}>Close</Button>
+            <Button variant="outline" onClick={openInNewTab} disabled={!url}>
+              <ExternalLink className="h-3.5 w-3.5" /> Open in new tab
+            </Button>
+            <Button onClick={download} disabled={!url}>
+              <Download className="h-3.5 w-3.5" /> Download
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
+}
+
+/**
+ * Builds the bill and hands it to the browser's own PDF viewer in a new tab —
+ * the most reliable way to show a PDF in Chrome. Returns false if it failed.
+ */
+export async function openInvoiceInNewTab(inv: Invoice): Promise<boolean> {
+  try {
+    const blob = await buildInvoiceBlob(inv);
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    // Give the tab time to load before releasing the object URL.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return !!win;
+  } catch (err) {
+    logError({ source: "billing:open-bill", error: err, severity: "warning" });
+    return false;
+  }
 }
