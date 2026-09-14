@@ -1,10 +1,10 @@
 # Audit fix roadmap (loop mode: fix → verify → next)
 
 ## Phase 1 — money agrees with itself
-- [ ] 1. Credit check uses GST-inclusive basis (NewOrder + OrderDetail edit)
-- [ ] 2. Money to collect includes advances on unbilled orders
-- [ ] 3. Money to collect nets credit notes
-- [ ] 4. One name per number: Order value (pre-GST) vs Billed (with GST)
+- [x] 1. Credit check uses GST-inclusive basis (NewOrder + OrderDetail edit)
+- [x] 2. Money to collect includes advances on unbilled orders
+- [x] 3. Money to collect nets credit notes
+- [x] 4. One name per number: Order value (pre-GST) vs Billed (with GST)
 
 ## Phase 2 — stranded orders
 - [ ] 5. "Raise the bill" for dispatched-but-unbilled orders + Money flag
