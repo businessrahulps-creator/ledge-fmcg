@@ -21,8 +21,9 @@ NEW ORDER ──────► ORDER PAGE ──────► DISPATCH & BILL
 Two places break this picture:
 
 - Money taken **before** a bill exists (the advance we just added) never appears on Money to collect.
-- 213 orders in the database are marked dispatched but have **no bill at all** — the order page offers
-  them only "Mark delivered", so there is no way to ever bill them.
+- 213 orders in the database are marked dispatched but have **no bill at all**. This is seed data, so
+  it is not a customer problem — but it is the only real material we have to test with, so it is the
+  proof that the billing path has a gap.
 
 ## What is actually broken
 
