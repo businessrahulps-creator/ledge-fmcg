@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AppLayout } from "@/components/layout/AppLayout";
