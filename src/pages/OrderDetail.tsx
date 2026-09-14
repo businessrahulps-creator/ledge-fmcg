@@ -611,9 +611,9 @@ export default function OrderDetail() {
         <div className="rounded-xl border border-border bg-background/80 backdrop-blur-xl px-4 py-3 shadow-sm md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:shadow-none">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             {finalInvoice ? (
-              <Button variant="outline" size="sm" onClick={() => setPreviewInvoice(finalInvoice)}>
+              <Button variant="outline" size="sm" onClick={() => viewBill(finalInvoice)}>
                 <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Bill</span>
+                <span className="hidden sm:inline">View GST bill</span>
               </Button>
             ) : (
               <Button
@@ -646,7 +646,7 @@ export default function OrderDetail() {
                 }}
               >
                 <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Order confirmation</span>
+                <span className="hidden sm:inline">Order confirmation (not a bill)</span>
               </Button>
             )}
 
@@ -673,6 +673,11 @@ export default function OrderDetail() {
               </span>
             </Button>
           </div>
+          {received > 0 && order.deliveryStatus !== "delivered" && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              This order cannot be deleted because money has been received against it. Cancel those payments first.
+            </p>
+          )}
         </div>
 
         {/* Activity History */}
