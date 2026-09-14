@@ -362,6 +362,12 @@ export function useOrdersDomain(deps: OrdersDeps) {
       deps.log("order", id, "deleted", `Deleted order ${deletedOrder?.orderNumber || id}`);
       return true;
     } catch (err: any) {
+      if (err?.code === "2F004" || /payment/i.test(String(err?.message || ""))) {
+        toast.error("This order has money recorded against it", {
+          description: "Cancel the payments on the order page first, then delete it.",
+        });
+        return false;
+      }
       handleSupabaseError(err, { source: "crud:orders.delete", title: "Failed to delete order", context: { id } });
       return false;
     }
