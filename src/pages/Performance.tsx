@@ -325,7 +325,7 @@ export default function Performance() {
 
   const kpis = [
     {
-      label: "Revenue",
+      label: "Order value",
       value: formatCurrency(totalRevenue),
       icon: IndianRupee,
       accent: "border-l-success",
@@ -381,7 +381,7 @@ export default function Performance() {
               Performance
             </h1>
             <p className="h1-subtitle">
-              Real-time business intelligence · <span className="text-foreground/80">{revenueMode === "delivered" ? "Delivered Revenue" : "Booked Revenue"}</span>
+              Real-time business intelligence · <span className="text-foreground/80">{revenueMode === "delivered" ? "Delivered order value" : "Booked order value"}</span>
             </p>
           </div>
 
@@ -441,7 +441,7 @@ export default function Performance() {
                   }`}
                 >
                   <span className={`h-1.5 w-1.5 rounded-full ${m === "delivered" ? "bg-success" : "bg-warning/70"}`} aria-hidden />
-                  {m === "delivered" ? "Delivered Revenue" : "Booked Revenue"}
+                  {m === "delivered" ? "Delivered order value" : "Booked order value"}
                 </button>
               ))}
             </div>
@@ -1060,7 +1060,7 @@ export default function Performance() {
             show: sel,
             data: {
               summary: [
-                { label: "Revenue", value: formatCurrencyPdf(totalRevenue) },
+                { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
                 { label: "Orders", value: totalOrderCount.toString() },
                 { label: "Avg Order", value: formatCurrencyPdf(avgOrderValue) },
                 { label: "Collection Rate", value: `${collectionRate.toFixed(0)}%` },
