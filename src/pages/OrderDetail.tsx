@@ -21,7 +21,7 @@ import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog } from "@/components/billing/InvoicePreviewDialog";
+import { InvoicePreviewDialog, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
 import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
@@ -99,6 +99,11 @@ export default function OrderDetail() {
   const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
 
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  /** Opens a bill in the browser's own PDF viewer; falls back to the in-app window. */
+  const viewBill = useCallback(async (inv: Invoice) => {
+    const ok = await openInvoiceInNewTab(inv);
+    if (!ok) setPreviewInvoice(inv);
+  }, []);
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
