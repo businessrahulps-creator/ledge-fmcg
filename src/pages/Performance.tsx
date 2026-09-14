@@ -736,7 +736,7 @@ export default function Performance() {
 
             {/* Top Dealers by Revenue bar chart */}
             <div className="glass-card rounded-md p-4">
-              <h3 className="mb-3 text-sm font-semibold text-foreground">Top Dealers by Revenue</h3>
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Top Dealers by order value</h3>
               {topDealers.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={topDealers} layout="vertical" margin={{ left: 0, right: 20 }}>
