@@ -144,7 +144,9 @@ function NewClaimDialog({
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
     invoices.forEach(inv => {
-      if (inv.docType === "gst_invoice" && inv.status === "final" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
+      // Any issued bill can be returned against — a bill that has since been
+      // paid or sent is still a real bill; only an unissued draft is not.
+      if (inv.docType === "gst_invoice" && inv.status !== "draft" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
     });
     return map;
   }, [invoices]);

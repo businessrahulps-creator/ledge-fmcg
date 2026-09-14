@@ -181,16 +181,16 @@ export interface DataContextType {
   deleteStockItem: (id: string) => Promise<boolean>;
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
 
-  addScheme: (s: Scheme) => void;
-  updateScheme: (s: Scheme) => void;
+  addScheme: (s: Scheme) => Promise<boolean>;
+  updateScheme: (s: Scheme) => Promise<boolean>;
   deleteScheme: (id: string) => Promise<boolean>;
 
   addSecondarySale: (s: SecondarySale) => void;
   deleteSecondarySale: (id: string) => Promise<boolean>;
 
   targets: Target[];
-  addTarget: (t: Target) => void;
-  updateTarget: (t: Target) => void;
+  addTarget: (t: Target) => Promise<boolean>;
+  updateTarget: (t: Target) => Promise<boolean>;
   deleteTarget: (id: string) => Promise<boolean>;
 
   claims: Claim[];

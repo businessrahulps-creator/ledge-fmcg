@@ -132,7 +132,7 @@ interface InlineTargetRowProps {
   existingTarget?: TargetType;
   periodStart: string;
   periodType: PeriodType;
-  onSave: (target: TargetType) => void;
+  onSave: (target: TargetType) => Promise<boolean>;
 }
 
 function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave }: InlineTargetRowProps) {
@@ -149,9 +149,9 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
   const overallStatus = targetRev > 0 ? revStatus : (targetOrd > 0 ? ordStatus : "no_target");
   const sc = STATUS_CONFIG[overallStatus];
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!dirty) return;
-    onSave({
+    const ok = await onSave({
       id: existingTarget?.id || "",
       entityType,
       entityId,
@@ -161,6 +161,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       targetRevenue: targetRev,
       targetOrders: targetOrd,
     });
+    if (!ok) return; // save failed — stay dirty so the user can retry
     setDirty(false);
     toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
   }, [dirty, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
@@ -318,11 +319,7 @@ export default function Targets() {
   }, [targets, period, periodType]);
 
   const handleSave = useCallback(async (target: TargetType) => {
-    if (target.id) {
-      await api.targets.update(target);
-    } else {
-      await api.targets.create(target);
-    }
+    return target.id ? await api.targets.update(target) : await api.targets.create(target);
   }, [api.targets]);
 
   // Blocking page skeleton removed — empty-state handles first-paint.

@@ -82,6 +82,8 @@ export default function Stock() {
   const setStockItems = api.stock.items.setAll;
 
   const [productSearch, setProductSearch] = useState("");
+  // Shows only the products whose GST rate is still unconfirmed (they block billing).
+  const [gstOnly, setGstOnly] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
@@ -167,9 +169,10 @@ export default function Stock() {
 
   const filteredProducts = useMemo(() => products.filter(
     (p) =>
-      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()) ||
-      p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase())
-  ), [products, debouncedProductSearch]);
+      (!gstOnly || !p.gstRateConfirmed) &&
+      (p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()) ||
+        p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase()))
+  ), [products, debouncedProductSearch, gstOnly]);
 
   const productsPagination = usePagination(filteredProducts.length);
   const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
@@ -253,9 +256,11 @@ export default function Stock() {
     if (ok) {
       setStockItems((prev) => prev.filter((si) => si.godownId !== deleteWarehouseLoc.id));
       if (selectedWarehouse === deleteWarehouseLoc.id) setSelectedWarehouse(null);
-      toast.success("Warehouse deleted", { description: `${deleteWarehouseLoc.name} and all its inventory have been removed.` });
+      toast.success("Warehouse deleted", { description: `${deleteWarehouseLoc.name} has been removed.` });
+      setDeleteWarehouseLoc(null);
+      setDeleteConfirmText("");
+      return;
     }
-    setDeleteWarehouseLoc(null);
     setDeleteConfirmText("");
   };
 
@@ -409,9 +414,19 @@ export default function Stock() {
           <TabsContent value="products">
             <div className="space-y-4">
               {products.some(p => !p.gstRateConfirmed) && (
-                <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-foreground md:text-sm">
-                  <strong>{products.filter(p => !p.gstRateConfirmed).length} products</strong> still need their GST rate confirmed.
-                  Open a product and pick its rate — bills can't be raised for them until you do.
+                <div className="flex flex-col gap-2 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-foreground sm:flex-row sm:items-center sm:justify-between md:text-sm">
+                  <span>
+                    <strong>{products.filter(p => !p.gstRateConfirmed).length} products</strong> still need their GST rate confirmed.
+                    Open a product and pick its rate — bills can't be raised for them until you do.
+                  </span>
+                  <Button
+                    variant={gstOnly ? "default" : "outline"}
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => setGstOnly(v => !v)}
+                  >
+                    {gstOnly ? "Show all products" : "Show these products"}
+                  </Button>
                 </div>
               )}
 
@@ -870,7 +885,7 @@ export default function Stock() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
               <AlertDialogDescription className="space-y-3">
-                <span>This will permanently delete <span className="font-semibold text-foreground">{deleteWarehouseLoc?.name}</span> and all its inventory. This action cannot be undone.</span>
+                <span>This will permanently delete <span className="font-semibold text-foreground">{deleteWarehouseLoc?.name}</span>. It can only be deleted if no product still has stock in it and no undispatched order is set to it. This action cannot be undone.</span>
                 <span className="block text-xs">Type <span className="font-mono font-semibold text-foreground">{deleteWarehouseLoc?.name}</span> to confirm:</span>
               </AlertDialogDescription>
             </AlertDialogHeader>
