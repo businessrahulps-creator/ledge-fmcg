@@ -502,7 +502,7 @@ export default function OrderDetail() {
               </Button>
             )}
             {dispatched && (
-              <Button size="sm" variant="outline" onClick={() => navigate("/claims")}>
+              <Button size="sm" variant="outline" onClick={() => navigate(`/claims?order=${order.id}`)}>
                 <RotateCcw className="h-3.5 w-3.5" /> Record return
               </Button>
             )}

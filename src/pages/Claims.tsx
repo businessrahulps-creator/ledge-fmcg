@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -491,7 +492,8 @@ export default function Claims() {
 
       <NewClaimDialog
         open={newClaimOpen}
-        onOpenChange={setNewClaimOpen}
+        onOpenChange={closeNewClaim}
+        presetOrderId={presetOrderId}
         orders={orders}
         invoices={invoices}
         api={api}
