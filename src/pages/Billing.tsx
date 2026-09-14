@@ -30,6 +30,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { InvoicePreviewDialog, buildInvoiceBlob, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
+import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -801,15 +802,14 @@ export default function Billing() {
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm tabular-nums">{formatCurrency(inv.grandTotal)}</TableCell>
                               <TableCell>
-                                {inv.status === "draft" ? (
-                                  <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
-                                    Draft
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
-                                    <Lock className="h-2.5 w-2.5" /> Final
-                                  </span>
-                                )}
+                                {(() => {
+                                  const view = billStatusView(inv.status);
+                                  return (
+                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
+                                      {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
+                                    </span>
+                                  );
+                                })()}
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
@@ -839,15 +839,14 @@ export default function Billing() {
                           <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
                             {docTypeLabels[inv.docType] || inv.docType}
                           </span>
-                          {inv.status === "draft" ? (
-                            <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
-                              Draft
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
-                              <Lock className="h-2.5 w-2.5" /> Final
-                            </span>
-                          )}
+                          {(() => {
+                            const view = billStatusView(inv.status);
+                            return (
+                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
+                                {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>

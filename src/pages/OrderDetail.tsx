@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck, Lock } from "lucide-react";
 import { HeroBand } from "@/components/ui/hero-band";
 import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
@@ -23,6 +23,7 @@ import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { InvoicePreviewDialog, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
+import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
@@ -652,9 +653,18 @@ export default function OrderDetail() {
                       </td>
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          doc.status === "final" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                        }`}>{doc.status}</span>
+                        {(() => {
+                          const view = billStatusView(doc.status);
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}
+                              title={view.locked ? "This document is final and cannot be edited." : "Not issued yet."}
+                            >
+                              {view.locked && <Lock className="h-2.5 w-2.5" />}
+                              {view.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
