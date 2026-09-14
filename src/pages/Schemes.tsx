@@ -141,24 +141,22 @@ export default function Schemes() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error("Name required", { description: "Please enter a scheme name." });
       return;
     }
-    if (editingScheme) {
-      api.schemes.update({ ...editingScheme, ...form });
-      toast.success("Scheme updated");
-    } else {
-      api.schemes.create({ id: crypto.randomUUID(), ...form });
-      toast.success("Scheme created");
-    }
+    const ok = editingScheme
+      ? await api.schemes.update({ ...editingScheme, ...form })
+      : await api.schemes.create({ id: crypto.randomUUID(), ...form });
+    if (!ok) return; // the save failed — keep the form open, error already shown
+    toast.success(editingScheme ? "Scheme updated" : "Scheme created");
     setDialogOpen(false);
   };
 
-  const handleToggle = (s: Scheme) => {
-    api.schemes.update({ ...s, isActive: !s.isActive });
-    toast.success(s.isActive ? "Scheme deactivated" : "Scheme activated");
+  const handleToggle = async (s: Scheme) => {
+    const ok = await api.schemes.update({ ...s, isActive: !s.isActive });
+    if (ok) toast.success(s.isActive ? "Scheme deactivated" : "Scheme activated");
   };
 
   const confirmDelete = async () => {

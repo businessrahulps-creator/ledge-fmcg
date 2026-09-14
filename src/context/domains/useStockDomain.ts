@@ -42,19 +42,20 @@ export function useStockDomain(deps: DomainDeps) {
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
-    const { data, error } = await supabase.from("stock_items").upsert({
-      company_id: deps.companyId, product_id: si.productId, godown_id: si.godownId,
-      quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
-    }, { onConflict: "company_id,product_id,godown_id" }).select().single();
+    // One locked server step: sets the quantity and records the change in the stock ledger.
+    const { data, error } = await supabase.rpc("adjust_stock_atomic", {
+      p_product_id: si.productId, p_godown_id: si.godownId,
+      p_new_quantity: si.quantity, p_threshold: si.threshold, p_note: "Stocked in warehouse",
+    });
     if (error) { handleSupabaseError(error, { source: "crud:stock_items.add", title: "Failed to add stock item" }); return; }
-    if (data) {
-      setStockItems(prev => {
-        const exists = prev.some(x => x.id === data.id);
-        if (exists) return prev.map(x => x.id === data.id ? { ...si, id: data.id } : x);
-        return [...prev, { ...si, id: data.id }];
-      });
-      deps.log("stock_item", data.id, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
-    }
+    const res = (data || {}) as { stock_item_id?: string };
+    const newId = res.stock_item_id || si.id;
+    setStockItems(prev => {
+      const exists = prev.some(x => x.id === newId);
+      if (exists) return prev.map(x => x.id === newId ? { ...si, id: newId } : x);
+      return [...prev, { ...si, id: newId }];
+    });
+    deps.log("stock_item", newId, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
   }, [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   const updateStockItem = useCallback(async (si: StockItem) => {
@@ -72,9 +73,12 @@ export function useStockDomain(deps: DomainDeps) {
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
-    const { error } = await supabase.from("stock_items").update({
-      quantity: si.quantity, threshold: si.threshold, last_deducted_date: si.lastDeductedDate,
-    }).eq("id", si.id);
+    // Locked server step — two people editing the same row can no longer overwrite each other,
+    // and every change lands in the stock ledger.
+    const { error } = await supabase.rpc("adjust_stock_atomic", {
+      p_product_id: si.productId, p_godown_id: si.godownId,
+      p_new_quantity: si.quantity, p_threshold: si.threshold, p_note: "Manual adjustment",
+    });
     if (error) { handleSupabaseError(error, { source: "crud:stock_items.update", title: "Failed to update stock item", context: { id: si.id } }); return; }
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
     deps.log("stock_item", si.id, "updated", `Updated ${si.productName} stock at ${si.godownName} to ${si.quantity}`, { productId: si.productId, godownId: si.godownId, quantity: si.quantity, threshold: si.threshold });
@@ -169,10 +173,29 @@ export function useStockDomain(deps: DomainDeps) {
     }
   }, [safeRefetchStockItems]);
 
+  // Warehouse delete goes through the server: it refuses while stock or undispatched orders
+  // remain, and clears the warehouse's empty stock rows so nothing is orphaned.
+  const deleteLocation = useCallback(async (id: string): Promise<boolean> => {
+    if (!navigator.onLine) {
+      toast.error("Cannot delete a warehouse while offline", { description: "Please reconnect and try again." });
+      return false;
+    }
+    const existing = locations.find(l => l.id === id);
+    const { error } = await supabase.rpc("delete_godown_atomic", { p_godown_id: id });
+    if (error) {
+      toast.error("Warehouse not deleted", { description: error.message });
+      return false;
+    }
+    setLocations(prev => prev.filter(l => l.id !== id));
+    setStockItems(prev => prev.filter(si => si.godownId !== id));
+    deps.log("warehouse", id, "deleted", `Deleted warehouse ${existing?.name || id}`);
+    return true;
+  }, [locations, deps.log]);
+
   return {
     stockItems, setStockItems, locations, setLocations,
     addStockItem, updateStockItem, deleteStockItem,
-    addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation: locCrud.remove,
+    addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation,
     safeRefetchGodowns, safeRefetchStockItems, deductStockForOrder,
   };
 }

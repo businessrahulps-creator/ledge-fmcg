@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -125,13 +126,14 @@ function ClaimCard({
 }
 
 function NewClaimDialog({
-  open, onOpenChange, orders, invoices, api,
+  open, onOpenChange, orders, invoices, api, presetOrderId,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   orders: Order[];
   invoices: Invoice[];
   api: ReturnType<typeof useApi>;
+  presetOrderId?: string | null;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [search, setSearch] = useState("");
@@ -144,7 +146,9 @@ function NewClaimDialog({
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
     invoices.forEach(inv => {
-      if (inv.docType === "gst_invoice" && inv.status === "final" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
+      // Any issued bill can be returned against — a bill that has since been
+      // paid or sent is still a real bill; only an unissued draft is not.
+      if (inv.docType === "gst_invoice" && inv.status !== "draft" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
     });
     return map;
   }, [invoices]);
@@ -182,6 +186,13 @@ function NewClaimDialog({
     setReason("");
     setStep(2);
   };
+
+  // Opened from an order page: jump straight to that order's return.
+  useEffect(() => {
+    if (!open || !presetOrderId || selectedOrder) return;
+    const match = eligibleOrders.find(o => o.id === presetOrderId);
+    if (match) selectOrder(match);
+  }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
   const returnLines = (selectedBill?.lines ?? []).map(l => ({
     invoiceLineId: l.id as string,
@@ -364,8 +375,22 @@ export default function Claims() {
   const isLoading = usePageLoading(api.loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [tab, setTab] = useState("open");
-  const [newClaimOpen, setNewClaimOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const presetOrderId = searchParams.get("order");
+  const [newClaimOpen, setNewClaimOpen] = useState(!!presetOrderId);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (presetOrderId) setNewClaimOpen(true);
+  }, [presetOrderId]);
+
+  const closeNewClaim = (v: boolean) => {
+    setNewClaimOpen(v);
+    if (!v && presetOrderId) {
+      searchParams.delete("order");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = tab === "all" ? claims : claims.filter(c => c.status === tab);
@@ -467,7 +492,8 @@ export default function Claims() {
 
       <NewClaimDialog
         open={newClaimOpen}
-        onOpenChange={setNewClaimOpen}
+        onOpenChange={closeNewClaim}
+        presetOrderId={presetOrderId}
         orders={orders}
         invoices={invoices}
         api={api}

@@ -2272,6 +2272,16 @@ export type Database = {
     }
     Functions: {
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
+      adjust_stock_atomic: {
+        Args: {
+          p_godown_id: string
+          p_new_quantity: number
+          p_note?: string
+          p_product_id: string
+          p_threshold?: number
+        }
+        Returns: Json
+      }
       aging_bucket_rank: { Args: { b: string }; Returns: number }
       book_order_atomic: {
         Args: {
@@ -2292,6 +2302,7 @@ export type Database = {
       }
       check_aging_transitions: { Args: never; Returns: Json }
       dealer_outstanding: { Args: { p_dealer: string }; Returns: number }
+      delete_godown_atomic: { Args: { p_godown_id: string }; Returns: Json }
       delete_member_atomic: {
         Args: { member_id: string }
         Returns: {

@@ -12,10 +12,10 @@
 - [x] 7. Orders list delete guard matches order page
 
 ## Phase 3 — stock trustworthy
-- [ ] 8. Stock movements written for every change; atomic manual adjust
-- [ ] 9. Warehouse delete handles its stock
-- [ ] 10. GST-rate-missing list (47 products)
+- [x] 8. Stock movements written for every change; atomic manual adjust
+- [x] 9. Warehouse delete handles its stock
+- [x] 10. GST-rate-missing list (47 products)
 
 ## Phase 4 — verify
-- [ ] 11. Targets duplicate-row check; Schemes toast-before-save check
-- [ ] 12. Full signed-in lifecycle run on seed data
+- [x] 11. Targets duplicate-row check; Schemes toast-before-save check
+- [x] 12. Full signed-in lifecycle run on seed data

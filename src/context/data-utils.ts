@@ -378,11 +378,11 @@ export function makeOfflineCrud<T extends { id: string }>(
   const { companyId, persistEntityToCache, log } = deps;
   const allowOfflineDelete = options?.allowOfflineDelete !== false; // default true
 
-  const add = async (item: T) => {
+  const add = async (item: T): Promise<boolean> => {
     if (!companyId) {
       toast.error("Workspace not set up", { description: "Please complete workspace setup before adding data." });
       logError({ source: `crud:${table}.add`, error: "Workspace not set up (companyId missing)", severity: "warning", context: { table } });
-      return;
+      return false;
     }
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
@@ -393,25 +393,26 @@ export function makeOfflineCrud<T extends { id: string }>(
       });
       await enqueueMutation({ type: "insert", table, clientTempId: tempId, payload: { ...toDbRow(item), company_id: companyId } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     const { data, error } = await supabase.from(table as any).insert({ ...toDbRow(item), company_id: companyId }).select().single();
     if (error) {
       handleSupabaseError(error, { source: `crud:${table}.add`, title: `Failed to add ${entityLogType || table}`, context: { table } });
-      return;
+      return false;
     }
     if (data) {
       const newId = (data as any).id;
       setter(prev => [...prev, { ...item, id: newId }]);
       if (entityLogType) log(entityLogType, newId, "created", `Added ${getLabel?.(item) || table}`);
     }
+    return true;
   };
 
-  const update = async (item: T) => {
+  const update = async (item: T): Promise<boolean> => {
     if (!companyId) {
       toast.error("Workspace not set up", { description: "Please complete workspace setup before saving changes." });
       logError({ source: `crud:${table}.update`, error: "Workspace not set up (companyId missing)", severity: "warning", context: { table, id: item.id } });
-      return;
+      return false;
     }
     if (!navigator.onLine) {
       setter(prev => {
@@ -421,15 +422,16 @@ export function makeOfflineCrud<T extends { id: string }>(
       });
       await enqueueMutation({ type: "update", table, payload: { id: item.id, ...toDbRow(item) } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     const { error } = await supabase.from(table as any).update(toDbRow(item)).eq("id", item.id);
     if (error) {
       handleSupabaseError(error, { source: `crud:${table}.update`, title: `Failed to update ${entityLogType || table}`, context: { table, id: item.id } });
-      return;
+      return false;
     }
     setter(prev => prev.map(x => x.id === item.id ? item : x));
     if (entityLogType) log(entityLogType, item.id, "updated", `Updated ${getLabel?.(item) || table}`);
+    return true;
   };
 
   const remove = async (id: string): Promise<boolean> => {

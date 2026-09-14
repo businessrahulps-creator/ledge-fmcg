@@ -3,8 +3,12 @@ import { renderHook, act } from "@testing-library/react";
 import { createChainMock, createMockDeps } from "@/test/mock-supabase";
 
 const mockFrom = vi.fn();
+const mockRpc = vi.fn();
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: (...args: any[]) => mockFrom(...args) },
+  supabase: {
+    from: (...args: any[]) => mockFrom(...args),
+    rpc: (...args: any[]) => mockRpc(...args),
+  },
 }));
 
 vi.mock("@/lib/offline-store", () => ({
@@ -31,17 +35,18 @@ describe("useStockDomain", () => {
     Object.defineProperty(navigator, "onLine", { value: true, writable: true, configurable: true });
   });
 
-  it("addStockItem online — upserts and adds to state", async () => {
+  it("addStockItem online — adjusts stock atomically and adds to state", async () => {
     const deps = createMockDeps();
     const chain = createChainMock({ data: { id: "si-new" }, error: null });
     mockFrom.mockReturnValue(chain);
+    mockRpc.mockResolvedValue({ data: { stock_item_id: "si-new", delta: 100 }, error: null });
 
     const { result } = renderHook(() => useStockDomain(deps));
     await act(async () => {
       await result.current.addStockItem(makeStockItem());
     });
 
-    expect(mockFrom).toHaveBeenCalledWith("stock_items");
+    expect(mockRpc).toHaveBeenCalledWith("adjust_stock_atomic", expect.objectContaining({ p_product_id: "p1", p_new_quantity: 100 }));
     expect(result.current.stockItems).toHaveLength(1);
   });
 

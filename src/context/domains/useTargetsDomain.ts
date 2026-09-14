@@ -15,8 +15,8 @@ export function useTargetsDomain(deps: DomainDeps) {
   const [targets, setTargets] = useState<Target[]>([]);
   const [secondarySales, setSecondarySales] = useState<SecondarySale[]>([]);
 
-  const addTarget = useCallback(async (target: Target) => {
-    if (!deps.companyId) return;
+  const addTarget = useCallback(async (target: Target): Promise<boolean> => {
+    if (!deps.companyId) return false;
 
     const dbRow = {
       company_id: deps.companyId, entity_type: target.entityType, entity_id: target.entityId,
@@ -30,22 +30,29 @@ export function useTargetsDomain(deps: DomainDeps) {
       setTargets(prev => [mapped, ...prev]);
       await enqueueMutation({ type: "insert", table: "targets", clientTempId: tempId, payload: dbRow });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
 
-    const { data, error } = await supabase.from("targets").insert(dbRow).select().single();
-    if (error) { handleSupabaseError(error, { source: "crud:targets.add", title: "Failed to save target" }); return; }
+    // Upsert so a second save for the same entity+period updates the existing target
+    // instead of creating a duplicate row.
+    const { data, error } = await supabase
+      .from("targets")
+      .upsert(dbRow, { onConflict: "company_id,entity_type,entity_id,period_type,period_start" })
+      .select()
+      .single();
+    if (error) { handleSupabaseError(error, { source: "crud:targets.add", title: "Failed to save target" }); return false; }
     if (data) {
       const mapped: Target = {
         id: data.id, entityType: target.entityType, entityId: target.entityId,
         entityName: target.entityName, periodType: target.periodType, periodStart: target.periodStart,
         targetRevenue: target.targetRevenue, targetOrders: target.targetOrders,
       };
-      setTargets(prev => [mapped, ...prev]);
+      setTargets(prev => [mapped, ...prev.filter(t => t.id !== mapped.id)]);
     }
+    return true;
   }, [deps.companyId]);
 
-  const updateTarget = useCallback(async (target: Target) => {
+  const updateTarget = useCallback(async (target: Target): Promise<boolean> => {
     const dbUpdates = {
       target_revenue: target.targetRevenue, target_orders: target.targetOrders,
       entity_name: sanitizeInput(target.entityName),
@@ -55,12 +62,13 @@ export function useTargetsDomain(deps: DomainDeps) {
       setTargets(prev => prev.map(t => t.id === target.id ? target : t));
       await enqueueMutation({ type: "update", table: "targets", payload: { id: target.id, ...dbUpdates } });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
 
     const { error } = await supabase.from("targets").update(dbUpdates).eq("id", target.id);
-    if (error) { handleSupabaseError(error, { source: "crud:targets.update", title: "Failed to update target", context: { id: target.id } }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:targets.update", title: "Failed to update target", context: { id: target.id } }); return false; }
     setTargets(prev => prev.map(t => t.id === target.id ? target : t));
+    return true;
   }, []);
 
   const deleteTarget = useCallback(async (id: string): Promise<boolean> => {
