@@ -306,6 +306,28 @@ export default function OrderDetail() {
     );
   };
 
+  /** Goods already left but no bill exists: raise the bill only, stock stays as it is. */
+  const raiseBillOnly = async (overrideCredit = false) => {
+    if (!order) return;
+    setIsSaving(true);
+    const res = await api.orders.dispatchAndBill(order.id, {
+      godownId: order.godownId || dispatchGodown || null,
+      dispatchDate: order.dispatchDate || null,
+      vehicle: order.vehicle,
+      driverName: order.driverName,
+      overrideCredit,
+    });
+    setIsSaving(false);
+    if (!res.success) {
+      if (!overrideCredit && canOverrideCredit && /credit limit/i.test(res.error || "")) {
+        setCreditDispatchOpen(true);
+      }
+      return;
+    }
+    toast.success(res.alreadyDone ? "This order already has a bill." : `Bill ${res.invoiceNumber} created.`);
+  };
+
+
   const handleDeleteOrder = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
@@ -347,6 +369,14 @@ export default function OrderDetail() {
   const delivered = order.deliveryStatus === "delivered";
   const settled = balance <= 0 && received > 0;
   const canEdit = !dispatched && !hasBill;
+  /* A bill can't be raised while any product on it is missing a confirmed GST rate. */
+  const gstPending = hasBill
+    ? []
+    : Array.from(new Set(order.lines.map(l => l.productId)))
+        .map(id => products.find(p => p.id === id))
+        .filter(p => p && (p.gstRate === null || p.gstRate === undefined || !p.gstRateConfirmed))
+        .map(p => p!.name);
+  const gstBlocked = gstPending.length > 0;
   const warehouseName = godowns.find(g => g.id === order.godownId)?.name
     || api.stock.locations.list().find(g => g.id === order.godownId)?.name
     || "Not set";
@@ -361,7 +391,11 @@ export default function OrderDetail() {
       detail: dispatched ? formatIndianDate(order.dispatchDate) : "Not sent yet",
       state: dispatched ? "done" : "current",
     },
-    { label: "Billed", detail: hasBill ? finalInvoice?.invoiceNumber : "On dispatch", state: hasBill ? "done" : "todo" },
+    {
+      label: "Billed",
+      detail: hasBill ? finalInvoice?.invoiceNumber : dispatched ? "Not billed yet" : "On dispatch",
+      state: hasBill ? "done" : dispatched ? "current" : "todo",
+    },
     { label: "Delivered", detail: delivered ? "Delivered" : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
     {
       label: "Paid",
@@ -425,24 +459,44 @@ export default function OrderDetail() {
         <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-4 md:p-5">
           <div className="min-w-0">
             <p className="text-sm font-semibold">
-              {!dispatched ? "Next: send the goods" : !delivered ? "Next: confirm it reached them" : "This order is complete"}
+              {!dispatched
+                ? "Next: send the goods"
+                : !hasBill
+                  ? "Next: raise the bill"
+                  : !delivered
+                    ? "Next: confirm it reached them"
+                    : "This order is complete"}
             </p>
             <p className="text-xs text-muted-foreground">
-              {!dispatched
-                ? "Dispatch takes stock out and creates the final GST bill in one step."
-                : !delivered
-                  ? "Mark it delivered once the dealer confirms they got the goods."
-                  : "Goods delivered. Record a return if anything comes back."}
+              {gstBlocked
+                ? `GST rate not confirmed for ${gstPending.slice(0, 3).join(", ")}${gstPending.length > 3 ? ` and ${gstPending.length - 3} more` : ""}. Confirm it in Stock to bill this order.`
+                : !dispatched
+                  ? "Dispatch takes stock out and creates the final GST bill in one step."
+                  : !hasBill
+                    ? "The goods have gone out but no bill was raised. Raising it now won't touch stock again."
+                    : !delivered
+                      ? "Mark it delivered once the dealer confirms they got the goods."
+                      : "Goods delivered. Record a return if anything comes back."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {gstBlocked && (
+              <Button size="sm" variant="outline" onClick={() => navigate("/stock")}>
+                <AlertTriangle className="h-3.5 w-3.5" /> Confirm GST rates
+              </Button>
+            )}
             {!dispatched && (
-              <Button size="sm" disabled={isSaving} onClick={startDispatch}>
+              <Button size="sm" disabled={isSaving || gstBlocked} onClick={startDispatch}>
                 <Truck className="h-3.5 w-3.5" /> Dispatch &amp; bill
               </Button>
             )}
+            {dispatched && !hasBill && (
+              <Button size="sm" disabled={isSaving || gstBlocked} onClick={() => raiseBillOnly()}>
+                <FileText className="h-3.5 w-3.5" /> Raise bill
+              </Button>
+            )}
             {dispatched && !delivered && (
-              <Button size="sm" disabled={isSaving} onClick={handleMarkDelivered}>
+              <Button size="sm" variant={hasBill ? "default" : "outline"} disabled={isSaving} onClick={handleMarkDelivered}>
                 <PackageCheck className="h-3.5 w-3.5" /> Mark delivered
               </Button>
             )}
@@ -871,9 +925,12 @@ export default function OrderDetail() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
               disabled={isSaving}
-              onClick={() => { setCreditDispatchOpen(false); confirmDispatch(true); }}
+              onClick={() => {
+                setCreditDispatchOpen(false);
+                if (dispatched && !hasBill) raiseBillOnly(true); else confirmDispatch(true);
+              }}
             >
-              {isSaving ? "Working…" : "Approve & dispatch"}
+              {isSaving ? "Working…" : dispatched && !hasBill ? "Approve & raise bill" : "Approve & dispatch"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
