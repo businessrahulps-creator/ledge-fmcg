@@ -69,7 +69,16 @@ Two places break this picture:
 - Whether saving two target fields quickly can create two rows for the same period.
 - Whether scheme saves show "Saved" before the server has actually accepted the change.
 
+## How we work through this
+
+One item at a time, in a loop: fix it → check the code builds and the tests pass → open the app signed
+in and prove it on the seed data → report that one item → move to the next. The seed account is the
+test bed, so every fix is verified against the real rows already there (819 orders, 452 bills,
+3,065 stock deductions, 41 returns). Nothing is batched up and declared done at the end.
+
 ## Fix order
+
+
 
 **Phase 1 — make the money agree with itself**
 - Credit checks use the same basis as the server: bill-equivalent value plus GST, minus credit notes.
