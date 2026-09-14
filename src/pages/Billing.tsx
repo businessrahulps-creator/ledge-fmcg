@@ -135,15 +135,16 @@ export default function Billing() {
     return inv.invoiceNumber.toLowerCase().includes(q) || inv.buyerName.toLowerCase().includes(q);
   }, [search]);
 
-  /** Every GST bill with the money that has landed against it. */
+  /** Every GST bill with the money that has landed against it, less any credit note. */
   const collections = useMemo(() => {
     const bills = inPeriod(invoices.filter(i => i.docType === "gst_invoice" && matchesSearch(i)));
     return bills
       .map(inv => {
         const received = receivedByInvoice.get(inv.id) || 0;
-        const due = Math.max(0, Math.round((inv.grandTotal - received) * 100) / 100);
+        const credited = creditedByInvoice.get(inv.id) || 0;
+        const due = Math.max(0, Math.round((inv.grandTotal - received - credited) * 100) / 100);
         const age = daysOld(inv.invoiceDate);
-        return { inv, received, due, age, overdue: due > 0 && age > 30 };
+        return { inv, received, credited, due, age, overdue: due > 0 && age > 30 };
       })
       .filter(r => {
         if (payFilter === "unpaid") return r.received === 0 && r.due > 0;
@@ -153,7 +154,21 @@ export default function Billing() {
         return true;
       })
       .sort((a, b) => (b.due > 0 ? b.age : -1) - (a.due > 0 ? a.age : -1));
-  }, [invoices, inPeriod, matchesSearch, receivedByInvoice, payFilter]);
+  }, [invoices, inPeriod, matchesSearch, receivedByInvoice, creditedByInvoice, payFilter]);
+
+  /** Money already taken on orders that have not been billed yet (advances). */
+  const advancesHeld = useMemo(() => {
+    const billedOrderIds = new Set(
+      invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
+    );
+    const rows = orders
+      .filter(o => !billedOrderIds.has(o.id))
+      .map(o => ({ order: o, received: receivedByOrder.get(o.id) || 0 }))
+      .filter(r => r.received > 0)
+      .sort((a, b) => b.received - a.received);
+    return { rows, total: rows.reduce((s, r) => s + r.received, 0) };
+  }, [orders, invoices, receivedByOrder]);
+
 
   const dealerName = useCallback((distributorId: string) =>
     api.dealers.list().find(d => d.id === distributorId)?.name || "", [api.dealers]);
