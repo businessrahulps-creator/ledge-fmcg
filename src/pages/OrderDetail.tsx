@@ -23,6 +23,7 @@ import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { InvoicePreviewDialog, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
+import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
 import { useCan } from "@/hooks/useCan";
 import {
