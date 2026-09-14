@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck, Lock } from "lucide-react";
 import { HeroBand } from "@/components/ui/hero-band";
 import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
