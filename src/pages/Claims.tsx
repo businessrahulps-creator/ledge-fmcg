@@ -374,8 +374,22 @@ export default function Claims() {
   const isLoading = usePageLoading(api.loading);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [tab, setTab] = useState("open");
-  const [newClaimOpen, setNewClaimOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const presetOrderId = searchParams.get("order");
+  const [newClaimOpen, setNewClaimOpen] = useState(!!presetOrderId);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (presetOrderId) setNewClaimOpen(true);
+  }, [presetOrderId]);
+
+  const closeNewClaim = (v: boolean) => {
+    setNewClaimOpen(v);
+    if (!v && presetOrderId) {
+      searchParams.delete("order");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = tab === "all" ? claims : claims.filter(c => c.status === tab);
