@@ -216,11 +216,20 @@ export default function Billing() {
 
   const collectionTotals = useMemo(() => {
     const billed = collections.reduce((s, r) => s + r.inv.grandTotal, 0);
-    const collected = collections.reduce((s, r) => s + r.received, 0);
+    const againstBills = collections.reduce((s, r) => s + r.received, 0);
+    const credited = collections.reduce((s, r) => s + r.credited, 0);
     const outstanding = collections.reduce((s, r) => s + r.due, 0);
     const overdue = collections.filter(r => r.overdue).reduce((s, r) => s + r.due, 0);
-    return { billed, collected, outstanding, overdue };
-  }, [collections]);
+    return {
+      billed,
+      collected: againstBills + advancesHeld.total,
+      credited,
+      advances: advancesHeld.total,
+      outstanding,
+      overdue,
+    };
+  }, [collections, advancesHeld]);
+
 
   /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
   const viewBill = useCallback(async (inv: Invoice) => {
