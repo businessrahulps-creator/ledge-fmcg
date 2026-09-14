@@ -125,13 +125,14 @@ function ClaimCard({
 }
 
 function NewClaimDialog({
-  open, onOpenChange, orders, invoices, api,
+  open, onOpenChange, orders, invoices, api, presetOrderId,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   orders: Order[];
   invoices: Invoice[];
   api: ReturnType<typeof useApi>;
+  presetOrderId?: string | null;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [search, setSearch] = useState("");
