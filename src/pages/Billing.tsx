@@ -569,7 +569,7 @@ export default function Billing() {
                       {paymentRows.map(r => {
                         const against = r.invoiceId
                           ? invoiceNumberById.get(r.invoiceId)
-                          : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} (advance)` : "—";
+                          : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} — advance, not billed yet` : "—";
                         return (
                           <TableRow key={r.id} className="row-hover">
                             <TableCell className="text-xs text-muted-foreground">{formatIndianDate(r.paidOn)}</TableCell>
@@ -608,7 +608,7 @@ export default function Billing() {
                         {r.reference ? ` · ${r.reference}` : ""}
                       </p>
                       <p className="font-mono text-[11px] text-muted-foreground">
-                        {r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} (advance)` : ""}
+                        {r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? `${orderNumberById.get(r.orderId) || "Order"} — advance, not billed yet` : ""}
                       </p>
                       {r.status === "voided" && (
                         <p className="text-[11px] text-muted-foreground">Cancelled{r.voidReason ? ` — ${r.voidReason}` : ""}</p>
@@ -744,7 +744,7 @@ export default function Billing() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPreviewInvoice(inv)} title="Preview">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(inv)} title="View">
                                     <Eye className="h-3.5 w-3.5" />
                                   </Button>
                                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
@@ -786,7 +786,7 @@ export default function Billing() {
                         </div>
                         <p className="text-xs text-muted-foreground">{inv.buyerName} · {formatIndianDate(inv.invoiceDate)}</p>
                         <div className="flex items-center gap-1 pt-1 border-t border-border/40">
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setPreviewInvoice(inv)}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(inv)}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(inv)}>
