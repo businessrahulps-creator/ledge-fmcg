@@ -586,7 +586,7 @@ export default function OrderDetail() {
                         <button
                           type="button"
                           className="text-primary underline-offset-2 hover:underline"
-                          onClick={() => setPreviewInvoice(doc)}
+                          onClick={() => viewBill(doc)}
                         >
                           {doc.invoiceNumber}
                         </button>
