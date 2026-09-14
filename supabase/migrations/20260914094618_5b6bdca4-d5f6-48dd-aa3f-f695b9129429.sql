@@ -1,0 +1,1 @@
+revoke all on function public.tg_activity_log_stamp_identity() from public;
