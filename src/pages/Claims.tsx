@@ -186,6 +186,13 @@ function NewClaimDialog({
     setStep(2);
   };
 
+  // Opened from an order page: jump straight to that order's return.
+  useEffect(() => {
+    if (!open || !presetOrderId || selectedOrder) return;
+    const match = eligibleOrders.find(o => o.id === presetOrderId);
+    if (match) selectOrder(match);
+  }, [open, presetOrderId, selectedOrder, eligibleOrders]);
+
   const returnLines = (selectedBill?.lines ?? []).map(l => ({
     invoiceLineId: l.id as string,
     productName: l.productName,
