@@ -261,10 +261,9 @@ export default function Billing() {
     );
   }
 
-  const notesCount = documents.filter(i => i.docType === "credit_note").length;
-  const creditedValue = documents
-    .filter(i => i.docType === "credit_note")
-    .reduce((s, i) => s + (i.grandTotal || 0), 0);
+  const notesCount = creditNotes.length;
+  const creditedValue = creditNotes.reduce((s, n) => s + n.grandTotal, 0);
+
 
   return (
     <AppLayout>
