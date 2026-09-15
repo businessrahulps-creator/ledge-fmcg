@@ -174,7 +174,7 @@ export default function Stock() {
         p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase()))
   ), [products, debouncedProductSearch, gstOnly]);
 
-  const productsPagination = usePagination(filteredProducts.length);
+  const productsPagination = usePagination(filteredProducts.length, undefined, `${debouncedProductSearch}|${gstOnly}`);
   const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
 
   const openNewProduct = () => {
@@ -320,7 +320,7 @@ export default function Stock() {
         )
     : [], [selectedWarehouse, stockItemsList, debouncedWarehouseSearch]);
 
-  const inventoryPagination = usePagination(warehouseInventory.length);
+  const inventoryPagination = usePagination(warehouseInventory.length, undefined, `${selectedWarehouse}|${debouncedWarehouseSearch}`);
   const paginatedInventory = useMemo(() => warehouseInventory.slice(inventoryPagination.from, inventoryPagination.to), [warehouseInventory, inventoryPagination.from, inventoryPagination.to]);
 
   const handleAddStock = () => {

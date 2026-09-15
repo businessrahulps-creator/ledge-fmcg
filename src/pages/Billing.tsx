@@ -268,7 +268,7 @@ export default function Billing() {
     return list;
   }, [invoices, creditNotes, inPeriod, inPeriodBy, matchesSearch, filterType, dq, dealerName]);
 
-  const { page, totalPages, from, to, setPage } = usePagination(documents.length, 15);
+  const { page, totalPages, from, to, setPage } = usePagination(documents.length, 15, `${filterType}|${dq}`);
   const paginatedDocs = useMemo(() => documents.slice(from, to), [documents, from, to]);
 
 
