@@ -666,7 +666,7 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Money still to collect"
-                      subtitle={periodRangeLabel(timePeriod)}
+                      subtitle={timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod)}
                       companyName={api.companyInfo.name}
                       companyAddress={api.companyInfo.address}
                       gstin={api.companyInfo.gstin}
@@ -805,7 +805,7 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Payments received"
-                      subtitle={periodRangeLabel(timePeriod)}
+                      subtitle={timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod)}
                       companyName={api.companyInfo.name}
                       companyAddress={api.companyInfo.address}
                       gstin={api.companyInfo.gstin}

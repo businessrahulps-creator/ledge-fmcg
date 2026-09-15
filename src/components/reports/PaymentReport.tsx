@@ -264,12 +264,12 @@ export function PaymentReport() {
                 { label: "Orders", value: String(filtered.length) },
               ]}
               columns={[
-                { header: "Order", width: "14%" },
-                { header: "Dealer", width: "20%" },
-                { header: "Date", width: "14%" },
-                { header: "Amount", width: "16%", align: "right" },
-                { header: "Status", width: "14%" },
-                { header: "Mode", width: "16%" },
+                { header: "Order", width: "16%" },
+                { header: "Dealer", width: "24%" },
+                { header: "Date", width: "13%" },
+                { header: "Amount", width: "17%", align: "right" },
+                { header: "Status", width: "15%" },
+                { header: "Mode", width: "15%" },
               ]}
               rows={filtered.map((o) => [
                 o.orderNumber,
