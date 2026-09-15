@@ -183,7 +183,7 @@ export default function Dashboard() {
   // DSO proxy: avg days since order for outstanding orders
   const outstandingOrders = useMemo(
     () => monthlyOrders.filter((o) => payStatus(o.id) !== "paid"),
-    [monthlyOrders],
+    [monthlyOrders, payStatus],
   );
   const avgOutstandingDays = useMemo(() => {
     if (outstandingOrders.length === 0) return 0;
