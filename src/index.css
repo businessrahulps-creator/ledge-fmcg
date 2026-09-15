@@ -370,6 +370,29 @@
     display: none;
   }
 
+  /* A finger needs ~44px. On touch screens every icon button gets that much,
+     however small its visual box is. */
+  @media (pointer: coarse) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Soft fade on the right edge of a side-scrolling strip, so it is obvious
+     there is more to swipe to. */
+  .scroll-hint {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  @media (min-width: 768px) {
+    .scroll-hint {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+
+
   /* Dot grid background for auth pages */
   .dot-grid-bg {
     background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
