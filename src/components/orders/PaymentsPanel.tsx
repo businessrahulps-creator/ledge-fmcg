@@ -66,6 +66,7 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+  const [overpayAck, setOverpayAck] = useState(false);
 
   const anchorColumn = invoiceId ? "invoice_id" : "order_id";
   const anchorId = invoiceId || orderId || "";
@@ -99,6 +100,14 @@ export function PaymentsPanel({
   const recordPayment = async () => {
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
+    if (value > balance + 0.5 && !overpayAck) {
+      setOverpayAck(true);
+      toast.warning("This is more than the balance", {
+        description: `Only ${formatCurrency(balance)} is due on ${docLabel}. Check the amount, then press Save payment again to go ahead.`,
+        duration: 8000,
+      });
+      return;
+    }
     setSaving(true);
     const shared = {
       p_amount: value,
