@@ -355,8 +355,19 @@ export default function Orders() {
                 <SelectItem value="delivered">Delivered</SelectItem>
               </SelectContent>
             </Select>
+            {needsBillCount > 0 && (
+              <Button
+                type="button"
+                variant={needsBillOnly ? "default" : "outline"}
+                className="h-10 rounded-lg"
+                onClick={() => setNeedsBillOnly(v => !v)}
+              >
+                Needs a bill · {needsBillCount}
+              </Button>
+            )}
           </div>
         </div>
+
 
         {/* Table */}
         {filtered.length === 0 ? (
