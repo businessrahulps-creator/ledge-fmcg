@@ -187,7 +187,7 @@ export function CommandPalette() {
                 >
                   <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground group-data-[selected=true]:text-current" />
                   <span className="truncate">{String(label)}</span>
-                  <span className="ml-2 truncate text-xs text-muted-foreground group-data-[selected=true]:text-current/80">
+                  <span className="ml-2 truncate text-xs text-muted-foreground group-data-[selected=true]:text-inherit group-data-[selected=true]:opacity-90">
                     {dealer}
                   </span>
                 </CommandItem>
