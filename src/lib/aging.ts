@@ -1,4 +1,4 @@
-import type { Order, Distributor } from "@/data/mock-data";
+// Aging buckets and dealer risk ordering. Balances themselves come from lib/receivables.ts.
 
 export type AgingBucket = "b0" | "b31" | "b61" | "b90";
 
