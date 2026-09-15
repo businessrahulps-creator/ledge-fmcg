@@ -39,17 +39,21 @@ export function useCollections(companyId?: string | null) {
   const load = useCallback(async () => {
     if (!companyId) { setReceipts([]); setCreditNotes([]); setLoading(false); return; }
     setLoading(true);
+    // Paged: past 1,000 receipts a plain select silently stops returning rows,
+    // which would quietly hide money from the collections figures.
     const [paymentsRes, notesRes] = await Promise.all([
-      supabase
-        .from("invoice_payments")
-        .select("id, amount, mode, paid_on, reference, note, status, void_reason, invoice_id, order_id, distributor_id")
-        .eq("company_id", companyId)
-        .order("paid_on", { ascending: false }),
-      supabase
-        .from("credit_notes")
-        .select("id, credit_note_number, note_date, grand_total, reason, invoice_id, order_id, distributor_id")
-        .eq("company_id", companyId)
-        .order("note_date", { ascending: false }),
+      fetchAllPages(() =>
+        supabase
+          .from("invoice_payments")
+          .select("id, amount, mode, paid_on, reference, note, status, void_reason, invoice_id, order_id, distributor_id")
+          .eq("company_id", companyId)
+          .order("paid_on", { ascending: false })),
+      fetchAllPages(() =>
+        supabase
+          .from("credit_notes")
+          .select("id, credit_note_number, note_date, grand_total, reason, invoice_id, order_id, distributor_id")
+          .eq("company_id", companyId)
+          .order("note_date", { ascending: false })),
     ]);
     setLoading(false);
     if (paymentsRes.error) {
