@@ -228,6 +228,24 @@ export default function Schemes() {
             </div>
           )}
 
+          {/* Expired but still switched on */}
+          {(() => {
+            const today = new Date().toISOString().split("T")[0];
+            const stale = activeSchemes.filter(s => s.validUntil && s.validUntil < today);
+            if (stale.length === 0) return null;
+            return (
+              <SignalCard
+                tier="warning"
+                icon={AlertTriangle}
+                label="PAST END DATE"
+                caption={`${stale.slice(0, 3).map(s => s.name).join(", ")}${stale.length > 3 ? ` +${stale.length - 3} more` : ""} ${stale.length === 1 ? "is" : "are"} still switched on but past the end date`}
+                subCaption="These no longer apply to new orders. Switch them off to keep the list clean."
+                value={stale.length}
+                valueSuffix={stale.length === 1 ? "SCHEME" : "SCHEMES"}
+              />
+            );
+          })()}
+
           {/* Expiring soon signal */}
           {(() => {
             const today = new Date().toISOString().split("T")[0];
