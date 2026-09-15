@@ -29,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
+import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
@@ -124,7 +124,6 @@ export default function Billing() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">(restoredFilters.period || "all");
   const [payFilter, setPayFilter] = useState<"all" | "unpaid" | "partial" | "paid" | "overdue">("all");
   const [modeFilter, setModeFilter] = useState<string>("all");
-  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [collectTarget, setCollectTarget] = useState<Invoice | null>(null);
 
   useEffect(() => {
@@ -135,14 +134,7 @@ export default function Billing() {
 
   const handleDownloadPdf = useCallback(async (inv: Invoice) => {
     try {
-      const blob = await buildInvoiceBlob(inv);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${inv.invoiceNumber}.pdf`;
-      a.click();
-      // Give the browser time to start the download before releasing the link.
-      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      await downloadInvoicePdf(inv);
     } catch {
       toast.error("Could not make the PDF. Try again.");
     }
@@ -306,9 +298,13 @@ export default function Billing() {
 
   const [pendingBillId, setPendingBillId] = useState<string | null>(null);
 
-  /** Opens the bill on its own page in a new tab — a plain link, so nothing gets blocked. */
-  const viewBill = useCallback((inv: Invoice) => {
-    window.open(`/bill/${inv.id}`, "_blank", "noopener,noreferrer");
+  /** Uses the same browser file path as Download PDF; embedded viewing is blocked by Chrome. */
+  const viewBill = useCallback(async (inv: Invoice) => {
+    try {
+      await downloadInvoicePdf(inv);
+    } catch {
+      toast.error("Could not open the PDF. Please try again.");
+    }
   }, []);
 
   const downloadBill = useCallback(async (inv: Invoice) => {
@@ -960,7 +956,6 @@ export default function Billing() {
         </Tabs>
       </div>
 
-      <InvoicePreviewDialog invoice={previewInvoice} onClose={() => setPreviewInvoice(null)} />
 
       <Sheet open={!!collectTarget} onOpenChange={o => !o && setCollectTarget(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-md">

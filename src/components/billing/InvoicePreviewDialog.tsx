@@ -58,6 +58,17 @@ export async function buildInvoiceBlob(inv: Invoice): Promise<Blob> {
   return blob;
 }
 
+/** Download the generated PDF through the browser's proven file path. */
+export async function downloadInvoicePdf(inv: Invoice): Promise<void> {
+  const blob = await buildInvoiceBlob(inv);
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${inv.invoiceNumber.replace(/[^\w-]+/g, "-")}.pdf`;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
 
 interface Props {
   invoice: Invoice | null;
