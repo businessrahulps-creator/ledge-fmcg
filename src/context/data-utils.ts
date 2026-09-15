@@ -250,7 +250,10 @@ export async function batchIn(table: string, column: string, ids: string[]) {
     const chunkRows: any[] = [];
     let done = false;
     for (let wave = 0; wave < MAX_PAGES && !done; wave += PAGE_CONCURRENCY) {
-      const waveSize = Math.min(PAGE_CONCURRENCY, MAX_PAGES - wave);
+      // First wave is a single probe request. Most tables fit in one page, so
+      // firing 4 speculative pages up-front just burned 3 extra round trips on
+      // every cold start (the biggest single cost on mobile).
+      const waveSize = wave === 0 ? 1 : Math.min(PAGE_CONCURRENCY, MAX_PAGES - wave);
       const pages = await Promise.all(
         Array.from({ length: waveSize }, async (_, k) => {
           const page = wave + k;
