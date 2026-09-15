@@ -243,7 +243,8 @@ function NewClaimDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) resetAndClose(); }}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      {/* Full screen on phones — the return form was too cramped in a small box */}
+      <DialogContent className="max-w-lg overflow-y-auto max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:border-0 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-h-[85vh]">
         {step === 1 ? (
           <>
             <DialogHeader>

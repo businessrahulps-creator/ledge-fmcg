@@ -422,7 +422,7 @@ export default function Command() {
         )}
 
         <Tabs value={safeTab} onValueChange={(v) => updateParam({ tab: v as TabId })} className="w-full min-w-0 space-y-4 md:space-y-6">
-          <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide">
+          <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide scroll-hint">
             <TabsList className="inline-flex h-10 min-w-max justify-start rounded-lg bg-muted/50 p-1 md:h-11">
               <TabsTrigger value="overview" className="shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs transition-colors data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:px-4 md:py-2 md:text-sm">
                 Overview

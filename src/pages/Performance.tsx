@@ -398,7 +398,7 @@ export default function Performance() {
 
           {/* Time period pills + Export */}
           <div className="flex flex-col gap-3 min-w-0 w-full sm:w-auto">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide scroll-hint">
               <TooltipProvider delayDuration={300}>
                 <UITooltip>
                   <TooltipTrigger asChild>
@@ -568,7 +568,7 @@ export default function Performance() {
 
         {/* Tabbed sections */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full justify-start gap-1 rounded-full bg-muted/50 p-1 overflow-x-auto scrollbar-hide">
+          <TabsList className="w-full justify-start gap-1 rounded-full bg-muted/50 p-1 overflow-x-auto scrollbar-hide scroll-hint">
             <TabsTrigger value="overview" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
             <TabsTrigger value="people" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">People</TabsTrigger>
             <TabsTrigger value="products" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Products</TabsTrigger>

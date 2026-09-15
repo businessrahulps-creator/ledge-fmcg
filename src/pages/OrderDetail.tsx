@@ -665,7 +665,34 @@ export default function OrderDetail() {
             </p>
           </div>
           {orderDocs.length > 0 ? (
-            <div className="overflow-x-auto">
+            <>
+            {/* Phones: one card per document — no sideways scrolling */}
+            <div className="divide-y divide-border/50 md:hidden">
+              {orderDocs.map(doc => {
+                const view = billStatusView(doc.status);
+                return (
+                  <button
+                    key={doc.id}
+                    type="button"
+                    onClick={() => viewBill(doc)}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left active:bg-muted/40"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-mono text-xs font-medium text-primary">{doc.invoiceNumber}</p>
+                      <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{doc.docType.replace("_", " ")}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="font-mono text-sm font-semibold tabular-nums">{formatCurrency(doc.grandTotal)}</p>
+                      <span className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
+                        {view.locked && <Lock className="h-2.5 w-2.5" />}
+                        {view.label}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/30 text-xs text-muted-foreground">
@@ -708,6 +735,7 @@ export default function OrderDetail() {
                 </tbody>
               </table>
             </div>
+            </>
           ) : (
             <p className="px-4 py-6 text-xs text-muted-foreground/60 text-center">No billing documents yet for this order.</p>
           )}
