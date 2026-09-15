@@ -29,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, buildInvoiceBlob, openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
+import { buildInvoiceBlob, openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
@@ -124,7 +124,6 @@ export default function Billing() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">(restoredFilters.period || "all");
   const [payFilter, setPayFilter] = useState<"all" | "unpaid" | "partial" | "paid" | "overdue">("all");
   const [modeFilter, setModeFilter] = useState<string>("all");
-  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [collectTarget, setCollectTarget] = useState<Invoice | null>(null);
 
   useEffect(() => {
@@ -965,7 +964,6 @@ export default function Billing() {
         </Tabs>
       </div>
 
-      <InvoicePreviewDialog invoice={previewInvoice} onClose={() => setPreviewInvoice(null)} />
 
       <Sheet open={!!collectTarget} onOpenChange={o => !o && setCollectTarget(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-md">

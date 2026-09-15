@@ -21,4 +21,4 @@
 - [x] 12. Full signed-in lifecycle run on seed data
 
 ## Bill viewer repair
-- [ ] Remove the blocked wrapper page and open the existing PDF directly
+- [x] Remove the blocked wrapper page and open the existing PDF directly

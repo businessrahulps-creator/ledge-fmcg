@@ -21,7 +21,7 @@ import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
 import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
+import { openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
@@ -100,7 +100,6 @@ export default function OrderDetail() {
   const [creditOverrideOpen, setCreditOverrideOpen] = useState(false);
   const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
 
-  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   /** Opens the generated PDF itself; no app page or embedded browser viewer. */
   const viewBill = useCallback(async (inv: Invoice) => {
     try {
@@ -1032,7 +1031,6 @@ export default function OrderDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <InvoicePreviewDialog invoice={previewInvoice} onClose={() => setPreviewInvoice(null)} />
     </AppLayout>
   );
 }
