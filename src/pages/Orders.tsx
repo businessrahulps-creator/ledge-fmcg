@@ -138,7 +138,7 @@ export default function Orders() {
     const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
     const matchesNeedsBill = !needsBillOnly || (!o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id));
     return matchesSearch && matchesPayment && matchesDelivery && matchesNeedsBill;
-  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds]);
+  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds, payStatus]);
 
   const needsBillCount = useMemo(
     () => orders.filter(o => !o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id)).length,
