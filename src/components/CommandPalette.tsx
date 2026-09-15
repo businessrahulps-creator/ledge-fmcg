@@ -175,16 +175,20 @@ export function CommandPalette() {
           <CommandGroup heading="Orders">
             {matchedOrders.map((o: any) => {
               const id = o.id ?? o.orderNumber ?? "";
+              const label = o.orderNumber ?? o.id ?? "";
               const dealer = o.dealerName ?? o.distributorName ?? "—";
               return (
                 <CommandItem
                   key={`result-order-${id}`}
-                  value={`order ${id} ${dealer}`}
+                  value={`order ${label} ${dealer}`}
                   onSelect={() => go(`/orders/${id}`)}
+                  className="group"
                 >
-                  <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{String(id)}</span>
-                  <span className="ml-2 truncate text-xs text-muted-foreground">{dealer}</span>
+                  <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground group-data-[selected=true]:text-current" />
+                  <span className="truncate">{String(label)}</span>
+                  <span className="ml-2 truncate text-xs text-muted-foreground group-data-[selected=true]:text-current/80">
+                    {dealer}
+                  </span>
                 </CommandItem>
               );
             })}
