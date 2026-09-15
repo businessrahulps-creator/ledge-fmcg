@@ -291,6 +291,7 @@ function NewClaimDialog({
     );
     setSubmitting(false);
     if (res) {
+      if (selectedBillId) forgetInvoiceLines(selectedBillId);
       toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
         description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
       });
