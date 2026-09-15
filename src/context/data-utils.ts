@@ -11,19 +11,30 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 // --- Map DB rows to app types ---
 
 export function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: any[] = []): Order[] {
+  // Group children by order_id once (O(N+M)) instead of scanning every child
+  // array per order (O(N*M)) — with 800+ orders and 3k+ lines that difference
+  // is the bulk of the work done on the main thread at startup.
+  const linesByOrder = new Map<string, OrderLine[]>();
+  for (const l of allLines) {
+    const list = linesByOrder.get(l.order_id) || [];
+    list.push({
+      productId: l.product_id, productName: l.product_name,
+      quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
+    });
+    linesByOrder.set(l.order_id, list);
+  }
+  const schemesByOrder = new Map<string, OrderScheme[]>();
+  for (const s of allOrderSchemes) {
+    const list = schemesByOrder.get(s.order_id) || [];
+    list.push({
+      schemeId: s.scheme_id || null, schemeName: s.scheme_name,
+      schemeLabel: s.scheme_label || "", savings: Number(s.savings || 0),
+    });
+    schemesByOrder.set(s.order_id, list);
+  }
   return ordersData.map(o => {
-    const oLines: OrderLine[] = allLines
-      .filter(l => l.order_id === o.id)
-      .map(l => ({
-        productId: l.product_id, productName: l.product_name,
-        quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
-      }));
-    const oSchemes: OrderScheme[] = allOrderSchemes
-      .filter(s => s.order_id === o.id)
-      .map(s => ({
-        schemeId: s.scheme_id || null, schemeName: s.scheme_name,
-        schemeLabel: s.scheme_label || "", savings: Number(s.savings || 0),
-      }));
+    const oLines: OrderLine[] = linesByOrder.get(o.id) || [];
+    const oSchemes: OrderScheme[] = schemesByOrder.get(o.id) || [];
     return {
       id: o.id, orderNumber: o.order_number, date: o.date,
       distributorId: o.distributor_id, distributorName: o.distributor_name,
@@ -229,20 +240,21 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   let truncated = false;
   let totalPages = 0;
 
-  // Fetch all pages for one id-chunk in waves of PAGE_CONCURRENCY. We don't know
-  // up-front how many pages exist, so each wave fires N speculative range
-  // requests at once. The wave loop stops as soon as any page returns < PAGE
-  // rows (the natural end of the result set), preserving the early-exit
-  // semantics of the previous sequential implementation while collapsing
-  // round-trip latency.
+  // Fetch all pages for one id-chunk. The first request is a single probe:
+  // nearly every table fits in one page, and firing speculative extra pages
+  // up-front cost three wasted round trips per chunk on every cold start —
+  // the single biggest delay on a phone. Only if the probe comes back full do
+  // we switch to parallel waves for the remaining pages.
   async function fetchChunk(chunk: string[]): Promise<any[]> {
     const chunkRows: any[] = [];
     let done = false;
-    for (let wave = 0; wave < MAX_PAGES && !done; wave += PAGE_CONCURRENCY) {
-      const waveSize = Math.min(PAGE_CONCURRENCY, MAX_PAGES - wave);
+    let nextPage = 0;
+    while (!done && nextPage < MAX_PAGES) {
+      const waveSize = nextPage === 0 ? 1 : Math.min(PAGE_CONCURRENCY, MAX_PAGES - nextPage);
+      const startPage = nextPage;
       const pages = await Promise.all(
         Array.from({ length: waveSize }, async (_, k) => {
-          const page = wave + k;
+          const page = startPage + k;
           const from = page * PAGE;
           const to = from + PAGE - 1;
           const { data, error } = await supabase
@@ -264,9 +276,10 @@ export async function batchIn(table: string, column: string, ids: string[]) {
           break;
         }
       }
+      nextPage = startPage + waveSize;
       // Safety cap: if we just finished the final wave and the last page was
       // still full, the result set is larger than we're willing to fetch.
-      if (!done && wave + waveSize >= MAX_PAGES) truncated = true;
+      if (!done && nextPage >= MAX_PAGES) truncated = true;
     }
     return chunkRows;
   }
