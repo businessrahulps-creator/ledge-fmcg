@@ -10,8 +10,8 @@ const NAV_SHORTCUTS: { keys: string; label: string; to: string }[] = [
   { keys: "g s", label: "Go to Stock", to: "/stock" },
   { keys: "g e", label: "Go to Dealers", to: "/distributors" },
   { keys: "g t", label: "Go to Sales Team", to: "/salespersons" },
-  { keys: "g r", label: "Go to Reports", to: "/reports" },
-  { keys: "g p", label: "Go to Performance", to: "/performance" },
+  { keys: "g r", label: "Go to Reports", to: "/command?tab=drill" },
+  { keys: "g p", label: "Go to Performance", to: "/command?tab=overview" },
 ];
 
 const GLOBAL_SHORTCUTS = [
