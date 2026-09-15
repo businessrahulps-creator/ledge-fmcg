@@ -308,8 +308,7 @@ export default function Billing() {
   /** Opens the generated PDF itself; no app page or embedded browser viewer. */
   const viewBill = useCallback(async (inv: Invoice) => {
     try {
-      const opened = await openInvoicePdf(inv);
-      if (!opened) toast.error("Chrome blocked the bill. Please allow pop-ups and try again.");
+      await openInvoicePdf(inv);
     } catch {
       toast.error("Could not open the PDF. Use Download PDF instead.");
     }

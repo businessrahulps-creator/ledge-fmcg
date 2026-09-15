@@ -58,23 +58,12 @@ export async function buildInvoiceBlob(inv: Invoice): Promise<Blob> {
   return blob;
 }
 
-/** Open the generated PDF itself, without routing through an app page or iframe. */
-export async function openInvoicePdf(inv: Invoice): Promise<boolean> {
-  const pdfWindow = window.open("", "_blank");
-  if (!pdfWindow) return false;
-
-  pdfWindow.document.title = `Opening ${inv.invoiceNumber}…`;
-  try {
-    const blob = await buildInvoiceBlob(inv);
-    const url = URL.createObjectURL(blob);
-    pdfWindow.opener = null;
-    pdfWindow.location.href = url;
-    window.setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
-    return true;
-  } catch (error) {
-    pdfWindow.close();
-    throw error;
-  }
+/** Open the generated PDF as the top-level page, where Chrome allows its PDF viewer. */
+export async function openInvoicePdf(inv: Invoice): Promise<void> {
+  const blob = await buildInvoiceBlob(inv);
+  const url = URL.createObjectURL(blob);
+  window.location.assign(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
 }
 
 
