@@ -549,8 +549,8 @@ export default function Orders() {
                   o.distributorName,
                   o.salesperson,
                   formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
-                  payStatus(o.id),
-                  o.deliveryStatus,
+                  titleCase(payStatus(o.id)),
+                  titleCase(o.deliveryStatus),
                 ])}
               />
             );
