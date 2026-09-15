@@ -277,12 +277,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const gds = phase1Out?.gds || [];
 
       const claimIds = (claimsRes as any[]).map((c: any) => c.id);
-      const invoiceIds = (invoicesRes as any[]).map((i: any) => i.id);
       const orderIds = (ordersRes as any[]).map((o: any) => o.id);
 
-      const [claimLinesData, invoiceLinesData, allLines, allOrderSchemes] = await Promise.all([
+      // Bill line items are deliberately NOT fetched here — they are only needed
+      // when a single bill is opened (PDF, WhatsApp, return form) and are loaded
+      // on demand by @/lib/invoice-lines.
+      const [claimLinesData, allLines, allOrderSchemes] = await Promise.all([
         batchIn("claim_lines", "claim_id", claimIds),
-        batchIn("invoice_lines", "invoice_id", invoiceIds),
         batchIn("order_lines", "order_id", orderIds),
         batchIn("order_schemes", "order_id", orderIds),
       ]);
@@ -293,7 +294,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
       const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
-      const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, invoiceLinesData));
+      const mappedInvoices = (invoicesRes as any[]).map((inv: any) => mapInvoice(inv, []));
       const mappedOrders = mapOrders((ordersRes as any[]) || [], allLines, allOrderSchemes);
 
       // Atomic commit window — for background refresh, phase-1 also lands here.
