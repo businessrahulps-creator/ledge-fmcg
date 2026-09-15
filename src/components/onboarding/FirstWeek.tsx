@@ -56,7 +56,7 @@ interface CelebrationState {
 export function FirstWeek() {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
-  const { steps, completedCount, totalSteps, isComplete } = useOnboarding();
+  const { steps, completedCount, totalSteps, isComplete, loading } = useOnboarding();
 
   const [dismissed, setDismissed] = useState(() => {
     try { return localStorage.getItem("ledge_first_week_dismissed") === "1"; } catch { return false; }
@@ -64,6 +64,17 @@ export function FirstWeek() {
   const [sealed, setSealed] = useState(() => {
     try { return localStorage.getItem(SEAL_KEY) === "1"; } catch { return false; }
   });
+  // Once every chapter has been done with real data on screen, remember it —
+  // a slow start must never resurface the guide.
+  const [everDone, setEverDone] = useState(() => {
+    try { return localStorage.getItem(DONE_KEY) === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    if (!loading && isComplete && !everDone) {
+      try { localStorage.setItem(DONE_KEY, "1"); } catch {}
+      setEverDone(true);
+    }
+  }, [loading, isComplete, everDone]);
   const [celebration, setCelebration] = useState<CelebrationState | null>(null);
 
   // Detect a fresh chapter completion to fire the synchronized celebration
