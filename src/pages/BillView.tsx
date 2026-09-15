@@ -3,13 +3,14 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download, Printer, Loader2, ArrowLeft } from "lucide-react";
-import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 import { mapInvoiceRow } from "@/context/domains/useBillingDomain";
 import type { Invoice } from "@/context/data-types";
 import { logError } from "@/utils/errorLogger";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "@/utils/formatCurrency";
+
 
 /**
  * A bill on its own page, opened in a new tab as a normal link.

@@ -50,6 +50,8 @@ const Targets = lazy(routeImporters["/targets"] as any);
 const Command = lazy(routeImporters["/command"] as any);
 const Settings = lazy(routeImporters["/settings"] as any);
 const Billing = lazy(routeImporters["/billing"] as any);
+const BillView = lazy(() => import("./pages/BillView"));
+
 const Help = lazy(routeImporters["/help"] as any);
 const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
@@ -174,6 +176,8 @@ const App = () => (
                   <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/claims" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/billing" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/bill/:invoiceId" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><BillView /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+
                   <Route path="/company" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/command" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/reports" element={<Navigate to="/command?tab=drill" replace />} />
