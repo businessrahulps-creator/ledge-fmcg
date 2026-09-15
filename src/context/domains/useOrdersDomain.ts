@@ -24,6 +24,37 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
   const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /**
+   * Refresh ONE order (plus its lines and schemes) and merge it in place.
+   * Realtime uses this instead of re-downloading the whole order history —
+   * the full refetch cost grows with every order the company has ever booked.
+   */
+  const refetchOrderById = useCallback(async (orderId: string) => {
+    if (!deps.companyId || !navigator.onLine) return;
+    try {
+      const { data: row, error } = await supabase
+        .from("orders").select("*").eq("id", orderId).eq("company_id", deps.companyId).maybeSingle();
+      if (error) return;
+      if (!row) {
+        setOrders(prev => prev.filter(o => o.id !== orderId));
+        return;
+      }
+      const [lines, schemes] = await Promise.all([
+        batchIn("order_lines", "order_id", [orderId]),
+        batchIn("order_schemes", "order_id", [orderId]),
+      ]);
+      const [mapped] = mapOrders([row], lines, schemes);
+      if (!mapped) return;
+      setOrders(prev => {
+        const idx = prev.findIndex(o => o.id === orderId);
+        if (idx === -1) return [mapped, ...prev];
+        const next = prev.slice();
+        next[idx] = mapped;
+        return next;
+      });
+    } catch { /* ignore — the 5-minute background refresh will reconcile */ }
+  }, [deps.companyId]);
+
   const safeRefetch = useCallback(() => {
     if (!deps.companyId) return Promise.resolve();
     if (refetchTimer.current) clearTimeout(refetchTimer.current);
