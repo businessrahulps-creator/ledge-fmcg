@@ -170,10 +170,9 @@
         background: #0F1F3A;
         color: #F5EFE6; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         transition: opacity .44s cubic-bezier(.4,0,.2,1), transform .44s cubic-bezier(.4,0,.2,1);
-        padding: 24px; text-align: center;
+        padding: 24px 24px 52px; text-align: center;
       }
-      /* optical centring: the lockup sits slightly above the true middle */
-      #ledge-splash > * { position: relative; transform: translateY(-14px); }
+
       #ledge-splash::before {
         content: ""; position: absolute; left: 50%; top: 46%; width: 460px; height: 460px;
         margin: -230px 0 0 -230px; border-radius: 50%; pointer-events: none;
@@ -198,7 +197,7 @@
       }
       @keyframes ledge-fade-up { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
       .ledge-bar {
-        margin-top: 27px; width: 116px; height: 2px; border-radius: 2px;
+        position: relative; margin-top: 27px; width: 116px; height: 2px; border-radius: 2px;
         background: rgba(245,239,230,.12); overflow: hidden;
         animation: ledge-fade-in .5s ease-out .5s both;
       }
