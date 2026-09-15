@@ -453,7 +453,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('targets', targets.safeRefetchTargets))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('secondary_sales', targets.safeRefetchSecondarySales))
         .subscribe((status) => {
-          if (status === 'CHANNEL_ERROR') logError({ source: "realtime:channel_error", error: "Realtime channel error — will retry", severity: "info", context: { companyId } });
+          // A dropped live connection retries on its own — console only, it is not a failure to review.
+          if (status === 'CHANNEL_ERROR') console.warn("[realtime] channel error — will retry", { companyId });
         });
     };
 

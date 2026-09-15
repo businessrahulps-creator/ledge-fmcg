@@ -193,12 +193,9 @@ const truncationWarnedKeys = new Set<string>();
 function warnPaginationOnce(key: string, detail: string) {
   if (paginationWarnedKeys.has(key)) return;
   paginationWarnedKeys.add(key);
-  logError({
-    source: `pagination:${key}`,
-    error: `Pagination needed: ${detail}`,
-    severity: "info",
-    context: { key, detail },
-  });
+  // Routine: large table fetched in pages. Console only — the error list is for
+  // things a person has to act on. Truncation (below) is still recorded.
+  console.info(`[data] pagination needed: ${key} — ${detail}`);
 }
 
 function warnTruncationOnce(key: string, detail: string) {
