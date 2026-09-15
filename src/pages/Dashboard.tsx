@@ -99,6 +99,13 @@ export default function Dashboard() {
   const selectedDateObj = useMemo(() => new Date(selectedDate + "T00:00:00"), [selectedDate]);
   const firstName = profile?.full_name?.split(" ")[0];
 
+  // Money owed comes from the receipts ledger, never from orders.payment_status.
+  const { rows: receivableRows, paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = useCallback(
+    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
+    [paymentStatusByOrderId],
+  );
+
   // This Month aggregates (memoized — recompute only when orders change)
   // Booked revenue scopes by order.date; delivered revenue scopes by delivered_at.
   // One pass over the order list builds this month, last month and the 7-day
