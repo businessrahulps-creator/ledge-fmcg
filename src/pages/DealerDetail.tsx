@@ -98,7 +98,7 @@ export default function DealerDetail() {
 
   const [ssExpanded, setSsExpanded] = useState(false);
   const [deleteSecondarySaleId, setDeleteSecondarySaleId] = useState<string | null>(null);
-  const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+  const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: toDateKey(new Date()), remarks: "" });
 
   if (!dealer) {
     if (api.loading || items.length === 0) {
@@ -673,7 +673,7 @@ export default function DealerDetail() {
                 className="h-9 gap-1.5 shrink-0"
                 disabled={!canManageDealers}
                 onClick={() => {
-                  setSsForm({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
+                  setSsForm({ retailerName: "", productId: "", quantity: 1, date: toDateKey(new Date()), remarks: "" });
                   setSsOpen(true);
                 }}
               >
