@@ -748,8 +748,9 @@ export default function NewOrder() {
               </section>
             )}
 
-            {/* Save button */}
-            <div className="pt-2 pb-4 md:pb-0">
+            {/* Save button — pinned to the bottom of the screen on phones, so it
+                is always in reach however long the product list gets. */}
+            <div className="sticky bottom-0 z-20 -mx-4 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:pt-2 md:pb-0 md:backdrop-blur-none">
               <Button
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
