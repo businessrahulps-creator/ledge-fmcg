@@ -8,7 +8,7 @@ import { buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
 import { shareInvoiceOnWhatsApp } from "@/utils/shareWhatsApp";
 import { mapInvoiceRow } from "@/context/domains/useBillingDomain";
 import type { Invoice } from "@/context/data-types";
-import { logError } from "@/utils/errorLogger";
+import { logError } from "@/utils/errorLog";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 
