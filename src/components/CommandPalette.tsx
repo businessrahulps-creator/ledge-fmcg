@@ -157,10 +157,67 @@ export function CommandPalette() {
     { label: "Settings", to: "/settings", icon: Settings },
   ];
 
+  const resultGroups = (
+    <>
+        {matchedOrders.length > 0 && (
+          <CommandGroup heading="Orders">
+            {matchedOrders.map((o: any) => {
+              const id = o.id ?? o.orderNumber ?? "";
+              const dealer = o.dealerName ?? o.distributorName ?? "—";
+              return (
+                <CommandItem
+                  key={`result-order-${id}`}
+                  value={`order ${id} ${dealer}`}
+                  onSelect={() => go(`/orders/${id}`)}
+                >
+                  <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{String(id)}</span>
+                  <span className="ml-2 truncate text-xs text-muted-foreground">{dealer}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
+        {matchedDealers.length > 0 && (
+          <CommandGroup heading="Dealers">
+            {matchedDealers.map((d: any) => (
+              <CommandItem
+                key={`result-dealer-${d.id}`}
+                value={`dealer ${d.name} ${d.city ?? ""}`}
+                onSelect={() => go(`/distributors/${d.id}`)}
+              >
+                <UserRound className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span className="truncate">{d.name}</span>
+                {d.city && <span className="ml-2 truncate text-xs text-muted-foreground">{d.city}</span>}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        {matchedProducts.length > 0 && (
+          <CommandGroup heading="Products">
+            {matchedProducts.map((p: any) => (
+              <CommandItem
+                key={`result-product-${p.id}`}
+                value={`product ${p.name} ${p.sku ?? ""}`}
+                onSelect={() => go(`/stock`)}
+              >
+                <Package className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span className="truncate">{p.name}</span>
+                {p.sku && <span className="ml-2 truncate text-xs text-muted-foreground">{p.sku}</span>}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+    </>
+  );
+
   const listContent = (
-    <CommandList className={isMobile ? "max-h-none flex-1 overflow-y-auto" : undefined}>
+    <CommandList className={isMobile ? "max-h-none flex-1 overflow-y-auto pb-6" : undefined}>
 
         <CommandEmpty>No matches. Try a different search.</CommandEmpty>
+
+        {/* What you typed comes first; pages and actions sit below it. */}
+        {q && resultGroups}
 
         {!q && recent.length > 0 && (
           <>
