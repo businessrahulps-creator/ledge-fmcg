@@ -6,7 +6,8 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, ty
 import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
@@ -192,32 +193,24 @@ export function ProductReport() {
         sections={rptSections}
         title="Export Product Report PDF"
         onGenerate={async (sel) => {
-          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-          downloadPdf(
-            pdfFilename("product-report"),
-            <ReportPdf
-              companyName={companyInfo.name}
-              companyAddress={companyInfo.address}
-              gstin={companyInfo.gstin}
-              logoUrl={companyInfo.logoUrl}
-              title="Product Report"
-              subtitle={periodLabel(period)}
-              showCompany={sel.company}
-              showSummary={sel.summary}
-              showTable={sel.table}
-              summary={[
-                { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
-                { label: "Units Sold", value: formatNumber(totalQty) },
-              ]}
-              columns={[
-                { header: "Product", width: "35%" },
-                { header: "SKU", width: "20%" },
-                { header: "Qty Sold", width: "20%", align: "right" },
-                { header: "Revenue", width: "25%", align: "right" },
-              ]}
-              rows={data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrencyPdf(p.revenue)])}
-            />
-          );
+          await exportReportPdf({
+            fileType: "product-report",
+            company: companyInfo,
+            selection: sel,
+            title: "Product Report",
+            subtitle: periodLabel(period),
+            summary: [
+              { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
+              { label: "Units Sold", value: formatNumber(totalQty) },
+            ],
+            columns: [
+              { header: "Product", width: "35%" },
+              { header: "SKU", width: "20%" },
+              { header: "Qty Sold", width: "20%", align: "right" },
+              { header: "Revenue", width: "25%", align: "right" },
+            ],
+            rows: data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrencyPdf(p.revenue)]),
+          });
         }}
       />
     </div>

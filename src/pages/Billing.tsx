@@ -30,11 +30,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
+import { withInvoiceLines } from "@/lib/invoice-lines";
 import { billStatusView, billStateFromMoney } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { formatMoneyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { formatIndianDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
@@ -384,7 +386,7 @@ export default function Billing() {
                 <WhatsAppIcon className="text-success" /> Remind on WhatsApp
               </DropdownMenuItem>
             ) : (
-              <DropdownMenuItem onClick={() => shareInvoiceOnWhatsApp(inv)}>
+              <DropdownMenuItem onClick={async () => shareInvoiceOnWhatsApp(await withInvoiceLines(inv))}>
                 <WhatsAppIcon className="text-success" /> Send bill on WhatsApp
               </DropdownMenuItem>
             )}
@@ -659,50 +661,37 @@ export default function Billing() {
                   ]),
                 )}
                 onPdf={async () => {
-                  const [{ ReportPdf }, { pdf }] = await Promise.all([
-                    import("@/components/pdf/ReportPdf"),
-                    import("@react-pdf/renderer"),
-                  ]);
-                  const blob = await pdf(
-                    <ReportPdf
-                      title="Money still to collect"
-                      subtitle={[
-                        timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
-                        payFilter === "unpaid" ? "Unpaid bills only"
-                          : payFilter === "partial" ? "Part paid bills only"
-                          : payFilter === "paid" ? "Settled bills only"
-                          : payFilter === "overdue" ? "Overdue bills only"
-                          : "All bills, including settled ones",
-                      ].join(" · ")}
-                      companyName={api.companyInfo.name}
-                      companyAddress={api.companyInfo.address}
-                      gstin={api.companyInfo.gstin}
-                      logoUrl={api.companyInfo.logoUrl}
-                      summary={[
-                        { label: "Billed", value: formatMoneyPdf(collectionTotals.billed) },
-                        { label: "Collected", value: formatMoneyPdf(collectionTotals.collected) },
-                        { label: "Still to collect", value: formatMoneyPdf(collectionTotals.outstanding) },
-                      ]}
-                      columns={[
-                        { header: "Bill", width: "20%" },
-                        { header: "Dealer", width: "24%" },
-                        { header: "Date", width: "12%" },
-                        { header: "Total", width: "15%", align: "right" },
-                        { header: "Received", width: "15%", align: "right" },
-                        { header: "Still due", width: "14%", align: "right" },
-                      ]}
-                      rows={collections.map(r => [
-                        r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
-                        formatMoneyPdf(r.inv.grandTotal), formatMoneyPdf(r.received), formatMoneyPdf(r.due),
-                      ])}
-                    />,
-                  ).toBlob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "to-collect.pdf";
-                  a.click();
-                  URL.revokeObjectURL(url);
+                  await exportReportPdf({
+                    fileType: "to-collect",
+                    company: api.companyInfo,
+                    selection: { company: true, summary: true, table: true },
+                    title: "Money still to collect",
+                    subtitle: [
+                      timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                      payFilter === "unpaid" ? "Unpaid bills only"
+                        : payFilter === "partial" ? "Part paid bills only"
+                        : payFilter === "paid" ? "Settled bills only"
+                        : payFilter === "overdue" ? "Overdue bills only"
+                        : "All bills, including settled ones",
+                    ].join(" · "),
+                    summary: [
+                      { label: "Billed", value: formatMoneyPdf(collectionTotals.billed) },
+                      { label: "Collected", value: formatMoneyPdf(collectionTotals.collected) },
+                      { label: "Still to collect", value: formatMoneyPdf(collectionTotals.outstanding) },
+                    ],
+                    columns: [
+                      { header: "Bill", width: "20%" },
+                      { header: "Dealer", width: "24%" },
+                      { header: "Date", width: "12%" },
+                      { header: "Total", width: "15%", align: "right" },
+                      { header: "Received", width: "15%", align: "right" },
+                      { header: "Still due", width: "14%", align: "right" },
+                    ],
+                    rows: collections.map(r => [
+                      r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
+                      formatMoneyPdf(r.inv.grandTotal), formatMoneyPdf(r.received), formatMoneyPdf(r.due),
+                    ]),
+                  });
                 }}
               />
             )}
@@ -805,44 +794,32 @@ export default function Billing() {
                   ]),
                 )}
                 onPdf={async () => {
-                  const [{ ReportPdf }, { pdf }] = await Promise.all([
-                    import("@/components/pdf/ReportPdf"),
-                    import("@react-pdf/renderer"),
-                  ]);
-                  const blob = await pdf(
-                    <ReportPdf
-                      title="Payments received"
-                      subtitle={timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod)}
-                      companyName={api.companyInfo.name}
-                      companyAddress={api.companyInfo.address}
-                      gstin={api.companyInfo.gstin}
-                      logoUrl={api.companyInfo.logoUrl}
-                      columns={[
-                        { header: "Date", width: "11%" },
-                        { header: "Dealer", width: "21%" },
-                        { header: "Against", width: "19%" },
-                        { header: "Paid by", width: "11%" },
-                        { header: "Reference", width: "13%" },
-                        { header: "Amount", width: "15%", align: "right" },
-                        { header: "Status", width: "10%", align: "right" },
-                      ]}
-                      rows={paymentRows.map(r => [
-                        formatIndianDate(r.paidOn),
-                        dealerName(r.distributorId),
-                        (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "-",
-                        modeLabels[r.mode] || r.mode,
-                        r.reference || "-",
-                        formatMoneyPdf(r.amount),
-                        r.status === "voided" ? "Cancelled" : "Posted",
-                      ])}
-                    />,
-                  ).toBlob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "payments.pdf";
-                  a.click();
-                  URL.revokeObjectURL(url);
+                  await exportReportPdf({
+                    fileType: "payments",
+                    company: api.companyInfo,
+                    selection: { company: true, summary: true, table: true },
+                    title: "Payments received",
+                    subtitle: timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                    summary: [],
+                    columns: [
+                      { header: "Date", width: "11%" },
+                      { header: "Dealer", width: "21%" },
+                      { header: "Against", width: "19%" },
+                      { header: "Paid by", width: "11%" },
+                      { header: "Reference", width: "13%" },
+                      { header: "Amount", width: "15%", align: "right" },
+                      { header: "Status", width: "10%", align: "right" },
+                    ],
+                    rows: paymentRows.map(r => [
+                      formatIndianDate(r.paidOn),
+                      dealerName(r.distributorId),
+                      (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "-",
+                      modeLabels[r.mode] || r.mode,
+                      r.reference || "-",
+                      formatMoneyPdf(r.amount),
+                      r.status === "voided" ? "Cancelled" : "Posted",
+                    ]),
+                  });
                 }}
               />
             )}

@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 import { supabase } from "@/integrations/supabase/client";
+import type { InvoiceLine } from "@/context/data-types";
+import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
   return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
@@ -157,6 +159,9 @@ function NewClaimDialog({
   const [submitting, setSubmitting] = useState(false);
   /** Pieces already sent back on earlier credit notes, per bill line. */
   const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number>>({});
+  /** Bill line items, fetched only for the bill being returned against. */
+  const [billLines, setBillLines] = useState<InvoiceLine[]>([]);
+  const [linesLoading, setLinesLoading] = useState(false);
 
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
@@ -192,6 +197,19 @@ function NewClaimDialog({
       });
       setAlreadyReturned(totals);
     })();
+    return () => { cancelled = true; };
+  }, [selectedBillId]);
+
+  // Line items for this one bill — they are not carried in the app-wide bill list.
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedBillId) { setBillLines([]); setLinesLoading(false); return; }
+    setLinesLoading(true);
+    fetchInvoiceLines(selectedBillId).then(lines => {
+      if (cancelled) return;
+      setBillLines(lines);
+      setLinesLoading(false);
+    });
     return () => { cancelled = true; };
   }, [selectedBillId]);
 
@@ -234,7 +252,7 @@ function NewClaimDialog({
     if (match) selectOrder(match);
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
-  const returnLines = (selectedBill?.lines ?? []).map(l => {
+  const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
     const returnedQty = alreadyReturned[l.id as string] ?? 0;
     return {
       invoiceLineId: l.id as string,
@@ -273,6 +291,7 @@ function NewClaimDialog({
     );
     setSubmitting(false);
     if (res) {
+      if (selectedBillId) forgetInvoiceLines(selectedBillId);
       toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
         description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
       });
@@ -359,6 +378,14 @@ function NewClaimDialog({
                       </tr>
                     </thead>
                     <tbody>
+                      {linesLoading && returnLines.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                            <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
+                            Loading the items on this bill…
+                          </td>
+                        </tr>
+                      )}
                       {returnLines.map(line => {
                         // Only what is still returnable: billed, less anything sent back earlier.
                         const other = (k: "goodQty" | "damagedQty") => line.remainingQty - (k === "goodQty" ? line.damagedQty : line.goodQty);

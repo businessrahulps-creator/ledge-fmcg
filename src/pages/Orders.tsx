@@ -9,7 +9,8 @@ import { usePageLoading } from "@/hooks/use-loading";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Plus, Search, Filter, Download, FileText, ShoppingCart, ChevronRight } from "lucide-react";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { EmptyCard } from "@/components/ui/empty-card";
@@ -517,47 +518,36 @@ export default function Orders() {
           onOpenChange={setPdfModalOpen}
           sections={ordersPdfSections}
           onGenerate={async (sel) => {
-            // Lazy-load the heavy @react-pdf/renderer-based ReportPdf only on click,
-            // so it doesn't bloat the initial Orders bundle.
-            const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-            const godownMap = Object.fromEntries(godowns.map(g => [g.id, g.name]));
             const totalAmount = filtered.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-            downloadPdf(
-              pdfFilename("orders"),
-              <ReportPdf
-                companyName={companyInfo.name}
-                companyAddress={companyInfo.address}
-                gstin={companyInfo.gstin}
-                logoUrl={companyInfo.logoUrl}
-                title="Orders Report"
-                subtitle={`${filtered.length} orders`}
-                showCompany={sel.company}
-                showSummary={sel.summary}
-                showTable={sel.table}
-                summary={[
-                  { label: "Total Orders", value: String(filtered.length) },
-                  { label: "Total Amount", value: formatCurrencyPdf(totalAmount) },
-                ]}
-                columns={[
-                  { header: "Order #", width: "12%" },
-                  { header: "Date", width: "12%" },
-                  { header: "Dealer", width: "20%" },
-                  { header: "Sales Person", width: "16%" },
-                  { header: "Amount", width: "14%", align: "right" },
-                  { header: "Payment", width: "12%" },
-                  { header: "Delivery", width: "14%" },
-                ]}
-                rows={filtered.map((o) => [
-                  o.orderNumber,
-                  formatIndianDate(o.date),
-                  o.distributorName,
-                  o.salesperson,
-                  formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
-                  titleCase(payStatus(o.id)),
-                  titleCase(o.deliveryStatus),
-                ])}
-              />
-            );
+            await exportReportPdf({
+              fileType: "orders",
+              company: companyInfo,
+              selection: sel,
+              title: "Orders Report",
+              subtitle: `${filtered.length} orders`,
+              summary: [
+                { label: "Total Orders", value: String(filtered.length) },
+                { label: "Total Amount", value: formatCurrencyPdf(totalAmount) },
+              ],
+              columns: [
+                { header: "Order #", width: "12%" },
+                { header: "Date", width: "12%" },
+                { header: "Dealer", width: "20%" },
+                { header: "Sales Person", width: "16%" },
+                { header: "Amount", width: "14%", align: "right" },
+                { header: "Payment", width: "12%" },
+                { header: "Delivery", width: "14%" },
+              ],
+              rows: filtered.map((o) => [
+                o.orderNumber,
+                formatIndianDate(o.date),
+                o.distributorName,
+                o.salesperson,
+                formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
+                titleCase(payStatus(o.id)),
+                titleCase(o.deliveryStatus),
+              ]),
+            });
           }}
         />
       </div>

@@ -100,15 +100,6 @@ export interface Order {
   appliedSchemes: OrderScheme[];
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-export function formatNumber(num: number): string {
-  return new Intl.NumberFormat("en-IN").format(num);
-}
+// Money and number formatting now lives in one place. Re-exported here so the
+// many existing imports from this module keep working unchanged.
+export { formatCurrency, formatNumber } from "@/utils/formatCurrency";

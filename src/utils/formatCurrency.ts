@@ -1,14 +1,25 @@
 /**
  * Canonical Indian Rupee formatting helpers.
  *
- * All currency rendering across the app should funnel through these helpers
- * so that grouping always follows the Indian numbering system
+ * All currency rendering across the app funnels through these helpers so that
+ * grouping always follows the Indian numbering system
  * (lakh / crore — e.g. ₹12,45,678 not ₹1,245,678).
- *
- * `formatCurrency` from `@/data/mock-data` already uses `Intl.NumberFormat("en-IN")`
- * and is re-exported here as the canonical name for new code.
  */
-export { formatCurrency, formatNumber } from "@/data/mock-data";
+const inr = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+const plain = new Intl.NumberFormat("en-IN");
+
+export function formatCurrency(amount: number): string {
+  return inr.format(Number.isFinite(amount) ? amount : 0);
+}
+
+export function formatNumber(num: number): string {
+  return plain.format(Number.isFinite(num) ? num : 0);
+}
 
 /**
  * Compact INR for tight spaces (KPI tiles, chart axes).

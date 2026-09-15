@@ -7,7 +7,8 @@ import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./Reve
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 import { ReportExportFooter } from "./ReportExportFooter";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
@@ -177,33 +178,25 @@ export function SalesTeamReport() {
         sections={rptSections}
         title="Export Sales Team Report PDF"
         onGenerate={async (sel) => {
-          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-          downloadPdf(
-            pdfFilename("sales-team-report"),
-            <ReportPdf
-              companyName={companyInfo.name}
-              companyAddress={companyInfo.address}
-              gstin={companyInfo.gstin}
-              logoUrl={companyInfo.logoUrl}
-              title="Sales Team Report"
-              subtitle={periodLabel(period)}
-              showCompany={sel.company}
-              showSummary={sel.summary}
-              showTable={sel.table}
-              summary={[
-                { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
-                { label: "Orders", value: String(totalOrders) },
-                { label: "Members", value: String(data.length) },
-              ]}
-              columns={[
-                { header: "Name", width: "30%" },
-                { header: "Region", width: "25%" },
-                { header: "Orders", width: "15%", align: "right" },
-                { header: "Revenue", width: "30%", align: "right" },
-              ]}
-              rows={data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrencyPdf(s.revenue)])}
-            />
-          );
+          await exportReportPdf({
+            fileType: "sales-team-report",
+            company: companyInfo,
+            selection: sel,
+            title: "Sales Team Report",
+            subtitle: periodLabel(period),
+            summary: [
+              { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
+              { label: "Orders", value: String(totalOrders) },
+              { label: "Members", value: String(data.length) },
+            ],
+            columns: [
+              { header: "Name", width: "30%" },
+              { header: "Region", width: "25%" },
+              { header: "Orders", width: "15%", align: "right" },
+              { header: "Revenue", width: "30%", align: "right" },
+            ],
+            rows: data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrencyPdf(s.revenue)]),
+          });
         }}
       />
     </div>
