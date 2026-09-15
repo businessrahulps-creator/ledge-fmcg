@@ -254,18 +254,22 @@
           });
         } catch (e) { /* no geometry: leave the ribbon fully drawn */ }
         var finished = false;
+        var started = Date.now();
         var slowTimer = setTimeout(function () { el.classList.add("slow"); }, 10000);
         var maxTimer = setTimeout(function () { api.done(); }, 30000);
         var api = {
           step: function () { /* the animation speaks for itself */ },
           done: function () {
             if (finished) return;
+            var left = 1500 - (Date.now() - started);
+            if (left > 0) { setTimeout(api.done, left); return; }
             finished = true;
             clearTimeout(slowTimer); clearTimeout(maxTimer);
             el.classList.add("ledge-splash-out");
             setTimeout(function () { el.parentNode && el.parentNode.removeChild(el); }, 540);
           }
         };
+
         window.__ledgeSplash = api;
       })();
     </script>
