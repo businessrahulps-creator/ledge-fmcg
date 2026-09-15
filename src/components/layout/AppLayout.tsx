@@ -323,18 +323,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-20 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={location.pathname}
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
-                  animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -4 }}
-                  transition={{ duration: reduceMotion ? 0.1 : 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-                  style={{ willChange: "opacity, transform" }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
+              {/* No exit animation: the new page appears immediately instead of
+                  waiting for the old one to fade out (review-animations §4). */}
+              <motion.div
+                key={location.pathname}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 2 }}
+                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                transition={{ duration: reduceMotion ? 0.1 : 0.14, ease: [0.2, 0.9, 0.25, 1] }}
+              >
+                {children}
+              </motion.div>
             </div>
           </main>
 

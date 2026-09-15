@@ -580,7 +580,7 @@ export default function Stock() {
                       key={loc.id}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04, type: "spring", damping: 26, stiffness: 200 }}
+                      transition={{ delay: Math.min(i, 5) * 0.03, duration: 0.24, ease: [0.2, 0.9, 0.25, 1] }}
                       onClick={() => setSelectedWarehouse(isSelected ? null : loc.id)}
                       className={`cursor-pointer glass-card card-hover p-5 md:p-6 transition-all ${isSelected ? "ring-2 ring-primary" : ""}`}
                     >

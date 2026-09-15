@@ -86,7 +86,7 @@ function CommandKpiCardInner({ label, value, pct, inverse, hint, spark, href, in
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: ease.decelerate, delay: index * 0.08 }}
+      transition={{ duration: 0.28, ease: ease.decelerate, delay: Math.min(index, 4) * 0.045 }}
       className="h-full"
     >
       {wrapped}
