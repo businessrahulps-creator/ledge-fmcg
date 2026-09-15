@@ -397,7 +397,11 @@ export default function Orders() {
                           <td className="px-4 py-3.5">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <StatusBadge status={order.paymentStatus} />
-                              <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                              {order.cancelledAt ? (
+                                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                              ) : (
+                                <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                              )}
                             </div>
                           </td>
                           <td className="px-4 py-3.5">
@@ -441,7 +445,11 @@ export default function Orders() {
                       </p>
                       <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <StatusBadge status={order.paymentStatus} />
-                        <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                        {order.cancelledAt ? (
+                          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                        ) : (
+                          <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                        )}
                         {billingStatus && (
                           <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
                             {billingStatus.label}
