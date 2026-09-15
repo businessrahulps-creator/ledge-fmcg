@@ -167,7 +167,7 @@ export default function Dashboard() {
       prevMonthLabel: prevMonthStart.toLocaleDateString("en-IN", { month: "short" }),
       last7Days: sparkKeys.map(s => ({ label: s.label, value: s.value })),
     };
-  }, [orders, today]);
+  }, [orders, today, payStatus]);
 
   const { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct } = stats;
   const monthRevenue = monthDeliveredRev; // primary number = delivered
