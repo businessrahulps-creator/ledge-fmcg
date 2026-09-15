@@ -15,7 +15,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, CheckCircle2, AlertTriangle, UserCheck, MapPin, Plus, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 import { EntityCard } from "@/components/ui/entity-card";
@@ -261,6 +261,7 @@ const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
 };
 
 export default function Targets() {
+  const navigate = useNavigate();
   const api = useApi();
   const canManageTargets = useCan("manage_schemes");
   const isLoading = usePageLoading(api.loading);
@@ -478,7 +479,7 @@ export default function Targets() {
                 title={q ? "No matching team members." : "No team members yet."}
                 description={q ? "Try a different search term." : "Add your sales team so you can set monthly targets for each person."}
                 actionLabel={!q ? "Add team member" : undefined}
-                onAction={!q ? () => { window.location.href = "/salespersons"; } : undefined}
+                onAction={!q ? () => navigate("/salespersons") : undefined}
               />
             );
             })()}
@@ -515,7 +516,7 @@ export default function Targets() {
                 title={q ? "No matching dealers." : "No dealers yet."}
                 description={q ? "Try a different search term." : "Add your dealer network so you can set targets per dealer."}
                 actionLabel={!q ? "Add dealer" : undefined}
-                onAction={!q ? () => { window.location.href = "/distributors"; } : undefined}
+                onAction={!q ? () => navigate("/distributors") : undefined}
               />
             );
             })()}

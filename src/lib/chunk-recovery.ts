@@ -119,11 +119,6 @@ export function renderUnrecoverableScreen(message = "Ledge couldn't load its fil
   });
   el.append(title, body, btn);
   document.body.appendChild(el);
-  try {
-    (window as any).__ledgeSplash?.done?.();
-  } catch {
-    /* ignore */
-  }
 }
 
 /** Handles a suspected stale-asset failure: recover once, otherwise show the fallback. */

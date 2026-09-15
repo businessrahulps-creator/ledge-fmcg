@@ -32,10 +32,22 @@ if (typeof window !== "undefined") {
       const target = e.target as HTMLElement | null;
       if (!target || target === (window as unknown as HTMLElement)) return;
       const tag = target.tagName?.toLowerCase();
-      const isStylesheet = tag === "link" && (target as HTMLLinkElement).rel === "stylesheet";
+      const stylesheetHref = tag === "link" ? (target as HTMLLinkElement).href : "";
+      let isAppStylesheet = false;
+      try {
+        const stylesheetUrl = new URL(stylesheetHref);
+        isAppStylesheet =
+          (target as HTMLLinkElement).rel === "stylesheet" &&
+          stylesheetUrl.origin === window.location.origin &&
+          /\/assets\/[^/]+\.css$/.test(stylesheetUrl.pathname);
+      } catch {
+        isAppStylesheet = false;
+      }
       const isAppScript =
-        tag === "script" && /\/assets\//.test((target as HTMLScriptElement).src || "");
-      if (isStylesheet || isAppScript) {
+        tag === "script" &&
+        (target as HTMLScriptElement).src.startsWith(window.location.origin) &&
+        /\/assets\//.test((target as HTMLScriptElement).src || "");
+      if (isAppStylesheet || isAppScript) {
         handleAssetFailure("Ledge couldn't load its files.");
       }
     },
@@ -67,10 +79,6 @@ if (isPreviewEnv) {
 }
 
 
-import { splashStep, splashDone } from "@/lib/boot-splash";
-
-splashStep("Signing you in", 40);
-
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
@@ -90,9 +98,4 @@ requestAnimationFrame(() => {
     }
   }, 0);
 });
-
-
-// Safety net: whatever happens during boot, never leave the opening animation
-// sitting on top of the app. The screen behind it always renders something.
-setTimeout(() => splashDone(), 6000);
 

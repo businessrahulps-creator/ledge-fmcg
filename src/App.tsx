@@ -8,7 +8,6 @@ import { DataProvider } from "@/context/DataContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
-import { SplashScreen } from "@/components/SplashScreen";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import { RequireCapability } from "@/components/auth/RequireCapability";
 import { isPreviewEnv } from "@/lib/preview-env";
@@ -120,7 +119,13 @@ function RoutePrefetcher() {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, authReady } = useAuth();
-  if (loading || !authReady) return <SplashScreen />;
+  if (loading || !authReady) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background p-6" role="status" aria-label="Opening Ledge">
+        <span className="text-sm text-muted-foreground">Opening Ledge…</span>
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace />;
   return <NoCompanyGuard>{children}</NoCompanyGuard>;
 }
