@@ -41,6 +41,7 @@ const FOUNDER_LINES: Record<string, { title: string; why: string; cta: string }>
 };
 
 const SEAL_KEY = "ledge_first_week_sealed";
+const DONE_KEY = "ledge_first_week_done";
 
 interface CelebrationState {
   chapterId: string;
@@ -131,7 +132,10 @@ export function FirstWeek() {
   const activeIdx = chapters.findIndex((c) => !c.isComplete);
 
   // Don't show if dismissed, or if sealed and complete (the moment did its job)
-  if (dismissed) return null;
+  if (dismissed || everDone) return null;
+  // Hold back until the whole business has loaded — a half-loaded snapshot
+  // would flash the guide and then hide it again.
+  if (loading) return null;
   if (isComplete && sealed) {
     // Show a sealed-state moment was already dismissed — surface nothing.
     return null;
