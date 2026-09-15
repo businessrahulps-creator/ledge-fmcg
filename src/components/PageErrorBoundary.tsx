@@ -40,8 +40,16 @@ export class PageErrorBoundary extends Component<Props, State> {
 
 
   render() {
+    if (this.state.recovering) {
+      return (
+        <div className="flex flex-1 items-center justify-center p-6">
+          <p className="text-sm text-muted-foreground">Updating Ledge…</p>
+        </div>
+      );
+    }
     if (this.state.hasError) {
       return (
+
         <div className="flex flex-1 items-center justify-center p-6">
           <div className="max-w-md text-center space-y-4">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
