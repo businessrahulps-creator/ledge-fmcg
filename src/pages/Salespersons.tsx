@@ -18,6 +18,7 @@ import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
@@ -87,6 +88,7 @@ export default function Salespersons() {
 
   const openEdit = (s: Salesperson, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canManageTeam) return;
     setEditItem({ ...s });
     setIsNew(false);
   };

@@ -21,6 +21,7 @@ import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
@@ -103,6 +104,7 @@ export default function Distributors() {
 
   const openEdit = (d: Distributor, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canManageDealers) return;
     setEditItem({ ...d });
     setIsNew(false);
   };
