@@ -28,6 +28,7 @@ import { useDealersDomain } from "./domains/useDealersDomain";
 import { useSalespersonsDomain } from "./domains/useSalespersonsDomain";
 import { useCatalogDomain } from "./domains/useCatalogDomain";
 import { useStockDomain } from "./domains/useStockDomain";
+import { splashStep, splashDone } from "@/lib/boot-splash";
 import { useOrdersDomain } from "./domains/useOrdersDomain";
 import { useBillingDomain } from "./domains/useBillingDomain";
 import { useTargetsDomain } from "./domains/useTargetsDomain";
