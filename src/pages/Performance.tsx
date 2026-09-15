@@ -1,3 +1,4 @@
+import { toDateKey, addDaysToKey } from "@/utils/dateKey";
 import { useState, useMemo, useCallback } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -920,13 +921,13 @@ export default function Performance() {
             {(() => {
               const allTargets = api.targets.list();
               const now = new Date();
-              const today = now.toISOString().split("T")[0];
+              const today = toDateKey(now);
               const dayOfWeek = now.getDay();
               const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-              const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
-              const weekEnd = new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0];
-              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-              const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+              const weekStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), mondayOffset));
+              const weekEnd = addDaysToKey(weekStart, 6);
+              const monthStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
+              const monthEnd = toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
               const activeTargets = allTargets.filter(t =>
                 (t.targetRevenue > 0 || t.targetOrders > 0) && (
                   (t.periodType === "daily" && t.periodStart === today) ||

@@ -78,6 +78,8 @@ export default function NewOrder() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
+  /** Set once the person has been told this order is ahead of available stock. */
+  const [shortStockAck, setShortStockAck] = useState(false);
 
   // Refs for scroll-to-first-error
   const dealerFieldRef = useRef<HTMLDivElement>(null);
@@ -227,6 +229,9 @@ export default function NewOrder() {
     return warnings;
   }, [lines, stockItems, selectedGodown, selectedGodownObj?.name]);
 
+  // Change the products or the warehouse and the short-stock warning starts fresh.
+  useEffect(() => { setShortStockAck(false); }, [lines, selectedGodown]);
+
   const scrollToFirstError = () => {
     let target: HTMLElement | null = null;
     if (errors.dealer) target = dealerFieldRef.current;
@@ -272,6 +277,18 @@ export default function NewOrder() {
     if (errors.warehouse) {
       toast.error("Warehouse required", { description: "Please select a source warehouse for this order." });
       scrollToFirstError();
+      return;
+    }
+
+    // Booking ahead of stock is allowed, but never by accident: the person has to
+    // see it once and press Save again before the order goes in.
+    if (stockWarnings.size > 0 && !shortStockAck) {
+      setShortStockAck(true);
+      toast.warning("Not enough stock for this order yet", {
+        description: "You can still book it as an advance order, but it cannot be dispatched until stock comes in. Press Save again to book it.",
+        duration: 9000,
+      });
+      productsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
