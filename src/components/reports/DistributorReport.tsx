@@ -176,33 +176,25 @@ export function DistributorReport() {
         sections={rptSections}
         title="Export Dealer Report PDF"
         onGenerate={async (sel) => {
-          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-          downloadPdf(
-            pdfFilename("dealer-report"),
-            <ReportPdf
-              companyName={companyInfo.name}
-              companyAddress={companyInfo.address}
-              gstin={companyInfo.gstin}
-              logoUrl={companyInfo.logoUrl}
-              title="Dealer Report"
-              subtitle={periodLabel(period)}
-              showCompany={sel.company}
-              showSummary={sel.summary}
-              showTable={sel.table}
-              summary={[
-                { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
-                { label: "Orders", value: String(totalOrders) },
-                { label: "Dealers", value: String(data.length) },
-              ]}
-              columns={[
-                { header: "Dealer", width: "30%" },
-                { header: "Location", width: "30%" },
-                { header: "Orders", width: "15%", align: "right" },
-                { header: "Revenue", width: "25%", align: "right" },
-              ]}
-              rows={data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrencyPdf(d.revenue)])}
-            />
-          );
+          await exportReportPdf({
+            fileType: "dealer-report",
+            company: companyInfo,
+            selection: sel,
+            title: "Dealer Report",
+            subtitle: periodLabel(period),
+            summary: [
+              { label: "Order value", value: formatCurrencyPdf(totalRevenue) },
+              { label: "Orders", value: String(totalOrders) },
+              { label: "Dealers", value: String(data.length) },
+            ],
+            columns: [
+              { header: "Dealer", width: "30%" },
+              { header: "Location", width: "30%" },
+              { header: "Orders", width: "15%", align: "right" },
+              { header: "Revenue", width: "25%", align: "right" },
+            ],
+            rows: data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrencyPdf(d.revenue)]),
+          });
         }}
       />
     </div>
