@@ -31,7 +31,7 @@ interface DelayedSuspenseProps {
 export function DelayedSuspense({
   children,
   fallback,
-  delayMs = 180,
+  delayMs = 120,
 }: DelayedSuspenseProps) {
   return (
     <Suspense fallback={<DelayedFallback delayMs={delayMs} fallback={fallback} />}>

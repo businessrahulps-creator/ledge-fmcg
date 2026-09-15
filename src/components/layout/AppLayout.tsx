@@ -12,6 +12,8 @@ import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
+import { signalNavDone, signalNavStart } from "@/components/NavProgress";
+import { prefetchRoute } from "@/lib/route-prefetch";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -171,6 +173,21 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
 
+  // The page chunk has loaded and the shell is on screen — stop the top bar.
+  useEffect(() => {
+    signalNavDone();
+  }, [location.pathname]);
+
+  // Start the chunk download and the progress bar on touch-down, so the press
+  // registers instantly instead of looking stuck.
+  const armNav = useCallback(
+    (url: string) => () => {
+      prefetchRoute(url);
+      if (!location.pathname.startsWith(url)) signalNavStart();
+    },
+    [location.pathname],
+  );
+
   return (
     <SidebarProvider>
       <TopProgress active={isRefreshing && online} />
@@ -312,7 +329,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 4 }}
                   animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                   exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -4 }}
-                  transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+                  transition={{ duration: reduceMotion ? 0.1 : 0.16, ease: [0.2, 0.8, 0.2, 1] }}
                   style={{ willChange: "opacity, transform" }}
                 >
                   {children}
@@ -341,6 +358,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   >
                     <Link
                       to={item.url}
+                      onPointerDown={armNav(item.url)}
                       aria-current={isActive ? "page" : undefined}
                       className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
                     >
@@ -427,7 +445,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       type="button"
                       onClick={() => {
                         setMoreOpen(false);
-                        setTimeout(() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette")), 120);
+                        window.dispatchEvent(new CustomEvent("ledge:open-command-palette"));
                       }}
                       className="flex w-full items-center gap-2.5 h-11 rounded-lg border border-border/70 bg-muted/30 hover:bg-muted/50 active:bg-muted/60 transition-colors px-3.5 text-[13.5px] text-muted-foreground"
                     >
@@ -453,6 +471,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                 <Link
                                   key={item.title}
                                   to={item.url}
+                                  onPointerDown={armNav(item.url)}
                                   onClick={() => setMoreOpen(false)}
                                   className={`group flex w-full items-center gap-3 px-3.5 min-h-[52px] text-left transition-colors duration-150 ${active ? "bg-primary/[0.05]" : "hover:bg-muted/40 active:bg-muted/60"}`}
                                 >

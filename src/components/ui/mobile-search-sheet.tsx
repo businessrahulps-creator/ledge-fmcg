@@ -20,6 +20,9 @@ interface MobileSearchSheetProps {
   leading?: React.ReactNode;
   /** Replace the entire search input area (still keeps back button + sticky styling). */
   headerSlot?: React.ReactNode;
+  /** Hide the built-in header entirely — the caller renders its own sticky header
+   *  inside `children` (needed when input + list must share one provider). */
+  hideHeader?: boolean;
 }
 
 
@@ -39,6 +42,7 @@ export function MobileSearchSheet({
   children,
   leading,
   headerSlot,
+  hideHeader = false,
 }: MobileSearchSheetProps) {
 
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -72,6 +76,7 @@ export function MobileSearchSheet({
           <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
 
           {/* Header */}
+          {hideHeader ? null : (
           <div
             className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/60 bg-background/95 px-2 backdrop-blur"
             style={{ paddingTop: "max(env(safe-area-inset-top), 8px)", paddingBottom: 8 }}
@@ -114,6 +119,7 @@ export function MobileSearchSheet({
             )}
 
           </div>
+          )}
 
           {/* Body */}
           <div
