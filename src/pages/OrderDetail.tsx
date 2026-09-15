@@ -735,6 +735,7 @@ export default function OrderDetail() {
                 </tbody>
               </table>
             </div>
+            </>
           ) : (
             <p className="px-4 py-6 text-xs text-muted-foreground/60 text-center">No billing documents yet for this order.</p>
           )}
