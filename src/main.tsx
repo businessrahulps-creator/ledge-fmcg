@@ -3,11 +3,17 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { logError } from "@/utils/errorLog";
+import {
+  isChunkLoadError,
+  handleAssetFailure,
+  clearChunkReloadFlag,
+} from "@/lib/chunk-recovery";
 
 // Global error capture — unhandled promise rejections + uncaught errors
 if (typeof window !== "undefined") {
   window.addEventListener("unhandledrejection", (e) => {
     logError({ source: "global:unhandledrejection", error: e.reason ?? "Unhandled rejection" });
+    if (isChunkLoadError(e.reason)) handleAssetFailure("Ledge couldn't load part of the app.");
   });
   window.addEventListener("error", (e) => {
     logError({
@@ -15,8 +21,28 @@ if (typeof window !== "undefined") {
       error: e.error ?? e.message,
       context: { filename: e.filename, lineno: e.lineno, colno: e.colno },
     });
+    if (isChunkLoadError(e.error ?? e.message)) handleAssetFailure("Ledge couldn't load part of the app.");
   });
+
+  // Resource-level failures (stylesheet / script 404 after a new release) do
+  // not surface as normal errors — they only fire on the element, capture phase.
+  window.addEventListener(
+    "error",
+    (e) => {
+      const target = e.target as HTMLElement | null;
+      if (!target || target === (window as unknown as HTMLElement)) return;
+      const tag = target.tagName?.toLowerCase();
+      const isStylesheet = tag === "link" && (target as HTMLLinkElement).rel === "stylesheet";
+      const isAppScript =
+        tag === "script" && /\/assets\//.test((target as HTMLScriptElement).src || "");
+      if (isStylesheet || isAppScript) {
+        handleAssetFailure("Ledge couldn't load its files.");
+      }
+    },
+    true,
+  );
 }
+
 
 // Guard: never register service workers in Lovable preview / iframes
 import { isPreviewEnv } from "@/lib/preview-env";
