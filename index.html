@@ -163,54 +163,44 @@
     <!-- Opening animation. Inline on purpose: it must paint on the very first
          frame, before any app code has downloaded, so the app never looks dead. -->
     <style>
-      html, body { background-color: #0F1F3A; }
+      html, body { background-color: #080C16; }
       #ledge-splash {
-        position: fixed; inset: 0; z-index: 2147483000;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        background: radial-gradient(120% 90% at 50% 38%, #17305A 0%, #0F1F3A 62%, #0B1730 100%);
+        position: fixed; inset: 0; z-index: 2147483000; overflow: hidden;
+        background: #080C16;
         color: #F5EFE6; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        transition: opacity .42s cubic-bezier(.22,1,.36,1), transform .42s cubic-bezier(.22,1,.36,1);
-        padding: 24px; text-align: center;
+        transition: opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);
       }
-      #ledge-splash.ledge-splash-out { opacity: 0; transform: scale(1.035); pointer-events: none; }
-      .ledge-glow {
-        position: absolute; width: 320px; height: 320px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(245,239,230,.14) 0%, rgba(245,239,230,0) 68%);
-        animation: ledge-breathe 3.2s ease-in-out infinite;
+      #ledge-splash::after {
+        content: ""; position: absolute; inset: 0; pointer-events: none;
+        background: radial-gradient(120% 80% at 50% 40%, rgba(255,255,255,.035) 0%, rgba(0,0,0,0) 55%),
+                    radial-gradient(100% 70% at 50% 100%, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 70%);
       }
-      @keyframes ledge-breathe { 0%,100% { transform: scale(.94); opacity: .75 } 50% { transform: scale(1.06); opacity: 1 } }
-      .ledge-mark { position: relative; width: 62px; height: 62px; animation: ledge-mark-in .55s cubic-bezier(.22,1,.36,1) both; }
-      @keyframes ledge-mark-in { from { opacity: 0; transform: translateY(8px) scale(.9) } to { opacity: 1; transform: none } }
-      .ledge-mark rect.s { transform-box: fill-box; transform-origin: left center; animation: ledge-stripe .5s cubic-bezier(.22,1,.36,1) both; }
-      .ledge-mark rect.s:nth-child(1) { animation-delay: .34s }
-      .ledge-mark rect.s:nth-child(2) { animation-delay: .24s }
-      .ledge-mark rect.s:nth-child(3) { animation-delay: .14s }
-      .ledge-mark rect.s:nth-child(4) { animation-delay: .04s }
-      @keyframes ledge-stripe { from { transform: scaleX(0); opacity: 0 } to { transform: scaleX(1); opacity: 1 } }
+      #ledge-splash.ledge-splash-out { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+      .ledge-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .ledge-ribbon path {
+        fill: none; stroke-linecap: round; stroke-linejoin: round;
+        transition: stroke-dashoffset 1.25s cubic-bezier(.32,.72,.26,1);
+      }
+      .ledge-ribbon.drawn path { stroke-dashoffset: 0 !important; }
       .ledge-word {
-        position: relative; margin-top: 18px; font-size: 26px; letter-spacing: .01em;
-        font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: #F5EFE6;
-        animation: ledge-fade-up .5s cubic-bezier(.22,1,.36,1) .62s both;
+        position: absolute; left: 0; right: 0; top: 62%; text-align: center;
+        font-size: 46px; letter-spacing: .04em; line-height: 1;
+        font-family: "Playfair Display", Georgia, "Times New Roman", serif; font-weight: 500; color: #F5EFE6;
+        animation: ledge-fade-up .7s cubic-bezier(.22,1,.36,1) .85s both;
       }
-      @keyframes ledge-fade-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
-      .ledge-bar {
-        position: relative; margin-top: 22px; width: 148px; height: 3px; border-radius: 3px;
-        background: rgba(245,239,230,.16); overflow: hidden;
-        animation: ledge-fade-up .4s ease-out .72s both;
+      @keyframes ledge-fade-up { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+      .ledge-foot {
+        position: absolute; left: 0; right: 0; bottom: 34px; text-align: center;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase;
+        color: rgba(245,239,230,.38);
+        animation: ledge-fade-up .6s ease-out 1.15s both;
       }
-      .ledge-bar i {
-        position: absolute; inset: 0 auto 0 0; display: block; width: 8%; border-radius: 3px;
-        background: linear-gradient(90deg, #A0522D, #C4703F);
-        transition: width .6s cubic-bezier(.22,1,.36,1);
+      .ledge-foot svg { width: 14px; height: 14px; display: block; }
+      .ledge-slow {
+        position: absolute; left: 0; right: 0; bottom: 78px; text-align: center;
+        font-size: 12.5px; color: rgba(245,239,230,.55); display: none;
       }
-      .ledge-bar.indeterminate i { width: 42%; animation: ledge-slide 1.25s ease-in-out infinite; }
-      @keyframes ledge-slide { 0% { transform: translateX(-110%) } 100% { transform: translateX(260%) } }
-      .ledge-step {
-        position: relative; margin-top: 14px; font-size: 13px; letter-spacing: .02em;
-        color: rgba(245,239,230,.72); min-height: 18px;
-        animation: ledge-fade-up .4s ease-out .8s both;
-      }
-      .ledge-slow { position: relative; margin-top: 12px; font-size: 12.5px; color: rgba(245,239,230,.6); display: none; }
       .ledge-slow button {
         background: none; border: 0; color: #E2B79A; font: inherit; text-decoration: underline;
         cursor: pointer; padding: 6px 8px; min-height: 32px;
@@ -218,56 +208,68 @@
       #ledge-splash.slow .ledge-slow { display: block; }
       @media (prefers-reduced-motion: reduce) {
         #ledge-splash *, #ledge-splash { animation: none !important; transition: opacity .2s linear !important; }
-        .ledge-glow { opacity: .8 }
+        .ledge-ribbon path { stroke-dashoffset: 0 !important; }
       }
     </style>
     <div id="ledge-splash" role="status" aria-live="polite" aria-label="Loading Ledge">
-      <div class="ledge-glow"></div>
-      <svg class="ledge-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="0" y="0" width="48" height="48" rx="7" fill="#F5EFE6" opacity=".08"></rect>
-        <rect class="s" x="9" y="10" width="30" height="5" rx="2.5" fill="#F5EFE6"></rect>
-        <rect class="s" x="9" y="19" width="22" height="5" rx="2.5" fill="#F5EFE6" opacity=".85"></rect>
-        <rect class="s" x="9" y="28" width="26" height="5" rx="2.5" fill="#C4703F"></rect>
-        <rect class="s" x="9" y="37" width="16" height="5" rx="2.5" fill="#F5EFE6" opacity=".6"></rect>
+      <svg class="ledge-ribbon" id="ledge-ribbon" viewBox="0 0 400 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="ledge-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#4C3A8C"></stop>
+            <stop offset="0.35" stop-color="#2E5AA8"></stop>
+            <stop offset="0.62" stop-color="#3E7FA8"></stop>
+            <stop offset="0.84" stop-color="#C4703F"></stop>
+            <stop offset="1" stop-color="#F0C48A"></stop>
+          </linearGradient>
+        </defs>
+        <path id="ledge-path" stroke="url(#ledge-grad)" stroke-width="26"
+          d="M -60 600 C 40 600 44 452 140 452 C 222 452 226 578 146 582 C 62 586 40 448 142 360 C 236 279 254 130 178 130 C 112 130 104 314 202 384 C 296 452 368 418 460 342"></path>
       </svg>
       <div class="ledge-word">Ledge</div>
-      <div class="ledge-bar indeterminate" id="ledge-bar"><i></i></div>
-      <div class="ledge-step" id="ledge-step">Starting Ledge</div>
-      <div class="ledge-slow">Slow connection — still loading.
+      <div class="ledge-slow">Still loading — slow connection.
         <button type="button" onclick="location.reload()">Retry</button>
+      </div>
+      <div class="ledge-foot">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="6" y="9" width="36" height="5" rx="2.5" fill="#F5EFE6"></rect>
+          <rect x="6" y="19" width="26" height="5" rx="2.5" fill="#F5EFE6" opacity=".8"></rect>
+          <rect x="6" y="29" width="31" height="5" rx="2.5" fill="#C4703F"></rect>
+          <rect x="6" y="39" width="19" height="5" rx="2.5" fill="#F5EFE6" opacity=".55"></rect>
+        </svg>
+        <span>Ledge · FMCG operations</span>
       </div>
     </div>
     <script>
       (function () {
         var el = document.getElementById("ledge-splash");
         if (!el) return;
-        var stepEl = document.getElementById("ledge-step");
-        var bar = document.getElementById("ledge-bar");
-        var fill = bar && bar.firstElementChild;
+        var svg = document.getElementById("ledge-ribbon");
+        var path = document.getElementById("ledge-path");
+        try {
+          var L = path.getTotalLength();
+          path.style.strokeDasharray = L + " " + L;
+          path.style.strokeDashoffset = L;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { svg.classList.add("drawn"); });
+          });
+        } catch (e) { /* no geometry: leave the ribbon fully drawn */ }
         var finished = false;
         var slowTimer = setTimeout(function () { el.classList.add("slow"); }, 10000);
         var maxTimer = setTimeout(function () { api.done(); }, 30000);
         var api = {
-          step: function (label, pct) {
-            if (finished) return;
-            if (label && stepEl) stepEl.textContent = label;
-            if (typeof pct === "number" && fill) {
-              bar.classList.remove("indeterminate");
-              fill.style.width = Math.max(8, Math.min(96, pct)) + "%";
-            }
-          },
+          step: function () { /* the animation speaks for itself */ },
           done: function () {
             if (finished) return;
             finished = true;
             clearTimeout(slowTimer); clearTimeout(maxTimer);
-            if (fill) { bar.classList.remove("indeterminate"); fill.style.width = "100%"; }
             el.classList.add("ledge-splash-out");
-            setTimeout(function () { el.parentNode && el.parentNode.removeChild(el); }, 460);
+            setTimeout(function () { el.parentNode && el.parentNode.removeChild(el); }, 540);
           }
         };
         window.__ledgeSplash = api;
       })();
     </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
