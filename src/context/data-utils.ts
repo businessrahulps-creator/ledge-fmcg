@@ -11,19 +11,30 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 // --- Map DB rows to app types ---
 
 export function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: any[] = []): Order[] {
+  // Group children by order_id once (O(N+M)) instead of scanning every child
+  // array per order (O(N*M)) — with 800+ orders and 3k+ lines that difference
+  // is the bulk of the work done on the main thread at startup.
+  const linesByOrder = new Map<string, OrderLine[]>();
+  for (const l of allLines) {
+    const list = linesByOrder.get(l.order_id) || [];
+    list.push({
+      productId: l.product_id, productName: l.product_name,
+      quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
+    });
+    linesByOrder.set(l.order_id, list);
+  }
+  const schemesByOrder = new Map<string, OrderScheme[]>();
+  for (const s of allOrderSchemes) {
+    const list = schemesByOrder.get(s.order_id) || [];
+    list.push({
+      schemeId: s.scheme_id || null, schemeName: s.scheme_name,
+      schemeLabel: s.scheme_label || "", savings: Number(s.savings || 0),
+    });
+    schemesByOrder.set(s.order_id, list);
+  }
   return ordersData.map(o => {
-    const oLines: OrderLine[] = allLines
-      .filter(l => l.order_id === o.id)
-      .map(l => ({
-        productId: l.product_id, productName: l.product_name,
-        quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
-      }));
-    const oSchemes: OrderScheme[] = allOrderSchemes
-      .filter(s => s.order_id === o.id)
-      .map(s => ({
-        schemeId: s.scheme_id || null, schemeName: s.scheme_name,
-        schemeLabel: s.scheme_label || "", savings: Number(s.savings || 0),
-      }));
+    const oLines: OrderLine[] = linesByOrder.get(o.id) || [];
+    const oSchemes: OrderScheme[] = schemesByOrder.get(o.id) || [];
     return {
       id: o.id, orderNumber: o.order_number, date: o.date,
       distributorId: o.distributor_id, distributorName: o.distributor_name,
