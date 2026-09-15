@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/page-skeleton";
 import { DelayedSuspense } from "@/components/ui/delayed-suspense";
 import { routeImporters, prefetchLikelyNext } from "@/lib/route-prefetch";
+import { NavProgress } from "@/components/NavProgress";
 
 // Eager: only the tiny 404. Everything else is lazy so the entry stays small.
 import NotFound from "./pages/NotFound";
@@ -148,6 +149,7 @@ const App = () => (
               <DeferredChrome />
               <OnlineStatusWatcher />
               <BrowserRouter>
+                <NavProgress />
                 <RoutePrefetcher />
                 <Routes>
                   <Route path="/" element={<DelayedSuspense fallback={ShellFallback}><Index /></DelayedSuspense>} />
