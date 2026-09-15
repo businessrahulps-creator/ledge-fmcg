@@ -133,7 +133,7 @@ export function PaymentsPanel({
     }
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setOverpayAck(false);
     await load();
     onChanged?.();
   };
@@ -227,7 +227,7 @@ export function PaymentsPanel({
       )}
 
       {/* Record payment */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setOverpayAck(false); }}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base">Record payment</DialogTitle>
@@ -238,7 +238,17 @@ export function PaymentsPanel({
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Amount received (₹) *</Label>
-              <NumberInput allowDecimal min={0} value={amount} onValueChange={setAmount} className="h-10 rounded-lg" />
+              <NumberInput
+                allowDecimal min={0} value={amount}
+                onValueChange={v => { setAmount(v); setOverpayAck(false); }}
+                className="h-10 rounded-lg"
+              />
+              {Number(amount || 0) > balance + 0.5 && (
+                <p className="text-xs text-warning">
+                  That is {formatCurrency(Number(amount || 0) - balance)} more than the {formatCurrency(balance)} due.
+                  {overpayAck ? " Press Save payment again to record it anyway." : ""}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
