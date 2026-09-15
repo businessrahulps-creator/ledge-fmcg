@@ -22,6 +22,7 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { toast } from "sonner";
 import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
+import { supabase } from "@/integrations/supabase/client";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
   return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
@@ -154,6 +155,8 @@ function NewClaimDialog({
   const [good, setGood] = useState<Record<string, number>>({});
   const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
+  /** Pieces already sent back on earlier credit notes, per bill line. */
+  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number>>({});
 
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
@@ -166,6 +169,31 @@ function NewClaimDialog({
   }, [invoices]);
 
   const selectedBill = selectedOrder ? billByOrderId.get(selectedOrder.id) ?? null : null;
+
+  // What has already gone back on earlier credit notes for this bill, so the
+  // form can only offer what is still returnable.
+  const selectedBillId = selectedBill?.id ?? null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedBillId) { setAlreadyReturned({}); return; }
+    (async () => {
+      const { data, error } = await supabase
+        .from("credit_notes")
+        .select("id, credit_note_lines(invoice_line_id, quantity)")
+        .eq("invoice_id", selectedBillId);
+      if (cancelled) return;
+      if (error || !data) { setAlreadyReturned({}); return; }
+      const totals: Record<string, number> = {};
+      data.forEach(note => {
+        (note.credit_note_lines || []).forEach(l => {
+          if (!l.invoice_line_id) return;
+          totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
+        });
+      });
+      setAlreadyReturned(totals);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedBillId]);
 
   const eligibleOrders = useMemo(() =>
     orders.filter(o => billByOrderId.has(o.id)),
@@ -206,15 +234,20 @@ function NewClaimDialog({
     if (match) selectOrder(match);
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
-  const returnLines = (selectedBill?.lines ?? []).map(l => ({
-    invoiceLineId: l.id as string,
-    productName: l.productName,
-    billedQty: l.quantity,
-    unitPrice: l.unitPrice,
-    gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
-    goodQty: good[l.id] ?? 0,
-    damagedQty: damaged[l.id] ?? 0,
-  }));
+  const returnLines = (selectedBill?.lines ?? []).map(l => {
+    const returnedQty = alreadyReturned[l.id as string] ?? 0;
+    return {
+      invoiceLineId: l.id as string,
+      productName: l.productName,
+      billedQty: l.quantity,
+      returnedQty,
+      remainingQty: Math.max(0, l.quantity - returnedQty),
+      unitPrice: l.unitPrice,
+      gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
+      goodQty: good[l.id] ?? 0,
+      damagedQty: damaged[l.id] ?? 0,
+    };
+  });
 
   // Preview must match the credit note the server actually raises: taxable value plus GST.
   const returnValue = returnLines.reduce(
@@ -327,10 +360,18 @@ function NewClaimDialog({
                     </thead>
                     <tbody>
                       {returnLines.map(line => {
-                        const other = (k: "goodQty" | "damagedQty") => line.billedQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
+                        // Only what is still returnable: billed, less anything sent back earlier.
+                        const other = (k: "goodQty" | "damagedQty") => line.remainingQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
                         return (
                           <tr key={line.invoiceLineId} className="border-b border-border/50">
-                            <td className="px-3 py-2 font-medium">{line.productName}</td>
+                            <td className="px-3 py-2 font-medium">
+                              {line.productName}
+                              {line.returnedQty > 0 && (
+                                <span className="block text-[10px] font-normal text-muted-foreground">
+                                  {line.returnedQty} already returned · {line.remainingQty} left
+                                </span>
+                              )}
+                            </td>
                             <td className="px-3 py-2 text-right text-muted-foreground">{line.billedQty}</td>
                             <td className="px-3 py-2 text-right">
                               <NumberInput

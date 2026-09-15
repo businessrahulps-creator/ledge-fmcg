@@ -30,7 +30,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
-import { billStatusView } from "@/lib/bill-status";
+import { billStatusView, billStateFromMoney } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -246,7 +246,10 @@ export default function Billing() {
       buyer: inv.buyerName,
       amount: inv.grandTotal,
       orderId: inv.sourceOrderId || null,
-      status: inv.status,
+      // Never trust the stored marker — older bills carry a stale "paid" flag.
+      status: inv.docType === "gst_invoice"
+        ? billStateFromMoney(inv.grandTotal, receivedByInvoice.get(inv.id) || 0, creditedByInvoice.get(inv.id) || 0)
+        : inv.status,
       invoice: inv,
     }));
     const noteCandidates = creditNotes.filter(n =>
@@ -792,18 +795,22 @@ export default function Billing() {
                     <ReportPdf
                       title="Payments received"
                       columns={[
-                        { header: "Date", width: "16%" },
-                        { header: "Dealer", width: "26%" },
-                        { header: "Against", width: "24%" },
-                        { header: "Paid by", width: "16%" },
-                        { header: "Amount", width: "18%", align: "right" },
+                        { header: "Date", width: "13%" },
+                        { header: "Dealer", width: "21%" },
+                        { header: "Against", width: "18%" },
+                        { header: "Paid by", width: "13%" },
+                        { header: "Reference", width: "15%" },
+                        { header: "Amount", width: "12%", align: "right" },
+                        { header: "Status", width: "8%" },
                       ]}
                       rows={paymentRows.map(r => [
                         formatIndianDate(r.paidOn),
                         dealerName(r.distributorId),
                         (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "",
                         modeLabels[r.mode] || r.mode,
+                        r.reference || "—",
                         formatCurrency(r.amount),
+                        r.status === "voided" ? "Cancelled" : "Posted",
                       ])}
                     />,
                   ).toBlob();
