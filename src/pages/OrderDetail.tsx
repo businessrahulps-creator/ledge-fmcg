@@ -153,6 +153,16 @@ export default function OrderDetail() {
   const orderDocs = invoices.filter(inv => inv.sourceOrderId === id);
   const finalInvoice = orderDocs.find(doc => doc.docType === "gst_invoice");
 
+  /**
+   * Badge state from the money actually received, not the stored marker —
+   * older bills carry a stale "paid" flag from before receipts were recorded.
+   */
+  const docState = (doc: typeof orderDocs[number]) => {
+    if (doc.id !== finalInvoice?.id) return doc.status;
+    if (money.balance <= 0.5) return "paid";
+    return money.received > 0 ? "partial" : "posted";
+  };
+
   /* --- Line editing helpers (edit dialog only) --- */
   const addLine = () => {
     setEditLines(prev => [...prev, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitPrice: 0 }]);
