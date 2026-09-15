@@ -139,6 +139,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       billing.setClaims([]);
       billing.setInvoices([]);
       setLoading(false);
+      // Signed out: the sign-in / landing screen is what comes next.
+      splashDone();
     }
   }, [authReady, user]);
 
@@ -263,9 +265,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // phase-2 is also ready, then commit atomically.
       let phase1Out: any = null;
       if (isColdStart) {
+        splashStep("Loading your business", 75);
         phase1Out = await phase1;
         if (token !== fetchTokenRef.current) return;
         applyPhase1(phase1Out);
+        // First real screen can paint now — retire the opening animation.
+        splashDone();
       }
 
       const [p1Final, p2] = await Promise.all([isColdStart ? Promise.resolve(phase1Out) : phase1, phase2]);
