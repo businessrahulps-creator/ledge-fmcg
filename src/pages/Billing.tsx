@@ -2,10 +2,10 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText, Download, Lock, Search, Filter, Link2, CalendarDays,
-  Eye, IndianRupee, Ban, MoreHorizontal,
+  Eye, IndianRupee, Ban, MoreHorizontal, Loader2,
 } from "lucide-react";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
@@ -37,6 +37,7 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { formatIndianDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
+import { useDebounce } from "@/hooks/use-debounce";
 import { ListPagination } from "@/components/ui/list-pagination";
 import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { usePageLoading } from "@/hooks/use-loading";
@@ -140,11 +141,13 @@ export default function Billing() {
       a.href = url;
       a.download = `${inv.invoiceNumber}.pdf`;
       a.click();
-      URL.revokeObjectURL(url);
+      // Give the browser time to start the download before releasing the link.
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
     } catch {
       toast.error("Could not make the PDF. Try again.");
     }
   }, []);
+
 
   /** Search + period filter, shared by every tab. */
   const inPeriod = useCallback((list: Invoice[]) => {
@@ -163,11 +166,15 @@ export default function Billing() {
     return list.filter((_, idx) => keep.has(idx));
   }, [timePeriod]);
 
+  /** Typing shouldn't recompute the whole page on every letter. */
+  const dq = useDebounce(search, 250);
+
   const matchesSearch = useCallback((inv: Invoice) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
+    if (!dq.trim()) return true;
+    const q = dq.toLowerCase();
     return inv.invoiceNumber.toLowerCase().includes(q) || inv.buyerName.toLowerCase().includes(q);
-  }, [search]);
+  }, [dq]);
+
 
 
   /** Every GST bill with the money that has landed against it, less any credit note. */
@@ -196,7 +203,7 @@ export default function Billing() {
     const billedOrderIds = new Set(
       invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
     );
-    const q = search.trim().toLowerCase();
+    const q = dq.trim().toLowerCase();
     const candidates = orders
       .filter(o => !billedOrderIds.has(o.id))
       .filter(o => !q || o.orderNumber.toLowerCase().includes(q) || (o.distributorName || "").toLowerCase().includes(q));
@@ -205,7 +212,7 @@ export default function Billing() {
       .filter(r => r.received > 0)
       .sort((a, b) => b.received - a.received);
     return { rows, total: rows.reduce((s, r) => s + r.received, 0) };
-  }, [orders, invoices, receivedByOrder, inPeriodBy, search]);
+  }, [orders, invoices, receivedByOrder, inPeriodBy, dq]);
 
 
 
@@ -226,7 +233,7 @@ export default function Billing() {
 
   /** Every receipt taken, newest first. */
   const paymentRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = dq.trim().toLowerCase();
     return receipts
       .filter(r => modeFilter === "all" || r.mode === modeFilter)
       .filter(r => {
@@ -234,11 +241,11 @@ export default function Billing() {
         const against = r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? orderNumberById.get(r.orderId) : "";
         return (against || "").toLowerCase().includes(q) || dealerName(r.distributorId).toLowerCase().includes(q);
       });
-  }, [receipts, modeFilter, search, invoiceNumberById, orderNumberById, dealerName]);
+  }, [receipts, modeFilter, dq, invoiceNumberById, orderNumberById, dealerName]);
 
   /** Bills and credit notes together, so a reduced bill can always be traced to its note. */
   const documents = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = dq.trim().toLowerCase();
     const billRows: DocRow[] = inPeriod(invoices.filter(matchesSearch)).map(inv => ({
       key: inv.id,
       type: inv.docType,
@@ -267,7 +274,7 @@ export default function Billing() {
     let list = [...billRows, ...noteRows].sort((a, b) => (a.date < b.date ? 1 : -1));
     if (filterType !== "all") list = list.filter(d => d.type === filterType);
     return list;
-  }, [invoices, creditNotes, inPeriod, inPeriodBy, matchesSearch, filterType, search, dealerName]);
+  }, [invoices, creditNotes, inPeriod, inPeriodBy, matchesSearch, filterType, dq, dealerName]);
 
   const { page, totalPages, from, to, setPage } = usePagination(documents.length, 15);
   const paginatedDocs = useMemo(() => documents.slice(from, to), [documents, from, to]);
@@ -290,14 +297,32 @@ export default function Billing() {
   }, [collections, advancesHeld]);
 
 
+  /** Orders looked up by id once, instead of scanning the list for every row. */
+  const ordersById = useMemo(() => {
+    const m = new Map<string, typeof orders[number]>();
+    orders.forEach(o => m.set(o.id, o));
+    return m;
+  }, [orders]);
+
+  const [pendingBillId, setPendingBillId] = useState<string | null>(null);
+
   /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
   const viewBill = useCallback(async (inv: Invoice) => {
+    setPendingBillId(inv.id);
     const ok = await openInvoiceInNewTab(inv);
+    setPendingBillId(null);
     if (!ok) {
       toast.message("Your browser blocked the new tab — showing the bill here instead.");
       setPreviewInvoice(inv);
     }
   }, []);
+
+  const downloadBill = useCallback(async (inv: Invoice) => {
+    setPendingBillId(inv.id);
+    await handleDownloadPdf(inv);
+    setPendingBillId(null);
+  }, [handleDownloadPdf]);
+
 
   const remind = (inv: Invoice, due: number) => {
     const msg = [
@@ -311,6 +336,68 @@ export default function Billing() {
     ].join("\n");
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
   };
+
+  /**
+   * One pattern everywhere: a worded primary button plus a "…" menu with the rest.
+   * The primary action is never repeated inside the menu.
+   */
+  const billActions = (
+    inv: Invoice,
+    opts: { due?: number; primary: "collect" | "view"; size?: "row" | "card" },
+  ) => {
+    const due = opts.due ?? 0;
+    const order = inv.sourceOrderId ? ordersById.get(inv.sourceOrderId) : null;
+    const busy = pendingBillId === inv.id;
+    const h = opts.size === "card" ? "h-9" : "h-8";
+    const collecting = opts.primary === "collect";
+    return (
+      <div className={cn("flex items-center gap-1.5", opts.size === "card" && "w-full")}>
+        {collecting ? (
+          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => setCollectTarget(inv)}>
+            <IndianRupee className="h-3.5 w-3.5" /> Record payment
+          </Button>
+        ) : (
+          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => viewBill(inv)} disabled={busy}>
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}
+            {busy ? "Opening…" : "View bill"}
+          </Button>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className={cn(h, opts.size === "card" ? "w-9" : "w-8")} aria-label="More actions">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {collecting && (
+              <DropdownMenuItem onClick={() => viewBill(inv)} disabled={busy}>
+                {busy ? <Loader2 className="animate-spin" /> : <Eye />} View bill
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => downloadBill(inv)} disabled={busy}>
+              <Download /> Download PDF
+            </DropdownMenuItem>
+            {order && (
+              <DropdownMenuItem onClick={() => navigate(`/orders/${order.id}`)}>
+                <Link2 /> Open order {order.orderNumber}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            {due > 0 ? (
+              <DropdownMenuItem onClick={() => remind(inv, due)}>
+                <WhatsAppIcon className="text-success" /> Remind on WhatsApp
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => shareInvoiceOnWhatsApp(inv)}>
+                <WhatsAppIcon className="text-success" /> Send bill on WhatsApp
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  };
+
 
   if (isLoading && invoices.length === 0) {
     return (
@@ -504,8 +591,8 @@ export default function Billing() {
                     </TableHeader>
                     <TableBody>
                       {collections.map(({ inv, received, due, age, overdue }) => {
-                        const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
                         return (
+
                           <TableRow key={inv.id} className="row-hover">
                             <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
                             <TableCell className="text-sm">{inv.buyerName}</TableCell>
@@ -525,40 +612,11 @@ export default function Billing() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                {canSeeMoney && due > 0 ? (
-                                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={() => setCollectTarget(inv)}>
-                                    <IndianRupee className="h-3.5 w-3.5" /> Record payment
-                                  </Button>
-                                ) : (
-                                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={() => viewBill(inv)}>
-                                    <Eye className="h-3.5 w-3.5" /> View bill
-                                  </Button>
-                                )}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More actions">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => viewBill(inv)}>
-                                      <Eye className="h-3.5 w-3.5" /> View bill
-                                    </DropdownMenuItem>
-                                    {linkedOrder && (
-                                      <DropdownMenuItem onClick={() => navigate(`/orders/${linkedOrder.id}`)}>
-                                        <Link2 className="h-3.5 w-3.5" /> Open order
-                                      </DropdownMenuItem>
-                                    )}
-                                    {due > 0 && (
-                                      <DropdownMenuItem onClick={() => remind(inv, due)}>
-                                        <WhatsAppIcon className="h-3.5 w-3.5" /> Remind on WhatsApp
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                              <div className="flex justify-end">
+                                {billActions(inv, { due, primary: canSeeMoney && due > 0 ? "collect" : "view" })}
                               </div>
                             </TableCell>
+
                           </TableRow>
                         );
                       })}
@@ -568,9 +626,7 @@ export default function Billing() {
 
                 {/* Mobile cards */}
                 <div className="space-y-3 p-3 md:hidden">
-                  {collections.map(({ inv, received, due, age, overdue }) => {
-                    const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
-                    return (
+                  {collections.map(({ inv, received, due, age, overdue }) => (
                     <div key={inv.id} className="space-y-2 rounded-md border border-border/60 bg-card p-4">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
@@ -585,42 +641,12 @@ export default function Billing() {
                       <p className="text-[11px] text-muted-foreground">
                         Bill total {formatCurrency(inv.grandTotal)} · Received {formatCurrency(received)}
                       </p>
-                      <div className="flex items-center gap-2 border-t border-border/40 pt-2">
-                        {canSeeMoney && due > 0 ? (
-                          <Button variant="outline" size="sm" className="h-9 flex-1 text-xs" onClick={() => setCollectTarget(inv)}>
-                            <IndianRupee className="h-3.5 w-3.5" /> Record payment
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" className="h-9 flex-1 text-xs" onClick={() => viewBill(inv)}>
-                            <Eye className="h-3.5 w-3.5" /> View bill
-                          </Button>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="More actions">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => viewBill(inv)}>
-                              <Eye className="h-3.5 w-3.5" /> View bill
-                            </DropdownMenuItem>
-                            {linkedOrder && (
-                              <DropdownMenuItem onClick={() => navigate(`/orders/${linkedOrder.id}`)}>
-                                <Link2 className="h-3.5 w-3.5" /> Open order
-                              </DropdownMenuItem>
-                            )}
-                            {due > 0 && (
-                              <DropdownMenuItem onClick={() => remind(inv, due)}>
-                                <WhatsAppIcon className="h-3.5 w-3.5" /> Remind on WhatsApp
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <div className="border-t border-border/40 pt-2">
+                        {billActions(inv, { due, primary: canSeeMoney && due > 0 ? "collect" : "view", size: "card" })}
                       </div>
                     </div>
-                    );
-                  })}
+                  ))}
+
                 </div>
               </motion.div>
             )}
@@ -836,7 +862,7 @@ export default function Billing() {
                       </TableHeader>
                       <TableBody>
                         {paginatedDocs.map(doc => {
-                          const linkedOrder = doc.orderId ? orders.find(o => o.id === doc.orderId) : null;
+                          const linkedOrder = doc.orderId ? ordersById.get(doc.orderId) : null;
                           const view = billStatusView(doc.status);
                           return (
                             <TableRow key={doc.key} className="row-hover">
@@ -871,21 +897,14 @@ export default function Billing() {
                               </TableCell>
                               <TableCell className="text-right">
                                 {doc.invoice ? (
-                                  <div className="flex items-center justify-end gap-1">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(doc.invoice as Invoice)} title="View">
-                                      <Eye className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(doc.invoice as Invoice)} title="Download PDF">
-                                      <Download className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)} title="Share on WhatsApp">
-                                      <WhatsAppIcon className="h-3.5 w-3.5" />
-                                    </Button>
+                                  <div className="flex justify-end">
+                                    {billActions(doc.invoice, { primary: "view" })}
                                   </div>
                                 ) : (
                                   <span className="text-[10px] text-muted-foreground">{doc.note || "Return credited"}</span>
                                 )}
                               </TableCell>
+
                             </TableRow>
                           );
                         })}
@@ -919,18 +938,11 @@ export default function Billing() {
                         </div>
                         <p className="text-xs text-muted-foreground">{doc.buyer} · {formatIndianDate(doc.date)}</p>
                         {doc.invoice ? (
-                          <div className="flex items-center gap-1 pt-1 border-t border-border/40">
-                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(doc.invoice as Invoice)}>
-                              <Eye className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(doc.invoice as Invoice)}>
-                              <Download className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)}>
-                              <WhatsAppIcon className="h-3.5 w-3.5" />
-                            </Button>
+                          <div className="pt-1 border-t border-border/40">
+                            {billActions(doc.invoice, { primary: "view", size: "card" })}
                           </div>
                         ) : (
+
                           <p className="pt-1 border-t border-border/40 text-[11px] text-muted-foreground">
                             {doc.note || "Return credited"}
                             {doc.orderId && (
