@@ -246,7 +246,10 @@ export default function Billing() {
       buyer: inv.buyerName,
       amount: inv.grandTotal,
       orderId: inv.sourceOrderId || null,
-      status: inv.status,
+      // Never trust the stored marker — older bills carry a stale "paid" flag.
+      status: inv.docType === "gst_invoice"
+        ? billStateFromMoney(inv.grandTotal, receivedByInvoice.get(inv.id) || 0, creditedByInvoice.get(inv.id) || 0)
+        : inv.status,
       invoice: inv,
     }));
     const noteCandidates = creditNotes.filter(n =>
