@@ -265,101 +265,57 @@ export function CommandPalette() {
           ))}
         </CommandGroup>
 
-        {matchedOrders.length > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading="Orders">
-              {matchedOrders.map((o: any) => {
-                const id = o.id ?? o.orderNumber ?? "";
-                const dealer = o.dealerName ?? o.distributorName ?? "—";
-                return (
-                  <CommandItem
-                    key={`order-${id}`}
-                    value={`order ${id} ${dealer}`}
-                    onSelect={() => go(`/orders/${id}`)}
-                  >
-                    <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span className="truncate">{String(id)}</span>
-                    <span className="ml-2 truncate text-xs text-muted-foreground">{dealer}</span>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </>
-        )}
-
-        {matchedDealers.length > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading="Dealers">
-              {matchedDealers.map((d: any) => (
-                <CommandItem
-                  key={`dealer-${d.id}`}
-                  value={`dealer ${d.name} ${d.city ?? ""}`}
-                  onSelect={() => go(`/distributors/${d.id}`)}
-                >
-                  <UserRound className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{d.name}</span>
-                  {d.city && (
-                    <span className="ml-2 truncate text-xs text-muted-foreground">{d.city}</span>
-                  )}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </>
-        )}
-
-        {matchedProducts.length > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup heading="Products">
-              {matchedProducts.map((p: any) => (
-                <CommandItem
-                  key={`product-${p.id}`}
-                  value={`product ${p.name} ${p.sku ?? ""}`}
-                  onSelect={() => go(`/stock`)}
-                >
-                  <Package className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{p.name}</span>
-                  {p.sku && (
-                    <span className="ml-2 truncate text-xs text-muted-foreground">{p.sku}</span>
-                  )}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </>
-        )}
       </CommandList>
   );
 
   if (isMobile) {
     return (
-      <MobileSearchSheet
-        open={open}
-        onOpenChange={setOpen}
-        title="Search"
-        headerSlot={
-          <div className="flex flex-1 items-center rounded-md border border-border/60 bg-muted/40 px-2">
-            <Command
-              className="flex w-full bg-transparent"
-              shouldFilter={false}
+      <MobileSearchSheet open={open} onOpenChange={setOpen} title="Search" hideHeader>
+        {/* One cmdk root: the box you type in and the list below it are the
+            same search — no mirror input, no second engine. */}
+        <Command
+          className={cn(
+            "flex h-full flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]]:px-1 [&_[cmdk-item]]:min-h-[48px] [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2 [&_[cmdk-item]]:text-[15px] [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5",
+            // Nothing looks pre-picked until something has been typed.
+            !q &&
+              "[&_[cmdk-item][data-selected=true]]:bg-transparent [&_[cmdk-item][data-selected=true]]:text-foreground",
+          )}
+        >
+          <div
+            className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/60 bg-background/95 px-2 backdrop-blur"
+            style={{ paddingTop: "max(env(safe-area-inset-top), 8px)", paddingBottom: 8 }}
+          >
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close search"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground active:bg-muted/60"
             >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex flex-1 items-center rounded-md border border-border/60 bg-muted/40 px-2 [&_[cmdk-input-wrapper]]:flex-1 [&_[cmdk-input-wrapper]]:border-0 [&_[cmdk-input-wrapper]]:px-0">
               <CommandInput
+                ref={mobileInputRef}
                 value={query}
                 onValueChange={setQuery}
                 placeholder="Search orders, dealers, products…"
-                className="h-10 text-base"
-                autoFocus
+                className="h-11 text-base"
               />
-            </Command>
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    mobileInputRef.current?.focus();
+                  }}
+                  aria-label="Clear search"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground active:bg-muted/60"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : null}
+            </div>
           </div>
-        }
-      >
-        <Command
-          className="flex h-full flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]]:px-1 [&_[cmdk-item]]:min-h-[48px] [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2 [&_[cmdk-item]]:text-[15px] [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
-        >
-          {/* Mirror input drives cmdk's internal filter for the list below */}
-          <CommandInput value={query} onValueChange={setQuery} className="sr-only h-0 border-0 p-0" />
           {listContent}
         </Command>
       </MobileSearchSheet>
