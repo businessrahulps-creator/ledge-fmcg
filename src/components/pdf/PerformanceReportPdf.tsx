@@ -17,7 +17,7 @@ const C = {
 
 /* ── shared tiny styles ── */
 const label = { fontSize: 7, color: C.labelText } as const;
-const sectionGap = { marginTop: 18 } as const;
+const sectionGap = { marginTop: 14 } as const;
 
 /* ── types ── */
 export interface PerformancePdfData {
@@ -92,7 +92,7 @@ export function PerformanceReportPdf({
     status === "paid" ? C.success : status === "partial" ? C.warning : C.destructive;
 
   return (
-    <Document>
+    <Document title={title} author={companyName || "Ledge"}>
       <Page size="A4" style={s.page}>
         <PdfHeader
           title={title}
@@ -106,7 +106,7 @@ export function PerformanceReportPdf({
 
         {/* KPI Summary */}
         {show.summary && data.summary.length > 0 && (
-          <View style={s.summaryRow}>
+          <View style={s.summaryRow} wrap={false}>
             {data.summary.map((item, i) => (
               <View key={i} style={s.summaryCard}>
                 <Text style={s.summaryLabel}>{item.label}</Text>
@@ -118,7 +118,7 @@ export function PerformanceReportPdf({
 
         {/* Revenue Trend */}
         {show.revenueTrend && data.revenueTrend.length > 0 && (
-          <View style={sectionGap}>
+          <View style={sectionGap} wrap={false}>
             <Text style={s.sectionTitle}>Revenue Trend</Text>
             {data.revenueTrend.map((d, i) => (
               <HBar
@@ -133,7 +133,7 @@ export function PerformanceReportPdf({
 
         {/* Payment Split */}
         {show.paymentSplit && data.paymentSplit.length > 0 && (
-          <View style={sectionGap}>
+          <View style={sectionGap} wrap={false}>
             <Text style={s.sectionTitle}>Payment Split</Text>
             {/* Stacked bar */}
             <View style={{ flexDirection: "row", height: 16, borderRadius: 3, overflow: "hidden", marginBottom: 6 }}>
@@ -164,7 +164,7 @@ export function PerformanceReportPdf({
 
         {/* Top Dealers */}
         {show.dealers && data.topDealers.length > 0 && (
-          <View style={sectionGap}>
+          <View style={sectionGap} wrap={false}>
             <Text style={s.sectionTitle}>Top Dealers</Text>
             {data.topDealers.map((d, i) => (
               <HBar
@@ -179,7 +179,7 @@ export function PerformanceReportPdf({
 
         {/* Top Products */}
         {show.products && data.productVelocity.length > 0 && (
-          <View style={sectionGap}>
+          <View style={sectionGap} wrap={false}>
             <Text style={s.sectionTitle}>Top Products</Text>
             {data.productVelocity.map((p, i) => (
               <HBar
@@ -194,7 +194,7 @@ export function PerformanceReportPdf({
 
         {/* Sales Team */}
         {show.salesTeam && data.salesRanking.length > 0 && (
-          <View style={sectionGap}>
+          <View style={sectionGap} wrap={false}>
             <Text style={s.sectionTitle}>Sales Team Ranking</Text>
             {data.salesRanking.map((sr, i) => (
               <HBar

@@ -2,7 +2,7 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
-import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatMoneyPdf } from "@/utils/exportPdf";
 import { numberToWords } from "@/utils/numberToWords";
 
 const docTypeLabels: Record<string, string> = {
@@ -131,9 +131,9 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
         {/* Line Items Table */}
         <Text style={s.sectionTitle}>Line Items</Text>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
-            <Text style={[s.tableHeaderCell, { width: isGst ? "24%" : "40%" }]}>Item</Text>
+            <Text style={[s.tableHeaderCell, { width: isGst ? "24%" : "37%" }]}>Item</Text>
             {isGst && <Text style={[s.tableHeaderCell, { width: "10%" }]}>HSN</Text>}
             <Text style={[s.tableHeaderCell, { width: "8%", textAlign: "right" }]}>Qty</Text>
             <Text style={[s.tableHeaderCell, { width: "8%" }]}>Unit</Text>
@@ -143,16 +143,16 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             <Text style={[s.tableHeaderCell, { width: "13%", textAlign: "right" }]}>Amount</Text>
           </View>
           {data.lines.map((line, i) => (
-            <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
+            <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false} minPresenceAhead={28}>
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
-              <Text style={[s.tableCellBold, { width: isGst ? "24%" : "40%" }]}>{line.productName}</Text>
+              <Text style={[s.tableCellBold, { width: isGst ? "24%" : "37%" }]}>{line.productName}</Text>
               {isGst && <Text style={[s.tableCell, { width: "10%" }]}>{line.hsnCode || "-"}</Text>}
               <Text style={[s.tableCellRight, { width: "8%" }]}>{line.quantity}</Text>
               <Text style={[s.tableCell, { width: "8%" }]}>{line.unit}</Text>
-              <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{formatMoneyPdf(line.unitPrice)}</Text>
               {isGst && <Text style={[s.tableCellRight, { width: "7%" }]}>{line.gstRate != null ? `${line.gstRate}%` : "-"}</Text>}
-              <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatCurrencyPdf(line.taxableValue)}</Text>
-              <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatCurrencyPdf(line.lineTotal ?? line.taxableValue)}</Text>
+              <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatMoneyPdf(line.taxableValue)}</Text>
+              <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatMoneyPdf(line.lineTotal ?? line.taxableValue)}</Text>
             </View>
           ))}
         </View>
@@ -162,18 +162,18 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
           <View style={s.totalsBox}>
             <View style={s.totalsRow}>
               <Text style={s.totalsLabel}>Subtotal</Text>
-              <Text style={s.totalsValue}>{formatCurrencyPdf(data.subtotal)}</Text>
+              <Text style={s.totalsValue}>{formatMoneyPdf(data.subtotal)}</Text>
             </View>
 
             {isGst && isIntraState && (
               <>
                 <View style={s.totalsRow}>
                   <Text style={s.totalsLabel}>{mixedRates ? "CGST" : `CGST @ ${halfRate}%`}</Text>
-                  <Text style={s.totalsValue}>{formatCurrencyPdf(data.cgstAmount)}</Text>
+                  <Text style={s.totalsValue}>{formatMoneyPdf(data.cgstAmount)}</Text>
                 </View>
                 <View style={s.totalsRow}>
                   <Text style={s.totalsLabel}>{mixedRates ? "SGST" : `SGST @ ${halfRate}%`}</Text>
-                  <Text style={s.totalsValue}>{formatCurrencyPdf(data.sgstAmount)}</Text>
+                  <Text style={s.totalsValue}>{formatMoneyPdf(data.sgstAmount)}</Text>
                 </View>
               </>
             )}
@@ -181,14 +181,14 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             {isGst && !isIntraState && (
               <View style={s.totalsRow}>
                 <Text style={s.totalsLabel}>{mixedRates ? "IGST" : `IGST @ ${headerRate}%`}</Text>
-                <Text style={s.totalsValue}>{formatCurrencyPdf(data.igstAmount)}</Text>
+                <Text style={s.totalsValue}>{formatMoneyPdf(data.igstAmount)}</Text>
               </View>
             )}
 
             {isGst && (
               <View style={s.totalsRow}>
                 <Text style={s.totalsLabel}>Total Tax</Text>
-                <Text style={s.totalsValue}>{formatCurrencyPdf(data.totalTax)}</Text>
+                <Text style={s.totalsValue}>{formatMoneyPdf(data.totalTax)}</Text>
               </View>
             )}
 
@@ -201,13 +201,13 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
 
             <View style={s.totalsRowBorder}>
               <Text style={s.totalsFinalLabel}>Grand Total</Text>
-              <Text style={s.totalsFinalValue}>{formatCurrencyPdf(data.grandTotal)}</Text>
+              <Text style={s.totalsFinalValue}>{formatMoneyPdf(data.grandTotal)}</Text>
             </View>
           </View>
         </View>
 
         {/* Amount in Words */}
-        <View style={{ marginTop: 12, padding: 8, backgroundColor: "#FAFAFA" }}>
+        <View style={s.callout} wrap={false}>
           <Text style={s.infoLabel}>Amount in Words</Text>
           <Text style={s.infoValueBold}>{data.amountInWords}</Text>
         </View>
@@ -252,6 +252,14 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             <Text style={s.infoValue}>{data.notes}</Text>
           </View>
         )}
+
+        {/* Signature */}
+        <View style={s.signatureRow} wrap={false}>
+          <View style={s.signatureBox}>
+            <Text style={s.signatureText}>For {data.sellerName || "the seller"}</Text>
+            <Text style={[s.signatureText, { marginTop: 18 }]}>Authorised Signatory</Text>
+          </View>
+        </View>
 
         <PdfFooter />
       </Page>

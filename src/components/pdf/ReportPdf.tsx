@@ -44,7 +44,7 @@ export function ReportPdf({
   logoUrl,
 }: ReportPdfProps) {
   return (
-    <Document>
+    <Document title={title} author={companyName || "Ledge"}>
       <Page size="A4" style={s.page}>
         <PdfHeader
           title={title}
@@ -57,7 +57,7 @@ export function ReportPdf({
         />
 
         {showSummary && summary.length > 0 && (
-          <View style={s.summaryRow}>
+          <View style={s.summaryRow} wrap={false}>
             {summary.map((item, i) => (
               <View key={i} style={s.summaryCard}>
                 <Text style={s.summaryLabel}>{item.label}</Text>
@@ -69,7 +69,7 @@ export function ReportPdf({
 
         {showTable && (
           <View style={s.table}>
-            <View style={s.tableHeader}>
+            <View style={s.tableHeader} fixed>
               {columns.map((col, i) => (
                 <Text
                   key={i}
@@ -83,7 +83,12 @@ export function ReportPdf({
               ))}
             </View>
             {rows.map((row, ri) => (
-              <View key={ri} style={ri % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
+              <View
+                key={ri}
+                style={ri % 2 === 1 ? s.tableRowAlt : s.tableRow}
+                wrap={false}
+                minPresenceAhead={24}
+              >
                 {row.map((cell, ci) => (
                   <Text
                     key={ci}
@@ -99,7 +104,7 @@ export function ReportPdf({
             ))}
             {rows.length === 0 && (
               <View style={s.tableRow}>
-                <Text style={[s.tableCell, { width: "100%", textAlign: "center", color: "#999" }]}>
+                <Text style={[s.tableCell, { width: "100%", textAlign: "center", color: "#8A93A3" }]}>
                   No data
                 </Text>
               </View>
