@@ -27,6 +27,21 @@ export type CreditNoteRow = {
   distributorId: string;
 };
 
+const PAGE = 1000;
+
+/** Reads every page of a query so nothing is silently cut off at the 1,000-row cap. */
+async function fetchAllPages(build: () => any): Promise<{ data: any[]; error: any }> {
+  const rows: any[] = [];
+  for (let page = 0; page < 200; page++) {
+    const { data, error } = await build().range(page * PAGE, page * PAGE + PAGE - 1);
+    if (error) return { data: rows, error };
+    const batch = data || [];
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return { data: rows, error: null };
+}
+
 /**
  * Every receipt in the workspace, plus how much has landed against each bill
  * and each order. One source for the money figures shown across Billing.
@@ -39,17 +54,21 @@ export function useCollections(companyId?: string | null) {
   const load = useCallback(async () => {
     if (!companyId) { setReceipts([]); setCreditNotes([]); setLoading(false); return; }
     setLoading(true);
+    // Paged: past 1,000 receipts a plain select silently stops returning rows,
+    // which would quietly hide money from the collections figures.
     const [paymentsRes, notesRes] = await Promise.all([
-      supabase
-        .from("invoice_payments")
-        .select("id, amount, mode, paid_on, reference, note, status, void_reason, invoice_id, order_id, distributor_id")
-        .eq("company_id", companyId)
-        .order("paid_on", { ascending: false }),
-      supabase
-        .from("credit_notes")
-        .select("id, credit_note_number, note_date, grand_total, reason, invoice_id, order_id, distributor_id")
-        .eq("company_id", companyId)
-        .order("note_date", { ascending: false }),
+      fetchAllPages(() =>
+        supabase
+          .from("invoice_payments")
+          .select("id, amount, mode, paid_on, reference, note, status, void_reason, invoice_id, order_id, distributor_id")
+          .eq("company_id", companyId)
+          .order("paid_on", { ascending: false })),
+      fetchAllPages(() =>
+        supabase
+          .from("credit_notes")
+          .select("id, credit_note_number, note_date, grand_total, reason, invoice_id, order_id, distributor_id")
+          .eq("company_id", companyId)
+          .order("note_date", { ascending: false })),
     ]);
     setLoading(false);
     if (paymentsRes.error) {

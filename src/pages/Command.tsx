@@ -37,6 +37,7 @@ import { useReceivables } from "@/hooks/useReceivables";
 import { netTotal } from "@/lib/revenue";
 import { formatCurrencyPdf } from "@/utils/exportPdf";
 import type { CommandPdfProps } from "@/components/pdf/CommandPdf";
+import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import "@/styles/command-print.css";
 
 type TabId = "overview" | "people" | "products" | "drill";
@@ -324,6 +325,16 @@ export default function Command() {
   const lastBlastPayloadRef = useRef(blastPayload);
   if (blastPayload) lastBlastPayloadRef.current = blastPayload;
   const renderedBlast = blastPayload ?? lastBlastPayloadRef.current;
+
+  if (api.loading) {
+    return (
+      <AppLayout>
+        <div className="page-stack" aria-busy="true">
+          <DashboardSkeleton />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

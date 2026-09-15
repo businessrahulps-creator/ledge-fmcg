@@ -101,51 +101,71 @@ export default function Dashboard() {
 
   // This Month aggregates (memoized — recompute only when orders change)
   // Booked revenue scopes by order.date; delivered revenue scopes by delivered_at.
-  const monthAgg = useMemo(() => {
+  // One pass over the order list builds this month, last month and the 7-day
+  // sparkline together. Walking the full history ten separate times was the
+  // single heaviest thing the home screen did.
+  const stats = useMemo(() => {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const inMonthByDate = (iso?: string | null) => {
-      if (!iso) return false;
-      const d = new Date(iso.slice(0, 10) + "T00:00:00");
-      return d >= monthStart && d <= today;
-    };
-    const monthlyOrders = orders.filter((o) => inMonthByDate(o.date));
-    const monthDeliveredOrders = orders.filter((o) => isDelivered(o) && inMonthByDate(o.deliveredAt || undefined));
-    const monthBookedOrders = monthlyOrders.filter(isBooked);
-    const monthDeliveredRev = monthDeliveredOrders.reduce((s, o) => s + netTotal(o), 0);
-    const monthBookedRev = monthBookedOrders.reduce((s, o) => s + netTotal(o), 0);
-    const monthOrderCount = monthlyOrders.length;
-    const monthOutstanding = monthlyOrders
-      .filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial")
-      .reduce((s, o) => s + netTotal(o), 0);
-    const monthDeliveredPct = monthOrderCount > 0
-      ? Math.round((monthlyOrders.filter(isDelivered).length / monthOrderCount) * 100)
-      : 0;
-    return { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct };
-  }, [orders, today]);
-  const { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct } = monthAgg;
-  const monthRevenue = monthDeliveredRev; // primary number = delivered
-  const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
-
-  // Previous month aggregates for insight deltas (delivered-basis)
-  const prevMonthAgg = useMemo(() => {
     const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-    const inPrev = (iso?: string | null) => {
-      if (!iso) return false;
-      const d = new Date(iso.slice(0, 10) + "T00:00:00");
-      return d >= prevMonthStart && d <= prevMonthEnd;
+    const dayKey = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const sparkKeys = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - 6 + i);
+      return { key: dayKey(d), label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: 0 };
+    });
+    const sparkIndex = new Map(sparkKeys.map((s, i) => [s.key, i]));
+    const asDate = (iso?: string | null) => (iso ? new Date(iso.slice(0, 10) + "T00:00:00") : null);
+
+    const monthlyOrders: typeof orders = [];
+    let monthDeliveredRev = 0, monthBookedRev = 0, monthOutstanding = 0, monthDeliveredCount = 0;
+    let prevMonthRevenue = 0, prevMonthOrderCount = 0, prevMonthDeliveredCount = 0;
+
+    for (const o of orders) {
+      const od = asDate(o.date);
+      const delivered = isDelivered(o);
+      const dd = delivered ? asDate(o.deliveredAt || undefined) : null;
+      const net = netTotal(o);
+
+      if (od && od >= monthStart && od <= today) {
+        monthlyOrders.push(o);
+        if (isBooked(o)) monthBookedRev += net;
+        if (o.paymentStatus === "pending" || o.paymentStatus === "partial") monthOutstanding += net;
+        if (delivered) monthDeliveredCount++;
+      } else if (od && od >= prevMonthStart && od <= prevMonthEnd) {
+        prevMonthOrderCount++;
+        if (delivered) prevMonthDeliveredCount++;
+      }
+
+      if (dd) {
+        if (dd >= monthStart && dd <= today) monthDeliveredRev += net;
+        else if (dd >= prevMonthStart && dd <= prevMonthEnd) prevMonthRevenue += net;
+        const si = sparkIndex.get((o.deliveredAt || "").slice(0, 10));
+        if (si !== undefined) sparkKeys[si].value += net;
+      }
+    }
+
+    const monthOrderCount = monthlyOrders.length;
+    return {
+      monthlyOrders,
+      monthDeliveredRev,
+      monthBookedRev,
+      monthOrderCount,
+      monthOutstanding,
+      monthDeliveredPct: monthOrderCount > 0 ? Math.round((monthDeliveredCount / monthOrderCount) * 100) : 0,
+      prevMonthRevenue,
+      prevMonthOrderCount,
+      prevMonthDeliveredPct: prevMonthOrderCount > 0 ? Math.round((prevMonthDeliveredCount / prevMonthOrderCount) * 100) : 0,
+      prevMonthLabel: prevMonthStart.toLocaleDateString("en-IN", { month: "short" }),
+      last7Days: sparkKeys.map(s => ({ label: s.label, value: s.value })),
     };
-    const prevMonthlyOrders = orders.filter((o) => inPrev(o.date));
-    const prevDeliveredOrders = orders.filter((o) => isDelivered(o) && inPrev(o.deliveredAt || undefined));
-    const prevMonthRevenue = prevDeliveredOrders.reduce((s, o) => s + netTotal(o), 0);
-    const prevMonthOrderCount = prevMonthlyOrders.length;
-    const prevMonthDeliveredPct = prevMonthOrderCount > 0
-      ? Math.round((prevMonthlyOrders.filter(isDelivered).length / prevMonthOrderCount) * 100)
-      : 0;
-    const prevMonthLabel = prevMonthStart.toLocaleDateString("en-IN", { month: "short" });
-    return { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel };
   }, [orders, today]);
-  const { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel } = prevMonthAgg;
+
+  const { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct } = stats;
+  const monthRevenue = monthDeliveredRev; // primary number = delivered
+  const monthLabel = today.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+  const { prevMonthRevenue, prevMonthOrderCount, prevMonthDeliveredPct, prevMonthLabel } = stats;
   const pctDelta = (curr: number, prev: number): number | null => {
     if (prev === 0) return null;
     return Math.round(((curr - prev) / prev) * 100);
@@ -166,16 +186,7 @@ export default function Dashboard() {
     }, 0) / outstandingOrders.length);
   }, [outstandingOrders, today]);
 
-  // 7-day DELIVERED revenue sparkline (scoped by delivered_at)
-  const last7Days = useMemo(() => Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - 6 + i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    const dayRevenue = orders
-      .filter(o => isDelivered(o) && (o.deliveredAt || "").slice(0, 10) === key)
-      .reduce((s, o) => s + netTotal(o), 0);
-    return { label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: dayRevenue };
-  }), [orders, today]);
+  const last7Days = stats.last7Days;
   const sparkMax = Math.max(...last7Days.map(d => d.value), 1);
   const allZero = last7Days.every(d => d.value === 0);
 
