@@ -78,7 +78,13 @@ const TIER_LABEL: Record<CommandPdfSignal["tier"], string> = {
 };
 
 function SectionTitle({ children }: { children: string }) {
-  return <Text style={s.sectionTitle}>{children}</Text>;
+  // Keep a heading with the first rows of its table instead of stranding it
+  // at the foot of a page.
+  return (
+    <Text style={s.sectionTitle} minPresenceAhead={60}>
+      {children}
+    </Text>
+  );
 }
 
 function EmptyRow({ cols, label = "No data" }: { cols: number; label?: string }) {
