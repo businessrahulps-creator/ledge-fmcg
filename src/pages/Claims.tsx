@@ -375,6 +375,14 @@ function NewClaimDialog({
                       </tr>
                     </thead>
                     <tbody>
+                      {linesLoading && returnLines.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                            <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
+                            Loading the items on this bill…
+                          </td>
+                        </tr>
+                      )}
                       {returnLines.map(line => {
                         // Only what is still returnable: billed, less anything sent back earlier.
                         const other = (k: "goodQty" | "damagedQty") => line.remainingQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
