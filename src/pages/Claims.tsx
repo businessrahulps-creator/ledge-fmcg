@@ -169,6 +169,31 @@ function NewClaimDialog({
 
   const selectedBill = selectedOrder ? billByOrderId.get(selectedOrder.id) ?? null : null;
 
+  // What has already gone back on earlier credit notes for this bill, so the
+  // form can only offer what is still returnable.
+  const selectedBillId = selectedBill?.id ?? null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedBillId) { setAlreadyReturned({}); return; }
+    (async () => {
+      const { data, error } = await supabase
+        .from("credit_notes")
+        .select("id, credit_note_lines(invoice_line_id, quantity)")
+        .eq("invoice_id", selectedBillId);
+      if (cancelled) return;
+      if (error || !data) { setAlreadyReturned({}); return; }
+      const totals: Record<string, number> = {};
+      data.forEach(note => {
+        (note.credit_note_lines || []).forEach(l => {
+          if (!l.invoice_line_id) return;
+          totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
+        });
+      });
+      setAlreadyReturned(totals);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedBillId]);
+
   const eligibleOrders = useMemo(() =>
     orders.filter(o => billByOrderId.has(o.id)),
     [orders, billByOrderId]
