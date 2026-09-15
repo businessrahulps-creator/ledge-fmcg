@@ -445,7 +445,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       type="button"
                       onClick={() => {
                         setMoreOpen(false);
-                        setTimeout(() => window.dispatchEvent(new CustomEvent("ledge:open-command-palette")), 120);
+                        window.dispatchEvent(new CustomEvent("ledge:open-command-palette"));
                       }}
                       className="flex w-full items-center gap-2.5 h-11 rounded-lg border border-border/70 bg-muted/30 hover:bg-muted/50 active:bg-muted/60 transition-colors px-3.5 text-[13.5px] text-muted-foreground"
                     >
