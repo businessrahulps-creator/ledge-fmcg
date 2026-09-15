@@ -27,6 +27,21 @@ export type CreditNoteRow = {
   distributorId: string;
 };
 
+const PAGE = 1000;
+
+/** Reads every page of a query so nothing is silently cut off at the 1,000-row cap. */
+async function fetchAllPages(build: () => any): Promise<{ data: any[]; error: any }> {
+  const rows: any[] = [];
+  for (let page = 0; page < 200; page++) {
+    const { data, error } = await build().range(page * PAGE, page * PAGE + PAGE - 1);
+    if (error) return { data: rows, error };
+    const batch = data || [];
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return { data: rows, error: null };
+}
+
 /**
  * Every receipt in the workspace, plus how much has landed against each bill
  * and each order. One source for the money figures shown across Billing.
