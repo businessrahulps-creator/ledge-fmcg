@@ -18,6 +18,7 @@ import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
@@ -77,18 +78,25 @@ export default function Salespersons() {
   const paginatedSales = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
+  const canManageTeam = useCan("manage_team");
+
   const openNew = () => {
+    if (!canManageTeam) return;
     setEditItem({ id: `s${Date.now()}`, name: "", phone: "", email: "", region: "", totalOrders: 0, totalValue: 0 });
     setIsNew(true);
   };
 
   const openEdit = (s: Salesperson, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canManageTeam) return;
     setEditItem({ ...s });
     setIsNew(false);
   };
 
-  const save = () => {
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (saving) return;
     if (!editItem?.name.trim()) { toast.error("Name required"); return; }
     if (!editItem?.phone.trim()) { toast.error("Phone required"); return; }
     if (!isValidIndianPhone(editItem.phone)) { toast.error("Invalid phone", { description: "Enter a valid 10-digit Indian mobile number." }); return; }
@@ -96,14 +104,17 @@ export default function Salespersons() {
     if (editItem.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editItem.email)) { toast.error("Invalid email"); return; }
     const normalizedPhone = normalizeIndianPhone(editItem.phone);
     const itemToSave = { ...editItem, phone: normalizedPhone || editItem.phone.trim() };
-    if (isNew) {
-      addSalesperson(itemToSave);
-      toast.success("Team member added", { description: `${itemToSave.name} has been added.` });
-    } else {
-      updateSalesperson(itemToSave);
-      toast.success("Team member updated", { description: `${itemToSave.name} has been updated.` });
+    setSaving(true);
+    try {
+      const ok = isNew ? await addSalesperson(itemToSave) : await updateSalesperson(itemToSave);
+      if (!ok) return; // keep the form open; the failure was already explained
+      toast.success(isNew ? "Team member added" : "Team member updated", {
+        description: `${itemToSave.name} has been ${isNew ? "added" : "updated"}.`,
+      });
+      setEditItem(null);
+    } finally {
+      setSaving(false);
     }
-    setEditItem(null);
   };
 
   const confirmDelete = async () => {
@@ -141,10 +152,12 @@ export default function Salespersons() {
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export CSV</span>
             </Button>
-            <Button onClick={openNew} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4" />
-              Add Member
-            </Button>
+            {canManageTeam && (
+              <Button onClick={openNew} className="flex-1 sm:flex-none">
+                <Plus className="h-4 w-4" />
+                Add Member
+              </Button>
+            )}
           </div>
         </div>
 
@@ -192,10 +205,10 @@ export default function Salespersons() {
                   { label: "Avg order", value: avgOrder > 0 ? formatCurrency(avgOrder) : "—", zero: avgOrder === 0 },
                   { label: "Dealers", value: dealersServed, zero: dealersServed === 0 },
                 ]}
-                menu={[
+                menu={canManageTeam ? [
                   { label: "Edit member", icon: Pencil, onSelect: () => openEdit(s, { stopPropagation: () => {} } as React.MouseEvent) },
                   { label: "Remove member", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(s.id) },
-                ]}
+                ] : []}
                 onClick={() => navigate(`/salespersons/${s.id}`)}
               />
             );
@@ -211,8 +224,8 @@ export default function Salespersons() {
               icon={UserCheck}
               title="No team members yet."
               description="Add your first team member to start tracking their orders and revenue."
-              actionLabel="Add team member"
-              onAction={openNew}
+              actionLabel={canManageTeam ? "Add team member" : undefined}
+              onAction={canManageTeam ? openNew : undefined}
             />
           ) : (
             <EmptyCard
@@ -231,7 +244,7 @@ export default function Salespersons() {
                 <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
                 <DialogDescription className="sr-only">{isNew ? "Add a new team member" : "Edit team member details"}</DialogDescription>
               </DialogHeader>
-              <form onSubmit={(e) => { e.preventDefault(); save(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name *</Label>
@@ -254,7 +267,7 @@ export default function Salespersons() {
               </div>
               <DialogFooter className="gap-2 sm:gap-0 mt-4">
                 <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-                <Button type="submit">{isNew ? "Add Member" : "Save Changes"}</Button>
+                <Button type="submit" disabled={saving}>{saving ? "Saving…" : isNew ? "Add Member" : "Save Changes"}</Button>
               </DialogFooter>
               </form>
             </DialogContent>

@@ -41,7 +41,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
   const products = api.products.list();
   const targets = api.targets.list();
   const claims = api.claims.list();
-  const { receipts } = useReceivables();
+  const { receipts, paymentStatus: payStatusMap } = useReceivables();
 
   const computed = useMemo(() => {
     const prevRange: PeriodRange = {
@@ -110,7 +110,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
       if (od < range.from || od > range.to) continue;
       const idx = Math.min(buckets - 1, Math.max(0, Math.floor((od.getTime() - range.from.getTime()) / bucketSize)));
       ordSpark[idx] += 1;
-      if (o.paymentStatus === "paid") colSpark[idx] += o.total || 0;
+      if (payStatusMap.get(o.id) === "paid") colSpark[idx] += o.total || 0;
       if (o.deliveryStatus === "dispatched" || o.deliveryStatus === "delivered") {
         const ref = o.dispatchDate ? new Date(o.dispatchDate) : od;
         if (ref >= range.from && ref <= range.to) {

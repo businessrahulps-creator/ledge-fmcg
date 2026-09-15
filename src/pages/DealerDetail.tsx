@@ -44,6 +44,7 @@ import {
 } from "@/lib/aging";
 import { sumDue } from "@/lib/receivables";
 import { useReceivables } from "@/hooks/useReceivables";
+import { useCan } from "@/hooks/useCan";
 
 
 export default function DealerDetail() {
@@ -61,7 +62,9 @@ export default function DealerDetail() {
   const dealerSS = useMemo(() => allSecondarySales.filter(s => s.distributorId === id), [allSecondarySales, id]);
 
   // Money for this dealer comes from bills, posted receipts and credit notes — never order flags.
-  const { rows: receivableRows, receipts, creditNotes, advances } = useReceivables();
+  const canManageDealers = useCan("see_all_dealers");
+  const { rows: receivableRows, receipts, creditNotes, advances, paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
   const invoices = api.invoices.list();
   const dealerOrderIds = useMemo(() => new Set(dealerOrders.map(o => o.id)), [dealerOrders]);
   const dealerInvoices = useMemo(
@@ -173,7 +176,7 @@ export default function DealerDetail() {
                     orderNumber: o.orderNumber,
                     date: o.date,
                     total: o.total,
-                    paymentStatus: o.paymentStatus,
+                    paymentStatus: payStatus(o.id),
                     schemeSavings: o.schemeSavings || 0,
                   })),
                 });
@@ -496,7 +499,7 @@ export default function DealerDetail() {
                         <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
                         <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(o.date)}</td>
                         <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
-                        <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
+                        <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>
                       </tr>
                     ))}
                   </tbody>
@@ -510,7 +513,7 @@ export default function DealerDetail() {
                       </div>
                       <div className="mt-0.5 flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{formatIndianDate(o.date)}</span>
-                        <StatusBadge status={o.paymentStatus} />
+                        <StatusBadge status={payStatus(o.id)} />
                       </div>
                     </div>
                   ))}
@@ -667,6 +670,7 @@ export default function DealerDetail() {
               <Button
                 size="sm"
                 className="h-9 gap-1.5 shrink-0"
+                disabled={!canManageDealers}
                 onClick={() => {
                   setSsForm({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
                   setSsOpen(true);
@@ -691,7 +695,7 @@ export default function DealerDetail() {
                         {ss.remarks ? ` · ${ss.remarks}` : ""}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => setDeleteSecondarySaleId(ss.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" disabled={!canManageDealers} onClick={() => setDeleteSecondarySaleId(ss.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

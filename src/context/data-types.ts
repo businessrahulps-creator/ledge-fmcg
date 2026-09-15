@@ -160,20 +160,20 @@ export interface DataContextType {
   cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
   markDelivered: (orderId: string, note?: string) => Promise<boolean>;
 
-  addDistributor: (d: Distributor) => void;
-  updateDistributor: (d: Distributor) => void;
+  addDistributor: (d: Distributor) => Promise<boolean>;
+  updateDistributor: (d: Distributor) => Promise<boolean>;
   deleteDistributor: (id: string) => Promise<boolean>;
 
-  addSalesperson: (s: Salesperson) => void;
-  updateSalesperson: (s: Salesperson) => void;
+  addSalesperson: (s: Salesperson) => Promise<boolean>;
+  updateSalesperson: (s: Salesperson) => Promise<boolean>;
   deleteSalesperson: (id: string) => Promise<boolean>;
 
-  addProduct: (p: Product) => void;
-  updateProduct: (p: Product) => void;
+  addProduct: (p: Product) => Promise<boolean>;
+  updateProduct: (p: Product) => Promise<boolean>;
   deleteProduct: (id: string) => Promise<boolean>;
 
-  addLocation: (l: GodownLocation) => void;
-  updateLocation: (l: GodownLocation) => void;
+  addLocation: (l: GodownLocation) => Promise<boolean>;
+  updateLocation: (l: GodownLocation) => Promise<boolean>;
   deleteLocation: (id: string) => Promise<boolean>;
 
   addStockItem: (si: StockItem) => void;

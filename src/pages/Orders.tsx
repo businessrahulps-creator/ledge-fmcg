@@ -34,6 +34,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AlertTriangle } from "lucide-react";
+import { useReceivables } from "@/hooks/useReceivables";
 
 export default function Orders() {
   const api = useApi();
@@ -42,6 +43,12 @@ export default function Orders() {
   const canPlaceOrders = useCan("place_orders");
   const orders = api.orders.list();
   const invoices = api.invoices.list();
+  // Payment chips come from the receipts ledger, never from orders.payment_status.
+  const { paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = useCallback(
+    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
+    [paymentStatusByOrderId],
+  );
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
@@ -127,11 +134,11 @@ export default function Orders() {
     const matchesSearch =
       o.orderNumber.toLowerCase().includes(q) ||
       o.distributorName.toLowerCase().includes(q);
-    const matchesPayment = paymentFilter === "all" || o.paymentStatus === paymentFilter;
+    const matchesPayment = paymentFilter === "all" || payStatus(o.id) === paymentFilter;
     const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
     const matchesNeedsBill = !needsBillOnly || (!o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id));
     return matchesSearch && matchesPayment && matchesDelivery && matchesNeedsBill;
-  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds]);
+  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds, payStatus]);
 
   const needsBillCount = useMemo(
     () => orders.filter(o => !o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id)).length,
@@ -160,7 +167,7 @@ export default function Orders() {
       if (t >= startOfMonth) { mtdCount++; mtdRevenue += net(o); }
       else if (t >= startOfPrevMonth) { prevCount++; prevRevenue += net(o); }
       if (o.date?.slice(0, 10) === todayIso) todaysCount++;
-      if (o.paymentStatus === "pending" || o.paymentStatus === "partial") {
+      if (payStatus(o.id) !== "paid") {
         pendingPayment++; pendingPaymentValue += net(o);
       }
       if (o.deliveryStatus === "pending" && o.dispatchDate && new Date(o.dispatchDate) < now) {
@@ -175,7 +182,7 @@ export default function Orders() {
       revenueDelta: pct(mtdRevenue, prevRevenue),
       countDelta: pct(mtdCount, prevCount),
     };
-  }, [orders]);
+  }, [orders, payStatus]);
 
   const prevMonthLabel = useMemo(() => {
     const d = new Date(); d.setMonth(d.getMonth() - 1);
@@ -236,7 +243,7 @@ export default function Orders() {
                     o.salesperson,
                     formatCurrency(o.total - (o.schemeSavings || 0)),
                     o.paymentMode.replace("_", " "),
-                    o.paymentStatus,
+                    payStatus(o.id),
                     o.deliveryStatus,
                     formatIndianDate(o.dispatchDate),
                     o.vehicle || "",
@@ -423,7 +430,7 @@ export default function Orders() {
                           <td className="px-4 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                           <td className="px-4 py-3.5">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <StatusBadge status={order.paymentStatus} />
+                              <StatusBadge status={payStatus(order.id)} />
                               {order.cancelledAt ? (
                                 <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
                               ) : (
@@ -471,7 +478,7 @@ export default function Orders() {
                         {order.distributorName} · {formatIndianDate(order.date)}
                       </p>
                       <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        <StatusBadge status={order.paymentStatus} />
+                        <StatusBadge status={payStatus(order.id)} />
                         {order.cancelledAt ? (
                           <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
                         ) : (
@@ -536,7 +543,7 @@ export default function Orders() {
                   o.distributorName,
                   o.salesperson,
                   formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
-                  o.paymentStatus,
+                  payStatus(o.id),
                   o.deliveryStatus,
                 ])}
               />

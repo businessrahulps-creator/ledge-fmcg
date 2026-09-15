@@ -2151,6 +2151,26 @@ export type Database = {
           distributor_name: string | null
           received_total: number | null
         }
+        Insert: {
+          balance_due?: never
+          billed_total?: never
+          company_id?: string | null
+          credit_limit?: number | null
+          credited_total?: never
+          distributor_id?: string | null
+          distributor_name?: string | null
+          received_total?: never
+        }
+        Update: {
+          balance_due?: never
+          billed_total?: never
+          company_id?: string | null
+          credit_limit?: number | null
+          credited_total?: never
+          distributor_id?: string | null
+          distributor_name?: string | null
+          received_total?: never
+        }
         Relationships: [
           {
             foreignKeyName: "distributors_company_id_fkey"

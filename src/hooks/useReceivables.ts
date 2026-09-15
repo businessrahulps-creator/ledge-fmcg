@@ -6,6 +6,7 @@ import {
   buildReceivables,
   advancesByDealer,
   agingFromReceivables,
+  paymentStatusByOrder,
   type ReceivableRow,
 } from "@/lib/receivables";
 
@@ -35,8 +36,14 @@ export function useReceivables() {
     [orders, invoices, receivedByOrder],
   );
 
+  /** Payment chip per order, derived from receipts — never `order.paymentStatus`. */
+  const paymentStatus = useMemo(
+    () => paymentStatusByOrder(orders, invoices, receivedByInvoice, receivedByOrder, creditedByInvoice),
+    [orders, invoices, receivedByInvoice, receivedByOrder, creditedByInvoice],
+  );
+
   return {
-    rows, aging, advances, receipts, creditNotes,
+    rows, aging, advances, receipts, creditNotes, paymentStatus,
     receivedByInvoice, receivedByOrder, creditedByInvoice,
     loading, reload,
   };

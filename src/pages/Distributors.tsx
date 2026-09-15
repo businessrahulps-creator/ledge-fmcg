@@ -21,6 +21,7 @@ import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Distributor } from "@/data/mock-data";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { isValidGstin, isValidPan, isValidIfsc, isValidIndianPhone, INDIAN_STATE_CODES, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
@@ -93,18 +94,25 @@ export default function Distributors() {
     return { totalOutstanding, overLimit, overLimitValue, approaching };
   }, [items]);
 
+  const canManageDealers = useCan("see_all_dealers");
+
   const openNew = () => {
+    if (!canManageDealers) return;
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
     setIsNew(true);
   };
 
   const openEdit = (d: Distributor, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canManageDealers) return;
     setEditItem({ ...d });
     setIsNew(false);
   };
 
-  const save = () => {
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (saving) return;
     if (!editItem?.name.trim()) {
       toast.error("Name required", { description: "Please enter a dealer name." });
       return;
@@ -132,14 +140,17 @@ export default function Distributors() {
     // Canonicalize phone before persisting (strip +91, spaces, dashes)
     const normalizedPhone = normalizeIndianPhone(editItem.contact);
     const itemToSave = { ...editItem, contact: normalizedPhone || editItem.contact.trim() };
-    if (isNew) {
-      addDistributor(itemToSave);
-      toast.success("Dealer added", { description: `${itemToSave.name} has been added.` });
-    } else {
-      updateDistributor(itemToSave);
-      toast.success("Dealer updated", { description: `${itemToSave.name} has been updated.` });
+    setSaving(true);
+    try {
+      const ok = isNew ? await addDistributor(itemToSave) : await updateDistributor(itemToSave);
+      if (!ok) return; // keep the form open; the failure was already explained
+      toast.success(isNew ? "Dealer added" : "Dealer updated", {
+        description: `${itemToSave.name} has been ${isNew ? "added" : "updated"}.`,
+      });
+      setEditItem(null);
+    } finally {
+      setSaving(false);
     }
-    setEditItem(null);
   };
 
   const confirmDelete = async () => {
@@ -192,10 +203,12 @@ export default function Distributors() {
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export CSV</span>
             </Button>
-            <Button onClick={openNew} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4" />
-              Add Dealer
-            </Button>
+            {canManageDealers && (
+              <Button onClick={openNew} className="flex-1 sm:flex-none">
+                <Plus className="h-4 w-4" />
+                Add Dealer
+              </Button>
+            )}
           </div>
         </div>
 
@@ -315,10 +328,10 @@ export default function Distributors() {
                 hero={hero}
                 cells={cells}
                 primaryAction={primaryAction}
-                menu={[
+                menu={canManageDealers ? [
                   { label: "Edit dealer", icon: Pencil, onSelect: () => openEdit(d, { stopPropagation: () => {} } as React.MouseEvent) },
                   { label: "Remove dealer", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(d.id) },
-                ]}
+                ] : []}
                 onClick={() => navigate(`/distributors/${d.id}`)}
               />
             );
@@ -334,8 +347,8 @@ export default function Distributors() {
               icon={MapPin}
               title="No dealers added yet."
               description="Add your first dealer to start taking orders and tracking outstanding."
-              actionLabel="Add dealer"
-              onAction={openNew}
+              actionLabel={canManageDealers ? "Add dealer" : undefined}
+              onAction={canManageDealers ? openNew : undefined}
             />
           ) : (
             <EmptyCard
@@ -353,7 +366,7 @@ export default function Distributors() {
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
               <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); save(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
             {editItem && (
               <div className="space-y-4 md:space-y-5">
                 <div className="space-y-3 md:space-y-4">
@@ -442,7 +455,7 @@ export default function Distributors() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button type="submit">{isNew ? "Add Dealer" : "Save Changes"}</Button>
+              <Button type="submit" disabled={saving}>{saving ? "Saving…" : isNew ? "Add Dealer" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>

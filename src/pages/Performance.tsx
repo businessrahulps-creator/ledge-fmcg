@@ -9,6 +9,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
+import { useReceivables } from "@/hooks/useReceivables";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { orderInScope, orderDateForMode, netTotal, type RevenueMode } from "@/lib/revenue";
 
@@ -140,6 +141,9 @@ export default function Performance() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
+  // Payment chips/split come from the receipts ledger, never orders.payment_status.
+  const { paymentStatus: payStatusMap } = useReceivables();
+  const payStatus = (oid: string) => payStatusMap.get(oid) ?? "pending";
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
   const products = api.products.list();
@@ -199,7 +203,7 @@ export default function Performance() {
   const totalRevenue = filteredOrders.reduce((s, o) => s + netTotal(o), 0);
   const totalOrderCount = filteredOrders.length;
   const avgOrderValue = totalOrderCount > 0 ? totalRevenue / totalOrderCount : 0;
-  const paidOrders = filteredOrders.filter((o) => o.paymentStatus === "paid");
+  const paidOrders = filteredOrders.filter((o) => payStatus(o.id) === "paid");
   const collectionRate =
     totalOrderCount > 0 ? (paidOrders.length / totalOrderCount) * 100 : 0;
 
@@ -207,7 +211,7 @@ export default function Performance() {
   const prevRevenue = prevOrders.reduce((s, o) => s + netTotal(o), 0);
   const prevOrderCount = prevOrders.length;
   const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
-  const prevPaid = prevOrders.filter((o) => o.paymentStatus === "paid");
+  const prevPaid = prevOrders.filter((o) => payStatus(o.id) === "paid");
   const prevCollection = prevOrderCount > 0 ? (prevPaid.length / prevOrderCount) * 100 : 0;
 
   // Revenue trend — group by mode-aware date
@@ -232,7 +236,7 @@ export default function Performance() {
   const paymentSplit = useMemo(() => {
     const counts = { paid: 0, partial: 0, pending: 0 };
     filteredOrders.forEach((o) => {
-      counts[o.paymentStatus]++;
+      counts[payStatus(o.id)]++;
     });
     return Object.entries(counts)
       .filter(([, v]) => v > 0)

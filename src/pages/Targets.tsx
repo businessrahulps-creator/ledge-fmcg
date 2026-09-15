@@ -4,6 +4,7 @@ import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
 
@@ -133,9 +134,10 @@ interface InlineTargetRowProps {
   periodStart: string;
   periodType: PeriodType;
   onSave: (target: TargetType) => Promise<boolean>;
+  readOnly?: boolean;
 }
 
-function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave }: InlineTargetRowProps) {
+function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, readOnly = false }: InlineTargetRowProps) {
   const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
   const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
@@ -150,7 +152,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
   const sc = STATUS_CONFIG[overallStatus];
 
   const handleSave = useCallback(async () => {
-    if (!dirty) return;
+    if (!dirty || readOnly) return;
     const ok = await onSave({
       id: existingTarget?.id || "",
       entityType,
@@ -164,7 +166,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
     if (!ok) return; // save failed — stay dirty so the user can retry
     setDirty(false);
     toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
-  }, [dirty, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
+  }, [dirty, readOnly, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
 
   const tier: "success" | "warning" | "destructive" | "muted" =
     overallStatus === "exceeded" || overallStatus === "on_track" ? "success"
@@ -191,7 +193,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
             <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
             {sc.label}
           </span>
-          {dirty && (
+          {dirty && !readOnly && (
             <Button size="sm" className="h-7 text-xs" onClick={handleSave}>Save</Button>
           )}
         </div>
@@ -209,6 +211,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
             allowEmpty
             min={0}
             value={revInput}
+            disabled={readOnly}
             onValueChange={(v) => { setRevInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 100000"
@@ -230,6 +233,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
             allowEmpty
             min={0}
             value={ordInput}
+            disabled={readOnly}
             onValueChange={(v) => { setOrdInput(v); setDirty(true); }}
             onBlur={handleSave}
             placeholder="e.g. 20"
@@ -258,6 +262,7 @@ const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
 
 export default function Targets() {
   const api = useApi();
+  const canManageTargets = useCan("manage_schemes");
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
   const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
@@ -463,6 +468,7 @@ export default function Targets() {
                     periodStart={period}
                     periodType={periodType}
                     onSave={handleSave}
+                    readOnly={!canManageTargets}
                   />
                 );
               })
@@ -499,6 +505,7 @@ export default function Targets() {
                     periodStart={period}
                     periodType={periodType}
                     onSave={handleSave}
+                    readOnly={!canManageTargets}
                   />
                 );
               })

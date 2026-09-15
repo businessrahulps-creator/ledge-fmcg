@@ -99,6 +99,13 @@ export default function Dashboard() {
   const selectedDateObj = useMemo(() => new Date(selectedDate + "T00:00:00"), [selectedDate]);
   const firstName = profile?.full_name?.split(" ")[0];
 
+  // Money owed comes from the receipts ledger, never from orders.payment_status.
+  const { rows: receivableRows, paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = useCallback(
+    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
+    [paymentStatusByOrderId],
+  );
+
   // This Month aggregates (memoized — recompute only when orders change)
   // Booked revenue scopes by order.date; delivered revenue scopes by delivered_at.
   // One pass over the order list builds this month, last month and the 7-day
@@ -131,7 +138,7 @@ export default function Dashboard() {
       if (od && od >= monthStart && od <= today) {
         monthlyOrders.push(o);
         if (isBooked(o)) monthBookedRev += net;
-        if (o.paymentStatus === "pending" || o.paymentStatus === "partial") monthOutstanding += net;
+        if (payStatus(o.id) !== "paid") monthOutstanding += net;
         if (delivered) monthDeliveredCount++;
       } else if (od && od >= prevMonthStart && od <= prevMonthEnd) {
         prevMonthOrderCount++;
@@ -160,7 +167,7 @@ export default function Dashboard() {
       prevMonthLabel: prevMonthStart.toLocaleDateString("en-IN", { month: "short" }),
       last7Days: sparkKeys.map(s => ({ label: s.label, value: s.value })),
     };
-  }, [orders, today]);
+  }, [orders, today, payStatus]);
 
   const { monthlyOrders, monthDeliveredRev, monthBookedRev, monthOrderCount, monthOutstanding, monthDeliveredPct } = stats;
   const monthRevenue = monthDeliveredRev; // primary number = delivered
@@ -175,8 +182,8 @@ export default function Dashboard() {
   const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
   // DSO proxy: avg days since order for outstanding orders
   const outstandingOrders = useMemo(
-    () => monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial"),
-    [monthlyOrders],
+    () => monthlyOrders.filter((o) => payStatus(o.id) !== "paid"),
+    [monthlyOrders, payStatus],
   );
   const avgOutstandingDays = useMemo(() => {
     if (outstandingOrders.length === 0) return 0;
@@ -215,7 +222,6 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  const { rows: receivableRows } = useReceivables();
 
   // Credit at Risk — unpaid GST bills, aged, computed from orders + distributors
   const agingRows = useMemo(
@@ -739,7 +745,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>
-                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={payStatus(order.id)} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                       </tr>
                     ))}
@@ -765,7 +771,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                         <div className="flex gap-1.5">
-                          <StatusBadge status={o.paymentStatus} />
+                          <StatusBadge status={payStatus(o.id)} />
                           <StatusBadge status={o.deliveryStatus} />
                         </div>
                       </div>

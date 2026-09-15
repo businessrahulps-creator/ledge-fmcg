@@ -32,10 +32,10 @@ export function PaymentReport() {
 
   const periodFiltered = filterByTimePeriod(orders, period);
   const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
-  const filtered = filter === "all" ? scoped : scoped.filter((o) => o.paymentStatus === filter);
-
   // Money actually collected in the same window — posted receipts only.
-  const { rows: receivableRows, receipts } = useReceivables();
+  const { rows: receivableRows, receipts, paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
+  const filtered = filter === "all" ? scoped : scoped.filter((o) => payStatus(o.id) === filter);
   const collectedInRange = useMemo(
     () => filterByTimePeriod(receipts.map(r => ({ ...r, date: r.paidOn })), period)
       .reduce((s, r) => (r.status === "posted" ? s + r.amount : s), 0),
@@ -106,7 +106,7 @@ export function PaymentReport() {
                   <td className="px-6 py-4">{o.distributorName}</td>
                   <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(o.date)}</td>
                   <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(o))}</td>
-                  <td className="px-6 py-4"><StatusBadge status={o.paymentStatus} /></td>
+                  <td className="px-6 py-4"><StatusBadge status={payStatus(o.id)} /></td>
                   <td className="px-6 py-4 capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</td>
                 </tr>
               ))}
@@ -126,7 +126,7 @@ export function PaymentReport() {
                 <span className="shrink-0 text-sm font-medium">{formatCurrency(netTotal(o))}</span>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <StatusBadge status={o.paymentStatus} />
+                <StatusBadge status={payStatus(o.id)} />
                 <span className="text-xs capitalize text-muted-foreground">{o.paymentMode.replace("_", " ")}</span>
               </div>
             </div>
@@ -144,7 +144,7 @@ export function PaymentReport() {
               o.distributorName,
               formatIndianDate(o.date),
               formatCurrency(netTotal(o)),
-              o.paymentStatus,
+              payStatus(o.id),
               o.paymentMode.replace("_", " "),
             ])
           )
@@ -194,7 +194,7 @@ export function PaymentReport() {
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Payment</span>
-                    <div className="mt-1"><StatusBadge status={selected.paymentStatus} /></div>
+                    <div className="mt-1"><StatusBadge status={payStatus(selected.id)} /></div>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
                     <span className="text-[10px] text-muted-foreground md:text-xs">Total</span>
@@ -276,7 +276,7 @@ export function PaymentReport() {
                 o.distributorName,
                 formatIndianDate(o.date),
                 formatCurrencyPdf(netTotal(o)),
-                o.paymentStatus,
+                payStatus(o.id),
                 o.paymentMode.replace("_", " "),
               ])}
             />

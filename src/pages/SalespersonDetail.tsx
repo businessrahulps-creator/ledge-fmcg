@@ -12,6 +12,7 @@ import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
+import { useReceivables } from "@/hooks/useReceivables";
 import { formatIndianDate } from "@/utils/formatDate";
 
 export default function SalespersonDetail() {
@@ -21,6 +22,10 @@ export default function SalespersonDetail() {
 
   const items = api.salespersons.list();
   const orders = api.orders.list();
+
+  // Payment chips come from the receipts ledger, never from orders.payment_status.
+  const { paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
 
   const person = items.find(s => s.id === id);
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
@@ -82,7 +87,7 @@ export default function SalespersonDetail() {
                   companyName: "",
                   salesperson: { name: person.name, phone: person.phone, email: person.email, region: person.region },
                   scorecard: sc,
-                  orders: personOrders.map(o => ({ orderNumber: o.orderNumber, date: o.date, distributorName: o.distributorName, total: o.total, paymentStatus: o.paymentStatus, schemeSavings: o.schemeSavings || 0 })),
+                  orders: personOrders.map(o => ({ orderNumber: o.orderNumber, date: o.date, distributorName: o.distributorName, total: o.total, paymentStatus: payStatus(o.id), schemeSavings: o.schemeSavings || 0 })),
                   health,
                 })
               );
@@ -253,7 +258,7 @@ export default function SalespersonDetail() {
                       <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
                       <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
                       <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
-                      <td className="px-4 py-3"><StatusBadge status={o.paymentStatus} /></td>
+                      <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -267,7 +272,7 @@ export default function SalespersonDetail() {
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">{o.distributorName}</span>
-                      <StatusBadge status={o.paymentStatus} />
+                      <StatusBadge status={payStatus(o.id)} />
                     </div>
                   </div>
                 ))}
