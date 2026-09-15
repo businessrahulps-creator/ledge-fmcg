@@ -138,11 +138,22 @@ export default function Billing() {
       .map(({ date, ...rest }) => rest as Invoice);
   }, [timePeriod]);
 
+  /** Same period window, for anything that isn't an invoice (orders, credit notes). */
+  const inPeriodBy = useCallback(<T,>(list: T[], getDate: (row: T) => string) => {
+    if (timePeriod === "all") return list;
+    const keep = new Set(
+      filterByTimePeriod(list.map((row, idx) => ({ __idx: idx, date: getDate(row) })), timePeriod)
+        .map(r => (r as { __idx: number }).__idx),
+    );
+    return list.filter((_, idx) => keep.has(idx));
+  }, [timePeriod]);
+
   const matchesSearch = useCallback((inv: Invoice) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return inv.invoiceNumber.toLowerCase().includes(q) || inv.buyerName.toLowerCase().includes(q);
   }, [search]);
+
 
   /** Every GST bill with the money that has landed against it, less any credit note. */
   const collections = useMemo(() => {
