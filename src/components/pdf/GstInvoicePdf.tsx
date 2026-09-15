@@ -4,6 +4,7 @@ import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
 import { formatMoneyPdf } from "@/utils/exportPdf";
 import { numberToWords } from "@/utils/numberToWords";
+import { formatIndianDate } from "@/utils/formatDate";
 
 const docTypeLabels: Record<string, string> = {
   gst_invoice: "Tax Invoice",
@@ -100,7 +101,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
               <Text style={s.infoLabel}>Invoice Details</Text>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>Date</Text>
-                <Text style={s.metaValue}>{data.invoiceDate}</Text>
+                <Text style={s.metaValue}>{formatIndianDate(data.invoiceDate)}</Text>
               </View>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>Supply Type</Text>
@@ -135,8 +136,8 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
             <Text style={[s.tableHeaderCell, { width: isGst ? "24%" : "37%" }]}>Item</Text>
             {isGst && <Text style={[s.tableHeaderCell, { width: "10%" }]}>HSN</Text>}
-            <Text style={[s.tableHeaderCell, { width: "8%", textAlign: "right" }]}>Qty</Text>
-            <Text style={[s.tableHeaderCell, { width: "8%" }]}>Unit</Text>
+            <Text style={[s.tableHeaderCell, { width: "7%", textAlign: "right" }]}>Qty</Text>
+            <Text style={[s.tableHeaderCell, { width: "9%", paddingLeft: 6 }]}>Unit</Text>
             <Text style={[s.tableHeaderCell, { width: isGst ? "13%" : "14%", textAlign: "right" }]}>Rate</Text>
             {isGst && <Text style={[s.tableHeaderCell, { width: "7%", textAlign: "right" }]}>GST%</Text>}
             <Text style={[s.tableHeaderCell, { width: isGst ? "12%" : "15%", textAlign: "right" }]}>Taxable</Text>
@@ -147,8 +148,8 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
               <Text style={[s.tableCellBold, { width: isGst ? "24%" : "37%" }]}>{line.productName}</Text>
               {isGst && <Text style={[s.tableCell, { width: "10%" }]}>{line.hsnCode || "-"}</Text>}
-              <Text style={[s.tableCellRight, { width: "8%" }]}>{line.quantity}</Text>
-              <Text style={[s.tableCell, { width: "8%" }]}>{line.unit}</Text>
+              <Text style={[s.tableCellRight, { width: "7%" }]}>{line.quantity}</Text>
+              <Text style={[s.tableCell, { width: "9%", paddingLeft: 6 }]}>{line.unit}</Text>
               <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{formatMoneyPdf(line.unitPrice)}</Text>
               {isGst && <Text style={[s.tableCellRight, { width: "7%" }]}>{line.gstRate != null ? `${line.gstRate}%` : "-"}</Text>}
               <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatMoneyPdf(line.taxableValue)}</Text>
@@ -195,7 +196,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
             {data.roundOff !== 0 && (
               <View style={s.totalsRow}>
                 <Text style={s.totalsLabel}>Round Off</Text>
-                <Text style={s.totalsValue}>{data.roundOff > 0 ? "+" : ""}{data.roundOff.toFixed(2)}</Text>
+                <Text style={s.totalsValue}>{data.roundOff > 0 ? "+" : "-"}{formatMoneyPdf(Math.abs(data.roundOff))}</Text>
               </View>
             )}
 
@@ -209,7 +210,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
         {/* Amount in Words */}
         <View style={s.callout} wrap={false}>
           <Text style={s.infoLabel}>Amount in Words</Text>
-          <Text style={s.infoValueBold}>{data.amountInWords}</Text>
+          <Text style={s.infoValueBold}>{data.amountInWords || numberToWords(data.grandTotal)}</Text>
         </View>
 
         {/* Bank Details */}
