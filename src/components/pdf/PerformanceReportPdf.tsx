@@ -119,7 +119,7 @@ export function PerformanceReportPdf({
         {/* Revenue Trend */}
         {show.revenueTrend && data.revenueTrend.length > 0 && (
           <View style={sectionGap} wrap={false}>
-            <Text style={s.sectionTitle}>Revenue Trend</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Revenue Trend</Text>
             {data.revenueTrend.map((d, i) => (
               <HBar
                 key={i}
@@ -134,7 +134,7 @@ export function PerformanceReportPdf({
         {/* Payment Split */}
         {show.paymentSplit && data.paymentSplit.length > 0 && (
           <View style={sectionGap} wrap={false}>
-            <Text style={s.sectionTitle}>Payment Split</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Payment Split</Text>
             {/* Stacked bar */}
             <View style={{ flexDirection: "row", height: 16, borderRadius: 3, overflow: "hidden", marginBottom: 6 }}>
               {data.paymentSplit.map((p, i) => (
@@ -165,7 +165,7 @@ export function PerformanceReportPdf({
         {/* Top Dealers */}
         {show.dealers && data.topDealers.length > 0 && (
           <View style={sectionGap} wrap={false}>
-            <Text style={s.sectionTitle}>Top Dealers</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Top Dealers</Text>
             {data.topDealers.map((d, i) => (
               <HBar
                 key={i}
@@ -180,7 +180,7 @@ export function PerformanceReportPdf({
         {/* Top Products */}
         {show.products && data.productVelocity.length > 0 && (
           <View style={sectionGap} wrap={false}>
-            <Text style={s.sectionTitle}>Top Products</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Top Products</Text>
             {data.productVelocity.map((p, i) => (
               <HBar
                 key={i}
@@ -195,7 +195,7 @@ export function PerformanceReportPdf({
         {/* Sales Team */}
         {show.salesTeam && data.salesRanking.length > 0 && (
           <View style={sectionGap} wrap={false}>
-            <Text style={s.sectionTitle}>Sales Team Ranking</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Sales Team Ranking</Text>
             {data.salesRanking.map((sr, i) => (
               <HBar
                 key={i}

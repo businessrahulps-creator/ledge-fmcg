@@ -100,7 +100,7 @@ export function SalespersonStatementPdf({
           </View>
         </View>
 
-        <Text style={s.sectionTitle}>Performance scorecard</Text>
+        <Text style={s.sectionTitle} minPresenceAhead={60}>Performance scorecard</Text>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "60%" }]}>Metric</Text>
@@ -114,7 +114,7 @@ export function SalespersonStatementPdf({
           ))}
         </View>
 
-        <Text style={s.sectionTitle}>Order history ({orders.length})</Text>
+        <Text style={s.sectionTitle} minPresenceAhead={60}>Order history ({orders.length})</Text>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "18%" }]}>Order</Text>

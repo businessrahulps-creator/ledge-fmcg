@@ -122,7 +122,7 @@ export function OrderInvoicePdf({
         </View>
 
         {/* Line items table */}
-        <Text style={s.sectionTitle}>Line Items</Text>
+        <Text style={s.sectionTitle} minPresenceAhead={60}>Line Items</Text>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
@@ -189,7 +189,7 @@ export function OrderInvoicePdf({
         {/* Bank Details */}
         {(bankName || bankAccount) && (
           <View style={{ marginTop: 12 }}>
-            <Text style={s.sectionTitle}>Bank Details</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Bank Details</Text>
             <View style={{ flexDirection: "row", gap: 12 }}>
               {bankName && (
                 <View style={s.summaryCard}>

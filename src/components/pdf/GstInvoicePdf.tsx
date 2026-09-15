@@ -130,7 +130,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
         </View>
 
         {/* Line Items Table */}
-        <Text style={s.sectionTitle}>Line Items</Text>
+        <Text style={s.sectionTitle} minPresenceAhead={60}>Line Items</Text>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
@@ -216,7 +216,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
         {/* Bank Details */}
         {(data.sellerBankName || data.sellerBankAccount) && (
           <View style={{ marginTop: 12 }}>
-            <Text style={s.sectionTitle}>Bank Details</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Bank Details</Text>
             <View style={{ flexDirection: "row", gap: 12 }}>
               {data.sellerBankName && (
                 <View style={s.summaryCard}>
