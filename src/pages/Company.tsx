@@ -15,6 +15,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/utils/errorLog";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
@@ -35,6 +36,7 @@ const upper = (re: RegExp, max: number) => (v: string) =>
 
 export default function Company() {
   const api = useApi();
+  const canEditCompany = useCan("manage_billing");
   const { companyId } = useAuth();
   const { updateCompanyInfo } = api;
   const savedPrefix = api.orders.prefix();
@@ -469,7 +471,7 @@ export default function Company() {
                   </p>}
             </div>
 
-            <Button onClick={handleSaveClick} disabled={isSubmitting || !isValid}>
+            <Button onClick={handleSaveClick} disabled={!canEditCompany || isSubmitting || !isValid}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>

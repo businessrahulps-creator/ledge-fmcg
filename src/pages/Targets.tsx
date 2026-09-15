@@ -4,6 +4,7 @@ import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
+import { useCan } from "@/hooks/useCan";
 import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
 
@@ -258,6 +259,7 @@ const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
 
 export default function Targets() {
   const api = useApi();
+  const canManageTargets = useCan("manage_schemes");
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
   const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
@@ -462,7 +464,7 @@ export default function Targets() {
                     existingTarget={existingTarget}
                     periodStart={period}
                     periodType={periodType}
-                    onSave={handleSave}
+                    onSave={canManageTargets ? handleSave : undefined}
                   />
                 );
               })
@@ -498,7 +500,7 @@ export default function Targets() {
                     existingTarget={existingTarget}
                     periodStart={period}
                     periodType={periodType}
-                    onSave={handleSave}
+                    onSave={canManageTargets ? handleSave : undefined}
                   />
                 );
               })
