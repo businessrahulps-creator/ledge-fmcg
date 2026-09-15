@@ -128,12 +128,13 @@ export default function BillView() {
             <Loader2 className="h-4 w-4 animate-spin" /> Preparing the bill…
           </div>
         )}
-        {url && (
-          <p className="sr-only">
-            If the bill does not appear, use the Download button above.
-          </p>
-        )}
       </main>
+      {url && (
+        <footer className="border-t border-border bg-background px-4 py-2 text-center text-[11px] text-muted-foreground">
+          Bill not showing on your screen? Use Download above to open the file.
+        </footer>
+      )}
     </div>
+
   );
 }
