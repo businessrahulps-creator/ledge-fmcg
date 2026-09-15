@@ -41,9 +41,17 @@ if (isPreviewEnv) {
 }
 
 
+import { splashStep, splashDone } from "@/lib/boot-splash";
+
+splashStep("Signing you in", 40);
+
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
   </HelmetProvider>,
 );
+
+// Safety net: whatever happens during boot, never leave the opening animation
+// sitting on top of the app. The screen behind it always renders something.
+setTimeout(() => splashDone(), 6000);
 
