@@ -795,18 +795,22 @@ export default function Billing() {
                     <ReportPdf
                       title="Payments received"
                       columns={[
-                        { header: "Date", width: "16%" },
-                        { header: "Dealer", width: "26%" },
-                        { header: "Against", width: "24%" },
-                        { header: "Paid by", width: "16%" },
-                        { header: "Amount", width: "18%", align: "right" },
+                        { header: "Date", width: "13%" },
+                        { header: "Dealer", width: "21%" },
+                        { header: "Against", width: "18%" },
+                        { header: "Paid by", width: "13%" },
+                        { header: "Reference", width: "15%" },
+                        { header: "Amount", width: "12%", align: "right" },
+                        { header: "Status", width: "8%" },
                       ]}
                       rows={paymentRows.map(r => [
                         formatIndianDate(r.paidOn),
                         dealerName(r.distributorId),
                         (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "",
                         modeLabels[r.mode] || r.mode,
+                        r.reference || "—",
                         formatCurrency(r.amount),
+                        r.status === "voided" ? "Cancelled" : "Posted",
                       ])}
                     />,
                   ).toBlob();
