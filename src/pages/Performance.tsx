@@ -9,6 +9,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
+import { useReceivables } from "@/hooks/useReceivables";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { orderInScope, orderDateForMode, netTotal, type RevenueMode } from "@/lib/revenue";
 
