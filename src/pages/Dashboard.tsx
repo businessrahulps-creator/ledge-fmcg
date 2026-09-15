@@ -138,7 +138,7 @@ export default function Dashboard() {
       if (od && od >= monthStart && od <= today) {
         monthlyOrders.push(o);
         if (isBooked(o)) monthBookedRev += net;
-        if (o.paymentStatus === "pending" || o.paymentStatus === "partial") monthOutstanding += net;
+        if (payStatus(o.id) !== "paid") monthOutstanding += net;
         if (delivered) monthDeliveredCount++;
       } else if (od && od >= prevMonthStart && od <= prevMonthEnd) {
         prevMonthOrderCount++;
@@ -182,7 +182,7 @@ export default function Dashboard() {
   const deliveredDelta = monthDeliveredPct - prevMonthDeliveredPct;
   // DSO proxy: avg days since order for outstanding orders
   const outstandingOrders = useMemo(
-    () => monthlyOrders.filter((o) => o.paymentStatus === "pending" || o.paymentStatus === "partial"),
+    () => monthlyOrders.filter((o) => payStatus(o.id) !== "paid"),
     [monthlyOrders],
   );
   const avgOutstandingDays = useMemo(() => {
@@ -222,7 +222,6 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  const { rows: receivableRows } = useReceivables();
 
   // Credit at Risk — unpaid GST bills, aged, computed from orders + distributors
   const agingRows = useMemo(
@@ -746,7 +745,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>
-                        <td className="px-6 py-4"><StatusBadge status={order.paymentStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={payStatus(order.id)} /></td>
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                       </tr>
                     ))}
@@ -772,7 +771,7 @@ className="h-full rounded-full bg-primary/60 dark:bg-primary/50"
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                         <div className="flex gap-1.5">
-                          <StatusBadge status={o.paymentStatus} />
+                          <StatusBadge status={payStatus(o.id)} />
                           <StatusBadge status={o.deliveryStatus} />
                         </div>
                       </div>
