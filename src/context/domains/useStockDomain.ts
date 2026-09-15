@@ -135,44 +135,6 @@ export function useStockDomain(deps: DomainDeps) {
     } catch { /* ignore */ }
   }, [deps.companyId]);
 
-  const deductStockForOrder = useCallback(async (
-    orderId: string, lines: OrderLine[], godownId: string, cId: string
-  ) => {
-    const today = new Date().toISOString().split("T")[0];
-    let hasNegative = false;
-
-    const freshStock = await fetchAllChunked<any>(
-      () => supabase.from("stock_items").select("*").eq("company_id", cId).eq("godown_id", godownId),
-      1000, 200, `stock_items(godown=${godownId})`,
-    );
-
-    for (const line of lines) {
-      await supabase.from("stock_deductions").insert({
-        company_id: cId, order_id: orderId, product_id: line.productId,
-        godown_id: godownId, quantity_deducted: line.quantity, date: today,
-      });
-      const existing = freshStock.find(si => si.product_id === line.productId && si.godown_id === godownId);
-      if (existing) {
-        const newQty = existing.quantity - line.quantity;
-        if (newQty < 0) hasNegative = true;
-        await supabase.from("stock_items").update({ quantity: newQty, last_deducted_date: today }).eq("id", existing.id);
-        existing.quantity = newQty;
-      } else {
-        hasNegative = true;
-        await supabase.from("stock_items").insert({
-          company_id: cId, product_id: line.productId, godown_id: godownId,
-          quantity: -line.quantity, threshold: 0, last_deducted_date: today,
-        });
-      }
-    }
-    await safeRefetchStockItems();
-    if (hasNegative) {
-      toast.warning("Negative stock warning", {
-        description: "Some products now have negative stock in this warehouse. This is allowed but please reconcile inventory.",
-      });
-    }
-  }, [safeRefetchStockItems]);
-
   // Warehouse delete goes through the server: it refuses while stock or undispatched orders
   // remain, and clears the warehouse's empty stock rows so nothing is orphaned.
   const deleteLocation = useCallback(async (id: string): Promise<boolean> => {
@@ -196,6 +158,6 @@ export function useStockDomain(deps: DomainDeps) {
     stockItems, setStockItems, locations, setLocations,
     addStockItem, updateStockItem, deleteStockItem,
     addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation,
-    safeRefetchGodowns, safeRefetchStockItems, deductStockForOrder,
+    safeRefetchGodowns, safeRefetchStockItems,
   };
 }

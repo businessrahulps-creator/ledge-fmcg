@@ -109,9 +109,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const ordersDeps = useMemo(() => ({
     ...deps,
-    deductStockForOrder: stock.deductStockForOrder,
     safeRefetchStockItems: stock.safeRefetchStockItems,
-  }), [deps, stock.deductStockForOrder, stock.safeRefetchStockItems]);
+  }), [deps, stock.safeRefetchStockItems]);
 
   const orders = useOrdersDomain(ordersDeps);
 

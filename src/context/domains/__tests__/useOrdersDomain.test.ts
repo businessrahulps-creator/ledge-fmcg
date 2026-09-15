@@ -28,7 +28,6 @@ import { enqueueMutation } from "@/lib/offline-store";
 function makeDeps(overrides = {}) {
   return {
     ...createMockDeps(),
-    deductStockForOrder: vi.fn().mockResolvedValue(undefined),
     safeRefetchStockItems: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -223,7 +222,6 @@ describe("useOrdersDomain", () => {
       await result.current.updateOrder("o1", { deliveryStatus: "delivered" });
     });
 
-    expect(deps.deductStockForOrder).not.toHaveBeenCalled();
   });
 
   it("deleteOrder online — cascading delete", async () => {
