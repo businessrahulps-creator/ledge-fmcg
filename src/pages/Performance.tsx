@@ -140,6 +140,9 @@ export default function Performance() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>(undefined);
   const [customTo, setCustomTo] = useState<Date | undefined>(undefined);
   const orders = api.orders.list();
+  // Payment chips/split come from the receipts ledger, never orders.payment_status.
+  const { paymentStatus: payStatusMap } = useReceivables();
+  const payStatus = (oid: string) => payStatusMap.get(oid) ?? "pending";
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
   const products = api.products.list();
