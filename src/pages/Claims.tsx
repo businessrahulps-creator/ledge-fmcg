@@ -250,7 +250,7 @@ function NewClaimDialog({
     if (match) selectOrder(match);
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
-  const returnLines = (selectedBill?.lines ?? []).map(l => {
+  const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
     const returnedQty = alreadyReturned[l.id as string] ?? 0;
     return {
       invoiceLineId: l.id as string,
