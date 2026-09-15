@@ -78,6 +78,8 @@ export default function NewOrder() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
+  /** Set once the person has been told this order is ahead of available stock. */
+  const [shortStockAck, setShortStockAck] = useState(false);
 
   // Refs for scroll-to-first-error
   const dealerFieldRef = useRef<HTMLDivElement>(null);
