@@ -12,6 +12,7 @@ import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
+import { useReceivables } from "@/hooks/useReceivables";
 import { formatIndianDate } from "@/utils/formatDate";
 
 export default function SalespersonDetail() {
