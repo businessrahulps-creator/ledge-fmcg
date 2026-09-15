@@ -75,7 +75,12 @@ export function ReportPdf({
                   key={i}
                   style={[
                     s.tableHeaderCell,
-                    { width: col.width, textAlign: col.align || "left" },
+                    {
+                      width: col.width,
+                      textAlign: col.align || "left",
+                      paddingRight: 8,
+                      paddingLeft: col.align === "right" ? 6 : 0,
+                    },
                   ]}
                 >
                   {col.header}
