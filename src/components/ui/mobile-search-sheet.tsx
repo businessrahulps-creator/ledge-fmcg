@@ -76,6 +76,7 @@ export function MobileSearchSheet({
           <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
 
           {/* Header */}
+          {hideHeader ? null : (
           <div
             className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/60 bg-background/95 px-2 backdrop-blur"
             style={{ paddingTop: "max(env(safe-area-inset-top), 8px)", paddingBottom: 8 }}
