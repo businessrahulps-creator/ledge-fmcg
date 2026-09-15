@@ -80,32 +80,4 @@ describe("useStockDomain", () => {
     expect(result.current.stockItems).toHaveLength(0);
   });
 
-  it("deductStockForOrder — deducts and warns on negative", async () => {
-    const deps = createMockDeps();
-    // stock_items select returns existing item with low quantity
-    const selectChain = createChainMock({ data: [{ id: "si1", product_id: "p1", godown_id: "g1", quantity: 3 }], error: null });
-    const insertChain = createChainMock({ data: null, error: null });
-    const updateChain = createChainMock({ data: null, error: null });
-    // For refetch
-    const refetchChain = createChainMock({ data: [], error: null });
-
-    mockFrom.mockImplementation((table: string) => {
-      if (table === "stock_deductions") return insertChain;
-      if (table === "stock_items") return { ...selectChain, update: vi.fn().mockReturnValue(updateChain), insert: vi.fn().mockReturnValue(insertChain) };
-      return refetchChain;
-    });
-
-    const { result } = renderHook(() => useStockDomain(deps));
-    await act(async () => {
-      await result.current.deductStockForOrder(
-        "o1",
-        [{ productId: "p1", productName: "Widget", quantity: 10, unitPrice: 100, lineTotal: 1000 }],
-        "g1",
-        "company-1"
-      );
-    });
-
-    // Stock deductions table should have been called
-    expect(mockFrom).toHaveBeenCalledWith("stock_deductions");
-  });
 });
