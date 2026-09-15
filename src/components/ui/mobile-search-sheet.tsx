@@ -42,6 +42,7 @@ export function MobileSearchSheet({
   children,
   leading,
   headerSlot,
+  hideHeader = false,
 }: MobileSearchSheetProps) {
 
   const inputRef = React.useRef<HTMLInputElement>(null);
