@@ -2,15 +2,22 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export function usePagination(totalItems: number, pageSize = DEFAULT_PAGE_SIZE) {
+/**
+ * @param resetKey  Any value describing the active search/filter. Changing it sends the
+ *                  user back to page 1 — needed because a different filter can produce a
+ *                  list of the same length, which the item count alone cannot detect.
+ */
+export function usePagination(totalItems: number, pageSize = DEFAULT_PAGE_SIZE, resetKey?: unknown) {
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  // Reset to page 1 when totalItems changes (search/filter)
+  const resetToken = typeof resetKey === "string" ? resetKey : JSON.stringify(resetKey ?? null);
+
+  // Reset to page 1 when the result count or the active search/filter changes
   useEffect(() => {
     setPage(1);
-  }, [totalItems]);
+  }, [totalItems, resetToken]);
 
   // Clamp page if it exceeds totalPages
   useEffect(() => {

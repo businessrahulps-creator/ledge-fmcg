@@ -242,9 +242,12 @@ export default function Settings() {
                     <p className="mt-0.5 text-xs font-medium md:mt-1 md:text-sm">Unlimited</p>
                   </div>
                 </div>
-                <Button className="w-full" size="lg" onClick={() => toast.info("Billing integration coming soon — contact support")}>
-                  Upgrade Plan
+                <Button className="w-full" size="lg" variant="outline" disabled>
+                  Upgrade Plan — coming soon
                 </Button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  Want to upgrade now? Contact support and we will set it up for you.
+                </p>
               </div>
             </motion.div>
           </TabsContent>

@@ -109,15 +109,17 @@ export default function Orders() {
   const getOrderBillingStatus = useCallback((orderId: string) => {
     const docs = invoicesByOrderId.get(orderId);
     if (!docs || docs.length === 0) return null;
-    const gstFinal = docs.find(d => d.docType === "gst_invoice" && d.status === "final");
-    if (gstFinal) return { label: "GST Invoice (Final)", color: "bg-success/10 text-success" };
+    // Any GST bill that is no longer a draft is a real, issued bill — whatever its
+    // payment state (posted / partial / paid).
+    const gstIssued = docs.find(d => d.docType === "gst_invoice" && d.status !== "draft");
+    if (gstIssued) return { label: "GST Bill", color: "bg-success/10 text-success" };
     const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
-    if (gstDraft) return { label: "GST Invoice (Draft)", color: "bg-warning/10 text-warning" };
+    if (gstDraft) return { label: "GST Bill (Draft)", color: "bg-warning/10 text-warning" };
     const proforma = docs.find(d => d.docType === "proforma");
     if (proforma) return { label: "Proforma", color: "bg-accent/10 text-accent" };
     const estimate = docs.find(d => d.docType === "estimate");
     if (estimate) return { label: "Estimate", color: "bg-warning/10 text-warning" };
-    return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
+    return { label: "Document", color: "bg-muted text-muted-foreground" };
   }, [invoicesByOrderId]);
 
   const billedOrderIds = useMemo(() => {
@@ -145,7 +147,11 @@ export default function Orders() {
     [orders, billedOrderIds],
   );
 
-  const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
+  const { page, totalPages, from, to, setPage } = usePagination(
+    filtered.length,
+    undefined,
+    `${debouncedSearch}|${paymentFilter}|${deliveryFilter}|${needsBillOnly}`,
+  );
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
   // ── Period insights (no new business logic — derived from existing orders)

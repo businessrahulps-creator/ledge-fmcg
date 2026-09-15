@@ -732,7 +732,7 @@ export default function Performance() {
                     {dealerData.map(d => {
                       const rc = churnRiskConfig[d.risk];
                       return (
-                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/distributors")}>
+                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" role="button" tabIndex={0} onClick={() => navigate("/distributors")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/distributors"); } }}>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{d.name}</p>
                             <p className="text-[10px] text-muted-foreground truncate tabular-nums">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
@@ -796,7 +796,7 @@ export default function Performance() {
                     {spData.map(d => {
                       const hc = performanceHealthConfig[d.health];
                       return (
-                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate("/salespersons")}>
+                        <div key={d.id} className="flex items-center gap-3 rounded-lg border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" role="button" tabIndex={0} onClick={() => navigate("/salespersons")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/salespersons"); } }}>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium truncate">{d.name}</p>
                             <p className="text-[10px] text-muted-foreground truncate tabular-nums">{d.orderCount} orders · {formatCurrency(d.revenue)}</p>
