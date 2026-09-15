@@ -833,18 +833,19 @@ export default function Billing() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedDocs.map(inv => {
-                          const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
+                        {paginatedDocs.map(doc => {
+                          const linkedOrder = doc.orderId ? orders.find(o => o.id === doc.orderId) : null;
+                          const view = billStatusView(doc.status);
                           return (
-                            <TableRow key={inv.id} className="row-hover">
+                            <TableRow key={doc.key} className="row-hover">
                               <TableCell>
-                                <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
-                                  {docTypeLabels[inv.docType] || inv.docType}
+                                <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.type] || 'bg-muted text-muted-foreground'}`}>
+                                  {docTypeLabels[doc.type] || doc.type}
                                 </span>
                               </TableCell>
-                              <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatIndianDate(inv.invoiceDate)}</TableCell>
-                              <TableCell className="text-sm">{inv.buyerName}</TableCell>
+                              <TableCell className="font-mono text-xs font-medium">{doc.number}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatIndianDate(doc.date)}</TableCell>
+                              <TableCell className="text-sm">{doc.buyer}</TableCell>
                               <TableCell className="text-xs">
                                 {linkedOrder ? (
                                   <button
@@ -858,33 +859,35 @@ export default function Billing() {
                                   <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-right font-mono text-sm tabular-nums">{formatCurrency(inv.grandTotal)}</TableCell>
+                              <TableCell className="text-right font-mono text-sm tabular-nums">
+                                {doc.invoice ? formatCurrency(doc.amount) : `− ${formatCurrency(doc.amount)}`}
+                              </TableCell>
                               <TableCell>
-                                {(() => {
-                                  const view = billStatusView(inv.status);
-                                  return (
-                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
-                                      {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
-                                    </span>
-                                  );
-                                })()}
+                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
+                                  {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
+                                </span>
                               </TableCell>
                               <TableCell className="text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(inv)} title="View">
-                                    <Eye className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
-                                    <Download className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)} title="Share on WhatsApp">
-                                    <WhatsAppIcon className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
+                                {doc.invoice ? (
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(doc.invoice as Invoice)} title="View">
+                                      <Eye className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(doc.invoice as Invoice)} title="Download PDF">
+                                      <Download className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)} title="Share on WhatsApp">
+                                      <WhatsAppIcon className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground">{doc.note || "Return credited"}</span>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
                         })}
+
                       </TableBody>
                     </Table>
                   </div>
