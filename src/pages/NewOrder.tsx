@@ -277,6 +277,18 @@ export default function NewOrder() {
       return;
     }
 
+    // Booking ahead of stock is allowed, but never by accident: the person has to
+    // see it once and press Save again before the order goes in.
+    if (stockWarnings.size > 0 && !shortStockAck) {
+      setShortStockAck(true);
+      toast.warning("Not enough stock for this order yet", {
+        description: "You can still book it as an advance order, but it cannot be dispatched until stock comes in. Press Save again to book it.",
+        duration: 9000,
+      });
+      productsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
