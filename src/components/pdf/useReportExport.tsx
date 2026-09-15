@@ -45,7 +45,7 @@ export async function exportReportPdf(opts: ReportExportOptions): Promise<void> 
       title={opts.title}
       subtitle={opts.subtitle}
       showCompany={sel.company}
-      showSummary={sel.summary}
+      showSummary={sel.summary && opts.summary.length > 0}
       showTable={sel.table}
       summary={opts.summary}
       columns={opts.columns}
