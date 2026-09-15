@@ -240,7 +240,9 @@ export function CommandPdf({
           )}
         </View>
 
-        {/* Credit at risk */}
+        {/* Credit at risk — heading grouped with the table so it never strands
+            alone at the foot of a page. */}
+        <View>
         <SectionTitle>Credit at risk</SectionTitle>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
@@ -261,6 +263,7 @@ export function CommandPdf({
               </View>
             ))
           )}
+        </View>
         </View>
 
         {showLeaderboards && (
