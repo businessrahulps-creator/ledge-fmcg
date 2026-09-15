@@ -116,6 +116,47 @@ export function advancesByDealer(
   return map;
 }
 
+export type DerivedPaymentStatus = "paid" | "partial" | "pending";
+
+/**
+ * What an order's payment chip should say, derived from receipts only.
+ *
+ *   billed order   → paid when bill − receipts − credit notes is settled,
+ *                    partial when some money came in, else pending.
+ *   unbilled order → partial when an advance is held, else pending.
+ *                    It can never be "paid": there is no bill to settle.
+ *
+ * `orders.payment_status` is a legacy flag and is deliberately ignored.
+ */
+export function paymentStatusByOrder(
+  orders: Order[],
+  invoices: Invoice[],
+  receivedByInvoice: Map<string, number>,
+  receivedByOrder: Map<string, number>,
+  creditedByInvoice: Map<string, number>,
+): Map<string, DerivedPaymentStatus> {
+  const invByOrder = new Map<string, Invoice>();
+  for (const inv of invoices) {
+    if (inv.docType !== "gst_invoice" || inv.status === "draft" || !inv.sourceOrderId) continue;
+    invByOrder.set(inv.sourceOrderId, inv);
+  }
+
+  const map = new Map<string, DerivedPaymentStatus>();
+  for (const o of orders) {
+    const inv = invByOrder.get(o.id);
+    if (inv) {
+      const billed = Number(inv.grandTotal || 0);
+      const received = receivedByInvoice.get(inv.id) || 0;
+      const credited = creditedByInvoice.get(inv.id) || 0;
+      const due = Math.round((billed - received - credited) * 100) / 100;
+      map.set(o.id, due <= 0.5 ? "paid" : received > 0 ? "partial" : "pending");
+    } else {
+      map.set(o.id, (receivedByOrder.get(o.id) || 0) > 0 ? "partial" : "pending");
+    }
+  }
+  return map;
+}
+
 /**
  * Per-dealer ageing built from unpaid bills. Same row shape the dashboard and
  * command widgets already render, so only the source changes, not the UI.
