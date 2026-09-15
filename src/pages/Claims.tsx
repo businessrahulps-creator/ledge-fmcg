@@ -211,13 +211,19 @@ function NewClaimDialog({
     productName: l.productName,
     billedQty: l.quantity,
     unitPrice: l.unitPrice,
+    gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
     goodQty: good[l.id] ?? 0,
     damagedQty: damaged[l.id] ?? 0,
   }));
 
+  // Preview must match the credit note the server actually raises: taxable value plus GST.
   const returnValue = returnLines.reduce(
     (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice, 0
   );
+  const returnTax = returnLines.reduce(
+    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice * ((l.gstRate ?? 0) / 100), 0
+  );
+  const returnTotal = returnValue + returnTax;
 
   const handleSubmit = async () => {
     if (!selectedOrder || !selectedBill) return;
@@ -357,9 +363,19 @@ function NewClaimDialog({
                 </p>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs">
-                <span className="text-muted-foreground">Credit note value (before tax)</span>
-                <span className="font-semibold">{formatCurrency(returnValue)}</span>
+              <div className="space-y-1 rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Value of goods</span>
+                  <span className="num">{formatCurrency(returnValue)}</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>GST</span>
+                  <span className="num">{formatCurrency(returnTax)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-border pt-1 text-sm">
+                  <span className="font-medium">Credit note total</span>
+                  <span className="font-semibold num">{formatCurrency(returnTotal)}</span>
+                </div>
               </div>
             </div>
 
