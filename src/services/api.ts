@@ -80,6 +80,7 @@ export function useApi() {
     claims: {
       list: () => data.claims,
       recordReturn: data.recordReturn,
+      resolveClaim: data.resolveClaim,
     },
     invoices: {
       list: () => data.invoices,

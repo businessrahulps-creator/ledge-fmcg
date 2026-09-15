@@ -2,7 +2,9 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/data/mock-data";
-import { BUCKET_TONE, computeDealerAging, type AgingBucket } from "@/lib/aging";
+import { BUCKET_TONE, type AgingBucket } from "@/lib/aging";
+import { agingFromReceivables } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
 import type { Order, Distributor } from "@/data/mock-data";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
@@ -24,7 +26,8 @@ function rowField() {
 }
 
 function AgingStripInner({ orders, distributors }: Props) {
-  const rows = computeDealerAging(orders, distributors);
+  const { rows: receivableRows } = useReceivables();
+  const rows = agingFromReceivables(receivableRows, distributors);
   const totals = rows.reduce(
     (acc, r) => ({
       bucket_0_30: acc.bucket_0_30 + r.bucket_0_30,

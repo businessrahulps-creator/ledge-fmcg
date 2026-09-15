@@ -163,10 +163,26 @@ export default function NewOrder() {
   // Credit guard — projected against the bill this order will become (order value + GST),
   // because the dealer's outstanding figure is itself GST-inclusive.
   const netOrderTotal = Math.max(0, orderTotal - totalSchemeSavings);
+  // A product with no GST rate set is NOT tax-free — assume the common 18% for the
+  // credit guard so exposure is never understated, and tell the user to confirm it.
+  const ASSUMED_GST_RATE = 18;
   const gstRateFor = useCallback(
-    (productId: string) => Number(products.find(p => p.id === productId)?.gstRate ?? 0),
+    (productId: string) => {
+      const rate = products.find(p => p.id === productId)?.gstRate;
+      return rate === null || rate === undefined ? ASSUMED_GST_RATE : Number(rate);
+    },
     [products],
   );
+  const missingGstProducts = useMemo(() => {
+    const names = new Set<string>();
+    for (const l of lines) {
+      if (!l.productId) continue;
+      const p = products.find(x => x.id === l.productId);
+      if (p && (p.gstRate === null || p.gstRate === undefined)) names.add(p.name);
+    }
+    return [...names];
+  }, [lines, products]);
+
   const orderBillEquivalent = useMemo(
     () => billEquivalentTotal(lines, gstRateFor, totalSchemeSavings),
     [lines, gstRateFor, totalSchemeSavings],
@@ -469,6 +485,21 @@ export default function NewOrder() {
                 valueSuffix="OVER LIMIT"
               />
             )}
+
+            {/* GST rate not confirmed — the bill can't be raised until it is */}
+            {missingGstProducts.length > 0 && (
+              <SignalCard
+                tier="warning"
+                icon={AlertTriangle}
+                label="GST RATE NOT SET"
+                caption={`Set the GST rate for ${missingGstProducts.join(", ")} in Stock`}
+                subCaption="You can book this order now, but the bill can't be raised until the rate is confirmed. We've assumed 18% for the credit check."
+                value={`${missingGstProducts.length} product${missingGstProducts.length > 1 ? "s" : ""}`}
+
+              />
+            )}
+
+
 
             {/* Order Lines */}
             <section ref={productsSectionRef} className="glass-card p-4 md:p-6">

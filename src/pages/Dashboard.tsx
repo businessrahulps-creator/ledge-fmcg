@@ -20,7 +20,9 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
-import { computeDealerAging, sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
+import { agingFromReceivables } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
+import { sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
 import { SignalCard } from "@/components/ui/signal-card";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
 
@@ -202,10 +204,12 @@ export default function Dashboard() {
     { label: "Dispatched", value: dispatchedOrders.toString() },
   ];
 
-  // Credit at Risk — aging-based, computed from orders + distributors
+  const { rows: receivableRows } = useReceivables();
+
+  // Credit at Risk — unpaid GST bills, aged, computed from orders + distributors
   const agingRows = useMemo(
-    () => sortByRisk(computeDealerAging(orders, distributors, today)),
-    [orders, distributors, today],
+    () => sortByRisk(agingFromReceivables(receivableRows, distributors)),
+    [receivableRows, distributors, today],
   );
   const totalOutstandingAll = useMemo(
     () => agingRows.reduce((s, r) => s + r.totalOutstanding, 0),

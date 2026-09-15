@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, AlertTriangle, Pencil, Truck, PackageCheck, Lock } from "lucide-react";
+import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, XCircle, AlertTriangle, Pencil, Truck, PackageCheck, Lock } from "lucide-react";
 import { HeroBand } from "@/components/ui/hero-band";
 import { JourneyTrack, type JourneyStep } from "@/components/ui/journey-track";
 import { EntityHistory } from "@/components/layout/EntityHistory";
@@ -11,6 +11,7 @@ import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
 // out of the OrderDetail initial bundle and to avoid a static+dynamic chunking conflict.
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -94,6 +95,9 @@ export default function OrderDetail() {
   const [dispatchVehicle, setDispatchVehicle] = useState("");
   const [dispatchDriver, setDispatchDriver] = useState("");
 
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -239,7 +243,12 @@ export default function OrderDetail() {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
     if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
-    const gstRateFor = (productId: string) => Number(products.find(p => p.id === productId)?.gstRate ?? 0);
+    // No rate set doesn't mean tax-free — assume 18% so exposure is never understated.
+    const gstRateFor = (productId: string) => {
+      const rate = products.find(p => p.id === productId)?.gstRate;
+      return rate === null || rate === undefined ? 18 : Number(rate);
+    };
+
     // The dealer's outstanding is GST-inclusive, so compare like with like.
     const alreadyCounted = order.paymentStatus === "paid"
       ? 0
@@ -331,6 +340,22 @@ export default function OrderDetail() {
     toast.success(res.alreadyDone ? "This order already has a bill." : `Bill ${res.invoiceNumber} created.`);
   };
 
+
+  const handleCancelOrder = async () => {
+    if (!order || cancelLoading) return;
+    if (cancelReason.trim().length < 3) {
+      toast.error("Please write a short reason for cancelling.");
+      return;
+    }
+    setCancelLoading(true);
+    const ok = await api.orders.cancel(order.id, cancelReason.trim());
+    setCancelLoading(false);
+    if (ok) {
+      toast.success("Order cancelled", { description: `${order.orderNumber} has been cancelled.` });
+      setCancelOpen(false);
+      setCancelReason("");
+    }
+  };
 
   const handleDeleteOrder = async () => {
     if (!deleteTarget) return;
@@ -456,11 +481,20 @@ export default function OrderDetail() {
           ]}
         />
 
+        {order.cancelledAt && (
+          <div className="glass-card border-l-4 border-destructive p-4 md:p-5">
+            <p className="text-sm font-semibold text-destructive">This order was cancelled</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatIndianDate(order.cancelledAt)}{order.cancelReason ? ` — ${order.cancelReason}` : ""}
+            </p>
+          </div>
+        )}
+
         {/* Where this order stands */}
-        <JourneyTrack steps={journey} />
+        {!order.cancelledAt && <JourneyTrack steps={journey} />}
 
         {/* What to do next — one clear action */}
-        <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-4 md:p-5">
+        {!order.cancelledAt && <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-4 md:p-5">
           <div className="min-w-0">
             <p className="text-sm font-semibold">
               {!dispatched
@@ -510,7 +544,7 @@ export default function OrderDetail() {
               </Button>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Plain facts — read, don't hunt */}
         <div className="fact-strip">
@@ -731,11 +765,21 @@ export default function OrderDetail() {
               <WhatsAppIcon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">WhatsApp</span>
             </Button>
+            {!order.cancelledAt && order.deliveryStatus === "pending" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setCancelOpen(true); setCancelReason(""); }}
+              >
+                <XCircle className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Cancel order</span>
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"
               className="ml-auto"
-              disabled={order.deliveryStatus === "delivered" || received > 0}
+              disabled={order.deliveryStatus === "delivered" || received > 0 || !!order.cancelledAt}
               title={received > 0 ? "Payments have been recorded on this order. Cancel them first." : undefined}
               onClick={() => { setDeleteTarget(order); setDeleteConfirmText(""); }}
             >
@@ -871,6 +915,34 @@ export default function OrderDetail() {
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
             <Button onClick={saveOrder} disabled={isSaving}>{isSaving ? "Saving…" : "Save changes"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Order */}
+      <Dialog open={cancelOpen} onOpenChange={(v) => { if (!v && !cancelLoading) { setCancelOpen(false); setCancelReason(""); } }}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel this order</DialogTitle>
+            <DialogDescription>
+              {order.orderNumber} will be marked cancelled. It stays in your records with the reason, and no bill can be raised on it afterwards.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">Why is it being cancelled?</Label>
+            <Textarea
+              id="cancel-reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="e.g. Dealer asked to hold the order."
+              rows={3}
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelLoading}>Keep order</Button>
+            <Button variant="destructive" onClick={handleCancelOrder} disabled={cancelLoading}>
+              {cancelLoading ? "Cancelling…" : "Cancel order"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

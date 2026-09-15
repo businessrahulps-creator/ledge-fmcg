@@ -92,6 +92,8 @@ export interface Order {
   driverName: string;
   deliveryStatus: "pending" | "dispatched" | "delivered";
   deliveredAt?: string | null;
+  cancelledAt?: string | null;
+  cancelReason?: string;
   dispatchRemarks: string;
   godownId?: string;
   schemeSavings: number;

@@ -85,8 +85,8 @@ export function useTargetsDomain(deps: DomainDeps) {
     return true;
   }, []);
 
-  const addSecondarySale = useCallback(async (sale: SecondarySale) => {
-    if (!deps.companyId) return;
+  const addSecondarySale = useCallback(async (sale: SecondarySale): Promise<boolean> => {
+    if (!deps.companyId) return false;
 
     const dbRow = {
       company_id: deps.companyId, distributor_id: sale.distributorId, product_id: sale.productId,
@@ -100,11 +100,11 @@ export function useTargetsDomain(deps: DomainDeps) {
       setSecondarySales(prev => [mapped, ...prev]);
       await enqueueMutation({ type: "insert", table: "secondary_sales", clientTempId: tempId, payload: dbRow });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
 
     const { data, error } = await supabase.from("secondary_sales").insert(dbRow).select().single();
-    if (error) { handleSupabaseError(error, { source: "crud:secondary_sales.add", title: "Failed to record secondary sale" }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:secondary_sales.add", title: "Failed to record secondary sale" }); return false; }
     if (data) {
       const mapped: SecondarySale = {
         id: data.id, distributorId: sale.distributorId, productId: sale.productId,
@@ -113,7 +113,9 @@ export function useTargetsDomain(deps: DomainDeps) {
       };
       setSecondarySales(prev => [mapped, ...prev]);
     }
+    return true;
   }, [deps.companyId]);
+
 
   const deleteSecondarySale = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {

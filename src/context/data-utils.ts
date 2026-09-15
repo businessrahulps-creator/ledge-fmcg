@@ -34,6 +34,8 @@ export function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: a
       dispatchDate: o.dispatch_date, vehicle: o.vehicle, driverName: o.driver_name,
       deliveryStatus: o.delivery_status as Order["deliveryStatus"],
       deliveredAt: o.delivered_at || null,
+      cancelledAt: o.cancelled_at || null,
+      cancelReason: o.cancel_reason || "",
       dispatchRemarks: o.dispatch_remarks, godownId: o.godown_id || undefined,
       schemeSavings: Number(o.scheme_savings || 0), appliedSchemes: oSchemes,
     };

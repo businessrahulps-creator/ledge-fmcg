@@ -185,7 +185,7 @@ export interface DataContextType {
   updateScheme: (s: Scheme) => Promise<boolean>;
   deleteScheme: (id: string) => Promise<boolean>;
 
-  addSecondarySale: (s: SecondarySale) => void;
+  addSecondarySale: (s: SecondarySale) => Promise<boolean>;
   deleteSecondarySale: (id: string) => Promise<boolean>;
 
   targets: Target[];
@@ -200,6 +200,7 @@ export interface DataContextType {
     reason: string,
     godownId?: string | null,
   ) => Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null>;
+  resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
   invoices: Invoice[];
 
@@ -272,6 +273,7 @@ export interface TransactionalContextType {
   deleteTarget: DataContextType["deleteTarget"];
 
   recordReturn: DataContextType["recordReturn"];
+  resolveClaim: DataContextType["resolveClaim"];
 
 
   nextOrderNumber: DataContextType["nextOrderNumber"];

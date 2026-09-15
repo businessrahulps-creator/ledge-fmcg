@@ -13,6 +13,9 @@ import { RunRatePill } from "../RunRatePill";
 import { KpiRowSkeleton, ChartSkeleton, CardSkeleton } from "../CommandSkeleton";
 import { Card } from "@/components/ui/card";
 import { Users, Package } from "lucide-react";
+import { useReceivables } from "@/hooks/useReceivables";
+import { netTotal } from "@/lib/revenue";
+
 import {
   buildRevenueTrend,
   collectionsInPeriod,
@@ -38,6 +41,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
   const products = api.products.list();
   const targets = api.targets.list();
   const claims = api.claims.list();
+  const { receipts } = useReceivables();
 
   const computed = useMemo(() => {
     const prevRange: PeriodRange = {
@@ -50,8 +54,8 @@ export function OverviewTab({ range, period = "30d" }: Props) {
     const prevRevenue = dispatchedRevenue(orders, prevRange);
     const orderCount = ordersInPeriod(orders, range).length;
     const prevOrderCount = ordersInPeriod(orders, prevRange).length;
-    const collections = collectionsInPeriod(orders, range);
-    const prevCollections = collectionsInPeriod(orders, prevRange);
+    const collections = collectionsInPeriod(receipts, range);
+    const prevCollections = collectionsInPeriod(receipts, prevRange);
     const outstanding = outstandingTotal(distributors);
 
     const trend = buildRevenueTrend(orders, targets, range);
@@ -62,7 +66,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
     const skuRev = new Map<string, number>();
     const skuName = new Map<string, string>();
     for (const o of periodOrders) {
-      dealerRev.set(o.distributorId, (dealerRev.get(o.distributorId) || 0) + (o.total || 0));
+      dealerRev.set(o.distributorId, (dealerRev.get(o.distributorId) || 0) + netTotal(o));
       for (const l of o.lines) {
         skuRev.set(l.productId, (skuRev.get(l.productId) || 0) + (l.lineTotal || 0));
         skuName.set(l.productId, l.productName);

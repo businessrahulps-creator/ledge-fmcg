@@ -2452,6 +2452,10 @@ export type Database = {
         Returns: undefined
       }
       resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
+      resolve_claim_atomic: {
+        Args: { p_claim_id: string; p_notes?: string }
+        Returns: Json
+      }
       reverse_dispatch_for_order: {
         Args: { p_order_id: string }
         Returns: Json

@@ -150,9 +150,30 @@ export function useBillingDomain(deps: BillingDeps) {
     }
   }, [deps.safeRefetchStockItems]);
 
+  /** Close an open return/claim with a note. Server-side, audited, one-way. */
+  const resolveClaim = useCallback(async (claimId: string, notes: string): Promise<boolean> => {
+    if (!navigator.onLine) {
+      toast.error("Cannot close a return offline", { description: "Please reconnect and try again." });
+      return false;
+    }
+    try {
+      const { error } = await supabase.rpc("resolve_claim_atomic", {
+        p_claim_id: claimId,
+        p_notes: sanitizeInput(notes || ""),
+      });
+      if (error) throw error;
+      await safeRefetchClaims();
+      return true;
+    } catch (err: any) {
+      handleSupabaseError(err, { source: "rpc:resolve_claim_atomic", title: "Could not close this return", context: { claimId } });
+      return false;
+    }
+  }, [safeRefetchClaims]);
+
   return {
     invoices, setInvoices, claims, setClaims,
-    recordReturn,
+    recordReturn, resolveClaim,
     safeRefetchInvoices, safeRefetchClaims,
   };
 }
+

@@ -536,6 +536,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     addSecondarySale: targets.addSecondarySale, deleteSecondarySale: targets.deleteSecondarySale,
     addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
     recordReturn: billing.recordReturn,
+    resolveClaim: billing.resolveClaim,
     nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber,
   }), [
     orders.orders, billing.invoices, billing.claims,
@@ -547,7 +548,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     stock.addStockItem, stock.updateStockItem, stock.deleteStockItem, stock.setStockItems,
     targets.addSecondarySale, targets.deleteSecondarySale,
     targets.addTarget, targets.updateTarget, targets.deleteTarget,
-    billing.recordReturn,
+    billing.recordReturn, billing.resolveClaim,
     orders.nextOrderNumber, orders.previewOrderNumber,
   ]);
 
