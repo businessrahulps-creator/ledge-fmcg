@@ -44,6 +44,7 @@ import {
 } from "@/lib/aging";
 import { sumDue } from "@/lib/receivables";
 import { useReceivables } from "@/hooks/useReceivables";
+import { useCan } from "@/hooks/useCan";
 
 
 export default function DealerDetail() {
@@ -61,6 +62,7 @@ export default function DealerDetail() {
   const dealerSS = useMemo(() => allSecondarySales.filter(s => s.distributorId === id), [allSecondarySales, id]);
 
   // Money for this dealer comes from bills, posted receipts and credit notes — never order flags.
+  const canManageDealers = useCan("see_all_dealers");
   const { rows: receivableRows, receipts, creditNotes, advances, paymentStatus: paymentStatusByOrderId } = useReceivables();
   const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
   const invoices = api.invoices.list();
@@ -668,6 +670,7 @@ export default function DealerDetail() {
               <Button
                 size="sm"
                 className="h-9 gap-1.5 shrink-0"
+                disabled={!canManageDealers}
                 onClick={() => {
                   setSsForm({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
                   setSsOpen(true);
@@ -692,7 +695,7 @@ export default function DealerDetail() {
                         {ss.remarks ? ` · ${ss.remarks}` : ""}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={() => setDeleteSecondarySaleId(ss.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" disabled={!canManageDealers} onClick={() => setDeleteSecondarySaleId(ss.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
