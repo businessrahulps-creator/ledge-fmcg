@@ -36,6 +36,8 @@ import {
   Plus,
   Search,
   Clock,
+  ArrowLeft,
+  X,
 } from "lucide-react";
 
 /**
@@ -58,6 +60,15 @@ export function CommandPalette() {
   const api = useApi();
   const canPlaceOrders = useCan("place_orders");
   const isMobile = useIsMobile();
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+
+  // The sheet blocks its own auto-focus (iOS jump), so focus the real input
+  // once the slide-in has finished.
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const t = window.setTimeout(() => mobileInputRef.current?.focus(), 160);
+    return () => window.clearTimeout(t);
+  }, [open, isMobile]);
 
 
   useEffect(() => {
