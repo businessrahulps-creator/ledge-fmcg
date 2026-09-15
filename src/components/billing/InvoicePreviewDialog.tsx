@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import type { Invoice } from "@/context/DataContext";
 import type { InvoicePdfData } from "@/components/pdf/GstInvoicePdf";
 import { logError } from "@/utils/errorLog";
+import { withInvoiceLines } from "@/lib/invoice-lines";
 
 export function invoiceToPdfData(inv: Invoice): InvoicePdfData {
   return {
