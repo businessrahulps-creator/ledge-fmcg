@@ -233,15 +233,20 @@ function NewClaimDialog({
     if (match) selectOrder(match);
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
-  const returnLines = (selectedBill?.lines ?? []).map(l => ({
-    invoiceLineId: l.id as string,
-    productName: l.productName,
-    billedQty: l.quantity,
-    unitPrice: l.unitPrice,
-    gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
-    goodQty: good[l.id] ?? 0,
-    damagedQty: damaged[l.id] ?? 0,
-  }));
+  const returnLines = (selectedBill?.lines ?? []).map(l => {
+    const returnedQty = alreadyReturned[l.id as string] ?? 0;
+    return {
+      invoiceLineId: l.id as string,
+      productName: l.productName,
+      billedQty: l.quantity,
+      returnedQty,
+      remainingQty: Math.max(0, l.quantity - returnedQty),
+      unitPrice: l.unitPrice,
+      gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
+      goodQty: good[l.id] ?? 0,
+      damagedQty: damaged[l.id] ?? 0,
+    };
+  });
 
   // Preview must match the credit note the server actually raises: taxable value plus GST.
   const returnValue = returnLines.reduce(
