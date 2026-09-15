@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatIndianDate } from "@/utils/formatDate";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
