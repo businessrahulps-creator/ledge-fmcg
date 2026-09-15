@@ -306,15 +306,9 @@ export default function Billing() {
 
   const [pendingBillId, setPendingBillId] = useState<string | null>(null);
 
-  /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
-  const viewBill = useCallback(async (inv: Invoice) => {
-    setPendingBillId(inv.id);
-    const ok = await openInvoiceInNewTab(inv);
-    setPendingBillId(null);
-    if (!ok) {
-      toast.message("Your browser blocked the new tab — showing the bill here instead.");
-      setPreviewInvoice(inv);
-    }
+  /** Opens the bill on its own page in a new tab — a plain link, so nothing gets blocked. */
+  const viewBill = useCallback((inv: Invoice) => {
+    window.open(`/bill/${inv.id}`, "_blank", "noopener,noreferrer");
   }, []);
 
   const downloadBill = useCallback(async (inv: Invoice) => {
@@ -322,6 +316,7 @@ export default function Billing() {
     await handleDownloadPdf(inv);
     setPendingBillId(null);
   }, [handleDownloadPdf]);
+
 
 
   const remind = (inv: Invoice, due: number) => {
