@@ -358,6 +358,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   >
                     <Link
                       to={item.url}
+                      onPointerDown={armNav(item.url)}
                       aria-current={isActive ? "page" : undefined}
                       className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
                     >
@@ -470,6 +471,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                 <Link
                                   key={item.title}
                                   to={item.url}
+                                  onPointerDown={armNav(item.url)}
                                   onClick={() => setMoreOpen(false)}
                                   className={`group flex w-full items-center gap-3 px-3.5 min-h-[52px] text-left transition-colors duration-150 ${active ? "bg-primary/[0.05]" : "hover:bg-muted/40 active:bg-muted/60"}`}
                                 >
