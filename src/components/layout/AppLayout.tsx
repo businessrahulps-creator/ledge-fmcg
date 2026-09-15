@@ -12,6 +12,8 @@ import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
+import { signalNavDone, signalNavStart } from "@/components/NavProgress";
+import { prefetchRoute } from "@/lib/route-prefetch";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -170,6 +172,21 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // The page chunk has loaded and the shell is on screen — stop the top bar.
+  useEffect(() => {
+    signalNavDone();
+  }, [location.pathname]);
+
+  // Start the chunk download and the progress bar on touch-down, so the press
+  // registers instantly instead of looking stuck.
+  const armNav = useCallback(
+    (url: string) => () => {
+      prefetchRoute(url);
+      if (!location.pathname.startsWith(url)) signalNavStart();
+    },
+    [location.pathname],
+  );
 
   return (
     <SidebarProvider>
