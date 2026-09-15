@@ -1,3 +1,4 @@
+import { toDateKey, addDaysToKey } from "@/utils/dateKey";
 import { useState, useMemo } from "react";
 import {
   AlertDialog,
@@ -426,18 +427,18 @@ export default function DealerDetail() {
             {(() => {
               const allTargets = api.targets.list();
               const now = new Date();
-              const today = now.toISOString().split("T")[0];
+              const today = toDateKey(now);
               const dayOfWeek = now.getDay();
               const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-              const weekStart = new Date(now.getFullYear(), now.getMonth(), mondayOffset).toISOString().split("T")[0];
-              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+              const weekStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), mondayOffset));
+              const monthStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
               const dailyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "daily" && t.periodStart === today);
               const weeklyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "weekly" && t.periodStart === weekStart);
               const monthlyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "monthly" && t.periodStart === monthStart);
               const target = dailyTarget || weeklyTarget || monthlyTarget;
               if (!target || (target.targetRevenue <= 0 && target.targetOrders <= 0)) return null;
               const periodLabel = target.periodType === "daily" ? "Today" : target.periodType === "weekly" ? "This Week" : new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
-              const periodEnd = target.periodType === "daily" ? today : target.periodType === "weekly" ? new Date(new Date(weekStart).getTime() + 6 * 86400000).toISOString().split("T")[0] : new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+              const periodEnd = target.periodType === "daily" ? today : target.periodType === "weekly" ? addDaysToKey(weekStart, 6) : toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
               const filteredOrders = dealerOrders.filter(o => o.date >= target.periodStart && o.date <= periodEnd);
               const actualRev = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
               const actualOrd = filteredOrders.length;
