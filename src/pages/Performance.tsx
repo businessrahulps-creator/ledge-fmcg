@@ -9,6 +9,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { useApi } from "@/services/api";
 import { usePageLoading } from "@/hooks/use-loading";
+import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import { orderInScope, orderDateForMode, netTotal, type RevenueMode } from "@/lib/revenue";
 
 import { formatCurrency } from "@/data/mock-data";
@@ -353,6 +354,16 @@ export default function Performance() {
       change: period !== "custom" ? pctChange(collectionRate, prevCollection) : null,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="page-stack" aria-busy="true">
+          <DashboardSkeleton />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
