@@ -49,11 +49,12 @@ const blobCache = new Map<string, Blob>();
 export async function buildInvoiceBlob(inv: Invoice): Promise<Blob> {
   const cached = blobCache.get(inv.id);
   if (cached) return cached;
-  const [{ GstInvoicePdf }, { pdf }] = await Promise.all([
+  const [{ GstInvoicePdf }, { pdf }, full] = await Promise.all([
     import("@/components/pdf/GstInvoicePdf"),
     import("@react-pdf/renderer"),
+    withInvoiceLines(inv),
   ]);
-  const blob = await pdf(<GstInvoicePdf data={invoiceToPdfData(inv)} />).toBlob();
+  const blob = await pdf(<GstInvoicePdf data={invoiceToPdfData(full)} />).toBlob();
   blobCache.set(inv.id, blob);
   return blob;
 }
