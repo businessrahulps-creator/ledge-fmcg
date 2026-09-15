@@ -93,7 +93,10 @@ export default function Distributors() {
     return { totalOutstanding, overLimit, overLimitValue, approaching };
   }, [items]);
 
+  const canManageDealers = useCan("see_all_dealers");
+
   const openNew = () => {
+    if (!canManageDealers) return;
     setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
     setIsNew(true);
   };
@@ -198,10 +201,12 @@ export default function Distributors() {
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export CSV</span>
             </Button>
-            <Button onClick={openNew} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4" />
-              Add Dealer
-            </Button>
+            {canManageDealers && (
+              <Button onClick={openNew} className="flex-1 sm:flex-none">
+                <Plus className="h-4 w-4" />
+                Add Dealer
+              </Button>
+            )}
           </div>
         </div>
 
@@ -321,10 +326,10 @@ export default function Distributors() {
                 hero={hero}
                 cells={cells}
                 primaryAction={primaryAction}
-                menu={[
+                menu={canManageDealers ? [
                   { label: "Edit dealer", icon: Pencil, onSelect: () => openEdit(d, { stopPropagation: () => {} } as React.MouseEvent) },
                   { label: "Remove dealer", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(d.id) },
-                ]}
+                ] : []}
                 onClick={() => navigate(`/distributors/${d.id}`)}
               />
             );
@@ -340,8 +345,8 @@ export default function Distributors() {
               icon={MapPin}
               title="No dealers added yet."
               description="Add your first dealer to start taking orders and tracking outstanding."
-              actionLabel="Add dealer"
-              onAction={openNew}
+              actionLabel={canManageDealers ? "Add dealer" : undefined}
+              onAction={canManageDealers ? openNew : undefined}
             />
           ) : (
             <EmptyCard

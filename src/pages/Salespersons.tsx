@@ -77,7 +77,10 @@ export default function Salespersons() {
   const paginatedSales = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
+  const canManageTeam = useCan("manage_team");
+
   const openNew = () => {
+    if (!canManageTeam) return;
     setEditItem({ id: `s${Date.now()}`, name: "", phone: "", email: "", region: "", totalOrders: 0, totalValue: 0 });
     setIsNew(true);
   };
@@ -147,10 +150,12 @@ export default function Salespersons() {
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Export CSV</span>
             </Button>
-            <Button onClick={openNew} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4" />
-              Add Member
-            </Button>
+            {canManageTeam && (
+              <Button onClick={openNew} className="flex-1 sm:flex-none">
+                <Plus className="h-4 w-4" />
+                Add Member
+              </Button>
+            )}
           </div>
         </div>
 
@@ -198,10 +203,10 @@ export default function Salespersons() {
                   { label: "Avg order", value: avgOrder > 0 ? formatCurrency(avgOrder) : "—", zero: avgOrder === 0 },
                   { label: "Dealers", value: dealersServed, zero: dealersServed === 0 },
                 ]}
-                menu={[
+                menu={canManageTeam ? [
                   { label: "Edit member", icon: Pencil, onSelect: () => openEdit(s, { stopPropagation: () => {} } as React.MouseEvent) },
                   { label: "Remove member", icon: Trash2, destructive: true, separator: true, onSelect: () => setDeleteId(s.id) },
-                ]}
+                ] : []}
                 onClick={() => navigate(`/salespersons/${s.id}`)}
               />
             );
@@ -217,8 +222,8 @@ export default function Salespersons() {
               icon={UserCheck}
               title="No team members yet."
               description="Add your first team member to start tracking their orders and revenue."
-              actionLabel="Add team member"
-              onAction={openNew}
+              actionLabel={canManageTeam ? "Add team member" : undefined}
+              onAction={canManageTeam ? openNew : undefined}
             />
           ) : (
             <EmptyCard
