@@ -384,7 +384,7 @@ export default function Billing() {
                 <WhatsAppIcon className="text-success" /> Remind on WhatsApp
               </DropdownMenuItem>
             ) : (
-              <DropdownMenuItem onClick={() => shareInvoiceOnWhatsApp(inv)}>
+              <DropdownMenuItem onClick={async () => shareInvoiceOnWhatsApp(await withInvoiceLines(inv))}>
                 <WhatsAppIcon className="text-success" /> Send bill on WhatsApp
               </DropdownMenuItem>
             )}
