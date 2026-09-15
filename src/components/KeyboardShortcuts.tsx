@@ -27,8 +27,8 @@ const TARGET_TO_PATH: Record<string, string> = {
   s: "/stock",
   e: "/distributors",
   t: "/salespersons",
-  r: "/reports",
-  p: "/performance",
+  r: "/command?tab=drill",
+  p: "/command?tab=overview",
 };
 
 function isTypingTarget(target: EventTarget | null): boolean {
