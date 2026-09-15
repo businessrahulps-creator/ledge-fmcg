@@ -25,7 +25,8 @@ export const pdfStyles = StyleSheet.create({
     paddingBottom: PAGE_PADDING_BOTTOM,
     fontFamily: PDF_FONT,
     fontSize: 9,
-    lineHeight: 1.35,
+    // NOTE: never set lineHeight on the Page style — react-pdf then drops
+    // `fixed` footers that use a render callback (page numbers disappear).
     color: MIDNIGHT,
     backgroundColor: "#FFFFFF",
   },
@@ -93,6 +94,7 @@ export const pdfStyles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 9,
+    lineHeight: 1.35,
     marginBottom: 2,
     color: INK_MUTED,
   },
@@ -181,10 +183,12 @@ export const pdfStyles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 8,
+    lineHeight: 1.3,
     paddingRight: 4,
   },
   tableCellRight: {
     fontSize: 8,
+    lineHeight: 1.3,
     textAlign: "right",
     paddingLeft: 4,
   },
