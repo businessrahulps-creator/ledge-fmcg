@@ -6,7 +6,8 @@ import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, ty
 import { RevenueScopeFilter, applyRevenueScope, type RevenueScope } from "./RevenueScopeFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
 
