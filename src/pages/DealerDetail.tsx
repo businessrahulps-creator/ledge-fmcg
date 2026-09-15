@@ -298,8 +298,34 @@ export default function DealerDetail() {
                     </div>
                   </div>
 
-                  {/* Outstanding orders table */}
-                  <div className="glass-card overflow-x-auto">
+                  {/* Outstanding bills — cards on phones, table on bigger screens */}
+                  <div className="glass-card divide-y divide-border/50 md:hidden">
+                    {outRows.map((r) => {
+                      const tone = BUCKET_TONE[r.bucket];
+                      return (
+                        <button
+                          key={r.invoiceId}
+                          type="button"
+                          onClick={() => r.orderId && navigate(`/orders/${r.orderId}`)}
+                          className={cn("relative flex w-full items-center justify-between gap-3 px-4 py-3 text-left active:bg-muted/40", tone.leftBar)}
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-primary">{r.invoiceNumber}</p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {formatIndianDate(r.invoiceDate)} · bill {formatCurrency(r.billed)}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="num text-sm font-semibold">{formatCurrency(r.due)}</p>
+                            <span className={cn("mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", tone.badge)}>
+                              {r.ageDays}d · {BUCKET_SHORT[r.bucket]}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="glass-card hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[560px] text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-xs text-muted-foreground">
