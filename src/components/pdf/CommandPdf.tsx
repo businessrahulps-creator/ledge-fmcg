@@ -242,7 +242,7 @@ export function CommandPdf({
 
         {/* Credit at risk — heading grouped with the table so it never strands
             alone at the foot of a page. */}
-        <View>
+        <View wrap={false}>
         <SectionTitle>Credit at risk</SectionTitle>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
