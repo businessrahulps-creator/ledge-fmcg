@@ -29,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { buildInvoiceBlob, openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
+import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
@@ -134,14 +134,7 @@ export default function Billing() {
 
   const handleDownloadPdf = useCallback(async (inv: Invoice) => {
     try {
-      const blob = await buildInvoiceBlob(inv);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${inv.invoiceNumber}.pdf`;
-      a.click();
-      // Give the browser time to start the download before releasing the link.
-      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      await downloadInvoicePdf(inv);
     } catch {
       toast.error("Could not make the PDF. Try again.");
     }
@@ -305,12 +298,12 @@ export default function Billing() {
 
   const [pendingBillId, setPendingBillId] = useState<string | null>(null);
 
-  /** Opens the generated PDF itself; no app page or embedded browser viewer. */
+  /** Uses the same browser file path as Download PDF; embedded viewing is blocked by Chrome. */
   const viewBill = useCallback(async (inv: Invoice) => {
     try {
-      await openInvoicePdf(inv);
+      await downloadInvoicePdf(inv);
     } catch {
-      toast.error("Could not open the PDF. Use Download PDF instead.");
+      toast.error("Could not open the PDF. Please try again.");
     }
   }, []);
 

@@ -58,12 +58,15 @@ export async function buildInvoiceBlob(inv: Invoice): Promise<Blob> {
   return blob;
 }
 
-/** Open the generated PDF as the top-level page, where Chrome allows its PDF viewer. */
-export async function openInvoicePdf(inv: Invoice): Promise<void> {
+/** Download the generated PDF through the browser's proven file path. */
+export async function downloadInvoicePdf(inv: Invoice): Promise<void> {
   const blob = await buildInvoiceBlob(inv);
   const url = URL.createObjectURL(blob);
-  window.location.assign(url);
-  window.setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${inv.invoiceNumber.replace(/[^\w-]+/g, "-")}.pdf`;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
 
