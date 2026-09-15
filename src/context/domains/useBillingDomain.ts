@@ -105,10 +105,12 @@ export function useBillingDomain(deps: BillingDeps) {
   const [claims, setClaims] = useState<Claim[]>([]);
 
 
+  // Line items are fetched per bill on demand (see @/lib/invoice-lines), never
+  // for the whole list — a year of bills would otherwise load on every refresh.
   const safeRefetchInvoices = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const data = await fetchAllChunked<InvoiceRow>(() =>
-      supabase.from("invoices").select("*, invoice_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+      supabase.from("invoices").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false })
     );
     setInvoices(data.map(mapInvoiceRow));
   }, [deps.companyId]);
