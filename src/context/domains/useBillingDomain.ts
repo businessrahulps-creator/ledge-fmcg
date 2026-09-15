@@ -16,7 +16,7 @@ type ClaimRow = Database["public"]["Tables"]["claims"]["Row"] & {
 };
 
 /** Map a Supabase `invoices` row (with joined lines) to the in-app Invoice shape. */
-function mapInvoiceRow(inv: InvoiceRow): Invoice {
+export function mapInvoiceRow(inv: InvoiceRow): Invoice {
   return {
     id: inv.id,
     invoiceNumber: inv.invoice_number,

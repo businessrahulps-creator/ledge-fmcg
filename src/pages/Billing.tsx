@@ -29,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, buildInvoiceBlob, openInvoiceInNewTab } from "@/components/billing/InvoicePreviewDialog";
+import { InvoicePreviewDialog, buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
 import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
@@ -306,15 +306,9 @@ export default function Billing() {
 
   const [pendingBillId, setPendingBillId] = useState<string | null>(null);
 
-  /** Opens the finished bill in the browser's own PDF viewer — most reliable in Chrome. */
-  const viewBill = useCallback(async (inv: Invoice) => {
-    setPendingBillId(inv.id);
-    const ok = await openInvoiceInNewTab(inv);
-    setPendingBillId(null);
-    if (!ok) {
-      toast.message("Your browser blocked the new tab — showing the bill here instead.");
-      setPreviewInvoice(inv);
-    }
+  /** Opens the bill on its own page in a new tab — a plain link, so nothing gets blocked. */
+  const viewBill = useCallback((inv: Invoice) => {
+    window.open(`/bill/${inv.id}`, "_blank", "noopener,noreferrer");
   }, []);
 
   const downloadBill = useCallback(async (inv: Invoice) => {
@@ -322,6 +316,7 @@ export default function Billing() {
     await handleDownloadPdf(inv);
     setPendingBillId(null);
   }, [handleDownloadPdf]);
+
 
 
   const remind = (inv: Invoice, due: number) => {
@@ -357,11 +352,11 @@ export default function Billing() {
             <IndianRupee className="h-3.5 w-3.5" /> Record payment
           </Button>
         ) : (
-          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => viewBill(inv)} disabled={busy}>
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}
-            {busy ? "Opening…" : "View bill"}
+          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => viewBill(inv)}>
+            <Eye className="h-3.5 w-3.5" /> View bill
           </Button>
         )}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className={cn(h, opts.size === "card" ? "w-9" : "w-8")} aria-label="More actions">
@@ -370,10 +365,11 @@ export default function Billing() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             {collecting && (
-              <DropdownMenuItem onClick={() => viewBill(inv)} disabled={busy}>
-                {busy ? <Loader2 className="animate-spin" /> : <Eye />} View bill
+              <DropdownMenuItem onClick={() => viewBill(inv)}>
+                <Eye /> View bill
               </DropdownMenuItem>
             )}
+
             <DropdownMenuItem onClick={() => downloadBill(inv)} disabled={busy}>
               <Download /> Download PDF
             </DropdownMenuItem>
