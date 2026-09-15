@@ -660,50 +660,37 @@ export default function Billing() {
                   ]),
                 )}
                 onPdf={async () => {
-                  const [{ ReportPdf }, { pdf }] = await Promise.all([
-                    import("@/components/pdf/ReportPdf"),
-                    import("@react-pdf/renderer"),
-                  ]);
-                  const blob = await pdf(
-                    <ReportPdf
-                      title="Money still to collect"
-                      subtitle={[
-                        timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
-                        payFilter === "unpaid" ? "Unpaid bills only"
-                          : payFilter === "partial" ? "Part paid bills only"
-                          : payFilter === "paid" ? "Settled bills only"
-                          : payFilter === "overdue" ? "Overdue bills only"
-                          : "All bills, including settled ones",
-                      ].join(" · ")}
-                      companyName={api.companyInfo.name}
-                      companyAddress={api.companyInfo.address}
-                      gstin={api.companyInfo.gstin}
-                      logoUrl={api.companyInfo.logoUrl}
-                      summary={[
-                        { label: "Billed", value: formatMoneyPdf(collectionTotals.billed) },
-                        { label: "Collected", value: formatMoneyPdf(collectionTotals.collected) },
-                        { label: "Still to collect", value: formatMoneyPdf(collectionTotals.outstanding) },
-                      ]}
-                      columns={[
-                        { header: "Bill", width: "20%" },
-                        { header: "Dealer", width: "24%" },
-                        { header: "Date", width: "12%" },
-                        { header: "Total", width: "15%", align: "right" },
-                        { header: "Received", width: "15%", align: "right" },
-                        { header: "Still due", width: "14%", align: "right" },
-                      ]}
-                      rows={collections.map(r => [
-                        r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
-                        formatMoneyPdf(r.inv.grandTotal), formatMoneyPdf(r.received), formatMoneyPdf(r.due),
-                      ])}
-                    />,
-                  ).toBlob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "to-collect.pdf";
-                  a.click();
-                  URL.revokeObjectURL(url);
+                  await exportReportPdf({
+                    fileType: "to-collect",
+                    company: api.companyInfo,
+                    selection: { company: true, summary: true, table: true },
+                    title: "Money still to collect",
+                    subtitle: [
+                      timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                      payFilter === "unpaid" ? "Unpaid bills only"
+                        : payFilter === "partial" ? "Part paid bills only"
+                        : payFilter === "paid" ? "Settled bills only"
+                        : payFilter === "overdue" ? "Overdue bills only"
+                        : "All bills, including settled ones",
+                    ].join(" · "),
+                    summary: [
+                      { label: "Billed", value: formatMoneyPdf(collectionTotals.billed) },
+                      { label: "Collected", value: formatMoneyPdf(collectionTotals.collected) },
+                      { label: "Still to collect", value: formatMoneyPdf(collectionTotals.outstanding) },
+                    ],
+                    columns: [
+                      { header: "Bill", width: "20%" },
+                      { header: "Dealer", width: "24%" },
+                      { header: "Date", width: "12%" },
+                      { header: "Total", width: "15%", align: "right" },
+                      { header: "Received", width: "15%", align: "right" },
+                      { header: "Still due", width: "14%", align: "right" },
+                    ],
+                    rows: collections.map(r => [
+                      r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
+                      formatMoneyPdf(r.inv.grandTotal), formatMoneyPdf(r.received), formatMoneyPdf(r.due),
+                    ]),
+                  });
                 }}
               />
             )}
