@@ -666,7 +666,14 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Money still to collect"
-                      subtitle={timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod)}
+                      subtitle={[
+                        timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                        payFilter === "unpaid" ? "Unpaid bills only"
+                          : payFilter === "partial" ? "Part paid bills only"
+                          : payFilter === "paid" ? "Settled bills only"
+                          : payFilter === "overdue" ? "Overdue bills only"
+                          : "All bills, including settled ones",
+                      ].join(" · ")}
                       companyName={api.companyInfo.name}
                       companyAddress={api.companyInfo.address}
                       gstin={api.companyInfo.gstin}
