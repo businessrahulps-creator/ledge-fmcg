@@ -36,6 +36,10 @@ import { SignalCard } from "@/components/ui/signal-card";
 import { AlertTriangle } from "lucide-react";
 import { useReceivables } from "@/hooks/useReceivables";
 
+/** Presentation only: "part paid" -> "Part paid" for PDF exports. */
+const titleCase = (v: string) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : v);
+
+
 export default function Orders() {
   const api = useApi();
   const { companyInfo } = api;
