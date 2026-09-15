@@ -29,7 +29,7 @@ import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCan } from "@/hooks/useCan";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
-import { InvoicePreviewDialog, buildInvoiceBlob } from "@/components/billing/InvoicePreviewDialog";
+import { InvoicePreviewDialog, buildInvoiceBlob, openInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billStatusView } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
@@ -306,9 +306,14 @@ export default function Billing() {
 
   const [pendingBillId, setPendingBillId] = useState<string | null>(null);
 
-  /** Opens the bill on its own page in a new tab — a plain link, so nothing gets blocked. */
-  const viewBill = useCallback((inv: Invoice) => {
-    window.open(`/bill/${inv.id}`, "_blank", "noopener,noreferrer");
+  /** Opens the generated PDF itself; no app page or embedded browser viewer. */
+  const viewBill = useCallback(async (inv: Invoice) => {
+    try {
+      const opened = await openInvoicePdf(inv);
+      if (!opened) toast.error("Chrome blocked the bill. Please allow pop-ups and try again.");
+    } catch {
+      toast.error("Could not open the PDF. Use Download PDF instead.");
+    }
   }, []);
 
   const downloadBill = useCallback(async (inv: Invoice) => {
