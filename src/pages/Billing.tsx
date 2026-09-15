@@ -221,14 +221,42 @@ export default function Billing() {
       });
   }, [receipts, modeFilter, search, invoiceNumberById, orderNumberById, dealerName]);
 
+  /** Bills and credit notes together, so a reduced bill can always be traced to its note. */
   const documents = useMemo(() => {
-    let list = inPeriod(invoices.filter(matchesSearch));
-    if (filterType !== "all") list = list.filter(i => i.docType === filterType);
+    const q = search.trim().toLowerCase();
+    const billRows: DocRow[] = inPeriod(invoices.filter(matchesSearch)).map(inv => ({
+      key: inv.id,
+      type: inv.docType,
+      number: inv.invoiceNumber,
+      date: inv.invoiceDate,
+      buyer: inv.buyerName,
+      amount: inv.grandTotal,
+      orderId: inv.sourceOrderId || null,
+      status: inv.status,
+      invoice: inv,
+    }));
+    const noteCandidates = creditNotes.filter(n =>
+      !q || n.number.toLowerCase().includes(q) || dealerName(n.distributorId).toLowerCase().includes(q));
+    const noteRows: DocRow[] = inPeriodBy(noteCandidates, n => n.noteDate).map(n => ({
+      key: `cn-${n.id}`,
+      type: "credit_note" as DocType,
+      number: n.number,
+      date: n.noteDate,
+      buyer: dealerName(n.distributorId),
+      amount: n.grandTotal,
+      orderId: n.orderId,
+      status: "final",
+      invoice: null,
+      note: n.reason,
+    }));
+    let list = [...billRows, ...noteRows].sort((a, b) => (a.date < b.date ? 1 : -1));
+    if (filterType !== "all") list = list.filter(d => d.type === filterType);
     return list;
-  }, [invoices, inPeriod, matchesSearch, filterType]);
+  }, [invoices, creditNotes, inPeriod, inPeriodBy, matchesSearch, filterType, search, dealerName]);
 
   const { page, totalPages, from, to, setPage } = usePagination(documents.length, 15);
   const paginatedDocs = useMemo(() => documents.slice(from, to), [documents, from, to]);
+
 
   const collectionTotals = useMemo(() => {
     const billed = collections.reduce((s, r) => s + r.inv.grandTotal, 0);
