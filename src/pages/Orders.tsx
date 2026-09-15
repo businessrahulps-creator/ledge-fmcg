@@ -34,6 +34,7 @@ import { KpiStrip } from "@/components/ui/kpi-strip";
 import { InsightLine } from "@/components/ui/insight-line";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AlertTriangle } from "lucide-react";
+import { useReceivables } from "@/hooks/useReceivables";
 
 export default function Orders() {
   const api = useApi();
@@ -42,6 +43,12 @@ export default function Orders() {
   const canPlaceOrders = useCan("place_orders");
   const orders = api.orders.list();
   const invoices = api.invoices.list();
+  // Payment chips come from the receipts ledger, never from orders.payment_status.
+  const { paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = useCallback(
+    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
+    [paymentStatusByOrderId],
+  );
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const [searchParams] = useSearchParams();
   const dealerParam = searchParams.get("dealer") || "";
