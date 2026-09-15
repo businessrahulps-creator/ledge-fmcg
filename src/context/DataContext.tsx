@@ -449,7 +449,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('stock_items', stock.safeRefetchStockItems))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('schemes', catalog.safeRefetchSchemes))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'claims', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('claims', billing.safeRefetchClaims))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('invoices', billing.safeRefetchInvoices))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, (payload) => queueRow('invoices', changedId(payload), billing.refetchInvoiceById, billing.safeRefetchInvoices))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('targets', targets.safeRefetchTargets))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('secondary_sales', targets.safeRefetchSecondarySales))
         .subscribe((status) => {
