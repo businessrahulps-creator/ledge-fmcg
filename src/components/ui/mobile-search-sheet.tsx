@@ -20,6 +20,9 @@ interface MobileSearchSheetProps {
   leading?: React.ReactNode;
   /** Replace the entire search input area (still keeps back button + sticky styling). */
   headerSlot?: React.ReactNode;
+  /** Hide the built-in header entirely — the caller renders its own sticky header
+   *  inside `children` (needed when input + list must share one provider). */
+  hideHeader?: boolean;
 }
 
 
