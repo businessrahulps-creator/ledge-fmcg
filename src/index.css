@@ -2868,3 +2868,23 @@
     color: hsl(var(--foreground)) !important;
   }
 }
+
+/* Native date inputs: keep the control inside its column on narrow screens
+   and align the value like every other field on the form. */
+@layer components {
+  .date-field {
+    max-width: 100%;
+    text-align: left;
+  }
+  .date-field::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+  }
+  .date-field::-webkit-datetime-edit {
+    padding: 0;
+  }
+  .date-field::-webkit-calendar-picker-indicator {
+    margin-left: auto;
+    opacity: 0.6;
+  }
+}
