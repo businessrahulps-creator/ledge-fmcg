@@ -182,7 +182,7 @@ export default function Orders() {
       revenueDelta: pct(mtdRevenue, prevRevenue),
       countDelta: pct(mtdCount, prevCount),
     };
-  }, [orders]);
+  }, [orders, payStatus]);
 
   const prevMonthLabel = useMemo(() => {
     const d = new Date(); d.setMonth(d.getMonth() - 1);
