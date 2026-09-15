@@ -160,6 +160,114 @@
 </head>
 
   <body>
+    <!-- Opening animation. Inline on purpose: it must paint on the very first
+         frame, before any app code has downloaded, so the app never looks dead. -->
+    <style>
+      html, body { background-color: #0F1F3A; }
+      #ledge-splash {
+        position: fixed; inset: 0; z-index: 2147483000;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: radial-gradient(120% 90% at 50% 38%, #17305A 0%, #0F1F3A 62%, #0B1730 100%);
+        color: #F5EFE6; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        transition: opacity .42s cubic-bezier(.22,1,.36,1), transform .42s cubic-bezier(.22,1,.36,1);
+        padding: 24px; text-align: center;
+      }
+      #ledge-splash.ledge-splash-out { opacity: 0; transform: scale(1.035); pointer-events: none; }
+      .ledge-glow {
+        position: absolute; width: 320px; height: 320px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(245,239,230,.14) 0%, rgba(245,239,230,0) 68%);
+        animation: ledge-breathe 3.2s ease-in-out infinite;
+      }
+      @keyframes ledge-breathe { 0%,100% { transform: scale(.94); opacity: .75 } 50% { transform: scale(1.06); opacity: 1 } }
+      .ledge-mark { position: relative; width: 62px; height: 62px; animation: ledge-mark-in .55s cubic-bezier(.22,1,.36,1) both; }
+      @keyframes ledge-mark-in { from { opacity: 0; transform: translateY(8px) scale(.9) } to { opacity: 1; transform: none } }
+      .ledge-mark rect.s { transform-box: fill-box; transform-origin: left center; animation: ledge-stripe .5s cubic-bezier(.22,1,.36,1) both; }
+      .ledge-mark rect.s:nth-child(1) { animation-delay: .34s }
+      .ledge-mark rect.s:nth-child(2) { animation-delay: .24s }
+      .ledge-mark rect.s:nth-child(3) { animation-delay: .14s }
+      .ledge-mark rect.s:nth-child(4) { animation-delay: .04s }
+      @keyframes ledge-stripe { from { transform: scaleX(0); opacity: 0 } to { transform: scaleX(1); opacity: 1 } }
+      .ledge-word {
+        position: relative; margin-top: 18px; font-size: 26px; letter-spacing: .01em;
+        font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: #F5EFE6;
+        animation: ledge-fade-up .5s cubic-bezier(.22,1,.36,1) .62s both;
+      }
+      @keyframes ledge-fade-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+      .ledge-bar {
+        position: relative; margin-top: 22px; width: 148px; height: 3px; border-radius: 3px;
+        background: rgba(245,239,230,.16); overflow: hidden;
+        animation: ledge-fade-up .4s ease-out .72s both;
+      }
+      .ledge-bar i {
+        position: absolute; inset: 0 auto 0 0; display: block; width: 8%; border-radius: 3px;
+        background: linear-gradient(90deg, #A0522D, #C4703F);
+        transition: width .6s cubic-bezier(.22,1,.36,1);
+      }
+      .ledge-bar.indeterminate i { width: 42%; animation: ledge-slide 1.25s ease-in-out infinite; }
+      @keyframes ledge-slide { 0% { transform: translateX(-110%) } 100% { transform: translateX(260%) } }
+      .ledge-step {
+        position: relative; margin-top: 14px; font-size: 13px; letter-spacing: .02em;
+        color: rgba(245,239,230,.72); min-height: 18px;
+        animation: ledge-fade-up .4s ease-out .8s both;
+      }
+      .ledge-slow { position: relative; margin-top: 12px; font-size: 12.5px; color: rgba(245,239,230,.6); display: none; }
+      .ledge-slow button {
+        background: none; border: 0; color: #E2B79A; font: inherit; text-decoration: underline;
+        cursor: pointer; padding: 6px 8px; min-height: 32px;
+      }
+      #ledge-splash.slow .ledge-slow { display: block; }
+      @media (prefers-reduced-motion: reduce) {
+        #ledge-splash *, #ledge-splash { animation: none !important; transition: opacity .2s linear !important; }
+        .ledge-glow { opacity: .8 }
+      }
+    </style>
+    <div id="ledge-splash" role="status" aria-live="polite" aria-label="Loading Ledge">
+      <div class="ledge-glow"></div>
+      <svg class="ledge-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <rect x="0" y="0" width="48" height="48" rx="7" fill="#F5EFE6" opacity=".08"></rect>
+        <rect class="s" x="9" y="10" width="30" height="5" rx="2.5" fill="#F5EFE6"></rect>
+        <rect class="s" x="9" y="19" width="22" height="5" rx="2.5" fill="#F5EFE6" opacity=".85"></rect>
+        <rect class="s" x="9" y="28" width="26" height="5" rx="2.5" fill="#C4703F"></rect>
+        <rect class="s" x="9" y="37" width="16" height="5" rx="2.5" fill="#F5EFE6" opacity=".6"></rect>
+      </svg>
+      <div class="ledge-word">Ledge</div>
+      <div class="ledge-bar indeterminate" id="ledge-bar"><i></i></div>
+      <div class="ledge-step" id="ledge-step">Starting Ledge</div>
+      <div class="ledge-slow">Slow connection — still loading.
+        <button type="button" onclick="location.reload()">Retry</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var el = document.getElementById("ledge-splash");
+        if (!el) return;
+        var stepEl = document.getElementById("ledge-step");
+        var bar = document.getElementById("ledge-bar");
+        var fill = bar && bar.firstElementChild;
+        var finished = false;
+        var slowTimer = setTimeout(function () { el.classList.add("slow"); }, 10000);
+        var maxTimer = setTimeout(function () { api.done(); }, 30000);
+        var api = {
+          step: function (label, pct) {
+            if (finished) return;
+            if (label && stepEl) stepEl.textContent = label;
+            if (typeof pct === "number" && fill) {
+              bar.classList.remove("indeterminate");
+              fill.style.width = Math.max(8, Math.min(96, pct)) + "%";
+            }
+          },
+          done: function () {
+            if (finished) return;
+            finished = true;
+            clearTimeout(slowTimer); clearTimeout(maxTimer);
+            if (fill) { bar.classList.remove("indeterminate"); fill.style.width = "100%"; }
+            el.classList.add("ledge-splash-out");
+            setTimeout(function () { el.parentNode && el.parentNode.removeChild(el); }, 460);
+          }
+        };
+        window.__ledgeSplash = api;
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
