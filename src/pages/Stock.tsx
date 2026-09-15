@@ -182,7 +182,11 @@ export default function Stock() {
     setIsNewProduct(true);
   };
 
-  const saveProduct = () => {
+  const [savingProduct, setSavingProduct] = useState(false);
+  const [savingWarehouse, setSavingWarehouse] = useState(false);
+
+  const saveProduct = async () => {
+    if (savingProduct) return;
     if (!editProduct?.name.trim()) {
       toast.error("Name required", { description: "Please enter a product name." });
       return;
@@ -195,14 +199,17 @@ export default function Stock() {
       toast.error("Invalid price", { description: "Base price must be greater than 0." });
       return;
     }
-    if (isNewProduct) {
-      addProduct(editProduct);
-      toast.success("Product added", { description: `${editProduct.name} has been added.` });
-    } else {
-      updateProduct(editProduct);
-      toast.success("Product updated", { description: `${editProduct.name} has been updated.` });
+    setSavingProduct(true);
+    try {
+      const ok = isNewProduct ? await addProduct(editProduct) : await updateProduct(editProduct);
+      if (!ok) return; // the CRUD helper already explained what went wrong — keep the form open
+      toast.success(isNewProduct ? "Product added" : "Product updated", {
+        description: `${editProduct.name} has been ${isNewProduct ? "added" : "updated"}.`,
+      });
+      setEditProduct(null);
+    } finally {
+      setSavingProduct(false);
     }
-    setEditProduct(null);
   };
 
   const confirmDeleteProduct = async () => {
@@ -235,19 +242,23 @@ export default function Stock() {
     setIsNewWarehouse(true);
   };
 
-  const saveWarehouse = () => {
+  const saveWarehouse = async () => {
+    if (savingWarehouse) return;
     if (!editWarehouse?.name.trim()) {
       toast.error("Name required", { description: "Please enter a warehouse name." });
       return;
     }
-    if (isNewWarehouse) {
-      addLocation(editWarehouse);
-      toast.success("Warehouse added", { description: `${editWarehouse.name} has been added.` });
-    } else {
-      updateLocation(editWarehouse);
-      toast.success("Warehouse updated", { description: `${editWarehouse.name} has been updated.` });
+    setSavingWarehouse(true);
+    try {
+      const ok = isNewWarehouse ? await addLocation(editWarehouse) : await updateLocation(editWarehouse);
+      if (!ok) return; // keep the form open so nothing is lost
+      toast.success(isNewWarehouse ? "Warehouse added" : "Warehouse updated", {
+        description: `${editWarehouse.name} has been ${isNewWarehouse ? "added" : "updated"}.`,
+      });
+      setEditWarehouse(null);
+    } finally {
+      setSavingWarehouse(false);
     }
-    setEditWarehouse(null);
   };
 
   const confirmDeleteWarehouse = async () => {
@@ -773,7 +784,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">{isNewProduct ? "Add Product" : "Edit Product"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewProduct ? "Add a new product" : "Edit product details"}</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveProduct(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void saveProduct(); }}>
             {editProduct && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -829,7 +840,7 @@ export default function Stock() {
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" onClick={() => setEditProduct(null)}>Cancel</Button>
-              <Button type="submit">{isNewProduct ? "Add Product" : "Save Changes"}</Button>
+              <Button type="submit" disabled={savingProduct}>{savingProduct ? "Saving…" : isNewProduct ? "Add Product" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>
@@ -858,7 +869,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">{isNewWarehouse ? "Add Warehouse" : "Edit Warehouse"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewWarehouse ? "Add a new warehouse" : "Edit warehouse details"}</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveWarehouse(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void saveWarehouse(); }}>
             {editWarehouse && (
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
@@ -873,7 +884,7 @@ export default function Stock() {
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" onClick={() => setEditWarehouse(null)}>Cancel</Button>
-              <Button type="submit">{isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
+              <Button type="submit" disabled={savingWarehouse}>{savingWarehouse ? "Saving…" : isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>
