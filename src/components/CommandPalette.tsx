@@ -113,9 +113,10 @@ export function CommandPalette() {
     if (!open) return [];
     const base = q
       ? orders.filter((o: any) => {
-          const id = String(o.id ?? o.orderNumber ?? "").toLowerCase();
+          const id = String(o.id ?? "").toLowerCase();
+          const number = String(o.orderNumber ?? "").toLowerCase();
           const dealer = String(o.dealerName ?? o.distributorName ?? "").toLowerCase();
-          return id.includes(q) || dealer.includes(q);
+          return number.includes(q) || dealer.includes(q) || id.includes(q);
         })
       : orders;
     return base.slice(0, 6);
