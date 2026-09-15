@@ -23,7 +23,7 @@ export interface ReportExportOptions {
   title: string;
   subtitle?: string;
   summary: { label: string; value: string }[];
-  columns: { header: string; width: string; align?: "left" | "right" | "center" }[];
+  columns: { header: string; width: string; align?: "left" | "right" }[];
   rows: string[][];
 }
 
