@@ -1,6 +1,7 @@
 import { Component, type ReactNode, type ErrorInfo } from "react";
 import { Button } from "@/components/ui/button";
 import { logError } from "@/utils/errorLog";
+import { isChunkLoadError, recoverFromChunkError } from "@/lib/chunk-recovery";
 
 interface Props {
   children: ReactNode;
@@ -9,16 +10,17 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  recovering: boolean;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, recovering: false };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, recovering: false };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -30,11 +32,24 @@ export class ErrorBoundary extends Component<Props, State> {
       severity: "error",
       context: { componentStack: String(errorInfo?.componentStack || "").slice(0, 2000), boundary: "root" },
     });
+    // Stale-asset failure after a new release: clear caches and reload once.
+    if (isChunkLoadError(error) && recoverFromChunkError()) {
+      this.setState({ recovering: true });
+    }
   }
 
+
   render() {
+    if (this.state.recovering) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background p-6">
+          <p className="text-sm text-muted-foreground">Updating Ledge…</p>
+        </div>
+      );
+    }
     if (this.state.hasError) {
       return (
+
         <div className="flex min-h-screen items-center justify-center bg-background p-6">
           <div className="max-w-md text-center space-y-4">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
