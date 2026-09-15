@@ -240,23 +240,21 @@ export async function batchIn(table: string, column: string, ids: string[]) {
   let truncated = false;
   let totalPages = 0;
 
-  // Fetch all pages for one id-chunk in waves of PAGE_CONCURRENCY. We don't know
-  // up-front how many pages exist, so each wave fires N speculative range
-  // requests at once. The wave loop stops as soon as any page returns < PAGE
-  // rows (the natural end of the result set), preserving the early-exit
-  // semantics of the previous sequential implementation while collapsing
-  // round-trip latency.
+  // Fetch all pages for one id-chunk. The first request is a single probe:
+  // nearly every table fits in one page, and firing speculative extra pages
+  // up-front cost three wasted round trips per chunk on every cold start —
+  // the single biggest delay on a phone. Only if the probe comes back full do
+  // we switch to parallel waves for the remaining pages.
   async function fetchChunk(chunk: string[]): Promise<any[]> {
     const chunkRows: any[] = [];
     let done = false;
-    for (let wave = 0; wave < MAX_PAGES && !done; wave += PAGE_CONCURRENCY) {
-      // First wave is a single probe request. Most tables fit in one page, so
-      // firing 4 speculative pages up-front just burned 3 extra round trips on
-      // every cold start (the biggest single cost on mobile).
-      const waveSize = wave === 0 ? 1 : Math.min(PAGE_CONCURRENCY, MAX_PAGES - wave);
+    let nextPage = 0;
+    while (!done && nextPage < MAX_PAGES) {
+      const waveSize = nextPage === 0 ? 1 : Math.min(PAGE_CONCURRENCY, MAX_PAGES - nextPage);
+      const startPage = nextPage;
       const pages = await Promise.all(
         Array.from({ length: waveSize }, async (_, k) => {
-          const page = wave + k;
+          const page = startPage + k;
           const from = page * PAGE;
           const to = from + PAGE - 1;
           const { data, error } = await supabase
@@ -278,9 +276,10 @@ export async function batchIn(table: string, column: string, ids: string[]) {
           break;
         }
       }
+      nextPage = startPage + waveSize;
       // Safety cap: if we just finished the final wave and the last page was
       // still full, the result set is larger than we're willing to fetch.
-      if (!done && wave + waveSize >= MAX_PAGES) truncated = true;
+      if (!done && nextPage >= MAX_PAGES) truncated = true;
     }
     return chunkRows;
   }
