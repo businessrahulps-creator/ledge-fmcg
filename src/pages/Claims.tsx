@@ -154,6 +154,8 @@ function NewClaimDialog({
   const [good, setGood] = useState<Record<string, number>>({});
   const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
+  /** Pieces already sent back on earlier credit notes, per bill line. */
+  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number>>({});
 
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
