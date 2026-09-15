@@ -104,7 +104,10 @@ export default function Distributors() {
     setIsNew(false);
   };
 
-  const save = () => {
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (saving) return;
     if (!editItem?.name.trim()) {
       toast.error("Name required", { description: "Please enter a dealer name." });
       return;
@@ -132,14 +135,17 @@ export default function Distributors() {
     // Canonicalize phone before persisting (strip +91, spaces, dashes)
     const normalizedPhone = normalizeIndianPhone(editItem.contact);
     const itemToSave = { ...editItem, contact: normalizedPhone || editItem.contact.trim() };
-    if (isNew) {
-      addDistributor(itemToSave);
-      toast.success("Dealer added", { description: `${itemToSave.name} has been added.` });
-    } else {
-      updateDistributor(itemToSave);
-      toast.success("Dealer updated", { description: `${itemToSave.name} has been updated.` });
+    setSaving(true);
+    try {
+      const ok = isNew ? await addDistributor(itemToSave) : await updateDistributor(itemToSave);
+      if (!ok) return; // keep the form open; the failure was already explained
+      toast.success(isNew ? "Dealer added" : "Dealer updated", {
+        description: `${itemToSave.name} has been ${isNew ? "added" : "updated"}.`,
+      });
+      setEditItem(null);
+    } finally {
+      setSaving(false);
     }
-    setEditItem(null);
   };
 
   const confirmDelete = async () => {
@@ -353,7 +359,7 @@ export default function Distributors() {
               <DialogTitle className="text-base md:text-lg">{isNew ? "Add Dealer" : "Edit Dealer"}</DialogTitle>
               <DialogDescription className="sr-only">{isNew ? "Add a new dealer" : "Edit dealer details"}</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); save(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
             {editItem && (
               <div className="space-y-4 md:space-y-5">
                 <div className="space-y-3 md:space-y-4">
@@ -442,7 +448,7 @@ export default function Distributors() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button type="submit">{isNew ? "Add Dealer" : "Save Changes"}</Button>
+              <Button type="submit" disabled={saving}>{saving ? "Saving…" : isNew ? "Add Dealer" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>

@@ -88,7 +88,10 @@ export default function Salespersons() {
     setIsNew(false);
   };
 
-  const save = () => {
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (saving) return;
     if (!editItem?.name.trim()) { toast.error("Name required"); return; }
     if (!editItem?.phone.trim()) { toast.error("Phone required"); return; }
     if (!isValidIndianPhone(editItem.phone)) { toast.error("Invalid phone", { description: "Enter a valid 10-digit Indian mobile number." }); return; }
@@ -96,14 +99,17 @@ export default function Salespersons() {
     if (editItem.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editItem.email)) { toast.error("Invalid email"); return; }
     const normalizedPhone = normalizeIndianPhone(editItem.phone);
     const itemToSave = { ...editItem, phone: normalizedPhone || editItem.phone.trim() };
-    if (isNew) {
-      addSalesperson(itemToSave);
-      toast.success("Team member added", { description: `${itemToSave.name} has been added.` });
-    } else {
-      updateSalesperson(itemToSave);
-      toast.success("Team member updated", { description: `${itemToSave.name} has been updated.` });
+    setSaving(true);
+    try {
+      const ok = isNew ? await addSalesperson(itemToSave) : await updateSalesperson(itemToSave);
+      if (!ok) return; // keep the form open; the failure was already explained
+      toast.success(isNew ? "Team member added" : "Team member updated", {
+        description: `${itemToSave.name} has been ${isNew ? "added" : "updated"}.`,
+      });
+      setEditItem(null);
+    } finally {
+      setSaving(false);
     }
-    setEditItem(null);
   };
 
   const confirmDelete = async () => {
@@ -231,7 +237,7 @@ export default function Salespersons() {
                 <DialogTitle className="text-base md:text-lg">{isNew ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
                 <DialogDescription className="sr-only">{isNew ? "Add a new team member" : "Edit team member details"}</DialogDescription>
               </DialogHeader>
-              <form onSubmit={(e) => { e.preventDefault(); save(); }}>
+              <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
               <div className="space-y-3 md:space-y-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Full Name *</Label>
@@ -254,7 +260,7 @@ export default function Salespersons() {
               </div>
               <DialogFooter className="gap-2 sm:gap-0 mt-4">
                 <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-                <Button type="submit">{isNew ? "Add Member" : "Save Changes"}</Button>
+                <Button type="submit" disabled={saving}>{saving ? "Saving…" : isNew ? "Add Member" : "Save Changes"}</Button>
               </DialogFooter>
               </form>
             </DialogContent>
