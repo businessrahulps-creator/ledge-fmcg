@@ -43,13 +43,21 @@ export function invoiceToPdfData(inv: Invoice): InvoicePdfData {
   };
 }
 
+/** Bills already built this session — the same bill opens instantly the second time. */
+const blobCache = new Map<string, Blob>();
+
 export async function buildInvoiceBlob(inv: Invoice): Promise<Blob> {
+  const cached = blobCache.get(inv.id);
+  if (cached) return cached;
   const [{ GstInvoicePdf }, { pdf }] = await Promise.all([
     import("@/components/pdf/GstInvoicePdf"),
     import("@react-pdf/renderer"),
   ]);
-  return pdf(<GstInvoicePdf data={invoiceToPdfData(inv)} />).toBlob();
+  const blob = await pdf(<GstInvoicePdf data={invoiceToPdfData(inv)} />).toBlob();
+  blobCache.set(inv.id, blob);
+  return blob;
 }
+
 
 interface Props {
   invoice: Invoice | null;
@@ -136,19 +144,31 @@ export function InvoicePreviewDialog({ invoice, onClose }: Props) {
 }
 
 /**
- * Builds the bill and hands it to the browser's own PDF viewer in a new tab —
- * the most reliable way to show a PDF in Chrome. Returns false if it failed.
+ * Opens the tab straight away (inside the click, so Chrome doesn't treat it as a
+ * pop-up), shows a "preparing" note in it, then swaps in the bill once it's built.
+ * Returns false if the tab couldn't be opened or the bill couldn't be made.
  */
 export async function openInvoiceInNewTab(inv: Invoice): Promise<boolean> {
+  const win = window.open("", "_blank");
+  if (!win) return false;
   try {
+    win.document.write(
+      `<!doctype html><title>${inv.invoiceNumber}</title>` +
+      `<body style="font:14px system-ui;display:flex;align-items:center;justify-content:center;height:90vh;color:#555">` +
+      `Preparing bill ${inv.invoiceNumber}…</body>`,
+    );
+    win.document.close();
     const blob = await buildInvoiceBlob(inv);
+    if (win.closed) return true;
     const url = URL.createObjectURL(blob);
-    const win = window.open(url, "_blank", "noopener,noreferrer");
-    // Give the tab time to load before releasing the object URL.
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    return !!win;
+    win.location.replace(url);
+    // Release the link once the viewer has had time to load it.
+    setTimeout(() => URL.revokeObjectURL(url), 120_000);
+    return true;
   } catch (err) {
     logError({ source: "billing:open-bill", error: err, severity: "warning" });
+    try { win.close(); } catch { /* already gone */ }
     return false;
   }
 }
+
