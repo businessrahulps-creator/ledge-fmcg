@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 import { supabase } from "@/integrations/supabase/client";
+import type { InvoiceLine } from "@/context/data-types";
+import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
   return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
