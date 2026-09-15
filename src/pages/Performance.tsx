@@ -199,7 +199,7 @@ export default function Performance() {
   const totalRevenue = filteredOrders.reduce((s, o) => s + netTotal(o), 0);
   const totalOrderCount = filteredOrders.length;
   const avgOrderValue = totalOrderCount > 0 ? totalRevenue / totalOrderCount : 0;
-  const paidOrders = filteredOrders.filter((o) => o.paymentStatus === "paid");
+  const paidOrders = filteredOrders.filter((o) => payStatus(o.id) === "paid");
   const collectionRate =
     totalOrderCount > 0 ? (paidOrders.length / totalOrderCount) * 100 : 0;
 
@@ -207,7 +207,7 @@ export default function Performance() {
   const prevRevenue = prevOrders.reduce((s, o) => s + netTotal(o), 0);
   const prevOrderCount = prevOrders.length;
   const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
-  const prevPaid = prevOrders.filter((o) => o.paymentStatus === "paid");
+  const prevPaid = prevOrders.filter((o) => payStatus(o.id) === "paid");
   const prevCollection = prevOrderCount > 0 ? (prevPaid.length / prevOrderCount) * 100 : 0;
 
   // Revenue trend — group by mode-aware date
@@ -232,7 +232,7 @@ export default function Performance() {
   const paymentSplit = useMemo(() => {
     const counts = { paid: 0, partial: 0, pending: 0 };
     filteredOrders.forEach((o) => {
-      counts[o.paymentStatus]++;
+      counts[payStatus(o.id)]++;
     });
     return Object.entries(counts)
       .filter(([, v]) => v > 0)

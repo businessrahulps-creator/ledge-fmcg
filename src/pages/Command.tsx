@@ -99,7 +99,7 @@ export default function Command() {
     [allSignals, acksMap],
   );
 
-  const { rows: receivableRows, receipts } = useReceivables();
+  const { rows: receivableRows, receipts, paymentStatus: payStatusMap } = useReceivables();
   const revenue = useMemo(() => dispatchedRevenue(orders, range), [orders, range]);
 
   // WhatsApp blast — which signals support it + the dealer set per blast
@@ -205,8 +205,8 @@ export default function Command() {
 
     // Pipeline by status
     const stageDefs: Array<{ stage: string; match: (o: typeof orders[number]) => boolean }> = [
-      { stage: "Pending", match: (o) => o.deliveryStatus === "pending" && o.paymentStatus === "pending" },
-      { stage: "Confirmed", match: (o) => o.deliveryStatus === "pending" && o.paymentStatus !== "pending" },
+      { stage: "Pending", match: (o) => o.deliveryStatus === "pending" && (payStatusMap.get(o.id) ?? "pending") === "pending" },
+      { stage: "Confirmed", match: (o) => o.deliveryStatus === "pending" && (payStatusMap.get(o.id) ?? "pending") !== "pending" },
       { stage: "Dispatched", match: (o) => o.deliveryStatus === "dispatched" },
       { stage: "Delivered", match: (o) => o.deliveryStatus === "delivered" },
     ];
