@@ -352,11 +352,11 @@ export default function Billing() {
             <IndianRupee className="h-3.5 w-3.5" /> Record payment
           </Button>
         ) : (
-          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => viewBill(inv)} disabled={busy}>
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}
-            {busy ? "Opening…" : "View bill"}
+          <Button size="sm" variant="outline" className={cn(h, "gap-1.5 text-xs", opts.size === "card" && "flex-1")} onClick={() => viewBill(inv)}>
+            <Eye className="h-3.5 w-3.5" /> View bill
           </Button>
         )}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className={cn(h, opts.size === "card" ? "w-9" : "w-8")} aria-label="More actions">
@@ -365,10 +365,11 @@ export default function Billing() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             {collecting && (
-              <DropdownMenuItem onClick={() => viewBill(inv)} disabled={busy}>
-                {busy ? <Loader2 className="animate-spin" /> : <Eye />} View bill
+              <DropdownMenuItem onClick={() => viewBill(inv)}>
+                <Eye /> View bill
               </DropdownMenuItem>
             )}
+
             <DropdownMenuItem onClick={() => downloadBill(inv)} disabled={busy}>
               <Download /> Download PDF
             </DropdownMenuItem>

@@ -101,11 +101,11 @@ export default function OrderDetail() {
   const [creditDispatchOpen, setCreditDispatchOpen] = useState(false);
 
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
-  /** Opens a bill in the browser's own PDF viewer; falls back to the in-app window. */
-  const viewBill = useCallback(async (inv: Invoice) => {
-    const ok = await openInvoiceInNewTab(inv);
-    if (!ok) setPreviewInvoice(inv);
+  /** Opens the bill on its own page in a new tab — a plain link, so nothing gets blocked. */
+  const viewBill = useCallback((inv: Invoice) => {
+    window.open(`/bill/${inv.id}`, "_blank", "noopener,noreferrer");
   }, []);
+
   const [money, setMoney] = useState({ received: 0, balance: 0 });
   const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
 
