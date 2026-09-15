@@ -119,6 +119,7 @@ export function MobileSearchSheet({
             )}
 
           </div>
+          )}
 
           {/* Body */}
           <div
