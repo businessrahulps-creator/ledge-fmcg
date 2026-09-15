@@ -22,3 +22,12 @@
 
 ## Bill viewer repair
 - [x] Remove the blocked wrapper page and open the existing PDF directly
+
+## Red-team plan — rounds 1-4 progress
+- [x] Bill lines now add up to bill totals (all 454 bills)
+- [x] Close a return/claim (server RPC + dialog on Returns page)
+- [x] Cancel an order with a reason (button, dialog, cancelled banner, excluded from revenue)
+- [x] "Needs a bill" filter on Orders (264 dispatched-but-unbilled)
+- [x] Stock movement ledger backfilled from past dispatches (3,068 rows)
+- [x] Old unsafe stock deduction path removed
+- [x] Expired-but-still-on offers flagged on Schemes
