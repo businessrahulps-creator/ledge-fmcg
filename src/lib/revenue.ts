@@ -3,10 +3,12 @@ import type { Order } from "@/data/mock-data";
 /** Net revenue value for a single order (after scheme discounts). */
 export const netTotal = (o: Order): number => Math.max(0, (o.total || 0) - (o.schemeSavings || 0));
 
-export const isDelivered = (o: Order): boolean => o.deliveryStatus === "delivered";
+/** Cancelled orders never count towards revenue, pipeline or targets. */
+export const isCancelled = (o: Order): boolean => !!o.cancelledAt;
+export const isDelivered = (o: Order): boolean => !isCancelled(o) && o.deliveryStatus === "delivered";
 export const isBooked = (o: Order): boolean =>
-  o.deliveryStatus === "pending" || o.deliveryStatus === "dispatched";
-/** "returned" or any future cancelled state. */
+  !isCancelled(o) && (o.deliveryStatus === "pending" || o.deliveryStatus === "dispatched");
+/** Cancelled orders, or any future non-booked, non-delivered state. */
 export const isExcluded = (o: Order): boolean => !isDelivered(o) && !isBooked(o);
 
 export const deliveredRevenue = (orders: Order[]): number =>

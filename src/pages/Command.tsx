@@ -32,7 +32,9 @@ import {
   PERIOD_LABELS,
   type CommandPeriod,
 } from "@/lib/command-signals";
-import { computeDealerAging } from "@/lib/aging";
+import { agingFromReceivables } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
+import { netTotal } from "@/lib/revenue";
 import { formatCurrencyPdf } from "@/utils/exportPdf";
 import type { CommandPdfProps } from "@/components/pdf/CommandPdf";
 import "@/styles/command-print.css";
@@ -96,6 +98,7 @@ export default function Command() {
     [allSignals, acksMap],
   );
 
+  const { rows: receivableRows, receipts } = useReceivables();
   const revenue = useMemo(() => dispatchedRevenue(orders, range), [orders, range]);
 
   // WhatsApp blast — which signals support it + the dealer set per blast
@@ -181,14 +184,14 @@ export default function Command() {
     const periodOrders = ordersInPeriod(orders, range);
     const orderCount = periodOrders.length;
     const aov = orderCount ? revenue / orderCount : 0;
-    const collections = collectionsInPeriod(orders, range);
+    const collections = collectionsInPeriod(receipts, range);
     const outstanding = outstandingTotal(distributors);
     const creditAtRiskDealers = distributors
       .filter((d) => d.creditLimit > 0 && d.outstandingAmount / d.creditLimit >= 0.9)
       .sort((a, b) => b.outstandingAmount / b.creditLimit - a.outstandingAmount / a.creditLimit);
     const creditAtRiskAmount = creditAtRiskDealers.reduce((s, d) => s + d.outstandingAmount, 0);
 
-    const agingRows = computeDealerAging(orders, distributors);
+    const agingRows = agingFromReceivables(receivableRows, distributors);
     const aging = agingRows.reduce(
       (acc, r) => ({
         b0: acc.b0 + r.bucket_0_30,
@@ -208,7 +211,7 @@ export default function Command() {
     ];
     const pipeline = stageDefs.map((d) => {
       const rows = periodOrders.filter(d.match);
-      return { stage: d.stage, count: rows.length, value: rows.reduce((s, o) => s + (o.total || 0), 0) };
+      return { stage: d.stage, count: rows.length, value: rows.reduce((s, o) => s + netTotal(o), 0) };
     });
 
     const trend = buildRevenueTrend(orders, targets, range, 12).map((p) => ({
@@ -223,8 +226,8 @@ export default function Command() {
     const revByProd = new Map<string, number>();
     const qtyByProd = new Map<string, number>();
     for (const o of periodOrders) {
-      revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + (o.total || 0));
-      revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + (o.total || 0));
+      revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + netTotal(o));
+      revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + netTotal(o));
       for (const ln of o.lines) {
         revByProd.set(ln.productId, (revByProd.get(ln.productId) || 0) + (ln.lineTotal || 0));
         qtyByProd.set(ln.productId, (qtyByProd.get(ln.productId) || 0) + (ln.quantity || 0));

@@ -35,16 +35,18 @@ const statusConfig: Record<string, { label: string; color: string; icon: typeof 
 };
 
 function ClaimCard({
-  claim, expandedId, setExpandedId,
+  claim, expandedId, setExpandedId, onClose,
 }: {
   claim: Claim;
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
+  onClose: (claim: Claim) => void;
 }) {
   const typeInfo = claimTypeLabels[claim.claimType] || claimTypeLabels.return;
   const statusInfo = statusConfig[claim.status] || statusConfig.open;
   const TypeIcon = typeInfo.icon;
   const isExpanded = expandedId === claim.id;
+
 
   return (
     <div className="glass-card overflow-hidden">
@@ -119,8 +121,18 @@ function ClaimCard({
             </div>
           )}
 
+          {claim.status === "open" && (
+            <div className="flex justify-end pt-1">
+              <Button size="sm" onClick={() => onClose(claim)}>
+                <CheckCircle2 className="h-4 w-4" />
+                Close this return
+              </Button>
+            </div>
+          )}
+
         </div>
       )}
+
     </div>
   );
 }
@@ -379,6 +391,21 @@ export default function Claims() {
   const presetOrderId = searchParams.get("order");
   const [newClaimOpen, setNewClaimOpen] = useState(!!presetOrderId);
   const [search, setSearch] = useState("");
+  const [closing, setClosing] = useState<Claim | null>(null);
+  const [closeNotes, setCloseNotes] = useState("");
+  const [savingClose, setSavingClose] = useState(false);
+
+  const handleCloseClaim = async () => {
+    if (!closing || savingClose) return;
+    setSavingClose(true);
+    const ok = await api.claims.resolveClaim(closing.id, closeNotes);
+    setSavingClose(false);
+    if (ok) {
+      toast.success("Return closed", { description: `${closing.orderNumber} is now settled.` });
+      setClosing(null);
+      setCloseNotes("");
+    }
+  };
 
   useEffect(() => {
     if (presetOrderId) setNewClaimOpen(true);
@@ -482,6 +509,7 @@ export default function Claims() {
                     claim={claim}
                     expandedId={expandedId}
                     setExpandedId={setExpandedId}
+                    onClose={c => { setClosing(c); setCloseNotes(""); }}
                   />
                 ))}
               </div>
@@ -498,6 +526,37 @@ export default function Claims() {
         invoices={invoices}
         api={api}
       />
+
+      <Dialog open={!!closing} onOpenChange={v => { if (!v && !savingClose) { setClosing(null); setCloseNotes(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Close this return</DialogTitle>
+            <DialogDescription>
+              {closing ? `${closing.orderNumber} · ${closing.distributorName} · ${formatCurrency(closing.totalClaimValue)}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="close-notes">What was decided? (optional)</Label>
+            <Textarea
+              id="close-notes"
+              value={closeNotes}
+              onChange={e => setCloseNotes(e.target.value)}
+              placeholder="e.g. Credit note issued, dealer informed."
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Closing a return cannot be undone. It does not change stock or money on its own.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClosing(null)} disabled={savingClose}>Cancel</Button>
+            <Button onClick={handleCloseClaim} disabled={savingClose}>
+              {savingClose ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Close return
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

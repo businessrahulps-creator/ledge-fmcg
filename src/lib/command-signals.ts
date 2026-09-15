@@ -4,6 +4,8 @@
  * Pure functions over DataContext domain shapes. No fetches, no side effects.
  * Recomputed by callers when the period changes.
  */
+import { collectedInPeriod } from "@/lib/receivables";
+import { netTotal } from "@/lib/revenue";
 import type { Order, Distributor, Salesperson, Product } from "@/data/mock-data";
 import type { Target } from "@/context/DataContext";
 
@@ -66,7 +68,7 @@ export function dispatchedRevenue(orders: Order[], range: PeriodRange): number {
     if (o.deliveryStatus !== "dispatched" && o.deliveryStatus !== "delivered") return sum;
     const ref = o.dispatchDate ? new Date(o.dispatchDate) : new Date(o.date);
     if (ref < range.from || ref > range.to) return sum;
-    return sum + (o.total || 0);
+    return sum + netTotal(o);
   }, 0);
 }
 
@@ -77,11 +79,15 @@ export function ordersInPeriod(orders: Order[], range: PeriodRange): Order[] {
   });
 }
 
-export function collectionsInPeriod(orders: Order[], range: PeriodRange): number {
-  return ordersInPeriod(orders, range).reduce(
-    (sum, o) => (o.paymentStatus === "paid" ? sum + (o.total || 0) : sum),
-    0,
-  );
+/**
+ * Money actually received in the period — posted receipts only.
+ * Order flags (`paymentStatus`) are a coarse label, never a cash figure.
+ */
+export function collectionsInPeriod(
+  receipts: Array<{ amount: number; paidOn: string; status: string }>,
+  range: PeriodRange,
+): number {
+  return collectedInPeriod(receipts, range.from, range.to);
 }
 
 export function outstandingTotal(distributors: Distributor[]): number {

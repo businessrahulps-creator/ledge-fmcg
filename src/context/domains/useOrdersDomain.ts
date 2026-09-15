@@ -12,7 +12,6 @@ import { logError } from "@/utils/errorLog";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 interface OrdersDeps extends DomainDeps {
-  deductStockForOrder: (orderId: string, lines: OrderLine[], godownId: string, cId: string) => Promise<void>;
   safeRefetchStockItems: () => Promise<void>;
 }
 
@@ -326,7 +325,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     if (summaryParts.length === 0 && linesChanged) summaryParts.push("updated line items");
     if (summaryParts.length === 0) summaryParts.push("updated details");
     deps.log("order", id, "updated", `${currentOrder?.orderNumber || "Order"}: ${summaryParts.join(", ")}`, updates);
-  }, [deps.companyId, deps.deductStockForOrder, deps.persistEntityToCache, deps.log]);
+  }, [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
     if (!navigator.onLine) {

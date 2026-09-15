@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BarChart3 } from "lucide-react";
 
 import { ReportExportFooter } from "./ReportExportFooter";
@@ -14,7 +14,9 @@ import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { downloadPdf, pdfFilename, formatCurrencyPdf } from "@/utils/exportPdf";
 import { ExportPdfModal, type PdfSection } from "@/components/pdf/ExportPdfModal";
 // ReportPdf is dynamically imported on click to keep @react-pdf/renderer out of this route chunk
-import { computeDealerAging, sortByRisk } from "@/lib/aging";
+import { sortByRisk } from "@/lib/aging";
+import { agingFromReceivables, collectedInPeriod } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
 
 export function PaymentReport() {
   const api = useApi();
@@ -31,6 +33,15 @@ export function PaymentReport() {
   const periodFiltered = filterByTimePeriod(orders, period);
   const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
   const filtered = filter === "all" ? scoped : scoped.filter((o) => o.paymentStatus === filter);
+
+  // Money actually collected in the same window — posted receipts only.
+  const { rows: receivableRows, receipts } = useReceivables();
+  const collectedInRange = useMemo(
+    () => filterByTimePeriod(receipts.map(r => ({ ...r, date: r.paidOn })), period)
+      .reduce((s, r) => (r.status === "posted" ? s + r.amount : s), 0),
+    [receipts, period],
+  );
+
   const [pdfOpen, setPdfOpen] = useState(false);
   const rptSections: PdfSection[] = [
     { id: "company", label: "Company header" },
@@ -64,7 +75,10 @@ export function PaymentReport() {
         </Select>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:gap-6 md:text-sm">
           <span className="whitespace-nowrap text-muted-foreground">
-            {periodLabel(period)}: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
+            {periodLabel(period)} order value: <span className="font-semibold text-foreground">{formatCurrency(filtered.reduce((s, o) => s + netTotal(o), 0))}</span>
+          </span>
+          <span className="whitespace-nowrap text-muted-foreground">
+            Collected: <span className="font-semibold text-foreground">{formatCurrency(collectedInRange)}</span>
           </span>
           <span className="whitespace-nowrap text-muted-foreground">{filtered.length} orders</span>
           <span className="whitespace-nowrap text-[11px] text-muted-foreground/70">Showing {periodRangeLabel(period)} · {scope === "delivered" ? "Delivered only" : "All orders"}</span>
@@ -141,7 +155,7 @@ export function PaymentReport() {
           icon: BarChart3,
           title: "Export aging summary for current filters (XLSX)",
           onClick: () => {
-            const aging = sortByRisk(computeDealerAging(filtered, distributors));
+            const aging = sortByRisk(agingFromReceivables(receivableRows, distributors));
             exportXlsx(
               xlsxFilename("payment-aging-summary"),
               ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
@@ -245,7 +259,8 @@ export function PaymentReport() {
               showSummary={sel.summary}
               showTable={sel.table}
               summary={[
-                { label: "Total", value: formatCurrencyPdf(totalAmount) },
+                { label: "Order value", value: formatCurrencyPdf(totalAmount) },
+                { label: "Collected", value: formatCurrencyPdf(collectedInRange) },
                 { label: "Orders", value: String(filtered.length) },
               ]}
               columns={[

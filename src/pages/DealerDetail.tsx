@@ -40,8 +40,11 @@ import { toast } from "sonner";
 import { formatIndianDate } from "@/utils/formatDate";
 import { cn } from "@/lib/utils";
 import {
-  outstandingOrdersForDealer, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE,
+  BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE,
 } from "@/lib/aging";
+import { sumDue } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
+
 
 export default function DealerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +60,38 @@ export default function DealerDetail() {
   const dealerOrders = useMemo(() => orders.filter(o => o.distributorId === id), [orders, id]);
   const dealerSS = useMemo(() => allSecondarySales.filter(s => s.distributorId === id), [allSecondarySales, id]);
 
+  // Money for this dealer comes from bills, posted receipts and credit notes — never order flags.
+  const { rows: receivableRows, receipts, creditNotes, advances } = useReceivables();
+  const invoices = api.invoices.list();
+  const dealerOrderIds = useMemo(() => new Set(dealerOrders.map(o => o.id)), [dealerOrders]);
+  const dealerInvoices = useMemo(
+    () => invoices
+      .filter(i => i.docType === "gst_invoice" && i.status !== "draft" && i.sourceOrderId && dealerOrderIds.has(i.sourceOrderId))
+      .sort((a, b) => a.invoiceDate.localeCompare(b.invoiceDate)),
+    [invoices, dealerOrderIds],
+  );
+  const dealerInvoiceIds = useMemo(() => new Set(dealerInvoices.map(i => i.id)), [dealerInvoices]);
+  const dealerReceipts = useMemo(
+    () => receipts.filter(r => r.distributorId === id
+      || (r.invoiceId && dealerInvoiceIds.has(r.invoiceId))
+      || (r.orderId && dealerOrderIds.has(r.orderId))),
+    [receipts, id, dealerInvoiceIds, dealerOrderIds],
+  );
+  const dealerCreditNotes = useMemo(
+    () => creditNotes.filter(n => n.distributorId === id),
+    [creditNotes, id],
+  );
+  const dealerReceivables = useMemo(
+    () => receivableRows.filter(r => r.distributorId === id),
+    [receivableRows, id],
+  );
+  const advanceHeld = advances.get(id || "") || 0;
+
+
   const [ssOpen, setSsOpen] = useState(false);
+  const [ssSaving, setSsSaving] = useState(false);
+  const [ssDeleting, setSsDeleting] = useState(false);
+
   const [ssExpanded, setSsExpanded] = useState(false);
   const [deleteSecondarySaleId, setDeleteSecondarySaleId] = useState<string | null>(null);
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: new Date().toISOString().split("T")[0], remarks: "" });
@@ -189,17 +223,18 @@ export default function DealerDetail() {
               })()}
             </div>
 
-            {/* Outstanding & Aging */}
+            {/* Unpaid bills & ageing — bills minus receipts minus credit notes */}
             {(() => {
-              const outRows = outstandingOrdersForDealer(orders, id || "");
-              const totalOut = outRows.reduce((s, r) => s + r.outstanding, 0);
+              const outRows = dealerReceivables;
+              const totalOut = sumDue(outRows);
               if (totalOut <= 0) return null;
               const buckets = {
-                b0: outRows.filter(r => r.bucket === "b0").reduce((s, r) => s + r.outstanding, 0),
-                b31: outRows.filter(r => r.bucket === "b31").reduce((s, r) => s + r.outstanding, 0),
-                b61: outRows.filter(r => r.bucket === "b61").reduce((s, r) => s + r.outstanding, 0),
-                b90: outRows.filter(r => r.bucket === "b90").reduce((s, r) => s + r.outstanding, 0),
+                b0: outRows.filter(r => r.bucket === "b0").reduce((s, r) => s + r.due, 0),
+                b31: outRows.filter(r => r.bucket === "b31").reduce((s, r) => s + r.due, 0),
+                b61: outRows.filter(r => r.bucket === "b61").reduce((s, r) => s + r.due, 0),
+                b90: outRows.filter(r => r.bucket === "b90").reduce((s, r) => s + r.due, 0),
               };
+
               const limit = dealer.creditLimit || 0;
               const util = limit > 0 ? (totalOut / limit) * 100 : null;
               const utilTone = util === null
@@ -208,12 +243,18 @@ export default function DealerDetail() {
               const order: Array<keyof typeof buckets> = ["b0", "b31", "b61", "b90"];
               return (
                 <div className="space-y-3">
-                  <h3 className="text-xs font-semibold md:text-sm">Outstanding & Aging</h3>
+                  <h3 className="text-xs font-semibold md:text-sm">Unpaid bills &amp; ageing</h3>
                   <div className="grid grid-cols-3 gap-2 md:gap-3">
                     <div className="glass-card p-3">
-                      <span className="text-[10px] text-muted-foreground">Total Outstanding</span>
+                      <span className="text-[10px] text-muted-foreground">Still to collect</span>
                       <p className="mt-0.5 text-sm font-semibold num">{formatCurrency(totalOut)}</p>
+                      {advanceHeld > 0 && (
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {formatCurrency(advanceHeld)} advance held on unbilled orders
+                        </p>
+                      )}
                     </div>
+
                     <div className="glass-card p-3">
                       <span className="text-[10px] text-muted-foreground">Credit Limit</span>
                       <p className="mt-0.5 text-sm font-semibold num">{limit > 0 ? formatCurrency(limit) : "No limit set"}</p>
@@ -262,12 +303,12 @@ export default function DealerDetail() {
                     <table className="w-full min-w-[560px] text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                          <th className="px-4 py-2.5 font-medium">Order</th>
+                          <th className="px-4 py-2.5 font-medium">Bill</th>
                           <th className="px-4 py-2.5 font-medium">Date</th>
-                          <th className="px-4 py-2.5 font-medium text-right">Total</th>
-                          <th className="px-4 py-2.5 font-medium text-right">Outstanding</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Bill total</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Received</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Still due</th>
                           <th className="px-4 py-2.5 font-medium">Age</th>
-                          <th className="px-4 py-2.5 font-medium">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -275,24 +316,25 @@ export default function DealerDetail() {
                           const tone = BUCKET_TONE[r.bucket];
                           return (
                             <tr
-                              key={r.orderId}
+                              key={r.invoiceId}
                               className="border-b border-border/50 row-hover cursor-pointer"
-                              onClick={() => navigate(`/orders/${r.orderId}`)}
+                              onClick={() => r.orderId && navigate(`/orders/${r.orderId}`)}
                             >
-                              <td className={cn("relative px-4 py-3 font-medium text-primary", tone.leftBar)}>{r.orderNumber}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.date)}</td>
-                              <td className="px-4 py-3 text-right num">{formatCurrency(r.total)}</td>
-                              <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.outstanding)}</td>
+                              <td className={cn("relative px-4 py-3 font-medium text-primary", tone.leftBar)}>{r.invoiceNumber}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.invoiceDate)}</td>
+                              <td className="px-4 py-3 text-right num">{formatCurrency(r.billed)}</td>
+                              <td className="px-4 py-3 text-right num">{formatCurrency(r.received + r.credited)}</td>
+                              <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.due)}</td>
                               <td className="px-4 py-3">
                                 <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", tone.badge)}>
                                   {r.ageDays}d · {BUCKET_SHORT[r.bucket]}
                                 </span>
                               </td>
-                              <td className="px-4 py-3"><StatusBadge status={r.paymentStatus} /></td>
                             </tr>
                           );
                         })}
                       </tbody>
+
                     </table>
                   </div>
                 </div>
@@ -460,15 +502,36 @@ export default function DealerDetail() {
             {(() => {
               type LedgerEntry = { date: string; particulars: string; debit: number; credit: number; balance: number; orderId?: string };
               const entries: Omit<LedgerEntry, "balance">[] = [];
-              dealerOrders.forEach(o => {
-                const net = o.total - (o.schemeSavings || 0);
-                entries.push({ date: o.date, particulars: o.orderNumber, debit: net, credit: 0, orderId: o.id });
-                if (o.paymentStatus === "paid") {
-                  entries.push({ date: o.date, particulars: `Payment — ${o.orderNumber}`, debit: 0, credit: net });
-                } else if (o.paymentStatus === "partial") {
-                  entries.push({ date: o.date, particulars: `Part Payment — ${o.orderNumber}`, debit: 0, credit: Math.round(net * 0.5) });
-                }
-              });
+              // Real books only: GST bills owed, money actually received, returns credited.
+              for (const inv of dealerInvoices) {
+                entries.push({
+                  date: inv.invoiceDate,
+                  particulars: `Bill ${inv.invoiceNumber}`,
+                  debit: Number(inv.grandTotal || 0),
+                  credit: 0,
+                  orderId: inv.sourceOrderId,
+                });
+              }
+              for (const r of dealerReceipts) {
+                if (r.status !== "posted") continue;
+                entries.push({
+                  date: r.paidOn,
+                  particulars: `Payment received${r.reference ? ` — ${r.reference}` : ""}`,
+                  debit: 0,
+                  credit: r.amount,
+                  orderId: r.orderId || undefined,
+                });
+              }
+              for (const n of dealerCreditNotes) {
+                entries.push({
+                  date: n.noteDate,
+                  particulars: `Credit note ${n.number}`,
+                  debit: 0,
+                  credit: n.grandTotal,
+                  orderId: n.orderId || undefined,
+                });
+              }
+
               entries.sort((a, b) => a.date.localeCompare(b.date));
               let running = 0;
               const ledger: LedgerEntry[] = entries.map(e => {
@@ -667,12 +730,13 @@ export default function DealerDetail() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setSsOpen(false)}>Cancel</Button>
-            <Button onClick={() => {
+            <Button variant="outline" onClick={() => setSsOpen(false)} disabled={ssSaving}>Cancel</Button>
+            <Button disabled={ssSaving} onClick={async () => {
               if (!ssForm.productId) { toast.error("Product required"); return; }
               if (ssForm.quantity < 1) { toast.error("Invalid quantity"); return; }
               const product = allProducts.find(p => p.id === ssForm.productId);
-              api.secondarySales.create({
+              setSsSaving(true);
+              const ok = await api.secondarySales.create({
                 id: "",
                 distributorId: id || "",
                 productId: ssForm.productId,
@@ -682,11 +746,14 @@ export default function DealerDetail() {
                 date: ssForm.date,
                 remarks: ssForm.remarks.trim(),
               });
+              setSsSaving(false);
+              if (!ok) return;
               setSsOpen(false);
               toast.success("Secondary sale recorded");
             }}>
-              Save
+              {ssSaving ? "Saving…" : "Save"}
             </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -701,7 +768,16 @@ export default function DealerDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={() => { if (deleteSecondarySaleId) { api.secondarySales.remove(deleteSecondarySaleId); setDeleteSecondarySaleId(null); toast.success("Secondary sale removed"); } }}>Remove</Button>
+            <Button variant="destructive" disabled={ssDeleting} onClick={async () => {
+              if (!deleteSecondarySaleId) return;
+              setSsDeleting(true);
+              const ok = await api.secondarySales.remove(deleteSecondarySaleId);
+              setSsDeleting(false);
+              if (!ok) return;
+              setDeleteSecondarySaleId(null);
+              toast.success("Secondary sale removed");
+            }}>{ssDeleting ? "Removing…" : "Remove"}</Button>
+
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

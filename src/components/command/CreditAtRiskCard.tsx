@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowRight, MessageCircle } from "lucide-react";
 import { formatCurrency, type Distributor, type Order } from "@/data/mock-data";
 import { CommandEmptyState } from "./CommandEmptyState";
-import { computeDealerAging } from "@/lib/aging";
+import { agingFromReceivables } from "@/lib/receivables";
+import { useReceivables } from "@/hooks/useReceivables";
 import { toast } from "sonner";
 
 interface Props {
@@ -54,8 +55,9 @@ function whatsappReminder(d: Distributor) {
 }
 
 function CreditAtRiskCardInner({ distributors, orders }: Props) {
+  const { rows: receivableRows } = useReceivables();
   const { rows, all, exposure, criticalCount } = useMemo(() => {
-    const aging = computeDealerAging(orders, distributors);
+    const aging = agingFromReceivables(receivableRows, distributors);
     const dpoBy = new Map(aging.map((a) => [a.distributorId, a.oldestAgeDays]));
     // "At risk" = >=70% credit utilisation. Sort by absolute exposure (₹)
     // so the biggest money in the air rises to the top, not the % bar shape.
@@ -71,7 +73,7 @@ function CreditAtRiskCardInner({ distributors, orders }: Props) {
     const exposure = all.reduce((s, d) => s + (d.outstandingAmount || 0), 0);
     const criticalCount = all.filter((d) => d.util >= 0.95).length;
     return { rows, all, exposure, criticalCount };
-  }, [distributors, orders]);
+  }, [distributors, receivableRows]);
 
   return (
     <Card className="p-4">

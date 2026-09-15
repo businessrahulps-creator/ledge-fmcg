@@ -113,6 +113,15 @@ export default function Orders() {
     return { label: docs[0].docType, color: "bg-muted text-muted-foreground" };
   }, [invoicesByOrderId]);
 
+  const billedOrderIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const inv of invoices) {
+      if (inv.docType === "gst_invoice" && inv.status !== "draft" && inv.sourceOrderId) set.add(inv.sourceOrderId);
+    }
+    return set;
+  }, [invoices]);
+  const [needsBillOnly, setNeedsBillOnly] = useState(false);
+
   const filtered = useMemo(() => orders.filter((o) => {
     const q = debouncedSearch.toLowerCase();
     const matchesSearch =
@@ -120,8 +129,14 @@ export default function Orders() {
       o.distributorName.toLowerCase().includes(q);
     const matchesPayment = paymentFilter === "all" || o.paymentStatus === paymentFilter;
     const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
-    return matchesSearch && matchesPayment && matchesDelivery;
-  }), [orders, debouncedSearch, paymentFilter, deliveryFilter]);
+    const matchesNeedsBill = !needsBillOnly || (!o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id));
+    return matchesSearch && matchesPayment && matchesDelivery && matchesNeedsBill;
+  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds]);
+
+  const needsBillCount = useMemo(
+    () => orders.filter(o => !o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id)).length,
+    [orders, billedOrderIds],
+  );
 
   const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
@@ -140,6 +155,7 @@ export default function Orders() {
     let todaysCount = 0;
 
     for (const o of orders) {
+      if (o.cancelledAt) continue;
       const t = new Date(o.date).getTime();
       if (t >= startOfMonth) { mtdCount++; mtdRevenue += net(o); }
       else if (t >= startOfPrevMonth) { prevCount++; prevRevenue += net(o); }
@@ -339,8 +355,19 @@ export default function Orders() {
                 <SelectItem value="delivered">Delivered</SelectItem>
               </SelectContent>
             </Select>
+            {needsBillCount > 0 && (
+              <Button
+                type="button"
+                variant={needsBillOnly ? "default" : "outline"}
+                className="h-10 rounded-lg"
+                onClick={() => setNeedsBillOnly(v => !v)}
+              >
+                Needs a bill · {needsBillCount}
+              </Button>
+            )}
           </div>
         </div>
+
 
         {/* Table */}
         {filtered.length === 0 ? (
@@ -397,7 +424,11 @@ export default function Orders() {
                           <td className="px-4 py-3.5">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <StatusBadge status={order.paymentStatus} />
-                              <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                              {order.cancelledAt ? (
+                                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                              ) : (
+                                <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                              )}
                             </div>
                           </td>
                           <td className="px-4 py-3.5">
@@ -441,7 +472,11 @@ export default function Orders() {
                       </p>
                       <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <StatusBadge status={order.paymentStatus} />
-                        <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                        {order.cancelledAt ? (
+                          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                        ) : (
+                          <StatusBadge status={order.deliveryStatus} kind="delivery" />
+                        )}
                         {billingStatus && (
                           <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${billingStatus.color}`}>
                             {billingStatus.label}
