@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { xlsxFilename } from "./exportXlsx";
+import { xlsxFilename, parseMoney, parseDateCell, buildWorksheet } from "./exportXlsx";
+import * as XLSX from "xlsx";
 
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2025-06-15T12:00:00Z")); });
 afterEach(() => { vi.useRealTimers(); });
