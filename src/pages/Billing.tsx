@@ -34,6 +34,7 @@ import { billStatusView, billStateFromMoney } from "@/lib/bill-status";
 import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { formatMoneyPdf } from "@/utils/exportPdf";
 import { formatIndianDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
@@ -665,17 +666,27 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Money still to collect"
+                      subtitle={periodRangeLabel(timePeriod)}
+                      companyName={api.companyInfo.name}
+                      companyAddress={api.companyInfo.address}
+                      gstin={api.companyInfo.gstin}
+                      logoUrl={api.companyInfo.logoUrl}
+                      summary={[
+                        { label: "Billed", value: formatMoneyPdf(collectionTotals.billed) },
+                        { label: "Collected", value: formatMoneyPdf(collectionTotals.collected) },
+                        { label: "Still to collect", value: formatMoneyPdf(collectionTotals.outstanding) },
+                      ]}
                       columns={[
-                        { header: "Bill", width: "18%" },
-                        { header: "Dealer", width: "22%" },
-                        { header: "Date", width: "14%" },
+                        { header: "Bill", width: "20%" },
+                        { header: "Dealer", width: "24%" },
+                        { header: "Date", width: "12%" },
                         { header: "Total", width: "15%", align: "right" },
                         { header: "Received", width: "15%", align: "right" },
-                        { header: "Still due", width: "16%", align: "right" },
+                        { header: "Still due", width: "14%", align: "right" },
                       ]}
                       rows={collections.map(r => [
                         r.inv.invoiceNumber, r.inv.buyerName, formatIndianDate(r.inv.invoiceDate),
-                        formatCurrency(r.inv.grandTotal), formatCurrency(r.received), formatCurrency(r.due),
+                        formatMoneyPdf(r.inv.grandTotal), formatMoneyPdf(r.received), formatMoneyPdf(r.due),
                       ])}
                     />,
                   ).toBlob();
@@ -794,22 +805,27 @@ export default function Billing() {
                   const blob = await pdf(
                     <ReportPdf
                       title="Payments received"
+                      subtitle={periodRangeLabel(timePeriod)}
+                      companyName={api.companyInfo.name}
+                      companyAddress={api.companyInfo.address}
+                      gstin={api.companyInfo.gstin}
+                      logoUrl={api.companyInfo.logoUrl}
                       columns={[
-                        { header: "Date", width: "13%" },
+                        { header: "Date", width: "11%" },
                         { header: "Dealer", width: "21%" },
-                        { header: "Against", width: "18%" },
-                        { header: "Paid by", width: "13%" },
-                        { header: "Reference", width: "15%" },
-                        { header: "Amount", width: "12%", align: "right" },
-                        { header: "Status", width: "8%" },
+                        { header: "Against", width: "19%" },
+                        { header: "Paid by", width: "11%" },
+                        { header: "Reference", width: "13%" },
+                        { header: "Amount", width: "15%", align: "right" },
+                        { header: "Status", width: "10%", align: "right" },
                       ]}
                       rows={paymentRows.map(r => [
                         formatIndianDate(r.paidOn),
                         dealerName(r.distributorId),
-                        (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "",
+                        (r.invoiceId ? invoiceNumberById.get(r.invoiceId) : orderNumberById.get(r.orderId || "")) || "-",
                         modeLabels[r.mode] || r.mode,
-                        r.reference || "—",
-                        formatCurrency(r.amount),
+                        r.reference || "-",
+                        formatMoneyPdf(r.amount),
                         r.status === "voided" ? "Cancelled" : "Posted",
                       ])}
                     />,
