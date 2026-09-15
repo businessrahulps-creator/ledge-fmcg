@@ -245,42 +245,34 @@ export function PaymentReport() {
         title="Export Payment Report PDF"
         onGenerate={async (sel) => {
           const totalAmount = filtered.reduce((s, o) => s + netTotal(o), 0);
-          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-          downloadPdf(
-            pdfFilename("payment-report"),
-            <ReportPdf
-              companyName={companyInfo.name}
-              companyAddress={companyInfo.address}
-              gstin={companyInfo.gstin}
-              logoUrl={companyInfo.logoUrl}
-              title="Payment Report"
-              subtitle={periodLabel(period)}
-              showCompany={sel.company}
-              showSummary={sel.summary}
-              showTable={sel.table}
-              summary={[
-                { label: "Order value", value: formatCurrencyPdf(totalAmount) },
-                { label: "Collected", value: formatCurrencyPdf(collectedInRange) },
-                { label: "Orders", value: String(filtered.length) },
-              ]}
-              columns={[
-                { header: "Order", width: "16%" },
-                { header: "Dealer", width: "24%" },
-                { header: "Date", width: "13%" },
-                { header: "Amount", width: "17%", align: "right" },
-                { header: "Status", width: "15%" },
-                { header: "Mode", width: "15%" },
-              ]}
-              rows={filtered.map((o) => [
-                o.orderNumber,
-                o.distributorName,
-                formatIndianDate(o.date),
-                formatCurrencyPdf(netTotal(o)),
-                payStatus(o.id),
-                o.paymentMode.replace("_", " "),
-              ])}
-            />
-          );
+          await exportReportPdf({
+            fileType: "payment-report",
+            company: companyInfo,
+            selection: sel,
+            title: "Payment Report",
+            subtitle: periodLabel(period),
+            summary: [
+              { label: "Order value", value: formatCurrencyPdf(totalAmount) },
+              { label: "Collected", value: formatCurrencyPdf(collectedInRange) },
+              { label: "Orders", value: String(filtered.length) },
+            ],
+            columns: [
+              { header: "Order", width: "16%" },
+              { header: "Dealer", width: "24%" },
+              { header: "Date", width: "13%" },
+              { header: "Amount", width: "17%", align: "right" },
+              { header: "Status", width: "15%" },
+              { header: "Mode", width: "15%" },
+            ],
+            rows: filtered.map((o) => [
+              o.orderNumber,
+              o.distributorName,
+              formatIndianDate(o.date),
+              formatCurrencyPdf(netTotal(o)),
+              payStatus(o.id),
+              o.paymentMode.replace("_", " "),
+            ]),
+          });
         }}
       />
     </div>
