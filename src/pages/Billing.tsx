@@ -47,6 +47,21 @@ import { cn } from "@/lib/utils";
 
 type DocType = Invoice["docType"];
 
+/** One row in the Documents list — a GST bill or a credit note. */
+type DocRow = {
+  key: string;
+  type: DocType;
+  number: string;
+  date: string;
+  buyer: string;
+  amount: number;
+  orderId: string | null;
+  status: string;
+  invoice: Invoice | null;
+  note?: string;
+};
+
+
 const docTypeLabels: Record<DocType, string> = {
   gst_invoice: "GST Invoice",
   estimate: "Estimate",
