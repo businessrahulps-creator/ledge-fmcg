@@ -22,6 +22,10 @@ export default function SalespersonDetail() {
   const items = api.salespersons.list();
   const orders = api.orders.list();
 
+  // Payment chips come from the receipts ledger, never from orders.payment_status.
+  const { paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
+
   const person = items.find(s => s.id === id);
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
 
