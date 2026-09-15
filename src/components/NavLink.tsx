@@ -2,6 +2,7 @@ import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
 import { forwardRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { prefetchRoute } from "@/lib/route-prefetch";
+import { signalNavStart } from "@/components/NavProgress";
 
 interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
   className?: string;
@@ -43,6 +44,10 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
       <RouterNavLink
         ref={ref}
         to={to}
+        onPointerDown={() => {
+          warm();
+          if (target && !window.location.pathname.startsWith(target)) signalNavStart();
+        }}
         className={({ isActive, isPending }) =>
           cn(className, isActive && activeClassName, isPending && pendingClassName)
         }
