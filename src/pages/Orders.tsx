@@ -145,7 +145,11 @@ export default function Orders() {
     [orders, billedOrderIds],
   );
 
-  const { page, totalPages, from, to, setPage } = usePagination(filtered.length);
+  const { page, totalPages, from, to, setPage } = usePagination(
+    filtered.length,
+    undefined,
+    `${debouncedSearch}|${paymentFilter}|${deliveryFilter}|${needsBillOnly}`,
+  );
   const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
 
   // ── Period insights (no new business logic — derived from existing orders)
