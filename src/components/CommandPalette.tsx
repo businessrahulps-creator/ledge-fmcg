@@ -162,7 +162,7 @@ export function CommandPalette() {
     { label: "Sales Team", to: "/salespersons", icon: UserCheck },
     { label: "Schemes", to: "/schemes", icon: Gift },
     { label: "Targets", to: "/targets", icon: Target },
-    { label: "Reports", to: "/reports", icon: ChartNoAxesCombined },
+    { label: "Reports", to: "/command?tab=drill", icon: ChartNoAxesCombined },
     { label: "Billing", to: "/billing", icon: FileText },
     { label: "Company", to: "/company", icon: Landmark },
     { label: "Returns", to: "/claims", icon: RotateCcw },
