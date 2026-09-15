@@ -447,7 +447,7 @@ export default function NewOrder() {
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="h-10 rounded-lg md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
                 </div>
                 <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
@@ -703,7 +703,7 @@ export default function NewOrder() {
           </div>
 
           {/* Sidebar Summary */}
-          <div className="space-y-4 pb-32 md:space-y-6 md:pb-0">
+          <div className="space-y-4 pb-28 md:space-y-6 md:pb-0">
 
             {/* Summary */}
             <section className="glass-card p-4 md:p-6">
@@ -765,9 +765,10 @@ export default function NewOrder() {
               </section>
             )}
 
-            {/* Save button — pinned to the bottom of the screen on phones, so it
-                is always in reach however long the product list gets. */}
-            <div className="sticky bottom-0 z-20 -mx-4 border-t border-border bg-background/95 px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:pt-2 md:pb-0 md:backdrop-blur-none">
+            {/* Save button — a real bottom action bar on phones (sits above the
+                tab bar, opaque, out of the column flow so nothing slides under
+                a translucent panel). Back in normal flow on desktop. */}
+            <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 border-t border-border bg-background px-3 py-3 shadow-[0_-6px_18px_-12px_hsl(var(--foreground)/0.35)] md:static md:z-auto md:border-0 md:bg-transparent md:px-0 md:pt-2 md:pb-0 md:shadow-none">
               <Button
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
