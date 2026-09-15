@@ -36,6 +36,7 @@ import { useCollections, daysOld } from "@/hooks/useCollections";
 import type { Invoice } from "@/context/DataContext";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { formatMoneyPdf } from "@/utils/exportPdf";
+import { exportReportPdf } from "@/components/pdf/useReportExport";
 import { formatIndianDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { usePagination } from "@/hooks/use-pagination";
