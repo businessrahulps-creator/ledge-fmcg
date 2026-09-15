@@ -4,7 +4,7 @@ import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { SplashScreen } from "@/components/SplashScreen";
+import { RouteSkeleton } from "@/components/ui/route-skeleton";
 
 interface RequireCapabilityProps {
   capability: CapabilityKey;
@@ -25,7 +25,7 @@ export function RequireCapability({ capability, message, children }: RequireCapa
 
   // Wait for profile + role + capability fetch to settle so we don't flash
   // the denial card to users who actually have access.
-  if (!profileLoaded) return <SplashScreen />;
+  if (!profileLoaded) return <AppLayout><RouteSkeleton /></AppLayout>;
 
   if (allowed) return <>{children}</>;
 
