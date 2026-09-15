@@ -202,42 +202,34 @@ export function DispatchReport() {
         sections={rptSections}
         title="Export Dispatch Report PDF"
         onGenerate={async (sel) => {
-          const { ReportPdf } = await import("@/components/pdf/ReportPdf");
-          downloadPdf(
-            pdfFilename("dispatch-report"),
-            <ReportPdf
-              companyName={companyInfo.name}
-              companyAddress={companyInfo.address}
-              gstin={companyInfo.gstin}
-              logoUrl={companyInfo.logoUrl}
-              title="Dispatch Report"
-              subtitle={periodLabel(period)}
-              showCompany={sel.company}
-              showSummary={sel.summary}
-              showTable={sel.table}
-              summary={[
-                { label: "Orders", value: String(filtered.length) },
-              ]}
-              columns={[
-                { header: "Order", width: "14%" },
-                { header: "Dealer", width: "18%" },
-                { header: "Date", width: "14%" },
-                { header: "Dispatch", width: "14%" },
-                { header: "Vehicle", width: "14%" },
-                { header: "Driver", width: "14%" },
-                { header: "Status", width: "12%" },
-              ]}
-              rows={filtered.map((o) => [
-                o.orderNumber,
-                o.distributorName,
-                formatIndianDate(o.date),
-                formatIndianDate(o.dispatchDate),
-                o.vehicle || "—",
-                o.driverName || "—",
-                o.deliveryStatus,
-              ])}
-            />
-          );
+          await exportReportPdf({
+            fileType: "dispatch-report",
+            company: companyInfo,
+            selection: sel,
+            title: "Dispatch Report",
+            subtitle: periodLabel(period),
+            summary: [
+              { label: "Orders", value: String(filtered.length) },
+            ],
+            columns: [
+              { header: "Order", width: "14%" },
+              { header: "Dealer", width: "18%" },
+              { header: "Date", width: "14%" },
+              { header: "Dispatch", width: "14%" },
+              { header: "Vehicle", width: "14%" },
+              { header: "Driver", width: "14%" },
+              { header: "Status", width: "12%" },
+            ],
+            rows: filtered.map((o) => [
+              o.orderNumber,
+              o.distributorName,
+              formatIndianDate(o.date),
+              formatIndianDate(o.dispatchDate),
+              o.vehicle || "—",
+              o.driverName || "—",
+              o.deliveryStatus,
+            ]),
+          });
         }}
       />
     </div>
