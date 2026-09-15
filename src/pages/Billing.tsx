@@ -47,6 +47,21 @@ import { cn } from "@/lib/utils";
 
 type DocType = Invoice["docType"];
 
+/** One row in the Documents list — a GST bill or a credit note. */
+type DocRow = {
+  key: string;
+  type: DocType;
+  number: string;
+  date: string;
+  buyer: string;
+  amount: number;
+  orderId: string | null;
+  status: string;
+  invoice: Invoice | null;
+  note?: string;
+};
+
+
 const docTypeLabels: Record<DocType, string> = {
   gst_invoice: "GST Invoice",
   estimate: "Estimate",
@@ -138,11 +153,22 @@ export default function Billing() {
       .map(({ date, ...rest }) => rest as Invoice);
   }, [timePeriod]);
 
+  /** Same period window, for anything that isn't an invoice (orders, credit notes). */
+  const inPeriodBy = useCallback(<T,>(list: T[], getDate: (row: T) => string) => {
+    if (timePeriod === "all") return list;
+    const keep = new Set(
+      filterByTimePeriod(list.map((row, idx) => ({ __idx: idx, date: getDate(row) })), timePeriod)
+        .map(r => (r as { __idx: number }).__idx),
+    );
+    return list.filter((_, idx) => keep.has(idx));
+  }, [timePeriod]);
+
   const matchesSearch = useCallback((inv: Invoice) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return inv.invoiceNumber.toLowerCase().includes(q) || inv.buyerName.toLowerCase().includes(q);
   }, [search]);
+
 
   /** Every GST bill with the money that has landed against it, less any credit note. */
   const collections = useMemo(() => {
@@ -165,18 +191,22 @@ export default function Billing() {
       .sort((a, b) => (b.due > 0 ? b.age : -1) - (a.due > 0 ? a.age : -1));
   }, [invoices, inPeriod, matchesSearch, receivedByInvoice, creditedByInvoice, payFilter]);
 
-  /** Money already taken on orders that have not been billed yet (advances). */
+  /** Money already taken on orders that have not been billed yet (advances). Same period + search window as the bills above. */
   const advancesHeld = useMemo(() => {
     const billedOrderIds = new Set(
       invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
     );
-    const rows = orders
+    const q = search.trim().toLowerCase();
+    const candidates = orders
       .filter(o => !billedOrderIds.has(o.id))
+      .filter(o => !q || o.orderNumber.toLowerCase().includes(q) || (o.distributorName || "").toLowerCase().includes(q));
+    const rows = inPeriodBy(candidates, o => o.date)
       .map(o => ({ order: o, received: receivedByOrder.get(o.id) || 0 }))
       .filter(r => r.received > 0)
       .sort((a, b) => b.received - a.received);
     return { rows, total: rows.reduce((s, r) => s + r.received, 0) };
-  }, [orders, invoices, receivedByOrder]);
+  }, [orders, invoices, receivedByOrder, inPeriodBy, search]);
+
 
 
   const dealerName = useCallback((distributorId: string) =>
@@ -206,14 +236,42 @@ export default function Billing() {
       });
   }, [receipts, modeFilter, search, invoiceNumberById, orderNumberById, dealerName]);
 
+  /** Bills and credit notes together, so a reduced bill can always be traced to its note. */
   const documents = useMemo(() => {
-    let list = inPeriod(invoices.filter(matchesSearch));
-    if (filterType !== "all") list = list.filter(i => i.docType === filterType);
+    const q = search.trim().toLowerCase();
+    const billRows: DocRow[] = inPeriod(invoices.filter(matchesSearch)).map(inv => ({
+      key: inv.id,
+      type: inv.docType,
+      number: inv.invoiceNumber,
+      date: inv.invoiceDate,
+      buyer: inv.buyerName,
+      amount: inv.grandTotal,
+      orderId: inv.sourceOrderId || null,
+      status: inv.status,
+      invoice: inv,
+    }));
+    const noteCandidates = creditNotes.filter(n =>
+      !q || n.number.toLowerCase().includes(q) || dealerName(n.distributorId).toLowerCase().includes(q));
+    const noteRows: DocRow[] = inPeriodBy(noteCandidates, n => n.noteDate).map(n => ({
+      key: `cn-${n.id}`,
+      type: "credit_note" as DocType,
+      number: n.number,
+      date: n.noteDate,
+      buyer: dealerName(n.distributorId),
+      amount: n.grandTotal,
+      orderId: n.orderId,
+      status: "final",
+      invoice: null,
+      note: n.reason,
+    }));
+    let list = [...billRows, ...noteRows].sort((a, b) => (a.date < b.date ? 1 : -1));
+    if (filterType !== "all") list = list.filter(d => d.type === filterType);
     return list;
-  }, [invoices, inPeriod, matchesSearch, filterType]);
+  }, [invoices, creditNotes, inPeriod, inPeriodBy, matchesSearch, filterType, search, dealerName]);
 
   const { page, totalPages, from, to, setPage } = usePagination(documents.length, 15);
   const paginatedDocs = useMemo(() => documents.slice(from, to), [documents, from, to]);
+
 
   const collectionTotals = useMemo(() => {
     const billed = collections.reduce((s, r) => s + r.inv.grandTotal, 0);
@@ -262,8 +320,10 @@ export default function Billing() {
     );
   }
 
-  const notesCount = creditNotes.length;
-  const creditedValue = creditNotes.reduce((s, n) => s + n.grandTotal, 0);
+  const creditRows = documents.filter(d => d.type === "credit_note");
+  const notesCount = creditRows.length;
+  const creditedValue = creditRows.reduce((s, d) => s + d.amount, 0);
+
 
 
   return (
@@ -775,18 +835,19 @@ export default function Billing() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedDocs.map(inv => {
-                          const linkedOrder = inv.sourceOrderId ? orders.find(o => o.id === inv.sourceOrderId) : null;
+                        {paginatedDocs.map(doc => {
+                          const linkedOrder = doc.orderId ? orders.find(o => o.id === doc.orderId) : null;
+                          const view = billStatusView(doc.status);
                           return (
-                            <TableRow key={inv.id} className="row-hover">
+                            <TableRow key={doc.key} className="row-hover">
                               <TableCell>
-                                <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
-                                  {docTypeLabels[inv.docType] || inv.docType}
+                                <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.type] || 'bg-muted text-muted-foreground'}`}>
+                                  {docTypeLabels[doc.type] || doc.type}
                                 </span>
                               </TableCell>
-                              <TableCell className="font-mono text-xs font-medium">{inv.invoiceNumber}</TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{formatIndianDate(inv.invoiceDate)}</TableCell>
-                              <TableCell className="text-sm">{inv.buyerName}</TableCell>
+                              <TableCell className="font-mono text-xs font-medium">{doc.number}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{formatIndianDate(doc.date)}</TableCell>
+                              <TableCell className="text-sm">{doc.buyer}</TableCell>
                               <TableCell className="text-xs">
                                 {linkedOrder ? (
                                   <button
@@ -800,47 +861,49 @@ export default function Billing() {
                                   <span className="text-muted-foreground/50 text-[10px]">Legacy</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-right font-mono text-sm tabular-nums">{formatCurrency(inv.grandTotal)}</TableCell>
+                              <TableCell className="text-right font-mono text-sm tabular-nums">
+                                {doc.invoice ? formatCurrency(doc.amount) : `− ${formatCurrency(doc.amount)}`}
+                              </TableCell>
                               <TableCell>
-                                {(() => {
-                                  const view = billStatusView(inv.status);
-                                  return (
-                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
-                                      {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
-                                    </span>
-                                  );
-                                })()}
+                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
+                                  {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
+                                </span>
                               </TableCell>
                               <TableCell className="text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(inv)} title="View">
-                                    <Eye className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(inv)} title="Download PDF">
-                                    <Download className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)} title="Share on WhatsApp">
-                                    <WhatsAppIcon className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
+                                {doc.invoice ? (
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewBill(doc.invoice as Invoice)} title="View">
+                                      <Eye className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadPdf(doc.invoice as Invoice)} title="Download PDF">
+                                      <Download className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)} title="Share on WhatsApp">
+                                      <WhatsAppIcon className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground">{doc.note || "Return credited"}</span>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
                         })}
+
                       </TableBody>
                     </Table>
                   </div>
 
                   {/* Mobile cards */}
                   <div className="space-y-3 p-3 md:hidden">
-                    {paginatedDocs.map(inv => (
-                      <div key={inv.id} className="rounded-md border border-border/60 bg-card p-4 space-y-2">
+                    {paginatedDocs.map(doc => (
+                      <div key={doc.key} className="rounded-md border border-border/60 bg-card p-4 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
-                            {docTypeLabels[inv.docType] || inv.docType}
+                          <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.type] || 'bg-muted text-muted-foreground'}`}>
+                            {docTypeLabels[doc.type] || doc.type}
                           </span>
                           {(() => {
-                            const view = billStatusView(inv.status);
+                            const view = billStatusView(doc.status);
                             return (
                               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
                                 {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
@@ -849,23 +912,37 @@ export default function Billing() {
                           })()}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
-                          <span className="text-sm font-bold tabular-nums">{formatCurrency(inv.grandTotal)}</span>
+                          <span className="font-mono text-xs font-medium">{doc.number}</span>
+                          <span className="text-sm font-bold tabular-nums">
+                            {doc.invoice ? formatCurrency(doc.amount) : `− ${formatCurrency(doc.amount)}`}
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground">{inv.buyerName} · {formatIndianDate(inv.invoiceDate)}</p>
-                        <div className="flex items-center gap-1 pt-1 border-t border-border/40">
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(inv)}>
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(inv)}>
-                            <Download className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)}>
-                            <WhatsAppIcon className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        <p className="text-xs text-muted-foreground">{doc.buyer} · {formatIndianDate(doc.date)}</p>
+                        {doc.invoice ? (
+                          <div className="flex items-center gap-1 pt-1 border-t border-border/40">
+                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(doc.invoice as Invoice)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(doc.invoice as Invoice)}>
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)}>
+                              <WhatsAppIcon className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="pt-1 border-t border-border/40 text-[11px] text-muted-foreground">
+                            {doc.note || "Return credited"}
+                            {doc.orderId && (
+                              <button onClick={() => navigate(`/orders/${doc.orderId}`)} className="ml-2 font-medium text-primary hover:underline">
+                                Open order
+                              </button>
+                            )}
+                          </p>
+                        )}
                       </div>
                     ))}
+
                   </div>
                 </>
               )}
