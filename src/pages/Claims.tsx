@@ -359,10 +359,18 @@ function NewClaimDialog({
                     </thead>
                     <tbody>
                       {returnLines.map(line => {
-                        const other = (k: "goodQty" | "damagedQty") => line.billedQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
+                        // Only what is still returnable: billed, less anything sent back earlier.
+                        const other = (k: "goodQty" | "damagedQty") => line.remainingQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
                         return (
                           <tr key={line.invoiceLineId} className="border-b border-border/50">
-                            <td className="px-3 py-2 font-medium">{line.productName}</td>
+                            <td className="px-3 py-2 font-medium">
+                              {line.productName}
+                              {line.returnedQty > 0 && (
+                                <span className="block text-[10px] font-normal text-muted-foreground">
+                                  {line.returnedQty} already returned · {line.remainingQty} left
+                                </span>
+                              )}
+                            </td>
                             <td className="px-3 py-2 text-right text-muted-foreground">{line.billedQty}</td>
                             <td className="px-3 py-2 text-right">
                               <NumberInput
