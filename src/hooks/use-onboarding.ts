@@ -110,7 +110,10 @@ export function useOnboarding() {
     isBrandNew,
     dismissed,
     dismiss,
-    visible: !dismissed && !isComplete,
+    // Business data arrives in two waves; until the second wave lands the step
+    // list can read as "incomplete" purely because orders haven't loaded yet.
+    loading: api.loading,
+    visible: !api.loading && !dismissed && !isComplete,
     companyIncomplete,
   };
 }
