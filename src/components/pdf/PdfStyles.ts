@@ -184,26 +184,28 @@ export const pdfStyles = StyleSheet.create({
   tableCell: {
     fontSize: 8,
     lineHeight: 1.3,
-    paddingRight: 4,
+    paddingRight: 8,
   },
   tableCellRight: {
     fontSize: 8,
     lineHeight: 1.3,
     textAlign: "right",
-    paddingLeft: 4,
+    paddingLeft: 6,
+    paddingRight: 8,
   },
   tableCellBold: {
     fontSize: 8,
     fontFamily: PDF_FONT,
     fontWeight: 700,
-    paddingRight: 4,
+    paddingRight: 8,
   },
   tableCellRightBold: {
     fontSize: 8,
     fontFamily: PDF_FONT,
     fontWeight: 700,
     textAlign: "right",
-    paddingLeft: 4,
+    paddingLeft: 6,
+    paddingRight: 8,
   },
   // Totals box
   totalsContainer: {
