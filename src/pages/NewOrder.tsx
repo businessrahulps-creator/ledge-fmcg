@@ -229,6 +229,9 @@ export default function NewOrder() {
     return warnings;
   }, [lines, stockItems, selectedGodown, selectedGodownObj?.name]);
 
+  // Change the products or the warehouse and the short-stock warning starts fresh.
+  useEffect(() => { setShortStockAck(false); }, [lines, selectedGodown]);
+
   const scrollToFirstError = () => {
     let target: HTMLElement | null = null;
     if (errors.dealer) target = dealerFieldRef.current;
