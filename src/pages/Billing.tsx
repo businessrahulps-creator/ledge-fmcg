@@ -320,8 +320,10 @@ export default function Billing() {
     );
   }
 
-  const notesCount = creditNotes.length;
-  const creditedValue = creditNotes.reduce((s, n) => s + n.grandTotal, 0);
+  const creditRows = documents.filter(d => d.type === "credit_note");
+  const notesCount = creditRows.length;
+  const creditedValue = creditRows.reduce((s, d) => s + d.amount, 0);
+
 
 
   return (
