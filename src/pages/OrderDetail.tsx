@@ -679,7 +679,7 @@ export default function OrderDetail() {
             {/* Phones: one card per document — no sideways scrolling */}
             <div className="divide-y divide-border/50 md:hidden">
               {orderDocs.map(doc => {
-                const view = billStatusView(doc.status);
+                const view = billStatusView(docState(doc));
                 return (
                   <button
                     key={doc.id}
@@ -728,7 +728,7 @@ export default function OrderDetail() {
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
                         {(() => {
-                          const view = billStatusView(doc.status);
+                          const view = billStatusView(docState(doc));
                           return (
                             <span
                               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}
