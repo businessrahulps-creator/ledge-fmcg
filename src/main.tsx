@@ -77,6 +77,21 @@ createRoot(document.getElementById("root")!).render(
   </HelmetProvider>,
 );
 
+// Stylesheet sentinel — if the app's CSS never arrived (stale cached document
+// pointing at a deleted asset), the app renders as raw unstyled text. Detect
+// that and self-repair once instead of leaving the user on a broken screen.
+requestAnimationFrame(() => {
+  setTimeout(() => {
+    const token = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+    if (!token) {
+      handleAssetFailure("Ledge couldn't load its styling.");
+    } else {
+      clearChunkReloadFlag();
+    }
+  }, 0);
+});
+
+
 // Safety net: whatever happens during boot, never leave the opening animation
 // sitting on top of the app. The screen behind it always renders something.
 setTimeout(() => splashDone(), 6000);
