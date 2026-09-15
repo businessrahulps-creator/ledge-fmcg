@@ -78,7 +78,13 @@ const TIER_LABEL: Record<CommandPdfSignal["tier"], string> = {
 };
 
 function SectionTitle({ children }: { children: string }) {
-  return <Text style={s.sectionTitle}>{children}</Text>;
+  // Keep a heading with the first rows of its table instead of stranding it
+  // at the foot of a page.
+  return (
+    <Text style={s.sectionTitle} minPresenceAhead={60}>
+      {children}
+    </Text>
+  );
 }
 
 function EmptyRow({ cols, label = "No data" }: { cols: number; label?: string }) {
@@ -112,7 +118,7 @@ export function CommandPdf({
 }: CommandPdfProps) {
   const pageStyle = pagePadding != null ? [s.page, { padding: pagePadding }] : s.page;
   return (
-    <Document>
+    <Document title="Command snapshot" author={companyName}>
       <Page size={pageSize} style={pageStyle}>
         <PdfHeader
           title="Command Snapshot"
@@ -126,9 +132,9 @@ export function CommandPdf({
 
         {/* KPIs */}
         <SectionTitle>Key metrics</SectionTitle>
-        <View style={[s.summaryRow, { flexWrap: "wrap", gap: 8 }]} wrap={false}>
+        <View style={s.summaryRow} wrap={false}>
           {kpis.map((k) => (
-            <View key={k.label} style={[s.summaryCard, { minWidth: "30%" }]}>
+            <View key={k.label} style={[s.summaryCard, { flexBasis: "30%", minWidth: "30%" }]}>
               <Text style={s.summaryLabel}>{k.label}</Text>
               <Text style={s.summaryValue}>{k.value}</Text>
             </View>
@@ -138,7 +144,7 @@ export function CommandPdf({
         {/* Signals */}
         <SectionTitle>{`Signals (${signals.length})`}</SectionTitle>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "12%" }]}>Tier</Text>
             <Text style={[s.tableHeaderCell, { width: "20%" }]}>Label</Text>
             <Text style={[s.tableHeaderCell, { width: "58%" }]}>Message</Text>
@@ -161,7 +167,7 @@ export function CommandPdf({
         {/* Aging */}
         <SectionTitle>Outstanding by age</SectionTitle>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "25%" }]}>Bucket</Text>
             <Text style={[s.tableHeaderCell, { width: "75%", textAlign: "right" }]}>Amount</Text>
           </View>
@@ -181,7 +187,7 @@ export function CommandPdf({
         {/* Pipeline */}
         <SectionTitle>Order pipeline</SectionTitle>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "50%" }]}>Stage</Text>
             <Text style={[s.tableHeaderCell, { width: "20%", textAlign: "right" }]}>Orders</Text>
             <Text style={[s.tableHeaderCell, { width: "30%", textAlign: "right" }]}>Value</Text>
@@ -216,7 +222,7 @@ export function CommandPdf({
         {/* Trend */}
         <SectionTitle>Revenue trend</SectionTitle>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "34%" }]}>Bucket</Text>
             <Text style={[s.tableHeaderCell, { width: "33%", textAlign: "right" }]}>Actual</Text>
             <Text style={[s.tableHeaderCell, { width: "33%", textAlign: "right" }]}>Target</Text>
@@ -234,10 +240,12 @@ export function CommandPdf({
           )}
         </View>
 
-        {/* Credit at risk */}
+        {/* Credit at risk — heading grouped with the table so it never strands
+            alone at the foot of a page. */}
+        <View wrap={false}>
         <SectionTitle>Credit at risk</SectionTitle>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "40%" }]}>Dealer</Text>
             <Text style={[s.tableHeaderCell, { width: "25%", textAlign: "right" }]}>Outstanding</Text>
             <Text style={[s.tableHeaderCell, { width: "20%", textAlign: "right" }]}>Limit</Text>
@@ -255,6 +263,7 @@ export function CommandPdf({
               </View>
             ))
           )}
+        </View>
         </View>
 
         {showLeaderboards && (
@@ -288,7 +297,7 @@ function LeaderTable({
   const hasSecondary = !!secondaryHeader;
   return (
     <View style={s.table}>
-      <View style={s.tableHeader}>
+      <View style={s.tableHeader} fixed>
         <Text style={[s.tableHeaderCell, { width: "8%" }]}>#</Text>
         <Text style={[s.tableHeaderCell, { width: hasSecondary ? "47%" : "62%" }]}>Name</Text>
         <Text style={[s.tableHeaderCell, { width: hasSecondary ? "25%" : "30%", textAlign: "right" }]}>

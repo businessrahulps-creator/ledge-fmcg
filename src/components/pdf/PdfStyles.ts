@@ -1,38 +1,73 @@
 import { StyleSheet } from "@react-pdf/renderer";
+import { PDF_FONT } from "./PdfFonts";
+
+/** Brand ink */
+const MIDNIGHT = "#0F1F3A";
+const INK_MUTED = "#5B6577";
+const INK_SOFT = "#8A93A3";
+const RULE = "#DCE0E7";
+const RULE_SOFT = "#EDEFF3";
+const BAND = "#F6F7F9";
+
+/**
+ * Page geometry — a generous bottom gutter keeps flowing tables clear of the
+ * fixed footer strip (which sits 26pt from the bottom edge).
+ */
+export const PAGE_PADDING_TOP = 36;
+export const PAGE_PADDING_X = 40;
+export const PAGE_PADDING_BOTTOM = 62;
 
 export const pdfStyles = StyleSheet.create({
   page: {
-    padding: 40,
-    fontFamily: "Helvetica",
+    paddingTop: PAGE_PADDING_TOP,
+    paddingLeft: PAGE_PADDING_X,
+    paddingRight: PAGE_PADDING_X,
+    paddingBottom: PAGE_PADDING_BOTTOM,
+    fontFamily: PDF_FONT,
     fontSize: 9,
-    color: "#0F1F3A",
-    backgroundColor: "#F5EFE6",
+    // NOTE: never set lineHeight on the Page style — react-pdf then drops
+    // `fixed` footers that use a render callback (page numbers disappear).
+    color: MIDNIGHT,
+    backgroundColor: "#FFFFFF",
   },
-  // Header — Midnight letterhead (PR-C brand placement)
+  // Header — Midnight letterhead
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
-    borderBottom: "1.5pt solid #0F1F3A",
+    alignItems: "flex-start",
+    marginBottom: 18,
+    borderBottom: `1.5pt solid ${MIDNIGHT}`,
     paddingBottom: 10,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    width: "58%",
+  },
+  headerRight: {
+    width: "40%",
+  },
   companyName: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
+    fontSize: 13,
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
+    letterSpacing: 0.2,
   },
   companyDetail: {
     fontSize: 8,
-    color: "#333",
+    color: INK_MUTED,
     marginTop: 2,
   },
   docTitle: {
     fontSize: 12,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     textAlign: "right",
   },
   docSubtitle: {
     fontSize: 8,
-    color: "#333",
+    color: INK_MUTED,
     textAlign: "right",
     marginTop: 2,
   },
@@ -40,7 +75,7 @@ export const pdfStyles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   billToBox: {
     width: "48%",
@@ -50,72 +85,86 @@ export const pdfStyles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 0.8,
-    color: "#666",
-    marginBottom: 6,
+    color: INK_SOFT,
+    marginBottom: 5,
   },
   infoValue: {
     fontSize: 9,
-    marginBottom: 3,
+    lineHeight: 1.35,
+    marginBottom: 2,
+    color: INK_MUTED,
   },
   infoValueBold: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     marginBottom: 3,
+    color: MIDNIGHT,
   },
   metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   metaLabel: {
     fontSize: 8,
-    color: "#555",
+    color: INK_MUTED,
   },
   metaValue: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
   },
   // Summary cards
   summaryRow: {
     flexDirection: "row",
-    marginBottom: 16,
-    gap: 12,
+    flexWrap: "wrap",
+    marginBottom: 14,
+    gap: 8,
   },
   summaryCard: {
-    flex: 1,
-    border: "0.5pt solid #D4D4D4",
-    backgroundColor: "#F9F9F9",
-    padding: 10,
+    flexGrow: 1,
+    flexBasis: "22%",
+    minWidth: "22%",
+    border: `0.5pt solid ${RULE}`,
+    backgroundColor: BAND,
+    borderRadius: 3,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   summaryLabel: {
     fontSize: 7,
-    color: "#666",
+    color: INK_SOFT,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   summaryValue: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
-    marginTop: 2,
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
+    marginTop: 3,
   },
   // Table
   table: {
     width: "100%",
     marginBottom: 12,
+    borderBottom: `0.5pt solid ${RULE}`,
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#0F1F3A",
-    color: "#fff",
+    backgroundColor: MIDNIGHT,
+    color: "#FFFFFF",
     paddingVertical: 6,
     paddingHorizontal: 8,
   },
   tableHeaderCell: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 0.3,
   },
@@ -123,80 +172,95 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 5,
     paddingHorizontal: 8,
-    borderBottom: "0.5pt solid #E5E5E5",
+    borderBottom: `0.5pt solid ${RULE_SOFT}`,
   },
   tableRowAlt: {
     flexDirection: "row",
     paddingVertical: 5,
     paddingHorizontal: 8,
-    borderBottom: "0.5pt solid #E5E5E5",
-    backgroundColor: "#FAFAFA",
+    borderBottom: `0.5pt solid ${RULE_SOFT}`,
+    backgroundColor: BAND,
   },
   tableCell: {
     fontSize: 8,
+    lineHeight: 1.3,
+    paddingRight: 8,
   },
   tableCellRight: {
     fontSize: 8,
+    lineHeight: 1.3,
     textAlign: "right",
+    paddingLeft: 6,
+    paddingRight: 8,
   },
   tableCellBold: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
+    paddingRight: 8,
   },
   tableCellRightBold: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     textAlign: "right",
+    paddingLeft: 6,
+    paddingRight: 8,
   },
   // Totals box
   totalsContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 12,
+    marginTop: 10,
   },
   totalsBox: {
-    width: "45%",
-    border: "0.5pt solid #D4D4D4",
+    width: "48%",
+    border: `0.5pt solid ${RULE}`,
+    borderRadius: 3,
   },
   totalsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 5,
+    paddingVertical: 4,
     paddingHorizontal: 12,
   },
   totalsRowBorder: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 12,
-    borderTop: "1pt solid #0F1F3A",
-    backgroundColor: "#F3F4F6",
+    borderTop: `1pt solid ${MIDNIGHT}`,
+    backgroundColor: BAND,
   },
   totalsLabel: {
     fontSize: 8,
-    color: "#555",
+    color: INK_MUTED,
   },
   totalsValue: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
   },
   totalsFinalLabel: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
   },
   totalsFinalValue: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
   },
   schemeDivider: {
-    borderTop: "0.5pt dashed #D4D4D4",
+    borderTop: `0.5pt dashed ${RULE}`,
     marginVertical: 2,
   },
   schemeHeader: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
     textTransform: "uppercase",
-    color: "#666",
+    color: INK_SOFT,
     paddingHorizontal: 12,
     paddingTop: 5,
     paddingBottom: 2,
@@ -210,33 +274,65 @@ export const pdfStyles = StyleSheet.create({
   },
   schemeName: {
     fontSize: 8,
-    color: "#059669",
+    color: "#1F7A4C",
   },
   schemeSavings: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    color: "#059669",
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
+    color: "#1F7A4C",
+  },
+  // Callout block (amount in words, notes)
+  callout: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: BAND,
+    border: `0.5pt solid ${RULE}`,
+    borderRadius: 3,
+  },
+  // Signature
+  signatureRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 24,
+  },
+  signatureBox: {
+    width: "40%",
+    alignItems: "center",
+    borderTop: `0.5pt solid ${RULE}`,
+    paddingTop: 6,
+  },
+  signatureText: {
+    fontSize: 8,
+    color: INK_MUTED,
   },
   // Footer
   footer: {
     position: "absolute",
-    bottom: 25,
-    left: 40,
-    right: 40,
+    bottom: 26,
+    left: PAGE_PADDING_X,
+    right: PAGE_PADDING_X,
     flexDirection: "row",
     justifyContent: "space-between",
-    borderTop: "0.5pt solid #ccc",
+    borderTop: `0.5pt solid ${RULE}`,
     paddingTop: 6,
   },
   footerText: {
     fontSize: 7,
-    color: "#999",
+    color: INK_SOFT,
   },
   // Section label
   sectionTitle: {
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontSize: 9,
+    fontFamily: PDF_FONT,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    color: MIDNIGHT,
     marginBottom: 6,
-    marginTop: 8,
+    marginTop: 10,
   },
 });
+
+export const pdfInk = { MIDNIGHT, INK_MUTED, INK_SOFT, RULE, RULE_SOFT, BAND };

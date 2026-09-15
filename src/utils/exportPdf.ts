@@ -2,13 +2,24 @@ import React from "react";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
 
-/** Helvetica-safe currency formatter for PDF rendering (uses "Rs." instead of ₹) */
-export function formatCurrencyPdf(amount: number): string {
+/**
+ * Money formatter for PDFs. The bundled PDF font (Noto Sans) carries the rupee
+ * sign, so documents print a real ₹ instead of "Rs.".
+ * Whole rupees by default (summary cards, analytics); pass 2 decimals for
+ * financial documents — bills, credit notes, statements, payment lists.
+ */
+export function formatCurrencyPdf(amount: number, decimals: 0 | 2 = 0): string {
+  const safe = Number.isFinite(amount) ? amount : 0;
   const formatted = new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-  return `Rs. ${formatted}`;
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(safe);
+  return `₹${formatted}`;
+}
+
+/** Exact money for financial documents — always two decimals. */
+export function formatMoneyPdf(amount: number): string {
+  return formatCurrencyPdf(amount, 2);
 }
 
 export async function downloadPdf(filename: string, document: React.ReactElement) {

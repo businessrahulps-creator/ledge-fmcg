@@ -9,6 +9,8 @@ interface PdfHeaderProps {
   title: string;
   subtitle?: string;
   showCompany?: boolean;
+  /** Repeat the letterhead at the top of every page of a flowing document. */
+  fixed?: boolean;
 }
 
 export function PdfHeader({
@@ -19,11 +21,12 @@ export function PdfHeader({
   title,
   subtitle,
   showCompany = true,
+  fixed = false,
 }: PdfHeaderProps) {
   const now = new Date();
   const dateStr = new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
     timeZone: "Asia/Kolkata",
   }).format(now);
@@ -35,21 +38,21 @@ export function PdfHeader({
   }).format(now);
 
   return (
-    <View style={s.headerRow}>
-      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+    <View style={s.headerRow} fixed={fixed}>
+      <View style={s.headerLeft}>
         {showCompany && logoUrl ? (
-          <Image src={logoUrl} style={{ width: 40, height: 40, objectFit: "contain" }} />
+          <Image src={logoUrl} style={{ width: 36, height: 36, objectFit: "contain" }} />
         ) : null}
-        <View>
+        <View style={{ flex: 1 }}>
           {showCompany && <Text style={s.companyName}>{companyName}</Text>}
           {showCompany && companyAddress ? <Text style={s.companyDetail}>{companyAddress}</Text> : null}
           {showCompany && gstin ? <Text style={s.companyDetail}>GSTIN: {gstin}</Text> : null}
         </View>
       </View>
-      <View>
+      <View style={s.headerRight}>
         <Text style={s.docTitle}>{title}</Text>
         {subtitle && <Text style={s.docSubtitle}>{subtitle}</Text>}
-        <Text style={s.docSubtitle}>Generated: {dateStr} {timeStr}</Text>
+        <Text style={s.docSubtitle}>Generated {dateStr}, {timeStr}</Text>
       </View>
     </View>
   );

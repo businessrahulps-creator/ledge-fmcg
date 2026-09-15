@@ -2,7 +2,7 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
 import { PdfFooter } from "./PdfFooter";
-import { formatCurrencyPdf } from "@/utils/exportPdf";
+import { formatMoneyPdf } from "@/utils/exportPdf";
 import { formatIndianDate } from "@/utils/formatDate";
 import { numberToWords } from "@/utils/numberToWords";
 import type { Order } from "@/data/mock-data";
@@ -48,10 +48,11 @@ export function OrderInvoicePdf({
   const effectiveTotal = Math.max(0, order.total - order.schemeSavings);
 
   return (
-    <Document>
+    <Document title={`Order confirmation ${order.orderNumber}`} author={companyName || "Ledge"}>
       <Page size="A4" style={s.page}>
         <PdfHeader
-          title={`Order Confirmation ${order.orderNumber} — NOT A TAX INVOICE`}
+          title="Order Confirmation"
+          subtitle={`${order.orderNumber} · Not a tax invoice`}
           companyName={companyName}
           companyAddress={companyAddress}
           gstin={gstin}
@@ -121,9 +122,9 @@ export function OrderInvoicePdf({
         </View>
 
         {/* Line items table */}
-        <Text style={s.sectionTitle}>Line Items</Text>
+        <Text style={s.sectionTitle} minPresenceAhead={60}>Line Items</Text>
         <View style={s.table}>
-          <View style={s.tableHeader}>
+          <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "5%" }]}>#</Text>
             <Text style={[s.tableHeaderCell, { width: "45%" }]}>Product</Text>
             <Text style={[s.tableHeaderCell, { width: "15%", textAlign: "right" }]}>Qty</Text>
@@ -131,12 +132,12 @@ export function OrderInvoicePdf({
             <Text style={[s.tableHeaderCell, { width: "20%", textAlign: "right" }]}>Total</Text>
           </View>
           {order.lines.map((line, i) => (
-            <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
+            <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false} minPresenceAhead={28}>
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
               <Text style={[s.tableCellBold, { width: "45%" }]}>{line.productName}</Text>
               <Text style={[s.tableCellRight, { width: "15%" }]}>{line.quantity}</Text>
-              <Text style={[s.tableCellRight, { width: "15%" }]}>{formatCurrencyPdf(line.unitPrice)}</Text>
-              <Text style={[s.tableCellRightBold, { width: "20%" }]}>{formatCurrencyPdf(line.lineTotal)}</Text>
+              <Text style={[s.tableCellRight, { width: "15%" }]}>{formatMoneyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRightBold, { width: "20%" }]}>{formatMoneyPdf(line.lineTotal)}</Text>
             </View>
           ))}
         </View>
@@ -147,7 +148,7 @@ export function OrderInvoicePdf({
             {/* Subtotal */}
             <View style={s.totalsRow}>
               <Text style={s.totalsLabel}>Subtotal</Text>
-              <Text style={s.totalsValue}>{formatCurrencyPdf(order.total)}</Text>
+              <Text style={s.totalsValue}>{formatMoneyPdf(order.total)}</Text>
             </View>
 
             {/* Schemes Applied */}
@@ -158,12 +159,12 @@ export function OrderInvoicePdf({
                 {order.appliedSchemes.map((scheme, i) => (
                   <View key={i} style={s.schemeRow}>
                     <Text style={s.schemeName}>{scheme.schemeName}</Text>
-                    <Text style={s.schemeSavings}>-{formatCurrencyPdf(scheme.savings)}</Text>
+                    <Text style={s.schemeSavings}>-{formatMoneyPdf(scheme.savings)}</Text>
                   </View>
                 ))}
                 <View style={s.totalsRow}>
                   <Text style={[s.totalsLabel, { color: "#059669" }]}>Total Savings</Text>
-                  <Text style={[s.totalsValue, { color: "#059669" }]}>-{formatCurrencyPdf(order.schemeSavings)}</Text>
+                  <Text style={[s.totalsValue, { color: "#059669" }]}>-{formatMoneyPdf(order.schemeSavings)}</Text>
                 </View>
               </>
             )}
@@ -171,14 +172,14 @@ export function OrderInvoicePdf({
             {/* Grand / Effective Total */}
             <View style={s.totalsRowBorder}>
               <Text style={s.totalsFinalLabel}>{hasSavings ? "Effective order value" : "Order value"}</Text>
-              <Text style={s.totalsFinalValue}>{formatCurrencyPdf(hasSavings ? effectiveTotal : order.total)}</Text>
+              <Text style={s.totalsFinalValue}>{formatMoneyPdf(hasSavings ? effectiveTotal : order.total)}</Text>
             </View>
             <Text style={[s.infoValue, { marginTop: 4 }]}>GST is added on the tax invoice raised at dispatch.</Text>
           </View>
         </View>
 
         {/* Amount in Words */}
-        <View style={{ marginTop: 12, padding: 8, backgroundColor: "#FAFAFA" }}>
+        <View style={s.callout} wrap={false}>
           <Text style={s.infoLabel}>Amount in Words</Text>
           <Text style={s.infoValueBold}>
             {numberToWords(hasSavings ? effectiveTotal : order.total)}
@@ -188,7 +189,7 @@ export function OrderInvoicePdf({
         {/* Bank Details */}
         {(bankName || bankAccount) && (
           <View style={{ marginTop: 12 }}>
-            <Text style={s.sectionTitle}>Bank Details</Text>
+            <Text style={s.sectionTitle} minPresenceAhead={60}>Bank Details</Text>
             <View style={{ flexDirection: "row", gap: 12 }}>
               {bankName && (
                 <View style={s.summaryCard}>
