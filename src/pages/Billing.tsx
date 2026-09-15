@@ -176,18 +176,22 @@ export default function Billing() {
       .sort((a, b) => (b.due > 0 ? b.age : -1) - (a.due > 0 ? a.age : -1));
   }, [invoices, inPeriod, matchesSearch, receivedByInvoice, creditedByInvoice, payFilter]);
 
-  /** Money already taken on orders that have not been billed yet (advances). */
+  /** Money already taken on orders that have not been billed yet (advances). Same period + search window as the bills above. */
   const advancesHeld = useMemo(() => {
     const billedOrderIds = new Set(
       invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
     );
-    const rows = orders
+    const q = search.trim().toLowerCase();
+    const candidates = orders
       .filter(o => !billedOrderIds.has(o.id))
+      .filter(o => !q || o.orderNumber.toLowerCase().includes(q) || (o.distributorName || "").toLowerCase().includes(q));
+    const rows = inPeriodBy(candidates, o => o.date)
       .map(o => ({ order: o, received: receivedByOrder.get(o.id) || 0 }))
       .filter(r => r.received > 0)
       .sort((a, b) => b.received - a.received);
     return { rows, total: rows.reduce((s, r) => s + r.received, 0) };
-  }, [orders, invoices, receivedByOrder]);
+  }, [orders, invoices, receivedByOrder, inPeriodBy, search]);
+
 
 
   const dealerName = useCallback((distributorId: string) =>
