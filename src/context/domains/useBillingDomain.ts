@@ -113,6 +113,24 @@ export function useBillingDomain(deps: BillingDeps) {
     setInvoices(data.map(mapInvoiceRow));
   }, [deps.companyId]);
 
+  /** Refresh one bill in place — realtime uses this instead of reloading every bill. */
+  const refetchInvoiceById = useCallback(async (invoiceId: string) => {
+    if (!deps.companyId || !navigator.onLine) return;
+    const { data, error } = await supabase
+      .from("invoices").select("*, invoice_lines(*)")
+      .eq("id", invoiceId).eq("company_id", deps.companyId).maybeSingle();
+    if (error) return;
+    if (!data) { setInvoices(prev => prev.filter(i => i.id !== invoiceId)); return; }
+    const mapped = mapInvoiceRow(data as InvoiceRow);
+    setInvoices(prev => {
+      const idx = prev.findIndex(i => i.id === invoiceId);
+      if (idx === -1) return [mapped, ...prev];
+      const next = prev.slice();
+      next[idx] = mapped;
+      return next;
+    });
+  }, [deps.companyId]);
+
   const safeRefetchClaims = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const data = await fetchAllChunked<ClaimRow>(() =>
