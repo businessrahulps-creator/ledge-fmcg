@@ -40,8 +40,16 @@ export class ErrorBoundary extends Component<Props, State> {
 
 
   render() {
+    if (this.state.recovering) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background p-6">
+          <p className="text-sm text-muted-foreground">Updating Ledge…</p>
+        </div>
+      );
+    }
     if (this.state.hasError) {
       return (
+
         <div className="flex min-h-screen items-center justify-center bg-background p-6">
           <div className="max-w-md text-center space-y-4">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
