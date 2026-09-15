@@ -894,14 +894,14 @@ export default function Billing() {
 
                   {/* Mobile cards */}
                   <div className="space-y-3 p-3 md:hidden">
-                    {paginatedDocs.map(inv => (
-                      <div key={inv.id} className="rounded-md border border-border/60 bg-card p-4 space-y-2">
+                    {paginatedDocs.map(doc => (
+                      <div key={doc.key} className="rounded-md border border-border/60 bg-card p-4 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[inv.docType] || 'bg-muted text-muted-foreground'}`}>
-                            {docTypeLabels[inv.docType] || inv.docType}
+                          <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium ${docTypeBadgeColors[doc.type] || 'bg-muted text-muted-foreground'}`}>
+                            {docTypeLabels[doc.type] || doc.type}
                           </span>
                           {(() => {
-                            const view = billStatusView(inv.status);
+                            const view = billStatusView(doc.status);
                             return (
                               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
                                 {view.locked && <Lock className="h-2.5 w-2.5" />} {view.label}
@@ -910,23 +910,37 @@ export default function Billing() {
                           })()}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-medium">{inv.invoiceNumber}</span>
-                          <span className="text-sm font-bold tabular-nums">{formatCurrency(inv.grandTotal)}</span>
+                          <span className="font-mono text-xs font-medium">{doc.number}</span>
+                          <span className="text-sm font-bold tabular-nums">
+                            {doc.invoice ? formatCurrency(doc.amount) : `− ${formatCurrency(doc.amount)}`}
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground">{inv.buyerName} · {formatIndianDate(inv.invoiceDate)}</p>
-                        <div className="flex items-center gap-1 pt-1 border-t border-border/40">
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(inv)}>
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(inv)}>
-                            <Download className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 text-success" onClick={() => shareInvoiceOnWhatsApp(inv)}>
-                            <WhatsAppIcon className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        <p className="text-xs text-muted-foreground">{doc.buyer} · {formatIndianDate(doc.date)}</p>
+                        {doc.invoice ? (
+                          <div className="flex items-center gap-1 pt-1 border-t border-border/40">
+                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => viewBill(doc.invoice as Invoice)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDownloadPdf(doc.invoice as Invoice)}>
+                              <Download className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-success" onClick={() => shareInvoiceOnWhatsApp(doc.invoice as Invoice)}>
+                              <WhatsAppIcon className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="pt-1 border-t border-border/40 text-[11px] text-muted-foreground">
+                            {doc.note || "Return credited"}
+                            {doc.orderId && (
+                              <button onClick={() => navigate(`/orders/${doc.orderId}`)} className="ml-2 font-medium text-primary hover:underline">
+                                Open order
+                              </button>
+                            )}
+                          </p>
+                        )}
                       </div>
                     ))}
+
                   </div>
                 </>
               )}
