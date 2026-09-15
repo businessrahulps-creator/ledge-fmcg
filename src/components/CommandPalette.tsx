@@ -157,7 +157,7 @@ export function CommandPalette() {
     { label: "Dashboard", to: "/dashboard", icon: House },
     { label: "Orders", to: "/orders", icon: ClipboardList },
     { label: "Stock", to: "/stock", icon: Package },
-    { label: "Performance", to: "/performance", icon: TrendingUp },
+    { label: "Performance", to: "/command?tab=overview", icon: TrendingUp },
     { label: "Dealers", to: "/distributors", icon: UserRound },
     { label: "Sales Team", to: "/salespersons", icon: UserCheck },
     { label: "Schemes", to: "/schemes", icon: Gift },
