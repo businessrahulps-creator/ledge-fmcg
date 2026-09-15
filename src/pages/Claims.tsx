@@ -198,6 +198,19 @@ function NewClaimDialog({
     return () => { cancelled = true; };
   }, [selectedBillId]);
 
+  // Line items for this one bill — they are not carried in the app-wide bill list.
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedBillId) { setBillLines([]); setLinesLoading(false); return; }
+    setLinesLoading(true);
+    fetchInvoiceLines(selectedBillId).then(lines => {
+      if (cancelled) return;
+      setBillLines(lines);
+      setLinesLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [selectedBillId]);
+
   const eligibleOrders = useMemo(() =>
     orders.filter(o => billByOrderId.has(o.id)),
     [orders, billByOrderId]
