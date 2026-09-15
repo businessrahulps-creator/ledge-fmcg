@@ -417,11 +417,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
       timers.set(key, setTimeout(() => { timers.delete(key); fn(); }, 250));
     };
 
+    // A realtime event usually touches ONE row. Collect the changed ids and
+    // refresh just those, instead of re-downloading the whole table (which
+    // gets slower every month as the company books more orders).
+    const rowQueues = new Map<string, Set<string>>();
+    const queueRow = (key: string, id: string | undefined, one: (id: string) => Promise<void>, all: () => any) => {
+      if (!id) { debouncedRefetch(key, all); return; }
+      const set = rowQueues.get(key) || new Set<string>();
+      set.add(id);
+      rowQueues.set(key, set);
+      debouncedRefetch(key, () => {
+        const ids = Array.from(rowQueues.get(key) || []);
+        rowQueues.delete(key);
+        // A burst wider than a handful of rows is cheaper as one table refresh.
+        if (ids.length > 5) { all(); return; }
+        ids.forEach(rowId => { void one(rowId); });
+      });
+    };
+    const changedId = (payload: any): string | undefined =>
+      (payload?.new as any)?.id ?? (payload?.old as any)?.id;
+
     const subscribe = () => {
       if (!navigator.onLine) return;
       channel = supabase
         .channel(`company-${companyId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('orders', orders.safeRefetch))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `company_id=eq.${companyId}` }, (payload) => queueRow('orders', changedId(payload), orders.refetchOrderById, orders.safeRefetch))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('distributors', dealers.safeRefetch))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('salespersons', salespersons.safeRefetch))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('products', catalog.safeRefetchProducts))
