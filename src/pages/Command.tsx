@@ -325,6 +325,16 @@ export default function Command() {
   if (blastPayload) lastBlastPayloadRef.current = blastPayload;
   const renderedBlast = blastPayload ?? lastBlastPayloadRef.current;
 
+  if (api.loading) {
+    return (
+      <AppLayout>
+        <div className="page-stack" aria-busy="true">
+          <DashboardSkeleton />
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <section
