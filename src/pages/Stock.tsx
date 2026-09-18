@@ -183,6 +183,8 @@ export default function Stock() {
   };
 
   const [savingProduct, setSavingProduct] = useState(false);
+  /** Set once the person has been told a product with this name or SKU exists. */
+  const duplicateProductAckRef = useRef("");
   const [savingWarehouse, setSavingWarehouse] = useState(false);
 
   const saveProduct = async () => {
@@ -197,6 +199,18 @@ export default function Stock() {
     }
     if (editProduct.basePrice <= 0) {
       toast.error("Invalid price", { description: "Base price must be greater than 0." });
+      return;
+    }
+    // Same name or same SKU twice makes stock and reports impossible to read.
+    const typedName = editProduct.name.trim().toLowerCase();
+    const typedSku = editProduct.sku.trim().toLowerCase();
+    const nameClash = products.some(p => p.id !== editProduct.id && p.name.trim().toLowerCase() === typedName);
+    const skuClash = products.some(p => p.id !== editProduct.id && p.sku.trim().toLowerCase() === typedSku);
+    if ((nameClash || skuClash) && duplicateProductAckRef.current !== `${typedName}|${typedSku}`) {
+      duplicateProductAckRef.current = `${typedName}|${typedSku}`;
+      toast.warning(skuClash ? "This SKU is already in use" : "A product with this name already exists", {
+        description: "Check you're not adding the same product twice. Save again to keep it.",
+      });
       return;
     }
     setSavingProduct(true);
