@@ -171,7 +171,10 @@ export function AppSidebar() {
     );
   };
 
-  const renderGroup = (label: string, items: NavItem[], showDivider: boolean) => (
+  const renderGroup = (label: string, rawItems: NavItem[], showDivider: boolean) => {
+    const items = visible(rawItems);
+    if (items.length === 0) return null;
+    return (
     <SidebarGroup className={showDivider ? "border-t border-border/40 mt-1 pt-1" : ""}>
       {!collapsed && (
         <SidebarGroupLabel className="px-3 mt-0.5 mb-0.5 text-[11px] font-medium tracking-normal normal-case text-muted-foreground/70">
