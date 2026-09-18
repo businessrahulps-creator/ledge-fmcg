@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
+import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -31,18 +32,23 @@ import {
 
 import { ChevronRight } from "lucide-react";
 
-const primaryMobileNav = [
+type MobileNavItem = { title: string; url: string; icon: typeof Wallet; cap?: CapabilityKey };
+
+const primaryMobileNav: MobileNavItem[] = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
+  { title: "Insights", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
 ];
 
-const moreGroups: Array<{ label: string; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
+// Shown in the fourth slot when someone can't open Insights, so the bar stays full.
+const primaryMobileFallback: MobileNavItem = { title: "Dealers", url: "/distributors", icon: UserRound };
+
+const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
   {
     label: "Work",
     items: [
-      { title: "Money to Collect", url: "/billing", icon: Wallet },
+      { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
@@ -58,13 +64,13 @@ const moreGroups: Array<{ label: string; items: Array<{ title: string; url: stri
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-      { title: "Company", url: "/company", icon: Landmark },
+      { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
     ],
   },
   {
     label: "Account",
     items: [
-      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
     ],
   },
 ];
@@ -172,6 +178,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // Only show menu entries this person is allowed to open.
+  const canSeeMoney = useCan("see_money");
+  const canManageBilling = useCan("manage_billing");
+  const canManageTeam = useCan("manage_team");
+  const navAllowed: Record<string, boolean> = {
+    see_money: canSeeMoney,
+    manage_billing: canManageBilling,
+    manage_team: canManageTeam,
+  };
+  const canOpen = (item: MobileNavItem) => !item.cap || navAllowed[item.cap];
+  const visiblePrimaryNav: MobileNavItem[] = primaryMobileNav.map(item =>
+    canOpen(item) ? item : primaryMobileFallback,
+  );
+  const visibleMoreGroups = moreGroups
+    .map(g => ({ ...g, items: g.items.filter(canOpen) }))
+    .filter(g => g.items.length > 0);
 
   // The page chunk has loaded and the shell is on screen — stop the top bar.
   useEffect(() => {
@@ -344,7 +367,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             aria-label="Primary"
           >
             <div className="grid w-full grid-cols-5 items-stretch">
-              {primaryMobileNav.map((item) => {
+              {visiblePrimaryNav.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
                 const Icon = item.icon;
                 return (
@@ -456,7 +479,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   {/* Scrollable sectioned list */}
                   <div className="relative flex-1 min-h-0">
                     <div className="absolute inset-0 overflow-y-auto overscroll-contain px-5 pb-6">
-                      {moreGroups.map((group, gIdx) => (
+                      {visibleMoreGroups.map((group, gIdx) => (
                         <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
                           <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1.5 px-1">
                             {group.label}

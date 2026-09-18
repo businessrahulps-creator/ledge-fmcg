@@ -26,7 +26,8 @@ export interface BillStatusView {
  */
 export function billStateFromMoney(grandTotal: number, received: number, credited: number): string {
   const due = Math.round((grandTotal - received - credited) * 100) / 100;
-  if (due <= 0.5) return "paid";
+  // A bill is paid only when nothing at all is left — even a few paise is a short payment.
+  if (due <= 0) return "paid";
   if (received > 0) return "partial";
   return "posted";
 }

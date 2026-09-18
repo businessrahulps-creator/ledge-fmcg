@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useApi } from "@/services/api";
+import { todayKey } from "@/utils/dateKey";
 import { toast } from "sonner";
 import { IndianRupee, Ban, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,19 +13,10 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/data/mock-data";
 import { formatIndianDate } from "@/utils/formatDate";
-import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { cn } from "@/lib/utils";
+import type { PaymentRecord } from "@/context/data-types";
 
-type PaymentRow = {
-  id: string;
-  amount: number;
-  mode: string;
-  paid_on: string;
-  reference: string;
-  note: string;
-  status: string;
-  void_reason: string;
-};
+type PaymentRow = PaymentRecord;
 
 const modes = [
   { value: "cash", label: "Cash" },
@@ -60,32 +52,23 @@ export function PaymentsPanel({
   const [saving, setSaving] = useState(false);
   const [amount, setAmount] = useState<number | null>(null);
   const [mode, setMode] = useState("cash");
-  const [paidOn, setPaidOn] = useState(() => new Date().toISOString().slice(0, 10));
+  const [paidOn, setPaidOn] = useState(() => todayKey());
   const [reference, setReference] = useState("");
   const [note, setNote] = useState("");
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
-  const [overpayAck, setOverpayAck] = useState(false);
 
-  const anchorColumn = invoiceId ? "invoice_id" : "order_id";
+  const api = useApi();
   const anchorId = invoiceId || orderId || "";
 
   const load = useCallback(async () => {
     if (!anchorId) { setRows([]); setLoading(false); return; }
     setLoading(true);
-    const { data, error } = await supabase
-      .from("invoice_payments")
-      .select("id, amount, mode, paid_on, reference, note, status, void_reason")
-      .eq(anchorColumn, anchorId)
-      .order("paid_on", { ascending: false });
+    const data = await api.payments.list({ invoiceId, orderId });
     setLoading(false);
-    if (error) {
-      handleSupabaseError(error, { source: "payments:list", title: "Couldn't load payments", context: { anchorId } });
-      return;
-    }
-    setRows((data || []) as PaymentRow[]);
-  }, [anchorColumn, anchorId]);
+    setRows(data);
+  }, [anchorId, invoiceId, orderId, api.payments]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -100,40 +83,31 @@ export function PaymentsPanel({
   const recordPayment = async () => {
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
-    if (value > balance + 0.5 && !overpayAck) {
-      setOverpayAck(true);
-      toast.warning("This is more than the balance", {
-        description: `Only ${formatCurrency(balance)} is due on ${docLabel}. Check the amount, then press Save payment again to go ahead.`,
-        duration: 8000,
+    // More than the balance is refused outright — the server will not take it either.
+    if (value > balance) {
+      toast.error("That is more than what is due", {
+        description: `Only ${formatCurrency(balance)} is due on ${docLabel}. Record ${formatCurrency(balance)} or less.`,
       });
       return;
     }
     setSaving(true);
-    const shared = {
-      p_amount: value,
-      p_mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
-      p_paid_on: paidOn,
-      p_reference: reference,
-      p_note: note,
+    const ok = await api.payments.record({
+      invoiceId,
+      orderId,
+      amount: value,
+      mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
+      paidOn,
+      reference,
+      note,
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
-      p_idempotency_key: `${anchorId}:${submitKey}`,
-    };
-    const { error } = invoiceId
-      ? await supabase.rpc("record_invoice_payment_atomic", { p_invoice_id: invoiceId, ...shared })
-      : await supabase.rpc("record_order_payment_atomic", { p_order_id: orderId as string, ...shared });
+      idempotencyKey: `${anchorId}:${submitKey}`,
+    });
     setSaving(false);
-    if (error) {
-      handleSupabaseError(error, {
-        source: invoiceId ? "rpc:record_invoice_payment_atomic" : "rpc:record_order_payment_atomic",
-        title: "Couldn't record this payment",
-        context: { anchorId },
-      });
-      return;
-    }
+    if (!ok) return;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setOverpayAck(false);
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
     await load();
     onChanged?.();
   };
@@ -142,15 +116,9 @@ export function PaymentsPanel({
     if (!voidTarget) return;
     if (!voidReason.trim()) { toast.error("Say why this payment is being cancelled"); return; }
     setSaving(true);
-    const { error } = await supabase.rpc("void_invoice_payment_atomic", {
-      p_payment_id: voidTarget.id,
-      p_reason: voidReason.trim(),
-    });
+    const ok = await api.payments.void(voidTarget.id, voidReason.trim());
     setSaving(false);
-    if (error) {
-      handleSupabaseError(error, { source: "rpc:void_invoice_payment_atomic", title: "Couldn't cancel this payment", context: { paymentId: voidTarget.id } });
-      return;
-    }
+    if (!ok) return;
     toast.success("Payment cancelled — the record stays in the history");
     setVoidTarget(null); setVoidReason("");
     await load();
@@ -227,7 +195,7 @@ export function PaymentsPanel({
       )}
 
       {/* Record payment */}
-      <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setOverpayAck(false); }}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base">Record payment</DialogTitle>
@@ -239,14 +207,14 @@ export function PaymentsPanel({
             <div className="space-y-1.5">
               <Label className="text-xs">Amount received (₹) *</Label>
               <NumberInput
-                allowDecimal min={0} value={amount}
-                onValueChange={v => { setAmount(v); setOverpayAck(false); }}
+                allowDecimal min={0} max={balance} value={amount}
+                onValueChange={v => setAmount(v)}
                 className="h-10 rounded-lg"
               />
-              {Number(amount || 0) > balance + 0.5 && (
-                <p className="text-xs text-warning">
+              {Number(amount || 0) > balance && (
+                <p className="text-xs text-destructive">
                   That is {formatCurrency(Number(amount || 0) - balance)} more than the {formatCurrency(balance)} due.
-                  {overpayAck ? " Press Save payment again to record it anyway." : ""}
+                  Record {formatCurrency(balance)} or less.
                 </p>
               )}
             </div>
@@ -262,7 +230,7 @@ export function PaymentsPanel({
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Date received</Label>
-                <Input type="date" value={paidOn} max={new Date().toISOString().slice(0, 10)}
+                <Input type="date" value={paidOn} max={todayKey()}
                   onChange={e => setPaidOn(e.target.value)} className="h-10 rounded-lg" />
               </div>
             </div>

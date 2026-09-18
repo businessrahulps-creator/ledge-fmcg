@@ -12,7 +12,7 @@ export function useDealersDomain(deps: DomainDeps) {
 
   const toDbRow = (d: Distributor) => ({
     name: sanitizeInput(d.name), location: sanitizeInput(d.location), contact: sanitizeInput(d.contact),
-    credit_limit: d.creditLimit || 0, email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""),
+    credit_limit: d.creditLimit || 0, credit_mode: d.creditMode || 'unlimited', email: sanitizeInput(d.email || ""), address: sanitizeInput(d.address || ""),
     gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""),
     bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""),
     bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || ""),

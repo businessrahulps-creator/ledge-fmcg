@@ -18,6 +18,8 @@ function makeDeps(overrides = {}) {
     ...createMockDeps(),
     getOrders: vi.fn().mockReturnValue([]),
     safeRefetchStockItems: vi.fn().mockResolvedValue(undefined),
+    safeRefetchDealers: vi.fn().mockResolvedValue(undefined),
+    safeRefetchOrders: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

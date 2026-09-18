@@ -33,6 +33,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { useAuth } from "@/context/AuthContext";
+import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 import ledgeMark from "@/assets/ledge-mark.webp";
 
@@ -41,12 +42,13 @@ type NavItem = {
   url: string;
   icon: React.ElementType;
   onClick?: () => void;
+  cap?: CapabilityKey;
 };
 
 const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Money to Collect", url: "/billing", icon: Wallet },
+  { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
   { title: "Returns", url: "/claims", icon: RotateCcw },
 ];
 
@@ -59,11 +61,11 @@ const catalogNav: NavItem[] = [
 const relationshipsNav: NavItem[] = [
   { title: "Dealers", url: "/distributors", icon: UserRound },
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-  { title: "Company", url: "/company", icon: Landmark },
+  { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
 ];
 
 const footerNav: NavItem[] = [
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
 ];
 
 export function AppSidebar() {
@@ -77,10 +79,21 @@ export function AppSidebar() {
 
   // Insights group — unified My Business surface (replaces Reports + Performance).
   const insightsNav: NavItem[] = [
-    { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
+    { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
   ];
 
-  const effectiveFooter: NavItem[] = footerNav;
+  // Only show what this person is allowed to open.
+  const canSeeMoney = useCan("see_money");
+  const canManageBilling = useCan("manage_billing");
+  const canManageTeam = useCan("manage_team");
+  const allowed: Record<string, boolean> = {
+    see_money: canSeeMoney,
+    manage_billing: canManageBilling,
+    manage_team: canManageTeam,
+  };
+  const visible = (items: NavItem[]) => items.filter(i => !i.cap || allowed[i.cap]);
+
+  const effectiveFooter: NavItem[] = visible(footerNav);
 
   const renderItem = (item: NavItem) => {
     const isActive = item.onClick ? false : location.pathname.startsWith(item.url);
@@ -159,7 +172,10 @@ export function AppSidebar() {
     );
   };
 
-  const renderGroup = (label: string, items: NavItem[], showDivider: boolean) => (
+  const renderGroup = (label: string, rawItems: NavItem[], showDivider: boolean) => {
+    const items = visible(rawItems);
+    if (items.length === 0) return null;
+    return (
     <SidebarGroup className={showDivider ? "border-t border-border/40 mt-1 pt-1" : ""}>
       {!collapsed && (
         <SidebarGroupLabel className="px-3 mt-0.5 mb-0.5 text-[11px] font-medium tracking-normal normal-case text-muted-foreground/70">
@@ -170,7 +186,9 @@ export function AppSidebar() {
         <SidebarMenu>{items.map(renderItem)}</SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+    );
+  };
+
 
   // Track scroll edges so we can render fade affordances ("there's more here").
   const { ref: scrollRef, showTopFade, showBottomFade } = useScrollEdges<HTMLDivElement>([collapsed, userRole]);

@@ -45,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { todayKey, addDaysToKey } from "@/utils/dateKey";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -97,7 +98,7 @@ const emptyScheme: Omit<Scheme, "id"> = {
   productId: null,
   dealerId: null,
   isActive: true,
-  validFrom: new Date().toISOString().split("T")[0],
+  validFrom: todayKey(),
   validUntil: null,
 };
 
@@ -230,7 +231,7 @@ export default function Schemes() {
 
           {/* Expired but still switched on */}
           {(() => {
-            const today = new Date().toISOString().split("T")[0];
+            const today = todayKey();
             const stale = activeSchemes.filter(s => s.validUntil && s.validUntil < today);
             if (stale.length === 0) return null;
             return (
@@ -248,8 +249,8 @@ export default function Schemes() {
 
           {/* Expiring soon signal */}
           {(() => {
-            const today = new Date().toISOString().split("T")[0];
-            const in7 = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+            const today = todayKey();
+            const in7 = addDaysToKey(todayKey(), 7);
             const expiring = activeSchemes.filter(s => s.validUntil && s.validUntil >= today && s.validUntil <= in7);
             if (expiring.length === 0) return null;
             return (
@@ -568,7 +569,7 @@ function SchemeCard({
   const product = s.productId ? products.find(p => p.id === s.productId) : null;
   const dealer = s.dealerId ? dealers.find(d => d.id === s.dealerId) : null;
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayKey();
   const isExpired = s.validUntil && s.validUntil < today;
   const isUpcoming = s.validFrom > today;
 

@@ -10,6 +10,7 @@ import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "l
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -98,7 +99,7 @@ export default function Distributors() {
 
   const openNew = () => {
     if (!canManageDealers) return;
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditMode: 'unlimited', outstandingAmount: 0 });
     setIsNew(true);
   };
 
@@ -127,6 +128,13 @@ export default function Distributors() {
     }
     if (!isValidGstin(editItem.gstin)) {
       toast.error("Invalid GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
+      return;
+    }
+    // The first two digits of a GSTIN are the state — a mismatch means the wrong tax on every bill.
+    if (editItem.gstin.trim() && editItem.stateCode.trim() && editItem.gstin.trim().slice(0, 2) !== editItem.stateCode.trim()) {
+      toast.error("State doesn't match the GSTIN", {
+        description: `This GSTIN starts with ${editItem.gstin.trim().slice(0, 2)}, but the state code says ${editItem.stateCode.trim()}. Fix one of them before saving.`,
+      });
       return;
     }
     if (!isValidPan(editItem.pan)) {
@@ -390,8 +398,30 @@ export default function Distributors() {
                       <Input type="email" value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="dealer@example.com" className="h-10 rounded-lg" />
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Credit</Label>
+                      <Select
+                        value={editItem.creditMode ?? "unlimited"}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditMode: v as "unlimited" | "limited" | "cash_only" })}
+                      >
+                        <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unlimited">No limit</SelectItem>
+                          <SelectItem value="limited">Up to a limit</SelectItem>
+                          <SelectItem value="cash_only">No credit (cash only)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">Credit Limit</Label>
-                      <NumberInput currency allowDecimal allowEmpty={false} min={0} value={editItem.creditLimit} onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                      <NumberInput
+                        currency allowDecimal allowEmpty={false} min={0}
+                        disabled={(editItem.creditMode ?? "unlimited") !== "limited"}
+                        value={editItem.creditLimit}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })}
+                        placeholder="e.g. 50,000" className="h-10 rounded-lg"
+                      />
                     </div>
                   </div>
                 </div>

@@ -1,5 +1,8 @@
 import type { Order, Distributor, Salesperson, Product, Scheme } from "@/data/mock-data";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
+import type { PaymentRecord, RecordPaymentInput } from "@/context/domains/useBillingDomain";
+
+export type { PaymentRecord, RecordPaymentInput };
 
 export interface AddOrderResult {
   success: boolean;
@@ -203,6 +206,9 @@ export interface DataContextType {
   resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
   invoices: Invoice[];
+  listPayments: (anchor: { invoiceId?: string | null; orderId?: string | null }) => Promise<PaymentRecord[]>;
+  recordPayment: (input: RecordPaymentInput) => Promise<boolean>;
+  voidPayment: (paymentId: string, reason: string) => Promise<boolean>;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -274,6 +280,9 @@ export interface TransactionalContextType {
 
   recordReturn: DataContextType["recordReturn"];
   resolveClaim: DataContextType["resolveClaim"];
+  listPayments: DataContextType["listPayments"];
+  recordPayment: DataContextType["recordPayment"];
+  voidPayment: DataContextType["voidPayment"];
 
 
   nextOrderNumber: DataContextType["nextOrderNumber"];

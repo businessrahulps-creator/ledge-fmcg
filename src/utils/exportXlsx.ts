@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import type * as XLSXType from "xlsx";
+import { todayKey } from "@/utils/dateKey";
 
 const CURRENCY_KEYWORDS = ["₹", "amount", "value", "price", "revenue", "total", "outstanding", "limit", "savings"];
 const DATE_KEYWORDS = ["date"];
@@ -128,6 +129,6 @@ export async function exportXlsx(filename: string, headers: string[], rows: stri
  * Generate a dated filename: {entity}_{YYYY-MM-DD}.xlsx
  */
 export function xlsxFilename(entity: string): string {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey();
   return `${entity}_${today}.xlsx`;
 }

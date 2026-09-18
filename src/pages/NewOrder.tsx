@@ -5,6 +5,7 @@ import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-re
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { Button } from "@/components/ui/button";
+import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -26,10 +27,9 @@ import {
 import { EntityPicker } from "@/components/ui/entity-picker";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import confetti from "canvas-confetti";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
+import { todayKey, addDaysToKey } from "@/utils/dateKey";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -88,7 +88,7 @@ export default function NewOrder() {
   const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
-  const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
+  const [orderDate, setOrderDate] = useState(todayKey());
   const [selectedDealer, setSelectedDealer] = useState("");
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -193,8 +193,8 @@ export default function NewOrder() {
     selectedDealerObj?.outstandingAmount || 0,
     orderBillEquivalent,
   );
-  const creditLimit = selectedDealerObj?.creditLimit || 0;
-  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
+  const creditLimit = creditCeiling(selectedDealerObj);
+  const exceedsCreditLimit = exceedsCredit(selectedDealerObj, projectedOutstanding);
 
   // --- Derived validation state (used for inline errors) ---
   const validLines = lines.filter((l) => l.productId && (l.quantity ?? 0) > 0);
@@ -338,22 +338,16 @@ export default function NewOrder() {
       // Advance taken at the counter — recorded against the order, never blocking the booking.
       const advance = Number(advanceAmount || 0);
       if (advance > 0 && result.orderId) {
-        const { error: payErr } = await supabase.rpc("record_order_payment_atomic", {
-          p_order_id: result.orderId,
-          p_amount: advance,
-          p_mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
-          p_paid_on: orderDate,
-          p_reference: advanceRef,
-          p_note: "Advance received at booking",
-          p_idempotency_key: `${result.orderId}:booking-advance`,
+        // Goes through the billing data layer so the dealer's balance updates everywhere.
+        await api.payments.record({
+          orderId: result.orderId,
+          amount: advance,
+          mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
+          paidOn: orderDate,
+          reference: advanceRef,
+          note: "Advance received at booking",
+          idempotencyKey: `${result.orderId}:booking-advance`,
         });
-        if (payErr) {
-          handleSupabaseError(payErr, {
-            source: "rpc:record_order_payment_atomic",
-            title: "Order saved, but the advance wasn't recorded",
-            context: { orderId: result.orderId },
-          });
-        }
       }
       trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
@@ -408,7 +402,7 @@ export default function NewOrder() {
         return;
       }
       toast.error("Credit limit exceeded", {
-        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Ask someone with override permission.`,
+        description: creditBlockMessage(selectedDealerObj, selectedDealerObj?.name || "This dealer"),
       });
       return;
     }
@@ -447,7 +441,7 @@ export default function NewOrder() {
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={addDaysToKey(todayKey(), -365)} max={todayKey()} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
                 </div>
                 <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
@@ -495,10 +489,10 @@ export default function NewOrder() {
               <SignalCard
                 tier="destructive"
                 icon={AlertTriangle}
-                label="CREDIT LIMIT BREACH"
-                caption={`${selectedDealerObj?.name} will exceed credit limit if this order ships unpaid`}
-                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Limit ${formatCurrency(creditLimit)}${canOverrideCredit ? " — you can override" : ""}`}
-                value={formatCurrency(projectedOutstanding - creditLimit)}
+                label={creditLimit === 0 ? "NO CREDIT ALLOWED" : "CREDIT LIMIT BREACH"}
+                caption={`${selectedDealerObj?.name} will exceed what they may owe if this order ships unpaid`}
+                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Allowed ${formatCurrency(creditLimit ?? 0)}${canOverrideCredit ? " — you can override" : ""}`}
+                value={formatCurrency(projectedOutstanding - (creditLimit ?? 0))}
                 valueSuffix="OVER LIMIT"
               />
             )}
@@ -797,7 +791,7 @@ export default function NewOrder() {
         <AlertDialogHeader>
           <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
           <AlertDialogDescription>
-            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, exceeding their credit limit of {formatCurrency(creditLimit)}. Do you want to proceed?
+            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, which is past the {formatCurrency(creditLimit ?? 0)} they may owe. Do you want to proceed?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
