@@ -37,5 +37,5 @@ export function useCanState(capability: CapabilityKey): { allowed: boolean; read
     },
   });
 
-  return data === true;
+  return { allowed: data === true, ready: !userId || isFetched || isError };
 }

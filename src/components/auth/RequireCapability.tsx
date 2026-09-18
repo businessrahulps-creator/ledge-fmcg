@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Lock } from "lucide-react";
-import { useCan, type CapabilityKey } from "@/hooks/useCan";
+import { useCanState, type CapabilityKey } from "@/hooks/useCan";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/layout/AppLayout";
