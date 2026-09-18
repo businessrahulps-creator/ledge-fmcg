@@ -49,7 +49,7 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
     label: "Work",
     items: [
       { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
-      { title: "Returns", url: "/claims", icon: RotateCcw },
+      { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
     ],
   },
   {
@@ -180,7 +180,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
 
   // Only show menu entries this person is allowed to open.
-  const canSeeMoney = useCan("see_money");
+  const { allowed: canSeeMoney, ready: moneyReady } = useCanState("see_money");
   const canManageBilling = useCan("manage_billing");
   const canManageTeam = useCan("manage_team");
   const navAllowed: Record<string, boolean> = {
@@ -189,9 +189,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     manage_team: canManageTeam,
   };
   const canOpen = (item: MobileNavItem) => !item.cap || navAllowed[item.cap];
-  const visiblePrimaryNav: MobileNavItem[] = primaryMobileNav.map(item =>
-    canOpen(item) ? item : primaryMobileFallback,
-  );
+  // Until the role answer arrives, hold the Insights slot empty rather than
+  // showing a tab that swaps to another one a moment later.
+  const visiblePrimaryNav: (MobileNavItem | null)[] = primaryMobileNav.map(item => {
+    if (!item.cap) return item;
+    if (item.cap === "see_money" && !moneyReady) return null;
+    return canOpen(item) ? item : primaryMobileFallback;
+  });
   const visibleMoreGroups = moreGroups
     .map(g => ({ ...g, items: g.items.filter(canOpen) }))
     .filter(g => g.items.length > 0);
@@ -367,7 +371,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             aria-label="Primary"
           >
             <div className="grid w-full grid-cols-5 items-stretch">
-              {visiblePrimaryNav.map((item) => {
+              {visiblePrimaryNav.map((item, slot) => {
+                if (!item) return <div key={`slot-${slot}`} className="min-h-[56px]" aria-hidden />;
                 const isActive = location.pathname.startsWith(item.url);
                 const Icon = item.icon;
                 return (
