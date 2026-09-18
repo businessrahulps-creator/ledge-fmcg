@@ -180,25 +180,16 @@ function NewClaimDialog({
   const selectedBillId = selectedBill?.id ?? null;
   useEffect(() => {
     let cancelled = false;
-    if (!selectedBillId) { setAlreadyReturned({}); return; }
-    (async () => {
-      const { data, error } = await supabase
-        .from("credit_notes")
-        .select("id, credit_note_lines(invoice_line_id, quantity)")
-        .eq("invoice_id", selectedBillId);
-      if (cancelled) return;
-      if (error || !data) { setAlreadyReturned({}); return; }
-      const totals: Record<string, number> = {};
-      data.forEach(note => {
-        (note.credit_note_lines || []).forEach(l => {
-          if (!l.invoice_line_id) return;
-          totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
-        });
-      });
-      setAlreadyReturned(totals);
-    })();
+    if (!selectedBillId) { setAlreadyReturned(null); setReturnedError(false); return; }
+    setAlreadyReturned(null);
+    setReturnedError(false);
+    api.claims.returnedQuantities(selectedBillId)
+      .then(totals => { if (!cancelled) setAlreadyReturned(totals); })
+      // A failed read must never look like "nothing has come back yet" —
+      // that is how the same goods get credited twice.
+      .catch(() => { if (!cancelled) setReturnedError(true); });
     return () => { cancelled = true; };
-  }, [selectedBillId]);
+  }, [selectedBillId, api.claims]);
 
   // Line items for this one bill — they are not carried in the app-wide bill list.
   useEffect(() => {
