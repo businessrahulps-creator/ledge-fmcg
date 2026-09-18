@@ -5,7 +5,7 @@
  * Recomputed by callers when the period changes.
  */
 import { collectedInPeriod } from "@/lib/receivables";
-import { netTotal } from "@/lib/revenue";
+import { netTotal, isCancelled } from "@/lib/revenue";
 import type { Order, Distributor, Salesperson, Product } from "@/data/mock-data";
 import type { Target } from "@/context/DataContext";
 
@@ -65,6 +65,7 @@ export function getPeriodRange(period: CommandPeriod, customFrom?: string, custo
 /** Revenue from dispatched/delivered orders only (the only "real" money number). */
 export function dispatchedRevenue(orders: Order[], range: PeriodRange): number {
   return orders.reduce((sum, o) => {
+    if (isCancelled(o)) return sum;
     if (o.deliveryStatus !== "dispatched" && o.deliveryStatus !== "delivered") return sum;
     const ref = o.dispatchDate ? new Date(o.dispatchDate) : new Date(o.date);
     if (ref < range.from || ref > range.to) return sum;
@@ -74,6 +75,7 @@ export function dispatchedRevenue(orders: Order[], range: PeriodRange): number {
 
 export function ordersInPeriod(orders: Order[], range: PeriodRange): Order[] {
   return orders.filter((o) => {
+    if (isCancelled(o)) return false;
     const d = new Date(o.date);
     return d >= range.from && d <= range.to;
   });

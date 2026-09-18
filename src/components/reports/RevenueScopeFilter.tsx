@@ -23,9 +23,11 @@ export function RevenueScopeFilter({
   );
 }
 
-export function applyRevenueScope<T extends Pick<Order, "deliveryStatus">>(
+/** Cancelled orders never count, whatever the scope. */
+export function applyRevenueScope<T extends Pick<Order, "deliveryStatus"> & { cancelledAt?: string | null }>(
   rows: T[],
   scope: RevenueScope
 ): T[] {
-  return scope === "delivered" ? rows.filter((o) => o.deliveryStatus === "delivered") : rows;
+  const live = rows.filter((o) => !o.cancelledAt);
+  return scope === "delivered" ? live.filter((o) => o.deliveryStatus === "delivered") : live;
 }
