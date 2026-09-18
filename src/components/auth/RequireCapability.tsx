@@ -21,11 +21,11 @@ interface RequireCapabilityProps {
 export function RequireCapability({ capability, message, children }: RequireCapabilityProps) {
   const navigate = useNavigate();
   const { profileLoaded } = useAuth();
-  const allowed = useCan(capability);
+  const { allowed, ready } = useCanState(capability);
 
   // Wait for profile + role + capability fetch to settle so we don't flash
   // the denial card to users who actually have access.
-  if (!profileLoaded) return <AppLayout><RouteSkeleton /></AppLayout>;
+  if (!profileLoaded || !ready) return <AppLayout><RouteSkeleton /></AppLayout>;
 
   if (allowed) return <>{children}</>;
 
