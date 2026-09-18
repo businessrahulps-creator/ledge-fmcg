@@ -1,4 +1,12 @@
 import type { Order } from "@/data/mock-data";
+import { isCancelled } from "@/lib/revenue";
+
+/**
+ * Payment state per order. Pass the receipt-derived map from `useReceivables()`.
+ * Falls back to the coarse order flag only when no resolver is supplied.
+ */
+export type PayStatusFn = (o: Order) => string;
+const defaultPayStatus: PayStatusFn = (o) => o.paymentStatus;
 
 export type ChurnRisk = "low" | "medium" | "high";
 
@@ -15,19 +23,21 @@ export interface DealerScorecard {
   daysSinceLastOrder: number | null;
 }
 
-export function getChurnRisk(dealerOrders: Order[]): ChurnRisk {
+export function getChurnRisk(allOrders: Order[], payStatus: PayStatusFn = defaultPayStatus): ChurnRisk {
+  const dealerOrders = allOrders.filter((o) => !isCancelled(o));
   if (dealerOrders.length === 0) return "high";
   const now = new Date();
   const sorted = [...dealerOrders].sort((a, b) => b.date.localeCompare(a.date));
   const daysSinceLastOrder = (now.getTime() - new Date(sorted[0].date + "T00:00:00").getTime()) / 86400000;
-  const paidPct = (dealerOrders.filter(o => o.paymentStatus === "paid").length / dealerOrders.length) * 100;
+  const paidPct = (dealerOrders.filter(o => payStatus(o) === "paid").length / dealerOrders.length) * 100;
 
   if (daysSinceLastOrder <= 30 && paidPct >= 60) return "low";
   if (daysSinceLastOrder <= 60 && paidPct >= 30) return "medium";
   return "high";
 }
 
-export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
+export function buildScorecard(allOrders: Order[], payStatus: PayStatusFn = defaultPayStatus): DealerScorecard {
+  const dealerOrders = allOrders.filter((o) => !isCancelled(o));
   const now = new Date();
   const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
   const d60 = new Date(now); d60.setDate(d60.getDate() - 60);
@@ -53,7 +63,7 @@ export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
     ? dealerOrders.reduce((s, o) => s + effectiveTotal(o), 0) / dealerOrders.length
     : 0;
 
-  const paidCount = dealerOrders.filter(o => o.paymentStatus === "paid").length;
+  const paidCount = dealerOrders.filter(o => payStatus(o) === "paid").length;
   const paymentTimeliness = dealerOrders.length > 0 ? (paidCount / dealerOrders.length) * 100 : 0;
 
   let daysSinceLastOrder: number | null = null;
@@ -71,7 +81,7 @@ export function buildScorecard(dealerOrders: Order[]): DealerScorecard {
     totalValue90d,
     avgOrderValue,
     paymentTimeliness,
-    churnRisk: getChurnRisk(dealerOrders),
+    churnRisk: getChurnRisk(dealerOrders, payStatus),
     daysSinceLastOrder,
   };
 }

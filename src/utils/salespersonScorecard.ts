@@ -1,4 +1,8 @@
 import type { Order } from "@/data/mock-data";
+import { isCancelled } from "@/lib/revenue";
+import type { PayStatusFn } from "@/utils/dealerScorecard";
+
+const defaultPayStatus: PayStatusFn = (o) => o.paymentStatus;
 
 export type PerformanceHealth = "high" | "medium" | "low";
 
@@ -15,12 +19,13 @@ export interface SalespersonScorecard {
   daysSinceLastOrder: number | null;
 }
 
-export function getPerformanceHealth(spOrders: Order[]): PerformanceHealth {
+export function getPerformanceHealth(allOrders: Order[], payStatus: PayStatusFn = defaultPayStatus): PerformanceHealth {
+  const spOrders = allOrders.filter((o) => !isCancelled(o));
   if (spOrders.length === 0) return "low";
   const now = new Date();
   const sorted = [...spOrders].sort((a, b) => b.date.localeCompare(a.date));
   const daysSince = (now.getTime() - new Date(sorted[0].date + "T00:00:00").getTime()) / 86400000;
-  const paidPct = (spOrders.filter(o => o.paymentStatus === "paid").length / spOrders.length) * 100;
+  const paidPct = (spOrders.filter(o => payStatus(o) === "paid").length / spOrders.length) * 100;
 
   if (daysSince <= 30 && paidPct >= 60) return "high";
   if (daysSince <= 60 && paidPct >= 30) return "medium";
@@ -41,7 +46,8 @@ export function getPerformanceInsight(health: PerformanceHealth, sc: Salesperson
   return "Low activity — needs support and motivation";
 }
 
-export function buildSalespersonScorecard(spOrders: Order[]): SalespersonScorecard {
+export function buildSalespersonScorecard(allOrders: Order[], payStatus: PayStatusFn = defaultPayStatus): SalespersonScorecard {
+  const spOrders = allOrders.filter((o) => !isCancelled(o));
   const now = new Date();
   const d30 = new Date(now); d30.setDate(d30.getDate() - 30);
   const d60 = new Date(now); d60.setDate(d60.getDate() - 60);
@@ -65,7 +71,7 @@ export function buildSalespersonScorecard(spOrders: Order[]): SalespersonScoreca
   const avgOrderValue = spOrders.length > 0 ? totalRevenue / spOrders.length : 0;
   const orderFrequency = last90.length > 0 ? +(last90.length / (90 / 7)).toFixed(1) : 0;
 
-  const paidCount = spOrders.filter(o => o.paymentStatus === "paid").length;
+  const paidCount = spOrders.filter(o => payStatus(o) === "paid").length;
   const paymentCollectionEfficiency = spOrders.length > 0 ? (paidCount / spOrders.length) * 100 : 0;
 
   let daysSinceLastOrder: number | null = null;
