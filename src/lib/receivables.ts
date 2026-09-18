@@ -68,7 +68,8 @@ export function buildReceivables({
     const received = receivedByInvoice.get(inv.id) || 0;
     const credited = creditedByInvoice.get(inv.id) || 0;
     const due = Math.max(0, Math.round((billed - received - credited) * 100) / 100);
-    if (due <= 0.5) continue;
+    // Keep bills with even a few paise left — they are genuinely short paid.
+    if (due <= 0) continue;
     const ageDays = dayDiff(inv.invoiceDate, today);
     rows.push({
       invoiceId: inv.id,
@@ -149,7 +150,7 @@ export function paymentStatusByOrder(
       const received = receivedByInvoice.get(inv.id) || 0;
       const credited = creditedByInvoice.get(inv.id) || 0;
       const due = Math.round((billed - received - credited) * 100) / 100;
-      map.set(o.id, due <= 0.5 ? "paid" : received > 0 ? "partial" : "pending");
+      map.set(o.id, due <= 0 ? "paid" : received > 0 ? "partial" : "pending");
     } else {
       map.set(o.id, (receivedByOrder.get(o.id) || 0) > 0 ? "partial" : "pending");
     }
