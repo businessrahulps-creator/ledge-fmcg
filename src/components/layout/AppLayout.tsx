@@ -366,7 +366,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             aria-label="Primary"
           >
             <div className="grid w-full grid-cols-5 items-stretch">
-              {primaryMobileNav.map((item) => {
+              {visiblePrimaryNav.map((item) => {
                 const isActive = location.pathname.startsWith(item.url);
                 const Icon = item.icon;
                 return (
@@ -478,7 +478,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   {/* Scrollable sectioned list */}
                   <div className="relative flex-1 min-h-0">
                     <div className="absolute inset-0 overflow-y-auto overscroll-contain px-5 pb-6">
-                      {moreGroups.map((group, gIdx) => (
+                      {visibleMoreGroups.map((group, gIdx) => (
                         <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
                           <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1.5 px-1">
                             {group.label}
