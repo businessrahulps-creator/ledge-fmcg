@@ -190,6 +190,8 @@ export default function Stock() {
   /** Set once the person has been told a product with this name or SKU exists. */
   const duplicateProductAckRef = useRef("");
   const [savingWarehouse, setSavingWarehouse] = useState(false);
+  // Stock saves wait for the server, so the dialog can't claim success early.
+  const [savingStock, setSavingStock] = useState(false);
 
   const saveProduct = async () => {
     if (savingProduct) return;
@@ -355,7 +357,8 @@ export default function Stock() {
   const inventoryPagination = usePagination(warehouseInventory.length, undefined, `${selectedWarehouse}|${debouncedWarehouseSearch}`);
   const paginatedInventory = useMemo(() => warehouseInventory.slice(inventoryPagination.from, inventoryPagination.to), [warehouseInventory, inventoryPagination.from, inventoryPagination.to]);
 
-  const handleAddStock = () => {
+  const handleAddStock = async () => {
+    if (savingStock) return;
     if (!addStockProductId || !selectedWarehouse) {
       toast.error("Product required", { description: "Please select a product." });
       return;
@@ -367,36 +370,43 @@ export default function Stock() {
     const existing = stockItemsList.find(
       (si) => si.productId === addStockProductId && si.godownId === selectedWarehouse
     );
-    if (existing) {
-      updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
-    } else {
-      const product = products.find((p) => p.id === addStockProductId);
-      const warehouse = locations.find((l) => l.id === selectedWarehouse);
-      if (product && warehouse) {
-        const newItem: StockItem = {
-          id: `si${Date.now()}`,
-          productId: product.id,
-          productName: product.name,
-          sku: product.sku,
-          unit: product.unit,
-          godownId: warehouse.id,
-          godownName: warehouse.name,
-          quantity: addStockQty,
-          threshold: 50,
-          basePrice: product.basePrice,
-          lastDeductedDate: null,
-        };
-        addStockItem(newItem);
+    setSavingStock(true);
+    try {
+      let ok = false;
+      if (existing) {
+        ok = await updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
+      } else {
+        const product = products.find((p) => p.id === addStockProductId);
+        const warehouse = locations.find((l) => l.id === selectedWarehouse);
+        if (product && warehouse) {
+          const newItem: StockItem = {
+            id: `si${Date.now()}`,
+            productId: product.id,
+            productName: product.name,
+            sku: product.sku,
+            unit: product.unit,
+            godownId: warehouse.id,
+            godownName: warehouse.name,
+            quantity: addStockQty,
+            threshold: 50,
+            basePrice: product.basePrice,
+            lastDeductedDate: null,
+          };
+          ok = await addStockItem(newItem);
+        }
       }
+      if (!ok) return; // keep the form open — nothing was saved
+      toast.success(existing ? "Stock updated" : "Product stocked", {
+        description: existing
+          ? `Added ${addStockQty} units to existing stock (now ${existing.quantity + addStockQty}).`
+          : `${addStockQty} units stocked in this warehouse.`,
+      });
+      setAddStockOpen(false);
+      setAddStockProductId("");
+      setAddStockQty(0);
+    } finally {
+      setSavingStock(false);
     }
-    toast.success(existing ? "Stock updated" : "Product stocked", {
-      description: existing
-        ? `Added ${addStockQty} units to existing stock (now ${existing.quantity + addStockQty}).`
-        : `${addStockQty} units stocked in this warehouse.`,
-    });
-    setAddStockOpen(false);
-    setAddStockProductId("");
-    setAddStockQty(0);
   };
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
