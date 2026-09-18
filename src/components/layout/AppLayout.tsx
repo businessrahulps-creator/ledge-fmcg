@@ -31,18 +31,23 @@ import {
 
 import { ChevronRight } from "lucide-react";
 
-const primaryMobileNav = [
+type MobileNavItem = { title: string; url: string; icon: typeof Wallet; cap?: CapabilityKey };
+
+const primaryMobileNav: MobileNavItem[] = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Insights", url: "/command", icon: ChartNoAxesCombined },
+  { title: "Insights", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
 ];
 
-const moreGroups: Array<{ label: string; items: Array<{ title: string; url: string; icon: typeof Wallet }> }> = [
+// Shown in the fourth slot when someone can't open Insights, so the bar stays full.
+const primaryMobileFallback: MobileNavItem = { title: "Dealers", url: "/distributors", icon: UserRound };
+
+const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
   {
     label: "Work",
     items: [
-      { title: "Money to Collect", url: "/billing", icon: Wallet },
+      { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw },
     ],
   },
@@ -58,13 +63,13 @@ const moreGroups: Array<{ label: string; items: Array<{ title: string; url: stri
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-      { title: "Company", url: "/company", icon: Landmark },
+      { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
     ],
   },
   {
     label: "Account",
     items: [
-      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
     ],
   },
 ];
