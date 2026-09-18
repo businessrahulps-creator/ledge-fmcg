@@ -135,10 +135,11 @@ interface InlineTargetRowProps {
   periodStart: string;
   periodType: PeriodType;
   onSave: (target: TargetType) => Promise<boolean>;
+  onClear: (id: string) => Promise<boolean>;
   readOnly?: boolean;
 }
 
-function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, readOnly = false }: InlineTargetRowProps) {
+function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, onClear, readOnly = false }: InlineTargetRowProps) {
   const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
   const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
@@ -154,6 +155,15 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
 
   const handleSave = useCallback(async () => {
     if (!dirty || readOnly) return;
+    // Both fields emptied means "remove this target" — never a silent zero.
+    if (revInput === null && ordInput === null) {
+      if (!existingTarget?.id) { setDirty(false); return; }
+      const cleared = await onClear(existingTarget.id);
+      if (!cleared) return;
+      setDirty(false);
+      toast.success("Target removed", { description: `${entityName} no longer has a ${periodType} target` });
+      return;
+    }
     const ok = await onSave({
       id: existingTarget?.id || "",
       entityType,
@@ -167,7 +177,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
     if (!ok) return; // save failed — stay dirty so the user can retry
     setDirty(false);
     toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
-  }, [dirty, readOnly, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, onSave]);
+  }, [dirty, readOnly, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, revInput, ordInput, onSave, onClear]);
 
   const tier: "success" | "warning" | "destructive" | "muted" =
     overallStatus === "exceeded" || overallStatus === "on_track" ? "success"
@@ -329,6 +339,8 @@ export default function Targets() {
     return target.id ? await api.targets.update(target) : await api.targets.create(target);
   }, [api.targets]);
 
+  const handleClear = useCallback(async (id: string) => api.targets.remove(id), [api.targets]);
+
   // Blocking page skeleton removed — empty-state handles first-paint.
 
   const dateOptions = periodType === "daily" ? dailyOptions : periodType === "weekly" ? weeklyOptions : monthOptions;
@@ -470,6 +482,7 @@ export default function Targets() {
                     periodStart={period}
                     periodType={periodType}
                     onSave={handleSave}
+                    onClear={handleClear}
                     readOnly={!canManageTargets}
                   />
                 );
@@ -507,6 +520,7 @@ export default function Targets() {
                     periodStart={period}
                     periodType={periodType}
                     onSave={handleSave}
+                    onClear={handleClear}
                     readOnly={!canManageTargets}
                   />
                 );
