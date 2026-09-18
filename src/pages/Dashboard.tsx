@@ -290,7 +290,7 @@ export default function Dashboard() {
               outstanding: monthOutstanding,
               overdueDealers: agingRows.filter(r => r.worstBucket === "b61" || r.worstBucket === "b90").length,
               lowStockSkus: 0,
-              topDealer: topDistributors[0]?.name,
+
             }}
           />
         )}

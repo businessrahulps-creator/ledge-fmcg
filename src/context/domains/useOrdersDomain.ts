@@ -86,38 +86,14 @@ export function useOrdersDomain(deps: OrdersDeps) {
   const addOrder = useCallback(async (order: Order): Promise<AddOrderResult> => {
     if (!deps.companyId) return { success: false, error: "No company" };
 
+    // Offline booking is disabled (see OFFLINE_MODE_ENABLED in @/lib/offline-store).
+    // Never invent an order number on the device: the server allocates it inside
+    // book_order_atomic, and a locally-made number would not match the real one once
+    // the order syncs — after the dealer may already have been sent it on WhatsApp.
     if (!navigator.onLine) {
-      const tempId = crypto.randomUUID();
-      const year = new Date().getFullYear();
-      const offlineNumber = `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
-      const newOrder: Order = { ...order, id: tempId, orderNumber: offlineNumber };
-      setOrders(prev => {
-        const updated = [newOrder, ...prev];
-        deps.persistEntityToCache("orders", updated);
-        return updated;
-      });
-      setOrderSequence(prev => {
-        const next = prev + 1;
-        deps.persistEntityToCache("orderSequence", next);
-        return next;
-      });
-      await enqueueMutation({
-        type: "insert_order_atomic", table: "orders", clientTempId: tempId,
-        payload: {
-          companyId: deps.companyId, date: order.date, distributorId: order.distributorId,
-          distributorName: order.distributorName, salespersonId: order.salespersonId,
-          salesperson: order.salesperson, total: order.total, paymentMode: order.paymentMode,
-          paymentStatus: order.paymentStatus, dispatchDate: order.dispatchDate || null,
-          vehicle: order.vehicle, driverName: order.driverName, deliveryStatus: order.deliveryStatus,
-          dispatchRemarks: order.dispatchRemarks, godownId: order.godownId || null, lines: order.lines,
-          // Offers must survive the queue — without these the order syncs at full price.
-          schemeSavings: order.schemeSavings || 0,
-          appliedSchemes: order.appliedSchemes || [],
-        },
-      });
-      toast("Saved offline — will sync when back online", { duration: 3000 });
-      return { success: true, orderNumber: offlineNumber };
+      return { success: false, error: "You're offline — reconnect to book this order." };
     }
+
 
     try {
       const { data: rpcData, error: rpcError } = await supabase.rpc("book_order_atomic", {

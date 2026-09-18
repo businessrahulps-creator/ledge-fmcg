@@ -379,14 +379,16 @@ export default function OrderDetail() {
   };
 
   if (!order) {
-    // While data is still loading show a skeleton instead of flashing "not found".
-    if (api.loading || orders.length === 0) {
+    // Wait only while data is genuinely loading. An empty list is a real answer —
+    // a brand-new workspace or a stale link must reach "not found", not spin forever.
+    if (api.loading) {
       return (
         <AppLayout>
           <RouteSkeleton />
         </AppLayout>
       );
     }
+
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">

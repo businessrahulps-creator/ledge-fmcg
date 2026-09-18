@@ -101,7 +101,8 @@ export default function DealerDetail() {
   const [ssForm, setSsForm] = useState({ retailerName: "", productId: "", quantity: 1, date: toDateKey(new Date()), remarks: "" });
 
   if (!dealer) {
-    if (api.loading || items.length === 0) {
+    if (api.loading) {
+
       return (
         <AppLayout>
           <RouteSkeleton />
