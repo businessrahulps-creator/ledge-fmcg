@@ -253,6 +253,9 @@ function NewClaimDialog({
       returnedQty,
       remainingQty: Math.max(0, l.quantity - returnedQty),
       unitPrice: l.unitPrice,
+      // Credit is raised on what was actually billed for the line — after any
+      // discount — not the list price, which would overstate the refund.
+      taxablePerPiece: l.quantity > 0 ? (l.taxableValue ?? l.quantity * l.unitPrice) / l.quantity : l.unitPrice,
       gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
       goodQty: good[l.id] ?? 0,
       damagedQty: damaged[l.id] ?? 0,
@@ -261,10 +264,10 @@ function NewClaimDialog({
 
   // Preview must match the credit note the server actually raises: taxable value plus GST.
   const returnValue = returnLines.reduce(
-    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice, 0
+    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.taxablePerPiece, 0
   );
   const returnTax = returnLines.reduce(
-    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.unitPrice * ((l.gstRate ?? 0) / 100), 0
+    (sum, l) => sum + (l.goodQty + l.damagedQty) * l.taxablePerPiece * ((l.gstRate ?? 0) / 100), 0
   );
   const returnTotal = returnValue + returnTax;
 

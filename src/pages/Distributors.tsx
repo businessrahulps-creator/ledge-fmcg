@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -111,11 +111,23 @@ export default function Distributors() {
   };
 
   const [saving, setSaving] = useState(false);
+  /** Set once the person has been told a dealer with this name already exists. */
+  const duplicateAckRef = useRef("");
 
   const save = async () => {
     if (saving) return;
     if (!editItem?.name.trim()) {
       toast.error("Name required", { description: "Please enter a dealer name." });
+      return;
+    }
+    // Two dealers with the same name are easy to mix up later — say so once.
+    const typedName = editItem.name.trim().toLowerCase();
+    const clash = items.some(d => d.id !== editItem.id && d.name.trim().toLowerCase() === typedName);
+    if (clash && duplicateAckRef.current !== typedName) {
+      duplicateAckRef.current = typedName;
+      toast.warning("A dealer with this name already exists", {
+        description: "Check you're not adding the same dealer twice. Save again to keep this name.",
+      });
       return;
     }
     if (!editItem?.contact.trim()) {
@@ -497,10 +509,10 @@ export default function Distributors() {
             <AlertDialogHeader>
               <AlertDialogTitle>Remove Dealer</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span>? This action cannot be undone.
+                Remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span> from your dealer list? Past orders, bills and payments stay exactly as they are — only the dealer is removed.
                 {deleteDealerOrderCount > 0 && (
                   <span className="mt-2 block text-destructive font-medium">
-                    ⚠ This dealer has {deleteDealerOrderCount} order{deleteDealerOrderCount > 1 ? "s" : ""} linked. Removing will leave those orders without a dealer reference.
+                    ⚠ This dealer has {deleteDealerOrderCount} order{deleteDealerOrderCount > 1 ? "s" : ""}. Those orders stay in your records, but the dealer won't be selectable for new ones.
                   </span>
                 )}
               </AlertDialogDescription>

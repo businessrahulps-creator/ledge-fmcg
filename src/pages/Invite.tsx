@@ -188,7 +188,7 @@ function renderView(view: ViewState, token: string, navigate: ReturnType<typeof 
         <Card
           tone="warning"
           title="This invite is for a different email address"
-          body={`You're signed in as ${view.signedInEmail}, but this invite was sent to ${view.preview.email}. Sign out and sign in with the invited email to join.`}
+          body={`You're signed in as ${view.signedInEmail}, but this invite was sent to a different email address. Sign out and sign in with the invited email to join.`}
           cta={
             <Button
               variant="outline"
@@ -259,8 +259,7 @@ function SignedOutInviteCard({ preview, token }: { preview: InvitePreview; token
         Join {preview.company_name} on Ledge
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">{preview.inviter_name}</span> has invited you to
-        join as <span className="font-medium text-foreground">{job.label}</span>.
+        You've been invited to join as <span className="font-medium text-foreground">{job.label}</span>.
       </p>
 
       <div className="mt-4 rounded-md border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -269,10 +268,11 @@ function SignedOutInviteCard({ preview, token }: { preview: InvitePreview; token
 
       <div className="mt-6 space-y-2">
         <Link to={`/auth?mode=signin&redirect=${encodeURIComponent(redirect)}`} className="block">
-          <Button className="w-full">Sign in with Google to accept</Button>
+          <Button className="w-full">Sign in to accept</Button>
         </Link>
         <Link
-          to={`/auth?mode=signup&redirect=${encodeURIComponent(redirect)}&email=${encodeURIComponent(preview.email)}`}
+          /* The invited address is deliberately not pre-filled — the link must not reveal it. */
+          to={`/auth?mode=signup&redirect=${encodeURIComponent(redirect)}`}
           className="block"
         >
           <Button variant="outline" className="w-full">
@@ -282,8 +282,8 @@ function SignedOutInviteCard({ preview, token }: { preview: InvitePreview; token
       </div>
 
       <p className="mt-4 text-[11px] text-muted-foreground">
-        This invite is for <span className="font-medium text-foreground">{preview.email}</span>. Use the
-        same email when you sign in.
+        {/* The invited address stays hidden until sign-in — an invite link should not reveal it. */}
+        Sign in with the email address this invite was sent to.
       </p>
     </div>
   );
