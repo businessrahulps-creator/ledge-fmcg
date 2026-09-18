@@ -51,26 +51,36 @@ export function TimePeriodFilter({ value, onChange }: TimePeriodFilterProps) {
   );
 }
 
+/**
+ * One window definition for both the caption and the filtering.
+ *
+ * Windows are whole India calendar days, so the caption always describes
+ * exactly the rows the table shows — no UTC slip, no leap-year drift.
+ */
+const PERIOD_DAYS: Record<TimePeriod, number> = {
+  daily: 1,
+  weekly: 7,
+  monthly: 30,
+  yearly: 365,
+};
+
+/** Inclusive India-calendar window as "YYYY-MM-DD" keys. */
+export function getPeriodKeys(period: TimePeriod): { fromKey: string; toKey: string } {
+  const toKey = todayKey();
+  return { fromKey: addDaysToKey(toKey, -(PERIOD_DAYS[period] - 1)), toKey };
+}
+
+const keyToDate = (key: string): Date => {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 /** Get start date (cutoff) and end date (today) for the selected period */
 export function getPeriodRange(period: TimePeriod): { from: Date; to: Date } {
-  const to = new Date();
-  const from = new Date();
-  from.setHours(0, 0, 0, 0);
-
-  switch (period) {
-    case "daily":
-      // from = today 00:00, to = now
-      break;
-    case "weekly":
-      from.setDate(to.getDate() - 6); // last 7 days inclusive of today
-      break;
-    case "monthly":
-      from.setDate(to.getDate() - 29); // last 30 days inclusive
-      break;
-    case "yearly":
-      from.setDate(to.getDate() - 364); // last 365 days inclusive
-      break;
-  }
+  const { fromKey, toKey } = getPeriodKeys(period);
+  const from = keyToDate(fromKey);
+  const to = keyToDate(toKey);
+  to.setHours(23, 59, 59, 999);
   return { from, to };
 }
 
@@ -81,31 +91,15 @@ export function periodRangeLabel(period: TimePeriod): string {
   return `${formatIndianDate(from)} – ${formatIndianDate(to)}`;
 }
 
-/** Filter items by time period relative to today's date (rolling window) */
+/** Filter items by time period — the same window the caption prints. */
 export function filterByTimePeriod<T extends { date: string }>(items: T[], period: TimePeriod): T[] {
-  const now = new Date();
-  const cutoff = new Date();
-
-  switch (period) {
-    case "daily":
-      cutoff.setDate(now.getDate() - 1);
-      break;
-    case "weekly":
-      cutoff.setDate(now.getDate() - 7);
-      break;
-    case "monthly":
-      cutoff.setMonth(now.getMonth() - 1);
-      break;
-    case "yearly":
-      cutoff.setFullYear(now.getFullYear() - 1);
-      break;
-  }
-
+  const { fromKey, toKey } = getPeriodKeys(period);
   return items.filter((item) => {
-    const itemDate = new Date(item.date);
-    return itemDate >= cutoff;
+    const key = (item.date || "").slice(0, 10);
+    return key >= fromKey && key <= toKey;
   });
 }
+
 
 export function periodLabel(period: TimePeriod): string {
   return PERIOD_LABELS[period];
