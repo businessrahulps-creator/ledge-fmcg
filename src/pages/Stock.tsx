@@ -293,8 +293,8 @@ export default function Stock() {
     setDeleteConfirmText("");
   };
 
-  const saveStockItemFn = () => {
-    if (!editStockItem) return;
+  const saveStockItemFn = async () => {
+    if (!editStockItem || savingStock) return;
     // Validate: if intent is add/remove, delta must be > 0. For "set" allow 0.
     if (adjustIntent !== "set" && (!adjustDelta || adjustDelta <= 0)) {
       toast.error("Enter a quantity", {
@@ -311,21 +311,35 @@ export default function Stock() {
     const finalQty = computedNewQty;
     const delta = finalQty - editOriginalQty;
     const updated: StockItem = { ...editStockItem, quantity: finalQty };
-    updateStockItem(updated);
-    const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
-    const absDelta = Math.abs(delta);
-    toast.success(
-      delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
-      { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
-    );
-    setEditStockItem(null);
+    setSavingStock(true);
+    try {
+      // Wait for the server before claiming anything — a failed save must not
+      // leave the user believing the quantity changed.
+      const ok = await updateStockItem(updated);
+      if (!ok) return; // domain already explained the failure; keep the form open
+      const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
+      const absDelta = Math.abs(delta);
+      toast.success(
+        delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
+        { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
+      );
+      setEditStockItem(null);
+    } finally {
+      setSavingStock(false);
+    }
   };
 
-  const deleteStockItemFn = () => {
-    if (!editStockItem) return;
-    deleteStockItemCtx(editStockItem.id);
-    toast.success("Inventory removed", { description: `${editStockItem.productName} removed from warehouse.` });
-    setEditStockItem(null);
+  const deleteStockItemFn = async () => {
+    if (!editStockItem || savingStock) return;
+    setSavingStock(true);
+    try {
+      const ok = await deleteStockItemCtx(editStockItem.id);
+      if (!ok) return;
+      toast.success("Inventory removed", { description: `${editStockItem.productName} removed from warehouse.` });
+      setEditStockItem(null);
+    } finally {
+      setSavingStock(false);
+    }
   };
 
   const warehouseInventory = useMemo(() => selectedWarehouse
