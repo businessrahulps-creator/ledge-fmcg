@@ -51,8 +51,8 @@ export default function SalespersonDetail() {
     );
   }
 
-  const sc = buildSalespersonScorecard(personOrders);
-  const health = getPerformanceHealth(personOrders);
+  const sc = buildSalespersonScorecard(personOrders, (o) => payStatus(o.id));
+  const health = getPerformanceHealth(personOrders, (o) => payStatus(o.id));
   const hc = performanceHealthConfig[health];
   const insight = getPerformanceInsight(health, sc);
   const trend30 = sc.ordersPrev30d > 0 ? ((sc.orders30d - sc.ordersPrev30d) / sc.ordersPrev30d) * 100 : sc.orders30d > 0 ? 100 : 0;
@@ -85,10 +85,13 @@ export default function SalespersonDetail() {
               downloadPdf(
                 pdfFilename("salesperson-statement", person.name.replace(/\s+/g, "-")),
                 SalespersonStatementPdf({
-                  companyName: "",
+                  companyName: api.companyInfo.name,
+                  companyAddress: api.companyInfo.address,
+                  gstin: api.companyInfo.gstin,
+                  logoUrl: api.companyInfo.logoUrl,
                   salesperson: { name: person.name, phone: person.phone, email: person.email, region: person.region },
                   scorecard: sc,
-                  orders: personOrders.map(o => ({ orderNumber: o.orderNumber, date: o.date, distributorName: o.distributorName, total: o.total, paymentStatus: payStatus(o.id), schemeSavings: o.schemeSavings || 0 })),
+                  orders: personOrders.filter(o => !o.cancelledAt).map(o => ({ orderNumber: o.orderNumber, date: o.date, distributorName: o.distributorName, total: o.total, paymentStatus: payStatus(o.id), schemeSavings: o.schemeSavings || 0 })),
                   health,
                 })
               );
