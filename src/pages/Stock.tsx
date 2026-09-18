@@ -968,7 +968,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
               <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveStockItemFn(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void saveStockItemFn(); }}>
             {editStockItem && (
               <div className="space-y-3 md:space-y-4">
                 <div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
@@ -1074,13 +1074,13 @@ export default function Stock() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={() => { setConfirmDeleteStockItem(false); deleteStockItemFn(); }}>Remove</Button>
+                    <Button variant="destructive" disabled={savingStock} onClick={() => { setConfirmDeleteStockItem(false); void deleteStockItemFn(); }}>{savingStock ? "Removing…" : "Remove"}</Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
               <div className="grid w-full grid-cols-2 gap-2">
-                <Button type="button" variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
-                <Button type="submit" className="w-full">Save Changes</Button>
+                <Button type="button" variant="outline" disabled={savingStock} onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
+                <Button type="submit" disabled={savingStock} className="w-full">{savingStock ? "Saving…" : "Save Changes"}</Button>
               </div>
             </DialogFooter>
             </form>
@@ -1138,7 +1138,7 @@ export default function Stock() {
             })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock} disabled={!addStockProductId}>Add Stock</Button>
+              <Button onClick={handleAddStock} disabled={!addStockProductId || savingStock}>{savingStock ? "Saving…" : "Add Stock"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
