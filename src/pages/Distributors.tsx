@@ -111,11 +111,23 @@ export default function Distributors() {
   };
 
   const [saving, setSaving] = useState(false);
+  /** Set once the person has been told a dealer with this name already exists. */
+  const duplicateAckRef = useRef("");
 
   const save = async () => {
     if (saving) return;
     if (!editItem?.name.trim()) {
       toast.error("Name required", { description: "Please enter a dealer name." });
+      return;
+    }
+    // Two dealers with the same name are easy to mix up later — say so once.
+    const typedName = editItem.name.trim().toLowerCase();
+    const clash = items.some(d => d.id !== editItem.id && d.name.trim().toLowerCase() === typedName);
+    if (clash && duplicateAckRef.current !== typedName) {
+      duplicateAckRef.current = typedName;
+      toast.warning("A dealer with this name already exists", {
+        description: "Check you're not adding the same dealer twice. Save again to keep this name.",
+      });
       return;
     }
     if (!editItem?.contact.trim()) {
