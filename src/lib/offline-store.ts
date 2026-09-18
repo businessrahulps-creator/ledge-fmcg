@@ -1,4 +1,5 @@
 import { get, set, del, keys } from "idb-keyval";
+import { todayKey } from "@/utils/dateKey";
 
 // ============================================================================
 // Offline mode is PAUSED. Flip this to `true` to re-enable cache + sync queue.
@@ -246,7 +247,7 @@ export async function replaySingleMutation(
       // Stock deduction — wrapped in try-catch so partial failure doesn't lose the order
       if (p.godownId && (p.deliveryStatus === "dispatched" || p.deliveryStatus === "delivered")) {
         try {
-          const today = new Date().toISOString().split("T")[0];
+          const today = todayKey();
           // Check if deductions already exist for this order (idempotency for partial replays)
           const { data: existingDeductions } = await supabase
             .from("stock_deductions").select("product_id")

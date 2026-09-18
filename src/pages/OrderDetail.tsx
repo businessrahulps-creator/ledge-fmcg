@@ -57,6 +57,7 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
+import { todayKey } from "@/utils/dateKey";
 
 interface EditLineState {
   id: string;
@@ -129,7 +130,7 @@ export default function OrderDetail() {
     if (order.id !== prevOrderId.current) {
       prevOrderId.current = order.id;
       setDispatchGodown(order.godownId || "");
-      setDispatchDate(order.dispatchDate || new Date().toISOString().slice(0, 10));
+      setDispatchDate(order.dispatchDate || todayKey());
       setDispatchVehicle(order.vehicle || "");
       setDispatchDriver(order.driverName || "");
     }

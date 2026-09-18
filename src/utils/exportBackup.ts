@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { buildWorksheet } from "./exportXlsx";
 import { fetchAllChunked } from "@/context/data-utils";
+import { todayKey } from "@/utils/dateKey";
 
 const s = (v: unknown) => String(v ?? "");
 const n = (v: unknown) => String(v ?? 0);
@@ -88,7 +89,7 @@ export async function exportFullBackup() {
     return;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey();
   XLSX.writeFile(wb, `ledge_backup_${today}.xlsx`);
 
   toast.success("Backup downloaded", {

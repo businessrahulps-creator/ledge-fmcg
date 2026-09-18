@@ -1,6 +1,7 @@
 import React from "react";
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
+import { todayKey } from "@/utils/dateKey";
 
 /**
  * Money formatter for PDFs. The bundled PDF font (Noto Sans) carries the rupee
@@ -40,6 +41,6 @@ export async function downloadPdf(filename: string, document: React.ReactElement
 }
 
 export function pdfFilename(type: string, suffix?: string): string {
-  const date = new Date().toISOString().slice(0, 10);
+  const date = todayKey();
   return suffix ? `${type}_${suffix}_${date}.pdf` : `${type}_${date}.pdf`;
 }

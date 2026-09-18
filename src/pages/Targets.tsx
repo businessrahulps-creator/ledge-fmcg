@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 import { EntityCard } from "@/components/ui/entity-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
+import { toDateKey, todayKey } from "@/utils/dateKey";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
@@ -28,7 +29,7 @@ function getMonthOptions() {
   const now = new Date();
   for (let i = -2; i <= 3; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const value = d.toISOString().split("T")[0];
+    const value = toDateKey(d);
     const label = d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
     opts.push({ value, label });
   }
@@ -40,7 +41,7 @@ function getDailyOptions() {
   const now = new Date();
   for (let i = -7; i <= 7; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const value = d.toISOString().split("T")[0];
+    const value = toDateKey(d);
     const isToday = i === 0;
     const label = isToday
       ? `Today (${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
@@ -65,7 +66,7 @@ function getWeeklyOptions() {
     monday.setDate(monday.getDate() + i * 7);
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
-    const value = monday.toISOString().split("T")[0];
+    const value = toDateKey(monday);
     const isCurrent = i === 0;
     const label = isCurrent
       ? `This Week (${monday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
@@ -81,16 +82,16 @@ function getPeriodEnd(periodType: PeriodType, periodStart: string) {
   if (periodType === "weekly") {
     const end = new Date(d);
     end.setDate(end.getDate() + 6);
-    return end.toISOString().split("T")[0];
+    return toDateKey(end);
   }
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split("T")[0];
+  return toDateKey(new Date(d.getFullYear(), d.getMonth() + 1, 0));
 }
 
 function getDefaultPeriodStart(periodType: PeriodType) {
   const now = new Date();
-  if (periodType === "daily") return now.toISOString().split("T")[0];
-  if (periodType === "weekly") return getMonday(now).toISOString().split("T")[0];
-  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+  if (periodType === "daily") return todayKey();
+  if (periodType === "weekly") return toDateKey(getMonday(now));
+  return toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
 }
 
 type StatusKey = "exceeded" | "on_track" | "behind" | "needs_attention" | "no_target";

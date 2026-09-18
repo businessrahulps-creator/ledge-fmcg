@@ -7,6 +7,7 @@
 
 import type { Scheme } from "@/data/mock-data";
 import { formatCurrency } from "@/data/mock-data";
+import { todayKey } from "@/utils/dateKey";
 
 export interface PricingLineInput {
   productId: string;
@@ -44,7 +45,7 @@ export function computeOrderPricing(
   dealerId: string,
   referenceDate?: string,
 ): OrderPricing {
-  const today = referenceDate || new Date().toISOString().split("T")[0];
+  const today = referenceDate || todayKey();
   const validLines = lines.filter(l => l.productId && l.quantity > 0);
   const grossTotal = validLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
 

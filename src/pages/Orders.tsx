@@ -36,6 +36,7 @@ import { InsightLine } from "@/components/ui/insight-line";
 import { SignalCard } from "@/components/ui/signal-card";
 import { AlertTriangle } from "lucide-react";
 import { useReceivables } from "@/hooks/useReceivables";
+import { todayKey } from "@/utils/dateKey";
 
 /** Presentation only: "part paid" -> "Part paid" for PDF exports. */
 const titleCase = (v: string) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : v);
@@ -164,7 +165,7 @@ export default function Orders() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
     const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = todayKey();
     const net = (o: typeof orders[number]) => (o.total ?? 0) - (o.schemeSavings || 0);
 
     let mtdCount = 0, mtdRevenue = 0, prevCount = 0, prevRevenue = 0;

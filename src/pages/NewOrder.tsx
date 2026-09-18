@@ -32,6 +32,7 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import confetti from "canvas-confetti";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
 import {
+import { todayKey, addDaysToKey } from "@/utils/dateKey";
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -89,7 +90,7 @@ export default function NewOrder() {
   const productsSectionRef = useRef<HTMLElement>(null);
 
   // Controlled form fields
-  const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0]);
+  const [orderDate, setOrderDate] = useState(todayKey());
   const [selectedDealer, setSelectedDealer] = useState("");
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -448,7 +449,7 @@ export default function NewOrder() {
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]} max={new Date().toISOString().split("T")[0]} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={addDaysToKey(todayKey(), -365)} max={todayKey()} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
                 </div>
                 <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
