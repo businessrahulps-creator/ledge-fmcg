@@ -26,6 +26,7 @@ import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
+import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
 import {
   Select,
@@ -252,7 +253,7 @@ export default function OrderDetail() {
   const saveOrder = () => {
     if (!order) return;
     const dealer = distributors.find(d => d.id === editDealerId);
-    if (!dealer || dealer.creditLimit <= 0) { executeSaveOrder(); return; }
+    if (!dealer || creditCeiling(dealer) === null) { executeSaveOrder(); return; }
     // No rate set doesn't mean tax-free — assume 18% so exposure is never understated.
     const gstRateFor = (productId: string) => {
       const rate = products.find(p => p.id === productId)?.gstRate;
@@ -265,11 +266,9 @@ export default function OrderDetail() {
       : billEquivalentTotal(order.lines, gstRateFor, order.schemeSavings || 0);
     const newBillEquivalent = billEquivalentTotal(editLines, gstRateFor, editPricing.totalSchemeSavings);
     const projected = projectedExposure(dealer.outstandingAmount, newBillEquivalent, alreadyCounted);
-    if (projected > dealer.creditLimit) {
+    if (exceedsCredit(dealer, projected)) {
       if (canOverrideCredit) { setCreditOverrideOpen(true); return; }
-      toast.error("Credit limit crossed", {
-        description: `${dealer.name} would owe more than their limit. Ask someone who can approve it.`,
-      });
+      toast.error("Credit limit crossed", { description: creditBlockMessage(dealer, dealer.name) });
       return;
     }
     executeSaveOrder();
