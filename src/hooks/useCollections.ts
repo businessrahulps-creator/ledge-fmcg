@@ -42,18 +42,48 @@ async function fetchAllPages(build: () => any): Promise<{ data: any[]; error: an
   return { data: rows, error: null };
 }
 
-/**
- * Every receipt in the workspace, plus how much has landed against each bill
- * and each order. One source for the money figures shown across Billing.
- */
-export function useCollections(companyId?: string | null) {
-  const [receipts, setReceipts] = useState<ReceiptRow[]>([]);
-  const [creditNotes, setCreditNotes] = useState<CreditNoteRow[]>([]);
-  const [loading, setLoading] = useState(true);
+type CollectionsSnapshot = {
+  receipts: ReceiptRow[];
+  creditNotes: CreditNoteRow[];
+  loading: boolean;
+};
 
-  const load = useCallback(async () => {
-    if (!companyId) { setReceipts([]); setCreditNotes([]); setLoading(false); return; }
-    setLoading(true);
+const EMPTY: CollectionsSnapshot = { receipts: [], creditNotes: [], loading: false };
+
+/**
+ * One shared load per workspace. Several parts of a page read collections at
+ * once (Insights alone mounts it four times); without this they would each run
+ * the same two paginated queries.
+ */
+type Store = {
+  snapshot: CollectionsSnapshot;
+  listeners: Set<() => void>;
+  inflight: Promise<void> | null;
+  loaded: boolean;
+};
+
+const stores = new Map<string, Store>();
+
+function getStore(companyId: string): Store {
+  let s = stores.get(companyId);
+  if (!s) {
+    s = { snapshot: { receipts: [], creditNotes: [], loading: true }, listeners: new Set(), inflight: null, loaded: false };
+    stores.set(companyId, s);
+  }
+  return s;
+}
+
+function publish(store: Store, next: Partial<CollectionsSnapshot>) {
+  store.snapshot = { ...store.snapshot, ...next };
+  store.listeners.forEach((l) => l());
+}
+
+async function loadCollections(companyId: string, force: boolean): Promise<void> {
+  const store = getStore(companyId);
+  if (store.inflight) return store.inflight;
+  if (store.loaded && !force) return;
+  publish(store, { loading: true });
+  const run = (async () => {
     // Paged: past 1,000 receipts a plain select silently stops returning rows,
     // which would quietly hide money from the collections figures.
     const [paymentsRes, notesRes] = await Promise.all([
@@ -70,11 +100,11 @@ export function useCollections(companyId?: string | null) {
           .eq("company_id", companyId)
           .order("note_date", { ascending: false })),
     ]);
-    setLoading(false);
+    const next: Partial<CollectionsSnapshot> = { loading: false };
     if (paymentsRes.error) {
       handleSupabaseError(paymentsRes.error, { source: "collections:list", title: "Couldn't load payments" });
     } else {
-      setReceipts((paymentsRes.data || []).map(r => ({
+      next.receipts = (paymentsRes.data || []).map(r => ({
         id: r.id,
         amount: Number(r.amount || 0),
         mode: r.mode as string,
@@ -86,12 +116,12 @@ export function useCollections(companyId?: string | null) {
         invoiceId: r.invoice_id,
         orderId: r.order_id,
         distributorId: r.distributor_id,
-      })));
+      }));
     }
     if (notesRes.error) {
       handleSupabaseError(notesRes.error, { source: "collections:credit-notes", title: "Couldn't load credit notes" });
     } else {
-      setCreditNotes((notesRes.data || []).map(n => ({
+      next.creditNotes = (notesRes.data || []).map(n => ({
         id: n.id,
         number: n.credit_note_number,
         noteDate: n.note_date,
@@ -100,11 +130,41 @@ export function useCollections(companyId?: string | null) {
         invoiceId: n.invoice_id,
         orderId: n.order_id,
         distributorId: n.distributor_id,
-      })));
+      }));
     }
+    store.loaded = true;
+    publish(store, next);
+  })();
+  store.inflight = run.finally(() => { store.inflight = null; });
+  return store.inflight;
+}
+
+/**
+ * Every receipt in the workspace, plus how much has landed against each bill
+ * and each order. One source for the money figures shown across Billing.
+ */
+export function useCollections(companyId?: string | null) {
+  const [snapshot, setSnapshot] = useState<CollectionsSnapshot>(
+    () => (companyId ? getStore(companyId).snapshot : EMPTY),
+  );
+
+  useEffect(() => {
+    if (!companyId) { setSnapshot(EMPTY); return; }
+    const store = getStore(companyId);
+    const sync = () => setSnapshot(store.snapshot);
+    store.listeners.add(sync);
+    sync();
+    void loadCollections(companyId, false);
+    return () => { store.listeners.delete(sync); };
   }, [companyId]);
 
-  useEffect(() => { load(); }, [load]);
+  const { receipts, creditNotes, loading } = snapshot;
+
+  const load = useCallback(async () => {
+    if (!companyId) return;
+    await loadCollections(companyId, true);
+  }, [companyId]);
+
 
   const receivedByInvoice = useMemo(() => {
     const map = new Map<string, number>();
