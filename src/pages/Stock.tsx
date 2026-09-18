@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useCan } from "@/hooks/useCan";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -107,6 +108,9 @@ export default function Stock() {
   const [adjustDelta, setAdjustDelta] = useState<number | null>(null);
 
   const [addStockOpen, setAddStockOpen] = useState(false);
+
+  // Any open edit form holds unsaved input — confirm before leaving the page.
+  useUnsavedChangesGuard(!!editProduct || !!editWarehouse || !!editStockItem || addStockOpen);
   const [addStockProductId, setAddStockProductId] = useState("");
   const [addStockQty, setAddStockQty] = useState(0);
 
