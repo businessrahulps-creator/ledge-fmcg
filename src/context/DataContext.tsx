@@ -104,7 +104,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const dealers = useDealersDomain(deps);
   const salespersons = useSalespersonsDomain(deps);
   const catalog = useCatalogDomain(deps);
-  const stock = useStockDomain(deps, () => catalog.products);
+  const stock = useStockDomain(deps, () => catalog.rawProducts);
   const targets = useTargetsDomain(deps);
 
   const ordersDeps = useMemo(() => ({
