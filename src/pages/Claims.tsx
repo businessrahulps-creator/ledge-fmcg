@@ -351,6 +351,15 @@ function NewClaimDialog({
             </DialogHeader>
 
             <div className="space-y-4">
+              {returnedError && (
+                <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Couldn't load what has already come back on this bill. Recording a return now could credit the
+                    same goods twice. Close this and try again.
+                  </span>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label className="text-xs">Why is it coming back? (optional)</Label>
                 <Textarea
@@ -447,7 +456,7 @@ function NewClaimDialog({
               <Button variant="outline" size="sm" onClick={() => setStep(1)} disabled={submitting}>
                 Back
               </Button>
-              <Button size="sm" onClick={handleSubmit} disabled={submitting}>
+              <Button size="sm" onClick={handleSubmit} disabled={submitting || !alreadyReturned}>
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
                 {submitting ? "Saving…" : "Record return"}
               </Button>
