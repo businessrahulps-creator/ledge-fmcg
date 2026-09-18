@@ -173,7 +173,7 @@ export default function DealerDetail() {
                     outstandingAmount: dealer.outstandingAmount,
                   },
                   scorecard: sc,
-                  orders: dealerOrders.map(o => ({
+                  orders: dealerOrders.filter(o => !o.cancelledAt).map(o => ({
                     orderNumber: o.orderNumber,
                     date: o.date,
                     total: o.total,
