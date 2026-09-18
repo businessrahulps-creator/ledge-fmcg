@@ -56,6 +56,9 @@ const statusColors: Record<string, string> = {
   delivered: "border-success/40 bg-success/10 text-success",
 };
 
+/** Half-written order, kept for this browser session only. */
+const ORDER_DRAFT_KEY = "ledge:newOrderDraft";
+
 export default function NewOrder() {
   const navigate = useNavigate();
   const api = useApi();
@@ -103,6 +106,47 @@ export default function NewOrder() {
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
   useUnsavedChangesGuard(isDirty && !isSaving);
+
+  // Leaving this screen — with Back or anything else — must not throw the order
+  // away. The half-written order is kept for this session and offered back.
+  const [draftRestored, setDraftRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(ORDER_DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as Partial<{
+        orderDate: string; selectedDealer: string; selectedSalesperson: string;
+        selectedGodown: string; remarks: string; lines: OrderLineState[];
+      }>;
+      if (!d || !Array.isArray(d.lines)) return;
+      if (d.orderDate) setOrderDate(d.orderDate);
+      if (d.selectedDealer) setSelectedDealer(d.selectedDealer);
+      if (d.selectedSalesperson) setSelectedSalesperson(d.selectedSalesperson);
+      if (d.selectedGodown) setSelectedGodown(d.selectedGodown);
+      if (d.remarks) setRemarks(d.remarks);
+      if (d.lines.length > 0) setLines(d.lines);
+      setDraftRestored(true);
+    } catch { /* a bad draft is simply ignored */ }
+    // Restores once, on open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (draftRestored) toast("Picked up where you left off", { duration: 3000 });
+  }, [draftRestored]);
+
+  useEffect(() => {
+    if (isSaving) return;
+    try {
+      if (isDirty) {
+        sessionStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify({
+          orderDate, selectedDealer, selectedSalesperson, selectedGodown, remarks, lines,
+        }));
+      } else {
+        sessionStorage.removeItem(ORDER_DRAFT_KEY);
+      }
+    } catch { /* storage full or blocked — the form still works */ }
+  }, [isDirty, isSaving, orderDate, selectedDealer, selectedSalesperson, selectedGodown, remarks, lines]);
 
 
   // Auto-select godown if only one exists
@@ -341,6 +385,7 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
+      try { sessionStorage.removeItem(ORDER_DRAFT_KEY); } catch { /* ignore */ }
       // Advance taken at the counter — recorded against the order, never blocking the booking.
       const advance = Number(advanceAmount || 0);
       if (advance > 0 && result.orderId) {
