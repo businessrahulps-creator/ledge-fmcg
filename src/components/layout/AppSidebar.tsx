@@ -60,11 +60,11 @@ const catalogNav: NavItem[] = [
 const relationshipsNav: NavItem[] = [
   { title: "Dealers", url: "/distributors", icon: UserRound },
   { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-  { title: "Company", url: "/company", icon: Landmark },
+  { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
 ];
 
 const footerNav: NavItem[] = [
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
 ];
 
 export function AppSidebar() {
