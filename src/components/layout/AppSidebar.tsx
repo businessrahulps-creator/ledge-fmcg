@@ -185,7 +185,9 @@ export function AppSidebar() {
         <SidebarMenu>{items.map(renderItem)}</SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+    );
+  };
+
 
   // Track scroll edges so we can render fade affordances ("there's more here").
   const { ref: scrollRef, showTopFade, showBottomFade } = useScrollEdges<HTMLDivElement>([collapsed, userRole]);
