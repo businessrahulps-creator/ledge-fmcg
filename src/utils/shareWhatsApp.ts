@@ -17,7 +17,7 @@ export function buildOrderSummary(order: Order, companyName: string): string {
     .join("\n");
 
   return [
-    `📄 *Invoice ${order.orderNumber}*`,
+    `📄 *Order confirmation ${order.orderNumber}*`,
     companyName ? `From: ${companyName}` : "",
     "",
     `👤 Dealer: ${order.distributorName}`,
