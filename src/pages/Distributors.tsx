@@ -390,8 +390,30 @@ export default function Distributors() {
                       <Input type="email" value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="dealer@example.com" className="h-10 rounded-lg" />
                     </div>
                     <div className="space-y-1.5 md:space-y-2">
+                      <Label className="text-xs md:text-sm">Credit</Label>
+                      <Select
+                        value={editItem.creditMode ?? "unlimited"}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditMode: v as "unlimited" | "limited" | "cash_only" })}
+                      >
+                        <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unlimited">No limit</SelectItem>
+                          <SelectItem value="limited">Up to a limit</SelectItem>
+                          <SelectItem value="cash_only">No credit (cash only)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-xs md:text-sm">Credit Limit</Label>
-                      <NumberInput currency allowDecimal allowEmpty={false} min={0} value={editItem.creditLimit} onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })} placeholder="0 = Unlimited" className="h-10 rounded-lg" />
+                      <NumberInput
+                        currency allowDecimal allowEmpty={false} min={0}
+                        disabled={(editItem.creditMode ?? "unlimited") !== "limited"}
+                        value={editItem.creditLimit}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })}
+                        placeholder="e.g. 50,000" className="h-10 rounded-lg"
+                      />
                     </div>
                   </div>
                 </div>
