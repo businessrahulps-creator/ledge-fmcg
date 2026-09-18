@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
