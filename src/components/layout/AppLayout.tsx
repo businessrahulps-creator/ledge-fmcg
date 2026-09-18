@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
 import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
+import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
 import { CommandPalette } from "@/components/CommandPalette";
