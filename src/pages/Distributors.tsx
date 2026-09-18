@@ -130,6 +130,13 @@ export default function Distributors() {
       toast.error("Invalid GSTIN", { description: "GSTIN must be 15 characters in the standard format (e.g. 27AAAAA0000A1Z5)." });
       return;
     }
+    // The first two digits of a GSTIN are the state — a mismatch means the wrong tax on every bill.
+    if (editItem.gstin.trim() && editItem.stateCode.trim() && editItem.gstin.trim().slice(0, 2) !== editItem.stateCode.trim()) {
+      toast.error("State doesn't match the GSTIN", {
+        description: `This GSTIN starts with ${editItem.gstin.trim().slice(0, 2)}, but the state code says ${editItem.stateCode.trim()}. Fix one of them before saving.`,
+      });
+      return;
+    }
     if (!isValidPan(editItem.pan)) {
       toast.error("Invalid PAN", { description: "PAN must be 10 characters (e.g. AAAAA0000A)." });
       return;
