@@ -448,10 +448,10 @@ export default function Stock() {
 
         <KpiStrip
           cells={[
-            { label: "Total SKUs", value: formatNumber(products.length), zero: products.length === 0 },
-            ...(!canManageStock ? [] : [{ label: "Stock value", value: formatCurrency(stockSummary.totalValue), zero: stockSummary.totalValue === 0 }]),
-            { label: "Low stock", value: formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: stockSummary.lowCount + stockSummary.criticalCount === 0 },
-            { label: "Warehouses", value: formatNumber(activeLocations.length), zero: activeLocations.length === 0 },
+            { label: "Total SKUs", value: isLoading ? "—" : formatNumber(products.length), zero: isLoading || products.length === 0 },
+            ...(!canManageStock ? [] : [{ label: "Stock value", value: isLoading ? "—" : formatCurrency(stockSummary.totalValue), zero: isLoading || stockSummary.totalValue === 0 }]),
+            { label: "Low stock", value: isLoading ? "—" : formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: isLoading || stockSummary.lowCount + stockSummary.criticalCount === 0 },
+            { label: "Warehouses", value: isLoading ? "—" : formatNumber(activeLocations.length), zero: isLoading || activeLocations.length === 0 },
           ]}
         />
 

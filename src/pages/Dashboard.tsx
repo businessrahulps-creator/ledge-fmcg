@@ -19,7 +19,7 @@ import { ExplainButton } from "@/components/ui/explain-button";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { trackDashboardVisit } from "@/hooks/use-install-prompt";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked } from "@/lib/revenue";
+import { deliveredRevenue, bookedRevenue, netTotal, isDelivered, isBooked, isCancelled } from "@/lib/revenue";
 import { agingFromReceivables } from "@/lib/receivables";
 import { useReceivables } from "@/hooks/useReceivables";
 import { sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
@@ -130,6 +130,7 @@ export default function Dashboard() {
     let prevMonthRevenue = 0, prevMonthOrderCount = 0, prevMonthDeliveredCount = 0;
 
     for (const o of orders) {
+      if (isCancelled(o)) continue; // cancelled orders never count anywhere
       const od = asDate(o.date);
       const delivered = isDelivered(o);
       const dd = delivered ? asDate(o.deliveredAt || undefined) : null;
