@@ -15,6 +15,8 @@ export interface Distributor {
   totalOrders: number;
   totalValue: number;
   creditLimit: number;
+  /** unlimited | limited | cash_only — 0 no longer means "no ceiling". */
+  creditMode?: 'unlimited' | 'limited' | 'cash_only';
   outstandingAmount: number;
 }
 

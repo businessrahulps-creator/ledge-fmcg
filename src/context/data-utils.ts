@@ -61,7 +61,8 @@ export function mapDistributor(d: any): Distributor {
     bankName: d.bank_name || "", bankAccountName: d.bank_account_name || "",
     bankAccount: d.bank_account || "", bankIfsc: d.bank_ifsc || "",
     totalOrders: d.total_orders ?? 0, totalValue: Number(d.total_value ?? 0),
-    creditLimit: Number(d.credit_limit ?? 0), outstandingAmount: Number(d.outstanding_amount ?? 0),
+    creditLimit: Number(d.credit_limit ?? 0), creditMode: (d.credit_mode ?? 'unlimited'),
+    outstandingAmount: Number(d.outstanding_amount ?? 0),
   };
 }
 
