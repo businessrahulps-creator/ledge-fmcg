@@ -409,7 +409,7 @@ export default function NewOrder() {
         return;
       }
       toast.error("Credit limit exceeded", {
-        description: `${selectedDealerObj?.name}'s outstanding (${formatCurrency(projectedOutstanding)}) would exceed their credit limit (${formatCurrency(creditLimit)}). Ask someone with override permission.`,
+        description: creditBlockMessage(selectedDealerObj, selectedDealerObj?.name || "This dealer"),
       });
       return;
     }
@@ -496,10 +496,10 @@ export default function NewOrder() {
               <SignalCard
                 tier="destructive"
                 icon={AlertTriangle}
-                label="CREDIT LIMIT BREACH"
-                caption={`${selectedDealerObj?.name} will exceed credit limit if this order ships unpaid`}
-                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Limit ${formatCurrency(creditLimit)}${canOverrideCredit ? " — you can override" : ""}`}
-                value={formatCurrency(projectedOutstanding - creditLimit)}
+                label={creditLimit === 0 ? "NO CREDIT ALLOWED" : "CREDIT LIMIT BREACH"}
+                caption={`${selectedDealerObj?.name} will exceed what they may owe if this order ships unpaid`}
+                subCaption={`Projected ${formatCurrency(projectedOutstanding)} / Allowed ${formatCurrency(creditLimit ?? 0)}${canOverrideCredit ? " — you can override" : ""}`}
+                value={formatCurrency(projectedOutstanding - (creditLimit ?? 0))}
                 valueSuffix="OVER LIMIT"
               />
             )}
@@ -798,7 +798,7 @@ export default function NewOrder() {
         <AlertDialogHeader>
           <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
           <AlertDialogDescription>
-            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, exceeding their credit limit of {formatCurrency(creditLimit)}. Do you want to proceed?
+            This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, which is past the {formatCurrency(creditLimit ?? 0)} they may owe. Do you want to proceed?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
