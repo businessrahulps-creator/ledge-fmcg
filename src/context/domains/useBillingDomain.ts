@@ -98,6 +98,32 @@ function mapClaimRow(c: ClaimRow): Claim {
 interface BillingDeps extends DomainDeps {
   getOrders: () => Order[];
   safeRefetchStockItems: () => Promise<void>;
+  /** Dealer money (outstanding) is recomputed server-side after every receipt. */
+  safeRefetchDealers: () => Promise<void>;
+  safeRefetchOrders: () => Promise<void>;
+}
+
+/** One receipt against a bill or an order. Receipts are never edited — only cancelled. */
+export interface PaymentRecord {
+  id: string;
+  amount: number;
+  mode: string;
+  paid_on: string;
+  reference: string;
+  note: string;
+  status: string;
+  void_reason: string;
+}
+
+export interface RecordPaymentInput {
+  invoiceId?: string | null;
+  orderId?: string | null;
+  amount: number;
+  mode: "cash" | "bank_transfer" | "cheque" | "upi";
+  paidOn: string;
+  reference?: string;
+  note?: string;
+  idempotencyKey: string;
 }
 
 export function useBillingDomain(deps: BillingDeps) {
@@ -190,9 +216,76 @@ export function useBillingDomain(deps: BillingDeps) {
     }
   }, [safeRefetchClaims]);
 
+  /** Receipts against one bill or order, newest first. */
+  const listPayments = useCallback(async (
+    anchor: { invoiceId?: string | null; orderId?: string | null },
+  ): Promise<PaymentRecord[]> => {
+    const column = anchor.invoiceId ? "invoice_id" : "order_id";
+    const id = anchor.invoiceId || anchor.orderId || "";
+    if (!id) return [];
+    const { data, error } = await supabase
+      .from("invoice_payments")
+      .select("id, amount, mode, paid_on, reference, note, status, void_reason")
+      .eq(column, id)
+      .order("paid_on", { ascending: false });
+    if (error) {
+      handleSupabaseError(error, { source: "payments:list", title: "Couldn't load payments", context: { id } });
+      return [];
+    }
+    return (data || []) as PaymentRecord[];
+  }, []);
+
+  const refreshMoney = useCallback(async () => {
+    await Promise.all([safeRefetchInvoices(), deps.safeRefetchDealers(), deps.safeRefetchOrders()]);
+  }, [safeRefetchInvoices, deps.safeRefetchDealers, deps.safeRefetchOrders]);
+
+  /** Record money received against a bill, or an advance against an order. */
+  const recordPayment = useCallback(async (input: RecordPaymentInput): Promise<boolean> => {
+    if (!navigator.onLine) {
+      toast.error("Cannot record a payment offline", { description: "Please reconnect and try again." });
+      return false;
+    }
+    const shared = {
+      p_amount: input.amount,
+      p_mode: input.mode,
+      p_paid_on: input.paidOn,
+      p_reference: sanitizeInput(input.reference || ""),
+      p_note: sanitizeInput(input.note || ""),
+      p_idempotency_key: input.idempotencyKey,
+    };
+    const { error } = input.invoiceId
+      ? await supabase.rpc("record_invoice_payment_atomic", { p_invoice_id: input.invoiceId, ...shared })
+      : await supabase.rpc("record_order_payment_atomic", { p_order_id: input.orderId as string, ...shared });
+    if (error) {
+      handleSupabaseError(error, {
+        source: input.invoiceId ? "rpc:record_invoice_payment_atomic" : "rpc:record_order_payment_atomic",
+        title: "Couldn't record this payment",
+        context: { invoiceId: input.invoiceId, orderId: input.orderId },
+      });
+      return false;
+    }
+    await refreshMoney();
+    return true;
+  }, [refreshMoney]);
+
+  /** Cancel a receipt. The record stays, the dealer's balance goes back up. */
+  const voidPayment = useCallback(async (paymentId: string, reason: string): Promise<boolean> => {
+    const { error } = await supabase.rpc("void_invoice_payment_atomic", {
+      p_payment_id: paymentId,
+      p_reason: sanitizeInput(reason),
+    });
+    if (error) {
+      handleSupabaseError(error, { source: "rpc:void_invoice_payment_atomic", title: "Couldn't cancel this payment", context: { paymentId } });
+      return false;
+    }
+    await refreshMoney();
+    return true;
+  }, [refreshMoney]);
+
   return {
     invoices, setInvoices, claims, setClaims,
     recordReturn, resolveClaim,
+    listPayments, recordPayment, voidPayment,
     safeRefetchInvoices, safeRefetchClaims, refetchInvoiceById,
   };
 }

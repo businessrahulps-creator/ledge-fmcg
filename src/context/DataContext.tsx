@@ -118,7 +118,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ...deps,
     getOrders: () => orders.orders,
     safeRefetchStockItems: stock.safeRefetchStockItems,
-  }), [deps, orders.orders, stock.safeRefetchStockItems]);
+    safeRefetchDealers: dealers.safeRefetch,
+    safeRefetchOrders: async () => { await orders.safeRefetch(); },
+  }), [deps, orders.orders, stock.safeRefetchStockItems, dealers.safeRefetch, orders.safeRefetch]);
 
   const billing = useBillingDomain(billingDeps);
 
@@ -558,6 +560,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     addTarget: targets.addTarget, updateTarget: targets.updateTarget, deleteTarget: targets.deleteTarget,
     recordReturn: billing.recordReturn,
     resolveClaim: billing.resolveClaim,
+    listPayments: billing.listPayments,
+    recordPayment: billing.recordPayment,
+    voidPayment: billing.voidPayment,
     nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber,
   }), [
     orders.orders, billing.invoices, billing.claims,
@@ -570,6 +575,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     targets.addSecondarySale, targets.deleteSecondarySale,
     targets.addTarget, targets.updateTarget, targets.deleteTarget,
     billing.recordReturn, billing.resolveClaim,
+    billing.listPayments, billing.recordPayment, billing.voidPayment,
     orders.nextOrderNumber, orders.previewOrderNumber,
   ]);
 

@@ -11,10 +11,18 @@ export type CapabilityKey = Database["public"]["Enums"]["capability_key"];
  * Returns false while loading or when unauthenticated.
  */
 export function useCan(capability: CapabilityKey): boolean {
+  return useCanState(capability).allowed;
+}
+
+/**
+ * Same check, plus whether the answer has actually arrived. Route gates use
+ * `ready` so nobody sees "no access" before their role is known.
+ */
+export function useCanState(capability: CapabilityKey): { allowed: boolean; ready: boolean } {
   const { user } = useAuth();
   const userId = user?.id ?? null;
 
-  const { data } = useQuery({
+  const { data, isFetched, isError } = useQuery({
     queryKey: ["capability", userId, capability],
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,

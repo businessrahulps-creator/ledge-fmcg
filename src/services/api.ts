@@ -85,5 +85,10 @@ export function useApi() {
     invoices: {
       list: () => data.invoices,
     },
+    payments: {
+      list: data.listPayments,
+      record: data.recordPayment,
+      void: data.voidPayment,
+    },
   };
 }

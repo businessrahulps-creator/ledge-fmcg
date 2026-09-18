@@ -557,6 +557,7 @@ export type Database = {
           contact: string
           created_at: string
           credit_limit: number
+          credit_mode: string
           email: string
           gstin: string
           id: string
@@ -579,6 +580,7 @@ export type Database = {
           contact?: string
           created_at?: string
           credit_limit?: number
+          credit_mode?: string
           email?: string
           gstin?: string
           id?: string
@@ -601,6 +603,7 @@ export type Database = {
           contact?: string
           created_at?: string
           credit_limit?: number
+          credit_mode?: string
           email?: string
           gstin?: string
           id?: string
@@ -1581,6 +1584,7 @@ export type Database = {
           free_qty: number
           id: string
           is_active: boolean
+          is_combinable: boolean
           min_order_value: number
           min_qty: number
           name: string
@@ -1601,6 +1605,7 @@ export type Database = {
           free_qty?: number
           id?: string
           is_active?: boolean
+          is_combinable?: boolean
           min_order_value?: number
           min_qty?: number
           name: string
@@ -1621,6 +1626,7 @@ export type Database = {
           free_qty?: number
           id?: string
           is_active?: boolean
+          is_combinable?: boolean
           min_order_value?: number
           min_qty?: number
           name?: string
@@ -2303,6 +2309,7 @@ export type Database = {
         Returns: Json
       }
       aging_bucket_rank: { Args: { b: string }; Returns: number }
+      amount_in_words_inr: { Args: { p_amount: number }; Returns: string }
       book_order_atomic: {
         Args: {
           p_applied_schemes?: Json
@@ -2491,10 +2498,12 @@ export type Database = {
         Args: { p_company_name: string; p_full_name: string }
         Returns: string
       }
+      state_code_of_gstin: { Args: { p_gstin: string }; Returns: string }
       void_invoice_payment_atomic: {
         Args: { p_payment_id: string; p_reason: string }
         Returns: Json
       }
+      words_below_hundred: { Args: { n: number }; Returns: string }
     }
     Enums: {
       app_role:
