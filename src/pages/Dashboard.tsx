@@ -441,6 +441,17 @@ export default function Dashboard() {
                   `${monthDeliveredPct}% delivered this month`,
                   `Previous month (${prevMonthLabel}): ${prevMonthOrderCount} orders, ₹${prevMonthRevenue} revenue, ${prevMonthDeliveredPct}% delivered`,
                 ];
+                // While the business data is still arriving, never show a confident
+                // zero — a placeholder reads as "loading", "₹0" reads as a fact.
+                if (isLoading) {
+                  return (
+                    <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
+                      <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
+                      <div className="mt-2 h-[26px] w-24 animate-pulse rounded bg-muted/60 md:h-[28px]" />
+                      <div className="mt-2 h-3 w-20 animate-pulse rounded bg-muted/40" />
+                    </div>
+                  );
+                }
                 return (
                   <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
                     <div className="flex items-center gap-1">
