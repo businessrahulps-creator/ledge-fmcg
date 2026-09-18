@@ -33,6 +33,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { NavLink } from "@/components/NavLink";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { useAuth } from "@/context/AuthContext";
+import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 import ledgeMark from "@/assets/ledge-mark.webp";
 
