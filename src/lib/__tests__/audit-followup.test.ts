@@ -25,7 +25,7 @@ const order = (o: Partial<Order>): Order => ({
   driverName: "",
   dispatchRemarks: "",
   cancelledAt: o.cancelledAt,
-} as Order);
+} as unknown as Order);
 
 describe("cancelled orders never count", () => {
   const range = getPeriodRange("30d");
