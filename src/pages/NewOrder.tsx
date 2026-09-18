@@ -27,8 +27,6 @@ import {
 import { EntityPicker } from "@/components/ui/entity-picker";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import confetti from "canvas-confetti";
 import { trackFirstOrderCreated } from "@/hooks/use-install-prompt";
 import {
