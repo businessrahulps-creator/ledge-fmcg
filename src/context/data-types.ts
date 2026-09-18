@@ -206,6 +206,7 @@ export interface DataContextType {
   resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
   invoices: Invoice[];
+  listReturnedQuantities: (invoiceId: string) => Promise<Record<string, number>>;
   listPayments: (anchor: { invoiceId?: string | null; orderId?: string | null }) => Promise<PaymentRecord[]>;
   recordPayment: (input: RecordPaymentInput) => Promise<boolean>;
   voidPayment: (paymentId: string, reason: string) => Promise<boolean>;
@@ -279,6 +280,7 @@ export interface TransactionalContextType {
   deleteTarget: DataContextType["deleteTarget"];
 
   recordReturn: DataContextType["recordReturn"];
+  listReturnedQuantities: DataContextType["listReturnedQuantities"];
   resolveClaim: DataContextType["resolveClaim"];
   listPayments: DataContextType["listPayments"];
   recordPayment: DataContextType["recordPayment"];

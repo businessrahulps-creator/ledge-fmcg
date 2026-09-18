@@ -304,7 +304,7 @@ export function useBillingDomain(deps: BillingDeps) {
 
   return {
     invoices, setInvoices, claims, setClaims,
-    recordReturn, resolveClaim,
+    recordReturn, resolveClaim, listReturnedQuantities,
     listPayments, recordPayment, voidPayment,
     safeRefetchInvoices, safeRefetchClaims, refetchInvoiceById,
   };
