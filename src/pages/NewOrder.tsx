@@ -5,6 +5,7 @@ import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-re
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { Button } from "@/components/ui/button";
+import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -193,8 +194,8 @@ export default function NewOrder() {
     selectedDealerObj?.outstandingAmount || 0,
     orderBillEquivalent,
   );
-  const creditLimit = selectedDealerObj?.creditLimit || 0;
-  const exceedsCreditLimit = creditLimit > 0 && projectedOutstanding > creditLimit;
+  const creditLimit = creditCeiling(selectedDealerObj);
+  const exceedsCreditLimit = exceedsCredit(selectedDealerObj, projectedOutstanding);
 
   // --- Derived validation state (used for inline errors) ---
   const validLines = lines.filter((l) => l.productId && (l.quantity ?? 0) > 0);
