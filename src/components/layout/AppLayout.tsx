@@ -178,6 +178,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isMoreActive = allMoreItems.some((item) => location.pathname.startsWith(item.url));
   const [moreOpen, setMoreOpen] = useState(false);
 
+  // Only show menu entries this person is allowed to open.
+  const canSeeMoney = useCan("see_money");
+  const canManageBilling = useCan("manage_billing");
+  const canManageTeam = useCan("manage_team");
+  const navAllowed: Record<string, boolean> = {
+    see_money: canSeeMoney,
+    manage_billing: canManageBilling,
+    manage_team: canManageTeam,
+  };
+  const canOpen = (item: MobileNavItem) => !item.cap || navAllowed[item.cap];
+  const visiblePrimaryNav: MobileNavItem[] = primaryMobileNav.map(item =>
+    canOpen(item) ? item : primaryMobileFallback,
+  );
+  const visibleMoreGroups = moreGroups
+    .map(g => ({ ...g, items: g.items.filter(canOpen) }))
+    .filter(g => g.items.length > 0);
+
   // The page chunk has loaded and the shell is on screen — stop the top bar.
   useEffect(() => {
     signalNavDone();
