@@ -337,6 +337,7 @@ export default function NewOrder() {
 
     const isFirstEverOrder = existingOrders.length === 0;
     const result = await addOrder(order);
+    savingRef.current = false;
     setIsSaving(false);
 
     if (result.success) {
