@@ -41,12 +41,13 @@ type NavItem = {
   url: string;
   icon: React.ElementType;
   onClick?: () => void;
+  cap?: CapabilityKey;
 };
 
 const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Money to Collect", url: "/billing", icon: Wallet },
+  { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
   { title: "Returns", url: "/claims", icon: RotateCcw },
 ];
 
