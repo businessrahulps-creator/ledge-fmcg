@@ -224,6 +224,7 @@ export async function replaySingleMutation(
         p_delivery_status: p.deliveryStatus,
         p_dispatch_remarks: sanitizeInput(p.dispatchRemarks || ""),
         p_godown_id: p.godownId || null,
+        p_scheme_savings: p.schemeSavings || 0,
       });
       if (rpcError) throw rpcError;
       const inserted = Array.isArray(rpcData) ? rpcData[0] : rpcData;
@@ -242,6 +243,21 @@ export async function replaySingleMutation(
           }))
         );
         if (linesError) throw linesError;
+      }
+
+      // Offers applied when the order was written offline — kept with the order so the
+      // dealer is not billed at full price after a sync.
+      if (Array.isArray(p.appliedSchemes) && p.appliedSchemes.length > 0) {
+        const { error: schemeError } = await supabase.from("order_schemes").insert(
+          p.appliedSchemes.map((s: any) => ({
+            order_id: inserted.id,
+            scheme_id: s.schemeId ?? s.scheme_id ?? null,
+            scheme_name: sanitizeInput(s.schemeName ?? s.scheme_name ?? ""),
+            scheme_label: sanitizeInput(s.schemeLabel ?? s.scheme_label ?? ""),
+            savings: Number(s.savings || 0),
+          }))
+        );
+        if (schemeError) throw schemeError;
       }
 
       // Stock deduction — wrapped in try-catch so partial failure doesn't lose the order

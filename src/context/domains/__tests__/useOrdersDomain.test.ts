@@ -162,6 +162,24 @@ describe("useOrdersDomain", () => {
     expect(result.current.orderSequence).toBe(2);
   });
 
+  it("addOrder offline — keeps scheme savings and applied offers in the queued mutation", async () => {
+    Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
+    const deps = makeDeps();
+    const { result } = renderHook(() => useOrdersDomain(deps));
+    await act(async () => {
+      await result.current.addOrder(makeOrder({
+        schemeSavings: 250,
+        appliedSchemes: [{ schemeId: "s1", schemeName: "Diwali 5%", schemeLabel: "5% off", savings: 250 }],
+      } as any));
+    });
+    expect(enqueueMutation).toHaveBeenCalledWith(expect.objectContaining({
+      payload: expect.objectContaining({
+        schemeSavings: 250,
+        appliedSchemes: [expect.objectContaining({ savings: 250 })],
+      }),
+    }));
+  });
+
   it("addOrder with no companyId returns error", async () => {
     const deps = makeDeps({ companyId: null });
     const { result } = renderHook(() => useOrdersDomain(deps));

@@ -196,6 +196,26 @@ export function useBillingDomain(deps: BillingDeps) {
     }
   }, [deps.safeRefetchStockItems]);
 
+  /**
+   * Pieces already sent back on earlier credit notes for one bill, per bill line.
+   * Throws when it cannot be read — the caller must never treat a failure as "nothing returned".
+   */
+  const listReturnedQuantities = useCallback(async (invoiceId: string): Promise<Record<string, number>> => {
+    const { data, error } = await supabase
+      .from("credit_notes")
+      .select("id, credit_note_lines(invoice_line_id, quantity)")
+      .eq("invoice_id", invoiceId);
+    if (error) throw error;
+    const totals: Record<string, number> = {};
+    (data || []).forEach(note => {
+      (note.credit_note_lines || []).forEach(l => {
+        if (!l.invoice_line_id) return;
+        totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
+      });
+    });
+    return totals;
+  }, []);
+
   /** Close an open return/claim with a note. Server-side, audited, one-way. */
   const resolveClaim = useCallback(async (claimId: string, notes: string): Promise<boolean> => {
     if (!navigator.onLine) {
@@ -284,7 +304,7 @@ export function useBillingDomain(deps: BillingDeps) {
 
   return {
     invoices, setInvoices, claims, setClaims,
-    recordReturn, resolveClaim,
+    recordReturn, resolveClaim, listReturnedQuantities,
     listPayments, recordPayment, voidPayment,
     safeRefetchInvoices, safeRefetchClaims, refetchInvoiceById,
   };

@@ -817,13 +817,19 @@ export default function OrderDetail() {
               variant="destructive"
               size="sm"
               className="ml-auto"
-              disabled={order.deliveryStatus === "delivered" || received > 0 || !!order.cancelledAt}
-              title={received > 0 ? "Payments have been recorded on this order. Cancel them first." : undefined}
+              disabled={!!finalInvoice || order.deliveryStatus === "delivered" || received > 0 || !!order.cancelledAt}
+              title={
+                finalInvoice
+                  ? "Cannot delete — this order has a bill."
+                  : received > 0
+                    ? "Payments have been recorded on this order. Cancel them first."
+                    : undefined
+              }
               onClick={() => { setDeleteTarget(order); setDeleteConfirmText(""); }}
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">
-                {order.deliveryStatus === "delivered" || received > 0 ? "Cannot delete" : "Delete"}
+                {finalInvoice || order.deliveryStatus === "delivered" || received > 0 ? "Cannot delete" : "Delete"}
               </span>
             </Button>
           </div>

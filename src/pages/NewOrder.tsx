@@ -76,6 +76,7 @@ export default function NewOrder() {
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
   const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
   /** Set once the person has been told this order is ahead of available stock. */
@@ -242,6 +243,9 @@ export default function NewOrder() {
   };
 
   const executeSave = async () => {
+    // A double tap can fire twice before React re-renders the disabled button —
+    // this ref closes that window so one order is never booked twice.
+    if (savingRef.current) return;
     setAttemptedSave(true);
 
     // Validation
@@ -292,6 +296,7 @@ export default function NewOrder() {
       return;
     }
 
+    savingRef.current = true;
     setIsSaving(true);
 
     const dealer = distributors.find((d) => d.id === selectedDealer);
@@ -332,6 +337,7 @@ export default function NewOrder() {
 
     const isFirstEverOrder = existingOrders.length === 0;
     const result = await addOrder(order);
+    savingRef.current = false;
     setIsSaving(false);
 
     if (result.success) {

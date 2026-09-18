@@ -22,7 +22,6 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { toast } from "sonner";
 import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
-import { supabase } from "@/integrations/supabase/client";
 import type { InvoiceLine } from "@/context/data-types";
 import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
 
@@ -158,7 +157,9 @@ function NewClaimDialog({
   const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
   /** Pieces already sent back on earlier credit notes, per bill line. */
-  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number>>({});
+  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number> | null>(null);
+  /** True when past returns could not be read — the form must stay locked. */
+  const [returnedError, setReturnedError] = useState(false);
   /** Bill line items, fetched only for the bill being returned against. */
   const [billLines, setBillLines] = useState<InvoiceLine[]>([]);
   const [linesLoading, setLinesLoading] = useState(false);
@@ -180,25 +181,16 @@ function NewClaimDialog({
   const selectedBillId = selectedBill?.id ?? null;
   useEffect(() => {
     let cancelled = false;
-    if (!selectedBillId) { setAlreadyReturned({}); return; }
-    (async () => {
-      const { data, error } = await supabase
-        .from("credit_notes")
-        .select("id, credit_note_lines(invoice_line_id, quantity)")
-        .eq("invoice_id", selectedBillId);
-      if (cancelled) return;
-      if (error || !data) { setAlreadyReturned({}); return; }
-      const totals: Record<string, number> = {};
-      data.forEach(note => {
-        (note.credit_note_lines || []).forEach(l => {
-          if (!l.invoice_line_id) return;
-          totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
-        });
-      });
-      setAlreadyReturned(totals);
-    })();
+    if (!selectedBillId) { setAlreadyReturned(null); setReturnedError(false); return; }
+    setAlreadyReturned(null);
+    setReturnedError(false);
+    api.claims.returnedQuantities(selectedBillId)
+      .then(totals => { if (!cancelled) setAlreadyReturned(totals); })
+      // A failed read must never look like "nothing has come back yet" —
+      // that is how the same goods get credited twice.
+      .catch(() => { if (!cancelled) setReturnedError(true); });
     return () => { cancelled = true; };
-  }, [selectedBillId]);
+  }, [selectedBillId, api.claims]);
 
   // Line items for this one bill — they are not carried in the app-wide bill list.
   useEffect(() => {
@@ -253,7 +245,7 @@ function NewClaimDialog({
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
   const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
-    const returnedQty = alreadyReturned[l.id as string] ?? 0;
+    const returnedQty = alreadyReturned?.[l.id as string] ?? 0;
     return {
       invoiceLineId: l.id as string,
       productName: l.productName,
@@ -278,6 +270,10 @@ function NewClaimDialog({
 
   const handleSubmit = async () => {
     if (!selectedOrder || !selectedBill) return;
+    if (!alreadyReturned) {
+      toast.error("Still checking what has already come back", { description: "Wait a moment, or reopen this return." });
+      return;
+    }
     const payload = returnLines.filter(l => l.goodQty + l.damagedQty > 0);
     if (payload.length === 0) {
       toast.error("Enter how many pieces are coming back");
@@ -355,6 +351,15 @@ function NewClaimDialog({
             </DialogHeader>
 
             <div className="space-y-4">
+              {returnedError && (
+                <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Couldn't load what has already come back on this bill. Recording a return now could credit the
+                    same goods twice. Close this and try again.
+                  </span>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label className="text-xs">Why is it coming back? (optional)</Label>
                 <Textarea
@@ -451,7 +456,7 @@ function NewClaimDialog({
               <Button variant="outline" size="sm" onClick={() => setStep(1)} disabled={submitting}>
                 Back
               </Button>
-              <Button size="sm" onClick={handleSubmit} disabled={submitting}>
+              <Button size="sm" onClick={handleSubmit} disabled={submitting || !alreadyReturned}>
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
                 {submitting ? "Saving…" : "Record return"}
               </Button>

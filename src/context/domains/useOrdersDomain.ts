@@ -110,6 +110,9 @@ export function useOrdersDomain(deps: OrdersDeps) {
           paymentStatus: order.paymentStatus, dispatchDate: order.dispatchDate || null,
           vehicle: order.vehicle, driverName: order.driverName, deliveryStatus: order.deliveryStatus,
           dispatchRemarks: order.dispatchRemarks, godownId: order.godownId || null, lines: order.lines,
+          // Offers must survive the queue — without these the order syncs at full price.
+          schemeSavings: order.schemeSavings || 0,
+          appliedSchemes: order.appliedSchemes || [],
         },
       });
       toast("Saved offline — will sync when back online", { duration: 3000 });
