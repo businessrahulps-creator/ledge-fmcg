@@ -201,7 +201,7 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     const start = performance.now();
 
     const draw = (now: number) => {
-      // Offscreen canvases stop the loop entirely (see the observer below) —
+      // Offscreen canvases stop the loop entirely (see the observer below):
       // a paused RAF chain still wakes the browser every frame.
       if (!visible) { raf = 0; return; }
       raf = requestAnimationFrame(draw);
