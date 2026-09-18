@@ -179,8 +179,8 @@ export interface DataContextType {
   updateLocation: (l: GodownLocation) => Promise<boolean>;
   deleteLocation: (id: string) => Promise<boolean>;
 
-  addStockItem: (si: StockItem) => void;
-  updateStockItem: (si: StockItem) => void;
+  addStockItem: (si: StockItem) => Promise<boolean>;
+  updateStockItem: (si: StockItem) => Promise<boolean>;
   deleteStockItem: (id: string) => Promise<boolean>;
   setStockItems: React.Dispatch<React.SetStateAction<StockItem[]>>;
 

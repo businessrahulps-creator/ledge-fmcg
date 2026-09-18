@@ -190,6 +190,8 @@ export default function Stock() {
   /** Set once the person has been told a product with this name or SKU exists. */
   const duplicateProductAckRef = useRef("");
   const [savingWarehouse, setSavingWarehouse] = useState(false);
+  // Stock saves wait for the server, so the dialog can't claim success early.
+  const [savingStock, setSavingStock] = useState(false);
 
   const saveProduct = async () => {
     if (savingProduct) return;
@@ -293,8 +295,8 @@ export default function Stock() {
     setDeleteConfirmText("");
   };
 
-  const saveStockItemFn = () => {
-    if (!editStockItem) return;
+  const saveStockItemFn = async () => {
+    if (!editStockItem || savingStock) return;
     // Validate: if intent is add/remove, delta must be > 0. For "set" allow 0.
     if (adjustIntent !== "set" && (!adjustDelta || adjustDelta <= 0)) {
       toast.error("Enter a quantity", {
@@ -311,21 +313,35 @@ export default function Stock() {
     const finalQty = computedNewQty;
     const delta = finalQty - editOriginalQty;
     const updated: StockItem = { ...editStockItem, quantity: finalQty };
-    updateStockItem(updated);
-    const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
-    const absDelta = Math.abs(delta);
-    toast.success(
-      delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
-      { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
-    );
-    setEditStockItem(null);
+    setSavingStock(true);
+    try {
+      // Wait for the server before claiming anything — a failed save must not
+      // leave the user believing the quantity changed.
+      const ok = await updateStockItem(updated);
+      if (!ok) return; // domain already explained the failure; keep the form open
+      const verb = delta > 0 ? "Added" : delta < 0 ? "Removed" : "Updated";
+      const absDelta = Math.abs(delta);
+      toast.success(
+        delta === 0 ? "Inventory updated" : `${verb} ${absDelta} ${editStockItem.unit || "units"}`,
+        { description: `${editStockItem.productName}: ${editOriginalQty} → ${finalQty}` },
+      );
+      setEditStockItem(null);
+    } finally {
+      setSavingStock(false);
+    }
   };
 
-  const deleteStockItemFn = () => {
-    if (!editStockItem) return;
-    deleteStockItemCtx(editStockItem.id);
-    toast.success("Inventory removed", { description: `${editStockItem.productName} removed from warehouse.` });
-    setEditStockItem(null);
+  const deleteStockItemFn = async () => {
+    if (!editStockItem || savingStock) return;
+    setSavingStock(true);
+    try {
+      const ok = await deleteStockItemCtx(editStockItem.id);
+      if (!ok) return;
+      toast.success("Inventory removed", { description: `${editStockItem.productName} removed from warehouse.` });
+      setEditStockItem(null);
+    } finally {
+      setSavingStock(false);
+    }
   };
 
   const warehouseInventory = useMemo(() => selectedWarehouse
@@ -341,7 +357,8 @@ export default function Stock() {
   const inventoryPagination = usePagination(warehouseInventory.length, undefined, `${selectedWarehouse}|${debouncedWarehouseSearch}`);
   const paginatedInventory = useMemo(() => warehouseInventory.slice(inventoryPagination.from, inventoryPagination.to), [warehouseInventory, inventoryPagination.from, inventoryPagination.to]);
 
-  const handleAddStock = () => {
+  const handleAddStock = async () => {
+    if (savingStock) return;
     if (!addStockProductId || !selectedWarehouse) {
       toast.error("Product required", { description: "Please select a product." });
       return;
@@ -353,36 +370,43 @@ export default function Stock() {
     const existing = stockItemsList.find(
       (si) => si.productId === addStockProductId && si.godownId === selectedWarehouse
     );
-    if (existing) {
-      updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
-    } else {
-      const product = products.find((p) => p.id === addStockProductId);
-      const warehouse = locations.find((l) => l.id === selectedWarehouse);
-      if (product && warehouse) {
-        const newItem: StockItem = {
-          id: `si${Date.now()}`,
-          productId: product.id,
-          productName: product.name,
-          sku: product.sku,
-          unit: product.unit,
-          godownId: warehouse.id,
-          godownName: warehouse.name,
-          quantity: addStockQty,
-          threshold: 50,
-          basePrice: product.basePrice,
-          lastDeductedDate: null,
-        };
-        addStockItem(newItem);
+    setSavingStock(true);
+    try {
+      let ok = false;
+      if (existing) {
+        ok = await updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
+      } else {
+        const product = products.find((p) => p.id === addStockProductId);
+        const warehouse = locations.find((l) => l.id === selectedWarehouse);
+        if (product && warehouse) {
+          const newItem: StockItem = {
+            id: `si${Date.now()}`,
+            productId: product.id,
+            productName: product.name,
+            sku: product.sku,
+            unit: product.unit,
+            godownId: warehouse.id,
+            godownName: warehouse.name,
+            quantity: addStockQty,
+            threshold: 50,
+            basePrice: product.basePrice,
+            lastDeductedDate: null,
+          };
+          ok = await addStockItem(newItem);
+        }
       }
+      if (!ok) return; // keep the form open — nothing was saved
+      toast.success(existing ? "Stock updated" : "Product stocked", {
+        description: existing
+          ? `Added ${addStockQty} units to existing stock (now ${existing.quantity + addStockQty}).`
+          : `${addStockQty} units stocked in this warehouse.`,
+      });
+      setAddStockOpen(false);
+      setAddStockProductId("");
+      setAddStockQty(0);
+    } finally {
+      setSavingStock(false);
     }
-    toast.success(existing ? "Stock updated" : "Product stocked", {
-      description: existing
-        ? `Added ${addStockQty} units to existing stock (now ${existing.quantity + addStockQty}).`
-        : `${addStockQty} units stocked in this warehouse.`,
-    });
-    setAddStockOpen(false);
-    setAddStockProductId("");
-    setAddStockQty(0);
   };
 
   const deleteProductName = deleteProductId ? products.find((p) => p.id === deleteProductId)?.name : "";
@@ -944,7 +968,7 @@ export default function Stock() {
               <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
               <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveStockItemFn(); }}>
+            <form onSubmit={(e) => { e.preventDefault(); void saveStockItemFn(); }}>
             {editStockItem && (
               <div className="space-y-3 md:space-y-4">
                 <div className="rounded-lg border border-border bg-muted/20 p-3 overflow-hidden">
@@ -1050,13 +1074,13 @@ export default function Stock() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={() => { setConfirmDeleteStockItem(false); deleteStockItemFn(); }}>Remove</Button>
+                    <Button variant="destructive" disabled={savingStock} onClick={() => { setConfirmDeleteStockItem(false); void deleteStockItemFn(); }}>{savingStock ? "Removing…" : "Remove"}</Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
               <div className="grid w-full grid-cols-2 gap-2">
-                <Button type="button" variant="outline" onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
-                <Button type="submit" className="w-full">Save Changes</Button>
+                <Button type="button" variant="outline" disabled={savingStock} onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
+                <Button type="submit" disabled={savingStock} className="w-full">{savingStock ? "Saving…" : "Save Changes"}</Button>
               </div>
             </DialogFooter>
             </form>
@@ -1114,7 +1138,7 @@ export default function Stock() {
             })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock} disabled={!addStockProductId}>Add Stock</Button>
+              <Button onClick={handleAddStock} disabled={!addStockProductId || savingStock}>{savingStock ? "Saving…" : "Add Stock"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

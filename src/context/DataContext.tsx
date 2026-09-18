@@ -104,7 +104,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const dealers = useDealersDomain(deps);
   const salespersons = useSalespersonsDomain(deps);
   const catalog = useCatalogDomain(deps);
-  const stock = useStockDomain(deps);
+  const stock = useStockDomain(deps, () => catalog.rawProducts);
   const targets = useTargetsDomain(deps);
 
   const ordersDeps = useMemo(() => ({
@@ -449,7 +449,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'salespersons', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('salespersons', salespersons.safeRefetch))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('products', catalog.safeRefetchProducts))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'godowns', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('godowns', stock.safeRefetchGodowns))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('stock_items', stock.safeRefetchStockItems))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `company_id=eq.${companyId}` }, (payload) => queueRow('stock_items', changedId(payload), stock.refetchStockItemById, stock.safeRefetchStockItems))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'schemes', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('schemes', catalog.safeRefetchSchemes))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'claims', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('claims', billing.safeRefetchClaims))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, (payload) => queueRow('invoices', changedId(payload), billing.refetchInvoiceById, billing.safeRefetchInvoices))

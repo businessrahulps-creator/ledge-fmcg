@@ -201,8 +201,11 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     const start = performance.now();
 
     const draw = (now: number) => {
+      // Offscreen canvases stop the loop entirely (see the observer below):
+      // a paused RAF chain still wakes the browser every frame.
+      if (!visible) { raf = 0; return; }
       raf = requestAnimationFrame(draw);
-      if (!visible || document.hidden || scrolling) return;
+      if (document.hidden || scrolling) return;
       if (now - last < 40) return; // ~25fps cap
       last = now;
 
@@ -225,6 +228,12 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     const io = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
+        if (visible && !raf && !reduce) {
+          raf = requestAnimationFrame(draw);
+        } else if (!visible && raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
       },
       { rootMargin: "120px" },
     );

@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { GodownLocation, StockItem } from "@/data/godown-data";
-import type { OrderLine } from "@/data/mock-data";
+import type { Product } from "@/data/mock-data";
 import { cacheData, enqueueMutation } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
 import { makeOfflineCrud, mapGodown, mapProduct, mapStockItem, fetchAllChunked } from "@/context/data-utils";
@@ -9,9 +9,16 @@ import type { DomainDeps } from "@/context/data-types";
 import { toast } from "sonner";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
-export function useStockDomain(deps: DomainDeps) {
+export function useStockDomain(deps: DomainDeps, getProducts?: () => Product[]) {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [locations, setLocations] = useState<GodownLocation[]>([]);
+
+  // Kept in refs so single-row realtime patches can reuse the product and
+  // warehouse details already in memory instead of re-downloading them.
+  const locationsRef = useRef<GodownLocation[]>(locations);
+  locationsRef.current = locations;
+  const productsRef = useRef<(() => Product[]) | undefined>(getProducts);
+  productsRef.current = getProducts;
 
   const locCrud = useMemo(() => makeOfflineCrud<GodownLocation>(
     deps, "godowns", setLocations, "locations",
@@ -20,8 +27,8 @@ export function useStockDomain(deps: DomainDeps) {
   ), [deps.companyId, deps.persistEntityToCache, deps.log]);
 
   // Stock Items — custom upsert logic
-  const addStockItem = useCallback(async (si: StockItem) => {
-    if (!deps.companyId) return;
+  const addStockItem = useCallback(async (si: StockItem): Promise<boolean> => {
+    if (!deps.companyId) return false;
     const summary = `Added ${si.quantity} ${si.unit || "units"} of ${si.productName} to ${si.godownName}`;
     if (!navigator.onLine) {
       const tempId = crypto.randomUUID();
@@ -40,14 +47,14 @@ export function useStockDomain(deps: DomainDeps) {
       });
       deps.log("stock_item", tempId, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     // One locked server step: sets the quantity and records the change in the stock ledger.
     const { data, error } = await supabase.rpc("adjust_stock_atomic", {
       p_product_id: si.productId, p_godown_id: si.godownId,
       p_new_quantity: si.quantity, p_threshold: si.threshold, p_note: "Stocked in warehouse",
     });
-    if (error) { handleSupabaseError(error, { source: "crud:stock_items.add", title: "Failed to add stock item" }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:stock_items.add", title: "Failed to add stock item" }); return false; }
     const res = (data || {}) as { stock_item_id?: string };
     const newId = res.stock_item_id || si.id;
     setStockItems(prev => {
@@ -56,9 +63,10 @@ export function useStockDomain(deps: DomainDeps) {
       return [...prev, { ...si, id: newId }];
     });
     deps.log("stock_item", newId, "created", summary, { productId: si.productId, godownId: si.godownId, quantity: si.quantity });
+    return true;
   }, [deps.companyId, deps.persistEntityToCache, deps.log]);
 
-  const updateStockItem = useCallback(async (si: StockItem) => {
+  const updateStockItem = useCallback(async (si: StockItem): Promise<boolean> => {
     if (!navigator.onLine) {
       setStockItems(prev => {
         const updated = prev.map(x => x.id === si.id ? si : x);
@@ -71,7 +79,7 @@ export function useStockDomain(deps: DomainDeps) {
       });
       deps.log("stock_item", si.id, "updated", `Updated ${si.productName} stock at ${si.godownName} to ${si.quantity}`, { productId: si.productId, godownId: si.godownId, quantity: si.quantity, threshold: si.threshold });
       toast("Saved offline — will sync when back online", { duration: 3000 });
-      return;
+      return true;
     }
     // Locked server step — two people editing the same row can no longer overwrite each other,
     // and every change lands in the stock ledger.
@@ -79,9 +87,10 @@ export function useStockDomain(deps: DomainDeps) {
       p_product_id: si.productId, p_godown_id: si.godownId,
       p_new_quantity: si.quantity, p_threshold: si.threshold, p_note: "Manual adjustment",
     });
-    if (error) { handleSupabaseError(error, { source: "crud:stock_items.update", title: "Failed to update stock item", context: { id: si.id } }); return; }
+    if (error) { handleSupabaseError(error, { source: "crud:stock_items.update", title: "Failed to update stock item", context: { id: si.id } }); return false; }
     setStockItems(prev => prev.map(x => x.id === si.id ? si : x));
     deps.log("stock_item", si.id, "updated", `Updated ${si.productName} stock at ${si.godownName} to ${si.quantity}`, { productId: si.productId, godownId: si.godownId, quantity: si.quantity, threshold: si.threshold });
+    return true;
   }, [deps.persistEntityToCache, deps.log]);
 
   const deleteStockItem = useCallback(async (id: string): Promise<boolean> => {
@@ -135,6 +144,35 @@ export function useStockDomain(deps: DomainDeps) {
     } catch { /* ignore */ }
   }, [deps.companyId]);
 
+  /**
+   * A live stock event usually touches ONE row. Fetch just that row and patch it
+   * in place, reusing the product and warehouse details already in memory —
+   * instead of re-downloading stock, products and warehouses in full.
+   */
+  const refetchStockItemById = useCallback(async (id: string) => {
+    if (!deps.companyId) return;
+    try {
+      const { data, error } = await supabase
+        .from("stock_items").select("*")
+        .eq("id", id).eq("company_id", deps.companyId).maybeSingle();
+      if (error) return;
+      const prods = productsRef.current?.() ?? [];
+      setStockItems(prev => {
+        let next: StockItem[];
+        if (!data) {
+          next = prev.filter(x => x.id !== id);
+        } else {
+          const mapped = mapStockItem(data, prods, locationsRef.current);
+          next = prev.some(x => x.id === id)
+            ? prev.map(x => (x.id === id ? mapped : x))
+            : [mapped, ...prev];
+        }
+        deps.persistEntityToCache("stockItems", next);
+        return next;
+      });
+    } catch { /* ignore */ }
+  }, [deps.companyId, deps.persistEntityToCache]);
+
   // Warehouse delete goes through the server: it refuses while stock or undispatched orders
   // remain, and clears the warehouse's empty stock rows so nothing is orphaned.
   const deleteLocation = useCallback(async (id: string): Promise<boolean> => {
@@ -158,6 +196,6 @@ export function useStockDomain(deps: DomainDeps) {
     stockItems, setStockItems, locations, setLocations,
     addStockItem, updateStockItem, deleteStockItem,
     addLocation: locCrud.add, updateLocation: locCrud.update, deleteLocation,
-    safeRefetchGodowns, safeRefetchStockItems,
+    safeRefetchGodowns, safeRefetchStockItems, refetchStockItemById,
   };
 }
