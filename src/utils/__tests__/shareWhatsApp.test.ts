@@ -139,3 +139,12 @@ describe("buildInvoiceSummary", () => {
     expect(msg).toContain(`*Grand Total: ${formatCurrency(1000)}*`);
   });
 });
+
+describe("order summary wording", () => {
+  it("calls itself an order confirmation, not an invoice", () => {
+    const msg = buildOrderSummary(makeOrder(), "Ledge Foods");
+    expect(msg).toContain("Order confirmation ORD-001");
+    expect(msg).not.toContain("*Invoice ORD-001*");
+    expect(msg).toContain("tax invoice follows on dispatch");
+  });
+});
