@@ -497,10 +497,10 @@ export default function Distributors() {
             <AlertDialogHeader>
               <AlertDialogTitle>Remove Dealer</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span>? This action cannot be undone.
+                Remove <span className="font-semibold text-foreground">{deleteDealer?.name}</span> from your dealer list? Past orders, bills and payments stay exactly as they are — only the dealer is removed.
                 {deleteDealerOrderCount > 0 && (
                   <span className="mt-2 block text-destructive font-medium">
-                    ⚠ This dealer has {deleteDealerOrderCount} order{deleteDealerOrderCount > 1 ? "s" : ""} linked. Removing will leave those orders without a dealer reference.
+                    ⚠ This dealer has {deleteDealerOrderCount} order{deleteDealerOrderCount > 1 ? "s" : ""}. Those orders stay in your records, but the dealer won't be selectable for new ones.
                   </span>
                 )}
               </AlertDialogDescription>
