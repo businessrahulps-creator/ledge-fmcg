@@ -228,6 +228,12 @@ export function ShaderBackdrop({ preset = "hero", className = "" }: Props) {
     const io = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
+        if (visible && !raf && !reduce) {
+          raf = requestAnimationFrame(draw);
+        } else if (!visible && raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
       },
       { rootMargin: "120px" },
     );
