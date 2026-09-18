@@ -7,6 +7,7 @@ import { useApi } from "@/services/api";
 import { netTotal } from "@/lib/revenue";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { applyRevenueScope } from "./RevenueScopeFilter";
 import { TimePeriodFilter, filterByTimePeriod, periodLabel, periodRangeLabel, type TimePeriod } from "./TimePeriodFilter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatIndianDate } from "@/utils/formatDate";
@@ -32,7 +33,7 @@ export function PaymentReport() {
   // netTotal imported from @/lib/revenue (single source of truth)
 
   const periodFiltered = filterByTimePeriod(orders, period);
-  const scoped = scope === "delivered" ? periodFiltered.filter(o => o.deliveryStatus === "delivered") : periodFiltered;
+  const scoped = applyRevenueScope(periodFiltered, scope);
   // Money actually collected in the same window — posted receipts only.
   const { rows: receivableRows, receipts, paymentStatus: paymentStatusByOrderId } = useReceivables();
   const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
@@ -154,9 +155,13 @@ export function PaymentReport() {
         extraAction={{
           label: "Aging Summary",
           icon: BarChart3,
-          title: "Export aging summary for current filters (XLSX)",
+          title: "Export aging for the dealers shown (XLSX)",
           onClick: () => {
-            const aging = sortByRisk(agingFromReceivables(receivableRows, distributors));
+            // Aging must describe the same dealers the filtered table shows —
+            // exporting the whole company would not reconcile with the screen.
+            const dealerIds = new Set(filtered.map((o) => o.distributorId));
+            const rowsInView = receivableRows.filter((r) => dealerIds.has(r.distributorId));
+            const aging = sortByRisk(agingFromReceivables(rowsInView, distributors));
             exportXlsx(
               xlsxFilename("payment-aging-summary"),
               ["Dealer", "0-30 (₹)", "31-60 (₹)", "61-90 (₹)", "90+ (₹)", "Total Outstanding (₹)", "Credit Limit (₹)", "Utilization %"],
