@@ -73,6 +73,16 @@ export function dispatchedRevenue(orders: Order[], range: PeriodRange): number {
   }, 0);
 }
 
+/** Orders whose dispatch falls in the window — the basis behind dispatched revenue. */
+export function dispatchedOrdersInPeriod(orders: Order[], range: PeriodRange): Order[] {
+  return orders.filter((o) => {
+    if (isCancelled(o)) return false;
+    if (o.deliveryStatus !== "dispatched" && o.deliveryStatus !== "delivered") return false;
+    const ref = o.dispatchDate ? new Date(o.dispatchDate) : new Date(o.date);
+    return ref >= range.from && ref <= range.to;
+  });
+}
+
 export function ordersInPeriod(orders: Order[], range: PeriodRange): Order[] {
   return orders.filter((o) => {
     if (isCancelled(o)) return false;
