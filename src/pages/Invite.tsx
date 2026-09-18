@@ -271,7 +271,8 @@ function SignedOutInviteCard({ preview, token }: { preview: InvitePreview; token
           <Button className="w-full">Sign in to accept</Button>
         </Link>
         <Link
-          to={`/auth?mode=signup&redirect=${encodeURIComponent(redirect)}&email=${encodeURIComponent(preview.email)}`}
+          /* The invited address is deliberately not pre-filled — the link must not reveal it. */
+          to={`/auth?mode=signup&redirect=${encodeURIComponent(redirect)}`}
           className="block"
         >
           <Button variant="outline" className="w-full">
