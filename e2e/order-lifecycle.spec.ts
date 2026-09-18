@@ -5,7 +5,11 @@ import { test, expect } from "../playwright-fixture";
 // For now, they demonstrate the test structure.
 
 test.describe("Order Lifecycle", () => {
-  test.skip(true, "Requires authenticated session — run manually after login");
+  test.skip(
+    !process.env.E2E_AUTH_STATE,
+    "Requires authenticated session — set E2E_AUTH_STATE=1 and wire storageState to run",
+  );
+
 
   test("create order page loads with form fields", async ({ page }) => {
     await page.goto("/orders/new");

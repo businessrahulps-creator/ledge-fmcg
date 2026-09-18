@@ -28,6 +28,7 @@ import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
 import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import {
   Select,
   SelectContent,
@@ -85,6 +86,8 @@ export default function OrderDetail() {
 
   /* --- Edit order (pre-dispatch only) --- */
   const [editOpen, setEditOpen] = useState(false);
+  // The edit dialog holds unsaved order changes — confirm before leaving.
+  useUnsavedChangesGuard(editOpen);
   const [isSaving, setIsSaving] = useState(false);
   const [editDealerId, setEditDealerId] = useState("");
   const [editSalespersonId, setEditSalespersonId] = useState("");
@@ -379,14 +382,16 @@ export default function OrderDetail() {
   };
 
   if (!order) {
-    // While data is still loading show a skeleton instead of flashing "not found".
-    if (api.loading || orders.length === 0) {
+    // Wait only while data is genuinely loading. An empty list is a real answer —
+    // a brand-new workspace or a stale link must reach "not found", not spin forever.
+    if (api.loading) {
       return (
         <AppLayout>
           <RouteSkeleton />
         </AppLayout>
       );
     }
+
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20">

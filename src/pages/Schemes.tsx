@@ -4,6 +4,7 @@ import { SignalCard } from "@/components/ui/signal-card";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
@@ -112,6 +113,8 @@ export default function Schemes() {
   const dealers = api.dealers.list();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  // An open offer form holds unsaved input — confirm before leaving the page.
+  useUnsavedChangesGuard(dialogOpen);
   const [editingScheme, setEditingScheme] = useState<Scheme | null>(null);
   const [form, setForm] = useState<Omit<Scheme, "id">>(emptyScheme);
   const [deleteId, setDeleteId] = useState<string | null>(null);

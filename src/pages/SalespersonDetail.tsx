@@ -32,7 +32,8 @@ export default function SalespersonDetail() {
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
 
   if (!person) {
-    if (api.loading || items.length === 0) {
+    if (api.loading) {
+
       return (
         <AppLayout>
           <RouteSkeleton />

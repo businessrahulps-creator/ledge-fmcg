@@ -79,10 +79,10 @@ export function TodayDigest({ context, cacheKey }: TodayDigestProps) {
     }
   };
 
+  // No automatic call on mount: business figures only leave the app when the
+  // owner asks for a briefing. A cached briefing from earlier today still shows.
   useEffect(() => {
-    if (summary) return;
-    fetchDigest();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSummary(readCache(cacheKey));
   }, [cacheKey]);
 
   return (
@@ -99,17 +99,19 @@ export function TodayDigest({ context, cacheKey }: TodayDigestProps) {
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
               Today's briefing
             </p>
-            <button
-              type="button"
-              onClick={() => fetchDigest(true)}
-              disabled={loading}
-              aria-label="Refresh briefing"
-              className="text-muted-foreground/60 hover:text-foreground transition-colors disabled:opacity-40"
-            >
-              <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
-            </button>
+            {summary && (
+              <button
+                type="button"
+                onClick={() => fetchDigest(true)}
+                disabled={loading}
+                aria-label="Refresh briefing"
+                className="text-muted-foreground/60 hover:text-foreground transition-colors disabled:opacity-40"
+              >
+                <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
+              </button>
+            )}
           </div>
-          {loading && !summary ? (
+          {loading ? (
             <div className="mt-2 space-y-1.5">
               <div className="h-3 w-11/12 animate-pulse rounded bg-muted" />
               <div className="h-3 w-9/12 animate-pulse rounded bg-muted" />
@@ -119,13 +121,28 @@ export function TodayDigest({ context, cacheKey }: TodayDigestProps) {
               Couldn't load briefing.{" "}
               <button onClick={() => fetchDigest(true)} className="text-link">Retry</button>
             </p>
-          ) : (
+          ) : summary ? (
             <p className="mt-1.5 text-[13.5px] leading-relaxed text-foreground/85 md:text-sm">
               {summary}
             </p>
+          ) : (
+            <div className="mt-1.5">
+              <p className="text-[13.5px] leading-relaxed text-muted-foreground md:text-sm">
+                Get a two-line read on today's numbers.
+              </p>
+              <button
+                type="button"
+                onClick={() => fetchDigest(true)}
+                className="mt-2 inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-border/70 bg-background px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Get today's briefing
+              </button>
+            </div>
           )}
         </div>
       </div>
     </section>
   );
 }
+

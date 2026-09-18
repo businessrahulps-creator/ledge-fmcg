@@ -40,7 +40,10 @@ export function numberToWords(amount: number): string {
     const remainder = rupees % 1000;
 
     const parts: string[] = [];
-    if (crore > 0) parts.push(twoDigits(crore) + " Crore");
+    // threeDigits (not twoDigits) — amounts of ₹100 crore and above have a
+    // three-digit crore group and would otherwise render as "undefined Crore".
+    if (crore > 0) parts.push(threeDigits(crore) + " Crore");
+
     if (lakh > 0) parts.push(twoDigits(lakh) + " Lakh");
     if (thousand > 0) parts.push(twoDigits(thousand) + " Thousand");
     if (remainder > 0) parts.push(threeDigits(remainder));

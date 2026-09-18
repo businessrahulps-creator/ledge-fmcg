@@ -75,4 +75,18 @@ describe("numberToWords", () => {
     expect(result).toContain("Ninety Nine Thousand");
     expect(result).toContain("Paise Only");
   });
+
+  it("100 crore — three-digit crore group", () => {
+    const result = numberToWords(1000000000);
+    expect(result).not.toContain("undefined");
+    expect(result).toBe("One Hundred Crore Rupees Only");
+  });
+
+  it("999 crore with a remainder", () => {
+    const result = numberToWords(9990000000 + 500000);
+    expect(result).not.toContain("undefined");
+    expect(result).toContain("Nine Hundred and Ninety Nine Crore");
+    expect(result).toContain("Five Lakh");
+  });
 });
+

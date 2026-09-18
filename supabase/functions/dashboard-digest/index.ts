@@ -31,7 +31,6 @@ interface DigestInput {
     outstanding: number;
     overdueDealers: number;
     lowStockSkus: number;
-    topDealer?: string;
     currency?: string;
   };
 }
@@ -83,7 +82,6 @@ Snapshot:
 - Outstanding: ${fmt(context.outstanding)} across receivables
 - Overdue dealers: ${context.overdueDealers}
 - Low/critical stock SKUs: ${context.lowStockSkus}
-${context.topDealer ? `- Top dealer this month: ${context.topDealer}` : ""}
 
 Lead with the most important signal (revenue trend, overdue risk, or stock risk). End with one concrete suggestion only if it's clearly warranted.`;
 

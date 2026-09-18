@@ -1,7 +1,11 @@
 import { test, expect } from "../playwright-fixture";
 
 test.describe("Billing", () => {
-  test.skip(true, "Requires authenticated session — run manually after login");
+  test.skip(
+    !process.env.E2E_AUTH_STATE,
+    "Requires authenticated session — set E2E_AUTH_STATE=1 and wire storageState to run",
+  );
+
 
   test("billing page loads with invoices and claims tabs", async ({ page }) => {
     await page.goto("/billing");

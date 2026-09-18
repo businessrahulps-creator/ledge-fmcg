@@ -144,7 +144,7 @@ describe("useOrdersDomain", () => {
     expect(addResult.error).toBe("DB error");
   });
 
-  it("addOrder offline — enqueues mutation and uses temp ID", async () => {
+  it("addOrder offline — refuses instead of inventing an order number", async () => {
     Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
     const deps = makeDeps();
 
@@ -154,31 +154,15 @@ describe("useOrdersDomain", () => {
       addResult = await result.current.addOrder(makeOrder());
     });
 
-    expect(addResult.success).toBe(true);
-    expect(addResult.orderNumber).toMatch(/^ORD-\d{4}-0001$/);
-    expect(enqueueMutation).toHaveBeenCalledWith(expect.objectContaining({ type: "insert_order_atomic" }));
-    expect(result.current.orders).toHaveLength(1);
-    // Sequence should have incremented
-    expect(result.current.orderSequence).toBe(2);
+    // A device-made number would not match the one book_order_atomic allocates
+    // on sync — after the dealer may already have been sent it.
+    expect(addResult.success).toBe(false);
+    expect(addResult.orderNumber).toBeUndefined();
+    expect(enqueueMutation).not.toHaveBeenCalled();
+    expect(result.current.orders).toHaveLength(0);
+    expect(result.current.orderSequence).toBe(1);
   });
 
-  it("addOrder offline — keeps scheme savings and applied offers in the queued mutation", async () => {
-    Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
-    const deps = makeDeps();
-    const { result } = renderHook(() => useOrdersDomain(deps));
-    await act(async () => {
-      await result.current.addOrder(makeOrder({
-        schemeSavings: 250,
-        appliedSchemes: [{ schemeId: "s1", schemeName: "Diwali 5%", schemeLabel: "5% off", savings: 250 }],
-      } as any));
-    });
-    expect(enqueueMutation).toHaveBeenCalledWith(expect.objectContaining({
-      payload: expect.objectContaining({
-        schemeSavings: 250,
-        appliedSchemes: [expect.objectContaining({ savings: 250 })],
-      }),
-    }));
-  });
 
   it("addOrder with no companyId returns error", async () => {
     const deps = makeDeps({ companyId: null });
