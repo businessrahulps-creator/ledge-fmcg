@@ -78,10 +78,21 @@ export function AppSidebar() {
 
   // Insights group — unified My Business surface (replaces Reports + Performance).
   const insightsNav: NavItem[] = [
-    { title: "My Business", url: "/command", icon: ChartNoAxesCombined },
+    { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
   ];
 
-  const effectiveFooter: NavItem[] = footerNav;
+  // Only show what this person is allowed to open.
+  const canSeeMoney = useCan("see_money");
+  const canManageBilling = useCan("manage_billing");
+  const canManageTeam = useCan("manage_team");
+  const allowed: Record<string, boolean> = {
+    see_money: canSeeMoney,
+    manage_billing: canManageBilling,
+    manage_team: canManageTeam,
+  };
+  const visible = (items: NavItem[]) => items.filter(i => !i.cap || allowed[i.cap]);
+
+  const effectiveFooter: NavItem[] = visible(footerNav);
 
   const renderItem = (item: NavItem) => {
     const isActive = item.onClick ? false : location.pathname.startsWith(item.url);
