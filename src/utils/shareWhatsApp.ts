@@ -30,6 +30,8 @@ export function buildOrderSummary(order: Order, companyName: string): string {
     `💰 *Total: ${formatCurrency(order.total)}*`,
     `💳 Payment: ${order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)} (${order.paymentMode.replace("_", " ")})`,
     `🚚 Delivery: ${order.deliveryStatus.charAt(0).toUpperCase() + order.deliveryStatus.slice(1)}`,
+    "",
+    "This is an order confirmation, not a tax invoice. The tax invoice follows on dispatch.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -39,7 +41,7 @@ export async function shareOrderOnWhatsApp(
   order: Order,
   companyInfo: CompanyInfo
 ) {
-  const loadingToast = toast.loading("Generating invoice…");
+  const loadingToast = toast.loading("Generating order confirmation…");
 
   try {
     // Dynamically import to keep bundle small
@@ -168,7 +170,7 @@ export function buildInvoiceSummary(inv: InvoiceShareData): string {
 }
 
 export async function shareInvoiceOnWhatsApp(inv: InvoiceShareData) {
-  const loadingToast = toast.loading("Generating invoice…");
+  const loadingToast = toast.loading("Generating order confirmation…");
 
   try {
     const [{ pdf }, { GstInvoicePdf }] = await Promise.all([
