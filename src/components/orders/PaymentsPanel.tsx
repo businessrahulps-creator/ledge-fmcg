@@ -195,7 +195,7 @@ export function PaymentsPanel({
       )}
 
       {/* Record payment */}
-      <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setOverpayAck(false); }}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base">Record payment</DialogTitle>
