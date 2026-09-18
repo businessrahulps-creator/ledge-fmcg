@@ -28,6 +28,7 @@ import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
 import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
+import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import {
   Select,
   SelectContent,
@@ -85,6 +86,8 @@ export default function OrderDetail() {
 
   /* --- Edit order (pre-dispatch only) --- */
   const [editOpen, setEditOpen] = useState(false);
+  // The edit dialog holds unsaved order changes — confirm before leaving.
+  useUnsavedChangesGuard(editOpen);
   const [isSaving, setIsSaving] = useState(false);
   const [editDealerId, setEditDealerId] = useState("");
   const [editSalespersonId, setEditSalespersonId] = useState("");
