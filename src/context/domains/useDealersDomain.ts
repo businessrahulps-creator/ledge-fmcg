@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Distributor } from "@/data/mock-data";
 import { cacheData } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapDistributor } from "@/context/data-utils";
+import { makeOfflineCrud, mapDistributor, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { fmtAmount } from "@/utils/activityLog";
 
@@ -25,9 +25,10 @@ export function useDealersDomain(deps: DomainDeps) {
   const safeRefetch = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const [{ data }, { data: balances }] = await Promise.all([
-        supabase.from("distributors").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999),
-        supabase.from("dealer_balances").select("distributor_id, balance_due").eq("company_id", deps.companyId).range(0, 9999),
+      // Paged: a single ranged read silently drops dealers past its cap.
+      const [data, balances] = await Promise.all([
+        fetchAllChunked<any>(() => supabase.from("distributors").select("*").eq("company_id", deps.companyId!).order("name"), 1000, 200, "distributors:refetch"),
+        fetchAllChunked<any>(() => supabase.from("dealer_balances").select("distributor_id, balance_due").eq("company_id", deps.companyId!), 1000, 200, "dealer_balances:refetch"),
       ]);
       if (data) {
         const byDealer = new Map<string, number>(

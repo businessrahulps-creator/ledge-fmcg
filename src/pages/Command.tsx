@@ -27,6 +27,7 @@ import {
   collectionsInPeriod,
   outstandingTotal,
   ordersInPeriod,
+  dispatchedOrdersInPeriod,
   buildRevenueTrend,
   getPeriodRange,
   PERIOD_LABELS,
@@ -184,7 +185,10 @@ export default function Command() {
   const pdfData: CommandPdfProps = useMemo(() => {
     const periodOrders = ordersInPeriod(orders, range);
     const orderCount = periodOrders.length;
-    const aov = orderCount ? revenue / orderCount : 0;
+    // Average order value must divide dispatched revenue by the same dispatched
+    // orders it came from — not by every order in the period.
+    const dispatchedCount = dispatchedOrdersInPeriod(orders, range).length;
+    const aov = dispatchedCount ? revenue / dispatchedCount : 0;
     const collections = collectionsInPeriod(receipts, range);
     const outstanding = outstandingTotal(distributors);
     const creditAtRiskDealers = distributors

@@ -106,6 +106,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
     const ordSpark = new Array(buckets).fill(0);
     const colSpark = new Array(buckets).fill(0);
     for (const o of orders) {
+      if (o.cancelledAt) continue;
       const od = new Date(o.date);
       if (od < range.from || od > range.to) continue;
       const idx = Math.min(buckets - 1, Math.max(0, Math.floor((od.getTime() - range.from.getTime()) / bucketSize)));

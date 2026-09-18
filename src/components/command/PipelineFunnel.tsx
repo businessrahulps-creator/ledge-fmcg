@@ -29,6 +29,7 @@ function PipelineFunnelInner({ orders }: Props) {
   };
 
   for (const o of orders) {
+    if (o.cancelledAt) continue; // cancelled orders are not pipeline work
     const v = o.total || 0;
     if (o.paymentStatus === "paid") {
       buckets.collected.count++;

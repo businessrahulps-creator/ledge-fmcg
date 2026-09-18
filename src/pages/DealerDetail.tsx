@@ -120,7 +120,7 @@ export default function DealerDetail() {
     );
   }
 
-  const sc = buildScorecard(dealerOrders);
+  const sc = buildScorecard(dealerOrders, (o) => payStatus(o.id));
   const risk = churnRiskConfig[sc.churnRisk];
   const trend = sc.orders30d > sc.ordersPrev30d ? "up" : sc.orders30d < sc.ordersPrev30d ? "down" : "flat";
   const totalSSQty = dealerSS.reduce((s, r) => s + r.quantity, 0);
@@ -173,7 +173,7 @@ export default function DealerDetail() {
                     outstandingAmount: dealer.outstandingAmount,
                   },
                   scorecard: sc,
-                  orders: dealerOrders.map(o => ({
+                  orders: dealerOrders.filter(o => !o.cancelledAt).map(o => ({
                     orderNumber: o.orderNumber,
                     date: o.date,
                     total: o.total,
