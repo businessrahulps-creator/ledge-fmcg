@@ -340,22 +340,16 @@ export default function NewOrder() {
       // Advance taken at the counter — recorded against the order, never blocking the booking.
       const advance = Number(advanceAmount || 0);
       if (advance > 0 && result.orderId) {
-        const { error: payErr } = await supabase.rpc("record_order_payment_atomic", {
-          p_order_id: result.orderId,
-          p_amount: advance,
-          p_mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
-          p_paid_on: orderDate,
-          p_reference: advanceRef,
-          p_note: "Advance received at booking",
-          p_idempotency_key: `${result.orderId}:booking-advance`,
+        // Goes through the billing data layer so the dealer's balance updates everywhere.
+        await api.payments.record({
+          orderId: result.orderId,
+          amount: advance,
+          mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
+          paidOn: orderDate,
+          reference: advanceRef,
+          note: "Advance received at booking",
+          idempotencyKey: `${result.orderId}:booking-advance`,
         });
-        if (payErr) {
-          handleSupabaseError(payErr, {
-            source: "rpc:record_order_payment_atomic",
-            title: "Order saved, but the advance wasn't recorded",
-            context: { orderId: result.orderId },
-          });
-        }
       }
       trackFirstOrderCreated();
       addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
