@@ -22,7 +22,6 @@ import { formatIndianDate } from "@/utils/formatDate";
 import { toast } from "sonner";
 import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
-import { supabase } from "@/integrations/supabase/client";
 import type { InvoiceLine } from "@/context/data-types";
 import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
 
@@ -158,7 +157,9 @@ function NewClaimDialog({
   const [damaged, setDamaged] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
   /** Pieces already sent back on earlier credit notes, per bill line. */
-  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number>>({});
+  const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number> | null>(null);
+  /** True when past returns could not be read — the form must stay locked. */
+  const [returnedError, setReturnedError] = useState(false);
   /** Bill line items, fetched only for the bill being returned against. */
   const [billLines, setBillLines] = useState<InvoiceLine[]>([]);
   const [linesLoading, setLinesLoading] = useState(false);
@@ -244,7 +245,7 @@ function NewClaimDialog({
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
   const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
-    const returnedQty = alreadyReturned[l.id as string] ?? 0;
+    const returnedQty = alreadyReturned?.[l.id as string] ?? 0;
     return {
       invoiceLineId: l.id as string,
       productName: l.productName,
@@ -269,6 +270,10 @@ function NewClaimDialog({
 
   const handleSubmit = async () => {
     if (!selectedOrder || !selectedBill) return;
+    if (!alreadyReturned) {
+      toast.error("Still checking what has already come back", { description: "Wait a moment, or reopen this return." });
+      return;
+    }
     const payload = returnLines.filter(l => l.goodQty + l.damagedQty > 0);
     if (payload.length === 0) {
       toast.error("Enter how many pieces are coming back");
