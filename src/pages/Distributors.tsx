@@ -10,6 +10,7 @@ import { Search, MapPin, Plus, Pencil, Trash2, Download, AlertTriangle } from "l
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -98,7 +99,7 @@ export default function Distributors() {
 
   const openNew = () => {
     if (!canManageDealers) return;
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, outstandingAmount: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditMode: 'unlimited', outstandingAmount: 0 });
     setIsNew(true);
   };
 
