@@ -110,7 +110,7 @@ export function PaymentsPanel({
     if (!ok) return;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setClamped(false);
     await load();
     onChanged?.();
   };
