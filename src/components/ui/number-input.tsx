@@ -104,7 +104,12 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       // Clamp to max as it is typed: live totals and Enter-to-submit must never
       // see an out-of-range number. (min is clamped on blur so typing "5" of
       // "50" isn't fought while the field is still incomplete.)
-      onValueChange(typeof max === "number" && parsed > max ? max : parsed);
+      if (typeof max === "number" && parsed > max) {
+        onClampedToMax?.(max);
+        onValueChange(max);
+      } else {
+        onValueChange(parsed);
+      }
 
     };
 
