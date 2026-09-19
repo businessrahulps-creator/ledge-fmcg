@@ -183,7 +183,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // Cold start = very first fetch for this session AND caller wants a foreground load.
     // Every later call (refresh, realtime, sync, tick) is silent — no skeleton flicker.
     const isColdStart = !hasHydratedRef.current && !isBackground;
-    console.warn("[fetchAll:start]", { attempt, isColdStart, isBackground });
     if (isColdStart) { setLoading(true); setLoadError(false); }
     else setIsRefreshing(true);
     // Set when we hand off to a retry — the finally block must not clear the
@@ -322,7 +321,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
         orderSequence: phase1Out?.orderSequence || 1,
       });
     } catch (err) {
-      console.warn("[fetchAll:catch]", { attempt, isColdStart, tokenOk: token === fetchTokenRef.current });
       logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
       // Background refresh: keep the last good snapshot — never blank the UI.
       if (!isColdStart || token !== fetchTokenRef.current) return;
