@@ -321,6 +321,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         orderSequence: phase1Out?.orderSequence || 1,
       });
     } catch (err) {
+      console.warn("[fetchAll:catch]", { attempt, isColdStart, tokenOk: token === fetchTokenRef.current });
       logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
       // Background refresh: keep the last good snapshot — never blank the UI.
       if (!isColdStart || token !== fetchTokenRef.current) return;
