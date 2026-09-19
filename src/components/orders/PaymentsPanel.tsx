@@ -210,13 +210,13 @@ export function PaymentsPanel({
               <Label className="text-xs">Amount received (₹) *</Label>
               <NumberInput
                 allowDecimal min={0} max={balance} value={amount}
-                onValueChange={v => setAmount(v)}
+                onValueChange={v => { setAmount(v); setClamped(false); }}
+                onClampedToMax={() => setClamped(true)}
                 className="h-10 rounded-lg"
               />
-              {Number(amount || 0) > balance && (
-                <p className="text-xs text-destructive">
-                  That is {formatCurrency(Number(amount || 0) - balance)} more than the {formatCurrency(balance)} due.
-                  Record {formatCurrency(balance)} or less.
+              {clamped && (
+                <p className="text-xs text-muted-foreground">
+                  Only {formatCurrency(balance)} is due on {docLabel}, so the amount has been set to {formatCurrency(balance)}.
                 </p>
               )}
             </div>
