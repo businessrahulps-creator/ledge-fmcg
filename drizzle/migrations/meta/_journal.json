@@ -43,6 +43,34 @@
       "when": 1789723146592,
       "tag": "0005_claim_capability_and_function_allowlist",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789799978036,
+      "tag": "0006_book_order_delete_where_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789800213073,
+      "tag": "0007_dispatch_stock_update_not_negative_insert",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789800608201,
+      "tag": "0008_return_restock_movement_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789800678824,
+      "tag": "0009_credit_note_amount_in_words",
+      "breakpoints": true
     }
   ]
 }
