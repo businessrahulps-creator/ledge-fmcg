@@ -50,6 +50,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       allowDecimal = false,
       allowEmpty = true,
       currency = false,
+      onClampedToMax,
       onBlur,
       onFocus,
       className,
