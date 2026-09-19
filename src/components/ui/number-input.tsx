@@ -23,6 +23,8 @@ export interface NumberInputProps
    * raw digits so cursor/selection behaviour stays sane.
    */
   currency?: boolean;
+  /** Called when a typed value above `max` is silently pulled back down to `max`. */
+  onClampedToMax?: (max: number) => void;
   className?: string;
 }
 
