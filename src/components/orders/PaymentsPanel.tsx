@@ -138,7 +138,7 @@ export function PaymentsPanel({
           </p>
         </div>
         {canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setClamped(false); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
