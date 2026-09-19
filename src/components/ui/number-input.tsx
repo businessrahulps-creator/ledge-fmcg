@@ -134,7 +134,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       }
       if (committed !== null) {
         if (typeof min === "number" && committed < min) committed = min;
-        if (typeof max === "number" && committed > max) committed = max;
+        if (typeof max === "number" && committed > max) { committed = max; onClampedToMax?.(max); }
       }
       const nextDraft = committed === null
         ? ""
