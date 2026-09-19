@@ -179,18 +179,20 @@ function NewClaimDialog({
   // What has already gone back on earlier credit notes for this bill, so the
   // form can only offer what is still returnable.
   const selectedBillId = selectedBill?.id ?? null;
+  // Hold the stable function itself — `api` is a fresh object every render.
+  const fetchReturnedQuantities = api.claims.returnedQuantities;
   useEffect(() => {
     let cancelled = false;
     if (!selectedBillId) { setAlreadyReturned(null); setReturnedError(false); return; }
     setAlreadyReturned(null);
     setReturnedError(false);
-    api.claims.returnedQuantities(selectedBillId)
+    fetchReturnedQuantities(selectedBillId)
       .then(totals => { if (!cancelled) setAlreadyReturned(totals); })
       // A failed read must never look like "nothing has come back yet" —
       // that is how the same goods get credited twice.
       .catch(() => { if (!cancelled) setReturnedError(true); });
     return () => { cancelled = true; };
-  }, [selectedBillId, api.claims]);
+  }, [selectedBillId, fetchReturnedQuantities]);
 
   // Line items for this one bill — they are not carried in the app-wide bill list.
   useEffect(() => {

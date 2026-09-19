@@ -61,14 +61,16 @@ export function PaymentsPanel({
 
   const api = useApi();
   const anchorId = invoiceId || orderId || "";
+  // Hold the stable function itself — `api` is a fresh object every render.
+  const listPayments = api.payments.list;
 
   const load = useCallback(async () => {
     if (!anchorId) { setRows([]); setLoading(false); return; }
     setLoading(true);
-    const data = await api.payments.list({ invoiceId, orderId });
+    const data = await listPayments({ invoiceId, orderId });
     setLoading(false);
     setRows(data);
-  }, [anchorId, invoiceId, orderId, api.payments]);
+  }, [anchorId, invoiceId, orderId, listPayments]);
 
   useEffect(() => { load(); }, [load]);
 
