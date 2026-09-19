@@ -58,6 +58,7 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+  const [clamped, setClamped] = useState(false);
 
   const api = useApi();
   const anchorId = invoiceId || orderId || "";
