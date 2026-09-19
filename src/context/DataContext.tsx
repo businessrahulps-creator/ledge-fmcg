@@ -183,6 +183,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // Cold start = very first fetch for this session AND caller wants a foreground load.
     // Every later call (refresh, realtime, sync, tick) is silent — no skeleton flicker.
     const isColdStart = !hasHydratedRef.current && !isBackground;
+    console.warn("[fetchAll:start]", { attempt, isColdStart, isBackground });
     if (isColdStart) { setLoading(true); setLoadError(false); }
     else setIsRefreshing(true);
     // Set when we hand off to a retry — the finally block must not clear the
