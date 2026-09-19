@@ -108,7 +108,7 @@ function PageTitle() {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { userRole, profile, signOut } = useAuth();
-  const { isRefreshing } = useData();
+  const { isRefreshing, loadError, retryLoad } = useData();
   const location = useLocation();
   const reduceMotion = useReducedMotion();
   const mainRef = useRef<HTMLElement>(null);
@@ -350,6 +350,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-20 md:p-6 md:pb-6">
             <div className="mx-auto max-w-5xl min-w-0">
+              {loadError && (
+                <div
+                  role="alert"
+                  className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-foreground"
+                >
+                  <span className="min-w-0 flex-1">
+                    Couldn't load your data. Check your connection and try again — nothing has been lost.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={retryLoad}
+                    className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
               {/* No exit animation: the new page appears immediately instead of
                   waiting for the old one to fade out (review-animations §4). */}
               <motion.div

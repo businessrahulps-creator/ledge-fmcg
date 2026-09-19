@@ -139,6 +139,10 @@ export interface DataContextType {
   loading: boolean;
   isRefreshing: boolean;
   isOfflineData: boolean;
+  /** True when the first load failed and nothing (not even a saved copy) could be shown. */
+  loadError: boolean;
+  /** Re-run the first load after a failure. */
+  retryLoad: () => void;
   companyInfo: CompanyInfo;
   updateCompanyInfo: (updates: Partial<CompanyInfo>) => void;
 
