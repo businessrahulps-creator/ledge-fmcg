@@ -44,7 +44,7 @@ const DataContext = createContext<DataContextType | null>(null);
 const NOOP_DATA_STUB = new Proxy({} as any, {
   get(_t, prop) {
     if (prop === "loading") return true;
-    if (prop === "isRefreshing" || prop === "isOfflineData") return false;
+    if (prop === "isRefreshing" || prop === "isOfflineData" || prop === "loadError") return false;
     if (prop === "companyInfo") return {
       name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "",
       pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "",
@@ -73,6 +73,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOfflineData, setIsOfflineData] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "",
     pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV",
@@ -178,12 +179,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   //   Phase 2 (heavy):    orders + lines + claims + invoices + stock_items + targets + secondary_sales.
   //                       Runs in parallel with phase 1 but does NOT block the loading flag,
   //                       so pages that don't depend on heavy data render immediately.
-  const fetchAll = useCallback(async (cId: string, token: number, isBackground = false) => {
+  const fetchAll = useCallback(async (cId: string, token: number, isBackground = false, attempt = 0) => {
     // Cold start = very first fetch for this session AND caller wants a foreground load.
     // Every later call (refresh, realtime, sync, tick) is silent — no skeleton flicker.
     const isColdStart = !hasHydratedRef.current && !isBackground;
-    if (isColdStart) setLoading(true);
+    if (isColdStart) { setLoading(true); setLoadError(false); }
     else setIsRefreshing(true);
+    // Set when we hand off to a retry — the finally block must not clear the
+    // skeleton or mark the session hydrated while that retry is still running.
+    let retrying = false;
 
     // Helper: commit phase-1 state. On cold start we commit incrementally so the
     // first paint can land asap. On background refresh we DEFER all commits until
@@ -308,6 +312,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       billing.setInvoices(mappedInvoices);
       orders.setOrders(mappedOrders);
       setIsOfflineData(false);
+      setLoadError(false);
 
       persistAllToCache(cId, {
         orders: mappedOrders, distributors: phase1Out?.dists || [], salespersons: phase1Out?.sps || [],
@@ -318,11 +323,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       logError({ source: "data:fetchAll", error: err, context: { companyId: cId } });
       // Background refresh: keep the last good snapshot — never blank the UI.
-      // Cold start with no network: try to paint from IDB cache so the user
-      // still sees something.
-      if (isColdStart && !navigator.onLine) await loadFromCache(cId);
+      if (!isColdStart || token !== fetchTokenRef.current) return;
+
+      const message = String((err as any)?.message ?? err ?? "");
+      const expiredSession = /jwt|token|401/i.test(message);
+
+      // One automatic retry: a single network blip or a session that went stale
+      // while the tab sat open should fix itself, not show empty screens.
+      if (attempt === 0) {
+        retrying = true;
+        if (expiredSession) {
+          try { await supabase.auth.refreshSession(); } catch { /* ignore */ }
+        } else {
+          await new Promise(r => setTimeout(r, 800));
+        }
+        if (token !== fetchTokenRef.current) { retrying = false; return; }
+        void fetchAllRef.current?.(cId, token, isBackground, attempt + 1);
+        return;
+      }
+
+      // Retry failed too — show the last saved copy if we have one (flagged as
+      // stale), otherwise say plainly that the load failed instead of zeros.
+      const hadCache = await loadFromCache(cId);
+      if (!hadCache) setLoadError(true);
     } finally {
-      if (token === fetchTokenRef.current) {
+      if (!retrying && token === fetchTokenRef.current) {
         setLoading(false);
         setIsRefreshing(false);
         hasHydratedRef.current = true;
@@ -330,6 +355,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [loadFromCache]);
+
+  // Self-reference so the retry above can re-enter the latest fetchAll.
+  const fetchAllRef = useRef<typeof fetchAll | null>(null);
+  fetchAllRef.current = fetchAll;
+
+  const retryLoad = useCallback(() => {
+    if (!companyId) return;
+    hasHydratedRef.current = false;
+    const token = ++fetchTokenRef.current;
+    void fetchAll(companyId, token, false);
+  }, [companyId, fetchAll]);
 
   useEffect(() => {
     if (!companyId) return;
@@ -583,12 +619,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const value = useMemo<DataContextType>(() => ({
     ...catalogValue,
     ...transactionalValue,
-    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    loading, isRefreshing, isOfflineData, loadError, retryLoad, companyInfo, updateCompanyInfo,
     orderPrefix: orders.orderPrefix, orderSequence: orders.orderSequence, setOrderPrefix: orders.setOrderPrefix,
     refreshAll,
   }), [
     catalogValue, transactionalValue,
-    loading, isRefreshing, isOfflineData, companyInfo, updateCompanyInfo,
+    loading, isRefreshing, isOfflineData, loadError, retryLoad, companyInfo, updateCompanyInfo,
     orders.orderPrefix, orders.orderSequence, orders.setOrderPrefix,
     refreshAll,
   ]);
