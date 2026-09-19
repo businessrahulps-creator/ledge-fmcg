@@ -23,6 +23,8 @@ export interface NumberInputProps
    * raw digits so cursor/selection behaviour stays sane.
    */
   currency?: boolean;
+  /** Called when a typed value above `max` is silently pulled back down to `max`. */
+  onClampedToMax?: (max: number) => void;
   className?: string;
 }
 
@@ -48,6 +50,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       allowDecimal = false,
       allowEmpty = true,
       currency = false,
+      onClampedToMax,
       onBlur,
       onFocus,
       className,
@@ -101,7 +104,12 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       // Clamp to max as it is typed: live totals and Enter-to-submit must never
       // see an out-of-range number. (min is clamped on blur so typing "5" of
       // "50" isn't fought while the field is still incomplete.)
-      onValueChange(typeof max === "number" && parsed > max ? max : parsed);
+      if (typeof max === "number" && parsed > max) {
+        onClampedToMax?.(max);
+        onValueChange(max);
+      } else {
+        onValueChange(parsed);
+      }
 
     };
 
@@ -126,7 +134,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       }
       if (committed !== null) {
         if (typeof min === "number" && committed < min) committed = min;
-        if (typeof max === "number" && committed > max) committed = max;
+        if (typeof max === "number" && committed > max) { committed = max; onClampedToMax?.(max); }
       }
       const nextDraft = committed === null
         ? ""

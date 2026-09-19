@@ -58,6 +58,7 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+  const [clamped, setClamped] = useState(false);
 
   const api = useApi();
   const anchorId = invoiceId || orderId || "";
@@ -109,7 +110,7 @@ export function PaymentsPanel({
     if (!ok) return;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID());
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setClamped(false);
     await load();
     onChanged?.();
   };
@@ -137,7 +138,7 @@ export function PaymentsPanel({
           </p>
         </div>
         {canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setClamped(false); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
@@ -210,13 +211,13 @@ export function PaymentsPanel({
               <Label className="text-xs">Amount received (₹) *</Label>
               <NumberInput
                 allowDecimal min={0} max={balance} value={amount}
-                onValueChange={v => setAmount(v)}
+                onValueChange={v => { setAmount(v); setClamped(false); }}
+                onClampedToMax={() => setClamped(true)}
                 className="h-10 rounded-lg"
               />
-              {Number(amount || 0) > balance && (
-                <p className="text-xs text-destructive">
-                  That is {formatCurrency(Number(amount || 0) - balance)} more than the {formatCurrency(balance)} due.
-                  Record {formatCurrency(balance)} or less.
+              {clamped && (
+                <p className="text-xs text-muted-foreground">
+                  Only {formatCurrency(balance)} is due on {docLabel}, so the amount has been set to {formatCurrency(balance)}.
                 </p>
               )}
             </div>
