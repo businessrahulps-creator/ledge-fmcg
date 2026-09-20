@@ -211,7 +211,9 @@ export function PaymentsPanel({
               <Label className="text-xs">Amount received (₹) *</Label>
               <NumberInput
                 allowDecimal min={0} max={balance} value={amount}
-                onValueChange={v => { setAmount(v); setClamped(false); }}
+                // Clearing the note only when the value drops below the due amount:
+                // on a clamp this fires with v === balance, so the note survives.
+                onValueChange={v => { setAmount(v); if ((v ?? 0) < balance) setClamped(false); }}
                 onClampedToMax={() => setClamped(true)}
                 className="h-10 rounded-lg"
               />
