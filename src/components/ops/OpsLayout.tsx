@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutGrid, Building2, Users, HeartPulse, Activity, LogOut } from "lucide-react";
+import { LayoutGrid, Building2, Users, HeartPulse, Activity, ArrowLeft, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/ops", label: "Overview", icon: LayoutGrid, end: true },
