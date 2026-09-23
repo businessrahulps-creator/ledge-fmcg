@@ -14,17 +14,22 @@ const ROLE_LABEL: Record<string, string> = {
   viewer: "Viewer",
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function OpsBusinessDetail() {
   const { id = "" } = useParams();
+  const validId = UUID_RE.test(id);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["ops", "company", id],
     queryFn: () => opsApi.companyDetail(id),
-    enabled: !!id,
+    enabled: validId,
     staleTime: 60_000,
+    retry: false,
   });
 
   const c = data?.company ?? null;
   const u = data?.usage;
+
 
   return (
     <OpsLayout
@@ -62,7 +67,7 @@ export default function OpsBusinessDetail() {
             <OpsCard title="Team">
               {(data?.team.length ?? 0) === 0 && <OpsEmpty>No members.</OpsEmpty>}
               {(data?.team.length ?? 0) > 0 && (
-                <OpsTable head={<tr><Th>Name</Th><Th>Email</Th><Th>Role</Th><Th>Last seen</Th></tr>}>
+                <OpsTable head={<tr><Th>Name</Th><Th>Email</Th><Th>Role</Th><Th>Profile updated</Th></tr>}>
                   {data!.team.map((m) => (
                     <tr key={m.email + m.created_at}>
                       <Td>{m.full_name || "—"}</Td>

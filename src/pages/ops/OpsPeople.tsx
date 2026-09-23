@@ -50,7 +50,7 @@ export default function OpsPeople() {
         {isError && <OpsEmpty>Couldn't load people.</OpsEmpty>}
         {!isLoading && !isError && (data?.length ?? 0) === 0 && <OpsEmpty>Nobody matches that search.</OpsEmpty>}
         {(data?.length ?? 0) > 0 && (
-          <OpsTable head={<tr><Th>Name</Th><Th>Email</Th><Th>Business</Th><Th>Role</Th><Th>Signed up</Th><Th>Last seen</Th></tr>}>
+          <OpsTable head={<tr><Th>Name</Th><Th>Email</Th><Th>Business</Th><Th>Role</Th><Th>Signed up</Th><Th>Profile updated</Th></tr>}>
             {data!.map((u) => (
               <tr key={u.user_id} className="hover:bg-muted/40">
                 <Td>{u.full_name || "—"}</Td>
