@@ -28,6 +28,12 @@ interface Props {
  */
 export function OpsLayout({ title, subtitle, actions, children }: Props) {
   const navigate = useNavigate();
+  const { companyId } = useAuth();
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/ops/login", { replace: true });
+  };
 
   return (
     <div className="min-h-dvh bg-muted/30">
@@ -37,15 +43,27 @@ export function OpsLayout({ title, subtitle, actions, children }: Props) {
           <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
             internal
           </span>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            {/* Only shown to staff who also run a Ledge business of their own. */}
+            {companyId && (
+              <Button
+                variant="ghost"
+                size="compact"
+                className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                onClick={() => navigate("/dashboard")}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to app
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="compact"
               className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-              onClick={() => navigate("/dashboard")}
+              onClick={signOut}
             >
               <LogOut className="h-4 w-4" />
-              Back to app
+              Sign out
             </Button>
           </div>
         </div>
