@@ -4,6 +4,7 @@
 Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (accent/warning), Bone (bg). Playfair Display H1/H2 only + Inter everywhere else. 6px radius. Fluent 2 depth/motion/density tokens. No glassmorphism in `/app`. Dark mode archived. Mobile-first PWA for Indian FMCG distribution. Lovable Cloud + RLS. No Google OAuth. Max font weight `font-semibold`. All colors via semantic tokens — no raw hex in components.
 
 ## Memories
+- [Ledge Ops admin panel](mem://features/ledge-ops-admin) — /ops internal platform admin: platform_staff, ops_* definer RPCs, audit log, read-only v1
 - [App motion system](mem://style/app-motion-system) — Signed-in app durations/easings, trigger-anchored popovers, press feedback, no blocking page exit
 - [Order flow](mem://features/order-flow) — New Order books only (+optional advance); Order Detail read-first with one next action; vehicle/driver/date live in the Dispatch & bill dialog; edit locked after dispatch
 - [Motion System v2](mem://style/motion-v2) — Fluent 2 + M3 Expressive doctrine, three ranks, named easings, scroll-scrubbed Hero, 3D tilt on tinted cards
