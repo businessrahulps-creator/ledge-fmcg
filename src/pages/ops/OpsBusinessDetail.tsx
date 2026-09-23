@@ -41,14 +41,15 @@ export default function OpsBusinessDetail() {
         </Link>
       }
     >
-      {isLoading && (
+      {!validId && <OpsCard><OpsEmpty>That business link isn't valid.</OpsEmpty></OpsCard>}
+      {validId && isLoading && (
         <div className="space-y-3">
           <Skeleton className="h-20 w-full rounded-md" />
           <Skeleton className="h-64 w-full rounded-md" />
         </div>
       )}
-      {isError && <OpsCard><OpsEmpty>Couldn't load this business.</OpsEmpty></OpsCard>}
-      {!isLoading && !isError && !c && <OpsCard><OpsEmpty>Business not found.</OpsEmpty></OpsCard>}
+      {validId && isError && <OpsCard><OpsEmpty>Couldn't load this business.</OpsEmpty></OpsCard>}
+      {validId && !isLoading && !isError && !c && <OpsCard><OpsEmpty>Business not found.</OpsEmpty></OpsCard>}
 
       {c && u && (
         <>
