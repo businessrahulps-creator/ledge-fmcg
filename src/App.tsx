@@ -10,6 +10,7 @@ import { PageErrorBoundary } from "@/components/PageErrorBoundary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { NoCompanyGuard } from "@/components/onboarding/NoCompanyGuard";
 import { RequireCapability } from "@/components/auth/RequireCapability";
+import { RequireStaff } from "@/components/ops/RequireStaff";
 import { isPreviewEnv } from "@/lib/preview-env";
 import { LedgeLoader } from "@/components/ui/ledge-loader";
 import { RouteSkeleton } from "@/components/ui/route-skeleton";
@@ -55,6 +56,14 @@ const Help = lazy(routeImporters["/help"] as any);
 const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
 const AdminErrors = lazy(() => import("./pages/AdminErrors"));
+
+// Ledge Ops — internal platform admin. Never linked from the customer app.
+const OpsOverview = lazy(() => import("./pages/ops/OpsOverview"));
+const OpsBusinesses = lazy(() => import("./pages/ops/OpsBusinesses"));
+const OpsBusinessDetail = lazy(() => import("./pages/ops/OpsBusinessDetail"));
+const OpsPeople = lazy(() => import("./pages/ops/OpsPeople"));
+const OpsHealth = lazy(() => import("./pages/ops/OpsHealth"));
+const OpsActivity = lazy(() => import("./pages/ops/OpsActivity"));
 
 // Marketing/legal — lazy
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -190,6 +199,12 @@ const App = () => (
                   <Route path="/settings" element={<ProtectedRoute><RequireCapability capability="manage_team" message="Team settings aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/ops" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsOverview /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
+                  <Route path="/ops/businesses" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsBusinesses /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
+                  <Route path="/ops/businesses/:id" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsBusinessDetail /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
+                  <Route path="/ops/people" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsPeople /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
+                  <Route path="/ops/health" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsHealth /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
+                  <Route path="/ops/activity" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsActivity /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
                   <Route path="/products" element={<Navigate to="/stock" replace />} />
                   <Route path="/godown" element={<Navigate to="/stock?tab=warehouses" replace />} />
                   <Route path="/godown/*" element={<Navigate to="/stock?tab=warehouses" replace />} />

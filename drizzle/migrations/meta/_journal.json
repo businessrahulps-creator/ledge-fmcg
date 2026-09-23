@@ -71,6 +71,13 @@
       "when": 1789800678824,
       "tag": "0009_credit_note_amount_in_words",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790155819452,
+      "tag": "0010_platform_ops_foundation",
+      "breakpoints": true
     }
   ]
 }

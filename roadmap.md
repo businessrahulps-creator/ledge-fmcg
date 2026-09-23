@@ -31,3 +31,6 @@
 - [x] Stock movement ledger backfilled from past dispatches (3,068 rows)
 - [x] Old unsafe stock deduction path removed
 - [x] Expired-but-still-on offers flagged on Schemes
+
+## Ledge Ops admin panel
+- [x] Internal platform admin panel (/ops) — staff list, cross-tenant read RPCs, audit log, 5 read-only sections
