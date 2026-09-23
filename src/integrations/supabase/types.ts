@@ -1410,6 +1410,57 @@ export type Database = {
           },
         ]
       }
+      platform_audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string
+          target_type?: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
+      platform_staff: {
+        Row: {
+          created_at: string
+          level: string
+          note: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          level?: string
+          note?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          level?: string
+          note?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           base_price: number
@@ -2425,9 +2476,77 @@ export type Database = {
           seq: number
         }[]
       }
+      is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_order_delivered_atomic: {
         Args: { p_delivered_on?: string; p_note?: string; p_order_id: string }
         Returns: Json
+      }
+      ops_company_detail: { Args: { p_company_id: string }; Returns: Json }
+      ops_guard: {
+        Args: { p_action: string; p_target_id?: string; p_target_type?: string }
+        Returns: undefined
+      }
+      ops_list_companies: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string }
+        Returns: {
+          billed_value: number
+          created_at: string
+          id: string
+          invoice_count: number
+          last_activity: string
+          member_count: number
+          name: string
+          order_count: number
+          outstanding: number
+          owner_email: string
+          owner_name: string
+          total_count: number
+          trial_ends_at: string
+        }[]
+      }
+      ops_list_users: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string }
+        Returns: {
+          company_id: string
+          company_name: string
+          created_at: string
+          email: string
+          full_name: string
+          phone: string
+          role: string
+          total_count: number
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      ops_platform_summary: { Args: never; Returns: Json }
+      ops_recent_activity: {
+        Args: { p_limit?: number }
+        Returns: {
+          action: string
+          company_id: string
+          company_name: string
+          created_at: string
+          entity_type: string
+          id: string
+          summary: string
+          user_name: string
+        }[]
+      }
+      ops_recent_errors: {
+        Args: { p_limit?: number; p_only_open?: boolean }
+        Returns: {
+          company_id: string
+          company_name: string
+          created_at: string
+          id: string
+          message: string
+          resolved: boolean
+          severity: string
+          source: string
+          stack: string
+          user_email: string
+        }[]
       }
       preview_dispatch_impact: {
         Args: { p_order_id: string }
