@@ -58,6 +58,7 @@ const Claims = lazy(routeImporters["/claims"] as any);
 const AdminErrors = lazy(() => import("./pages/AdminErrors"));
 
 // Ledge Ops — internal platform admin. Never linked from the customer app.
+const OpsLogin = lazy(() => import("./pages/ops/OpsLogin"));
 const OpsOverview = lazy(() => import("./pages/ops/OpsOverview"));
 const OpsBusinesses = lazy(() => import("./pages/ops/OpsBusinesses"));
 const OpsBusinessDetail = lazy(() => import("./pages/ops/OpsBusinessDetail"));
@@ -199,6 +200,7 @@ const App = () => (
                   <Route path="/settings" element={<ProtectedRoute><RequireCapability capability="manage_team" message="Team settings aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
                   <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/ops/login" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsLogin /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/ops" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsOverview /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
                   <Route path="/ops/businesses" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsBusinesses /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
                   <Route path="/ops/businesses/:id" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsBusinessDetail /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />

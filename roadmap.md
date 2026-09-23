@@ -34,3 +34,4 @@
 
 ## Ledge Ops admin panel
 - [x] Internal platform admin panel (/ops) — staff list, cross-tenant read RPCs, audit log, 5 read-only sections
+- [x] Ops admin sign-in page (/ops/login, shared `admin` login)
