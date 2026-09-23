@@ -56,6 +56,14 @@ const Company = lazy(routeImporters["/company"] as any);
 const Claims = lazy(routeImporters["/claims"] as any);
 const AdminErrors = lazy(() => import("./pages/AdminErrors"));
 
+// Ledge Ops — internal platform admin. Never linked from the customer app.
+const OpsOverview = lazy(() => import("./pages/ops/OpsOverview"));
+const OpsBusinesses = lazy(() => import("./pages/ops/OpsBusinesses"));
+const OpsBusinessDetail = lazy(() => import("./pages/ops/OpsBusinessDetail"));
+const OpsPeople = lazy(() => import("./pages/ops/OpsPeople"));
+const OpsHealth = lazy(() => import("./pages/ops/OpsHealth"));
+const OpsActivity = lazy(() => import("./pages/ops/OpsActivity"));
+
 // Marketing/legal — lazy
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
