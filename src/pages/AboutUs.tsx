@@ -35,7 +35,7 @@ const sections = [
     icon: Users,
     title: "Who We Built This For",
     content: [
-      "Ledge is designed for Indian manufacturers, distributors, and brands with field sales teams operating across multiple regions. Strong fit for FMCG, building materials, agri-inputs, auto-parts, and consumer goods. Whether you have a team of three or three hundred, Ledge scales with your operations.",
+      "Ledge is designed for Indian manufacturers, distributors, and brands with field sales teams operating across multiple regions. Strong fit for FMCG, building materials, agri-inputs, pharma distribution, auto parts, electricals and consumer durables. Whether you have a team of three or three hundred, Ledge scales with your operations.",
     ],
   },
   {
@@ -51,7 +51,7 @@ export default function AboutUs() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <SeoHead
-        title="About Ledge — Built for Indian FMCG Owners"
+        title="About Ledge — Built for Indian Distribution Businesses"
         description="Ledge is built for Indian business owners who run both factory and field. One platform for orders, payments, dealers, and stock — in real time, from any device."
         path="/about-us"
       />

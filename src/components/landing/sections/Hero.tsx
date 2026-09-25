@@ -52,8 +52,8 @@ export function Hero() {
         <div className="lg:col-span-7">
           <motion.div {...fadeUp(0)}>
             <span className="lp-eyebrow">
-              <span className="hidden sm:inline">The Operating System for India’s FMCG Businesses</span>
-              <span className="sm:hidden">OS for India’s FMCG</span>
+              <span className="hidden sm:inline">The operating system for India’s distribution businesses</span>
+              <span className="sm:hidden">OS for India’s distributors</span>
             </span>
           </motion.div>
 
@@ -70,8 +70,8 @@ export function Hero() {
             className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
             {...fadeUp(0.16)}
           >
-            Built for super-stockists and FMCG owners across India. Mobile-first. Works offline.
-            Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks every year between your factory and your field</span>.
+            Built for Indian manufacturers, distributors and wholesalers who sell through dealers and a field team.
+            FMCG, building materials, agri-inputs, pharma, auto parts, electricals. Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks between your godown and your field</span>.
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>

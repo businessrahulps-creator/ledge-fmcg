@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Hero } from "@/components/landing/sections/Hero";
+import { WhoItsFor } from "@/components/landing/sections/WhoItsFor";
 import { TrustBar } from "@/components/landing/sections/TrustBar";
 import { Problem } from "@/components/landing/sections/Problem";
 import { HowItWorks } from "@/components/landing/sections/HowItWorks";
@@ -32,8 +33,8 @@ export default function Index() {
   return (
     <div className="lp-theme bg-background text-foreground font-body antialiased light" data-theme="light" style={{ colorScheme: "light", scrollBehavior: "smooth" }}>
       <SeoHead
-        title="Ledge — The Operating System for India's FMCG Businesses"
-        description="Orders, payments, stock, invoices and reports — one mobile app for India's FMCG super-stockists. Mobile-first, works offline. Start free for 30 days."
+        title="Ledge — The operating system for India's distribution businesses"
+        description="Orders, dealers, stock, GST bills and payments in one mobile app for Indian manufacturers, distributors and wholesalers. Start free for 30 days."
         path="/"
       />
       <a href="#main-content" className="lp-skip-link">Skip to Content</a>
@@ -41,6 +42,7 @@ export default function Index() {
       <main id="main-content">
         <Hero />
         <TrustBar />
+        <WhoItsFor />
         <Problem />
         <HowItWorks />
         <Outcome />
