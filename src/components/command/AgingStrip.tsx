@@ -8,6 +8,7 @@ import { useReceivables } from "@/hooks/useReceivables";
 import type { Order, Distributor } from "@/data/mock-data";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
+import { outstandingTotal } from "@/lib/command-signals";
 
 interface Props {
   orders: Order[];
@@ -48,6 +49,12 @@ function AgingStripInner({ orders, distributors }: Props) {
   const grandTotal =
     totals.bucket_0_30 + totals.bucket_31_60 + totals.bucket_61_90 + totals.bucket_90_plus;
 
+  // The age chart counts only what dealers owe you. The headline "Unpaid amount"
+  // nets off money you owe back (returns on fully-paid bills, advances), so the
+  // two can differ. Explain the gap instead of showing two silently different totals.
+  const netUnpaid = outstandingTotal(distributors);
+  const owedBack = Math.round(grandTotal - netUnpaid);
+
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -56,8 +63,13 @@ function AgingStripInner({ orders, distributors }: Props) {
           <p className="mt-0.5 text-xs text-muted-foreground">
             {grandTotal > 0
               ? `Total ${formatCurrency(grandTotal)} across ${rows.length} dealer${rows.length === 1 ? "" : "s"}.`
-              : "No outstanding balances right now."}
+              : "No unpaid bills right now."}
           </p>
+          {grandTotal > 0 && owedBack > 0 && (
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {`You owe ${formatCurrency(owedBack)} back to dealers (returns, advances), so the unpaid amount is ${formatCurrency(netUnpaid)}.`}
+            </p>
+          )}
         </div>
       </div>
 

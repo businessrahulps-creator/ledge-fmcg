@@ -38,7 +38,7 @@ export function SortableTh<K extends string>({
         className={cn("inline-flex items-center gap-1 hover:text-foreground", active && "text-foreground")}
       >
         {label}
-        <Icon className={cn("h-3 w-3", !active && "opacity-40")} aria-hidden />
+        <Icon className={cn("h-3 w-3", !active ? "text-muted-foreground" : "text-foreground")} aria-hidden />
       </button>
     </th>
   );

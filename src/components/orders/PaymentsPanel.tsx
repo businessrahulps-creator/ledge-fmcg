@@ -100,7 +100,7 @@ export function PaymentsPanel({
       amount: value,
       mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
       paidOn,
-      reference,
+      reference: mode === "cash" ? "" : reference,
       note,
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
@@ -225,7 +225,7 @@ export function PaymentsPanel({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Paid by</Label>
+                <Label className="text-xs">Payment method</Label>
                 <Select value={mode} onValueChange={setMode}>
                   <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -239,10 +239,12 @@ export function PaymentsPanel({
                   onChange={e => setPaidOn(e.target.value)} className="h-10 rounded-lg" />
               </div>
             </div>
+            {mode !== "cash" && (
             <div className="space-y-1.5">
               <Label className="text-xs">Reference (cheque or UPI number)</Label>
               <Input value={reference} onChange={e => setReference(e.target.value)} placeholder="Optional" className="h-10 rounded-lg" />
             </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs">Note</Label>
               <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Optional" className="h-10 rounded-lg" />
