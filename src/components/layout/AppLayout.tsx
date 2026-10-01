@@ -18,7 +18,7 @@ import { prefetchRoute } from "@/lib/route-prefetch";
 import { ShellContext, markShellMounted, shellMountedCount } from "./shell-context";
 
 
-import { RotateCcw, Target, ShoppingBasket, Store } from "lucide-react";
+import { RotateCcw, Target, ShoppingBasket, Store, FileBarChart } from "lucide-react";
 import { getQueue, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ const primaryMobileNav: MobileNavItem[] = [
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
+  { title: "Reports", url: "/reports", icon: FileBarChart },
 ];
 
 // Shown in the fourth slot when someone can't open Insights, so the bar stays full.
