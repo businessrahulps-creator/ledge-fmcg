@@ -43,7 +43,7 @@ function CommandKpiCardInner({ label, value, pct, inverse, hint, spark, href, in
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+        <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
         {href && (
           <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
         )}

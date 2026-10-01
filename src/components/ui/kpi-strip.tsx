@@ -43,7 +43,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
         const Inner = (
           <>
             <div className="flex items-center gap-1">
-              <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+              <p className="text-[13px] font-medium text-muted-foreground">{c.label}</p>
               {c.explain && !c.zero && (
                 <ExplainButton metric={c.label} value={c.explain.value} context={c.explain.context} />
               )}
