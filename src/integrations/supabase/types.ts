@@ -3102,6 +3102,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      delete_order_atomic: { Args: { p_order_id: string }; Returns: Json }
       dispatch_and_bill_order_atomic: {
         Args: {
           p_dispatch_date?: string

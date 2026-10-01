@@ -81,7 +81,7 @@ export interface TallyInput {
 }
 
 export const xmlEscape = (s: string) =>
-  String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  String(s ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
 const tdate = (k: string) => k.slice(0, 10).replace(/-/g, "");
 const amt = (n: number) => (Math.round(n * 100) / 100).toFixed(2);
