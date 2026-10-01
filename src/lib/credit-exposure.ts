@@ -15,19 +15,25 @@ export interface ExposureLine {
   unitPrice: number;
 }
 
-/** Rupees this order will be billed for once GST is added, after scheme savings. */
+/** Rupees this order will be billed for once GST is added, after scheme savings.
+ *  Pass `lineDiscounts` (from allocateLineDiscounts) so a product offer stays on
+ *  its own product's GST rate; without it savings are spread by value.
+ *  `inclusive` = company prices already include GST (don't add it again). */
 export function billEquivalentTotal(
   lines: ExposureLine[],
   gstRateFor: (productId: string) => number,
   schemeSavings = 0,
+  opts: { lineDiscounts?: number[]; inclusive?: boolean } = {},
 ): number {
   const valid = lines.filter(l => l.productId && (l.quantity ?? 0) > 0);
   const gross = valid.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
   if (gross <= 0) return 0;
-  // Savings shave the taxable value proportionally across the lines.
+  const useLines = opts.lineDiscounts && opts.lineDiscounts.length === valid.length;
   const keepRatio = Math.max(0, (gross - Math.max(0, schemeSavings))) / gross;
-  const total = valid.reduce((s, l) => {
-    const taxable = l.quantity * l.unitPrice * keepRatio;
+  const total = valid.reduce((s, l, i) => {
+    const amount = l.quantity * l.unitPrice;
+    const taxable = useLines ? Math.max(0, amount - opts.lineDiscounts![i]) : amount * keepRatio;
+    if (opts.inclusive) return s + taxable;
     const rate = gstRateFor(l.productId);
     return s + taxable * (1 + (Number.isFinite(rate) ? rate : 0) / 100);
   }, 0);
