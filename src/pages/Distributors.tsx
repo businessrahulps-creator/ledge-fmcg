@@ -251,7 +251,7 @@ export default function Distributors() {
         <KpiStrip
           cells={[
             { label: "Active dealers", value: items.length, zero: items.length === 0 },
-            { label: "Total outstanding", value: formatCurrency(portfolio.totalOutstanding), zero: portfolio.totalOutstanding === 0 },
+            { label: "Total unpaid amount", value: formatCurrency(portfolio.totalOutstanding), zero: portfolio.totalOutstanding === 0 },
             { label: "Approaching limit", value: portfolio.approaching, zero: portfolio.approaching === 0 },
             { label: "Over limit", value: portfolio.overLimit, zero: portfolio.overLimit === 0 },
           ]}

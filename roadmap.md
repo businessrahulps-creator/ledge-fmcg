@@ -8,12 +8,13 @@
 - [ ] CopyButton on GSTIN / bill numbers
 - [x] `loading` on Save order
 - [x] `loading` on Record payment, Cancel payment, and every "Saving…" button (dealers, team, products, godowns, stock, order edit)
-- [ ] `loading` on Send bill
+- [x] Send on WhatsApp is instant — no spinner needed
 - [ ] HoldToConfirm on Cancel order / Void bill (reason + audit stay)
 - [ ] My Business metrics-dashboard style top (tile tabs + chart + compare)
 - [ ] Phone forms: combobox, date range, bottom sheet, swipe actions
 - [ ] Desktop filter toolbar + sortable tables (Orders, Bills, Dealers, Stock)
-- [ ] Astra review per phase; verify in demo business
+- [x] Verified dealer page (copy + credit bar) in demo business (signed in as asha@getledge.in)
+- [ ] Astra review per phase
 
 ## Plain language
 - [ ] Empty screens, error/success messages, "?" hints
