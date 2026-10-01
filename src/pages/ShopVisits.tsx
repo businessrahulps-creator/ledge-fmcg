@@ -170,9 +170,9 @@ export default function ShopVisits() {
         <Tabs value={tab} onValueChange={setTab}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <TabsList className="h-auto w-full sm:w-auto">
-              <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="promises">Promises{promiseCount ? ` (${promiseCount})` : ""}</TabsTrigger>
-              <TabsTrigger value="new">New shops</TabsTrigger>
+              <TabsTrigger value="visits" className="flex-1 sm:flex-none min-h-11 sm:min-h-0">Visits</TabsTrigger>
+              <TabsTrigger value="promises" className="flex-1 sm:flex-none min-h-11 sm:min-h-0">Promises{promiseCount ? ` (${promiseCount})` : ""}</TabsTrigger>
+              <TabsTrigger value="new" className="flex-1 sm:flex-none min-h-11 sm:min-h-0">New shops</TabsTrigger>
             </TabsList>
             <div className="relative sm:w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
