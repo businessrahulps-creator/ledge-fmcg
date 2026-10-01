@@ -217,10 +217,12 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
   const { allowed: canSeeMoney, ready: moneyReady } = useCanState("see_money");
   const canManageBilling = useCan("manage_billing");
   const canManageTeam = useCan("manage_team");
+  const canManageBuying = useCan("manage_buying");
   const navAllowed: Record<string, boolean> = {
     see_money: canSeeMoney,
     manage_billing: canManageBilling,
     manage_team: canManageTeam,
+    manage_buying: canManageBuying,
   };
   const canOpen = (item: MobileNavItem) => !item.cap || navAllowed[item.cap];
   // Until the role answer arrives, hold the Insights slot empty rather than
