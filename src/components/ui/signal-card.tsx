@@ -82,7 +82,7 @@ const SignalCardImpl = React.forwardRef<HTMLDivElement, SignalCardProps>(
             {subCaption && <p className="text-[11px] text-muted-foreground mt-0.5 num truncate">{subCaption}</p>}
           </div>
           <div className="text-right shrink-0">
-            <p className={cn("font-heading text-[26px] sm:text-[32px] num tabular-nums leading-none whitespace-nowrap", s.text)}>{value}</p>
+            <p className={cn("font-heading font-semibold tracking-tight text-[26px] sm:text-[32px] num tabular-nums leading-none whitespace-nowrap", s.text)}>{value}</p>
             {valueSuffix && (
               <p className={cn("text-[12px] mt-1.5 whitespace-nowrap", s.textSoft)}>{valueSuffix}</p>
             )}
