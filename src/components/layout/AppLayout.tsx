@@ -15,6 +15,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 import { signalNavDone, signalNavStart } from "@/components/NavProgress";
 import { prefetchRoute } from "@/lib/route-prefetch";
+import { ShellContext, markShellMounted, shellMountedCount } from "./shell-context";
 
 
 import { RotateCcw, Target } from "lucide-react";
@@ -111,9 +112,11 @@ function PageTitle() {
  * becomes a pass-through, so the sidebar, header and bottom bar stay mounted
  * across page switches instead of being rebuilt on every click.
  */
-const ShellContext = createContext(false);
-
 export function AppShell() {
+  useEffect(() => {
+    markShellMounted(1);
+    return () => markShellMounted(-1);
+  }, []);
   return (
     <ShellContext.Provider value={true}>
       <AppLayoutFrame>
@@ -125,7 +128,8 @@ export function AppShell() {
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const inShell = useContext(ShellContext);
-  if (inShell) return <>{children}</>;
+  // Safety net: never draw a second frame if the shared one is on screen.
+  if (inShell || shellMountedCount() > 0) return <>{children}</>;
   return <AppLayoutFrame>{children}</AppLayoutFrame>;
 }
 
