@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/ui/copy-button";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Gift, RotateCcw, Trash2, FileText, Plus, X, XCircle, AlertTriangle, Pencil, Truck, PackageCheck, Lock } from "lucide-react";
@@ -729,6 +730,7 @@ export default function OrderDetail() {
                         >
                           {doc.invoiceNumber}
                         </button>
+                        <CopyButton value={doc.invoiceNumber} label="bill number" className="ml-1 h-6 w-6 align-middle" />
                       </td>
                       <td className="px-4 py-3 text-right font-mono tabular-nums">{formatCurrency(doc.grandTotal)}</td>
                       <td className="px-4 py-3">
