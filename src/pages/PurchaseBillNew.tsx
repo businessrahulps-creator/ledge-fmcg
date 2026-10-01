@@ -123,7 +123,7 @@ export default function PurchaseBillNew() {
                   {lines.length > 1 && <Button type="button" variant="ghost" size="icon" aria-label="Remove item" onClick={() => setLines(ls => ls.filter(x => x.key !== l.key))}><Trash2 className="h-4 w-4" /></Button>}
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="space-y-1"><Label className="text-xs">Quantity{p?.unit ? ` (${p.unit})` : ""}</Label><NumberInput value={l.quantity} onValueChange={v => setLine(l.key, { quantity: v })} min={0} allowEmpty /></div>
+                  <div className="space-y-1"><Label className="text-xs">Quantity{p?.unit ? ` (${p.unit})` : ""}</Label><NumberInput aria-label={`Quantity for item ${i + 1}`} value={l.quantity} onValueChange={v => setLine(l.key, { quantity: v })} min={0} allowEmpty /></div>
                   <div className="space-y-1"><Label className="text-xs">Rate per unit (₹)</Label><NumberInput aria-label="Rate per unit (₹)" value={l.rate} onValueChange={v => setLine(l.key, { rate: v })} min={0} allowDecimal allowEmpty /></div>
                   <div className="space-y-1">
                     <Label className="text-xs">GST %</Label>
