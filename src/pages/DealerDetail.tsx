@@ -722,6 +722,8 @@ export default function DealerDetail() {
         </Tabs>
       </div>
 
+        <DealerVisitsPanel dealerId={id!} dealerName={dealer?.name ?? ""} />
+
         {/* Activity History */}
         <div className="glass-card p-4 md:p-6">
           <EntityHistory entityType="dealer" entityId={id!} />
