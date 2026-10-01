@@ -2548,6 +2548,7 @@ export type Database = {
           user_email: string
         }[]
       }
+      order_bill_equivalent: { Args: { p_order_id: string }; Returns: number }
       preview_dispatch_impact: {
         Args: { p_order_id: string }
         Returns: {

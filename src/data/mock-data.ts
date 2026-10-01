@@ -36,6 +36,8 @@ export interface Scheme {
   isActive: boolean;
   validFrom: string;
   validUntil: string | null;
+  /** Can stack with other offers. Non-combinable: only the biggest one applies. Defaults to true. */
+  isCombinable?: boolean;
 }
 
 export interface Product {

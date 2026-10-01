@@ -102,6 +102,7 @@ export function mapScheme(s: any): Scheme {
     flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
     productId: s.product_id || null, dealerId: s.dealer_id || null,
     isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
+    isCombinable: s.is_combinable ?? true,
   };
 }
 

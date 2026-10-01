@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
-import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
+import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
@@ -269,7 +269,9 @@ export default function OrderDetail() {
     const alreadyCounted = order.paymentStatus === "paid"
       ? 0
       : billEquivalentTotal(order.lines, gstRateFor, order.schemeSavings || 0);
-    const newBillEquivalent = billEquivalentTotal(editLines, gstRateFor, editPricing.totalSchemeSavings);
+    const newBillEquivalent = billEquivalentTotal(editLines, gstRateFor, editPricing.totalSchemeSavings, {
+      lineDiscounts: allocateLineDiscounts(editLines, editPricing.appliedSchemes),
+    });
     const projected = projectedExposure(dealer.outstandingAmount, newBillEquivalent, alreadyCounted);
     if (exceedsCredit(dealer, projected)) {
       if (canOverrideCredit) { setCreditOverrideOpen(true); return; }

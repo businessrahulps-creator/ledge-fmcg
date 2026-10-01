@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { formatCurrency } from "@/data/mock-data";
-import { computeOrderPricing, serializeAppliedSchemes } from "@/lib/order-pricing";
+import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts } from "@/lib/order-pricing";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { useApi } from "@/services/api";
 import {
@@ -232,8 +232,10 @@ export default function NewOrder() {
   }, [lines, products]);
 
   const orderBillEquivalent = useMemo(
-    () => billEquivalentTotal(lines, gstRateFor, totalSchemeSavings),
-    [lines, gstRateFor, totalSchemeSavings],
+    () => billEquivalentTotal(lines, gstRateFor, totalSchemeSavings, {
+      lineDiscounts: allocateLineDiscounts(lines, appliedSchemes),
+    }),
+    [lines, gstRateFor, totalSchemeSavings, appliedSchemes],
   );
   const projectedOutstanding = projectedExposure(
     selectedDealerObj?.outstandingAmount || 0,
