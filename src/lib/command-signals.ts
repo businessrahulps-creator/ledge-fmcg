@@ -345,9 +345,11 @@ export function buildRevenueTrend(
     const to = new Date(range.from.getTime() + bucketSize * (i + 1));
     let actual = 0;
     for (const o of orders) {
+      if (o.cancelledAt) continue;
       if (o.deliveryStatus !== "dispatched" && o.deliveryStatus !== "delivered") continue;
       const ref = o.dispatchDate ? new Date(o.dispatchDate) : new Date(o.date);
-      if (ref >= from && ref < to) actual += o.total || 0;
+      // orders.total is before offers; subtract scheme savings once (net sales).
+      if (ref >= from && ref < to) actual += Math.max(0, (o.total || 0) - (o.schemeSavings || 0));
     }
     points.push({
       date: from.toISOString(),
