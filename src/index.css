@@ -255,7 +255,7 @@
   /* Timeframe pill — small filter chip distinct from section titles */
   .timeframe-pill {
     @apply inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-0.5
-           text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80;
+           text-[12px] font-medium text-muted-foreground;
   }
 
   /* Hairline gradient divider */
@@ -2814,7 +2814,7 @@
     @apply font-heading text-[28px] leading-none text-foreground [font-variant-numeric:tabular-nums] md:text-[36px];
   }
   .rank-section {
-    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+    @apply text-[13px] font-medium text-muted-foreground;
   }
   .rank-quiet {
     @apply text-sm text-muted-foreground;
@@ -2825,7 +2825,7 @@
     @apply flex flex-wrap gap-x-8 gap-y-3 rounded-lg bg-[hsl(var(--surface-quiet))] px-4 py-3;
   }
   .fact-label {
-    @apply text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+    @apply text-[12px] font-medium text-muted-foreground;
   }
   .fact-value {
     @apply mt-0.5 text-sm font-medium text-foreground;
