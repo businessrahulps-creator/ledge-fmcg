@@ -407,6 +407,7 @@ export type Database = {
           fy: string
           grand_total: number
           id: string
+          idempotency_key: string | null
           igst_amount: number
           invoice_id: string
           note_date: string
@@ -429,6 +430,7 @@ export type Database = {
           fy?: string
           grand_total?: number
           id?: string
+          idempotency_key?: string | null
           igst_amount?: number
           invoice_id: string
           note_date?: string
@@ -451,6 +453,7 @@ export type Database = {
           fy?: string
           grand_total?: number
           id?: string
+          idempotency_key?: string | null
           igst_amount?: number
           invoice_id?: string
           note_date?: string
@@ -2587,6 +2590,7 @@ export type Database = {
       record_return_and_credit_atomic: {
         Args: {
           p_godown_id?: string
+          p_idempotency_key?: string
           p_lines: Json
           p_note_date?: string
           p_order_id: string
