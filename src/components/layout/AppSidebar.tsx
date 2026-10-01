@@ -16,6 +16,7 @@ import {
   Landmark,
   Wallet,
   ListTodo,
+  ShoppingBasket,
 } from "lucide-react";
 import {
   Sidebar,
