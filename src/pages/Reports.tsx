@@ -247,7 +247,7 @@ export default function Reports() {
                           sections.length > 1 ? <tr key={`h-${s.name}`} className="bg-muted/40"><td colSpan={def.columns.length} className="px-3 py-1.5 text-xs font-semibold text-foreground">{s.name} · {s.rows.length}</td></tr> : null,
                           ...shown.map((r, i) => (
                             <tr key={`${s.name}-${i}`} className="border-t border-border">
-                              {def.columns.map(c => <td key={c.key} className={cn("px-3 py-2 text-foreground", c.type === "money" || c.type === "number" ? "text-right tabular-nums whitespace-nowrap" : "")}>{cellText(c, r[c.key])}</td>)}
+                              {def.columns.map(c => <td key={c.key} className={cn("px-3 py-2 text-foreground", c.type === "money" || c.type === "number" ? "text-right tabular-nums whitespace-nowrap" : (c.weight ?? 1) < 2 ? "whitespace-nowrap" : "")}>{cellText(c, r[c.key])}</td>)}
                             </tr>
                           )),
                         ];

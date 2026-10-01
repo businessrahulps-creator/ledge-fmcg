@@ -61,7 +61,7 @@ export const REPORTS: ReportDef[] = [
     id: "orders", group: "Sales", title: "Orders list", capability: "see_money", usesDates: true,
     description: "Every order taken in these dates, with value after offers.",
     columns: [
-      { key: "order_number", header: "Order no." }, { key: "date", header: "Date", type: "date" },
+      { key: "order_number", header: "Order no.", weight: 1.6 }, { key: "date", header: "Date", type: "date" },
       { key: "dealer", header: "Dealer", weight: 2 }, { key: "salesperson", header: "Taken by" },
       { key: "net", header: "Value", type: "money", total: true },
       { key: "payment", header: "Payment" }, { key: "delivery", header: "Delivery" },
@@ -115,7 +115,7 @@ export const REPORTS: ReportDef[] = [
     id: "cancelled_orders", group: "Sales", title: "Cancelled orders", capability: "see_money", usesDates: true,
     description: "Orders that were cancelled, with the reason given.",
     columns: [
-      { key: "order_number", header: "Order no." }, { key: "date", header: "Date", type: "date" },
+      { key: "order_number", header: "Order no.", weight: 1.6 }, { key: "date", header: "Date", type: "date" },
       { key: "dealer", header: "Dealer", weight: 2 }, { key: "net", header: "Value", type: "money", total: true },
       { key: "reason", header: "Reason", weight: 2 },
     ],
@@ -164,7 +164,7 @@ export const REPORTS: ReportDef[] = [
     id: "credit_notes", group: "Money", title: "Credit notes", capability: "see_money", usesDates: true,
     description: "Goods returned by dealers and the money taken off their bills.",
     columns: [
-      { key: "number", header: "Credit note" }, { key: "date", header: "Date", type: "date" }, { key: "dealer", header: "Dealer", weight: 2 },
+      { key: "number", header: "Credit note", weight: 1.6 }, { key: "date", header: "Date", type: "date" }, { key: "dealer", header: "Dealer", weight: 2 },
       { key: "reason", header: "Reason", weight: 2 }, { key: "taxable", header: "Before GST", type: "money", total: true },
       { key: "tax", header: "GST", type: "money", total: true }, { key: "total", header: "Total", type: "money", total: true },
     ],
@@ -230,7 +230,7 @@ export const REPORTS: ReportDef[] = [
     id: "purchase_bills", group: "Buying", title: "Purchase bills", capability: "see_money", usesDates: true,
     description: "Bills from your suppliers. Cancelled bills are marked and not added up.",
     columns: [
-      { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "bill_no", header: "Bill no." },
+      { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "bill_no", header: "Bill no.", weight: 1.6 },
       { key: "taxable", header: "Before GST", type: "money", total: true }, { key: "tax", header: "GST", type: "money", total: true },
       { key: "total", header: "Total", type: "money", total: true }, { key: "status", header: "Status" },
     ],
@@ -272,7 +272,7 @@ export const REPORTS: ReportDef[] = [
     id: "gst_sales_register", group: "GST", title: "GST sales register", capability: "see_money", usesDates: true,
     description: "Every GST bill, split into B2B (buyer has GSTIN) and B2C. For GSTR-1.",
     columns: [
-      { key: "number", header: "Bill no." }, { key: "date", header: "Date", type: "date" }, { key: "buyer", header: "Buyer", weight: 2 },
+      { key: "number", header: "Bill no.", weight: 1.6 }, { key: "date", header: "Date", type: "date" }, { key: "buyer", header: "Buyer", weight: 2 },
       { key: "gstin", header: "GSTIN", weight: 1.5 }, { key: "pos", header: "State" },
       { key: "taxable", header: "Before GST", type: "money", total: true }, { key: "cgst", header: "CGST", type: "money", total: true },
       { key: "sgst", header: "SGST", type: "money", total: true }, { key: "igst", header: "IGST", type: "money", total: true },
@@ -314,7 +314,7 @@ export const REPORTS: ReportDef[] = [
     description: "GST on your purchase bills (cancelled bills left out). Check with your accountant before claiming.",
     columns: [
       { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "gstin", header: "GSTIN", weight: 1.5 },
-      { key: "bill_no", header: "Bill no." }, { key: "taxable", header: "Before GST", type: "money", total: true },
+      { key: "bill_no", header: "Bill no.", weight: 1.6 }, { key: "taxable", header: "Before GST", type: "money", total: true },
       { key: "cgst", header: "CGST", type: "money", total: true }, { key: "sgst", header: "SGST", type: "money", total: true },
       { key: "igst", header: "IGST", type: "money", total: true }, { key: "total", header: "Total", type: "money", total: true },
     ],
