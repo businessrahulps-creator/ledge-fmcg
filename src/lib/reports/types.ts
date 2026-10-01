@@ -40,7 +40,7 @@ export interface ReportDef {
   title: string;
   description: string;
   /** Capability needed to see this report. */
-  capability: "see_money" | "manage_stock" | null;
+  capability: "see_money" | "manage_stock" | "manage_buying" | null;
   /** false = a snapshot of today, dates don't apply. */
   usesDates: boolean;
   columns: ReportColumn[];
