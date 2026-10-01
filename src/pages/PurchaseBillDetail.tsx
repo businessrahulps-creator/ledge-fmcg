@@ -169,8 +169,8 @@ function ReturnDialog({ open, onOpenChange, billId, billDate, lines, returnedByL
             );
           })}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Return date</Label><Input type="date" value={date} min={billDate} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Reason</Label><Input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Damaged" /></div>
+            <div className="space-y-1.5"><Label>Return date</Label><Input aria-label="Return date" type="date" value={date} min={billDate} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
+            <div className="space-y-1.5"><Label>Reason</Label><Input aria-label="Reason" value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Damaged" /></div>
           </div>
           <p className="text-sm">You'll owe about <span className="font-semibold num tabular-nums">{formatCurrency(est)}</span> less (including GST).</p>
           <DialogFooter>

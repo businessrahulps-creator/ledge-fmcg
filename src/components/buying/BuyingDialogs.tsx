@@ -53,15 +53,15 @@ export function SupplierDialog({ open, onOpenChange, supplier, onSaved }: {
           <DialogDescription>The business you buy raw materials or goods from.</DialogDescription>
         </DialogHeader>
         <form className="space-y-3" onSubmit={e => { e.preventDefault(); void save(); }}>
-          <div className="space-y-1.5"><Label>Supplier name *</Label><Input autoFocus value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="e.g. Sri Lakshmi Packaging" /></div>
+          <div className="space-y-1.5"><Label>Supplier name *</Label><Input aria-label="Supplier name *" autoFocus value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="e.g. Sri Lakshmi Packaging" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Phone</Label><Input inputMode="tel" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></div>
-            <div className="space-y-1.5"><Label>GSTIN</Label><Input value={f.gstin} onChange={e => setF({ ...f, gstin: e.target.value.toUpperCase() })} className="font-mono" maxLength={15} /></div>
+            <div className="space-y-1.5"><Label>Phone</Label><Input aria-label="Phone" inputMode="tel" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></div>
+            <div className="space-y-1.5"><Label>GSTIN</Label><Input aria-label="GSTIN" value={f.gstin} onChange={e => setF({ ...f, gstin: e.target.value.toUpperCase() })} className="font-mono" maxLength={15} /></div>
           </div>
-          <div className="space-y-1.5"><Label>Address</Label><Textarea rows={2} value={f.address} onChange={e => setF({ ...f, address: e.target.value })} /></div>
+          <div className="space-y-1.5"><Label>Address</Label><Textarea aria-label="Address" rows={2} value={f.address} onChange={e => setF({ ...f, address: e.target.value })} /></div>
           <div className="space-y-1.5">
             <Label>Money you already owe them (₹)</Label>
-            <NumberInput value={f.opening} onValueChange={v => setF({ ...f, opening: v })} min={0} allowDecimal disabled={locked} />
+            <NumberInput aria-label="Money you already owe them (₹)" value={f.opening} onValueChange={v => setF({ ...f, opening: v })} min={0} allowDecimal disabled={locked} />
             <p className="text-[11px] text-muted-foreground">{locked ? "Can't be changed after bills or payments are added." : "From before you started using Ledge. Leave 0 if nothing."}</p>
           </div>
           <DialogFooter>
@@ -110,7 +110,7 @@ export function PaySupplierDialog({ open, onOpenChange, supplier }: { open: bool
           <DialogDescription>{supplier?.name} · You owe {formatCurrency(owed)}</DialogDescription>
         </DialogHeader>
         <form className="space-y-3" onSubmit={e => { e.preventDefault(); void save(); }}>
-          <div className="space-y-1.5"><Label>Amount paid (₹) *</Label><NumberInput value={amount} onValueChange={setAmount} min={0} max={owed} allowDecimal allowEmpty /></div>
+          <div className="space-y-1.5"><Label>Amount paid (₹) *</Label><NumberInput aria-label="Amount paid (₹) *" value={amount} onValueChange={setAmount} min={0} max={owed} allowDecimal allowEmpty /></div>
           <div className="space-y-1.5">
             <Label>Payment method</Label>
             <div role="radiogroup" className="grid grid-cols-4 gap-2">
@@ -121,10 +121,10 @@ export function PaySupplierDialog({ open, onOpenChange, supplier }: { open: bool
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Date paid</Label><Input type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
+            <div className="space-y-1.5"><Label>Date paid</Label><Input aria-label="Date paid" type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
             {mode !== "cash" && <div className="space-y-1.5"><Label>{mode === "cheque" ? "Cheque number" : "Reference no."}</Label><Input value={reference} onChange={e => setReference(e.target.value)} /></div>}
           </div>
-          <div className="space-y-1.5"><Label>Note</Label><Input value={note} onChange={e => setNote(e.target.value)} placeholder="Optional" /></div>
+          <div className="space-y-1.5"><Label>Note</Label><Input aria-label="Note" value={note} onChange={e => setNote(e.target.value)} placeholder="Optional" /></div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" onClick={save} disabled={owed <= 0}>Save payment</Button>
@@ -149,7 +149,7 @@ export function ReasonDialog({ open, onOpenChange, title, description, confirmLa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription></DialogHeader>
-        <div className="space-y-1.5"><Label>Reason *</Label><Textarea rows={2} value={reason} onChange={e => setReason(e.target.value)} autoFocus /></div>
+        <div className="space-y-1.5"><Label>Reason *</Label><Textarea aria-label="Reason *" rows={2} value={reason} onChange={e => setReason(e.target.value)} autoFocus /></div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Keep it</Button>
           <Button variant="destructive" onClick={go}>{confirmLabel}</Button>

@@ -91,8 +91,8 @@ export default function PurchaseBillNew() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Supplier's bill no. *</Label><Input value={billNo} onChange={e => setBillNo(e.target.value)} placeholder="e.g. SLP/245" /></div>
-            <div className="space-y-1.5"><Label>Bill date</Label><Input type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
+            <div className="space-y-1.5"><Label>Supplier's bill no. *</Label><Input aria-label="Supplier's bill no. *" value={billNo} onChange={e => setBillNo(e.target.value)} placeholder="e.g. SLP/245" /></div>
+            <div className="space-y-1.5"><Label>Bill date</Label><Input aria-label="Bill date" type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
           </div>
           <div className="space-y-1.5">
             <Label>Goods went to which godown? *</Label>
@@ -124,7 +124,7 @@ export default function PurchaseBillNew() {
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1"><Label className="text-xs">Quantity{p?.unit ? ` (${p.unit})` : ""}</Label><NumberInput value={l.quantity} onValueChange={v => setLine(l.key, { quantity: v })} min={0} allowEmpty /></div>
-                  <div className="space-y-1"><Label className="text-xs">Rate per unit (₹)</Label><NumberInput value={l.rate} onValueChange={v => setLine(l.key, { rate: v })} min={0} allowDecimal allowEmpty /></div>
+                  <div className="space-y-1"><Label className="text-xs">Rate per unit (₹)</Label><NumberInput aria-label="Rate per unit (₹)" value={l.rate} onValueChange={v => setLine(l.key, { rate: v })} min={0} allowDecimal allowEmpty /></div>
                   <div className="space-y-1">
                     <Label className="text-xs">GST %</Label>
                     <Select value={String(l.gstRate)} onValueChange={v => setLine(l.key, { gstRate: Number(v) })}>
@@ -149,7 +149,7 @@ export default function PurchaseBillNew() {
           <p className="text-[11px] text-muted-foreground">If the supplier's total is a few paise different (rounding), that's normal.</p>
         </section>
 
-        <div className="space-y-1.5 max-w-3xl"><Label>Note</Label><Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" /></div>
+        <div className="space-y-1.5 max-w-3xl"><Label>Note</Label><Input aria-label="Note" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" /></div>
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={() => navigate("/buying")}>Cancel</Button>
