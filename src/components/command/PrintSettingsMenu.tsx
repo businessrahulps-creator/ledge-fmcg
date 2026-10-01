@@ -61,8 +61,8 @@ export function PrintSettingsMenu() {
           </div>
 
           <div>
-            <div className="mb-1.5 font-medium text-foreground">Margins</div>
-            <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Page margins">
+            <div className="mb-1.5 font-medium text-foreground">Page edges</div>
+            <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Page edges">
               {MARGINS.map((opt) => {
                 const active = margin === opt.value;
                 return (

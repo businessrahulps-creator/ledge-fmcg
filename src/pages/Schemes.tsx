@@ -206,7 +206,7 @@ export default function Schemes() {
           {/* Header */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <h1 className="h1-display">Schemes</h1>
+              <h1 className="h1-display">Offers & schemes</h1>
               <p className="h1-subtitle">
                 Create offers and discounts that automatically apply to orders
               </p>
@@ -362,7 +362,7 @@ export default function Schemes() {
 
             {/* Type selector */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Scheme Type</Label>
+              <Label className="text-xs">Offer type</Label>
               <div className="grid gap-2">
                 {SCHEME_TYPES.map(t => (
                   <button
@@ -502,7 +502,7 @@ export default function Schemes() {
             {/* Validity */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Valid From</Label>
+                <Label className="text-xs">Starts on</Label>
                 <Input
                   type="date"
                   value={form.validFrom}
@@ -510,7 +510,7 @@ export default function Schemes() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Valid Until (optional)</Label>
+                <Label className="text-xs">Ends on (optional)</Label>
                 <Input
                   type="date"
                   value={form.validUntil || ""}
@@ -533,7 +533,7 @@ export default function Schemes() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Scheme</AlertDialogTitle>
+            <AlertDialogTitle>Delete offer</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this scheme? This action cannot be undone.
             </AlertDialogDescription>

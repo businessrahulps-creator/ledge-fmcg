@@ -40,7 +40,7 @@ export function SavedViewsMenu({ currentParams }: Props) {
         <PopoverTrigger asChild>
           <button
             type="button"
-            aria-label="Saved views"
+            aria-label="Saved screens"
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
           >
             <Bookmark className="h-3.5 w-3.5" />
@@ -83,7 +83,7 @@ export function SavedViewsMenu({ currentParams }: Props) {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); remove(v); }}
-                      aria-label="Delete view"
+                      aria-label="Delete saved screen"
                       className="hidden h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-background hover:text-destructive group-hover:inline-flex"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -125,7 +125,7 @@ export function SavedViewsMenu({ currentParams }: Props) {
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Save this view</DialogTitle>
+            <DialogTitle>Save this screen</DialogTitle>
             <DialogDescription>
               Captures the current period and tab so you can jump back in one click.
             </DialogDescription>
@@ -139,7 +139,7 @@ export function SavedViewsMenu({ currentParams }: Props) {
           />
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSaveOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!name.trim()}>Save view</Button>
+            <Button onClick={handleSave} disabled={!name.trim()}>Save this screen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

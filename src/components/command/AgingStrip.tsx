@@ -52,7 +52,7 @@ function AgingStripInner({ orders, distributors }: Props) {
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Outstanding by age</h3>
+          <h3 className="text-sm font-semibold text-foreground">Unpaid, by days pending</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {grandTotal > 0
               ? `Total ${formatCurrency(grandTotal)} across ${rows.length} dealer${rows.length === 1 ? "" : "s"}.`

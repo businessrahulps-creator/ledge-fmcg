@@ -80,7 +80,7 @@ function CreditAtRiskCardInner({ distributors, orders }: Props) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <AlertTriangle className="h-4 w-4 text-warning" />
-          Credit at risk
+          Near credit limit
         </h3>
         {all.length > 0 && (
           <Link to="/distributors?filter=overdue" className="flex items-center gap-1 text-xs text-primary hover:underline">
@@ -90,12 +90,12 @@ function CreditAtRiskCardInner({ distributors, orders }: Props) {
       </div>
 
       {all.length === 0 ? (
-        <CommandEmptyState title="No dealers over 70% credit utilisation" hint="You're in the clear." />
+        <CommandEmptyState title="No dealers above 70% of credit limit" hint="You're in the clear." />
       ) : (
         <>
           <div className="mb-3 flex items-end justify-between gap-3 rounded-md bg-destructive/[0.04] px-3 py-2 border-l-[3px] border-destructive">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-destructive">Total exposure</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-destructive">Total unpaid</p>
               <p className="font-heading text-[22px] leading-tight num text-foreground">{formatCurrency(exposure)}</p>
             </div>
             <p className="text-[11px] text-muted-foreground text-right">

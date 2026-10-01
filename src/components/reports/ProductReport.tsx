@@ -81,8 +81,8 @@ export function ProductReport() {
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Product</th>
-                <th className="px-6 py-3 font-medium">SKU</th>
-                <th className="px-6 py-3 font-medium text-right">Qty Sold</th>
+                <th className="px-6 py-3 font-medium">Product code</th>
+                <th className="px-6 py-3 font-medium text-right">Quantity sold</th>
                 <th className="px-6 py-3 font-medium text-right">Order value</th>
               </tr>
             </thead>
@@ -121,7 +121,7 @@ export function ProductReport() {
         onExcel={() =>
           exportXlsx(
             xlsxFilename("product-report"),
-            ["Product", "SKU", "Qty Sold", "Revenue"],
+            ["Product", "Product code", "Quantity sold", "Sales"],
             data.map((p) => [p.name, p.sku, String(p.qtySold), formatCurrency(p.revenue)])
           )
         }
@@ -139,11 +139,11 @@ export function ProductReport() {
               <div className="space-y-4 md:space-y-5">
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">SKU</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Product code</span>
                     <p className="mt-0.5 font-mono text-xs font-medium md:text-sm">{selected.sku}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
-                    <span className="text-[10px] text-muted-foreground md:text-xs">Base Price</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Price before GST</span>
                     <p className="mt-0.5 text-xs font-medium md:text-sm">{formatCurrency(selected.basePrice)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/20 p-3">
@@ -164,7 +164,7 @@ export function ProductReport() {
                         <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
                           <th className="px-2 py-2 font-medium md:px-4">Order</th>
                           <th className="px-2 py-2 font-medium md:px-4">Dealer</th>
-                          <th className="px-2 py-2 font-medium text-right md:px-4">Qty</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Quantity</th>
                           <th className="px-2 py-2 font-medium text-right md:px-4">Total</th>
                         </tr>
                       </thead>
@@ -205,9 +205,9 @@ export function ProductReport() {
             ],
             columns: [
               { header: "Product", width: "35%" },
-              { header: "SKU", width: "20%" },
-              { header: "Qty Sold", width: "20%", align: "right" },
-              { header: "Revenue", width: "25%", align: "right" },
+              { header: "Product code", width: "20%" },
+              { header: "Quantity sold", width: "20%", align: "right" },
+              { header: "Sales", width: "25%", align: "right" },
             ],
             rows: data.map((p) => [p.name, p.sku, formatNumber(p.qtySold), formatCurrencyPdf(p.revenue)]),
           });

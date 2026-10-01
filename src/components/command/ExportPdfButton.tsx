@@ -49,7 +49,7 @@ export const ExportPdfButton = forwardRef<HTMLButtonElement, Props>(function Exp
       type="button"
       onClick={handle}
       disabled={busy}
-      aria-label="Download PDF snapshot"
+      aria-label="Download PDF"
       title="Download PDF (P)"
       className="command-no-print inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
     >

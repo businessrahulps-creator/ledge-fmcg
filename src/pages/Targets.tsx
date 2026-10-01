@@ -216,7 +216,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
     >
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Revenue target</label>
+          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Sales goal</label>
           <NumberInput
             allowDecimal
             allowEmpty
@@ -239,7 +239,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
           )}
         </div>
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Orders target</label>
+          <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Number of orders goal</label>
           <NumberInput
             allowEmpty
             min={0}

@@ -220,7 +220,7 @@ export default function Dashboard() {
     { label: "Order value", value: formatCurrency(totalRevenue) },
     { label: "Orders", value: totalOrders.toString() },
     { label: "Pending", value: pendingOrders.toString() },
-    { label: "Dispatched", value: dispatchedOrders.toString() },
+    { label: "Sent", value: dispatchedOrders.toString() },
   ];
 
 
@@ -418,12 +418,12 @@ export default function Dashboard() {
                 },
                 { label: "Orders", value: monthOrderCount.toString(), zero: monthOrderCount === 0, insight: renderDelta(ordersDelta) },
                 {
-                  label: "Outstanding",
+                  label: "Unpaid amount",
                   value: formatCurrency(monthOutstanding),
                   zero: monthOutstanding === 0,
                   insight: outstandingOrders.length > 0
                     ? <span className="insight-line insight-flat">Avg {avgOutstandingDays}d outstanding</span>
-                    : <span className="insight-line insight-up"><TrendingUp className="icon-inline" />All settled</span>,
+                    : <span className="insight-line insight-up"><TrendingUp className="icon-inline" />All paid</span>,
                 },
                 {
                   label: "Delivered",
@@ -478,7 +478,7 @@ export default function Dashboard() {
           {/* 7-day revenue sparkline — full width band directly under strip */}
           <div className="mt-4">
             {allZero ? (
-              <p className="text-[10px] text-muted-foreground/40 italic">No revenue this week</p>
+              <p className="text-[10px] text-muted-foreground/40 italic">No sales this week</p>
             ) : (
               <div>
                 <svg viewBox="0 0 186 48" className="w-full h-14 text-primary" preserveAspectRatio="none">
@@ -531,7 +531,7 @@ export default function Dashboard() {
         <section>
           <div className="flex items-end justify-between mb-3 gap-3 flex-wrap">
             <div>
-              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">Daily breakdown</p>
+              <p className="text-[10px] text-muted-foreground/60 font-semibold tracking-[0.22em] uppercase">Day by day</p>
               <p className="text-[13px] text-foreground/80 mt-1">
                 {selectedDateObj.toLocaleDateString("en-IN", { weekday: "long" })}, {formatIndianDate(selectedDate)}
               </p>
@@ -610,7 +610,7 @@ export default function Dashboard() {
           <section className="space-y-3">
             <SignalCard
               tier={cardTier}
-              label="Credit at Risk"
+              label="Near credit limit"
               caption={`${formatCurrency(totalOutstandingAll)} outstanding across ${agingRows.length} dealer${agingRows.length > 1 ? "s" : ""}`}
               subCaption={worstAcross
                 ? <>Oldest: {agingRows[0].oldestAgeDays}d · {BUCKET_LABEL[worstAcross]}</>

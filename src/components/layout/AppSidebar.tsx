@@ -54,7 +54,7 @@ const workNav: NavItem[] = [
 
 const catalogNav: NavItem[] = [
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Schemes", url: "/schemes", icon: Gift },
+  { title: "Offers & schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
 ];
 
@@ -247,9 +247,9 @@ export function AppSidebar() {
         <div className="relative flex min-h-0 flex-1 flex-col">
           <SidebarContent ref={scrollRef} className="px-2 scrollbar-thin-hover">
             {renderGroup("Work", workNav, false)}
-            {renderGroup("Catalog", catalogNav, true)}
-            {renderGroup("Relationships", relationshipsNav, true)}
-            {renderGroup("Insights", insightsNav, true)}
+            {renderGroup("Products", catalogNav, true)}
+            {renderGroup("People", relationshipsNav, true)}
+            {renderGroup("Reports", insightsNav, true)}
           </SidebarContent>
           {/* Top fade — there's content above */}
           <div

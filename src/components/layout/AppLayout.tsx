@@ -38,7 +38,7 @@ const primaryMobileNav: MobileNavItem[] = [
   { title: "Home", url: "/dashboard", icon: House },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Insights", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
+  { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
 ];
 
 // Shown in the fourth slot when someone can't open Insights, so the bar stays full.
@@ -53,14 +53,14 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
     ],
   },
   {
-    label: "Catalog",
+    label: "Products",
     items: [
-      { title: "Schemes", url: "/schemes", icon: Gift },
+      { title: "Offers & schemes", url: "/schemes", icon: Gift },
       { title: "Targets", url: "/targets", icon: Target },
     ],
   },
   {
-    label: "Relationships",
+    label: "People",
     items: [
       { title: "Dealers", url: "/distributors", icon: UserRound },
       { title: "Sales Team", url: "/salespersons", icon: UserCheck },
@@ -80,7 +80,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/orders": "Orders",
-  "/command": "Insights",
+  "/command": "My Business",
   "/billing": "Money to Collect",
   "/stock": "Stock",
   "/distributors": "Dealers",
@@ -408,7 +408,7 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
             data-mobile-nav
             className="sticky bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl md:hidden"
             style={{ paddingBottom: "max(6px, env(safe-area-inset-bottom))" }}
-            aria-label="Primary"
+            aria-label="Your sales to dealers"
           >
             <div className="grid w-full grid-cols-5 items-stretch">
               {visiblePrimaryNav.map((item, slot) => {

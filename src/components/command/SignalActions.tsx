@@ -26,7 +26,7 @@ export function SignalActions({ signalKey, ack, onSnooze, onAssign, onResolve, o
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label="Signal actions"
+          aria-label="What to do next"
           onClick={(e) => e.stopPropagation()}
           className={cn(
             "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",

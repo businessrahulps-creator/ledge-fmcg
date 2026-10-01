@@ -32,7 +32,7 @@ const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; c
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   open: { label: "Open", color: "bg-warning/10 text-warning", icon: PackageX },
-  resolved: { label: "Resolved", color: "bg-success/10 text-success", icon: CheckCircle2 },
+  resolved: { label: "Closed", color: "bg-success/10 text-success", icon: CheckCircle2 },
   rejected: { label: "Rejected", color: "bg-destructive/10 text-destructive", icon: XCircle },
 };
 
@@ -91,7 +91,7 @@ function ClaimCard({
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
                   <th className="px-3 py-2 font-medium">Product</th>
-                  <th className="px-3 py-2 font-medium text-right">Qty</th>
+                  <th className="px-3 py-2 font-medium text-right">Quantity</th>
                   <th className="px-3 py-2 font-medium text-right">Price</th>
                   <th className="px-3 py-2 font-medium text-right">Total</th>
                 </tr>
@@ -560,7 +560,7 @@ export default function Claims() {
           <SignalCard
             tier="warning"
             icon={AlertTriangle}
-            label="Open claims"
+            label="Open returns"
             caption={`${openCount} claim${openCount > 1 ? "s" : ""} awaiting your decision`}
             subCaption={openValue > 0 ? `${formatCurrency(openValue)} in claim value at stake` : undefined}
             value={openCount}
@@ -582,7 +582,7 @@ export default function Claims() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="open">Open</TabsTrigger>
-            <TabsTrigger value="resolved">Resolved</TabsTrigger>
+            <TabsTrigger value="resolved">Closed</TabsTrigger>
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
 

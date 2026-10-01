@@ -604,7 +604,7 @@ export default function NewOrder() {
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">Qty</Label>
+                            <Label className="text-xs text-muted-foreground">Quantity</Label>
                             <NumberInput
                               allowEmpty
                               min={1}
@@ -676,7 +676,7 @@ export default function NewOrder() {
                   <Label className="text-xs md:text-sm">Ships from *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
                     <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
-                      <SelectValue placeholder="Select warehouse" />
+                      <SelectValue placeholder="Select godown" />
                     </SelectTrigger>
                     <SelectContent>
                       {godowns.map((g) => (
@@ -759,7 +759,7 @@ export default function NewOrder() {
                   <span>{lines.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs md:text-sm">
-                  <span className="text-muted-foreground">Total Qty</span>
+                  <span className="text-muted-foreground">Total quantity</span>
                   <span>{lines.reduce((s, l) => s + (l.quantity ?? 0), 0)}</span>
                 </div>
                 <div className="border-t border-border pt-2 md:pt-3">
@@ -801,7 +801,7 @@ export default function NewOrder() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-success/70">Effective Total</span>
+                    <span className="text-xs text-success/70">Total after discount</span>
                     <span className="text-sm font-bold text-success">
                       {formatCurrency(Math.max(0, orderTotal - totalSchemeSavings))}
                     </span>
@@ -840,7 +840,7 @@ export default function NewOrder() {
     <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
       <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
+          <AlertDialogTitle>Allow above credit limit</AlertDialogTitle>
           <AlertDialogDescription>
             This order will push {selectedDealerObj?.name}'s outstanding to {formatCurrency(projectedOutstanding)}, which is past the {formatCurrency(creditLimit ?? 0)} they may owe. Do you want to proceed?
           </AlertDialogDescription>
@@ -848,7 +848,7 @@ export default function NewOrder() {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={() => { setCreditOverrideOpen(false); executeSave(); }}>
-            Override & Save
+            Save anyway (above limit)
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

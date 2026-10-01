@@ -105,15 +105,15 @@ export function ProductsTab({ range }: Props) {
           SKU revenue
         </h3>
         {computed.rows.length === 0 ? (
-          <CommandEmptyState title="No SKU revenue this period" hint="As orders log, top SKUs appear here." />
+          <CommandEmptyState title="No product sales this period" hint="As orders log, top SKUs appear here." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="py-2 pr-2">SKU</th>
-                  <th className="py-2 pr-2 text-right">Qty</th>
-                  <th className="py-2 pr-2 text-right">Revenue</th>
+                  <th className="py-2 pr-2">Product code</th>
+                  <th className="py-2 pr-2 text-right">Quantity</th>
+                  <th className="py-2 pr-2 text-right">Sales</th>
                   <th className="py-2 pr-2 text-right">vs prev</th>
                   <th className="py-2 pr-2 text-right">Stock</th>
                 </tr>

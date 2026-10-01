@@ -451,7 +451,7 @@ export default function Stock() {
             { label: "Total SKUs", value: isLoading ? "—" : formatNumber(products.length), zero: isLoading || products.length === 0 },
             ...(!canManageStock ? [] : [{ label: "Stock value", value: isLoading ? "—" : formatCurrency(stockSummary.totalValue), zero: isLoading || stockSummary.totalValue === 0 }]),
             { label: "Low stock", value: isLoading ? "—" : formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: isLoading || stockSummary.lowCount + stockSummary.criticalCount === 0 },
-            { label: "Warehouses", value: isLoading ? "—" : formatNumber(activeLocations.length), zero: isLoading || activeLocations.length === 0 },
+            { label: "Godowns", value: isLoading ? "—" : formatNumber(activeLocations.length), zero: isLoading || activeLocations.length === 0 },
           ]}
         />
 
@@ -459,7 +459,7 @@ export default function Stock() {
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="h-10 w-max rounded-lg bg-muted/50 p-1 md:h-12 md:w-auto">
               <TabsTrigger value="products" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Products</TabsTrigger>
-              <TabsTrigger value="warehouses" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Warehouses</TabsTrigger>
+              <TabsTrigger value="warehouses" className="rounded-md px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">Godowns</TabsTrigger>
             </TabsList>
           </div>
 
@@ -498,11 +498,11 @@ export default function Stock() {
                     variant="outline"
                     size="icon"
                     className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-                    aria-label="Export CSV"
+                    aria-label="Download CSV"
                     onClick={() => {
                       exportXlsx(
                         xlsxFilename("products"),
-                        ["Product Name", "SKU", "Unit", "Base Price", "Total Sold", "Total Stock"],
+                        ["Product Name", "Product code", "Unit", "Price before GST", "Total Sold", "Total Stock"],
                         filteredProducts.map((p) => [
                           p.name,
                           p.sku,
@@ -515,7 +515,7 @@ export default function Stock() {
                     }}
                   >
                     <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">Export CSV</span>
+                    <span className="hidden sm:inline">Download CSV</span>
                   </Button>
                   {canManageStock && (
                     <Button onClick={openNewProduct} className="flex-1 sm:flex-none">
@@ -532,9 +532,9 @@ export default function Stock() {
                     <thead>
                       <tr className="border-b border-border text-left text-xs text-muted-foreground">
                         <th className="px-6 py-3 font-medium">Product Name</th>
-                        <th className="px-6 py-3 font-medium">SKU</th>
+                        <th className="px-6 py-3 font-medium">Product code</th>
                         <th className="px-6 py-3 font-medium">Unit</th>
-                        <th className="px-6 py-3 font-medium text-right">Base Price</th>
+                        <th className="px-6 py-3 font-medium text-right">Price before GST</th>
                         <th className="px-6 py-3 font-medium text-right">Total Sold</th>
                         <th className="px-6 py-3 font-medium text-right">Total Stock</th>
                         {canManageStock && <th className="px-6 py-3 font-medium text-right">Actions</th>}
@@ -599,7 +599,7 @@ export default function Stock() {
                 {filteredProducts.length === 0 && (
                   <EmptyCard
                     icon={Package}
-                    title="No products in your catalog."
+                    title="No products added yet."
                     description="Add a product so you can stock and sell it."
                     actionLabel={canManageStock ? "Add product" : undefined}
                     onAction={canManageStock ? openNewProduct : undefined}
@@ -676,7 +676,7 @@ export default function Stock() {
               {locations.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <Warehouse className="h-10 w-10 text-muted-foreground/50" strokeWidth={1.5} />
-                  <p className="mt-3 text-sm font-medium">No warehouses yet</p>
+                  <p className="mt-3 text-sm font-medium">No godowns yet</p>
                   <p className="text-xs text-muted-foreground">Add your first warehouse to start tracking inventory</p>
                   {canManageStock && (
                     <Button size="sm" className="mt-3" onClick={openNewWarehouse}>
@@ -706,7 +706,7 @@ export default function Stock() {
                           <div className="relative flex-1 sm:flex-initial">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
-                              placeholder="Search inventory..."
+                              placeholder="Search stock..."
                               value={warehouseSearch}
                               onChange={(e) => setWarehouseSearch(e.target.value)}
                               className="h-10 rounded-lg pl-10 md:max-w-xs"
@@ -719,7 +719,7 @@ export default function Stock() {
                               const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "warehouse";
                               exportXlsx(
                                 xlsxFilename(`inventory-${whName.toLowerCase().replace(/\s+/g, "-")}`),
-                                ["Product Name", "SKU", "Unit", "Quantity", "Threshold", "Health", "Base Price", "Stock Value"],
+                                ["Product Name", "Product code", "Unit", "Quantity", "Alert at", "Health", "Price before GST", "Stock Value"],
                                 warehouseInventory.map((si) => {
                                   const health = getStockHealth(si.quantity, si.threshold);
                                   return [
@@ -737,7 +737,7 @@ export default function Stock() {
                             }}
                           >
                             <Download className="h-4 w-4" />
-                            <span className="hidden sm:inline">Export CSV</span>
+                            <span className="hidden sm:inline">Download CSV</span>
                           </Button>
                           {canManageStock && (
                             <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
@@ -755,9 +755,9 @@ export default function Stock() {
                           <thead>
                             <tr className="border-b border-border text-left text-xs text-muted-foreground">
                               <th className="px-6 py-3 font-medium">Product</th>
-                              <th className="px-6 py-3 font-medium">SKU</th>
+                              <th className="px-6 py-3 font-medium">Product code</th>
                               <th className="px-6 py-3 font-medium text-right">Quantity</th>
-                              <th className="px-6 py-3 font-medium text-right">Threshold</th>
+                              <th className="px-6 py-3 font-medium text-right">Alert at</th>
                               <th className="px-6 py-3 font-medium text-right">Est. Value</th>
                               <th className="px-6 py-3 font-medium">Health</th>
                             </tr>
@@ -806,7 +806,7 @@ export default function Stock() {
                       {warehouseInventory.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
                           <Package className="h-8 w-8 text-muted-foreground/50" strokeWidth={1.5} />
-                          <p className="mt-2 text-sm font-medium">No inventory in this warehouse</p>
+                          <p className="mt-2 text-sm font-medium">No stock in this godown</p>
                           <p className="text-xs text-muted-foreground">Add stock to get started</p>
                         </div>
                       )}
@@ -936,7 +936,7 @@ export default function Stock() {
         <AlertDialog open={!!deleteWarehouseLoc} onOpenChange={() => { setDeleteWarehouseLoc(null); setDeleteConfirmText(""); }}>
           <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
+              <AlertDialogTitle>Delete godown</AlertDialogTitle>
               <AlertDialogDescription className="space-y-3">
                 <span>This will permanently delete <span className="font-semibold text-foreground">{deleteWarehouseLoc?.name}</span>. It can only be deleted if no product still has stock in it and no undispatched order is set to it. This action cannot be undone.</span>
                 <span className="block text-xs">Type <span className="font-mono font-semibold text-foreground">{deleteWarehouseLoc?.name}</span> to confirm:</span>
@@ -955,7 +955,7 @@ export default function Stock() {
                 onClick={confirmDeleteWarehouse}
                 disabled={deleteConfirmText !== deleteWarehouseLoc?.name}
               >
-                Delete Warehouse
+                Delete godown
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -965,7 +965,7 @@ export default function Stock() {
         <Dialog open={!!editStockItem} onOpenChange={() => setEditStockItem(null)}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">Edit Inventory</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">Edit stock</DialogTitle>
               <DialogDescription className="sr-only">Edit stock item quantity and threshold</DialogDescription>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); void saveStockItemFn(); }}>
@@ -1048,7 +1048,7 @@ export default function Stock() {
 
                 {/* Threshold (kept as direct edit) */}
                 <div className="space-y-1.5 md:space-y-2">
-                  <Label className="text-xs md:text-sm">Low Stock Threshold</Label>
+                  <Label className="text-xs md:text-sm">Low stock alert at</Label>
                   <NumberInput
                     allowEmpty={false}
                     min={0}
@@ -1067,7 +1067,7 @@ export default function Stock() {
                 </Button>
                 <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Remove Inventory Item</AlertDialogTitle>
+                    <AlertDialogTitle>Remove stock item</AlertDialogTitle>
                     <AlertDialogDescription>
                       Remove <span className="font-semibold text-foreground">{editStockItem?.productName}</span> from this warehouse? This action cannot be undone.
                     </AlertDialogDescription>

@@ -276,10 +276,10 @@ export default function Command() {
       kpis: [
         { label: "Order value", value: formatCurrencyPdf(revenue) },
         { label: "Orders", value: String(orderCount) },
-        { label: "Avg Order", value: formatCurrencyPdf(aov) },
-        { label: "Collections", value: formatCurrencyPdf(collections) },
-        { label: "Outstanding", value: formatCurrencyPdf(outstanding) },
-        { label: "Credit at risk", value: formatCurrencyPdf(creditAtRiskAmount) },
+        { label: "Average order", value: formatCurrencyPdf(aov) },
+        { label: "Money received", value: formatCurrencyPdf(collections) },
+        { label: "Unpaid amount", value: formatCurrencyPdf(outstanding) },
+        { label: "Near credit limit", value: formatCurrencyPdf(creditAtRiskAmount) },
       ],
       signals: signals.map((s) => ({
         label: s.label,
@@ -358,7 +358,7 @@ export default function Command() {
               Period: {range.from.toLocaleDateString()} – {range.to.toLocaleDateString()} · Generated {new Date().toLocaleString()}
             </p>
           </div>
-          <div className="command-no-print flex flex-col gap-2 lg:items-end" aria-label="View controls">
+          <div className="command-no-print flex flex-col gap-2 lg:items-end" aria-label="Screen options">
             {/* Row 1 — Actions */}
             <div className="flex flex-wrap items-center gap-2">
               <SavedViewsMenu currentParams={currentParams} />
@@ -366,7 +366,7 @@ export default function Command() {
                 type="button"
                 onClick={toggleDensity}
                 aria-label={density === "dense" ? "Switch to comfortable density" : "Switch to compact density"}
-                title="Toggle density (D)"
+                title="Change row spacing (D)"
                 className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
               >
                 {density === "dense" ? "Compact" : "Comfortable"}

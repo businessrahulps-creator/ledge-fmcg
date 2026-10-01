@@ -140,7 +140,7 @@ export default function Salespersons() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-              aria-label="Export CSV"
+              aria-label="Download CSV"
               onClick={() => {
                 exportXlsx(
                   xlsxFilename("sales-team"),
@@ -150,7 +150,7 @@ export default function Salespersons() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">Download CSV</span>
             </Button>
             {canManageTeam && (
               <Button onClick={openNew} className="flex-1 sm:flex-none">

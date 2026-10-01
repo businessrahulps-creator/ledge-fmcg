@@ -55,7 +55,7 @@ export function billStatusView(status: string | null | undefined): BillStatusVie
 
   if (raw === "partial") {
     return {
-      label: "Part paid",
+      label: "Partly paid",
       tone: "partial",
       className: "bg-warning/10 text-warning",
       locked: true,

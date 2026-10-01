@@ -195,8 +195,8 @@ export default function DealerDetail() {
           <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders ({dealerOrders.length})</TabsTrigger>
-            <TabsTrigger value="ledger">Ledger</TabsTrigger>
-            <TabsTrigger value="secondary">Secondary Sales</TabsTrigger>
+            <TabsTrigger value="ledger">Bills & payments</TabsTrigger>
+            <TabsTrigger value="secondary">Dealer sales to shops</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -219,7 +219,7 @@ export default function DealerDetail() {
                 const textColor = limit === 0 ? "" : pct >= 100 ? "text-destructive" : pct >= 70 ? "text-warning" : "text-success";
                 return (
                   <div className={`col-span-2 glass-card ${borderColor} p-3 md:p-4`}>
-                    <span className="text-xs text-muted-foreground">Outstanding / Credit Limit</span>
+                    <span className="text-xs text-muted-foreground">Unpaid / credit limit</span>
                     <p className={`mt-0.5 text-sm font-semibold md:text-base ${textColor}`}>
                       {formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}
                     </p>
@@ -265,7 +265,7 @@ export default function DealerDetail() {
                       <p className="mt-0.5 text-sm font-semibold num">{limit > 0 ? formatCurrency(limit) : "No limit set"}</p>
                     </div>
                     <div className="glass-card p-3">
-                      <span className="text-[10px] text-muted-foreground">Utilization</span>
+                      <span className="text-[10px] text-muted-foreground">Limit used</span>
                       <p className={cn("mt-0.5 text-sm font-semibold num", utilTone)}>
                         {util === null ? "—" : `${util.toFixed(0)}%`}
                       </p>
@@ -339,7 +339,7 @@ export default function DealerDetail() {
                           <th className="px-4 py-2.5 font-medium text-right">Bill total</th>
                           <th className="px-4 py-2.5 font-medium text-right">Received</th>
                           <th className="px-4 py-2.5 font-medium text-right">Still due</th>
-                          <th className="px-4 py-2.5 font-medium">Age</th>
+                          <th className="px-4 py-2.5 font-medium">Days unpaid</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -404,7 +404,7 @@ export default function DealerDetail() {
                 <p className="text-sm font-semibold mt-0.5">{sc.orders90d}</p>
               </div>
               <div className="glass-card p-3">
-                <span className="text-[10px] text-muted-foreground">Avg Order Value</span>
+                <span className="text-[10px] text-muted-foreground">Average order amount</span>
                 <p className="text-sm font-semibold mt-0.5">{formatCurrency(sc.avgOrderValue)}</p>
               </div>
               <div className="glass-card p-3">
@@ -577,7 +577,7 @@ export default function DealerDetail() {
                 return (
                   <div className="py-12 text-center">
                     <FileText className="h-8 w-8 text-muted-foreground/50 mx-auto" />
-                    <p className="mt-2 text-sm text-muted-foreground">No ledger entries yet</p>
+                    <p className="mt-2 text-sm text-muted-foreground">No bills or payments yet</p>
                   </div>
                 );
               }
@@ -590,7 +590,7 @@ export default function DealerDetail() {
                       <thead>
                         <tr className="border-b border-border text-left text-xs text-muted-foreground">
                           <th className="px-4 py-2.5 font-medium">Date</th>
-                          <th className="px-4 py-2.5 font-medium">Particulars</th>
+                          <th className="px-4 py-2.5 font-medium">Details</th>
                           <th className="px-4 py-2.5 font-medium text-right">Debit (₹)</th>
                           <th className="px-4 py-2.5 font-medium text-right">Credit (₹)</th>
                           <th className="px-4 py-2.5 font-medium text-right">Balance (₹)</th>
@@ -625,7 +625,7 @@ export default function DealerDetail() {
                   {/* Mobile cards */}
                   <div className="md:hidden space-y-2">
                     <div className="glass-card p-3 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Outstanding</span>
+                      <span className="text-xs text-muted-foreground">Unpaid amount</span>
                       <span className="text-sm font-bold">{formatCurrency(closing)}</span>
                     </div>
                     <div className="glass-card overflow-hidden divide-y divide-border/50">
@@ -665,7 +665,7 @@ export default function DealerDetail() {
                   <p className="text-sm font-semibold mt-0.5">{dealerSS.length}</p>
                 </div>
                 <div className="glass-card p-2.5">
-                  <span className="text-[10px] text-muted-foreground">Total Qty Sold</span>
+                  <span className="text-[10px] text-muted-foreground">Total quantity sold</span>
                   <p className="text-sm font-semibold mt-0.5">{totalSSQty} units</p>
                 </div>
               </div>
@@ -706,7 +706,7 @@ export default function DealerDetail() {
             ) : (
               <div className="py-12 text-center">
                 <Store className="h-8 w-8 text-muted-foreground/50 mx-auto" />
-                <p className="mt-2 text-sm text-muted-foreground">No secondary sales recorded yet</p>
+                <p className="mt-2 text-sm text-muted-foreground">No dealer sales to shops yet</p>
                 <p className="text-xs text-muted-foreground">Track what this dealer sells to retailers</p>
               </div>
             )}
@@ -723,14 +723,14 @@ export default function DealerDetail() {
       <Dialog open={ssOpen} onOpenChange={setSsOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base md:text-lg">Record Secondary Sale</DialogTitle>
+            <DialogTitle className="text-base md:text-lg">Add dealer sale to shop</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Track what {dealer.name} sold to a retailer
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs md:text-sm">Retailer Name</Label>
+              <Label className="text-xs md:text-sm">Shop name</Label>
               <Input value={ssForm.retailerName} onChange={(e) => setSsForm({ ...ssForm, retailerName: e.target.value })} placeholder="e.g. Ganesh Kirana Store" className="h-10 rounded-lg" />
             </div>
             <div className="space-y-1.5">
@@ -757,7 +757,7 @@ export default function DealerDetail() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs md:text-sm">Remarks (optional)</Label>
+              <Label className="text-xs md:text-sm">Notes (optional)</Label>
               <Input value={ssForm.remarks} onChange={(e) => setSsForm({ ...ssForm, remarks: e.target.value })} placeholder="Any notes..." className="h-10 rounded-lg" />
             </div>
           </div>
@@ -793,7 +793,7 @@ export default function DealerDetail() {
       <AlertDialog open={!!deleteSecondarySaleId} onOpenChange={() => setDeleteSecondarySaleId(null)}>
         <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Secondary Sale</AlertDialogTitle>
+            <AlertDialogTitle>Remove dealer sale to shop</AlertDialogTitle>
             <AlertDialogDescription>
               Remove this secondary sale record? This action cannot be undone.
             </AlertDialogDescription>

@@ -106,7 +106,7 @@ export function SalesTeamReport() {
         onExcel={() =>
           exportXlsx(
             xlsxFilename("sales-team-report"),
-            ["Name", "Region", "Phone", "Orders", "Revenue"],
+            ["Name", "Region", "Phone", "Orders", "Sales"],
             data.map((s) => [s.name, s.region, s.phone, String(s.orderCount), formatCurrency(s.revenue)])
           )
         }
@@ -193,7 +193,7 @@ export function SalesTeamReport() {
               { header: "Name", width: "30%" },
               { header: "Region", width: "25%" },
               { header: "Orders", width: "15%", align: "right" },
-              { header: "Revenue", width: "30%", align: "right" },
+              { header: "Sales", width: "30%", align: "right" },
             ],
             rows: data.map((s) => [s.name, s.region, String(s.orderCount), formatCurrencyPdf(s.revenue)]),
           });

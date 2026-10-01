@@ -78,7 +78,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
     return (
       <CommandEmptyState
         icon={LineChartIcon}
-        title="No revenue in this period yet"
+        title="No sales in this period yet"
         hint="Dispatched orders will plot here once they ship."
       />
     );
