@@ -23,9 +23,9 @@
 - [x] Stock low count per product; Reference hidden on Cash; clearer sort arrows; unpaid-by-age gap explained
 - [x] Returns: same bill line twice rejected
 - [x] Sales trend excludes cancelled, subtracts offers
-- [ ] New-order offer preview must match server (non-combinable pick, repeated product lines) — needs OK
-- [ ] Product-specific discounts spread across other GST rates on bill — needs OK (changes future bills)
-- [ ] Credit check / advance cap use pre-GST value — needs OK
+- [x] New-order offer preview must match server (non-combinable pick, repeated product lines)
+- [x] Product-specific discounts spread across other GST rates on bill
+- [x] Credit check / advance cap use pre-GST value
 - [ ] Split returns can leave ₹1 rounding owed
 - [ ] Custom date range starts 05:30 IST; comparison windows overlap
 - [ ] 192 legacy 13-Apr bills: header tax rounded to rupee (grand totals correct; bills immutable — leave)
