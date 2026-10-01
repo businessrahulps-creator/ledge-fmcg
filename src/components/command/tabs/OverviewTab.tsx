@@ -92,7 +92,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
         const p = products.find((x) => x.id === id);
         return {
           id,
-          name: skuName.get(id) || p?.name || "Unknown SKU",
+          name: skuName.get(id) || p?.name || "Unknown product",
           primary: formatCurrency(v),
           secondary: p?.sku,
         };
@@ -265,7 +265,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
               title="Top products"
               icon={Package}
               rows={computed.topSkus}
-              emptyTitle="No SKU revenue yet this period"
+              emptyTitle="No product sales yet this period"
               viewAllHref="/stock"
             />
             <ActivityFeed orders={orders} claims={claims} />
