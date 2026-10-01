@@ -121,7 +121,7 @@ export function ReportPdf({
               ))}
             </View>
             {blocks.map((b, bi) => (
-              <View key={bi}>
+              <View key={bi} wrap>
                 {b.name ? (
                   <View style={[s.tableRow, { backgroundColor: "#EDEDED" }]} wrap={false} minPresenceAhead={40}>
                     <Text style={[s.tableCellBold, { width: "100%" }]}>{b.name} · {b.rows.length} row{b.rows.length === 1 ? "" : "s"}</Text>
@@ -132,7 +132,6 @@ export function ReportPdf({
                     key={ri}
                     style={ri % 2 === 1 ? s.tableRowAlt : s.tableRow}
                     wrap={false}
-                    minPresenceAhead={24}
                   >
                     {row.map((cell, ci) => (
                       <Text

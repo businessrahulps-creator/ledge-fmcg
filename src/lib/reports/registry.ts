@@ -174,6 +174,97 @@ export const REPORTS: ReportDef[] = [
     },
   },
   {
+    id: "money_by_age", group: "Money", title: "Money to collect by age", capability: "see_money", usesDates: false,
+    description: "How long each dealer's unpaid money has been waiting: 0–30, 31–60, 61–90, 90+ days.",
+    columns: [
+      { key: "dealer", header: "Dealer", weight: 2.2 }, { key: "b0", header: "0–30 days", type: "money", total: true },
+      { key: "b31", header: "31–60 days", type: "money", total: true }, { key: "b61", header: "61–90 days", type: "money", total: true },
+      { key: "b90", header: "90+ days", type: "money", total: true }, { key: "unpaid", header: "Unpaid", type: "money", total: true },
+    ],
+    fetch: async () => {
+      const today = Date.parse(TODAY() + "T00:00:00+05:30");
+      const d = await fetchAll((a, b) => db.from("distributors").select("id,name,outstanding_amount").gt("outstanding_amount", 0).order("outstanding_amount", { ascending: false }).range(a, b));
+      const ids = new Set(d.map((x: any) => x.id));
+      const ord = await fetchAll((a, b) => db.from("orders").select("distributor_id,date,total,scheme_savings").is("cancelled_at", null).order("date", { ascending: false }).range(a, b));
+      const byDealer = new Map<string, any[]>();
+      for (const o of ord) if (ids.has(o.distributor_id)) { const l = byDealer.get(o.distributor_id) ?? []; l.push(o); byDealer.set(o.distributor_id, l); }
+      // Unpaid money (from the dealer balance) is matched to the newest orders first; older orders count as paid.
+      return one(d.map((x: any) => {
+        let left = n(x.outstanding_amount); const r: ReportRow = { dealer: x.name, b0: 0, b31: 0, b61: 0, b90: 0, unpaid: r2(left) };
+        for (const o of byDealer.get(x.id) ?? []) {
+          if (left <= 0) break;
+          const amt = Math.min(left, n(o.total) - n(o.scheme_savings)); if (amt <= 0) continue;
+          const age = Math.floor((today - Date.parse(o.date + "T00:00:00+05:30")) / 86400000);
+          const k = age > 90 ? "b90" : age > 60 ? "b61" : age > 30 ? "b31" : "b0";
+          r[k] = r2(n(r[k]) + amt); left -= amt;
+        }
+        if (left > 0.004) r.b90 = r2(n(r.b90) + left); // opening balance or older than any order
+        return r;
+      }));
+    },
+    summary: rows => [
+      { label: "Total unpaid", value: sumBy(rows, "unpaid"), kind: "money" },
+      { label: "Over 90 days", value: sumBy(rows, "b90"), kind: "money" },
+      { label: "Dealers over 90 days", value: rows.filter(r => n(r.b90) > 0).length, kind: "number" },
+    ],
+    note: rows => { const c = rows.filter(r => n(r.b90) > 0).length; return c ? `${c} dealer${c === 1 ? "" : "s"} have money waiting over 90 days. Call them first.` : null; },
+  },
+  {
+    id: "dealer_accounts", group: "Money", title: "Dealer account summary", capability: "see_money", usesDates: true,
+    description: "For each dealer: ordered, paid and returned in these dates, and what they owe today.",
+    columns: [
+      { key: "dealer", header: "Dealer", weight: 2.4 }, { key: "ordered", header: "Ordered", type: "money", total: true },
+      { key: "paid", header: "Paid", type: "money", total: true }, { key: "returned", header: "Returned", type: "money", total: true },
+      { key: "unpaid", header: "Owes today", type: "money", total: true },
+    ],
+    fetch: async p => {
+      const [d, ord, pay, cn] = await Promise.all([
+        fetchAll((a, b) => db.from("distributors").select("id,name,outstanding_amount").order("name").range(a, b)),
+        liveOrdersRaw(p),
+        fetchAll((a, b) => db.from("invoice_payments").select("distributor_id,amount").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("credit_notes").select("distributor_id,grand_total").gte("note_date", p.from).lte("note_date", p.to).range(a, b)),
+      ]);
+      const add = (m: Map<string, number>, k: string, v: number) => m.set(k, r2((m.get(k) ?? 0) + v));
+      const o = new Map<string, number>(), py = new Map<string, number>(), c = new Map<string, number>();
+      ord.forEach((x: any) => add(o, x.distributor_id, n(x.total) - n(x.scheme_savings)));
+      pay.forEach((x: any) => add(py, x.distributor_id, n(x.amount)));
+      cn.forEach((x: any) => add(c, x.distributor_id, n(x.grand_total)));
+      return one(d.map((x: any) => ({ dealer: x.name, ordered: o.get(x.id) ?? 0, paid: py.get(x.id) ?? 0, returned: c.get(x.id) ?? 0, unpaid: r2(Math.max(0, n(x.outstanding_amount))) }))
+        .filter(r => r.ordered || r.paid || r.returned || r.unpaid));
+    },
+  },
+  {
+    id: "day_book", group: "Money", title: "Day book", capability: "see_money", usesDates: true,
+    description: "Everything that moved money, day by day: bills, payments in and out, returns.",
+    columns: [
+      { key: "date", header: "Date", type: "date" }, { key: "type", header: "What", weight: 1.4 }, { key: "ref", header: "No.", weight: 1.6 },
+      { key: "party", header: "Dealer / supplier", weight: 2 }, { key: "in", header: "Money in", type: "money", total: true },
+      { key: "out", header: "Money out", type: "money", total: true }, { key: "billed", header: "Bill value", type: "money", total: true },
+    ],
+    fetch: async p => {
+      const [bills, pay, cn, pb, sp] = await Promise.all([
+        salesBills(p),
+        fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,distributors(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("credit_notes").select("credit_note_number,note_date,grand_total,distributors(name)").gte("note_date", p.from).lte("note_date", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("purchase_bills").select("bill_date,supplier_name,supplier_bill_no,grand_total").neq("status", "cancelled").gte("bill_date", p.from).lte("bill_date", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("supplier_payments").select("paid_on,amount,mode,suppliers(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
+      ]);
+      const rows: ReportRow[] = [
+        ...bills.map((x: any) => ({ date: x.invoice_date, type: "Sales bill", ref: x.invoice_number, party: x.buyer_name, in: null, out: null, billed: r2(x.grand_total) })),
+        ...pay.map((x: any) => ({ date: x.paid_on, type: `Payment in (${modeWord[x.mode] ?? x.mode})`, ref: "", party: x.distributors?.name ?? "", in: r2(x.amount), out: null, billed: null })),
+        ...cn.map((x: any) => ({ date: x.note_date, type: "Credit note", ref: x.credit_note_number, party: x.distributors?.name ?? "", in: null, out: null, billed: -r2(x.grand_total) })),
+        ...pb.map((x: any) => ({ date: x.bill_date, type: "Purchase bill", ref: x.supplier_bill_no, party: x.supplier_name, in: null, out: null, billed: null })),
+        ...sp.map((x: any) => ({ date: x.paid_on, type: `Paid supplier (${modeWord[x.mode] ?? x.mode})`, ref: "", party: x.suppliers?.name ?? "", in: null, out: r2(x.amount), billed: null })),
+      ].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      return one(rows);
+    },
+    summary: rows => [
+      { label: "Money in", value: sumBy(rows, "in"), kind: "money" },
+      { label: "Money out", value: sumBy(rows, "out"), kind: "money" },
+      { label: "Net", value: r2(sumBy(rows, "in") - sumBy(rows, "out")), kind: "money" },
+    ],
+  },
+  {
     id: "cancelled_payments", group: "Money", title: "Cancelled payments", capability: "see_money", usesDates: true,
     description: "Payments that were entered by mistake and cancelled, with the reason.",
     columns: [
@@ -223,6 +314,32 @@ export const REPORTS: ReportDef[] = [
       const word: Record<string, string> = { dispatch: "Sent to dealer", purchase: "Bought", purchase_return: "Returned to supplier", return_restock: "Returned by dealer", manual_adjust: "Adjusted", adjustment: "Adjusted", opening: "Opening stock", dispatch_reversal: "Sending undone", purchase_cancel: "Bill cancelled" };
       return one(rows.map((x: any) => ({ date: new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(x.created_at)), product: x.products?.name ?? "", godown: x.godowns?.name ?? "", type: word[x.movement_type] ?? x.movement_type, change: n(x.delta), note: x.note })));
     },
+  },
+
+  {
+    id: "slow_moving", group: "Stock", title: "Slow-moving stock", capability: null, usesDates: false,
+    description: "Items in stock that haven't been sent to any dealer in the last 60 days.",
+    columns: [
+      { key: "product", header: "Item", weight: 3 }, { key: "godown", header: "Godown" }, { key: "qty", header: "In stock", type: "number", total: true },
+      { key: "last", header: "Last sent", type: "date" }, { key: "value", header: "Value (avg cost)", type: "money", total: true },
+    ],
+    fetch: async () => {
+      const since = new Date(Date.now() - 60 * 86400000).toISOString();
+      const [items, mv] = await Promise.all([
+        fetchAll((a, b) => db.from("stock_items").select("product_id,godown_id,quantity,products(name,avg_cost,item_kind),godowns(name)").gt("quantity", 0).range(a, b)),
+        fetchAll((a, b) => db.from("stock_movements").select("product_id,godown_id,created_at").eq("movement_type", "dispatch").order("created_at", { ascending: false }).range(a, b)),
+      ]);
+      const last = new Map<string, string>();
+      for (const m of mv) { const k = m.product_id + "|" + m.godown_id; if (!last.has(k)) last.set(k, m.created_at); }
+      return one(items.filter((x: any) => x.products?.item_kind !== "raw_material").map((x: any) => ({ x, l: last.get(x.product_id + "|" + x.godown_id) }))
+        .filter(({ l }) => !l || l < since)
+        .map(({ x, l }) => ({ product: x.products?.name ?? "", godown: x.godowns?.name ?? "", qty: n(x.quantity), last: l ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(l)) : null, value: r2(n(x.quantity) * n(x.products?.avg_cost)) }))
+        .sort((a, b) => b.value - a.value));
+    },
+    summary: rows => [
+      { label: "Slow items", value: rows.length, kind: "number" },
+      { label: "Money stuck in them", value: sumBy(rows, "value"), kind: "money" },
+    ],
   },
 
   // ───────── Buying
@@ -368,7 +485,39 @@ export const REPORTS: ReportDef[] = [
       { label: "Promises broken", value: rows.filter(r => r.status === "Didn't happen").length, kind: "number" },
     ],
   },
+  {
+    id: "salesperson_targets", group: "Team", title: "Salesperson vs target", capability: "see_money", usesDates: true,
+    description: "Monthly sales target for each salesperson against what they actually sold.",
+    columns: [
+      { key: "month", header: "Month" }, { key: "salesperson", header: "Salesperson", weight: 2 },
+      { key: "target", header: "Target", type: "money", total: true }, { key: "actual", header: "Sold", type: "money", total: true },
+      { key: "pct", header: "% done", type: "number" },
+    ],
+    fetch: async p => {
+      const mFrom = p.from.slice(0, 7) + "-01";
+      const t = await fetchAll((a, b) => db.from("targets").select("entity_id,entity_name,period_start,target_revenue").eq("entity_type", "salesperson").eq("period_type", "monthly").gte("period_start", mFrom).lte("period_start", p.to).order("period_start").range(a, b));
+      const last = (k: string) => { const [y, m] = k.split("-").map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); };
+      const ord = t.length ? await liveOrdersRaw({ from: mFrom, to: last(t[t.length - 1].period_start.slice(0, 10)) }) : [];
+      const sold = new Map<string, number>();
+      ord.forEach((o: any) => { const k = o.salesperson_id + "|" + String(o.date).slice(0, 7); sold.set(k, (sold.get(k) ?? 0) + n(o.total) - n(o.scheme_savings)); });
+      return one(t.map((x: any) => {
+        const month = String(x.period_start).slice(0, 7); const actual = r2(sold.get(x.entity_id + "|" + month) ?? 0);
+        const [y, m] = month.split("-").map(Number);
+        return { month: new Date(Date.UTC(y, m - 1, 1)).toLocaleString("en-IN", { month: "short", year: "numeric", timeZone: "UTC" }), salesperson: x.entity_name, target: r2(x.target_revenue), actual, pct: n(x.target_revenue) ? Math.round(actual / n(x.target_revenue) * 100) : 0 };
+      }));
+    },
+    summary: rows => [
+      { label: "Target", value: sumBy(rows, "target"), kind: "money" },
+      { label: "Sold", value: sumBy(rows, "actual"), kind: "money" },
+      { label: "Met target", value: rows.filter(r => n(r.pct) >= 100).length, kind: "number" },
+    ],
+  },
 ];
+
+async function liveOrdersRaw(p: ReportParams): Promise<any[]> {
+  return fetchAll((a, b) => db.from("orders").select("distributor_id,salesperson_id,date,total,scheme_savings").is("cancelled_at", null).gte("date", p.from).lte("date", p.to).range(a, b));
+}
+const TODAY = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 
 async function stockRows(): Promise<ReportRow[]> {
   const rows = await fetchAll((a, b) => db.from("stock_items").select("quantity,threshold,products(name,sku,unit,avg_cost,base_price),godowns(name)").range(a, b));
