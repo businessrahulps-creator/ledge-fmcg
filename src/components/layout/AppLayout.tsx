@@ -18,7 +18,7 @@ import { prefetchRoute } from "@/lib/route-prefetch";
 import { ShellContext, markShellMounted, shellMountedCount } from "./shell-context";
 
 
-import { RotateCcw, Target, ShoppingBasket } from "lucide-react";
+import { RotateCcw, Target, ShoppingBasket, Store } from "lucide-react";
 import { getQueue, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
     label: "Work",
     items: [
       { title: "Today's work", url: "/today", icon: CircleDot, cap: "see_money" },
+      { title: "Shop visits", url: "/visits", icon: Store },
       { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
       { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "see_money" },
@@ -93,6 +94,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/targets": "Targets",
   "/claims": "Returns",
   "/buying": "Buying",
+  "/visits": "Shop visits",
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",

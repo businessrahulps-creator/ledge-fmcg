@@ -17,6 +17,7 @@ import {
   Wallet,
   ListTodo,
   ShoppingBasket,
+  Store,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,7 @@ const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
   { title: "Today's work", url: "/today", icon: ListTodo, cap: "see_money" },
   { title: "Orders", url: "/orders", icon: ClipboardList },
+  { title: "Shop visits", url: "/visits", icon: Store },
   { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
   { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
   { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "see_money" },

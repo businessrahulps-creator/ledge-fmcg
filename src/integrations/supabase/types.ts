@@ -2144,6 +2144,160 @@ export type Database = {
           },
         ]
       }
+      shop_prospects: {
+        Row: {
+          area: string
+          company_id: string
+          converted_distributor_id: string | null
+          created_at: string
+          created_by: string
+          created_by_name: string
+          id: string
+          name: string
+          note: string
+          owner_name: string
+          phone: string
+          shop_type: string
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          area?: string
+          company_id: string
+          converted_distributor_id?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          id?: string
+          name: string
+          note?: string
+          owner_name?: string
+          phone?: string
+          shop_type?: string
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          company_id?: string
+          converted_distributor_id?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          id?: string
+          name?: string
+          note?: string
+          owner_name?: string
+          phone?: string
+          shop_type?: string
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_prospects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_prospects_converted_distributor_id_fkey"
+            columns: ["converted_distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "shop_prospects_converted_distributor_id_fkey"
+            columns: ["converted_distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "shop_prospects_converted_distributor_id_fkey"
+            columns: ["converted_distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_visits: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          created_by_name: string
+          distributor_id: string
+          id: string
+          note: string
+          outcome: string
+          promise_amount: number | null
+          promise_date: string | null
+          promise_status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          distributor_id: string
+          id?: string
+          note?: string
+          outcome: string
+          promise_amount?: number | null
+          promise_date?: string | null
+          promise_status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          created_by_name?: string
+          distributor_id?: string
+          id?: string
+          note?: string
+          outcome?: string
+          promise_amount?: number | null
+          promise_date?: string | null
+          promise_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_visits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_visits_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_aging"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "shop_visits_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "dealer_balances"
+            referencedColumns: ["distributor_id"]
+          },
+          {
+            foreignKeyName: "shop_visits_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signal_acknowledgements: {
         Row: {
           actor: string
@@ -2860,6 +3014,10 @@ export type Database = {
         Returns: Json
       }
       check_aging_transitions: { Args: never; Returns: Json }
+      convert_prospect_to_dealer_atomic: {
+        Args: { p_prospect_id: string }
+        Returns: Json
+      }
       dealer_outstanding: { Args: { p_dealer: string }; Returns: number }
       delete_godown_atomic: { Args: { p_godown_id: string }; Returns: Json }
       delete_member_atomic: {

@@ -134,6 +134,13 @@
       "when": 1790843352645,
       "tag": "0018_buying_module",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790846300996,
+      "tag": "0019_shop_visits_crm",
+      "breakpoints": true
     }
   ]
 }

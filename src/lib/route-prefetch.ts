@@ -26,6 +26,7 @@ export const routeImporters = {
   "/command": () => import("@/pages/Command"),
   "/today": () => import("@/pages/Today"),
   "/buying": () => import("@/pages/Buying"),
+  "/visits": () => import("@/pages/ShopVisits"),
   "/settings": () => import("@/pages/Settings"),
   "/billing": () => import("@/pages/Billing"),
   "/help": () => import("@/pages/Help"),

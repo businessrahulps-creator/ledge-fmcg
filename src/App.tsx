@@ -52,6 +52,7 @@ const Targets = lazy(routeImporters["/targets"] as any);
 const Command = lazy(routeImporters["/command"] as any);
 const Today = lazy(routeImporters["/today"] as any);
 const Buying = lazy(routeImporters["/buying"] as any);
+const ShopVisits = lazy(routeImporters["/visits"] as any);
 const PurchaseBillNew = lazy(() => import("@/pages/PurchaseBillNew"));
 const PurchaseBillDetail = lazy(() => import("@/pages/PurchaseBillDetail"));
 const SupplierDetail = lazy(() => import("@/pages/SupplierDetail"));
@@ -196,6 +197,7 @@ const App = () => (
                   <Route path="/salespersons/:id" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><SalespersonDetail /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/salespersons" element={<PageErrorBoundary><DelayedSuspense fallback={SalespersonsFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/schemes" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Schemes /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/visits" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><ShopVisits /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/targets" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/claims" element={<RequireCapability capability="see_money" message="Returns and credit notes aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/buying" element={<RequireCapability capability="see_money" message="Buying isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Buying /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
