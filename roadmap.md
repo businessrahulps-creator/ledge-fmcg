@@ -4,9 +4,11 @@
 - [x] Button: press scale + `loading` spinner
 - [x] UsageMeter on dealer page (credit limit used)
 - [x] New primitives: CopyButton, HoldToConfirm, Sparkline, UsageMeter, SegmentedControl, AnimatedCounter (existing animated-number)
-- [ ] Apply CopyButton to bill numbers / GSTIN / phones
+- [x] CopyButton on dealer phone
+- [ ] CopyButton on GSTIN / bill numbers
 - [x] `loading` on Save order
-- [ ] `loading` on Record payment, Send bill
+- [x] `loading` on Record payment, Cancel payment, and every "Saving…" button (dealers, team, products, godowns, stock, order edit)
+- [ ] `loading` on Send bill
 - [ ] HoldToConfirm on Cancel order / Void bill (reason + audit stay)
 - [ ] My Business metrics-dashboard style top (tile tabs + chart + compare)
 - [ ] Phone forms: combobox, date range, bottom sheet, swipe actions
