@@ -93,7 +93,7 @@ function ForecastPanel({ today }: { today: string }) {
   const orders = useApi().orders.list();
   const f = useMemo(() => forecastNext4Weeks(orders, today), [orders, today]);
   const [showTable, setShowTable] = useState(false);
-  if (!f.ok) {
+  if ("reason" in f) {
     return <Panel title="Sales likely in the next 4 weeks"><Empty text={notReadyText(f)} /></Panel>;
   }
   const wk = f.total / 4;
