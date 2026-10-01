@@ -87,6 +87,8 @@ export function ReportPdf({
           logoUrl={logoUrl}
         />
 
+        {meta ? <Text style={{ fontSize: 7.5, color: "#5C6370", marginTop: -6, marginBottom: 10 }}>{meta}</Text> : null}
+
         {showSummary && summary.length > 0 && (
           <View style={s.summaryRow} wrap={false}>
             {summary.map((item, i) => (
@@ -118,35 +120,48 @@ export function ReportPdf({
                 </Text>
               ))}
             </View>
-            {rows.map((row, ri) => (
-              <View
-                key={ri}
-                style={ri % 2 === 1 ? s.tableRowAlt : s.tableRow}
-                wrap={false}
-                minPresenceAhead={24}
-              >
-                {row.map((cell, ci) => (
-                  <Text
-                    key={ci}
-                    style={[
-                      columns[ci]?.align === "right" ? s.tableCellRight : s.tableCell,
-                      { width: columns[ci]?.width || "auto" },
-                    ]}
+            {blocks.map((b, bi) => (
+              <View key={bi}>
+                {b.name ? (
+                  <View style={[s.tableRow, { backgroundColor: "#EDEDED" }]} wrap={false} minPresenceAhead={40}>
+                    <Text style={[s.tableCellBold, { width: "100%" }]}>{b.name} · {b.rows.length} row{b.rows.length === 1 ? "" : "s"}</Text>
+                  </View>
+                ) : null}
+                {b.rows.map((row, ri) => (
+                  <View
+                    key={ri}
+                    style={ri % 2 === 1 ? s.tableRowAlt : s.tableRow}
+                    wrap={false}
+                    minPresenceAhead={24}
                   >
-                    {cell}
-                  </Text>
+                    {row.map((cell, ci) => (
+                      <Text
+                        key={ci}
+                        style={[
+                          columns[ci]?.align === "right" ? s.tableCellRight : s.tableCell,
+                          { width: columns[ci]?.width || "auto" },
+                        ]}
+                      >
+                        {cell}
+                      </Text>
+                    ))}
+                  </View>
                 ))}
+                {b.subtotal ? boldRow(b.subtotal, `sub-${bi}`) : null}
               </View>
             ))}
-            {rows.length === 0 && (
+            {blocks.every(b => b.rows.length === 0) && (
               <View style={s.tableRow}>
                 <Text style={[s.tableCell, { width: "100%", textAlign: "center", color: "#8A93A3" }]}>
-                  No data
+                  Nothing in these dates
                 </Text>
               </View>
             )}
+            {totalsRow ? boldRow(totalsRow, "grand", true) : null}
           </View>
         )}
+
+        {note ? <Text style={{ fontSize: 8.5, marginTop: 4 }} wrap={false}>{note}</Text> : null}
 
         <PdfFooter />
       </Page>
