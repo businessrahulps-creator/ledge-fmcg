@@ -818,16 +818,9 @@ export default function NewOrder() {
                 className="w-full shadow-lg md:shadow-none"
                 size="lg"
                 onClick={handleSave}
-                disabled={isSaving}
+                loading={isSaving}
               >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>Save Order</>
-                )}
+                {isSaving ? "Saving…" : "Save order"}
               </Button>
             </div>
           </div>
