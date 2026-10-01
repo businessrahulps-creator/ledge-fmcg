@@ -333,6 +333,8 @@ export async function batchIn(table: string, column: string, ids: string[]) {
 // time using `.range(from, to)` until we get a short page. Pass a `build`
 // function that returns the base query (filters + ordering applied) — we'll
 // add the range each iteration. `label` identifies the query in warnings.
+export const FETCH_PAGE_TIMEOUT_MS = 20_000;
+
 export async function fetchAllChunked<T = any>(
   build: () => any,
   pageSize = 1000,
@@ -345,8 +347,21 @@ export async function fetchAllChunked<T = any>(
   for (let page = 0; page < maxPages; page++) {
     const from = page * pageSize;
     const to = from + pageSize - 1;
-    const { data, error } = await build().range(from, to);
-    if (error) throw error;
+    // A phone waking from the background can leave a request hanging forever,
+    // which kept screens on "Refreshing…". Give each page a time limit so the
+    // caller's retry/cache fallback can take over.
+    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), FETCH_PAGE_TIMEOUT_MS) : null;
+    let res: { data: unknown; error: unknown };
+    try {
+      let q = build().range(from, to);
+      if (ctrl && typeof q.abortSignal === "function") q = q.abortSignal(ctrl.signal);
+      res = await q;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+    const { data, error } = res as { data: unknown; error: any };
+    if (error) throw ctrl?.signal.aborted ? new Error(`Loading ${label || "data"} took too long`) : error;
     const rows = (data || []) as T[];
     results.push(...rows);
     pages++;
