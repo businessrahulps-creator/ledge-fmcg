@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Phone } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
@@ -34,13 +35,13 @@ export default function SupplierDetail() {
     <AppLayout>
       <PageHeader
         title={s.name}
-        subtitle={[s.phone, s.address].filter(Boolean).join(" · ") || "Supplier"}
+        subtitle={<span className="inline-flex flex-wrap items-center gap-1">{s.phone && <><Phone className="h-3 w-3" />{s.phone}<CopyButton value={s.phone} label="Copy phone number" />{s.address && " · "}</>}{s.address || (!s.phone && "Supplier")}</span>}
         breadcrumbs={[{ label: "Buying", to: "/buying?tab=suppliers" }, { label: s.name }]}
         actions={
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline" onClick={() => setEditOpen(true)}>Edit</Button>
             <Button variant="outline" onClick={() => navigate(`/buying/new?supplier=${s.id}`)}>Add purchase bill</Button>
-            <Button onClick={() => setPayOpen(true)} disabled={owed <= 0}>Pay supplier</Button>
+            <Button onClick={() => setPayOpen(true)} disabled={owed <= 0} title={owed <= 0 ? "Nothing to pay right now" : undefined}>Pay supplier</Button>
           </div>
         }
       />

@@ -68,9 +68,10 @@ export default function PurchaseBillDetail() {
         subtitle={`${bill.supplierName} · ${fmtDate(bill.billDate)} · ${godowns.find(g => g.id === bill.godownId)?.name || "Godown"}`}
         breadcrumbs={[{ label: "Buying", to: "/buying" }, { label: `Bill ${bill.supplierBillNo}` }]}
         actions={!cancelled && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {canReturn && <Button variant="outline" onClick={() => setReturnOpen(true)}>Return to supplier</Button>}
-            {myReturns.length === 0 && <Button variant="outline" onClick={() => setCancelOpen(true)}>Cancel bill</Button>}
+            {myReturns.length === 0 && (!st || st.status === "unpaid") && <Button variant="outline" onClick={() => setCancelOpen(true)}>Cancel bill</Button>}
+            {myReturns.length === 0 && st && st.status !== "unpaid" && <span className="text-xs text-muted-foreground">Already paid, so it can't be cancelled. Use Return to supplier instead.</span>}
           </div>
         )}
       />
@@ -94,7 +95,7 @@ export default function PurchaseBillDetail() {
                 <li key={l.id} className="flex justify-between gap-3 px-4 py-3 text-sm">
                   <div className="min-w-0">
                     <p className="font-medium">{l.product_name}</p>
-                    <p className="text-xs text-muted-foreground">{l.quantity} {l.unit} × {formatCurrency(l.rate)} · GST {l.gst_rate}%{back > 0 && ` · ${back} returned`}</p>
+                    <p className="text-xs text-muted-foreground">{l.quantity} {l.unit} × ₹{Number(l.rate).toLocaleString("en-IN", { maximumFractionDigits: 2 })} · GST {l.gst_rate}%{back > 0 && ` · ${back} returned`}</p>
                   </div>
                   <p className="num tabular-nums shrink-0">{formatCurrency(l.line_total)}</p>
                 </li>
@@ -102,6 +103,7 @@ export default function PurchaseBillDetail() {
             })}
           </ul>
           <div className="border-t border-border px-4 py-3 text-sm space-y-1 num tabular-nums">
+            {myReturns.length > 0 && <p className="text-[11px] text-muted-foreground">As first billed. See "Returned to supplier" below for what came off.</p>}
             <div className="flex justify-between"><span className="text-muted-foreground">Amount before GST</span><span>{formatCurrency(bill.subtotal)}</span></div>
             {bill.supplyType === "inter" ? <div className="flex justify-between"><span className="text-muted-foreground">IGST</span><span>{formatCurrency(bill.igst)}</span></div>
               : <><div className="flex justify-between"><span className="text-muted-foreground">CGST</span><span>{formatCurrency(bill.cgst)}</span></div><div className="flex justify-between"><span className="text-muted-foreground">SGST</span><span>{formatCurrency(bill.sgst)}</span></div></>}
@@ -170,7 +172,7 @@ function ReturnDialog({ open, onOpenChange, billId, billDate, lines, returnedByL
           })}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label>Return date</Label><Input aria-label="Return date" type="date" value={date} min={billDate} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Reason</Label><Input aria-label="Reason" value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Damaged" /></div>
+            <div className="space-y-1.5"><Label>Reason (optional)</Label><Input aria-label="Reason (optional)" value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Damaged" /></div>
           </div>
           <p className="text-sm">You'll owe about <span className="font-semibold num tabular-nums">{formatCurrency(est)}</span> less (including GST).</p>
           <DialogFooter>
