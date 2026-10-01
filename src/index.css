@@ -205,20 +205,20 @@
   /* ── Editorial type system ── */
   .h1-display {
     font-family: var(--font-heading);
-    font-weight: 500;
-    font-size: 28px;
-    line-height: 1.05;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.15;
     letter-spacing: -0.02em;
     color: hsl(var(--foreground));
   }
   @media (min-width: 768px) {
-    .h1-display { font-size: 34px; }
+    .h1-display { font-size: 28px; }
   }
   .h2-display {
     font-family: var(--font-heading);
-    font-weight: 500;
-    font-size: 22px;
-    line-height: 1.15;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.25;
     letter-spacing: -0.01em;
     color: hsl(var(--foreground));
   }
@@ -1919,6 +1919,8 @@
 }
 
 .lp-theme {
+  /* The public website keeps its serif headings. */
+  --font-heading: 'Playfair Display', Georgia, serif;
   /* ── Semantic remap ── */
   --background: var(--brand-mist);
   --foreground: var(--brand-ink);
@@ -2724,11 +2726,24 @@
 
 @layer components {
   /* ── The one loud block ───────────────────────────────────────── */
+  /* Monochrome: the band is now a white bordered panel. Inverting the two
+     tokens locally flips every text-primary-foreground inside to near-black
+     without rewriting each screen. */
   .hero-band {
-    @apply relative overflow-hidden rounded-lg text-primary-foreground shadow-[var(--shadow-8)];
-    background-image: var(--gradient-hero);
-    background-color: hsl(var(--primary));
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 9%;
+    --hero-good: 142 64% 30%;
+    --hero-attention: 25 85% 42%;
+    @apply relative overflow-hidden rounded-lg border border-border text-primary-foreground;
+    background-color: hsl(var(--card));
   }
+  .hero-band .hero-band-label,
+  .hero-band .hero-band-eyebrow {
+    @apply normal-case tracking-normal text-[13px] font-medium;
+    color: hsl(0 0% 42%) !important;
+  }
+  .hero-band .hero-band-value-primary { @apply font-semibold tracking-tight; }
+  .hero-band .hero-band-title { @apply font-semibold tracking-tight; }
   .hero-band-inner {
     @apply relative space-y-5 px-4 py-5 md:px-7 md:py-7;
   }
