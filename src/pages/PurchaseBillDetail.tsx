@@ -95,7 +95,7 @@ export default function PurchaseBillDetail() {
                 <li key={l.id} className="flex justify-between gap-3 px-4 py-3 text-sm">
                   <div className="min-w-0">
                     <p className="font-medium">{l.product_name}</p>
-                    <p className="text-xs text-muted-foreground">{l.quantity} {l.unit} × {formatCurrency(l.rate)} · GST {l.gst_rate}%{back > 0 && ` · ${back} returned`}</p>
+                    <p className="text-xs text-muted-foreground">{l.quantity} {l.unit} × ₹{Number(l.rate).toLocaleString("en-IN", { maximumFractionDigits: 2 })} · GST {l.gst_rate}%{back > 0 && ` · ${back} returned`}</p>
                   </div>
                   <p className="num tabular-nums shrink-0">{formatCurrency(l.line_total)}</p>
                 </li>
