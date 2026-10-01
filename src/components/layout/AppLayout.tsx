@@ -52,6 +52,7 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
       { title: "Today's work", url: "/today", icon: CircleDot, cap: "see_money" },
       { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
+      { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "see_money" },
     ],
   },
   {
@@ -91,6 +92,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/schemes": "Schemes",
   "/targets": "Targets",
   "/claims": "Returns",
+  "/buying": "Buying",
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",

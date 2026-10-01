@@ -52,6 +52,7 @@ const workNav: NavItem[] = [
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
   { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
+  { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "see_money" },
 ];
 
 const catalogNav: NavItem[] = [
