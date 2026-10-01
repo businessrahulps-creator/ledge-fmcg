@@ -354,7 +354,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       const deletedOrder = ordersRef.current.find(o => o.id === id);
       setOrders(prev => prev.filter(o => o.id !== id));
       await deps.safeRefetchStockItems();
-      deps.log("order", id, "deleted", `Deleted order ${deletedOrder?.orderNumber || id}`);
+      void deletedOrder; // activity is written by delete_order_atomic
       return true;
     } catch (err: any) {
       if (err?.code === "23001" || err?.code === "restrict_violation" || /payment/i.test(String(err?.message || ""))) {
