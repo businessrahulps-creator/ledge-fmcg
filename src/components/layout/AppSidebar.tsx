@@ -133,13 +133,13 @@ export function AppSidebar() {
       );
     }
 
-    const rowClass = `relative flex items-center gap-3 rounded-md px-3 h-9 text-sm transition-colors hover:bg-sidebar-accent/60 ${
-      isActive ? "bg-primary/[0.06] font-semibold text-primary" : "font-medium text-foreground/75"
+    const rowClass = `relative flex items-center gap-3 rounded-md px-2.5 h-10 md:h-8 text-[13px] transition-colors hover:bg-sidebar-accent/60 ${
+      isActive ? "bg-sidebar-accent font-medium text-foreground" : "font-normal text-foreground/70"
     }`;
     const iconEl = (
       <Icon
-        className={`h-[18px] w-[18px] shrink-0 transition-colors ${isActive ? "text-primary" : "text-foreground/55"}`}
-        strokeWidth={isActive ? 2 : 1.7}
+        className={`h-[18px] w-[18px] shrink-0 transition-colors ${isActive ? "text-foreground" : "text-foreground/50"}`}
+        strokeWidth={1.75}
       />
     );
     const labelEl = <span className="tracking-[-0.005em]">{item.title}</span>;

@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 
 type StatusType = "paid" | "partial" | "pending" | "dispatched" | "delivered";
 
-// V2: status colors mapped to semantic tokens (Forest/Terracotta/Destructive/Midnight).
+// Monochrome: quiet outlined pill; colour lives only in the icon.
 const statusStyles: Record<StatusType, string> = {
-  paid: "bg-success/10 text-success",
-  partial: "bg-warning/10 text-warning border-l-2 border-warning rounded-l-[2px]",
-  pending: "bg-destructive/10 text-destructive border-l-2 border-destructive rounded-l-[2px]",
-  dispatched: "bg-primary/10 text-primary",
-  delivered: "bg-success/10 text-success",
+  paid: "[&>svg]:text-success",
+  partial: "[&>svg]:text-warning",
+  pending: "[&>svg]:text-destructive",
+  dispatched: "[&>svg]:text-muted-foreground",
+  delivered: "[&>svg]:text-success",
 };
 
 const statusLabels: Record<StatusType, string> = {
@@ -64,7 +64,7 @@ function StatusBadgeImpl({ status, className, kind = "payment" }: StatusBadgePro
       animate={pulseKey > 0 && !reduce ? { scale: [1, 1.08, 1] } : { scale: 1 }}
       transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.4, 1] }}
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium leading-[1.4] origin-center",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-medium leading-[1.4] text-foreground origin-center",
         statusStyles[status],
         className,
       )}

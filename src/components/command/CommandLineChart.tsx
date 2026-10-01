@@ -97,8 +97,8 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
           <ComposedChart data={data} margin={{ top: 20, right: 16, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="cmdActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
+                <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -139,7 +139,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
             <Area
               type="monotone"
               dataKey="actual"
-              stroke="hsl(var(--success))"
+              stroke="hsl(var(--foreground))"
               strokeWidth={2.25}
               fill="url(#cmdActual)"
               isAnimationActive={false}
@@ -148,7 +148,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
               <Line
                 type="monotone"
                 dataKey="target"
-                stroke="hsl(var(--primary))"
+                stroke="hsl(var(--muted-foreground))"
                 strokeWidth={2}
                 strokeDasharray="6 4"
                 dot={false}
@@ -159,7 +159,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
             {targetUnreachable && projectedClose > 0 && (
               <ReferenceLine
                 y={projectedClose / data.length}
-                stroke="hsl(var(--primary))"
+                stroke="hsl(var(--muted-foreground))"
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 ifOverflow="extendDomain"
@@ -177,7 +177,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
                 x={peak.label}
                 y={peak.actual}
                 r={4}
-                fill="hsl(var(--success))"
+                fill="hsl(var(--foreground))"
                 stroke="hsl(var(--background))"
                 strokeWidth={2}
                 ifOverflow="visible"
