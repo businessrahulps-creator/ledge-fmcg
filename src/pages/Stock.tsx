@@ -882,7 +882,7 @@ export default function Stock() {
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" onClick={() => setEditProduct(null)}>Cancel</Button>
-              <Button type="submit" disabled={savingProduct}>{savingProduct ? "Saving…" : isNewProduct ? "Add Product" : "Save Changes"}</Button>
+              <Button type="submit" loading={savingProduct}>{savingProduct ? "Saving…" : isNewProduct ? "Add Product" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>
@@ -926,7 +926,7 @@ export default function Stock() {
             )}
             <DialogFooter className="gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" onClick={() => setEditWarehouse(null)}>Cancel</Button>
-              <Button type="submit" disabled={savingWarehouse}>{savingWarehouse ? "Saving…" : isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
+              <Button type="submit" loading={savingWarehouse}>{savingWarehouse ? "Saving…" : isNewWarehouse ? "Add Warehouse" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>
@@ -1080,7 +1080,7 @@ export default function Stock() {
               </AlertDialog>
               <div className="grid w-full grid-cols-2 gap-2">
                 <Button type="button" variant="outline" disabled={savingStock} onClick={() => setEditStockItem(null)} className="w-full">Cancel</Button>
-                <Button type="submit" disabled={savingStock} className="w-full">{savingStock ? "Saving…" : "Save Changes"}</Button>
+                <Button type="submit" loading={savingStock} className="w-full">{savingStock ? "Saving…" : "Save Changes"}</Button>
               </div>
             </DialogFooter>
             </form>
