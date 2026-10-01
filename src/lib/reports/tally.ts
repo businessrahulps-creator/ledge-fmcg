@@ -97,7 +97,7 @@ function entryXml(e: Entry, isParty: boolean) {
 
 function voucherXml(type: string, number: string, date: string, party: string, entries: Entry[], narration = "") {
   const clean = entries.filter(e => Math.abs(e.debit) >= 0.005);
-  return `<TALLYMESSAGE xmlns:UDF="TallyUDF"><VOUCHER VCHTYPE="${type}" ACTION="Create" OBJVIEW="Accounting Voucher View"><DATE>${tdate(date)}</DATE><VOUCHERTYPENAME>${type}</VOUCHERTYPENAME><VOUCHERNUMBER>${xmlEscape(number)}</VOUCHERNUMBER><PARTYLEDGERNAME>${xmlEscape(party)}</PARTYLEDGERNAME><PERSISTEDVIEW>Accounting Voucher View</PERSISTEDVIEW><NARRATION>${xmlEscape(narration)}</NARRATION>${clean.map(e => entryXml(e, e.ledger === party)).join("")}</VOUCHER></TALLYMESSAGE>`;
+  return `<TALLYMESSAGE xmlns:UDF="TallyUDF"><VOUCHER VCHTYPE="${type}" ACTION="Create" OBJVIEW="Accounting Voucher View"><DATE>${tdate(date)}</DATE><VOUCHERTYPENAME>${type}</VOUCHERTYPENAME><VOUCHERNUMBER>${xmlEscape(number)}</VOUCHERNUMBER><PARTYLEDGERNAME>${xmlEscape(party)}</PARTYLEDGERNAME><PERSISTEDVIEW>Accounting Voucher View</PERSISTEDVIEW><NARRATION>${xmlEscape(narration)}</NARRATION>${clean.map((e, i) => entryXml(e, i === 0)).join("")}</VOUCHER></TALLYMESSAGE>`;
 }
 
 /** Ledger lines for a tax document. sign=+1 means party is debited (sale); -1 means party is credited (purchase). */
