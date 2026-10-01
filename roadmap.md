@@ -37,7 +37,8 @@
 - [x] Reports: Sales x5, Money x4, Stock x3, Buying x3, GST x4, Shop visits
 - [x] Tally: ledger names, checks, XML + Excel, only-new tracking, export history
 - [x] Added: money by age, dealer account summary, day book, slow-moving stock, salesperson vs target; Tally XML checked (174 vouchers, all balance)
-- [ ] Later: area filter, per-dealer full statement, background PDF for huge reports
+- [x] Area filter (money reports), dealer statement with running balance; money-by-age + dealer summary now use GST bills (app rule)
+- [ ] Background PDF for huge reports (only needed past ~5,000 rows)
 - [ ] Import sample XML into a real TallyPrime (needs the user's accountant)
 
 ## Vyapar ideas (plan declined — waiting for user's choice)

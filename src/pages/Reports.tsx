@@ -31,7 +31,9 @@ export default function Reports() {
   const canMoney = useCan("see_money");
   const canStock = useCan("manage_stock");
   const { profile, user, companyId } = useAuth();
-  const { companyInfo } = useData();
+  const { companyInfo, distributors } = useData();
+  const dealerOpts = useMemo(() => [...(distributors || [])].sort((a, b) => a.name.localeCompare(b.name)), [distributors]);
+  const areaOpts = useMemo(() => [...new Set((distributors || []).map(d => d.location).filter(Boolean))].sort(), [distributors]);
   const [params, setParams] = useSearchParams();
 
   const allowed = useMemo(() => REPORTS.filter(r => r.capability == null || (r.capability === "see_money" ? canMoney : canStock || canMoney)), [canMoney, canStock]);
@@ -44,6 +46,8 @@ export default function Reports() {
   const [custom, setCustom] = useState(() => periodRange("month"));
   const range = period === "custom" ? custom : periodRange(period);
   const [compare, setCompare] = useState(false);
+  const [dealerId, setDealerId] = useState(() => params.get("dealer") || "");
+  const [area, setArea] = useState("");
   const [include, setInclude] = useState({ company: true, summary: true, table: true });
   const [favs, setFavs] = useState<string[]>(() => readLS(FAV_KEY, []));
   const [recent, setRecent] = useState<Recent[]>(() => readLS(RECENT_KEY, []));
@@ -60,20 +64,25 @@ export default function Reports() {
     if (!def) { setSections(null); return; }
     let live = true;
     setLoading(true); setError(null);
-    const p = def.usesDates ? range : { from: todayKey(), to: todayKey() };
-    const prev = compare && def.usesDates && def.summary ? previousRange(range.from, range.to) : null;
+    const f = { dealerId: def.filters?.includes("dealer") ? dealerId || undefined : undefined, area: def.filters?.includes("area") ? area || undefined : undefined };
+    if (def.filters?.includes("dealer") && !dealerId) { setSections(null); setLoading(false); return; }
+    const p = { ...(def.usesDates ? range : { from: todayKey(), to: todayKey() }), ...f };
+    const prevR = compare && def.usesDates && def.summary ? previousRange(range.from, range.to) : null;
+    const prev = prevR ? { ...prevR, ...f } : null;
     Promise.all([def.fetch(p), prev ? def.fetch(prev) : Promise.resolve(null)])
       .then(([s, ps]) => { if (!live) return; setSections(s); setPrevSummary(ps && def.summary ? def.summary(allRows(ps)) : null); })
       .catch(() => live && setError("Couldn't load this report. Check your internet and try again."))
       .finally(() => live && setLoading(false));
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [def?.id, range.from, range.to, compare]);
+  }, [def?.id, range.from, range.to, compare, dealerId, area]);
 
   const rows = useMemo(() => (sections ? allRows(sections) : []), [sections]);
   const summary = useMemo(() => (def?.summary && sections ? def.summary(rows) : []), [def, rows, sections]);
   const totals = useMemo(() => (def && hasTotals(def.columns) ? totalsOf(def.columns, rows) : null), [def, rows]);
-  const periodLabel = def && !def.usesDates ? rangeLabel(todayKey(), todayKey()) : rangeLabel(range.from, range.to);
+  const dealerName = dealerOpts.find(d => d.id === dealerId)?.name;
+  const baseLabel = def && !def.usesDates ? rangeLabel(todayKey(), todayKey()) : rangeLabel(range.from, range.to);
+  const periodLabel = [baseLabel, def?.filters?.includes("dealer") && dealerName, def?.filters?.includes("area") && area && `Area: ${area}`].filter(Boolean).join(" · ");
   const madeBy = profile?.full_name || user?.email || "";
 
   const ctx = (): ExportContext | null => def && sections ? ({
@@ -183,6 +192,28 @@ export default function Reports() {
                 )}
               </div>
             )}
+
+            {def?.filters?.length ? (
+              <div className="flex flex-wrap gap-3">
+                {def.filters.includes("dealer") && (
+                  <label className="flex flex-col gap-1 text-sm text-foreground">Dealer
+                    <select value={dealerId} onChange={e => setDealerId(e.target.value)} className="h-11 min-w-64 rounded-md border border-input bg-background px-3 text-sm">
+                      <option value="">Pick a dealer…</option>
+                      {dealerOpts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
+                  </label>
+                )}
+                {def.filters.includes("area") && areaOpts.length > 0 && (
+                  <label className="flex flex-col gap-1 text-sm text-foreground">Area
+                    <select value={area} onChange={e => setArea(e.target.value)} className="h-11 min-w-48 rounded-md border border-input bg-background px-3 text-sm">
+                      <option value="">All areas</option>
+                      {areaOpts.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </label>
+                )}
+              </div>
+            ) : null}
+            {def?.filters?.includes("dealer") && !dealerId && <p className="text-sm text-muted-foreground">Pick a dealer to see their statement.</p>}
 
             {isTally && <>
               <div><h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><BookOpen className="h-5 w-5" /> Tally export</h2>
