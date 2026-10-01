@@ -36,6 +36,8 @@ interface Props {
   /** Called after money moves so the page can refresh order/dealer figures. */
   onChanged?: () => void;
   canRecord?: boolean;
+  /** The order was cancelled — no new payments can be added. */
+  cancelled?: boolean;
   /** Reports money received / balance up to the page so the hero band can show it. */
   onTotals?: (t: { received: number; balance: number }) => void;
   /** Hide the surrounding card chrome when embedded in a sheet. */
@@ -44,7 +46,7 @@ interface Props {
 
 /** Money actually received against one order or bill. Receipts are never edited or deleted — only cancelled. */
 export function PaymentsPanel({
-  invoiceId, orderId, docLabel, docTotal, onChanged, canRecord = true, onTotals, bare = false,
+  invoiceId, orderId, docLabel, docTotal, onChanged, canRecord = true, cancelled = false, onTotals, bare = false,
 }: Props) {
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,7 +139,9 @@ export function PaymentsPanel({
             {invoiceId ? `Against bill ${docLabel}` : `Against order ${docLabel} — carries over to the bill`}
           </p>
         </div>
-        {canRecord && balance > 0 && (
+        {cancelled ? (
+          <p className="text-xs text-muted-foreground">This order was cancelled, so payments can't be added.</p>
+        ) : canRecord && balance > 0 && (
           <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setClamped(false); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment

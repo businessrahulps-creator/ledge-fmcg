@@ -56,6 +56,12 @@ function toFriendlyMessage(error: unknown): string {
   if (msg.includes("jwt") || msg.includes("not authenticated") || code === "401") {
     return "Your session has expired. Please sign in again.";
   }
+  // Business-rule refusals raised by our own database functions (RAISE EXCEPTION
+  // → P0001) are already written as plain sentences for the user.
+  const raw = String(err?.message || "").trim();
+  if (code === "P0001" && raw && raw.length <= 200 && !/[_{}]|sql|relation|column/i.test(raw)) {
+    return raw;
+  }
   // Fallback — short, generic, never the raw Postgres string
   return "Something went wrong. Please try again — we've logged the details.";
 }
