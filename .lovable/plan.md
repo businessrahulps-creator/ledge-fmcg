@@ -1,59 +1,70 @@
-# Reports: one place to download any data (CSV, Excel, PDF, Tally)
+# Reports: one world-class place to download any data (CSV, Excel, PDF, Tally)
 
 ## What you get
-A new **Reports** screen (menu item under My Business, at `/reports`). Today `/reports` only redirects into My Business. You pick a report, pick dates, pick a format, and download it.
+A new **Reports** screen in the menu, right under My Business, at `/reports`. Today `/reports` only redirects into My Business. You pick a report, pick dates, check a preview, and download in the format you need. Every report gives the same numbers as the app screens.
 
 ```text
-[ Pick a report ]  ->  [ Dates + filters ]  ->  [ Preview first 20 rows ]  ->  [ CSV | Excel | PDF | Tally ]
+[ Pick a report ] -> [ Dates + filters ] -> [ Live preview with totals ] -> [ PDF | Excel | CSV | Tally | WhatsApp ]
 ```
 
 ### Screen layout
-- **Left (on phone: top):** reports grouped into Sales, Money, Stock, Buying, GST, Team, and Tally. Each report has a one-line plain description and a search box.
-- **Right:** a date range (This month / Last month / This year (Apr–Mar) / Custom, in Indian time), simple filters (dealer, salesperson, godown, product), a live preview table with row count and totals, and download buttons.
-- **Recent downloads:** the last 10 reports you made, with one tap to make them again for new dates.
-- **Favourites:** star the reports you use often so they show at the top.
+- **Report list** (left on desktop, top on phone). Reports are grouped into Sales, Money, Stock, Buying, GST, Team and Tally. Each one has a plain one-line "what this shows" note and a search box. Starred favourites sit at the top.
+- **Settings bar.** Dates: Today, This week, This month, Last month, This year (Apr–Mar), Custom, all in Indian time. Filters: dealer, salesperson, godown, product, area, as each report needs. "Compare with previous period" switch.
+- **Live preview.** First 50 rows, row count, totals, and the period printed clearly. Empty results say why ("No bills between 1–15 Oct").
+- **Download bar.** PDF, Excel, CSV, Tally (when it applies), and "Send on WhatsApp" (PDF).
+- **Recent downloads.** Your last 10, with "Make again for new dates".
 
-### Reports included (v1)
+### Reports included
 | Group | Reports |
 |---|---|
-| Sales | Orders list, Order lines by product, Sales by dealer, Sales by product, Sales by salesperson, Offers given |
-| Money | Money to collect (by age), Dealer statement (ledger), Payments received, Credit notes, Cancelled payments |
-| Stock | Stock now (by godown), Stock movements, Low stock, Stock value |
+| Sales | Orders list, Order lines by product, Sales by dealer, by product, by salesperson, by area, Offers given, Cancelled orders |
+| Money | Money to collect by age (0–30/31–60/61–90/90+), Dealer statement, Payments received (by mode), Credit notes, Cancelled payments, Day book (all money in and out for a day) |
+| Stock | Stock now by godown, Stock movements, Low stock, Stock value (at average cost), Slow-moving items |
 | Buying | Purchase bills, Supplier balances, Supplier statement, Supplier payments, Returns to supplier |
-| GST | Sales register (GSTR-1 style: B2B / B2C / HSN summary), Purchase register, GST summary (GSTR-3B style) |
-| Team | Salesperson performance vs target, Shop visits and promises |
-| Tally | Tally export (see below) |
+| GST | Sales register (GSTR-1 layout: B2B, B2C large, B2C small, Credit notes, HSN summary), Purchase register, GST summary (GSTR-3B layout: output tax, input tax, net) |
+| Team | Salesperson vs target, Shop visits and promises kept/broken |
+| Tally | Tally export (below) |
 
-### Formats
-- **CSV:** plain, opens anywhere.
-- **Excel:** proper number and date cells, ₹ format, a totals row, frozen header, one sheet per section (for example GST: B2B, B2C and HSN on separate sheets).
-- **PDF:** company letterhead, period, filters used, table, totals, and page numbers. Uses the same look as your current bills.
-- **Tally:** a file TallyPrime can import directly.
+## World-class PDFs (built on your current PDF workflow)
+This reuses the existing PDF letterhead, footer, fonts and download/share flow that bills and dealer statements already use, and upgrades it into one report template:
+- **Cover strip:** company logo, name, GSTIN and address (same header as bills), then the report title, period, filters used, and "Made by Rahul on 01 Oct 2026, 3:50 PM IST".
+- **Summary cards at the top:** 3–4 key numbers, for example Total sales, Collected, Still unpaid, with the change from the previous period when compare is on.
+- **Clean table:** right-aligned ₹ amounts in Indian format (₹1,23,456), the header repeats on every page, light zebra rows, groups with subtotals (for example by dealer), and a grand total row.
+- **Plain closing note** where it helps, for example "12 dealers owe ₹4,26,046; 3 are over 90 days."
+- **Every page:** page X of Y, company name, report name, and "Generated by Ledge".
+- **Portrait or landscape** picked automatically for wide reports. A4, and it prints cleanly in black and white.
+- **Large reports** (thousands of rows) are built in the background with a progress bar, so the screen never freezes.
+- Same choose-what-to-include dialog as today (summary / table / company details).
 
-### Tally export
-- Choose what to send: **Sales bills, Credit notes, Payments received, Purchase bills, Supplier payments**, plus **Party and stock-item masters** (dealers, suppliers, products, with GSTIN, state, HSN and GST rate).
-- Output: a Tally XML file (the format TallyPrime imports via *Import > Vouchers / Masters*). An Excel version of the same data is also available for accountants who map columns themselves.
-- **Ledger names screen** (one-time setup): match your accountant's Tally ledger names, for example Sales ledger "Sales @18%", CGST/SGST/IGST output ledgers, Round off, Cash/Bank. Ledge suggests the standard names.
-- Before downloading, a check shows problems in plain words, for example: "3 dealers have no GSTIN — they'll go in as unregistered", or "1 product has no HSN code".
-- Each export remembers what was sent, so "Only new since last export" avoids duplicate entries in Tally.
+## Excel and CSV
+- **Excel:** real number and date cells (so formulas work), ₹ formatting, frozen header, filters on, totals row, column widths set, a "Report info" sheet (period, filters, made by/at), and one sheet per section (GST: B2B / B2C / HSN / Credit notes).
+- **CSV:** plain UTF-8 that opens correctly in Excel and Google Sheets, including ₹ and Indian names.
+
+## Tally export
+- Choose what to send: **Sales bills, Credit notes, Payments received, Purchase bills, Supplier payments**, plus **masters** (dealers and suppliers as parties with GSTIN and state; products as stock items with HSN, unit and GST rate).
+- Output: a **TallyPrime XML file** (*Gateway > Import > Masters / Transactions*), plus the same data as Excel for accountants who map columns themselves.
+- **One-time ledger-name setup:** match your accountant's Tally names (Sales @5/12/18%, CGST/SGST/IGST output and input, Round off, Cash, Bank, Purchase ledgers). Ledge fills in standard names to start.
+- **Check before export**, in plain words: "3 dealers have no GSTIN; they'll go in as unregistered", "1 product has no HSN code". You can fix these or continue.
+- **No duplicates:** "Only new since last export" remembers what was already sent, and you can see a history of exports (who, when, how many).
 
 ## Rules this keeps
-- Nothing is changed by exporting; it is read-only. Bills stay locked.
-- People only see what their role allows. For example, a salesperson can't download money reports, and Tally/GST is for the owner and accountant only.
-- Numbers come from the same calculations the app already uses, so a report total always matches the screen.
-- Plain words throughout (15-year-old test). The look stays black, white and grey.
+- Exporting is read-only. Nothing changes, and GST bills stay locked.
+- Role access: salespeople see only their own sales/visit reports; money, GST and Tally reports are for the owner and accountant. A report you can't open doesn't appear in the list.
+- Totals are calculated by the same rules the app uses (canonical balances, cancelled orders excluded, offers subtracted once, IST dates).
+- Plain words (15-year-old test). The look stays black, white and grey.
 
 ## Build order
-1. Reports screen, the report catalogue, preview, CSV/Excel/PDF. Starts with Sales, Money and Stock.
-2. Buying, GST and Team reports.
-3. Tally: ledger-name setup, checks, XML and Excel export, "only new" tracking.
-4. Astra/Claude review of every report total against the app screens. A sample Tally XML gets checked against TallyPrime's import format before release.
+1. Reports screen, report catalogue, preview, and upgraded PDF template plus Excel/CSV, starting with Sales, Money and Stock.
+2. Buying, GST and Team reports, compare mode, WhatsApp send, background build for large reports.
+3. Tally: ledger-name setup, checks, XML and Excel export, "only new" tracking, export history.
+4. Astra/Claude review: every report total checked against the matching app screen on the demo business, a PDF visual check per report, and a sample Tally XML checked against TallyPrime's import format.
 
 ## Technical details
-- Route `/reports` (replaces the redirect) with lazy loading and prefetch, plus a sidebar item; gated by a new `see_reports`-style check using existing capabilities (`see_money` for money/GST/Tally reports).
-- `src/lib/reports/registry.ts`: each report is `{ id, group, title, description, capability, filters, columns, fetch(params) -> rows, totals }`. All reports share one renderer.
-- Data: reuse existing hooks/selectors (receivables, payables, `dealer_outstanding`, `supplier_balance`). Large ranges load in pages from the database, not from session state.
-- Exporters: extend `exportXlsx` (multi-sheet, typed cells), add `exportCsv`, and add a generic `ReportPdf` document reusing `downloadPdf`. Export libraries are loaded only when needed.
-- Tally: `src/lib/reports/tally.ts` builds TallyPrime XML (`ENVELOPE/IMPORTDATA/TALLYMESSAGE` with `VOUCHER` and `LEDGER`/`STOCKITEM` masters), with unit tests on sample bills. New table `tally_settings` (ledger-name mapping, per company) and `export_log` (who exported what, when, and which document IDs). Both use company RLS and GRANTs. Exports are also written to activity_log.
-- Recent downloads/favourites: local per user (no new table).
-- Tests: registry totals vs existing calculations, CSV/Excel round-trip, Tally XML snapshot tests.
+- Route `/reports` replaces the redirect (lazy loading, prefetch, sidebar item). Existing `/command?tab=drill` reports keep working; their export buttons link into the new screen.
+- `src/lib/reports/registry.ts`: `{ id, group, title, description, capability, filters, columns(type, align, total), fetch(params) -> rows, summary(rows), groupBy? }`. One generic preview and one exporter set.
+- Data: reuse existing selectors (receivables, payables, `dealer_outstanding`, `supplier_balance`, order total convention). Large ranges are paged from the database by date, not taken from in-memory session state.
+- PDF: extend `ReportPdf` / `PdfHeader` / `PdfFooter` / `PdfStyles` with summary cards, group subtotals, fixed repeating table header, page X of Y, and auto orientation. Keep `exportReportPdf` + `ExportPdfModal` + `downloadPdf` as the single pipeline; render large docs in a web worker. Existing statement/invoice PDFs are untouched.
+- Excel: extend `exportXlsx` to multi-sheet with typed cells and an info sheet. Add `exportCsv` (UTF-8 BOM). Both are loaded only when needed.
+- Tally: `src/lib/reports/tally.ts` builds `ENVELOPE > BODY > IMPORTDATA > TALLYMESSAGE` with `VOUCHER` (Sales/Credit Note/Receipt/Purchase/Payment, GST ledger entries, round-off) and `LEDGER`/`STOCKITEM` masters, with snapshot tests on sample bills. New tables `tally_settings` (ledger mapping per company) and `export_log` (company, user, report, params, document IDs, created_at), both with company RLS + GRANTs. Exports are also written to activity_log.
+- Favourites and recent downloads are stored locally per user.
+- Tests: registry totals vs existing calculations, Excel/CSV round-trip, PDF render smoke tests, Tally XML snapshots. The existing tests must keep passing.
