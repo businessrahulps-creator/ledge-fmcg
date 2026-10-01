@@ -35,7 +35,7 @@ export function TallyExportPanel({ from, to, companyName }: { from: string; to: 
   const check = async () => {
     setBusy(true);
     try { setBundle(await loadTallyBundle({ from, to }, choice, companyName, ledgers)); }
-    catch (e) { handleSupabaseError(e as never, "Couldn't read the data for Tally"); }
+    catch (e) { handleSupabaseError(e, { title: "Couldn't read the data for Tally", source: "reports:tally" }); }
     finally { setBusy(false); }
   };
 
@@ -74,7 +74,7 @@ export function TallyExportPanel({ from, to, companyName }: { from: string; to: 
   const save = async () => {
     if (!editLedgers || !companyId || !user) return;
     try { await saveLedgers(companyId, user.id, editLedgers); setLedgers(editLedgers); setEditLedgers(null); toast.success("Tally names saved"); }
-    catch (e) { handleSupabaseError(e as never, "Couldn't save Tally names"); }
+    catch (e) { handleSupabaseError(e, { title: "Couldn't save Tally names", source: "reports:tally-names" }); }
   };
 
   const warnings = bundle ? tallyWarnings(bundle.input) : [];
