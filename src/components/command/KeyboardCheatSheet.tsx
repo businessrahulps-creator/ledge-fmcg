@@ -13,7 +13,7 @@ const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["1"], label: "Period: Last 7 days" },
   { keys: ["2"], label: "Period: Last 30 days" },
   { keys: ["3"], label: "Period: Last 90 days" },
-  { keys: ["4"], label: "Period: Year to date" },
+  { keys: ["4"], label: "Period: This financial year" },
   { keys: ["5"], label: "Period: Custom" },
   { keys: ["P"], label: "Download PDF" },
   { keys: ["Shift", "P"], label: "Browser print" },
