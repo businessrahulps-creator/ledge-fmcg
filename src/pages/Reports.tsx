@@ -168,7 +168,7 @@ export default function Reports() {
 
             {(def?.usesDates || isTally) && (
               <div className="flex flex-wrap items-end gap-3">
-                <SegmentedControl label="Dates" value={period} onChange={setPeriod} options={PERIODS} className="flex-wrap" />
+                <SegmentedControl<PeriodId> label="Dates" value={period} onChange={setPeriod} options={PERIODS} className="flex-wrap" />
                 {period === "custom" && (
                   <div className="flex items-center gap-2">
                     <Input type="date" aria-label="From date" value={custom.from} max={custom.to} onChange={e => e.target.value && setCustom(c => ({ ...c, from: e.target.value }))} className="w-40" />
