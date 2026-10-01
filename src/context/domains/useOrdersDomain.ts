@@ -395,12 +395,12 @@ export function useOrdersDomain(deps: OrdersDeps) {
   }, [deps.companyId, deps.persistEntityToCache]);
 
   const previewOrderNumber = useCallback(() => {
-    const year = new Date().getFullYear();
+    const year = Number(todayKey().slice(0, 4));
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
   const nextOrderNumber = useCallback(() => {
-    const year = new Date().getFullYear();
+    const year = Number(todayKey().slice(0, 4));
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 

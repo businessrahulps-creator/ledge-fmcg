@@ -189,7 +189,7 @@ export default function SalespersonDetail() {
         {/* Targets */}
         {(() => {
           const allTargets = api.targets.list();
-          const now = new Date();
+          const now = istCalendarNow();
           const today = toDateKey(now);
           const dayOfWeek = now.getDay();
           const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
