@@ -130,6 +130,8 @@ export default function NewOrder() {
       }>;
       if (!d || !Array.isArray(d.lines)) return;
       if (d.orderDate) setOrderDate(d.orderDate);
+      // "Take order" for a specific shop wins over an old half-written order.
+      if (presetDealer && d.selectedDealer !== presetDealer) return;
       if (d.selectedDealer) setSelectedDealer(d.selectedDealer);
       if (d.selectedSalesperson) setSelectedSalesperson(d.selectedSalesperson);
       if (d.selectedGodown) setSelectedGodown(d.selectedGodown);
