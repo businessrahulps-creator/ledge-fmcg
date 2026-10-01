@@ -44,7 +44,7 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
   { label: "Account", items: NAV_FOOTER },
 ];
 
-const allMoreItems = moreGroups.flatMap((g) => g.items);
+const allMoreItems = moreGroups.flatMap((g) => g.items).filter(i => !MOBILE_PRIMARY.some(p => p.url === i.url));
 
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -503,9 +503,11 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
                     <div className="absolute inset-0 overflow-y-auto overscroll-contain px-5 pb-6">
                       {visibleMoreGroups.map((group, gIdx) => (
                         <div key={group.label} className={gIdx === 0 ? "" : "mt-5"}>
+                          {group.label !== "Main" && (
                           <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1.5 px-1">
                             {group.label}
                           </p>
+                          )}
                           <div className="rounded-xl border border-border/50 bg-background/60 overflow-hidden divide-y divide-border/40 shadow-depth-2">
                             {group.items.map((item) => {
                               const active = location.pathname.startsWith(item.url);
