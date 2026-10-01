@@ -220,7 +220,7 @@ export const REPORTS: ReportDef[] = [
     ],
     fetch: async p => {
       const rows = await fetchAll((a, b) => db.from("stock_movements").select("created_at,delta,movement_type,note,products(name),godowns(name)").gte("created_at", istStart(p.from)).lte("created_at", istEnd(p.to)).order("created_at").range(a, b));
-      const word: Record<string, string> = { dispatch: "Sent to dealer", purchase: "Bought", purchase_return: "Returned to supplier", sales_return: "Returned by dealer", adjustment: "Adjusted", opening: "Opening stock", dispatch_reversal: "Sending undone", purchase_cancel: "Bill cancelled" };
+      const word: Record<string, string> = { dispatch: "Sent to dealer", purchase: "Bought", purchase_return: "Returned to supplier", return_restock: "Returned by dealer", manual_adjust: "Adjusted", adjustment: "Adjusted", opening: "Opening stock", dispatch_reversal: "Sending undone", purchase_cancel: "Bill cancelled" };
       return one(rows.map((x: any) => ({ date: new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(x.created_at)), product: x.products?.name ?? "", godown: x.godowns?.name ?? "", type: word[x.movement_type] ?? x.movement_type, change: n(x.delta), note: x.note })));
     },
   },
