@@ -13,6 +13,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Phone, Mail, FileText, TrendingUp, TrendingDown, Minus, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Plus, Trash2, Target } from "lucide-react";
 import { EntityHistory } from "@/components/layout/EntityHistory";
+import { DealerVisitsPanel } from "@/components/visits/DealerVisitsPanel";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { shareDealerOnWhatsApp } from "@/utils/shareWhatsApp";
 import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
