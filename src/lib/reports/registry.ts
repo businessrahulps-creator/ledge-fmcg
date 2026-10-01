@@ -124,14 +124,14 @@ export const REPORTS: ReportDef[] = [
 
   // ───────── Money
   {
-    id: "money_to_collect", group: "Money", title: "Money to collect", capability: "see_money", usesDates: false,
+    id: "money_to_collect", group: "Money", title: "Money to collect", capability: "see_money", usesDates: false, filters: ["area"],
     description: "Every dealer who owes you money today, biggest first.",
     columns: [
       { key: "dealer", header: "Dealer", weight: 2 }, { key: "area", header: "Area" }, { key: "phone", header: "Phone" },
       { key: "limit", header: "Credit limit", type: "money" }, { key: "unpaid", header: "Unpaid", type: "money", total: true },
     ],
-    fetch: async () => {
-      const d = await fetchAll((a, b) => db.from("distributors").select("name,location,contact,credit_limit,outstanding_amount").gt("outstanding_amount", 0).order("outstanding_amount", { ascending: false }).range(a, b));
+    fetch: async p => {
+      const d = await fetchAll((a, b) => { let q = db.from("distributors").select("name,location,contact,credit_limit,outstanding_amount").gt("outstanding_amount", 0); if (p.area) q = q.eq("location", p.area); return q.order("outstanding_amount", { ascending: false }).range(a, b); });
       return one(d.map((x: any) => ({ dealer: x.name, area: x.location, phone: x.contact, limit: r2(x.credit_limit), unpaid: r2(x.outstanding_amount) })));
     },
     summary: rows => [
@@ -174,63 +174,87 @@ export const REPORTS: ReportDef[] = [
     },
   },
   {
-    id: "money_by_age", group: "Money", title: "Money to collect by age", capability: "see_money", usesDates: false,
-    description: "How long each dealer's unpaid money has been waiting: 0–30, 31–60, 61–90, 90+ days.",
+    id: "money_by_age", group: "Money", title: "Money to collect by age", capability: "see_money", usesDates: false, filters: ["area"],
+    description: "How long each dealer's unpaid bills have been waiting: 0–30, 31–60, 61–90, 90+ days.",
     columns: [
       { key: "dealer", header: "Dealer", weight: 2.2 }, { key: "b0", header: "0–30 days", type: "money", total: true },
       { key: "b31", header: "31–60 days", type: "money", total: true }, { key: "b61", header: "61–90 days", type: "money", total: true },
       { key: "b90", header: "90+ days", type: "money", total: true }, { key: "unpaid", header: "Unpaid", type: "money", total: true },
     ],
-    fetch: async () => {
+    fetch: async p => {
       const today = Date.parse(TODAY() + "T00:00:00+05:30");
-      const d = await fetchAll((a, b) => db.from("distributors").select("id,name,outstanding_amount").gt("outstanding_amount", 0).order("outstanding_amount", { ascending: false }).range(a, b));
-      const ids = new Set(d.map((x: any) => x.id));
-      const ord = await fetchAll((a, b) => db.from("orders").select("distributor_id,date,total,scheme_savings").is("cancelled_at", null).order("date", { ascending: false }).range(a, b));
-      const byDealer = new Map<string, any[]>();
-      for (const o of ord) if (ids.has(o.distributor_id)) { const l = byDealer.get(o.distributor_id) ?? []; l.push(o); byDealer.set(o.distributor_id, l); }
-      // Unpaid money (from the dealer balance) is matched to the newest orders first; older orders count as paid.
-      return one(d.map((x: any) => {
-        let left = n(x.outstanding_amount); const r: ReportRow = { dealer: x.name, b0: 0, b31: 0, b61: 0, b90: 0, unpaid: r2(left) };
-        for (const o of byDealer.get(x.id) ?? []) {
-          if (left <= 0) break;
-          const amt = Math.min(left, n(o.total) - n(o.scheme_savings)); if (amt <= 0) continue;
-          const age = Math.floor((today - Date.parse(o.date + "T00:00:00+05:30")) / 86400000);
-          const k = age > 90 ? "b90" : age > 60 ? "b61" : age > 30 ? "b31" : "b0";
-          r[k] = r2(n(r[k]) + amt); left -= amt;
-        }
-        if (left > 0.004) r.b90 = r2(n(r.b90) + left); // opening balance or older than any order
-        return r;
-      }));
+      const bills = await billLedger(p.area);
+      const m = new Map<string, ReportRow>();
+      for (const x of bills) {
+        if (x.due <= 0) continue;
+        const r = m.get(x.dealerId) ?? { dealer: x.dealer, b0: 0, b31: 0, b61: 0, b90: 0, unpaid: 0 };
+        const age = Math.floor((today - Date.parse(x.date + "T00:00:00+05:30")) / 86400000);
+        const k = age > 90 ? "b90" : age > 60 ? "b61" : age > 30 ? "b31" : "b0";
+        r[k] = r2(n(r[k]) + x.due); r.unpaid = r2(n(r.unpaid) + x.due); m.set(x.dealerId, r);
+      }
+      return one([...m.values()].sort((a, b) => n(b.unpaid) - n(a.unpaid)));
     },
     summary: rows => [
       { label: "Total unpaid", value: sumBy(rows, "unpaid"), kind: "money" },
       { label: "Over 90 days", value: sumBy(rows, "b90"), kind: "money" },
       { label: "Dealers over 90 days", value: rows.filter(r => n(r.b90) > 0).length, kind: "number" },
     ],
-    note: rows => { const c = rows.filter(r => n(r.b90) > 0).length; return c ? `${c} dealer${c === 1 ? "" : "s"} have money waiting over 90 days. Call them first.` : null; },
+    note: rows => { const c = rows.filter(r => n(r.b90) > 0).length; return c ? `${c} dealer${c === 1 ? "" : "s"} have bills waiting over 90 days. Call them first.` : null; },
   },
   {
-    id: "dealer_accounts", group: "Money", title: "Dealer account summary", capability: "see_money", usesDates: true,
-    description: "For each dealer: ordered, paid and returned in these dates, and what they owe today.",
+    id: "dealer_accounts", group: "Money", title: "Dealer account summary", capability: "see_money", usesDates: true, filters: ["area"],
+    description: "For each dealer: billed, paid and returned in these dates, and what they owe on bills today.",
     columns: [
-      { key: "dealer", header: "Dealer", weight: 2.4 }, { key: "ordered", header: "Ordered", type: "money", total: true },
+      { key: "dealer", header: "Dealer", weight: 2.4 }, { key: "billed", header: "Billed", type: "money", total: true },
       { key: "paid", header: "Paid", type: "money", total: true }, { key: "returned", header: "Returned", type: "money", total: true },
       { key: "unpaid", header: "Owes today", type: "money", total: true },
     ],
     fetch: async p => {
-      const [d, ord, pay, cn] = await Promise.all([
-        fetchAll((a, b) => db.from("distributors").select("id,name,outstanding_amount").order("name").range(a, b)),
-        liveOrdersRaw(p),
-        fetchAll((a, b) => db.from("invoice_payments").select("distributor_id,amount").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
-        fetchAll((a, b) => db.from("credit_notes").select("distributor_id,grand_total").gte("note_date", p.from).lte("note_date", p.to).range(a, b)),
-      ]);
-      const add = (m: Map<string, number>, k: string, v: number) => m.set(k, r2((m.get(k) ?? 0) + v));
-      const o = new Map<string, number>(), py = new Map<string, number>(), c = new Map<string, number>();
-      ord.forEach((x: any) => add(o, x.distributor_id, n(x.total) - n(x.scheme_savings)));
-      pay.forEach((x: any) => add(py, x.distributor_id, n(x.amount)));
-      cn.forEach((x: any) => add(c, x.distributor_id, n(x.grand_total)));
-      return one(d.map((x: any) => ({ dealer: x.name, ordered: o.get(x.id) ?? 0, paid: py.get(x.id) ?? 0, returned: c.get(x.id) ?? 0, unpaid: r2(Math.max(0, n(x.outstanding_amount))) }))
-        .filter(r => r.ordered || r.paid || r.returned || r.unpaid));
+      const ev = await dealerEvents(p.area);
+      const m = new Map<string, ReportRow>();
+      const get = (id: string, name: string) => { let r = m.get(id); if (!r) { r = { dealer: name, billed: 0, paid: 0, returned: 0, unpaid: 0 }; m.set(id, r); } return r; };
+      for (const e of ev) {
+        const r = get(e.dealerId, e.dealer);
+        r.unpaid = r2(n(r.unpaid) + e.dr - e.cr);
+        if (e.date < p.from || e.date > p.to) continue;
+        if (e.kind === "bill") r.billed = r2(n(r.billed) + e.dr);
+        else if (e.kind === "payment") r.paid = r2(n(r.paid) + e.cr);
+        else r.returned = r2(n(r.returned) + e.cr);
+      }
+      return one([...m.values()].map(r => ({ ...r, unpaid: r2(Math.max(0, n(r.unpaid))) }))
+        .filter(r => r.billed || r.paid || r.returned || r.unpaid).sort((a, b) => String(a.dealer).localeCompare(String(b.dealer))));
+    },
+  },
+  {
+    id: "dealer_statement", group: "Money", title: "Dealer statement", capability: "see_money", usesDates: true, filters: ["dealer"],
+    description: "One dealer's bills, payments and returns with a running balance. Send it to them.",
+    columns: [
+      { key: "date", header: "Date", type: "date" }, { key: "what", header: "What", weight: 1.4 }, { key: "ref", header: "No.", weight: 1.6 },
+      { key: "dr", header: "Bill (+)", type: "money", total: true }, { key: "cr", header: "Paid / returned (−)", type: "money", total: true },
+      { key: "balance", header: "Balance", type: "money" },
+    ],
+    fetch: async p => {
+      if (!p.dealerId) return one([]);
+      const ev = (await dealerEvents(undefined, p.dealerId)).sort((a, b) => a.date.localeCompare(b.date) || a.order - b.order);
+      let bal = 0; const rows: ReportRow[] = [];
+      for (const e of ev) { if (e.date < p.from) bal += e.dr - e.cr; }
+      rows.push({ date: p.from, what: "Opening balance", ref: "", dr: null, cr: null, balance: r2(bal) });
+      for (const e of ev) {
+        if (e.date < p.from || e.date > p.to) continue;
+        bal += e.dr - e.cr;
+        rows.push({ date: e.date, what: e.what, ref: e.ref, dr: e.dr || null, cr: e.cr || null, balance: r2(bal) });
+      }
+      rows.push({ date: p.to, what: "Closing balance", ref: "", dr: null, cr: null, balance: r2(bal) });
+      return one(rows);
+    },
+    summary: rows => {
+      const last = rows[rows.length - 1];
+      return [
+        { label: "Opening", value: n(rows[0]?.balance), kind: "money" },
+        { label: "Billed", value: sumBy(rows, "dr"), kind: "money" },
+        { label: "Paid / returned", value: sumBy(rows, "cr"), kind: "money" },
+        { label: "Closing", value: n(last?.balance), kind: "money" },
+      ];
     },
   },
   {
@@ -517,6 +541,47 @@ export const REPORTS: ReportDef[] = [
 async function liveOrdersRaw(p: ReportParams): Promise<any[]> {
   return fetchAll((a, b) => db.from("orders").select("distributor_id,salesperson_id,date,total,scheme_savings").is("cancelled_at", null).gte("date", p.from).lte("date", p.to).range(a, b));
 }
+type BillDue = { id: string; dealerId: string; dealer: string; date: string; number: string; total: number; due: number };
+/** GST bills with what's still due on each: bill − posted receipts − credit notes (same rule as the app). */
+async function billLedger(area?: string, dealerId?: string): Promise<BillDue[]> {
+  const [inv, pay, cn, ord, dist] = await Promise.all([
+    fetchAll((a, b) => db.from("invoices").select("id,invoice_number,invoice_date,grand_total,status,source_order_id,buyer_name").eq("doc_type", "gst_invoice").neq("status", "draft").range(a, b)),
+    fetchAll((a, b) => db.from("invoice_payments").select("invoice_id,amount").eq("status", "posted").not("invoice_id", "is", null).range(a, b)),
+    fetchAll((a, b) => db.from("credit_notes").select("invoice_id,grand_total").range(a, b)),
+    fetchAll((a, b) => db.from("orders").select("id,distributor_id").range(a, b)),
+    fetchAll((a, b) => db.from("distributors").select("id,name,location").range(a, b)),
+  ]);
+  const add = (m: Map<string, number>, k: string, v: number) => m.set(k, (m.get(k) ?? 0) + v);
+  const rec = new Map<string, number>(), cr = new Map<string, number>();
+  pay.forEach((x: any) => add(rec, x.invoice_id, n(x.amount)));
+  cn.forEach((x: any) => x.invoice_id && add(cr, x.invoice_id, n(x.grand_total)));
+  const o2d = new Map(ord.map((o: any) => [o.id, o.distributor_id]));
+  const dm = new Map(dist.map((d: any) => [d.id, d]));
+  return inv.map((x: any) => {
+    const did = o2d.get(x.source_order_id) ?? ""; const d: any = dm.get(did);
+    return { id: x.id, dealerId: did, dealer: d?.name ?? x.buyer_name, area: d?.location ?? "", date: x.invoice_date, number: x.invoice_number, total: r2(x.grand_total), due: r2(Math.max(0, n(x.grand_total) - (rec.get(x.id) ?? 0) - (cr.get(x.id) ?? 0))) };
+  }).filter(x => (!area || x.area === area) && (!dealerId || x.dealerId === dealerId));
+}
+
+type DealerEvent = { dealerId: string; dealer: string; date: string; kind: "bill" | "payment" | "credit"; what: string; ref: string; dr: number; cr: number; order: number };
+/** Every bill (+), posted payment (−) and credit note (−) per dealer. Sum = what they owe on bills. */
+async function dealerEvents(area?: string, dealerId?: string): Promise<DealerEvent[]> {
+  let dq = db.from("distributors").select("id,name,location");
+  if (dealerId) dq = dq.eq("id", dealerId); else if (area) dq = dq.eq("location", area);
+  const dist = await fetchAll((a, b) => dq.range(a, b));
+  const ids = new Set(dist.map((d: any) => d.id)); const name = new Map(dist.map((d: any) => [d.id, d.name]));
+  const [bills, pay, cn] = await Promise.all([
+    billLedger(area, dealerId),
+    fetchAll((a, b) => { let q = db.from("invoice_payments").select("distributor_id,paid_on,amount,mode,reference").eq("status", "posted"); if (dealerId) q = q.eq("distributor_id", dealerId); return q.range(a, b); }),
+    fetchAll((a, b) => { let q = db.from("credit_notes").select("distributor_id,note_date,credit_note_number,grand_total"); if (dealerId) q = q.eq("distributor_id", dealerId); return q.range(a, b); }),
+  ]);
+  const ev: DealerEvent[] = [];
+  for (const x of bills) if (ids.has(x.dealerId)) ev.push({ dealerId: x.dealerId, dealer: x.dealer, date: x.date, kind: "bill", what: "Bill", ref: x.number, dr: x.total, cr: 0, order: 0 });
+  for (const x of pay as any[]) if (ids.has(x.distributor_id)) ev.push({ dealerId: x.distributor_id, dealer: name.get(x.distributor_id) as string, date: x.paid_on, kind: "payment", what: `Paid (${modeWord[x.mode] ?? x.mode})`, ref: x.reference || "", dr: 0, cr: r2(x.amount), order: 1 });
+  for (const x of cn as any[]) if (ids.has(x.distributor_id)) ev.push({ dealerId: x.distributor_id, dealer: name.get(x.distributor_id) as string, date: x.note_date, kind: "credit", what: "Credit note (return)", ref: x.credit_note_number, dr: 0, cr: r2(x.grand_total), order: 2 });
+  return ev;
+}
+
 const TODAY = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 
 async function stockRows(): Promise<ReportRow[]> {

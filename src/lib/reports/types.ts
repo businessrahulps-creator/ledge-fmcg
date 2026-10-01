@@ -20,6 +20,10 @@ export interface ReportSection {
 export interface ReportParams {
   from: string; // YYYY-MM-DD (IST day)
   to: string;   // YYYY-MM-DD inclusive
+  /** Only this dealer (dealer statement). */
+  dealerId?: string;
+  /** Only dealers in this area. */
+  area?: string;
 }
 
 export interface SummaryItem {
@@ -44,4 +48,6 @@ export interface ReportDef {
   summary?: (rows: ReportRow[]) => SummaryItem[];
   /** Short plain sentence for the bottom of the PDF. */
   note?: (rows: ReportRow[]) => string | null;
+  /** Extra pickers shown above the report. "dealer" is required when listed. */
+  filters?: ("dealer" | "area")[];
 }
