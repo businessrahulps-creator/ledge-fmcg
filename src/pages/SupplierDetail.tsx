@@ -37,7 +37,7 @@ export default function SupplierDetail() {
         subtitle={[s.phone, s.address].filter(Boolean).join(" · ") || "Supplier"}
         breadcrumbs={[{ label: "Buying", to: "/buying?tab=suppliers" }, { label: s.name }]}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline" onClick={() => setEditOpen(true)}>Edit</Button>
             <Button variant="outline" onClick={() => navigate(`/buying/new?supplier=${s.id}`)}>Add purchase bill</Button>
             <Button onClick={() => setPayOpen(true)} disabled={owed <= 0}>Pay supplier</Button>
@@ -46,8 +46,8 @@ export default function SupplierDetail() {
       />
       <div className="max-w-3xl space-y-4">
         <section className="rounded-md border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Money you owe them</p>
-          <p className="text-3xl font-semibold num tabular-nums">{formatCurrency(owed)}</p>
+          <p className="text-xs text-muted-foreground">{owed < 0 ? "They owe you (you paid extra)" : "Money you owe them"}</p>
+          <p className="text-3xl font-semibold num tabular-nums">{formatCurrency(Math.abs(owed))}</p>
           <p className="text-xs text-muted-foreground mt-1 num tabular-nums">
             {s.openingBalance > 0 && <>Opening {formatCurrency(s.openingBalance)} + </>}
             Bills {formatCurrency(myBills.filter(b => b.status === "posted").reduce((n, b) => n + b.grandTotal, 0))}

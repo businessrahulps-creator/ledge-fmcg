@@ -122,7 +122,7 @@ export function PaySupplierDialog({ open, onOpenChange, supplier }: { open: bool
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label>Date paid</Label><Input aria-label="Date paid" type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
-            {mode !== "cash" && <div className="space-y-1.5"><Label>{mode === "cheque" ? "Cheque number" : "Reference no."}</Label><Input value={reference} onChange={e => setReference(e.target.value)} /></div>}
+            {mode !== "cash" && <div className="space-y-1.5"><Label>{mode === "cheque" ? "Cheque number" : "Reference no."}</Label><Input aria-label={mode === "cheque" ? "Cheque number" : "Reference no."} value={reference} onChange={e => setReference(e.target.value)} /></div>}
           </div>
           <div className="space-y-1.5"><Label>Note</Label><Input aria-label="Note" value={note} onChange={e => setNote(e.target.value)} placeholder="Optional" /></div>
           <DialogFooter>

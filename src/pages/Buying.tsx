@@ -76,7 +76,7 @@ export default function Buying() {
           <p className="text-xl font-semibold num tabular-nums">{formatCurrency(bills.filter(b => b.status === "posted" && b.billDate.startsWith(today.slice(0, 7))).reduce((n, b) => n + b.grandTotal, 0))}</p>
         </div>
         <div className="rounded-md border border-border bg-card p-3 col-span-2 sm:col-span-1">
-          <p className="text-xs text-muted-foreground">GST paid on purchases this month</p>
+          <p className="text-xs text-muted-foreground">GST included in this month's purchases</p>
           <p className="text-xl font-semibold num tabular-nums">{formatCurrency(bills.filter(b => b.status === "posted" && b.billDate.startsWith(today.slice(0, 7))).reduce((n, b) => n + b.totalTax, 0))}</p>
           <p className="text-[11px] text-muted-foreground">Ask your accountant how much you can claim back.</p>
         </div>
@@ -91,7 +91,7 @@ export default function Buying() {
           </TabsList>
           <div className="relative sm:w-72">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={e => setQ(e.target.value)} placeholder="Search supplier or bill no." className="pl-9" />
+            <Input value={q} onChange={e => setQ(e.target.value)} placeholder={tab === "pay" ? "Search supplier" : "Search supplier or bill no."} className="pl-9" />
           </div>
         </div>
 

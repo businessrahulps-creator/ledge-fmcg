@@ -62,6 +62,7 @@ export default function PurchaseBillNew() {
     if (!billNo.trim()) { toast.error("Enter the supplier's bill number", { description: "It's printed on the bill they gave you." }); return; }
     if (!godownId) { toast.error("Choose which godown the goods went to"); return; }
     if (valid.length === 0) { toast.error("Add at least one item with quantity and rate"); return; }
+    if (lines.some(l => (l.productId || l.quantity || l.rate !== null) && !valid.includes(l))) { toast.error("Some items are missing quantity or rate", { description: "Fill them in or remove the row before saving." }); return; }
     const ids = valid.map(l => l.productId);
     if (new Set(ids).size !== ids.length) { toast.error("Same item added twice", { description: "Combine it into one line." }); return; }
     const res = await buyingRpc<{ bill_id: string }>("record_purchase_bill_atomic", {
@@ -84,20 +85,20 @@ export default function PurchaseBillNew() {
             <Label>Supplier *</Label>
             <div className="flex gap-2">
               <Select value={supplierId} onValueChange={setSupplierId}>
-                <SelectTrigger className="flex-1"><SelectValue placeholder="Choose supplier" /></SelectTrigger>
+                <SelectTrigger className="flex-1" aria-label="Supplier *"><SelectValue placeholder="Choose supplier" /></SelectTrigger>
                 <SelectContent>{suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
               <Button type="button" variant="outline" onClick={() => setAddSupplier(true)}><Plus className="h-4 w-4" />New</Button>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Supplier's bill no. *</Label><Input aria-label="Supplier's bill no. *" value={billNo} onChange={e => setBillNo(e.target.value)} placeholder="e.g. SLP/245" /></div>
+            <div className="space-y-1.5"><Label>Supplier's bill no. *</Label><Input aria-label="Supplier's bill no. *" value={billNo} onChange={e => setBillNo(e.target.value)} placeholder="e.g. SLP/245" /><p className="text-[11px] text-muted-foreground">Stops the same bill being entered twice.</p></div>
             <div className="space-y-1.5"><Label>Bill date</Label><Input aria-label="Bill date" type="date" value={date} max={todayKey()} onChange={e => setDate(e.target.value)} /></div>
           </div>
           <div className="space-y-1.5">
             <Label>Goods went to which godown? *</Label>
             <Select value={godownId} onValueChange={setGodownId}>
-              <SelectTrigger><SelectValue placeholder="Choose godown" /></SelectTrigger>
+              <SelectTrigger aria-label="Goods went to which godown? *"><SelectValue placeholder="Choose godown" /></SelectTrigger>
               <SelectContent>{godowns.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
