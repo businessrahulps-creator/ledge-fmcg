@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ArrowLeft, Loader2, AlertTriangle, Gift } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, AlertTriangle, Gift } from "lucide-react";
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 
 import { Button } from "@/components/ui/button";
