@@ -1,3 +1,4 @@
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -716,15 +717,18 @@ export default function NewOrder() {
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Paid by</Label>
-                    <Select value={advanceMode} onValueChange={setAdvanceMode}>
-                      <SelectTrigger className="h-10 rounded-lg md:h-12"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="upi">UPI</SelectItem>
-                        <SelectItem value="bank_transfer">Bank transfer</SelectItem>
-                        <SelectItem value="cheque">Cheque</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <SegmentedControl
+                      label="Paid by"
+                      value={advanceMode as "cash" | "upi" | "bank_transfer" | "cheque"}
+                      onChange={setAdvanceMode}
+                      options={[
+                        { value: "cash", label: "Cash" },
+                        { value: "upi", label: "UPI" },
+                        { value: "bank_transfer", label: "Bank" },
+                        { value: "cheque", label: "Cheque" },
+                      ]}
+                      className="grid w-full grid-cols-4"
+                    />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Reference</Label>
