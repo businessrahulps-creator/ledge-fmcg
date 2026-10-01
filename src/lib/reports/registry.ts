@@ -221,7 +221,7 @@ export const REPORTS: ReportDef[] = [
         else if (e.kind === "payment") r.paid = r2(n(r.paid) + e.cr);
         else r.returned = r2(n(r.returned) + e.cr);
       }
-      return one([...m.values()].map(r => ({ ...r, unpaid: r2(Math.max(0, n(r.unpaid))) }))
+      return one([...m.values()].map((r): ReportRow => ({ ...r, unpaid: r2(Math.max(0, n(r.unpaid))) }))
         .filter(r => r.billed || r.paid || r.returned || r.unpaid).sort((a, b) => String(a.dealer).localeCompare(String(b.dealer))));
     },
   },
