@@ -53,7 +53,8 @@ export function computeOrderPricing(
   const lineAmount = (l: PricingLineInput) => r2(l.quantity * l.unitPrice);
   const grossTotal = r2(validLines.reduce((sum, l) => sum + lineAmount(l), 0));
   const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-  const topPrice = validLines.reduce((m, l) => Math.max(m, l.unitPrice), 0);
+  // Order-wide "buy X get Y": free items are valued at the cheapest product (matches book_order_atomic).
+  const topPrice = validLines.length ? validLines.reduce((m, l) => Math.min(m, l.unitPrice), Infinity) : 0;
 
   const activeSchemes = allSchemes.filter(
     s => s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today),

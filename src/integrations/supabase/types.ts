@@ -3398,6 +3398,7 @@ export type Database = {
         | "view_error_logs"
         | "see_own_performance_only"
         | "place_orders"
+        | "manage_buying"
       delivery_status: "pending" | "dispatched" | "delivered"
       invite_status: "pending" | "accepted" | "expired"
       payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
@@ -3547,6 +3548,7 @@ export const Constants = {
         "view_error_logs",
         "see_own_performance_only",
         "place_orders",
+        "manage_buying",
       ],
       delivery_status: ["pending", "dispatched", "delivered"],
       invite_status: ["pending", "accepted", "expired"],

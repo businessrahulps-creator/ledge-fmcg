@@ -233,6 +233,11 @@ export function useOrdersDomain(deps: OrdersDeps) {
     const currentOrder = ordersRef.current.find(o => o.id === id);
     const previousDelivery = currentOrder?.deliveryStatus || "pending";
     const newDelivery = updates.deliveryStatus || previousDelivery;
+    // Sending goods must go through "Send & make bill" (stock + credit checks, GST bill).
+    if (previousDelivery === "pending" && newDelivery === "dispatched") {
+      toast.error("Use Send & make bill to send this order", { description: "That checks stock and credit before goods leave." });
+      return;
+    }
 
     const dbUpdates: TablesUpdate<"orders"> = {};
     if (updates.paymentMode !== undefined) dbUpdates.payment_mode = updates.paymentMode;
@@ -291,24 +296,8 @@ export function useOrdersDomain(deps: OrdersDeps) {
       }
     }
 
-    const movingToDispatched = previousDelivery === "pending" && newDelivery === "dispatched";
     const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
                       newDelivery === "pending";
-
-    if (movingToDispatched && currentOrder && deps.companyId) {
-      const { error: dispErr } = await supabase.rpc("dispatch_order_atomic", {
-        p_order_id: id,
-        p_dispatch_date: updates.dispatchDate || currentOrder.dispatchDate || null,
-        p_vehicle: updates.vehicle ?? null,
-        p_driver_name: updates.driverName ?? null,
-        p_dispatch_remarks: updates.dispatchRemarks ?? null,
-      });
-      if (dispErr) {
-        handleSupabaseError(dispErr, { source: "rpc:dispatch_order_atomic", title: "Failed to dispatch order", context: { id } });
-        return;
-      }
-      await deps.safeRefetchStockItems();
-    }
 
     if (reverting && deps.companyId) {
       const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: id });

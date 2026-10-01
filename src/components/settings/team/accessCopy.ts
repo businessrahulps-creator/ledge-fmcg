@@ -25,6 +25,7 @@ export const TOGGLEABLE_CAPS: ToggleableCap[] = [
     sub: "Not just their own",
   },
   { key: "override_credit_limit", label: "Can override credit limits" },
+  { key: "manage_buying", label: "Can buy from suppliers", sub: "Purchase bills, supplier payments" },
 ];
 
 export interface OwnerOnlyCap {
@@ -48,6 +49,7 @@ export const SHORT_CAP_LABEL: Record<CapabilityKey, string> = {
   override_credit_limit: "override credit",
   manage_team: "manage the team",
   manage_billing: "manage billing",
+  manage_buying: "buy from suppliers",
   view_error_logs: "view error logs",
   see_own_performance_only: "see only their own numbers",
 };

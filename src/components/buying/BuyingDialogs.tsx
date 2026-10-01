@@ -11,6 +11,9 @@ import { useAuth } from "@/context/AuthContext";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { formatCurrency } from "@/data/mock-data";
 import { todayKey } from "@/utils/dateKey";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { INDIAN_STATE_CODES } from "@/utils/validators";
+import { useData } from "@/context/DataContext";
 import { buyingRpc, useBuying, type Supplier } from "@/hooks/useBuying";
 
 const GSTIN_RE = /^[0-9]{2}[A-Z0-9]{13}$/;
@@ -21,10 +24,12 @@ export function SupplierDialog({ open, onOpenChange, supplier, onSaved }: {
 }) {
   const { companyId } = useAuth();
   const { reload, bills, payments } = useBuying();
-  const [f, setF] = useState({ name: "", phone: "", gstin: "", address: "", opening: 0 as number | null });
+  const { companyInfo } = useData();
+  const homeState = companyInfo?.stateCode || "";
+  const [f, setF] = useState({ name: "", phone: "", gstin: "", state: "", address: "", opening: 0 as number | null });
   useEffect(() => {
-    if (open) setF({ name: supplier?.name || "", phone: supplier?.phone || "", gstin: supplier?.gstin || "", address: supplier?.address || "", opening: supplier?.openingBalance ?? 0 });
-  }, [open, supplier]);
+    if (open) setF({ name: supplier?.name || "", phone: supplier?.phone || "", gstin: supplier?.gstin || "", state: supplier?.stateCode || homeState, address: supplier?.address || "", opening: supplier?.openingBalance ?? 0 });
+  }, [open, supplier, homeState]);
   const locked = !!supplier && (bills.some(b => b.supplierId === supplier.id) || payments.some(p => p.supplierId === supplier.id));
 
   const save = async () => {
@@ -32,7 +37,7 @@ export function SupplierDialog({ open, onOpenChange, supplier, onSaved }: {
     const gstin = f.gstin.trim().toUpperCase();
     if (!name) { toast.error("Supplier name needed"); return; }
     if (gstin && !GSTIN_RE.test(gstin)) { toast.error("GSTIN doesn't look right", { description: "It should be 15 letters and numbers, starting with the 2-digit state code." }); return; }
-    const row: any = { name, phone: f.phone.trim(), gstin, state_code: gstin ? gstin.slice(0, 2) : "", address: f.address.trim() };
+    const row: any = { name, phone: f.phone.trim(), gstin, state_code: gstin ? gstin.slice(0, 2) : (f.state || ""), address: f.address.trim() };
     if (!locked) row.opening_balance = Math.max(0, f.opening || 0);
     const q = supplier
       ? supabase.from("suppliers").update(row).eq("id", supplier.id).select("id").single()
@@ -58,6 +63,20 @@ export function SupplierDialog({ open, onOpenChange, supplier, onSaved }: {
             <div className="space-y-1.5"><Label>Phone</Label><Input aria-label="Phone" inputMode="tel" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></div>
             <div className="space-y-1.5"><Label>GSTIN</Label><Input aria-label="GSTIN" value={f.gstin} onChange={e => setF({ ...f, gstin: e.target.value.toUpperCase() })} className="font-mono" maxLength={15} /></div>
           </div>
+          {!f.gstin.trim() && (
+            <div className="space-y-1.5">
+              <Label>Supplier's state</Label>
+              <Select value={f.state || undefined} onValueChange={v => setF({ ...f, state: v })}>
+                <SelectTrigger aria-label="Supplier's state"><SelectValue placeholder="Pick a state" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {Object.entries(INDIAN_STATE_CODES).sort((a, b) => a[1].localeCompare(b[1])).map(([code, name]) => (
+                    <SelectItem key={code} value={code}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">Decides the GST split: same state as you = CGST + SGST, other state = IGST.</p>
+            </div>
+          )}
           <div className="space-y-1.5"><Label>Address</Label><Textarea aria-label="Address" rows={2} value={f.address} onChange={e => setF({ ...f, address: e.target.value })} /></div>
           <div className="space-y-1.5">
             <Label>Money you already owe them (₹)</Label>

@@ -148,6 +148,20 @@
       "when": 1790850521394,
       "tag": "0020_reports_tally_export",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790852791620,
+      "tag": "0021_add_manage_buying_capability",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790852840708,
+      "tag": "0022_qa_fixes_access_buying_payments",
+      "breakpoints": true
     }
   ]
 }

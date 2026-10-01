@@ -76,8 +76,8 @@ describe("computeOrderPricing", () => {
       ...baseScheme, id: "s4", schemeType: "buy_x_get_y", buyQty: 5, freeQty: 1, productId: null,
     }];
     const result = computeOrderPricing(lines, schemes, "d1");
-    // totalQty = 15, sets = floor(15/5) = 3, savings = 3 * 1 * 200 (highest price) = 600
-    expect(result.totalSchemeSavings).toBe(600);
+    // totalQty = 15, sets = 3, free items valued at the cheapest product (100) = 300
+    expect(result.totalSchemeSavings).toBe(300);
   });
 
   it("filters by dealer ID", () => {

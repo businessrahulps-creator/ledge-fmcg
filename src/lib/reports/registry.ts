@@ -378,7 +378,7 @@ export const REPORTS: ReportDef[] = [
 
   // ───────── Buying
   {
-    id: "purchase_bills", group: "Buying", title: "Purchase bills", capability: "see_money", usesDates: true,
+    id: "purchase_bills", group: "Buying", title: "Purchase bills", capability: "manage_buying", usesDates: true,
     description: "Bills from your suppliers. Cancelled bills are marked and not added up.",
     columns: [
       { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "bill_no", header: "Bill no.", weight: 1.6 },
@@ -394,7 +394,7 @@ export const REPORTS: ReportDef[] = [
     },
   },
   {
-    id: "supplier_payments", group: "Buying", title: "Supplier payments", capability: "see_money", usesDates: true,
+    id: "supplier_payments", group: "Buying", title: "Supplier payments", capability: "manage_buying", usesDates: true,
     description: "Money you paid to suppliers.",
     columns: [
       { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "mode", header: "Mode" },
@@ -406,7 +406,7 @@ export const REPORTS: ReportDef[] = [
     },
   },
   {
-    id: "supplier_balances", group: "Buying", title: "Money you owe suppliers", capability: "see_money", usesDates: false,
+    id: "supplier_balances", group: "Buying", title: "Money you owe suppliers", capability: "manage_buying", usesDates: false,
     description: "What you owe each supplier today.",
     columns: [
       { key: "supplier", header: "Supplier", weight: 3 }, { key: "phone", header: "Phone" }, { key: "owed", header: "You owe", type: "money", total: true },
@@ -461,7 +461,7 @@ export const REPORTS: ReportDef[] = [
     },
   },
   {
-    id: "gst_purchase_register", group: "GST", title: "GST purchase register", capability: "see_money", usesDates: true,
+    id: "gst_purchase_register", group: "GST", title: "GST purchase register", capability: "manage_buying", usesDates: true,
     description: "GST on your purchase bills (cancelled bills left out). Check with your accountant before claiming.",
     columns: [
       { key: "date", header: "Date", type: "date" }, { key: "supplier", header: "Supplier", weight: 2 }, { key: "gstin", header: "GSTIN", weight: 1.5 },
