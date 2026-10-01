@@ -211,8 +211,12 @@ export default function Billing() {
 
 
 
+  const dealerNameById = useMemo(
+    () => new Map(api.dealers.list().map(d => [d.id, d.name] as const)),
+    [api.dealers],
+  );
   const dealerName = useCallback((distributorId: string) =>
-    api.dealers.list().find(d => d.id === distributorId)?.name || "", [api.dealers]);
+    dealerNameById.get(distributorId) || "", [dealerNameById]);
 
   const invoiceNumberById = useMemo(() => {
     const m = new Map<string, string>();

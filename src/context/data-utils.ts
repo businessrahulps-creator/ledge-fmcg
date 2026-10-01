@@ -125,6 +125,22 @@ export function mapTarget(t: any): Target {
   };
 }
 
+// Group child lines by parent id once per source array (keeps map callers O(N+M)).
+const groupCache = new WeakMap<any[], Map<string, any[]>>();
+function linesFor(lines: any[], key: string, id: string): any[] {
+  let g = groupCache.get(lines);
+  if (!g) {
+    g = new Map();
+    for (const l of lines) {
+      const k = l[key];
+      const arr = g.get(k);
+      if (arr) arr.push(l); else g.set(k, [l]);
+    }
+    groupCache.set(lines, g);
+  }
+  return g.get(id) || [];
+}
+
 export function mapClaim(c: any, claimLines: any[]): Claim {
   return {
     id: c.id, orderId: c.order_id, orderNumber: c.order_number || "",
@@ -132,8 +148,7 @@ export function mapClaim(c: any, claimLines: any[]): Claim {
     claimType: c.claim_type as Claim["claimType"], status: c.status as Claim["status"],
     reason: c.reason || "", resolutionNotes: c.resolution_notes || "",
     restoreStock: c.restore_stock || false, totalClaimValue: Number(c.total_claim_value || 0),
-    lines: claimLines
-      .filter((cl: any) => cl.claim_id === c.id)
+    lines: linesFor(claimLines, "claim_id", c.id)
       .map((cl: any) => ({
         productId: cl.product_id, productName: cl.product_name || "",
         quantity: cl.quantity || 0, unitPrice: Number(cl.unit_price || 0),
@@ -165,8 +180,7 @@ export function mapInvoice(inv: any, invoiceLines: any[]): Invoice {
     status: inv.status as Invoice["status"],
     vehicle: inv.vehicle || "",
     driverName: inv.driver_name || "",
-    lines: invoiceLines
-      .filter((l: any) => l.invoice_id === inv.id)
+    lines: linesFor(invoiceLines, "invoice_id", inv.id)
       .map((l: any) => ({
         id: l.id, productName: l.product_name || "", hsnCode: l.hsn_code || "",
         quantity: l.quantity || 0, unit: l.unit || "Pack",
