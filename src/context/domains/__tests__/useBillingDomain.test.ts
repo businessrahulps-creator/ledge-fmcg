@@ -70,6 +70,7 @@ describe("useBillingDomain — record return", () => {
       p_lines: [{ invoice_line_id: "il-1", good_qty: 2, damaged_qty: 1 }],
       p_reason: "Leaking bottles",
       p_godown_id: null,
+      p_idempotency_key: null,
     });
     expect(res).toEqual({ creditNoteNumber: "CN/2026-27/0001", grandTotal: 1180, restocked: true });
     expect(deps.safeRefetchStockItems).toHaveBeenCalled();
