@@ -25,7 +25,7 @@ BEGIN
             (now() AT TIME ZONE 'Asia/Kolkata')::date, 'return_reversal');
     DELETE FROM stock_deductions WHERE id = v_row.id;  -- trigger restores stock_items.quantity
     INSERT INTO stock_movements (company_id, product_id, godown_id, delta, movement_type, source_doc_type, source_doc_id, actor, note)
-    VALUES (v_company, v_row.product_id, v_row.godown_id, v_row.quantity_deducted, 'dispatch_reversal', 'order', p_order_id, auth.uid(), 'Send undone');
+    VALUES (v_company, v_row.product_id, v_row.godown_id, v_row.quantity_deducted, 'cancel_reversal', 'order', p_order_id, auth.uid(), 'Send undone');
     v_reversed := v_reversed + 1;
   END LOOP;
   RETURN jsonb_build_object('ok', true, 'reversed', v_reversed);
