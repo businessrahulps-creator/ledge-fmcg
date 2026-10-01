@@ -35,18 +35,27 @@ export function useUnsavedChangesGuard(isDirty: boolean): void {
       return window.confirm(MESSAGE);
     };
 
+    const leavesPage = (nextUrl: string | URL | null | undefined) => {
+      if (nextUrl == null || nextUrl === "") return false;
+      try {
+        return new URL(String(nextUrl), window.location.href).pathname !== window.location.pathname;
+      } catch {
+        return false;
+      }
+    };
+
     window.history.pushState = function (...args: Parameters<History["pushState"]>) {
-      const nextUrl = args[2];
-      // Same-URL pushes (query/state housekeeping) never count as leaving.
-      if (nextUrl && String(nextUrl) !== window.location.pathname && !confirmLeave()) return;
+      // Only a move to a different page counts as leaving; query/hash/state
+      // changes on the same page (e.g. opening the Menu) never ask.
+      if (leavesPage(args[2]) && !confirmLeave()) return;
       return originalPush(...args);
     };
     window.history.replaceState = function (...args: Parameters<History["replaceState"]>) {
       return originalReplace(...args);
     };
 
-    // Back / forward buttons.
-    window.history.pushState(window.history.state, "", window.location.href);
+    // Back / forward buttons. The guard's own entry never asks.
+    originalPush(window.history.state, "", window.location.href);
     const onPopState = () => {
       if (dirtyRef.current && !window.confirm(MESSAGE)) {
         originalPush(window.history.state, "", window.location.href);
