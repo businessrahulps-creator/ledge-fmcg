@@ -2718,7 +2718,7 @@
     hsl(212 44% 20%) 76%,
     hsl(19 30% 22%) 100%
   );
-  --surface-quiet: 34 30% 96%;
+  --surface-quiet: 0 0% 98%;
   /* Figure tones that stay above 4.5:1 on the band. */
   --hero-good: 158 52% 66%;
   --hero-attention: 22 82% 72%;
