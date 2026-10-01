@@ -127,6 +127,13 @@
       "when": 1790841350387,
       "tag": "0017_intel_actions_and_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790843352645,
+      "tag": "0018_buying_module",
+      "breakpoints": true
     }
   ]
 }
