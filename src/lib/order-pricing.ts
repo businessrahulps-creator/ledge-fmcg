@@ -45,66 +45,57 @@ export function computeOrderPricing(
   dealerId: string,
   referenceDate?: string,
 ): OrderPricing {
+  // Mirrors public.book_order_atomic exactly — the server is authoritative,
+  // this is the preview. Keep the two in step.
   const today = referenceDate || todayKey();
   const validLines = lines.filter(l => l.productId && l.quantity > 0);
-  const grossTotal = validLines.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const lineAmount = (l: PricingLineInput) => r2(l.quantity * l.unitPrice);
+  const grossTotal = r2(validLines.reduce((sum, l) => sum + lineAmount(l), 0));
+  const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
+  const topPrice = validLines.reduce((m, l) => Math.max(m, l.unitPrice), 0);
 
   const activeSchemes = allSchemes.filter(
     s => s.isActive && s.validFrom <= today && (!s.validUntil || s.validUntil >= today),
   );
 
-  const appliedSchemes: AppliedScheme[] = [];
+  const stacked: AppliedScheme[] = [];
+  let best: AppliedScheme | null = null;
 
   for (const s of activeSchemes) {
-    // Dealer filter
     if (s.dealerId && s.dealerId !== dealerId) continue;
-
-    // Min order value filter
     if (s.minOrderValue > 0 && grossTotal < s.minOrderValue) continue;
 
-    // Product / quantity filter
+    // Every line of the product counts (the same product can appear twice).
+    const productLines = s.productId ? validLines.filter(l => l.productId === s.productId) : [];
     if (s.productId) {
-      const matchingLine = validLines.find(l => l.productId === s.productId);
-      if (!matchingLine) continue;
-      if (s.minQty > 0 && matchingLine.quantity < s.minQty) continue;
-    } else if (s.minQty > 0) {
-      const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-      if (totalQty < s.minQty) continue;
+      if (productLines.length === 0) continue;
+      const q = productLines.reduce((sum, l) => sum + l.quantity, 0);
+      if (s.minQty > 0 && q < s.minQty) continue;
+    } else if (s.minQty > 0 && totalQty < s.minQty) {
+      continue;
     }
 
     let savings = 0;
     let label = "";
-
     switch (s.schemeType) {
       case "percentage": {
-        if (s.productId) {
-          const line = validLines.find(l => l.productId === s.productId);
-          savings = line ? (line.quantity * line.unitPrice * s.discountPercent) / 100 : 0;
-        } else {
-          savings = (grossTotal * s.discountPercent) / 100;
-        }
+        const base = s.productId ? productLines.reduce((sum, l) => sum + lineAmount(l), 0) : grossTotal;
+        savings = (base * s.discountPercent) / 100;
         label = `${s.discountPercent}% off`;
         break;
       }
       case "buy_x_get_y": {
-        if (s.productId) {
-          const line = validLines.find(l => l.productId === s.productId);
-          if (line && line.quantity >= s.buyQty) {
-            const sets = Math.floor(line.quantity / s.buyQty);
-            savings = sets * s.freeQty * line.unitPrice;
-            label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
+        if (s.buyQty > 0) {
+          if (s.productId) {
+            const q = productLines.reduce((sum, l) => sum + l.quantity, 0);
+            const price = productLines.reduce((m, l) => Math.max(m, l.unitPrice), 0);
+            savings = Math.floor(q / s.buyQty) * s.freeQty * price;
+          } else {
+            savings = Math.floor(totalQty / s.buyQty) * s.freeQty * topPrice;
           }
-        } else {
-          const sorted = [...validLines].sort((a, b) => b.unitPrice - a.unitPrice);
-          if (sorted.length > 0) {
-            const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
-            if (totalQty >= s.buyQty) {
-              const sets = Math.floor(totalQty / s.buyQty);
-              savings = sets * s.freeQty * sorted[0].unitPrice;
-            }
-          }
-          label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
         }
+        label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
         break;
       }
       case "flat_discount": {
@@ -113,20 +104,47 @@ export function computeOrderPricing(
         break;
       }
     }
+    savings = r2(Math.max(savings, 0));
+    if (savings <= 0) continue;
 
-    if (savings > 0) {
-      appliedSchemes.push({ scheme: s, savings, label });
-    }
+    const applied = { scheme: s, savings, label };
+    if (s.isCombinable !== false) stacked.push(applied);
+    else if (!best || savings > best.savings) best = applied;
   }
 
-  const totalSchemeSavings = appliedSchemes.reduce((sum, a) => sum + a.savings, 0);
+  const appliedSchemes = best ? [...stacked, best] : stacked;
+  const lineDiscounts = allocateLineDiscounts(validLines, appliedSchemes);
+  const totalSchemeSavings = r2(lineDiscounts.reduce((a, b) => a + b, 0));
 
   return {
     grossTotal,
     totalSchemeSavings,
-    netTotal: Math.max(0, grossTotal - totalSchemeSavings),
+    netTotal: Math.max(0, r2(grossTotal - totalSchemeSavings)),
     appliedSchemes,
   };
+}
+
+/**
+ * Per-line discounts, same rule as the server: a product offer is spread only
+ * over that product's lines, an order-wide offer over every line; the leftover
+ * paisa goes to the largest line in the group; each line is capped at its own
+ * amount. Returned in the same order as `lines` (after dropping empty lines).
+ */
+export function allocateLineDiscounts(lines: PricingLineInput[], applied: AppliedScheme[]): number[] {
+  const valid = lines.filter(l => l.productId && l.quantity > 0);
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const amounts = valid.map(l => r2(l.quantity * l.unitPrice));
+  const disc = valid.map(() => 0);
+  for (const a of applied) {
+    const idx = valid.map((l, i) => i).filter(i => !a.scheme.productId || valid[i].productId === a.scheme.productId);
+    const tot = idx.reduce((s, i) => s + amounts[i], 0);
+    if (idx.length === 0) continue;
+    const shares = idx.map(i => (tot > 0 ? r2((a.savings * amounts[i]) / tot) : 0));
+    const largest = idx.reduce((bi, i, k) => (amounts[i] > amounts[idx[bi]] ? k : bi), 0);
+    shares[largest] = r2(shares[largest] + a.savings - shares.reduce((s, x) => s + x, 0));
+    idx.forEach((i, k) => { disc[i] = r2(disc[i] + shares[k]); });
+  }
+  return disc.map((d, i) => Math.min(Math.max(d, 0), amounts[i]));
 }
 
 /**
