@@ -120,6 +120,13 @@
       "when": 1790839937433,
       "tag": "0016_ist_dates_return_idempotency_seq_growth",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790841350387,
+      "tag": "0017_intel_actions_and_settings",
+      "breakpoints": true
     }
   ]
 }
