@@ -33,56 +33,15 @@ import {
 
 import { ChevronRight } from "lucide-react";
 
-type MobileNavItem = { title: string; url: string; icon: typeof Wallet; cap?: CapabilityKey };
+import { NAV_GROUPS, NAV_FOOTER, MOBILE_PRIMARY, MOBILE_FALLBACK, type NavItem } from "./nav-config";
 
-const primaryMobileNav: MobileNavItem[] = [
-  { title: "Home", url: "/dashboard", icon: House },
-  { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Stock", url: "/stock", icon: Package },
-  { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
-];
-
-// Shown in the fourth slot when someone can't open Insights, so the bar stays full.
-const primaryMobileFallback: MobileNavItem = { title: "Dealers", url: "/distributors", icon: UserRound };
-
+type MobileNavItem = NavItem;
+const primaryMobileNav = MOBILE_PRIMARY;
+const primaryMobileFallback = MOBILE_FALLBACK;
+// Phone Menu shows the same groups, in the same order, as the computer menu.
 const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
-  {
-    label: "Work",
-    items: [
-      { title: "Today's work", url: "/today", icon: CircleDot, cap: "see_money" },
-      { title: "Shop visits", url: "/visits", icon: Store },
-      { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
-      { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
-      { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "manage_buying" },
-    ],
-  },
-  {
-    label: "Insights",
-    items: [
-      { title: "Reports", url: "/reports", icon: FileBarChart },
-    ],
-  },
-  {
-    label: "Products",
-    items: [
-      { title: "Offers & schemes", url: "/schemes", icon: Gift },
-      { title: "Targets", url: "/targets", icon: Target },
-    ],
-  },
-  {
-    label: "People",
-    items: [
-      { title: "Dealers", url: "/distributors", icon: UserRound },
-      { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-      { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
-    ],
-  },
+  ...NAV_GROUPS.map(g => ({ label: g.label ?? "Main", items: g.items })),
+  { label: "Account", items: NAV_FOOTER },
 ];
 
 const allMoreItems = moreGroups.flatMap((g) => g.items);
