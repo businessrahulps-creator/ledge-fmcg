@@ -80,7 +80,7 @@ const allMoreItems = moreGroups.flatMap((g) => g.items);
 const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/orders": "Orders",
-  "/command": "Insights",
+  "/command": "My Business",
   "/billing": "Money to Collect",
   "/stock": "Stock",
   "/distributors": "Dealers",
