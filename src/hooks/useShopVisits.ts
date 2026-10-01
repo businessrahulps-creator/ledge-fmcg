@@ -100,10 +100,12 @@ export function useShopVisits() {
     // A promise to pay quiets the "Collect" card in Today's work until the promised day,
     // when it comes back on top. Best-effort: only roles that see money can write this.
     if (input.outcome === "promised_payment" && input.promiseDate) {
-      await supabase.from("intel_actions").insert({
+      const { error: intelErr } = await supabase.from("intel_actions").insert({
         company_id: companyId, kind: "collect", subject_id: `collect:${input.distributorId}`, state: "promised",
         until_date: addDaysToKey(input.promiseDate, -1), promised_amount: input.promiseAmount ?? null,
       });
+      // Roles without money access can't write this (by design); the promise itself is still saved.
+      if (intelErr && intelErr.code !== "42501") console.warn("[visits] Today's work link not saved", intelErr.message);
     }
     store.snap = { ...store.snap, visits: [mapVisit(data), ...store.snap.visits] }; emit();
     return true;
