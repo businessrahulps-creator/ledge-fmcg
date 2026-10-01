@@ -1,1 +1,2 @@
 - Signed-in pages render inside one persistent AppShell layout route (App.tsx); page-level <AppLayout> is a pass-through there — why: sidebar/header must not rebuild on every page switch.
+- Today's work rules live as pure functions in src/lib/intelligence.ts (no AI for numbers); handled cards persist in intel_actions, thresholds in companies.intel_settings — why: testable, trustworthy, no nagging.
