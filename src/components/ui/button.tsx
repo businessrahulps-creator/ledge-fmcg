@@ -57,27 +57,50 @@ export interface ButtonProps
   loading?: boolean;
 }
 
+/**
+ * Every button shows a spinner while its action runs: pass `loading`, or just
+ * return a Promise from onClick and the button stays busy until it settles.
+ */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, children, onClick, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    if (asChild || !loading) {
+    const [pending, setPending] = React.useState(false);
+    const mounted = React.useRef(true);
+    React.useEffect(() => () => { mounted.current = false; }, []);
+    const busy = loading || pending;
+
+    const handleClick = React.useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (busy) { e.preventDefault(); return; }
+        const result = onClick?.(e) as unknown;
+        if (result && typeof (result as Promise<unknown>).then === "function") {
+          setPending(true);
+          (result as Promise<unknown>).then(
+            () => { if (mounted.current) setPending(false); },
+            () => { if (mounted.current) setPending(false); },
+          );
+        }
+      },
+      [busy, onClick],
+    );
+
+    if (asChild) {
       return (
-        <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} onClick={onClick} {...props}>
+        <Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref} onClick={onClick} {...props}>
           {children}
-        </Comp>
+        </Slot>
       );
     }
+    const spinner = <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden />;
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-        aria-busy
-        aria-disabled
-        onClick={(e) => e.preventDefault()}
+        aria-busy={busy || undefined}
+        aria-disabled={busy || props["aria-disabled"] || undefined}
+        onClick={handleClick}
       >
-        <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden />
-        {children}
+        {busy ? (size === "icon" ? spinner : <>{spinner}{children}</>) : children}
       </button>
     );
   },
