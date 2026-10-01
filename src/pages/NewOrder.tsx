@@ -63,7 +63,7 @@ const ORDER_DRAFT_KEY = "ledge:newOrderDraft";
 export default function NewOrder() {
   const navigate = useNavigate();
   const api = useApi();
-  const products = api.products.list();
+  const products = api.products.list().filter(p => p.itemKind !== "raw_material");
   const distributors = api.dealers.list();
   const salespersons = api.salespersons.list();
   const godowns = api.stock.locations.list().filter(g => g.isActive);
