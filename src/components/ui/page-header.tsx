@@ -72,7 +72,7 @@ export function PageHeader({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
         <div className="min-w-0">
-          <h1 className="h1-display text-[26px] leading-[1.15] tracking-[-0.01em] text-foreground sm:text-[30px]">
+          <h1 className="h1-display">
             {title}
           </h1>
           {subtitle && (
