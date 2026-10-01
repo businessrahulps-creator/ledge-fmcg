@@ -174,7 +174,7 @@ describe("useOrdersDomain", () => {
     expect(addResult.success).toBe(false);
   });
 
-  it("updateOrder — dispatched calls dispatch_order_atomic RPC", async () => {
+  it("updateOrder — sending via plain update is refused (must use Send & make bill)", async () => {
     const deps = makeDeps();
     const chain = createChainMock({ data: null, error: null });
     mockFrom.mockReturnValue(chain);
@@ -189,8 +189,8 @@ describe("useOrdersDomain", () => {
       await result.current.updateOrder("o1", { deliveryStatus: "dispatched" });
     });
 
-    expect(mockRpc).toHaveBeenCalledWith("dispatch_order_atomic", expect.objectContaining({ p_order_id: "o1" }));
-    expect(deps.safeRefetchStockItems).toHaveBeenCalled();
+    expect(mockRpc).not.toHaveBeenCalledWith("dispatch_order_atomic", expect.anything());
+    expect(mockFrom).not.toHaveBeenCalledWith("orders");
   });
 
   it("updateOrder — delivered after dispatched does NOT re-deduct", async () => {
