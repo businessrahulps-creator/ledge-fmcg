@@ -51,7 +51,7 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
             <p
               className={cn(
                 "font-heading text-[20px] sm:text-[22px] md:text-[24px] font-semibold tracking-[-0.02em] leading-[1.05] num tabular-nums mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
-                c.zero && "text-muted-foreground/55",
+                c.zero && "text-foreground",
               )}
             >
               <AnimatedNumber value={c.value} />
