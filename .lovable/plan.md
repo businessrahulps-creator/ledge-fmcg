@@ -28,20 +28,31 @@ Each finding is ranked "must fix", "should fix" or "small", with the screen, the
 - No animation on numbers people are reading, except the existing counters on first load.
 - If the phone is set to reduce motion, everything becomes a simple fade.
 
-## 4. Menu reorganisation (proposed)
+## 4. Menu reorganisation: small, careful changes
+
+Approach: keep the menu people already know and fix only what the review proves is wrong. No renaming and no big reshuffle.
+
+Fixed rules:
+- **Dashboard is always the first item**, named "Dashboard", on computer, in the phone bottom bar and in the phone Menu.
+- Page names stay exactly as they are today.
+- Items each role can't use stay hidden, as today.
 
 ```text
-Work (daily)          Money                 Stock & buying        People               Insights
-Home                  Money to collect      Stock                 Dealers              My Business
-Today's work          Returns               Buying                Sales team           Reports
-Orders                                      Offers & schemes      Targets
-Shop visits
-                                                          Bottom: Company, Settings
+Dashboard                         <- always first, on its own
+Work:      Today's work, Orders, Shop visits, Money to collect, Returns, Buying
+Products:  Stock, Offers & schemes, Targets
+People:    Dealers, Sales team, Company
+Insights:  My Business, Reports
+Bottom:    Settings
 ```
 
-- Phone bottom bar stays at five buttons: Home, Orders, Today's work (or Stock for roles without money access), Money to collect (or Shop visits for salespeople), Menu.
-- The Menu sheet uses the same groups and order as the computer menu, with a search box at the top.
-- Items each role can't use stay hidden, as today.
+What the review checks, with a fix only when there's evidence:
+- Group headings and spacing look the same on computer and phone.
+- The phone Menu lists the same items in the same order as the computer menu. Today the two lists are built separately, so they can drift.
+- The phone bottom bar keeps Dashboard, Orders, Stock, My Business, Menu, so nothing gets pushed off.
+- The active page is clearly marked, and every icon is the same size and weight.
+
+Any move beyond these (for example, moving Targets into Insights) goes to you as a suggestion, not a change.
 
 ## 5. Fix and verify
 - Fix every "must fix" and "should fix" item. List anything that would change a feature for your decision.
