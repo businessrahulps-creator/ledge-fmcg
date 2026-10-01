@@ -1,3 +1,4 @@
+import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 import { CopyButton } from "@/components/ui/copy-button";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -991,9 +992,9 @@ export default function OrderDetail() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelLoading}>Keep order</Button>
-            <Button variant="destructive" onClick={handleCancelOrder} disabled={cancelLoading}>
-              {cancelLoading ? "Cancelling…" : "Cancel order"}
-            </Button>
+            <HoldToConfirm onConfirm={handleCancelOrder} disabled={cancelLoading}>
+              {cancelLoading ? "Cancelling…" : "Hold to cancel order"}
+            </HoldToConfirm>
           </DialogFooter>
         </DialogContent>
       </Dialog>
