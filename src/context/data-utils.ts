@@ -76,6 +76,8 @@ export function mapProduct(p: any): Product {
     hsnCode: p.hsn_code || "", totalSold: p.total_sold ?? 0,
     gstRate: p.gst_rate === null || p.gst_rate === undefined ? null : Number(p.gst_rate),
     gstRateConfirmed: !!p.gst_rate_confirmed,
+    itemKind: p.item_kind === "raw_material" ? "raw_material" : "product",
+    avgCost: Number(p.avg_cost) || 0,
   };
 }
 

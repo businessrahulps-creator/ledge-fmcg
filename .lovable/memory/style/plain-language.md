@@ -1,0 +1,1 @@
+- Buying words: Buying (not Procurement), Purchase bill, Supplier, Money to pay, Money you owe suppliers, Return to supplier, Raw material, Pay supplier.

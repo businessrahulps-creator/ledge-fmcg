@@ -52,6 +52,10 @@ export interface Product {
   gstRate?: number | null;
   /** True once someone has confirmed the rate is right. Bills are blocked until then. */
   gstRateConfirmed?: boolean;
+  /** "raw_material" items are bought, never sold to dealers. */
+  itemKind?: "product" | "raw_material";
+  /** Weighted average purchase cost per unit, before GST. */
+  avgCost?: number;
 }
 
 export interface Salesperson {

@@ -1513,6 +1513,7 @@ export type Database = {
       }
       products: {
         Row: {
+          avg_cost: number
           base_price: number
           company_id: string
           created_at: string
@@ -1520,6 +1521,7 @@ export type Database = {
           gst_rate_confirmed: boolean
           hsn_code: string
           id: string
+          item_kind: string
           name: string
           sku: string
           total_sold: number
@@ -1527,6 +1529,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avg_cost?: number
           base_price?: number
           company_id: string
           created_at?: string
@@ -1534,6 +1537,7 @@ export type Database = {
           gst_rate_confirmed?: boolean
           hsn_code?: string
           id?: string
+          item_kind?: string
           name: string
           sku: string
           total_sold?: number
@@ -1541,6 +1545,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avg_cost?: number
           base_price?: number
           company_id?: string
           created_at?: string
@@ -1548,6 +1553,7 @@ export type Database = {
           gst_rate_confirmed?: boolean
           hsn_code?: string
           id?: string
+          item_kind?: string
           name?: string
           sku?: string
           total_sold?: number
@@ -1607,6 +1613,294 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_bill_lines: {
+        Row: {
+          bill_id: string
+          cgst_amount: number
+          created_at: string
+          gst_rate: number
+          id: string
+          igst_amount: number
+          line_total: number
+          product_id: string
+          product_name: string
+          quantity: number
+          rate: number
+          sgst_amount: number
+          taxable_value: number
+          unit: string
+        }
+        Insert: {
+          bill_id: string
+          cgst_amount?: number
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          igst_amount?: number
+          line_total: number
+          product_id: string
+          product_name: string
+          quantity: number
+          rate: number
+          sgst_amount?: number
+          taxable_value: number
+          unit?: string
+        }
+        Update: {
+          bill_id?: string
+          cgst_amount?: number
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          igst_amount?: number
+          line_total?: number
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          rate?: number
+          sgst_amount?: number
+          taxable_value?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_bill_lines_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_bill_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_bills: {
+        Row: {
+          bill_date: string
+          cancel_reason: string
+          cancelled_at: string | null
+          cgst_amount: number
+          company_id: string
+          created_at: string
+          godown_id: string
+          grand_total: number
+          id: string
+          idempotency_key: string | null
+          igst_amount: number
+          notes: string
+          posted_by: string | null
+          sgst_amount: number
+          status: string
+          subtotal: number
+          supplier_bill_no: string
+          supplier_id: string
+          supplier_name: string
+          supply_type: string
+          total_tax: number
+        }
+        Insert: {
+          bill_date: string
+          cancel_reason?: string
+          cancelled_at?: string | null
+          cgst_amount?: number
+          company_id: string
+          created_at?: string
+          godown_id: string
+          grand_total?: number
+          id?: string
+          idempotency_key?: string | null
+          igst_amount?: number
+          notes?: string
+          posted_by?: string | null
+          sgst_amount?: number
+          status?: string
+          subtotal?: number
+          supplier_bill_no: string
+          supplier_id: string
+          supplier_name: string
+          supply_type?: string
+          total_tax?: number
+        }
+        Update: {
+          bill_date?: string
+          cancel_reason?: string
+          cancelled_at?: string | null
+          cgst_amount?: number
+          company_id?: string
+          created_at?: string
+          godown_id?: string
+          grand_total?: number
+          id?: string
+          idempotency_key?: string | null
+          igst_amount?: number
+          notes?: string
+          posted_by?: string | null
+          sgst_amount?: number
+          status?: string
+          subtotal?: number
+          supplier_bill_no?: string
+          supplier_id?: string
+          supplier_name?: string
+          supply_type?: string
+          total_tax?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_bills_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_bills_godown_id_fkey"
+            columns: ["godown_id"]
+            isOneToOne: false
+            referencedRelation: "godowns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_bills_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_return_lines: {
+        Row: {
+          bill_line_id: string
+          created_at: string
+          id: string
+          line_total: number
+          product_id: string
+          product_name: string
+          quantity: number
+          return_id: string
+          tax_amount: number
+          taxable_value: number
+        }
+        Insert: {
+          bill_line_id: string
+          created_at?: string
+          id?: string
+          line_total: number
+          product_id: string
+          product_name: string
+          quantity: number
+          return_id: string
+          tax_amount: number
+          taxable_value: number
+        }
+        Update: {
+          bill_line_id?: string
+          created_at?: string
+          id?: string
+          line_total?: number
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          return_id?: string
+          tax_amount?: number
+          taxable_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_return_lines_bill_line_id_fkey"
+            columns: ["bill_line_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_bill_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_return_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_return_lines_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_returns: {
+        Row: {
+          bill_id: string
+          company_id: string
+          created_at: string
+          grand_total: number
+          id: string
+          idempotency_key: string | null
+          posted_by: string | null
+          reason: string
+          return_date: string
+          subtotal: number
+          supplier_id: string
+          total_tax: number
+        }
+        Insert: {
+          bill_id: string
+          company_id: string
+          created_at?: string
+          grand_total?: number
+          id?: string
+          idempotency_key?: string | null
+          posted_by?: string | null
+          reason?: string
+          return_date: string
+          subtotal?: number
+          supplier_id: string
+          total_tax?: number
+        }
+        Update: {
+          bill_id?: string
+          company_id?: string
+          created_at?: string
+          grand_total?: number
+          id?: string
+          idempotency_key?: string | null
+          posted_by?: string | null
+          reason?: string
+          return_date?: string
+          subtotal?: number
+          supplier_id?: string
+          total_tax?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_returns_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_returns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_returns_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -2083,6 +2377,122 @@ export type Database = {
           },
         ]
       }
+      supplier_payments: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          mode: Database["public"]["Enums"]["payment_mode"]
+          note: string
+          paid_on: string
+          posted_by: string | null
+          reference: string
+          status: string
+          supplier_id: string
+          void_reason: string
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          mode: Database["public"]["Enums"]["payment_mode"]
+          note?: string
+          paid_on: string
+          posted_by?: string | null
+          reference?: string
+          status?: string
+          supplier_id: string
+          void_reason?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          mode?: Database["public"]["Enums"]["payment_mode"]
+          note?: string
+          paid_on?: string
+          posted_by?: string | null
+          reference?: string
+          status?: string
+          supplier_id?: string
+          void_reason?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          address: string
+          company_id: string
+          created_at: string
+          gstin: string
+          id: string
+          name: string
+          opening_balance: number
+          phone: string
+          state_code: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          company_id: string
+          created_at?: string
+          gstin?: string
+          id?: string
+          name: string
+          opening_balance?: number
+          phone?: string
+          state_code?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          company_id?: string
+          created_at?: string
+          gstin?: string
+          id?: string
+          name?: string
+          opening_balance?: number
+          phone?: string
+          state_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       targets: {
         Row: {
           company_id: string
@@ -2398,6 +2808,23 @@ export type Database = {
       }
     }
     Functions: {
+      _buying_move_stock: {
+        Args: {
+          p_company: string
+          p_delta: number
+          p_doc: string
+          p_doc_type: string
+          p_godown: string
+          p_note: string
+          p_product: string
+          p_type: string
+        }
+        Returns: undefined
+      }
+      _buying_refresh_avg_cost: {
+        Args: { p_product: string }
+        Returns: undefined
+      }
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
       adjust_stock_atomic: {
         Args: {
@@ -2426,6 +2853,10 @@ export type Database = {
       }
       cancel_order_atomic: {
         Args: { p_order_id: string; p_reason: string }
+        Returns: Json
+      }
+      cancel_purchase_bill_atomic: {
+        Args: { p_bill_id: string; p_reason: string }
         Returns: Json
       }
       check_aging_transitions: { Args: never; Returns: Json }
@@ -2634,6 +3065,18 @@ export type Database = {
         }
         Returns: Json
       }
+      record_purchase_bill_atomic: {
+        Args: {
+          p_bill_date: string
+          p_godown_id: string
+          p_idempotency_key: string
+          p_lines: Json
+          p_notes: string
+          p_supplier_bill_no: string
+          p_supplier_id: string
+        }
+        Returns: Json
+      }
       record_return_and_credit_atomic: {
         Args: {
           p_godown_id?: string
@@ -2645,6 +3088,18 @@ export type Database = {
         }
         Returns: Json
       }
+      record_supplier_payment_atomic: {
+        Args: {
+          p_amount: number
+          p_idempotency_key: string
+          p_mode: Database["public"]["Enums"]["payment_mode"]
+          p_note: string
+          p_paid_on: string
+          p_reference: string
+          p_supplier_id: string
+        }
+        Returns: Json
+      }
       refresh_dealer_outstanding: {
         Args: { p_dealer: string }
         Returns: undefined
@@ -2652,6 +3107,16 @@ export type Database = {
       resend_team_invite: { Args: { p_invite_id: string }; Returns: string }
       resolve_claim_atomic: {
         Args: { p_claim_id: string; p_notes?: string }
+        Returns: Json
+      }
+      return_purchase_atomic: {
+        Args: {
+          p_bill_id: string
+          p_idempotency_key: string
+          p_lines: Json
+          p_reason: string
+          p_return_date: string
+        }
         Returns: Json
       }
       reverse_dispatch_for_order: {
@@ -2670,7 +3135,12 @@ export type Database = {
         Returns: string
       }
       state_code_of_gstin: { Args: { p_gstin: string }; Returns: string }
+      supplier_balance: { Args: { p_supplier: string }; Returns: number }
       void_invoice_payment_atomic: {
+        Args: { p_payment_id: string; p_reason: string }
+        Returns: Json
+      }
+      void_supplier_payment_atomic: {
         Args: { p_payment_id: string; p_reason: string }
         Returns: Json
       }
