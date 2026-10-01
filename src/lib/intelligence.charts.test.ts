@@ -50,7 +50,7 @@ describe("buyingLessPairs", () => {
   it("ranks by rupee drop and skips new dealers", () => {
     const os = [
       order(addDaysToKey(T, -45), 10000, "big"), order(addDaysToKey(T, -5), 2000, "big"),
-      order(addDaysToKey(T, -45), 3000, "small"),
+      order(addDaysToKey(T, -45), 3000, "small"), order(addDaysToKey(T, -61), 1, "small"), order(addDaysToKey(T, -61), 1, "big"),
       order(addDaysToKey(T, -20), 9000, "new"),
       order(addDaysToKey(T, -70), 1, "grow"), order(addDaysToKey(T, -40), 100, "grow"), order(addDaysToKey(T, -2), 900, "grow"),
     ];
