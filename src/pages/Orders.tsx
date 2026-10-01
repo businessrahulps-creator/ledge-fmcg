@@ -1,3 +1,4 @@
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { cn } from "@/lib/utils";
@@ -158,7 +159,37 @@ export default function Orders() {
     undefined,
     `${debouncedSearch}|${paymentFilter}|${deliveryFilter}|${needsBillOnly}`,
   );
-  const paginatedOrders = useMemo(() => filtered.slice(from, to), [filtered, from, to]);
+  const [sort, setSort] = useState<{ key: "number" | "date" | "dealer" | "value"; dir: "asc" | "desc" } | null>(null);
+  const sorted = useMemo(() => {
+    if (!sort) return filtered;
+    const val = (o: (typeof filtered)[number]): string | number =>
+      sort.key === "number" ? o.orderNumber
+      : sort.key === "date" ? new Date(o.date).getTime()
+      : sort.key === "dealer" ? (o.distributorName || "").toLowerCase()
+      : o.total - (o.schemeSavings || 0);
+    const m = sort.dir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      const x = val(a), y = val(b);
+      return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true })) * m;
+    });
+  }, [filtered, sort]);
+  const toggleSort = (key: "number" | "date" | "dealer" | "value") => {
+    setSort((s) => (s?.key !== key ? { key, dir: key === "dealer" ? "asc" : "desc" } : s.dir === "desc" ? { key, dir: "asc" } : { key, dir: "desc" }));
+    setPage(1);
+  };
+  const sortHeader = (key: "number" | "date" | "dealer" | "value", label: string, right = false) => {
+    const active = sort?.key === key;
+    const Icon = !active ? ArrowUpDown : sort!.dir === "asc" ? ArrowUp : ArrowDown;
+    return (
+      <th className={`px-4 py-3 font-semibold ${right ? "text-right" : ""}`} aria-sort={active ? (sort!.dir === "asc" ? "ascending" : "descending") : "none"}>
+        <button type="button" onClick={() => toggleSort(key)} className={`inline-flex items-center gap-1 hover:text-foreground ${active ? "text-foreground" : ""}`}>
+          {label}
+          <Icon className={`h-3 w-3 ${active ? "" : "opacity-40"}`} aria-hidden />
+        </button>
+      </th>
+    );
+  };
+  const paginatedOrders = useMemo(() => sorted.slice(from, to), [sorted, from, to]);
 
   // ── Period insights (no new business logic — derived from existing orders)
   const insights = useMemo(() => {
@@ -414,10 +445,10 @@ export default function Orders() {
                 <table className="w-full text-sm [font-variant-numeric:tabular-nums]">
                   <thead>
                     <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">Order #</th>
-                      <th className="px-4 py-3 font-semibold">Date</th>
-                      <th className="px-4 py-3 font-semibold">Dealer</th>
-                      <th className="px-4 py-3 font-semibold text-right">Order value</th>
+                      {sortHeader("number", "Order #")}
+                      {sortHeader("date", "Date")}
+                      {sortHeader("dealer", "Dealer")}
+                      {sortHeader("value", "Order value", true)}
                       <th className="px-4 py-3 font-semibold">Status</th>
                       <th className="px-4 py-3 font-semibold">Billing</th>
                     </tr>
