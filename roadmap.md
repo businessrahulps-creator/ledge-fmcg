@@ -36,8 +36,9 @@
 - [x] PDF (existing letterhead pipeline + sections/subtotals/totals/note/landscape), Excel (typed, multi-sheet, info sheet), CSV (UTF-8), WhatsApp share
 - [x] Reports: Sales x5, Money x4, Stock x3, Buying x3, GST x4, Shop visits
 - [x] Tally: ledger names, checks, XML + Excel, only-new tracking, export history
-- [ ] Not yet: money-to-collect by age buckets, dealer/supplier statements, day book, slow-moving stock, salesperson vs target, area filter; background (worker) PDF for very large reports
-- [ ] Astra review of report totals vs app screens; import sample XML into a real TallyPrime
+- [x] Added: money by age, dealer account summary, day book, slow-moving stock, salesperson vs target; Tally XML checked (174 vouchers, all balance)
+- [ ] Later: area filter, per-dealer full statement, background PDF for huge reports
+- [ ] Import sample XML into a real TallyPrime (needs the user's accountant)
 
 ## Vyapar ideas (plan declined — waiting for user's choice)
 - [ ] WhatsApp reminders + UPI link, Vyapar import, quotations, challans, expenses, small-printer bills
