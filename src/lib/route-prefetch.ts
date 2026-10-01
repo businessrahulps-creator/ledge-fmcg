@@ -24,6 +24,7 @@ export const routeImporters = {
   "/reports": () => import("@/pages/Command"),
   "/performance": () => import("@/pages/Command"),
   "/command": () => import("@/pages/Command"),
+  "/today": () => import("@/pages/Today"),
   "/settings": () => import("@/pages/Settings"),
   "/billing": () => import("@/pages/Billing"),
   "/help": () => import("@/pages/Help"),
@@ -76,7 +77,7 @@ const ric: IdleCb =
  * warm only what the user is most likely to click — never the whole app.
  */
 const likelyNext: Record<string, string[]> = {
-  "/dashboard": ["/orders", "/billing", "/command", "/distributors"],
+  "/dashboard": ["/orders", "/today", "/billing", "/command", "/distributors"],
   "/orders": ["/orders/new", "/billing"],
   "/orders/new": ["/orders"],
   "/distributors": ["/orders/new"],

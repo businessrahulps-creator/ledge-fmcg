@@ -252,6 +252,7 @@ export type Database = {
           gst_price_basis: string
           gstin: string
           id: string
+          intel_settings: Json
           invoice_prefix: string
           logo_url: string
           name: string
@@ -276,6 +277,7 @@ export type Database = {
           gst_price_basis?: string
           gstin?: string
           id?: string
+          intel_settings?: Json
           invoice_prefix?: string
           logo_url?: string
           name: string
@@ -300,6 +302,7 @@ export type Database = {
           gst_price_basis?: string
           gstin?: string
           id?: string
+          intel_settings?: Json
           invoice_prefix?: string
           logo_url?: string
           name?: string
@@ -740,6 +743,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "godowns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intel_actions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          promised_amount: number | null
+          state: string
+          subject_id: string
+          until_date: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind: string
+          promised_amount?: number | null
+          state: string
+          subject_id: string
+          until_date?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          promised_amount?: number | null
+          state?: string
+          subject_id?: string
+          until_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intel_actions_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"

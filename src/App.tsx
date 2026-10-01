@@ -50,6 +50,7 @@ const Stock = lazy(routeImporters["/stock"] as any);
 const Schemes = lazy(routeImporters["/schemes"] as any);
 const Targets = lazy(routeImporters["/targets"] as any);
 const Command = lazy(routeImporters["/command"] as any);
+const Today = lazy(routeImporters["/today"] as any);
 const Settings = lazy(routeImporters["/settings"] as any);
 const Billing = lazy(routeImporters["/billing"] as any);
 
@@ -196,6 +197,7 @@ const App = () => (
                   <Route path="/billing" element={<RequireCapability capability="see_money" message="Money and bills aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
 
                   <Route path="/company" element={<RequireCapability capability="manage_billing" message="Company details aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
+                  <Route path="/today" element={<RequireCapability capability="see_money" message="Today's work isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Today /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/command" element={<RequireCapability capability="see_money" message="Insights aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/reports" element={<Navigate to="/command?tab=drill" replace />} />
                   <Route path="/performance" element={<Navigate to="/command?tab=overview" replace />} />
