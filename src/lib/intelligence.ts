@@ -421,7 +421,7 @@ export function forecastNext4Weeks(orders: Order[], today: string): WeekForecast
   const firstIdx = all.findIndex(w => w.sales > 0);
   if (firstIdx < 0) return null;
   const usable = all.slice(firstIdx);
-  if (usable.length < 6) return null;
+  if (usable.length < 6 || usable.filter(w => w.sales > 0).length < 5) return null;
   const history = usable.slice(-8);
   const mean = history.reduce((n, w) => n + w.sales, 0) / history.length;
   if (mean <= 0) return null;

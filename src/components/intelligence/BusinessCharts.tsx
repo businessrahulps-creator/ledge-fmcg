@@ -85,7 +85,7 @@ function ForecastPanel() {
   if (!f) {
     return (
       <Panel title="Sales likely in the next 4 weeks">
-        <Empty text="We need about 6 weeks of sales before we can estimate. Keep adding orders." />
+        <Empty text="We need sales in at least 5 different weeks before we can make a fair estimate. Keep adding orders." />
       </Panel>
     );
   }
