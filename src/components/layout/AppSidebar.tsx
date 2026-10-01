@@ -3,24 +3,6 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useScrollEdges } from "@/hooks/use-scroll-edges";
 import {
-  House,
-  ClipboardList,
-  UserRound,
-  Package,
-  ChartNoAxesCombined,
-  Settings,
-  UserCheck,
-  Gift,
-  Target,
-  RotateCcw,
-  Landmark,
-  Wallet,
-  ListTodo,
-  ShoppingBasket,
-  Store,
-  FileBarChart,
-} from "lucide-react";
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -41,39 +23,9 @@ import { useCan, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 import ledgeMark from "@/assets/ledge-mark.webp";
 
-type NavItem = {
-  title: string;
-  url: string;
-  icon: React.ElementType;
-  onClick?: () => void;
-  cap?: CapabilityKey;
-};
+import { NAV_GROUPS, NAV_FOOTER, type NavItem as BaseNavItem } from "./nav-config";
 
-const workNav: NavItem[] = [
-  { title: "Dashboard", url: "/dashboard", icon: House },
-  { title: "Today's work", url: "/today", icon: ListTodo, cap: "see_money" },
-  { title: "Orders", url: "/orders", icon: ClipboardList },
-  { title: "Shop visits", url: "/visits", icon: Store },
-  { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
-  { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
-  { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "manage_buying" },
-];
-
-const catalogNav: NavItem[] = [
-  { title: "Stock", url: "/stock", icon: Package },
-  { title: "Offers & schemes", url: "/schemes", icon: Gift },
-  { title: "Targets", url: "/targets", icon: Target },
-];
-
-const relationshipsNav: NavItem[] = [
-  { title: "Dealers", url: "/distributors", icon: UserRound },
-  { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-  { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
-];
-
-const footerNav: NavItem[] = [
-  { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
-];
+type NavItem = BaseNavItem & { onClick?: () => void };
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -83,12 +35,6 @@ export function AppSidebar() {
   const { userRole } = useAuth();
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [markLoaded, setMarkLoaded] = useState(false);
-
-  // Insights group — unified My Business surface (replaces Reports + Performance).
-  const insightsNav: NavItem[] = [
-    { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
-    { title: "Reports", url: "/reports", icon: FileBarChart },
-  ];
 
   // Only show what this person is allowed to open.
   const canSeeMoney = useCan("see_money");
@@ -103,7 +49,7 @@ export function AppSidebar() {
   };
   const visible = (items: NavItem[]) => items.filter(i => !i.cap || allowed[i.cap]);
 
-  const effectiveFooter: NavItem[] = visible(footerNav);
+  const effectiveFooter: NavItem[] = visible(NAV_FOOTER);
 
   const renderItem = (item: NavItem) => {
     const isActive = item.onClick ? false : location.pathname.startsWith(item.url);
@@ -182,12 +128,12 @@ export function AppSidebar() {
     );
   };
 
-  const renderGroup = (label: string, rawItems: NavItem[], showDivider: boolean) => {
+  const renderGroup = (label: string | null, rawItems: NavItem[], showDivider: boolean) => {
     const items = visible(rawItems);
     if (items.length === 0) return null;
     return (
     <SidebarGroup className={showDivider ? "border-t border-border/40 mt-1 pt-1" : ""}>
-      {!collapsed && (
+      {!collapsed && label && (
         <SidebarGroupLabel className="px-3 mt-0.5 mb-0.5 text-[11px] font-medium tracking-normal normal-case text-muted-foreground/70">
           {label}
         </SidebarGroupLabel>
@@ -256,10 +202,9 @@ export function AppSidebar() {
         {/* Scroll region with edge-fade affordances. */}
         <div className="relative flex min-h-0 flex-1 flex-col">
           <SidebarContent ref={scrollRef} className="px-2 scrollbar-thin-hover">
-            {renderGroup("Work", workNav, false)}
-            {renderGroup("Products", catalogNav, true)}
-            {renderGroup("People", relationshipsNav, true)}
-            {renderGroup("Reports", insightsNav, true)}
+            {NAV_GROUPS.map((g, i) => (
+              <div key={g.label ?? "top"}>{renderGroup(g.label, g.items, i > 0)}</div>
+            ))}
           </SidebarContent>
           {/* Top fade — there's content above */}
           <div
