@@ -47,6 +47,7 @@ import { sumDue } from "@/lib/receivables";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useCan } from "@/hooks/useCan";
 import { UsageMeter } from "@/components/ui/usage-meter";
+import { CopyButton } from "@/components/ui/copy-button";
 
 
 export default function DealerDetail() {
@@ -143,7 +144,7 @@ export default function DealerDetail() {
               <h1 className="h1-display">{dealer.name}</h1>
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{dealer.location}</span>
-                <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dealer.contact}</span>
+                <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dealer.contact}{dealer.contact && <CopyButton value={dealer.contact} label="phone number" className="h-6 w-6" />}</span>
               </div>
             </div>
           </div>

@@ -963,7 +963,7 @@ export default function OrderDetail() {
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-            <Button onClick={saveOrder} disabled={isSaving}>{isSaving ? "Saving…" : "Save changes"}</Button>
+            <Button onClick={saveOrder} loading={isSaving}>{isSaving ? "Saving…" : "Save changes"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

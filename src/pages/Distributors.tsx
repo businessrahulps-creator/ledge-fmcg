@@ -497,7 +497,7 @@ export default function Distributors() {
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>
-              <Button type="submit" disabled={saving}>{saving ? "Saving…" : isNew ? "Add Dealer" : "Save Changes"}</Button>
+              <Button type="submit" loading={saving}>{saving ? "Saving…" : isNew ? "Add Dealer" : "Save Changes"}</Button>
             </DialogFooter>
             </form>
           </DialogContent>

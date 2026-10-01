@@ -250,7 +250,7 @@ export function PaymentsPanel({
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
-            <Button onClick={recordPayment} disabled={saving}>
+            <Button onClick={recordPayment} loading={saving}>
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Save payment
             </Button>
@@ -273,7 +273,7 @@ export function PaymentsPanel({
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setVoidTarget(null)}>Keep it</Button>
-            <Button variant="destructive" onClick={cancelPayment} disabled={saving}>
+            <Button variant="destructive" onClick={cancelPayment} loading={saving}>
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Cancel payment
             </Button>
