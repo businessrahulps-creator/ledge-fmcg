@@ -54,7 +54,7 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
       { title: "Shop visits", url: "/visits", icon: Store },
       { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
-      { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "see_money" },
+      { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "manage_buying" },
     ],
   },
   {

@@ -66,6 +66,7 @@ export const JOB_BY_ROLE: Record<AppRole, JobDef> = JOBS.reduce(
 export const CAP_LABEL: Record<string, string> = {
   manage_team: "team management",
   manage_billing: "billing",
+  manage_buying: "buying from suppliers",
   see_money: "money and revenue",
   manage_stock: "stock and products",
   manage_schemes: "schemes",
