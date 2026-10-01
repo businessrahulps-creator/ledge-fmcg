@@ -321,19 +321,19 @@ export const REPORTS: ReportDef[] = [
     description: "Items in stock that haven't been sent to any dealer in the last 60 days.",
     columns: [
       { key: "product", header: "Item", weight: 3 }, { key: "godown", header: "Godown" }, { key: "qty", header: "In stock", type: "number", total: true },
-      { key: "last", header: "Last sent", type: "date" }, { key: "value", header: "Value (avg cost)", type: "money", total: true },
+      { key: "last", header: "Last sent", type: "date" }, { key: "value", header: "Value", type: "money", total: true },
     ],
     fetch: async () => {
       const since = new Date(Date.now() - 60 * 86400000).toISOString();
       const [items, mv] = await Promise.all([
-        fetchAll((a, b) => db.from("stock_items").select("product_id,godown_id,quantity,products(name,avg_cost,item_kind),godowns(name)").gt("quantity", 0).range(a, b)),
+        fetchAll((a, b) => db.from("stock_items").select("product_id,godown_id,quantity,products(name,avg_cost,base_price,item_kind),godowns(name)").gt("quantity", 0).range(a, b)),
         fetchAll((a, b) => db.from("stock_movements").select("product_id,godown_id,created_at").eq("movement_type", "dispatch").order("created_at", { ascending: false }).range(a, b)),
       ]);
       const last = new Map<string, string>();
       for (const m of mv) { const k = m.product_id + "|" + m.godown_id; if (!last.has(k)) last.set(k, m.created_at); }
       return one(items.filter((x: any) => x.products?.item_kind !== "raw_material").map((x: any) => ({ x, l: last.get(x.product_id + "|" + x.godown_id) }))
         .filter(({ l }) => !l || l < since)
-        .map(({ x, l }) => ({ product: x.products?.name ?? "", godown: x.godowns?.name ?? "", qty: n(x.quantity), last: l ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(l)) : null, value: r2(n(x.quantity) * n(x.products?.avg_cost)) }))
+        .map(({ x, l }) => ({ product: x.products?.name ?? "", godown: x.godowns?.name ?? "", qty: n(x.quantity), last: l ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(l)) : null, value: r2(n(x.quantity) * (n(x.products?.avg_cost) || n(x.products?.base_price))) }))
         .sort((a, b) => b.value - a.value));
     },
     summary: rows => [
@@ -522,7 +522,7 @@ const TODAY = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" 
 async function stockRows(): Promise<ReportRow[]> {
   const rows = await fetchAll((a, b) => db.from("stock_items").select("quantity,threshold,products(name,sku,unit,avg_cost,base_price),godowns(name)").range(a, b));
   return rows.map((x: any) => {
-    const cost = n(x.products?.avg_cost) || 0;
+    const cost = n(x.products?.avg_cost) || n(x.products?.base_price);
     return { product: x.products?.name ?? "", code: x.products?.sku ?? "", godown: x.godowns?.name ?? "", qty: n(x.quantity), unit: x.products?.unit ?? "", threshold: n(x.threshold), value: r2(n(x.quantity) * cost), low: n(x.quantity) <= n(x.threshold) ? "Yes" : "No" };
   }).sort((a, b) => String(a.product).localeCompare(String(b.product)));
 }
