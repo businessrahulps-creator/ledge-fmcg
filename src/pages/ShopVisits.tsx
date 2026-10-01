@@ -71,7 +71,9 @@ export default function ShopVisits() {
   }, [dealers, orders, v.visits, q, today]);
 
   const visitedToday = useMemo(() => new Set(v.visits.filter(x => x.createdAt.slice(0, 10) === today).map(x => x.distributorId)).size, [v.visits, today]);
-  const quiet = rows.filter(r => r.lastOrderDays == null || r.lastOrderDays >= 30).length;
+  // Orders arrive a moment after dealers; until then don't call anyone "Never ordered".
+  const ordersReady = orders.length > 0 || dealers.every(d => !d.totalOrders);
+  const quiet = ordersReady ? rows.filter(r => r.lastOrderDays == null || r.lastOrderDays >= 30).length : null;
 
   const promises = useMemo(() => {
     const open = v.visits.filter(x => x.promiseStatus === "open" && x.promiseDate);
@@ -157,7 +159,7 @@ export default function ShopVisits() {
           ].map(k => (
             <div key={k.label} className="rounded-md border border-border bg-card p-3">
               <p className="text-xs text-muted-foreground">{k.label}</p>
-              <p className="text-2xl font-semibold tabular-nums text-foreground">{v.loading && !v.loaded ? "–" : k.value}</p>
+              <p className="text-2xl font-semibold tabular-nums text-foreground">{(v.loading && !v.loaded) || k.value == null ? "–" : k.value}</p>
             </div>
           ))}
         </div>
@@ -202,8 +204,8 @@ export default function ShopVisits() {
                     <dl className="grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <dt className="text-xs text-muted-foreground">Last order</dt>
-                        <dd className={cn("text-foreground", (lastOrderDays == null || lastOrderDays >= 30) && "font-medium text-destructive")}>
-                          {ago(lastOrderDays, "Never ordered")}
+                        <dd className={cn("text-foreground", ordersReady && (lastOrderDays == null || lastOrderDays >= 30) && "font-medium text-destructive")}>
+                          {ordersReady ? ago(lastOrderDays, "Never ordered") : "Loading…"}
                         </dd>
                       </div>
                       <div>
