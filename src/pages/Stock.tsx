@@ -175,14 +175,17 @@ export default function Stock() {
   const debouncedProductSearch = useDebounce(productSearch);
   const debouncedWarehouseSearch = useDebounce(warehouseSearch);
 
+  const [kindFilter, setKindFilter] = useState<"all" | "sale" | "raw">("all");
+  const hasRaw = products.some(p => p.itemKind === "raw_material");
   const filteredProducts = useMemo(() => products.filter(
     (p) =>
       (!gstOnly || !p.gstRateConfirmed) &&
+      (kindFilter === "all" || (kindFilter === "raw") === (p.itemKind === "raw_material")) &&
       (p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()) ||
         p.sku.toLowerCase().includes(debouncedProductSearch.toLowerCase()))
-  ), [products, debouncedProductSearch, gstOnly]);
+  ), [products, debouncedProductSearch, gstOnly, kindFilter]);
 
-  const productsPagination = usePagination(filteredProducts.length, undefined, `${debouncedProductSearch}|${gstOnly}`);
+  const productsPagination = usePagination(filteredProducts.length, undefined, `${debouncedProductSearch}|${gstOnly}|${kindFilter}`);
   const productSort = useSortedRows(filteredProducts, (p, k: "name" | "sku" | "price" | "sold" | "stock") =>
     k === "name" ? p.name : k === "sku" ? (p.sku || "") : k === "price" ? p.basePrice : k === "sold" ? (p.totalSold || 0) : getProductStock(p.id));
   const paginatedProducts = useMemo(() => productSort.sorted.slice(productsPagination.from, productsPagination.to), [productSort.sorted, productsPagination.from, productsPagination.to]);
@@ -489,6 +492,14 @@ export default function Stock() {
                 </div>
               )}
 
+              {hasRaw && (
+                <div role="group" aria-label="Show items" className="inline-flex rounded-md border border-border p-0.5 text-xs">
+                  {([["all", "All items"], ["sale", "For sale"], ["raw", "Raw materials"]] as const).map(([k, l]) => (
+                    <button key={k} type="button" aria-pressed={kindFilter === k} onClick={() => setKindFilter(k)}
+                      className={`min-h-[32px] rounded px-3 ${kindFilter === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
+                  ))}
+                </div>
+              )}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -835,6 +846,21 @@ export default function Stock() {
             <form onSubmit={(e) => { e.preventDefault(); void saveProduct(); }}>
             {editProduct && (
               <div className="space-y-3 md:space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs md:text-sm">What is this item?</Label>
+                  <div role="radiogroup" className="grid grid-cols-2 gap-2">
+                    {([["product", "Product for sale", "Shown when taking dealer orders"], ["raw_material", "Raw material", "Bought to make products. Not sold to dealers"]] as const).map(([k, l, h]) => {
+                      const on = (editProduct.itemKind || "product") === k;
+                      return (
+                        <button key={k} type="button" role="radio" aria-checked={on} onClick={() => setEditProduct({ ...editProduct, itemKind: k })}
+                          className={`rounded-md border px-3 py-2 text-left min-h-[44px] ${on ? "border-foreground bg-muted" : "border-border"}`}>
+                          <span className="block text-sm font-medium">{l}</span>
+                          <span className="block text-[11px] text-muted-foreground">{h}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Product Name *</Label>
                   <Input autoFocus value={editProduct.name} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} placeholder="e.g. Premium Basmati Rice 5kg" className="h-10 rounded-lg" />
