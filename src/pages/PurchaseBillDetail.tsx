@@ -157,7 +157,7 @@ function ReturnDialog({ open, onOpenChange, billId, billDate, lines, returnedByL
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>Return to supplier</DialogTitle><DialogDescription>Items you are sending back. Stock goes down and you'll owe less.</DialogDescription></DialogHeader>
-        <form className="space-y-3" onSubmit={e => { e.preventDefault(); void save(); }}>
+        <form className="space-y-3" onSubmit={e => e.preventDefault()}>
           {lines.map(l => {
             const left = l.quantity - (returnedByLine.get(l.id) || 0);
             if (left <= 0) return null;

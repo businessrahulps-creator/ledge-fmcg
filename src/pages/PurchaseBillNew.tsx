@@ -78,7 +78,7 @@ export default function PurchaseBillNew() {
   return (
     <AppLayout>
       <PageHeader title="Add purchase bill" subtitle="Type in the bill your supplier gave you. Saving adds the items to stock." breadcrumbs={[{ label: "Buying", to: "/buying" }, { label: "Add purchase bill" }]} />
-      <form className="space-y-5 max-w-3xl" onSubmit={e => { e.preventDefault(); void save(); }}>
+      <form className="space-y-5 max-w-3xl" onSubmit={e => e.preventDefault()}>
         <section className="rounded-md border border-border bg-card p-4 space-y-3">
           <div className="space-y-1.5">
             <Label>Supplier *</Label>

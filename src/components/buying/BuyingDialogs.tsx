@@ -52,7 +52,7 @@ export function SupplierDialog({ open, onOpenChange, supplier, onSaved }: {
           <DialogTitle>{supplier ? "Edit supplier" : "Add supplier"}</DialogTitle>
           <DialogDescription>The business you buy raw materials or goods from.</DialogDescription>
         </DialogHeader>
-        <form className="space-y-3" onSubmit={e => { e.preventDefault(); void save(); }}>
+        <form className="space-y-3" onSubmit={e => e.preventDefault()}>
           <div className="space-y-1.5"><Label>Supplier name *</Label><Input aria-label="Supplier name *" autoFocus value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="e.g. Sri Lakshmi Packaging" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label>Phone</Label><Input aria-label="Phone" inputMode="tel" value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })} /></div>
@@ -109,7 +109,7 @@ export function PaySupplierDialog({ open, onOpenChange, supplier }: { open: bool
           <DialogTitle>Pay supplier</DialogTitle>
           <DialogDescription>{supplier?.name} · You owe {formatCurrency(owed)}</DialogDescription>
         </DialogHeader>
-        <form className="space-y-3" onSubmit={e => { e.preventDefault(); void save(); }}>
+        <form className="space-y-3" onSubmit={e => e.preventDefault()}>
           <div className="space-y-1.5"><Label>Amount paid (₹) *</Label><NumberInput aria-label="Amount paid (₹) *" value={amount} onValueChange={setAmount} min={0} max={owed} allowDecimal allowEmpty /></div>
           <div className="space-y-1.5">
             <Label>Payment method</Label>
