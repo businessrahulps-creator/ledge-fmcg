@@ -212,7 +212,7 @@ export default function Stock() {
       toast.error("Product code needed", { description: "Please enter a product code." });
       return;
     }
-    if (editProduct.basePrice <= 0) {
+    if (editProduct.itemKind !== "raw_material" && editProduct.basePrice <= 0) {
       toast.error("Invalid price", { description: "Base price must be greater than 0." });
       return;
     }
