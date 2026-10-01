@@ -140,7 +140,7 @@ export default function BusinessCharts() {
   const returned = useMemo(() => topReturnedProducts(claims as any, today), [claims, today]);
   const runOut = useMemo(() => {
     const { low } = stockRunway({ orders, stockItems, products, settings: { ...DEFAULT_INTEL_SETTINGS, runwayDays: 1e9 }, today });
-    return low.slice(0, 5).map(c => ({ id: c.subjectId, label: c.title, value: c.meta!.days as number }));
+    return low.filter(c => (c.meta!.days as number) <= 60).slice(0, 5).map(c => ({ id: c.subjectId, label: c.title, value: c.meta!.days as number }));
   }, [orders, stockItems, products, today]);
 
   const top = unpaid.items[0];
@@ -171,7 +171,7 @@ export default function BusinessCharts() {
       >
         {runOut.length
           ? <RankedBars items={runOut} format={d => d <= 0 ? "Out of stock" : `about ${d} day${d === 1 ? "" : "s"}`} />
-          : <Empty text="No products were sent in the last 30 days, so we can't estimate yet." />}
+          : <Empty text="Nothing is likely to run out in the next 2 months, based on the last 30 days." />}
       </Panel>
 
       <Panel
