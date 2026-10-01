@@ -23,6 +23,7 @@ import {
 import { DelayedSuspense } from "@/components/ui/delayed-suspense";
 import { routeImporters, prefetchLikelyNext } from "@/lib/route-prefetch";
 import { NavProgress } from "@/components/NavProgress";
+import { AppShell } from "@/components/layout/AppLayout";
 
 // Eager: only the tiny 404. Everything else is lazy so the entry stays small.
 import NotFound from "./pages/NotFound";
@@ -179,27 +180,29 @@ const App = () => (
                   <Route path="/welcome" element={<DelayedSuspense fallback={ShellFallback}><Welcome /></DelayedSuspense>} />
                   <Route path="/reset-password" element={<DelayedSuspense fallback={ShellFallback}><ResetPassword /></DelayedSuspense>} />
                   <Route path="/invite/:token" element={<DelayedSuspense fallback={ShellFallback}><Invite /></DelayedSuspense>} />
-                  <Route path="/dashboard" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/orders/new" element={<ProtectedRoute><RequireCapability capability="place_orders" message="Placing orders isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
-                  <Route path="/orders/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OrderDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><DealerDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/distributors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={DealersFallback}><Distributors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/stock" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={StockFallback}><Stock /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons/:id" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><SalespersonDetail /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/salespersons" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={SalespersonsFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/schemes" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Schemes /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/targets" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/claims" element={<ProtectedRoute><RequireCapability capability="see_money" message="Returns and credit notes aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute><RequireCapability capability="see_money" message="Money and bills aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
+                  <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+                  <Route path="/dashboard" element={<PageErrorBoundary><DelayedSuspense fallback={DashboardFallback}><Dashboard /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/orders" element={<PageErrorBoundary><DelayedSuspense fallback={OrdersFallback}><Orders /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/orders/new" element={<RequireCapability capability="place_orders" message="Placing orders isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><NewOrder /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
+                  <Route path="/orders/:id" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OrderDetail /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/distributors/:id" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><DealerDetail /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/distributors" element={<PageErrorBoundary><DelayedSuspense fallback={DealersFallback}><Distributors /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/stock" element={<PageErrorBoundary><DelayedSuspense fallback={StockFallback}><Stock /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/salespersons/:id" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><SalespersonDetail /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/salespersons" element={<PageErrorBoundary><DelayedSuspense fallback={SalespersonsFallback}><Salespersons /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/schemes" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Schemes /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/targets" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Targets /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/claims" element={<RequireCapability capability="see_money" message="Returns and credit notes aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Claims /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
+                  <Route path="/billing" element={<RequireCapability capability="see_money" message="Money and bills aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={BillingFallback}><Billing /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
 
-                  <Route path="/company" element={<ProtectedRoute><RequireCapability capability="manage_billing" message="Company details aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
-                  <Route path="/command" element={<ProtectedRoute><RequireCapability capability="see_money" message="Insights aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
+                  <Route path="/company" element={<RequireCapability capability="manage_billing" message="Company details aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
+                  <Route path="/command" element={<RequireCapability capability="see_money" message="Insights aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/reports" element={<Navigate to="/command?tab=drill" replace />} />
                   <Route path="/performance" element={<Navigate to="/command?tab=overview" replace />} />
-                  <Route path="/settings" element={<ProtectedRoute><RequireCapability capability="manage_team" message="Team settings aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></RequireCapability></ProtectedRoute>} />
-                  <Route path="/help" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
-                  <Route path="/admin/errors" element={<ProtectedRoute><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary></ProtectedRoute>} />
+                  <Route path="/settings" element={<RequireCapability capability="manage_team" message="Team settings aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
+                  <Route path="/help" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary>} />
+                  <Route path="/admin/errors" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><AdminErrors /></DelayedSuspense></PageErrorBoundary>} />
+                  </Route>
                   <Route path="/ops/login" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsLogin /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/ops" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsOverview /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />
                   <Route path="/ops/businesses" element={<RequireStaff><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><OpsBusinesses /></DelayedSuspense></PageErrorBoundary></RequireStaff>} />

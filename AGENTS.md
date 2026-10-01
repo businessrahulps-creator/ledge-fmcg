@@ -1,0 +1,1 @@
+- Signed-in pages render inside one persistent AppShell layout route (App.tsx); page-level <AppLayout> is a pass-through there — why: sidebar/header must not rebuild on every page switch.

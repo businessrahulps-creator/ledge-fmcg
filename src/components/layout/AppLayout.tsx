@@ -1,7 +1,7 @@
-import { ReactNode, useRef, useEffect, useState, useCallback } from "react";
+import { ReactNode, useRef, useEffect, useState, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, Outlet } from "react-router-dom";
 import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, RefreshCw, UserRound, UserCheck, Gift, ChartNoAxesCombined, Landmark, Wallet, LogOut, CircleDot } from "lucide-react";
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -106,7 +106,30 @@ function PageTitle() {
   );
 }
 
+/**
+ * When pages render inside the persistent AppShell, their own <AppLayout>
+ * becomes a pass-through, so the sidebar, header and bottom bar stay mounted
+ * across page switches instead of being rebuilt on every click.
+ */
+const ShellContext = createContext(false);
+
+export function AppShell() {
+  return (
+    <ShellContext.Provider value={true}>
+      <AppLayoutFrame>
+        <Outlet />
+      </AppLayoutFrame>
+    </ShellContext.Provider>
+  );
+}
+
 export function AppLayout({ children }: { children: ReactNode }) {
+  const inShell = useContext(ShellContext);
+  if (inShell) return <>{children}</>;
+  return <AppLayoutFrame>{children}</AppLayoutFrame>;
+}
+
+function AppLayoutFrame({ children }: { children: ReactNode }) {
   const { userRole, profile, signOut } = useAuth();
   const { isRefreshing, loadError, retryLoad } = useData();
   const location = useLocation();
