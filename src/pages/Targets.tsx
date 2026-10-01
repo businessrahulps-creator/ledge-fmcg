@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 import { EntityCard } from "@/components/ui/entity-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
-import { toDateKey, todayKey } from "@/utils/dateKey";
+import { toDateKey, todayKey, istCalendarNow } from "@/utils/dateKey";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
