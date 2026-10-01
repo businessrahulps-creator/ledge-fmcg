@@ -245,7 +245,7 @@ export default function ShopVisits() {
             <SegmentedControl
               label="Show shops"
               value={stageFilter}
-              onChange={setStageFilter}
+              onChange={(x) => setStageFilter(x as typeof stageFilter)}
               options={[
                 { value: "open", label: "Working on" },
                 { value: "converted", label: "Became dealers" },
