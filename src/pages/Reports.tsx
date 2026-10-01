@@ -29,7 +29,7 @@ const PREVIEW = 50;
 
 export default function Reports() {
   const canMoney = useCan("see_money");
-  const canStock = useCan("manage_stock");
+  const canStock = useCan("manage_stock"); // day_book also lists purchases, so it needs buying access too
   const canBuy = useCan("manage_buying");
   const { profile, user, companyId } = useAuth();
   const { companyInfo, distributors } = useData();
@@ -37,7 +37,7 @@ export default function Reports() {
   const areaOpts = useMemo(() => [...new Set((distributors || []).map(d => d.location).filter(Boolean))].sort(), [distributors]);
   const [params, setParams] = useSearchParams();
 
-  const allowed = useMemo(() => REPORTS.filter(r => r.capability == null || (r.capability === "see_money" ? canMoney : r.capability === "manage_buying" ? canBuy : canStock || canMoney)), [canMoney, canStock, canBuy]);
+  const allowed = useMemo(() => REPORTS.filter(r => r.capability == null || (r.capability === "see_money" ? canMoney && (r.id !== "day_book" || canBuy) : r.capability === "manage_buying" ? canBuy : canStock || canMoney)), [canMoney, canStock, canBuy]);
   const selected = params.get("r") || allowed[0]?.id || "";
   const isTally = selected === "tally";
   const def = isTally ? null : reportById(selected) && allowed.some(a => a.id === selected) ? reportById(selected)! : null;
