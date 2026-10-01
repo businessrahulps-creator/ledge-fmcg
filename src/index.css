@@ -21,69 +21,72 @@
     --ledge-terracotta: 19 56% 40%;
     --ledge-bone:     34 47% 93%;
 
-    --background: 34 47% 93%;
-    --foreground: 220 22% 8%;
+    /* Monochrome app palette (Oct 2026) — white surfaces, near-black ink,
+       neutral hairline greys. Colour is reserved for status only. */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 22% 8%;
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 22% 8%;
+    --popover-foreground: 0 0% 9%;
 
-    --primary: 218 60% 14%;
-    --primary-foreground: 34 47% 96%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 34 25% 88%;
-    --secondary-foreground: 220 22% 14%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 34 20% 90%;
-    --muted-foreground: 220 10% 38%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 19 56% 40%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 0 65% 42%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 165 50% 22%;
+    --success: 142 64% 30%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 19 56% 40%;
+    --warning: 25 85% 42%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 30 8% 84%;
-    --input: 30 8% 84%;
-    --ring: 218 60% 14%;
+    --border: 0 0% 90%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 9%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 34 47% 93%;
-    --sidebar-foreground: 220 22% 14%;
-    --sidebar-primary: 218 60% 14%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 34 30% 87%;
-    --sidebar-accent-foreground: 218 60% 14%;
-    --sidebar-border: 30 8% 82%;
-    --sidebar-ring: 218 60% 14%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 0 0% 9%;
 
     --surface: 0 0% 100%;
-    --surface-border: 30 8% 86%;
+    --surface-border: 0 0% 90%;
 
-    --brand-gradient: linear-gradient(90deg, hsl(218 60% 14%) 0%, hsl(19 56% 40%) 100%);
-    --brand-gradient-soft: linear-gradient(90deg, hsl(218 60% 14% / 0.08) 0%, hsl(19 56% 40% / 0.08) 100%);
+    --brand-gradient: linear-gradient(90deg, hsl(0 0% 9%) 0%, hsl(0 0% 9%) 100%);
+    --brand-gradient-soft: linear-gradient(90deg, hsl(0 0% 9% / 0.04) 0%, hsl(0 0% 9% / 0.04) 100%);
 
-    /* Fluent depth scale */
-    --shadow-2:  0 1px 2px hsl(220 22% 8% / 0.06);
-    --shadow-4:  0 2px 6px hsl(220 22% 8% / 0.07), 0 1px 2px hsl(220 22% 8% / 0.04);
-    --shadow-8:  0 6px 14px hsl(220 22% 8% / 0.09), 0 2px 4px hsl(220 22% 8% / 0.05);
-    --shadow-16: 0 10px 24px hsl(220 22% 8% / 0.11), 0 3px 6px hsl(220 22% 8% / 0.05);
-    --shadow-28: 0 18px 40px hsl(220 22% 8% / 0.15), 0 6px 12px hsl(220 22% 8% / 0.07);
+    /* Flat depth scale — hairlines for resting surfaces, real lift only for overlays */
+    --shadow-2:  0 0 0 0 transparent;
+    --shadow-4:  0 1px 2px hsl(0 0% 0% / 0.05);
+    --shadow-8:  0 2px 8px hsl(0 0% 0% / 0.06);
+    --shadow-16: 0 8px 24px hsl(0 0% 0% / 0.08), 0 2px 6px hsl(0 0% 0% / 0.04);
+    --shadow-28: 0 18px 40px hsl(0 0% 0% / 0.12), 0 6px 12px hsl(0 0% 0% / 0.05);
 
     --control-h-compact: 32px;
     --control-h-default: 40px;
 
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-heading: 'Playfair Display', Georgia, serif;
+    /* App headings are Inter now; the landing page keeps its own serif. */
+    --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
 
     /* Durations */
     --duration-micro:  180ms;
