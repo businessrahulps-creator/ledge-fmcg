@@ -197,6 +197,13 @@
       "when": 1790856422096,
       "tag": "0027_security_hardening_suite",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1790859546574,
+      "tag": "0028_restrict_role_capability_defaults",
+      "breakpoints": true
     }
   ]
 }
