@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/services/api";
 import { todayKey } from "@/utils/dateKey";
 import { toast } from "sonner";
-import { IndianRupee, Ban, Loader2 } from "lucide-react";
+import { IndianRupee, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
