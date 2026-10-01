@@ -14,6 +14,13 @@ export interface PdfSummaryItem {
   value: string;
 }
 
+export interface PdfSectionBlock {
+  name?: string;
+  rows: string[][];
+  /** Subtotal row printed under this section. */
+  subtotal?: string[];
+}
+
 interface ReportPdfProps {
   title: string;
   subtitle?: string;
@@ -27,6 +34,15 @@ interface ReportPdfProps {
   companyAddress?: string;
   gstin?: string;
   logoUrl?: string;
+  /** "Period · filters · Made by …" line under the title. */
+  meta?: string;
+  /** Grouped rows; when set, replaces `rows`. */
+  sections?: PdfSectionBlock[];
+  /** Grand total row (bold). */
+  totalsRow?: string[];
+  /** Plain closing sentence under the table. */
+  note?: string;
+  orientation?: "portrait" | "landscape";
 }
 
 export function ReportPdf({
@@ -42,10 +58,25 @@ export function ReportPdf({
   companyAddress,
   gstin,
   logoUrl,
+  meta,
+  sections,
+  totalsRow,
+  note,
+  orientation = "portrait",
 }: ReportPdfProps) {
+  const blocks: PdfSectionBlock[] = sections ?? [{ rows }];
+  const boldRow = (cells: string[], key: string, label?: boolean) => (
+    <View key={key} style={[s.tableRow, { borderTop: "0.75pt solid #1A1A1A" }]} wrap={false}>
+      {cells.map((cell, ci) => (
+        <Text key={ci} style={[columns[ci]?.align === "right" ? s.tableCellRightBold : s.tableCellBold, { width: columns[ci]?.width || "auto" }]}>
+          {ci === 0 && label && !cell ? "Total" : cell}
+        </Text>
+      ))}
+    </View>
+  );
   return (
     <Document title={title} author={companyName || "Ledge"}>
-      <Page size="A4" style={s.page}>
+      <Page size="A4" orientation={orientation} style={s.page}>
         <PdfHeader
           title={title}
           subtitle={subtitle}
