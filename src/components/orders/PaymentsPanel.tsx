@@ -100,7 +100,7 @@ export function PaymentsPanel({
       amount: value,
       mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
       paidOn,
-      reference,
+      reference: mode === "cash" ? "" : reference,
       note,
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.

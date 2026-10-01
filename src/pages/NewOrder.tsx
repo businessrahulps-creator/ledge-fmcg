@@ -396,7 +396,7 @@ export default function NewOrder() {
           amount: advance,
           mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
           paidOn: orderDate,
-          reference: advanceRef,
+          reference: advanceMode === "cash" ? "" : advanceRef,
           note: "Advance received at booking",
           idempotencyKey: `${result.orderId}:booking-advance`,
         });
