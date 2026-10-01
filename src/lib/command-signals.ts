@@ -97,7 +97,7 @@ export function ordersInPeriod(orders: Order[], range: PeriodRange): Order[] {
   return orders.filter((o) => {
     if (isCancelled(o)) return false;
     const d = new Date(o.date);
-    return d >= range.from && d <= range.to;
+    return d >= range.from && d < range.to;
   });
 }
 
