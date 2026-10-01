@@ -730,6 +730,7 @@ export default function NewOrder() {
                       className="grid w-full grid-cols-4"
                     />
                   </div>
+                  {advanceMode !== "cash" && (
                   <div className="space-y-1.5 md:space-y-2">
                     <Label className="text-xs md:text-sm">Reference</Label>
                     <Input
@@ -739,6 +740,7 @@ export default function NewOrder() {
                       className="h-10 rounded-lg md:h-12"
                     />
                   </div>
+                  )}
                 </div>
                 {Number(advanceAmount || 0) > 0 && (
                   <p className="mt-3 text-xs text-muted-foreground">
