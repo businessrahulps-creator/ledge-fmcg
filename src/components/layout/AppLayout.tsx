@@ -40,7 +40,6 @@ const primaryMobileNav: MobileNavItem[] = [
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
-  { title: "Reports", url: "/reports", icon: FileBarChart },
 ];
 
 // Shown in the fourth slot when someone can't open Insights, so the bar stays full.
@@ -55,6 +54,12 @@ const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
       { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
       { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
       { title: "Buying", url: "/buying", icon: ShoppingBasket, cap: "manage_buying" },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { title: "Reports", url: "/reports", icon: FileBarChart },
     ],
   },
   {
