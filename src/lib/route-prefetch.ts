@@ -21,7 +21,7 @@ export const routeImporters = {
   "/stock": () => import("@/pages/Stock"),
   "/schemes": () => import("@/pages/Schemes"),
   "/targets": () => import("@/pages/Targets"),
-  "/reports": () => import("@/pages/Command"),
+  "/reports": () => import("@/pages/Reports"),
   "/performance": () => import("@/pages/Command"),
   "/command": () => import("@/pages/Command"),
   "/today": () => import("@/pages/Today"),
@@ -87,6 +87,7 @@ const likelyNext: Record<string, string[]> = {
   "/stock": ["/orders/new"],
   "/salespersons": ["/command"],
   "/reports": ["/command"],
+
   "/performance": ["/command"],
   "/command": ["/distributors", "/orders"],
 };

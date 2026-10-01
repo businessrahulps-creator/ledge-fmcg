@@ -53,6 +53,7 @@ const Command = lazy(routeImporters["/command"] as any);
 const Today = lazy(routeImporters["/today"] as any);
 const Buying = lazy(routeImporters["/buying"] as any);
 const ShopVisits = lazy(routeImporters["/visits"] as any);
+const Reports = lazy(routeImporters["/reports"] as any);
 const PurchaseBillNew = lazy(() => import("@/pages/PurchaseBillNew"));
 const PurchaseBillDetail = lazy(() => import("@/pages/PurchaseBillDetail"));
 const SupplierDetail = lazy(() => import("@/pages/SupplierDetail"));
@@ -209,7 +210,7 @@ const App = () => (
                   <Route path="/company" element={<RequireCapability capability="manage_billing" message="Company details aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Company /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/today" element={<RequireCapability capability="see_money" message="Today's work isn't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Today /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/command" element={<RequireCapability capability="see_money" message="Insights aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={ReportsFallback}><Command /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
-                  <Route path="/reports" element={<Navigate to="/command?tab=drill" replace />} />
+                  <Route path="/reports" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Reports /></DelayedSuspense></PageErrorBoundary>} />
                   <Route path="/performance" element={<Navigate to="/command?tab=overview" replace />} />
                   <Route path="/settings" element={<RequireCapability capability="manage_team" message="Team settings aren't part of your role. If you think this is wrong, ask your Owner to update your access in Team Settings."><PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Settings /></DelayedSuspense></PageErrorBoundary></RequireCapability>} />
                   <Route path="/help" element={<PageErrorBoundary><DelayedSuspense fallback={RouteFallback}><Help /></DelayedSuspense></PageErrorBoundary>} />

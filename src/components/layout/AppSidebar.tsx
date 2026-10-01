@@ -86,6 +86,7 @@ export function AppSidebar() {
   // Insights group — unified My Business surface (replaces Reports + Performance).
   const insightsNav: NavItem[] = [
     { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
+    { title: "Reports", url: "/reports", icon: FileBarChart },
   ];
 
   // Only show what this person is allowed to open.

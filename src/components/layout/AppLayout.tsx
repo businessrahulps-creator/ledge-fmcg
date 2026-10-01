@@ -40,6 +40,7 @@ const primaryMobileNav: MobileNavItem[] = [
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
+  { title: "Reports", url: "/reports", icon: FileBarChart },
 ];
 
 // Shown in the fourth slot when someone can't open Insights, so the bar stays full.
@@ -95,6 +96,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/claims": "Returns",
   "/buying": "Buying",
   "/visits": "Shop visits",
+  "/reports": "Reports",
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",
