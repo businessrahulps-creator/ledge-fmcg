@@ -1,6 +1,7 @@
+import React from "react";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, ArrowLeft, AlertTriangle, Gift } from "lucide-react";
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
@@ -95,6 +96,14 @@ export default function NewOrder() {
   // Controlled form fields
   const [orderDate, setOrderDate] = useState(todayKey());
   const [selectedDealer, setSelectedDealer] = useState("");
+  // "Take order" from Shop visits opens this form with the dealer already picked.
+  const [searchParams] = useSearchParams();
+  const presetDealer = searchParams.get("dealer");
+  const presetApplied = React.useRef(false);
+  React.useEffect(() => {
+    if (presetApplied.current || !presetDealer) return;
+    if (distributors.some(d => d.id === presetDealer)) { setSelectedDealer(presetDealer); presetApplied.current = true; }
+  }, [presetDealer, distributors]);
   const [selectedSalesperson, setSelectedSalesperson] = useState("");
   const [remarks, setRemarks] = useState("");
 
