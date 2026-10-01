@@ -164,7 +164,7 @@ function CommandLineChartInner({ data, height = 240 }: Props) {
                 strokeDasharray="4 4"
                 ifOverflow="extendDomain"
                 label={{
-                  value: `Run-rate · ${formatCurrency(projectedClose / data.length)}/bucket`,
+                  value: `Average · ${formatCurrency(projectedClose / data.length)}`,
                   position: "insideTopRight",
                   fill: "hsl(var(--muted-foreground))",
                   fontSize: 10,

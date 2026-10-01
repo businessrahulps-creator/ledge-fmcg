@@ -52,17 +52,17 @@ export function RunRatePill({ actualRevenue, actualCollections, periodTarget, da
   const PaceIcon = paceState === "ahead" ? CheckCircle2 : paceState === "behind" ? AlertCircle : TrendingUp;
   const paceLabel =
     paceState === "ahead"
-      ? "Ahead of pace"
+      ? "Ahead of target"
       : paceState === "behind"
-        ? "Behind pace"
-        : "On pace";
+        ? "Behind target"
+        : "On track";
 
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Forecast
+            Expected by end of period
           </p>
           <span className="text-[11px] text-muted-foreground">
             · {daysRemaining} day{daysRemaining === 1 ? "" : "s"} left
@@ -79,18 +79,18 @@ export function RunRatePill({ actualRevenue, actualCollections, periodTarget, da
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Projected revenue
+            Expected sales
           </p>
           <p className="num mt-1 text-lg font-semibold text-foreground tabular-nums truncate">
             {formatCurrency(projectedRevenue)}
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            at current run-rate
+            if sales continue at this speed
           </p>
         </div>
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Projected collections
+            Expected money collected
           </p>
           <p className="num mt-1 text-lg font-semibold text-foreground tabular-nums truncate">
             {formatCurrency(projectedCollections)}
