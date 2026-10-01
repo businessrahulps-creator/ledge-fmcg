@@ -31,14 +31,20 @@ function save(blob: Blob, filename: string) {
 
 const rawValue = (c: ReportColumn, v: ReportRow[string]) => (v == null ? "" : c.type === "date" && v ? String(v).slice(0, 10) : v);
 
+/** Stops spreadsheet formula injection: text starting with = + - @ tab or CR is opened as plain text. */
+export const csvSafeText = (s: string) => (/^[=+\-@\t\r]/.test(s) ? `'${s}` : s);
+
 /* ── CSV: UTF-8 with BOM so Excel shows ₹ and Indian names correctly. */
 export function exportCsv(ctx: ExportContext) {
   const { def, sections } = ctx;
   const multi = sections.length > 1;
   const head = [...(multi ? ["Section"] : []), ...def.columns.map(c => c.header)];
   const esc = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const lines = [head.map(esc).join(",")];
-  for (const s of sections) for (const r of s.rows) lines.push([...(multi ? [s.name] : []), ...def.columns.map(c => rawValue(c, r[c.key]))].map(esc).join(","));
+  const lines = [head.map(t => esc(csvSafeText(t))).join(",")];
+  for (const s of sections) for (const r of s.rows) lines.push([
+    ...(multi ? [csvSafeText(s.name)] : []),
+    ...def.columns.map(c => { const v = rawValue(c, r[c.key]); return typeof v === "string" && c.type !== "money" && c.type !== "number" ? csvSafeText(v) : v; }),
+  ].map(esc).join(","));
   save(new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }), `${fileBase(def, ctx.periodLabel)}.csv`);
   return allRows(sections).length;
 }
