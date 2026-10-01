@@ -270,6 +270,19 @@ export function useOrdersDomain(deps: OrdersDeps) {
       return;
     }
 
+    const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
+                      newDelivery === "pending";
+
+    // Undo stock first; if refused (e.g. order already has a GST bill), leave the order unchanged.
+    if (reverting && deps.companyId) {
+      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: id });
+      if (revErr) {
+        handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Couldn't undo sending this order", context: { id } });
+        return;
+      }
+      await deps.safeRefetchStockItems();
+    }
+
     if (Object.keys(dbUpdates).length > 0) {
       const { error } = await supabase.from("orders").update(dbUpdates).eq("id", id);
       if (error) { handleSupabaseError(error, { source: "crud:orders.update", title: "Failed to update order", context: { id } }); return; }
@@ -296,17 +309,6 @@ export function useOrdersDomain(deps: OrdersDeps) {
       }
     }
 
-    const reverting = (previousDelivery === "dispatched" || previousDelivery === "delivered") &&
-                      newDelivery === "pending";
-
-    if (reverting && deps.companyId) {
-      const { error: revErr } = await supabase.rpc("reverse_dispatch_for_order", { p_order_id: id });
-      if (revErr) {
-        handleSupabaseError(revErr, { source: "rpc:reverse_dispatch_for_order", title: "Failed to reverse stock deduction", context: { id } });
-      } else {
-        await deps.safeRefetchStockItems();
-      }
-    }
 
     setOrders(prev => prev.map(o => {
       if (o.id !== id) return o;

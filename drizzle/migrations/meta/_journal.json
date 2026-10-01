@@ -162,6 +162,34 @@
       "when": 1790852840708,
       "tag": "0022_qa_fixes_access_buying_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790855308982,
+      "tag": "0023_dealer_outstanding_exclude_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790855349116,
+      "tag": "0024_buying_avg_cost_lock_and_cancel_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790855392508,
+      "tag": "0025_reverse_dispatch_guard_billed",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790855428315,
+      "tag": "0026_reverse_dispatch_movement_type",
+      "breakpoints": true
     }
   ]
 }
