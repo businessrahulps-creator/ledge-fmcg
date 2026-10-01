@@ -68,7 +68,7 @@ describe("stockRunway", () => {
       stockItems: [{ productId: "p1", godownId: "g", godownName: "Main", quantity: 5 }] as any,
       products: [{ id: "p1", name: "A", unit: "box", basePrice: 10 }] as any, settings: S, today: "2026-10-01",
     });
-    expect(low[0].meta!.days).toBe(5);
+    expect(low[0].meta!.days).toBeCloseTo(5 / (30 / 11)); // only 11 days of history
   });
 });
 

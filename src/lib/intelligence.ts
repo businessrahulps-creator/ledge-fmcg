@@ -245,7 +245,7 @@ export function stockRunway(input: {
   products: Product[];
   settings: IntelSettings;
   today: string;
-}): { low: IntelCard[]; slow: IntelCard[] } {
+}): { low: IntelCard[]; slow: IntelCard[]; historyDays: number } {
   const { orders, stockItems, products, settings, today } = input;
   const from30 = addDaysToKey(today, -30);
   const sold30 = new Map<string, number>();
@@ -254,7 +254,7 @@ export function stockRunway(input: {
   for (const o of orders) {
     if (!isLive(o)) continue;
     if (!firstOrder || o.date < firstOrder) firstOrder = o.date;
-    if (o.deliveryStatus === "pending" || !o.dispatchDate) continue;
+    if (o.deliveryStatus === "pending" || !o.dispatchDate || o.dispatchDate > today) continue;
     for (const l of o.lines) {
       if (o.dispatchDate > from30) sold30.set(l.productId, (sold30.get(l.productId) || 0) + l.quantity);
       const cur = lastSold.get(l.productId);
@@ -277,19 +277,20 @@ export function stockRunway(input: {
     const sold = sold30.get(p.id) || 0;
     const godowns = items.map(s => `${s.godownName}: ${s.quantity}`).join(", ");
     if (sold > 0) {
-      const perDay = sold / 30;
-      const days = Math.floor(qty / perDay);
+      const windowDays = Math.min(30, Math.max(1, historyDays));
+      const perDay = sold / windowDays;
+      const days = qty / perDay; // fractional; shown rounded down
       if (days < settings.runwayDays) {
         low.push({
           kind: "stock",
           subjectId: `stock:${p.id}`,
           title: p.name,
-          fact: qty <= 0 ? "Out of stock" : `About ${days} day${days === 1 ? "" : "s"} of stock left`,
+          fact: qty <= 0 ? "Out of stock" : days < 1 ? "Less than 1 day of stock left" : `About ${Math.floor(days)} day${Math.floor(days) === 1 ? "" : "s"} of stock left`,
           score: sold * (p.basePrice || 0),
           why: [
-            `Sent ${sold} ${p.unit || "units"} in the last 30 days (about ${perDay.toFixed(1)} a day).`,
+            `Sent ${sold} ${p.unit || "units"} in the last ${windowDays} days (about ${perDay.toFixed(1)} a day).`,
             `In stock now: ${qty} (${godowns}).`,
-            `You asked to be warned under ${settings.runwayDays} days. This is an estimate based on the last 30 days.`,
+            `You asked to be warned under ${settings.runwayDays} days. This is an estimate based on the last ${windowDays} days.`,
           ],
           link: "/stock",
           meta: { qty, sold, days },
@@ -317,7 +318,7 @@ export function stockRunway(input: {
   }
   low.sort((a, b) => (a.meta!.days as number) - (b.meta!.days as number) || b.score - a.score);
   slow.sort((a, b) => (b.meta!.value as number) - (a.meta!.value as number));
-  return { low, slow };
+  return { low, slow, historyDays };
 }
 
 // ── Handled cards (Done / Remind me / Promised) ───────────────────────────
@@ -405,44 +406,50 @@ export function weeklySales(orders: Order[], today: string, weeks = 26): WeekPoi
 }
 
 export interface WeekForecast {
+  ok: true;
   history: WeekPoint[];          // last 8 complete weeks
-  next: { start: string; end: string; expected: number; low: number; high: number }[];
-  total: number; low: number; high: number;
+  next: { start: string; end: string; expected: number }[];
+  total: number;
+  /** Range from backtesting the same 4-week forecast on past data; null until 3 backtests exist. */
+  range: { low: number; high: number; checks: number } | null;
   uncertain: boolean;
 }
+export interface ForecastNotReady { ok: false; reason: "no_sales" | "few_weeks" | "few_sale_weeks"; have: number; need: number }
+
+const sumSales = (ws: WeekPoint[]) => ws.reduce((n, w) => n + w.sales, 0);
 
 /**
- * Next 4 weeks = average of the last 8 weeks. The range comes from how wrong
- * the same method was on earlier weeks (backtest), so it is honest, not guessed.
- * Returns null when there are fewer than 6 weeks of sales history.
+ * Next 4 weeks = 4 × average of the last 8 weeks. The range comes from how wrong
+ * this exact 4-week forecast was on earlier periods (backtest), never guessed.
  */
-export function forecastNext4Weeks(orders: Order[], today: string): WeekForecast | null {
-  const all = weeklySales(orders, today, 26);
+export function forecastNext4Weeks(orders: Order[], today: string): WeekForecast | ForecastNotReady {
+  const all = weeklySales(orders, today, 52);
   const firstIdx = all.findIndex(w => w.sales > 0);
-  if (firstIdx < 0) return null;
+  if (firstIdx < 0) return { ok: false, reason: "no_sales", have: 0, need: 5 };
   const usable = all.slice(firstIdx);
-  if (usable.length < 6 || usable.filter(w => w.sales > 0).length < 5) return null;
+  const saleWeeks = usable.filter(w => w.sales > 0).length;
+  if (saleWeeks < 5) return { ok: false, reason: "few_sale_weeks", have: saleWeeks, need: 5 };
+  if (usable.length < 6) return { ok: false, reason: "few_weeks", have: usable.length, need: 6 };
   const history = usable.slice(-8);
-  const mean = history.reduce((n, w) => n + w.sales, 0) / history.length;
-  if (mean <= 0) return null;
+  const mean = sumSales(history) / history.length;
+  if (mean <= 0) return { ok: false, reason: "few_sale_weeks", have: 0, need: 5 };
   const errs: number[] = [];
-  for (let i = 4; i < usable.length - 1; i++) {
-    const win = usable.slice(Math.max(0, i - 8), i);
-    const m = win.reduce((n, w) => n + w.sales, 0) / win.length;
-    if (m > 0) errs.push(Math.abs(usable[i].sales - m) / m);
+  for (let i = 8; i + 4 <= usable.length; i++) {
+    const predicted = (sumSales(usable.slice(i - 8, i)) / 8) * 4;
+    if (predicted > 0) errs.push(Math.abs(sumSales(usable.slice(i, i + 4)) - predicted) / predicted);
   }
-  const sd = Math.sqrt(history.reduce((n, w) => n + (w.sales - mean) ** 2, 0) / history.length);
   errs.sort((a, b) => a - b);
-  const errPct = errs.length >= 3 ? errs[Math.floor(errs.length * 0.8)] : sd / mean;
+  const total = mean * 4;
+  const range = errs.length >= 3
+    ? (() => { const e = errs[Math.min(errs.length - 1, Math.ceil(errs.length * 0.8) - 1)]; return { low: Math.max(0, total * (1 - e)), high: total * (1 + e), checks: errs.length }; })()
+    : null;
+  const sd = Math.sqrt(history.reduce((n, w) => n + (w.sales - mean) ** 2, 0) / history.length);
   const last = history[history.length - 1].end;
   const next = [1, 2, 3, 4].map(k => {
     const end = addDaysToKey(last, 7 * k);
-    return { start: addDaysToKey(end, -6), end, expected: mean, low: Math.max(0, mean * (1 - errPct)), high: mean * (1 + errPct) };
+    return { start: addDaysToKey(end, -6), end, expected: mean };
   });
-  // Weekly errors partly cancel over 4 weeks → spread grows with √4, not 4.
-  const total = mean * 4;
-  const spread = mean * errPct * 2;
-  return { history, next, total, low: Math.max(0, total - spread), high: total + spread, uncertain: sd / mean > 0.5 };
+  return { ok: true, history, next, total, range, uncertain: sd / mean > 0.5 };
 }
 
 export interface BarItem { id: string; label: string; value: number; note?: string; link?: string }
@@ -470,23 +477,25 @@ export function topUnpaidDealers(rows: ReceivableRow[], limit = 5): { items: Bar
 export interface PairItem { id: string; label: string; before: number; now: number; link: string }
 
 /** Dealers buying less: previous 30 days vs last 30 days, ranked by rupee drop. New dealers skipped. */
-export function buyingLessPairs(orders: Order[], today: string, limit = 5): PairItem[] {
-  const recentFrom = addDaysToKey(today, -30);
-  const priorFrom = addDaysToKey(today, -60);
+export function buyingLessPairs(orders: Order[], today: string, limit = 5): { items: PairItem[]; from: string; mid: string; to: string } {
+  const y = addDaysToKey(today, -1);
+  const recentFrom = addDaysToKey(y, -30);
+  const priorFrom = addDaysToKey(y, -60);
   const m = new Map<string, { name: string; before: number; now: number; first: string }>();
   for (const o of orders) {
-    if (!isLive(o) || o.date > today) continue;
+    if (!isLive(o) || o.date > y) continue;
     const cur = m.get(o.distributorId) || { name: o.distributorName, before: 0, now: 0, first: o.date };
     if (o.date < cur.first) cur.first = o.date;
     if (o.date > recentFrom) cur.now += orderNet(o);
     else if (o.date > priorFrom) cur.before += orderNet(o);
     m.set(o.distributorId, cur);
   }
-  return [...m.entries()]
+  const items = [...m.entries()]
     .filter(([, v]) => v.first <= priorFrom && v.before > v.now)
     .sort((a, b) => (b[1].before - b[1].now) - (a[1].before - a[1].now))
     .slice(0, limit)
     .map(([id, v]) => ({ id, label: v.name, before: v.before, now: v.now, link: `/distributors/${id}` }));
+  return { items, from: addDaysToKey(priorFrom, 1), mid: recentFrom, to: y };
 }
 
 export interface ClaimLite { status: string; createdAt: string; lines: { productId: string; productName: string; quantity: number }[] }
@@ -496,7 +505,8 @@ export function topReturnedProducts(claims: ClaimLite[], today: string, days = 9
   const from = addDaysToKey(today, -days);
   const m = new Map<string, { name: string; qty: number }>();
   for (const c of claims) {
-    if (c.status === "rejected" || c.createdAt.slice(0, 10) <= from) continue;
+    const d = c.createdAt.slice(0, 10);
+    if (c.status === "rejected" || d <= from || d > today) continue;
     for (const l of c.lines) {
       const cur = m.get(l.productId) || { name: l.productName, qty: 0 };
       cur.qty += l.quantity;
