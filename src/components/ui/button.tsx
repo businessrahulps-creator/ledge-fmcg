@@ -65,19 +65,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, children, onClick, ...props }, ref) => {
     const [pending, setPending] = React.useState(false);
     const mounted = React.useRef(true);
-    React.useEffect(() => () => { mounted.current = false; }, []);
+    const inFlight = React.useRef(false);
+    React.useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
     const busy = loading || pending;
 
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (busy) { e.preventDefault(); return; }
+        if (busy || inFlight.current) { e.preventDefault(); return; }
         const result = onClick?.(e) as unknown;
         if (result && typeof (result as Promise<unknown>).then === "function") {
+          inFlight.current = true;
           setPending(true);
-          (result as Promise<unknown>).then(
-            () => { if (mounted.current) setPending(false); },
-            () => { if (mounted.current) setPending(false); },
-          );
+          const done = () => { inFlight.current = false; if (mounted.current) setPending(false); };
+          (result as Promise<unknown>).then(done, done);
         }
       },
       [busy, onClick],

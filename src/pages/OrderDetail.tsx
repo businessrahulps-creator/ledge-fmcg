@@ -1,4 +1,3 @@
-import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 import { CopyButton } from "@/components/ui/copy-button";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -986,15 +985,15 @@ export default function OrderDetail() {
               id="cancel-reason"
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="e.g. Dealer asked to hold the order."
+              placeholder="e.g. Dealer no longer needs these goods."
               rows={3}
             />
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelLoading}>Keep order</Button>
-            <HoldToConfirm onConfirm={handleCancelOrder} disabled={cancelLoading}>
-              {cancelLoading ? "Cancelling…" : "Hold to cancel order"}
-            </HoldToConfirm>
+            <Button variant="destructive" onClick={handleCancelOrder} loading={cancelLoading}>
+              Cancel order
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
