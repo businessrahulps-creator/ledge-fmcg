@@ -348,15 +348,9 @@ export function useOrdersDomain(deps: OrdersDeps) {
         });
         return false;
       }
-      const { error: sdErr } = await supabase.from("stock_deductions").delete().eq("order_id", id);
-      if (sdErr) throw sdErr;
-      const { error: osErr } = await supabase.from("order_schemes").delete().eq("order_id", id);
-      if (osErr) throw osErr;
-      const { error: olErr } = await supabase.from("order_lines").delete().eq("order_id", id);
-      if (olErr) throw olErr;
-      const { data: deleted, error: oErr } = await supabase.from("orders").delete().eq("id", id).select("id");
-      if (oErr) throw oErr;
-      if (!deleted || deleted.length === 0) throw new Error("Order could not be deleted — you may not have permission.");
+      // All-or-nothing on the server: stock, offers, lines and the order go together.
+      const { error: delErr } = await supabase.rpc("delete_order_atomic" as any, { p_order_id: id });
+      if (delErr) throw delErr;
       const deletedOrder = ordersRef.current.find(o => o.id === id);
       setOrders(prev => prev.filter(o => o.id !== id));
       await deps.safeRefetchStockItems();
