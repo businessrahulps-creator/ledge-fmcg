@@ -114,7 +114,7 @@ export default function ShopVisits() {
       <div className="rounded-md border border-border bg-card p-4 space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
-            <Link to={`/distributors/${x.distributorId}`} className="font-medium text-foreground hover:underline">
+            <Link to={`/distributors/${x.distributorId}`} className="inline-flex items-center min-h-11 sm:min-h-0 font-medium text-foreground hover:underline">
               {dealerName.get(x.distributorId) || "Dealer"}
             </Link>
             <p className="text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export default function ShopVisits() {
 
         <Tabs value={tab} onValueChange={setTab}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <TabsList>
+            <TabsList className="h-auto w-full sm:w-auto">
               <TabsTrigger value="visits">Visits</TabsTrigger>
               <TabsTrigger value="promises">Promises{promiseCount ? ` (${promiseCount})` : ""}</TabsTrigger>
               <TabsTrigger value="new">New shops</TabsTrigger>
@@ -194,7 +194,7 @@ export default function ShopVisits() {
                   <div key={d.id} className="rounded-md border border-border bg-card p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <Link to={`/distributors/${d.id}`} className="font-medium text-foreground hover:underline">{d.name}</Link>
+                        <Link to={`/distributors/${d.id}`} className="inline-flex items-center min-h-11 sm:min-h-0 font-medium text-foreground hover:underline">{d.name}</Link>
                         {d.location && <p className="text-xs text-muted-foreground truncate">{d.location}</p>}
                       </div>
                       {canSeeMoney && d.outstandingAmount > 0 && (
