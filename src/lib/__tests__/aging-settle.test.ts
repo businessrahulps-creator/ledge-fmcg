@@ -7,7 +7,7 @@ const row = (due: number, ageDays: number, bucket: ReceivableRow["bucket"]): Rec
 });
 
 describe("agingFromReceivables settleToBalance", () => {
-  const rows = [row(1000, 100, "b90"), row(500, 10, "b0_30" as any)];
+  const rows = [row(1000, 100, "b90"), row(500, 10, "b0")];
   it("keeps bill-level totals when not settling", () => {
     expect(agingFromReceivables(rows, [{ id: "d1", name: "A", outstandingAmount: 1200 }])[0].totalOutstanding).toBe(1500);
   });
