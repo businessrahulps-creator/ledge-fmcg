@@ -1,3 +1,4 @@
+import { SortableTh, useSortedRows } from "@/components/ui/sortable-th";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useCan } from "@/hooks/useCan";
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
@@ -179,7 +180,9 @@ export default function Stock() {
   ), [products, debouncedProductSearch, gstOnly]);
 
   const productsPagination = usePagination(filteredProducts.length, undefined, `${debouncedProductSearch}|${gstOnly}`);
-  const paginatedProducts = useMemo(() => filteredProducts.slice(productsPagination.from, productsPagination.to), [filteredProducts, productsPagination.from, productsPagination.to]);
+  const productSort = useSortedRows(filteredProducts, (p, k: "name" | "sku" | "price" | "sold" | "stock") =>
+    k === "name" ? p.name : k === "sku" ? (p.sku || "") : k === "price" ? p.basePrice : k === "sold" ? (p.totalSold || 0) : getProductStock(p.id));
+  const paginatedProducts = useMemo(() => productSort.sorted.slice(productsPagination.from, productsPagination.to), [productSort.sorted, productsPagination.from, productsPagination.to]);
 
   const openNewProduct = () => {
     setEditProduct({ id: `p${Date.now()}`, name: "", sku: "", unit: "Pack", basePrice: 0, hsnCode: "", totalSold: 0, gstRate: 18, gstRateConfirmed: false });
@@ -531,12 +534,12 @@ export default function Stock() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                        <th className="px-6 py-3 font-medium">Product Name</th>
-                        <th className="px-6 py-3 font-medium">Product code</th>
+                        <SortableTh sortKey="name" label="Product name" textual sort={productSort.sort} onSort={(k, t) => { productSort.toggle(k, t); productsPagination.setPage(1); }} className="px-6 py-3 font-medium" />
+                        <SortableTh sortKey="sku" label="Product code" textual sort={productSort.sort} onSort={(k, t) => { productSort.toggle(k, t); productsPagination.setPage(1); }} className="px-6 py-3 font-medium" />
                         <th className="px-6 py-3 font-medium">Unit</th>
-                        <th className="px-6 py-3 font-medium text-right">Price before GST</th>
-                        <th className="px-6 py-3 font-medium text-right">Total Sold</th>
-                        <th className="px-6 py-3 font-medium text-right">Total Stock</th>
+                        <SortableTh sortKey="price" label="Price before GST" sort={productSort.sort} onSort={(k, t) => { productSort.toggle(k, t); productsPagination.setPage(1); }} className="px-6 py-3 font-medium text-right" />
+                        <SortableTh sortKey="sold" label="Total sold" sort={productSort.sort} onSort={(k, t) => { productSort.toggle(k, t); productsPagination.setPage(1); }} className="px-6 py-3 font-medium text-right" />
+                        <SortableTh sortKey="stock" label="Total stock" sort={productSort.sort} onSort={(k, t) => { productSort.toggle(k, t); productsPagination.setPage(1); }} className="px-6 py-3 font-medium text-right" />
                         {canManageStock && <th className="px-6 py-3 font-medium text-right">Actions</th>}
                       </tr>
                     </thead>
