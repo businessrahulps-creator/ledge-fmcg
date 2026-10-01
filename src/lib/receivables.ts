@@ -186,8 +186,11 @@ const BUCKET_FIELD: Record<AgingBucket, keyof Pick<DealerReceivableAging,
 
 export function agingFromReceivables(
   rows: ReceivableRow[],
-  distributors: Array<{ id: string; name: string; creditLimit?: number }>,
+  distributors: Array<{ id: string; name: string; creditLimit?: number; outstandingAmount?: number }>,
+  /** Pass true only when `rows` is every open bill (not a filtered view). */
+  opts: { settleToBalance?: boolean } = {},
 ): DealerReceivableAging[] {
+  const canonical = new Map(distributors.map(d => [d.id, d.outstandingAmount]));
   const byDealer = new Map<string, DealerReceivableAging>();
   for (const d of distributors) {
     byDealer.set(d.id, {
@@ -206,8 +209,29 @@ export function agingFromReceivables(
     if (r.ageDays > agg.oldestAgeDays) agg.oldestAgeDays = r.ageDays;
     if (r.received > 0) agg.partialCount += 1;
   }
+  // Payments not linked to a bill (advances) and overpaid bills still reduce
+  // what the dealer owes. Settle that spare credit against the oldest money
+  // first so the total equals the canonical dealer balance.
+  const OLDEST_FIRST = ["bucket_90_plus", "bucket_61_90", "bucket_31_60", "bucket_0_30"] as const;
+  const AGE_FLOOR: Record<(typeof OLDEST_FIRST)[number], number> = { bucket_90_plus: 91, bucket_61_90: 61, bucket_31_60: 31, bucket_0_30: 0 };
+  for (const a of byDealer.values()) {
+    const bal = canonical.get(a.distributorId);
+    if (!opts.settleToBalance || typeof bal !== "number" || !Number.isFinite(bal)) continue;
+    let spare = a.totalOutstanding - Math.max(0, bal);
+    if (spare <= 0.005) continue;
+    for (const f of OLDEST_FIRST) {
+      const take = Math.min(a[f], spare);
+      a[f] -= take; spare -= take; a.totalOutstanding -= take;
+      if (spare <= 0.005) break;
+    }
+    const top = OLDEST_FIRST.find(f => a[f] > 0.005);
+    if (top && a.oldestAgeDays > 0) {
+      const ceil = top === "bucket_90_plus" ? Infinity : top === "bucket_61_90" ? 90 : top === "bucket_31_60" ? 60 : 30;
+      a.oldestAgeDays = Math.max(AGE_FLOOR[top], Math.min(a.oldestAgeDays, ceil));
+    }
+  }
   return [...byDealer.values()]
-    .filter(a => a.totalOutstanding > 0)
+    .filter(a => a.totalOutstanding > 0.005)
     .map(a => ({
       ...a,
       totalOutstanding: Math.round(a.totalOutstanding * 100) / 100,

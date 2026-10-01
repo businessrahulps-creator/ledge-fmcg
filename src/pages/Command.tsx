@@ -199,7 +199,7 @@ export default function Command() {
       .sort((a, b) => b.outstandingAmount / b.creditLimit - a.outstandingAmount / a.creditLimit);
     const creditAtRiskAmount = creditAtRiskDealers.reduce((s, d) => s + d.outstandingAmount, 0);
 
-    const agingRows = agingFromReceivables(receivableRows, distributors);
+    const agingRows = agingFromReceivables(receivableRows, distributors, { settleToBalance: true });
     const aging = agingRows.reduce(
       (acc, r) => ({
         b0: acc.b0 + r.bucket_0_30,

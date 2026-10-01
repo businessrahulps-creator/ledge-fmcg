@@ -202,7 +202,17 @@ export const REPORTS: ReportDef[] = [
         const k = age > 90 ? "b90" : age > 60 ? "b61" : age > 30 ? "b31" : "b0";
         r[k] = r2(n(r[k]) + x.due); r.unpaid = r2(n(r.unpaid) + x.due); m.set(x.dealerId, r);
       }
-      return one([...m.values()].sort((a, b) => n(b.unpaid) - n(a.unpaid)));
+      // Advances / payments not linked to a bill settle the oldest money first,
+      // so the total matches each dealer's real balance (and the dashboard).
+      const bal = new Map((await fetchAll((a, b) => db.from("distributors").select("id,outstanding_amount").range(a, b))).map((d: any) => [d.id, n(d.outstanding_amount)]));
+      for (const [id, r] of m) {
+        let spare = r2(n(r.unpaid) - Math.max(0, bal.get(id) ?? n(r.unpaid)));
+        for (const k of ["b90", "b61", "b31", "b0"]) {
+          if (spare <= 0) break;
+          const take = Math.min(n(r[k]), spare); r[k] = r2(n(r[k]) - take); r.unpaid = r2(n(r.unpaid) - take); spare = r2(spare - take);
+        }
+      }
+      return one([...m.values()].filter(r => n(r.unpaid) > 0).sort((a, b) => n(b.unpaid) - n(a.unpaid)));
     },
     summary: rows => [
       { label: "Total unpaid", value: sumBy(rows, "unpaid"), kind: "money" },

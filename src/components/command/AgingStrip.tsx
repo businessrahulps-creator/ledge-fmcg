@@ -28,7 +28,7 @@ function rowField() {
 
 function AgingStripInner({ orders, distributors }: Props) {
   const { rows: receivableRows } = useReceivables();
-  const rows = agingFromReceivables(receivableRows, distributors);
+  const rows = agingFromReceivables(receivableRows, distributors, { settleToBalance: true });
   const totals = rows.reduce(
     (acc, r) => ({
       bucket_0_30: acc.bucket_0_30 + r.bucket_0_30,

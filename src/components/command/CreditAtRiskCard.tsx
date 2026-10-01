@@ -57,7 +57,7 @@ function whatsappReminder(d: Distributor) {
 function CreditAtRiskCardInner({ distributors, orders }: Props) {
   const { rows: receivableRows } = useReceivables();
   const { rows, all, exposure, criticalCount } = useMemo(() => {
-    const aging = agingFromReceivables(receivableRows, distributors);
+    const aging = agingFromReceivables(receivableRows, distributors, { settleToBalance: true });
     const dpoBy = new Map(aging.map((a) => [a.distributorId, a.oldestAgeDays]));
     // "At risk" = >=70% credit utilisation. Sort by absolute exposure (₹)
     // so the biggest money in the air rises to the top, not the % bar shape.
