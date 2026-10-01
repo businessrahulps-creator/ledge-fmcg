@@ -16,7 +16,7 @@ export const PERIOD_LABELS: Record<CommandPeriod, string> = {
   "7d": "Last 7 days",
   "30d": "Last 30 days",
   "90d": "Last 90 days",
-  ytd: "Year to date",
+  ytd: "This financial year (from 1 April)",
   custom: "Custom",
 };
 
@@ -26,6 +26,14 @@ export interface PeriodRange {
   /** Previous comparable window of equal length (used for deltas). */
   prevFrom: Date;
   prevTo: Date;
+}
+
+function parseDay(v: string, addDays: number): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    const [y, m, d] = v.split("-").map(Number);
+    return new Date(y, m - 1, d + addDays, 0, 0, 0, 0);
+  }
+  return new Date(v);
 }
 
 export function getPeriodRange(period: CommandPeriod, customFrom?: string, customTo?: string): PeriodRange {
@@ -47,12 +55,14 @@ export function getPeriodRange(period: CommandPeriod, customFrom?: string, custo
       from.setDate(now.getDate() - 90);
       break;
     case "ytd":
-      from.setMonth(0, 1);
+      // Indian financial year starts 1 April.
+      from.setFullYear(now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1, 3, 1);
       from.setHours(0, 0, 0, 0);
       break;
     case "custom":
-      if (customFrom) from.setTime(new Date(customFrom).getTime());
-      if (customTo) to.setTime(new Date(customTo).getTime());
+      // Date-only picks mean whole local days: start at midnight, end at the next midnight.
+      if (customFrom) from.setTime(parseDay(customFrom, 0).getTime());
+      if (customTo) to.setTime(parseDay(customTo, 1).getTime());
       break;
   }
 
@@ -157,7 +167,9 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
   // 2. Dormant dealers — no order in selected period AND they have history.
   const lastOrderByDealer = new Map<string, Date>();
   for (const o of orders) {
+    if (isCancelled(o)) continue;
     const d = new Date(o.date);
+    if (d > range.to) continue;
     const cur = lastOrderByDealer.get(o.distributorId);
     if (!cur || d > cur) lastOrderByDealer.set(o.distributorId, d);
   }
@@ -181,7 +193,7 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
   // 3. Salesperson behind target — current period revenue vs proportional target.
   const periodOrders = ordersInPeriod(orders, range);
   const revBySp = new Map<string, number>();
-  for (const o of periodOrders) revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + (o.total || 0));
+  for (const o of periodOrders) revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + netTotal(o));
   const behind = salespersons.filter((s) => {
     const target = ctx.targets.find((t) => t.entityId === s.id && t.entityType === "salesperson");
     if (!target || !target.targetRevenue) return false;
@@ -206,7 +218,7 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
 
   // Build per-dealer revenue this period (used by combined signals + winner).
   const revByDealer = new Map<string, number>();
-  for (const o of periodOrders) revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + (o.total || 0));
+  for (const o of periodOrders) revByDealer.set(o.distributorId, (revByDealer.get(o.distributorId) || 0) + netTotal(o));
 
   // 4. COMBINED: Dormant + Outstanding — silent and still owes money.
   const dormantOwing = dormant.filter((d) => (d.outstandingAmount || 0) > 0);
@@ -248,7 +260,7 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
   };
   const prevOrders = ordersInPeriod(orders, prevRange);
   const prevBySp = new Map<string, number>();
-  for (const o of prevOrders) prevBySp.set(o.salespersonId, (prevBySp.get(o.salespersonId) || 0) + (o.total || 0));
+  for (const o of prevOrders) prevBySp.set(o.salespersonId, (prevBySp.get(o.salespersonId) || 0) + netTotal(o));
   const declining = salespersons
     .map((s) => {
       const prev = prevBySp.get(s.id) || 0;
@@ -281,8 +293,8 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
   // 7. COMBINED: Scheme cannibalisation — discounts eating >25% of gross.
   const periodRevenue = periodOrders.reduce((s, o) => s + (o.total || 0), 0);
   const periodSavings = periodOrders.reduce((s, o) => s + (o.schemeSavings || 0), 0);
-  if (periodRevenue > 0 && periodSavings / (periodRevenue + periodSavings) > 0.25) {
-    const pct = Math.round((periodSavings / (periodRevenue + periodSavings)) * 100);
+  if (periodRevenue > 0 && periodSavings / periodRevenue > 0.25) {
+    const pct = Math.round((periodSavings / periodRevenue) * 100);
     out.push({
       id: "scheme-cannibalisation",
       tier: "warning",
