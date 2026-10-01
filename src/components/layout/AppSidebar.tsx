@@ -133,7 +133,7 @@ export function AppSidebar() {
       );
     }
 
-    const rowClass = `relative flex items-center gap-3 rounded-md px-2.5 h-8 text-[13px] transition-colors hover:bg-sidebar-accent/60 ${
+    const rowClass = `relative flex items-center gap-3 rounded-md px-2.5 h-10 md:h-8 text-[13px] transition-colors hover:bg-sidebar-accent/60 ${
       isActive ? "bg-sidebar-accent font-medium text-foreground" : "font-normal text-foreground/70"
     }`;
     const iconEl = (
