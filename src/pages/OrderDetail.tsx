@@ -431,7 +431,7 @@ export default function OrderDetail() {
   const journey: JourneyStep[] = [
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
     {
-      label: "Dispatched",
+      label: "Sent",
       detail: dispatched ? formatIndianDate(order.dispatchDate) : "Not sent yet",
       state: dispatched ? "done" : "current",
     },
@@ -572,7 +572,7 @@ export default function OrderDetail() {
             <p className="fact-value truncate">{order.salesperson}</p>
           </div>
           <div className="min-w-0">
-            <p className="fact-label">Ships from</p>
+            <p className="fact-label">Sent from</p>
             <p className="fact-value truncate">{warehouseName}</p>
           </div>
           <div>
@@ -589,7 +589,7 @@ export default function OrderDetail() {
         {dispatched && (
           <div className="fact-strip">
             <div>
-              <p className="fact-label">Dispatched on</p>
+              <p className="fact-label">Sent on</p>
               <p className="fact-value">{formatIndianDate(order.dispatchDate)}</p>
             </div>
             <div className="min-w-0">
@@ -638,7 +638,7 @@ export default function OrderDetail() {
           <div className="rounded-md border border-success/30 bg-success/5 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Gift className="h-4 w-4 text-success" />
-              <span className="text-sm font-semibold text-success">Schemes applied</span>
+              <span className="text-sm font-semibold text-success">Offers applied</span>
             </div>
             <div className="space-y-1.5">
               {order.appliedSchemes.map((s, i) => (
@@ -882,9 +882,9 @@ export default function OrderDetail() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Ships from</Label>
+                <Label className="text-xs">Sent from</Label>
                 <Select value={editGodown} onValueChange={setEditGodown}>
-                  <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select godown" /></SelectTrigger>
                   <SelectContent>
                     {godowns.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
                   </SelectContent>
@@ -921,7 +921,7 @@ export default function OrderDetail() {
                           min={1}
                           value={line.quantity}
                           onValueChange={v => updateLine(line.id, "quantity", v)}
-                          placeholder="Qty"
+                          placeholder="Quantity"
                           className="h-9 text-xs text-right"
                         />
                       </div>
@@ -1034,14 +1034,14 @@ export default function OrderDetail() {
       <AlertDialog open={creditOverrideOpen} onOpenChange={setCreditOverrideOpen}>
         <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-xl sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Credit Limit Override</AlertDialogTitle>
+            <AlertDialogTitle>Allow above credit limit</AlertDialogTitle>
             <AlertDialogDescription>
               This change will push the dealer's outstanding above their credit limit. Do you want to proceed?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>Override & Save</Button>
+            <Button onClick={() => { setCreditOverrideOpen(false); executeSaveOrder(); }}>Save anyway (above limit)</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1084,14 +1084,14 @@ export default function OrderDetail() {
             <div className="space-y-1.5">
               <Label className="text-xs">Ships from *</Label>
               <Select value={dispatchGodown} onValueChange={setDispatchGodown}>
-                <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
+                <SelectTrigger className="h-10 rounded-lg"><SelectValue placeholder="Select godown" /></SelectTrigger>
                 <SelectContent>
                   {godowns.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Dispatch date</Label>
+              <Label className="text-xs">Sent date</Label>
               <Input type="date" value={dispatchDate} onChange={e => setDispatchDate(e.target.value)} className="h-10 rounded-lg" />
             </div>
             <div className="space-y-1.5">

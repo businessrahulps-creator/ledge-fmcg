@@ -160,7 +160,7 @@ export function CommandPalette() {
     { label: "Performance", to: "/command?tab=overview", icon: TrendingUp },
     { label: "Dealers", to: "/distributors", icon: UserRound },
     { label: "Sales Team", to: "/salespersons", icon: UserCheck },
-    { label: "Schemes", to: "/schemes", icon: Gift },
+    { label: "Offers & schemes", to: "/schemes", icon: Gift },
     { label: "Targets", to: "/targets", icon: Target },
     { label: "Reports", to: "/command?tab=drill", icon: ChartNoAxesCombined },
     { label: "Billing", to: "/billing", icon: FileText },

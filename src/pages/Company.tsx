@@ -346,7 +346,7 @@ export default function Company() {
                 {errMsg("companyPan") && <p className="text-xs text-destructive">{errMsg("companyPan")}</p>}
               </div>
               <div className="space-y-1.5 md:space-y-2">
-                <Label className="text-xs md:text-sm">State Code</Label>
+                <Label className="text-xs md:text-sm">State code (GST)</Label>
                 <Controller
                   control={control}
                   name="companyStateCode"
@@ -401,7 +401,7 @@ export default function Company() {
                     {errMsg("bankAccount") && <p className="text-xs text-destructive">{errMsg("bankAccount")}</p>}
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">IFSC Code</Label>
+                    <Label className="text-xs md:text-sm">IFSC (bank branch code)</Label>
                     <Controller
                       control={control}
                       name="bankIfsc"

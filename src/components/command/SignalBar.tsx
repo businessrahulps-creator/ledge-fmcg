@@ -151,7 +151,7 @@ export function SignalBar({
                           e.stopPropagation();
                           onBlast!(s.id);
                         }}
-                        aria-label="Send WhatsApp blast"
+                        aria-label="WhatsApp all of them"
                         className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-success"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />

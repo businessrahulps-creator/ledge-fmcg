@@ -205,7 +205,7 @@ export default function Distributors() {
               variant="outline"
               size="icon"
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
-              aria-label="Export CSV"
+              aria-label="Download CSV"
               onClick={() => {
                 exportXlsx(
                   xlsxFilename("dealers"),
@@ -221,7 +221,7 @@ export default function Distributors() {
               }}
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">Download CSV</span>
             </Button>
             {canManageDealers && (
               <Button onClick={openNew} className="flex-1 sm:flex-none">
@@ -287,7 +287,7 @@ export default function Distributors() {
             const heroIsOutstanding = outstanding > 0;
             const hero = {
               value: formatCurrency(heroIsOutstanding ? outstanding : d.totalValue),
-              label: heroIsOutstanding ? "Outstanding" : "Lifetime revenue",
+              label: heroIsOutstanding ? "Unpaid amount" : "Lifetime revenue",
             };
 
             const cells = [
@@ -297,12 +297,12 @@ export default function Distributors() {
                 zero: d.totalOrders === 0,
               },
               {
-                label: heroIsOutstanding ? "Lifetime" : "Outstanding",
+                label: heroIsOutstanding ? "Lifetime" : "Unpaid amount",
                 value: formatCurrency(heroIsOutstanding ? d.totalValue : outstanding),
                 zero: (heroIsOutstanding ? d.totalValue : outstanding) === 0,
               },
               {
-                label: limit > 0 ? "Utilization" : "Credit limit",
+                label: limit > 0 ? "Limit used" : "Credit limit",
                 value: limit > 0 ? utilLabel : "—",
                 zero: limit === 0,
                 hint: limit > 0 ? (
@@ -463,7 +463,7 @@ export default function Distributors() {
                         <Input value={editItem.pan} onChange={(e) => setEditItem({ ...editItem, pan: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) })} maxLength={10} className="h-10 rounded-lg font-mono" placeholder="ABCDE1234F" />
                       </div>
                       <div className="space-y-1.5 md:space-y-2">
-                        <Label className="text-xs md:text-sm">State Code</Label>
+                        <Label className="text-xs md:text-sm">State code (GST)</Label>
                         <Input value={editItem.stateCode} onChange={(e) => setEditItem({ ...editItem, stateCode: e.target.value.replace(/\D/g, "").slice(0, 2) })} maxLength={2} className="h-10 rounded-lg max-w-[100px] font-mono" placeholder="27" />
                         <p className="text-[10px] text-muted-foreground md:text-xs">2-digit GST state code</p>
                       </div>
@@ -487,7 +487,7 @@ export default function Distributors() {
                         <Input value={editItem.bankAccount} onChange={(e) => setEditItem({ ...editItem, bankAccount: e.target.value.replace(/\D/g, "") })} className="h-10 rounded-lg font-mono" placeholder="1234567890" />
                       </div>
                       <div className="space-y-1.5 md:space-y-2">
-                        <Label className="text-xs md:text-sm">IFSC Code</Label>
+                        <Label className="text-xs md:text-sm">IFSC (bank branch code)</Label>
                         <Input value={editItem.bankIfsc} onChange={(e) => setEditItem({ ...editItem, bankIfsc: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11) })} maxLength={11} className="h-10 rounded-lg font-mono" placeholder="SBIN0001234" />
                       </div>
                     </div>

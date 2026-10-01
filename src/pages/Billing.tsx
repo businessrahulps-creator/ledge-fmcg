@@ -461,7 +461,7 @@ export default function Billing() {
                 <SelectContent>
                   <SelectItem value="all">All bills</SelectItem>
                   <SelectItem value="unpaid">Nothing paid</SelectItem>
-                  <SelectItem value="partial">Part paid</SelectItem>
+                  <SelectItem value="partial">Partly paid</SelectItem>
                   <SelectItem value="paid">Fully paid</SelectItem>
                   <SelectItem value="overdue">Over 30 days</SelectItem>
                 </SelectContent>
@@ -492,7 +492,7 @@ export default function Billing() {
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="gst_invoice">GST Invoice</SelectItem>
                   <SelectItem value="estimate">Estimate</SelectItem>
-                  <SelectItem value="proforma">Proforma</SelectItem>
+                  <SelectItem value="proforma">Estimate bill</SelectItem>
                   <SelectItem value="credit_note">Credit Note</SelectItem>
                 </SelectContent>
               </Select>
@@ -583,7 +583,7 @@ export default function Billing() {
                         <TableHead className="text-xs text-right">Bill total</TableHead>
                         <TableHead className="text-xs text-right">Received</TableHead>
                         <TableHead className="text-xs text-right">Still due</TableHead>
-                        <TableHead className="text-xs">Age</TableHead>
+                        <TableHead className="text-xs">Days unpaid</TableHead>
                         <TableHead className="text-xs text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -602,7 +602,7 @@ export default function Billing() {
                             </TableCell>
                             <TableCell className="text-xs">
                               {due === 0 ? (
-                                <span className="text-muted-foreground">Settled</span>
+                                <span className="text-muted-foreground">Paid</span>
                               ) : (
                                 <span className={overdue ? "font-medium text-destructive" : "text-muted-foreground"}>
                                   {age} day{age === 1 ? "" : "s"}
@@ -717,7 +717,7 @@ export default function Billing() {
                       <TableRow>
                         <TableHead className="text-xs">Date</TableHead>
                         <TableHead className="text-xs">Dealer</TableHead>
-                        <TableHead className="text-xs">Against</TableHead>
+                        <TableHead className="text-xs">For bill</TableHead>
                         <TableHead className="text-xs">Paid by</TableHead>
                         <TableHead className="text-xs">Reference</TableHead>
                         <TableHead className="text-xs text-right">Amount</TableHead>
@@ -782,7 +782,7 @@ export default function Billing() {
                 excelLabel="Download Excel"
                 onExcel={() => exportXlsx(
                   xlsxFilename("payments"),
-                  ["Date", "Dealer", "Against", "Paid by", "Reference", "Amount", "Status"],
+                  ["Date", "Dealer", "For bill", "Paid by", "Reference", "Amount", "Status"],
                   paymentRows.map(r => [
                     r.paidOn,
                     dealerName(r.distributorId),
@@ -804,7 +804,7 @@ export default function Billing() {
                     columns: [
                       { header: "Date", width: "11%" },
                       { header: "Dealer", width: "21%" },
-                      { header: "Against", width: "19%" },
+                      { header: "For bill", width: "19%" },
                       { header: "Paid by", width: "11%" },
                       { header: "Reference", width: "13%" },
                       { header: "Amount", width: "15%", align: "right" },

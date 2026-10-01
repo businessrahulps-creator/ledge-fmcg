@@ -156,7 +156,7 @@ export default function SalespersonDetail() {
               <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.orders90d}</p>
             </div>
             <div className="glass-card p-3 md:p-4">
-              <span className="text-xs text-muted-foreground">Avg Order Value</span>
+              <span className="text-xs text-muted-foreground">Average order amount</span>
               <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.avgOrderValue)}</p>
             </div>
             <div className="glass-card p-3 md:p-4">

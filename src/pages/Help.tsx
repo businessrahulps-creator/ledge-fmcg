@@ -78,7 +78,7 @@ export default function Help() {
                 <p>Orders are the core of Ledge. Here's everything you need to know:</p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li><strong>Creating an order</strong> — Click <em>+ New Order</em>, select a dealer, choose a salesperson, add line items (products + quantities), and save. Ledge auto-generates the order number using your prefix (e.g., ORD-001).</li>
-                  <li><strong>Payment status</strong> — Each order has a payment status: <em>Pending</em>, <em>Partial</em>, or <em>Paid</em>. Update it as you receive payments. Choose the payment mode (Cash, Bank Transfer, Cheque, or UPI).</li>
+                  <li><strong>Payment status</strong> — Each order has a payment status: <em>Pending</em>, <em>Partly paid</em>, or <em>Paid</em>. Update it as you receive payments. Choose the payment mode (Cash, Bank Transfer, Cheque, or UPI).</li>
                   <li><strong>Delivery status</strong> — Track fulfilment: <em>Pending → Dispatched → Delivered</em>. When dispatching, you can record vehicle number, driver name, and dispatch remarks.</li>
                   <li><strong>Order detail view</strong> — Click any order to see its full breakdown: line items, payment info, delivery info, and linked invoice. You can edit payment/delivery status from here.</li>
                   <li><strong>Linking to invoices</strong> — Once an order is created, you can generate a GST Invoice directly from the order detail page. The invoice pulls all order data automatically.</li>

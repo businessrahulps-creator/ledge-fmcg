@@ -122,7 +122,7 @@ export default function Orders() {
     const gstDraft = docs.find(d => d.docType === "gst_invoice" && d.status === "draft");
     if (gstDraft) return { label: "GST Bill (Draft)", color: "bg-warning/10 text-warning" };
     const proforma = docs.find(d => d.docType === "proforma");
-    if (proforma) return { label: "Proforma", color: "bg-accent/10 text-accent" };
+    if (proforma) return { label: "Estimate bill", color: "bg-accent/10 text-accent" };
     const estimate = docs.find(d => d.docType === "estimate");
     if (estimate) return { label: "Estimate", color: "bg-warning/10 text-warning" };
     return { label: "Document", color: "bg-muted text-muted-foreground" };
@@ -267,17 +267,17 @@ export default function Orders() {
             >
               <Download className="h-4 w-4" />
               <span className="sm:hidden">Excel</span>
-              <span className="hidden sm:inline">Export Excel</span>
+              <span className="hidden sm:inline">Download Excel</span>
             </Button>
             <Button
               variant="outline"
               className="h-10 px-3 sm:px-4"
-              aria-label="Export PDF"
+              aria-label="Download PDF"
               onClick={() => setPdfModalOpen(true)}
             >
               <FileText className="h-4 w-4" />
               <span className="sm:hidden">PDF</span>
-              <span className="hidden sm:inline">Export PDF</span>
+              <span className="hidden sm:inline">Download PDF</span>
             </Button>
             <Can do="place_orders">
               <Link to="/orders/new" className="flex-1 sm:flex-none">
@@ -327,7 +327,7 @@ export default function Orders() {
           <SignalCard
             tier="destructive"
             icon={AlertTriangle}
-            label="Overdue dispatch"
+            label="Late to send"
             caption={`${insights.overdueDispatch} order${insights.overdueDispatch > 1 ? "s" : ""} past their dispatch date`}
             subCaption={`${formatCurrency(insights.overdueDispatchValue)} pending delivery`}
             value={insights.overdueDispatch}
@@ -359,7 +359,7 @@ export default function Orders() {
               <SelectContent>
                 <SelectItem value="all">All Payments</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="partial">Partly paid</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
@@ -370,7 +370,7 @@ export default function Orders() {
               <SelectContent>
                 <SelectItem value="all">All Delivery</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="dispatched">Dispatched</SelectItem>
+                <SelectItem value="dispatched">Sent</SelectItem>
                 <SelectItem value="delivered">Delivered</SelectItem>
               </SelectContent>
             </Select>

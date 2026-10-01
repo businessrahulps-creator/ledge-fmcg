@@ -55,7 +55,7 @@ function PipelineFunnelInner({ orders }: Props) {
 
   const stages: Stage[] = [
     { key: "confirmed", label: "Confirmed", ...buckets.confirmed, href: "/orders?status=pending", tone: "bg-muted-foreground/35" },
-    { key: "dispatched", label: "Dispatched", ...buckets.dispatched, href: "/orders?status=dispatched", tone: "bg-primary/40" },
+    { key: "dispatched", label: "Sent", ...buckets.dispatched, href: "/orders?status=dispatched", tone: "bg-primary/40" },
     { key: "delivered", label: "Delivered", ...buckets.delivered, href: "/orders?status=delivered", tone: "bg-primary/60" },
     { key: "invoiced", label: "Partial pay", ...buckets.invoiced, href: "/orders?filter=partial", tone: "bg-warning/70" },
     { key: "collected", label: "Collected", ...buckets.collected, href: "/orders?filter=paid", tone: "bg-success/80" },
@@ -68,7 +68,7 @@ function PipelineFunnelInner({ orders }: Props) {
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Order pipeline</h3>
+          <h3 className="text-sm font-semibold text-foreground">Orders by stage</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {totalCount > 0
               ? `${totalCount} order${totalCount === 1 ? "" : "s"} across the pipeline`

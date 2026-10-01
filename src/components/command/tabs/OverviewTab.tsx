@@ -171,7 +171,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <CommandKpiCard
             index={0}
-            label="Revenue (dispatched)"
+            label="Sales (goods sent)"
             value={formatCurrency(computed.revenue)}
             pct={pctDelta(computed.revenue, computed.prevRevenue)}
             spark={computed.revSpark}
@@ -187,7 +187,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
           />
           <CommandKpiCard
             index={2}
-            label="Collections"
+            label="Money received"
             value={formatCurrency(computed.collections)}
             pct={pctDelta(computed.collections, computed.prevCollections)}
             spark={computed.colSpark}
@@ -195,7 +195,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
           />
           <CommandKpiCard
             index={3}
-            label="Outstanding"
+            label="Unpaid amount"
             value={formatCurrency(computed.outstanding)}
             pct={null}
             inverse
@@ -235,7 +235,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
 
       <Card className="p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground">Revenue trend</h3>
+          <h3 className="text-sm font-semibold text-foreground">Sales over time</h3>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-success" /> Actual</span>
             <span className="flex items-center gap-1"><span className="h-px w-3 bg-primary" style={{ borderTop: "1px dashed" }} /> Target</span>
@@ -262,7 +262,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
               viewAllHref="/distributors"
             />
             <LeaderboardCard
-              title="Top SKUs"
+              title="Top products"
               icon={Package}
               rows={computed.topSkus}
               emptyTitle="No SKU revenue yet this period"

@@ -233,7 +233,7 @@ export function PeopleTab({ range }: Props) {
           )}
         </div>
         {computed.dormant.length === 0 ? (
-          <CommandEmptyState title="No dormant dealers" hint="Every active dealer ordered this period." />
+          <CommandEmptyState title="No dealers who stopped ordering" hint="Every active dealer ordered this period." />
         ) : (
           <ul className="divide-y divide-border/60">
             {computed.dormant.map((d) => (

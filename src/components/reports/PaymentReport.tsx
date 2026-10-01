@@ -62,7 +62,7 @@ export function PaymentReport() {
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
-            <SelectItem value="partial">Partial</SelectItem>
+            <SelectItem value="partial">Partly paid</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
           </SelectContent>
         </Select>
@@ -220,7 +220,7 @@ export function PaymentReport() {
                       <thead>
                         <tr className="border-b border-border text-left text-[10px] text-muted-foreground md:text-xs">
                           <th className="px-2 py-2 font-medium md:px-4">Product</th>
-                          <th className="px-2 py-2 font-medium text-right md:px-4">Qty</th>
+                          <th className="px-2 py-2 font-medium text-right md:px-4">Quantity</th>
                           <th className="px-2 py-2 font-medium text-right md:px-4">Price</th>
                           <th className="px-2 py-2 font-medium text-right md:px-4">Total</th>
                         </tr>

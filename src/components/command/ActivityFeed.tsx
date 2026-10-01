@@ -63,7 +63,7 @@ function ActivityFeedInner({ orders, claims, windowHours = 48 }: Props) {
         ts: dispatchedTs,
         icon: Truck,
         tone: "text-foreground",
-        label: "Dispatched",
+        label: "Sent",
         message: `${o.distributorName} · ${o.vehicle || "vehicle pending"}`,
         href: `/orders/${o.id}`,
       });

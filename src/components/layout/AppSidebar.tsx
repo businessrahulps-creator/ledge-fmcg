@@ -54,7 +54,7 @@ const workNav: NavItem[] = [
 
 const catalogNav: NavItem[] = [
   { title: "Stock", url: "/stock", icon: Package },
-  { title: "Schemes", url: "/schemes", icon: Gift },
+  { title: "Offers & schemes", url: "/schemes", icon: Gift },
   { title: "Targets", url: "/targets", icon: Target },
 ];
 

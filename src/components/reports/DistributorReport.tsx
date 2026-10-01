@@ -105,7 +105,7 @@ export function DistributorReport() {
         onExcel={() =>
           exportXlsx(
             xlsxFilename("dealer-report"),
-            ["Dealer", "Location", "Contact", "Orders", "Revenue"],
+            ["Dealer", "Location", "Contact", "Orders", "Sales"],
             data.map((d) => [d.name, d.location, d.contact, String(d.orderCount), formatCurrency(d.revenue)])
           )
         }
@@ -192,7 +192,7 @@ export function DistributorReport() {
               { header: "Dealer", width: "30%" },
               { header: "Location", width: "30%" },
               { header: "Orders", width: "15%", align: "right" },
-              { header: "Revenue", width: "25%", align: "right" },
+              { header: "Sales", width: "25%", align: "right" },
             ],
             rows: data.map((d) => [d.name, d.location, String(d.orderCount), formatCurrencyPdf(d.revenue)]),
           });
