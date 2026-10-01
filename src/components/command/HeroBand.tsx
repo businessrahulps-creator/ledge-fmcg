@@ -30,14 +30,14 @@ export function HeroBand({ collected, newInvoiced, prevCollected, periodLabel }:
   }
 
   const interpretation = net > 0
-    ? `You brought outstanding down by ${formatCurrency(net)} this ${periodLabel.toLowerCase()}.`
+    ? `Dealers now owe you ${formatCurrency(net)} this ${periodLabel.toLowerCase()}.`
     : net < 0
-      ? `You added ${formatCurrency(Math.abs(net))} to outstanding this ${periodLabel.toLowerCase()}.`
-      : `Money in matched money invoiced this ${periodLabel.toLowerCase()}.`;
+      ? `Dealers now owe you ${formatCurrency(Math.abs(net))} more than before (this ${periodLabel.toLowerCase()}.`
+      : `You collected exactly as much as you billed this ${periodLabel.toLowerCase()}.`;
 
   return (
     <HeroBandShell
-      eyebrow={`Net position · ${periodLabel}`}
+      eyebrow={`Collected minus billed · ${periodLabel}`}
       title={`${positive && net !== 0 ? "+" : ""}${formatCurrency(net)}`}
       subtitle={interpretation}
       figures={[

@@ -142,7 +142,7 @@ export function CommandPdf({
         </View>
 
         {/* Signals */}
-        <SectionTitle>{`Signals (${signals.length})`}</SectionTitle>
+        <SectionTitle>{`Things to check (${signals.length})`}</SectionTitle>
         <View style={s.table}>
           <View style={s.tableHeader} fixed>
             <Text style={[s.tableHeaderCell, { width: "12%" }]}>Tier</Text>
@@ -151,7 +151,7 @@ export function CommandPdf({
             <Text style={[s.tableHeaderCell, { width: "10%", textAlign: "right" }]}>Value</Text>
           </View>
           {signals.length === 0 ? (
-            <EmptyRow cols={4} label="No active signals — all clear" />
+            <EmptyRow cols={4} label="Nothing to check — all clear" />
           ) : (
             signals.map((sig, i) => (
               <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false}>
