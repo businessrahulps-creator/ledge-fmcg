@@ -716,9 +716,9 @@ export default function NewOrder() {
                     />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">Paid by</Label>
+                    <Label className="text-xs md:text-sm">Payment method</Label>
                     <SegmentedControl
-                      label="Paid by"
+                      label="Payment method"
                       value={advanceMode as "cash" | "upi" | "bank_transfer" | "cheque"}
                       onChange={setAdvanceMode}
                       options={[
