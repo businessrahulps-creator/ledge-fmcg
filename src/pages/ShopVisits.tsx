@@ -98,6 +98,8 @@ export default function ShopVisits() {
     if (dealerId) {
       toast.success(`${name} is now a dealer`);
       navigate(`/orders/new?dealer=${dealerId}`);
+      // Pull the new dealer into the lists right away (the order form picks it as soon as it arrives).
+      void api.refreshAll?.();
     }
   };
 
