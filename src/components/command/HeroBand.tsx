@@ -53,10 +53,16 @@ export function HeroBand({ collected, newInvoiced, prevCollected, periodLabel }:
           note: `Billed this ${periodLabel.toLowerCase()}`,
         },
         {
-          label: "Net effect",
-          value: net === 0 ? "No change" : net > 0 ? "Balance came down" : "Balance went up",
+          label: "Money dealers owe you",
+          value: net === 0
+            ? "No change"
+            : `${net > 0 ? "Went down by" : "Went up by"} ${formatCurrency(Math.abs(net))}`,
           tone: net === 0 ? "default" : net > 0 ? "good" : "attention",
-          note: "Money in minus money billed",
+          note: net === 0
+            ? "You collected as much as you billed"
+            : net > 0
+              ? "You collected more than you billed"
+              : "You billed more than you collected",
         },
       ]}
     />
