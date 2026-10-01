@@ -102,10 +102,10 @@ export function ProductsTab({ range }: Props) {
       <Card className="p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
           <Package className="h-4 w-4 text-muted-foreground" />
-          SKU revenue
+          Sales by product
         </h3>
         {computed.rows.length === 0 ? (
-          <CommandEmptyState title="No product sales this period" hint="As orders log, top SKUs appear here." />
+          <CommandEmptyState title="No product sales this period" hint="As orders log, top products appear here." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -147,10 +147,10 @@ export function ProductsTab({ range }: Props) {
         <Card className="p-4 border-warning/40">
           <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
             <AlertTriangle className="h-4 w-4 text-warning" />
-            Stock-out risk on top SKUs
+            Best sellers running out
           </h3>
           <p className="mb-3 text-xs text-muted-foreground">
-            Your best-selling SKUs are out or critically low. Revenue at risk if not restocked.
+            Your best-selling products are out or almost out. Refill them so you do not lose sales.
           </p>
           <ul className="divide-y divide-border/60">
             {computed.stockOutRisk.map((r) => (
@@ -211,7 +211,7 @@ export function ProductsTab({ range }: Props) {
             Dead stock
           </h3>
           {computed.dead.length === 0 ? (
-            <CommandEmptyState title="Nothing sitting idle" hint="Every stocked SKU moved this period." />
+            <CommandEmptyState title="Nothing sitting idle" hint="Every product sold this period." />
           ) : (
             <ul className="divide-y divide-border/60">
               {computed.dead.map((p) => (

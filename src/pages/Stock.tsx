@@ -200,7 +200,7 @@ export default function Stock() {
       return;
     }
     if (!editProduct?.sku.trim()) {
-      toast.error("SKU required", { description: "Please enter a SKU." });
+      toast.error("Product code needed", { description: "Please enter a product code." });
       return;
     }
     if (editProduct.basePrice <= 0) {
@@ -214,7 +214,7 @@ export default function Stock() {
     const skuClash = products.some(p => p.id !== editProduct.id && p.sku.trim().toLowerCase() === typedSku);
     if ((nameClash || skuClash) && duplicateProductAckRef.current !== `${typedName}|${typedSku}`) {
       duplicateProductAckRef.current = `${typedName}|${typedSku}`;
-      toast.warning(skuClash ? "This SKU is already in use" : "A product with this name already exists", {
+      toast.warning(skuClash ? "This product code is already in use" : "A product with this name already exists", {
         description: "Check you're not adding the same product twice. Save again to keep it.",
       });
       return;
@@ -437,18 +437,18 @@ export default function Stock() {
             label={stockSummary.criticalCount > 0 ? "OUT OF STOCK" : "LOW STOCK"}
             caption={
               stockSummary.criticalCount > 0
-                ? `${stockSummary.criticalCount} SKU${stockSummary.criticalCount !== 1 ? "s" : ""} below reorder threshold — refill before next dispatch`
-                : `${stockSummary.lowCount} SKU${stockSummary.lowCount !== 1 ? "s" : ""} approaching reorder point`
+                ? `${stockSummary.criticalCount} product${stockSummary.criticalCount !== 1 ? "s" : ""} almost out — refill before sending more`
+                : `${stockSummary.lowCount} product${stockSummary.lowCount !== 1 ? "s" : ""} running low`
             }
             subCaption={stockSummary.atRiskValue > 0 ? `≈ ${formatCurrency(stockSummary.atRiskValue)} revenue at risk` : undefined}
             value={stockSummary.criticalCount > 0 ? stockSummary.criticalCount : stockSummary.lowCount}
-            valueSuffix="SKUs"
+            valueSuffix="products"
           />
         )}
 
         <KpiStrip
           cells={[
-            { label: "Total SKUs", value: isLoading ? "—" : formatNumber(products.length), zero: isLoading || products.length === 0 },
+            { label: "Total products", value: isLoading ? "—" : formatNumber(products.length), zero: isLoading || products.length === 0 },
             ...(!canManageStock ? [] : [{ label: "Stock value", value: isLoading ? "—" : formatCurrency(stockSummary.totalValue), zero: isLoading || stockSummary.totalValue === 0 }]),
             { label: "Low stock", value: isLoading ? "—" : formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: isLoading || stockSummary.lowCount + stockSummary.criticalCount === 0 },
             { label: "Godowns", value: isLoading ? "—" : formatNumber(activeLocations.length), zero: isLoading || activeLocations.length === 0 },
@@ -835,7 +835,7 @@ export default function Stock() {
                 </div>
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-1.5 md:space-y-2">
-                    <Label className="text-xs md:text-sm">SKU *</Label>
+                    <Label className="text-xs md:text-sm">Product code *</Label>
                     <Input value={editProduct.sku} onChange={(e) => setEditProduct({ ...editProduct, sku: e.target.value })} placeholder="RIC-BAS-5K" className="h-10 rounded-lg" />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
@@ -1110,7 +1110,7 @@ export default function Stock() {
                       value={addStockProductId}
                       onChange={setAddStockProductId}
                       placeholder="Search for a product"
-                      searchPlaceholder="Search by name or SKU…"
+                      searchPlaceholder="Search by name or product code…"
                       emptyHint="No matching products."
                       options={products.map((p) => {
                         const existingQty = stockedQtyByProduct.get(p.id);
