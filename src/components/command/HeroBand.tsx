@@ -30,9 +30,9 @@ export function HeroBand({ collected, newInvoiced, prevCollected, periodLabel }:
   }
 
   const interpretation = net > 0
-    ? `Dealers now owe you ${formatCurrency(net)} this ${periodLabel.toLowerCase()}.`
+    ? `Dealers now owe you ${formatCurrency(net)} less than at the start of this ${periodLabel.toLowerCase()}.`
     : net < 0
-      ? `Dealers now owe you ${formatCurrency(Math.abs(net))} more than before (this ${periodLabel.toLowerCase()}.`
+      ? `Dealers now owe you ${formatCurrency(Math.abs(net))} more than at the start of this ${periodLabel.toLowerCase()}.`
       : `You collected exactly as much as you billed this ${periodLabel.toLowerCase()}.`;
 
   return (
