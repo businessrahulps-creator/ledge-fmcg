@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/services/api";
 import { todayKey } from "@/utils/dateKey";
 import { toast } from "sonner";
-import { IndianRupee, Ban, Loader2 } from "lucide-react";
+import { IndianRupee, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -257,7 +257,6 @@ export function PaymentsPanel({
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
             <Button onClick={recordPayment} loading={saving}>
-              {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Save payment
             </Button>
           </DialogFooter>
@@ -280,7 +279,6 @@ export function PaymentsPanel({
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setVoidTarget(null)}>Keep it</Button>
             <Button variant="destructive" onClick={cancelPayment} loading={saving}>
-              {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Cancel payment
             </Button>
           </DialogFooter>
