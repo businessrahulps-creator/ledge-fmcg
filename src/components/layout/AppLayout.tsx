@@ -18,7 +18,7 @@ import { prefetchRoute } from "@/lib/route-prefetch";
 import { ShellContext, markShellMounted, shellMountedCount } from "./shell-context";
 
 
-import { RotateCcw, Target, ShoppingBasket, Store } from "lucide-react";
+import { RotateCcw, Target, ShoppingBasket, Store, FileBarChart } from "lucide-react";
 import { getQueue, OFFLINE_MODE_ENABLED } from "@/lib/offline-store";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { Button } from "@/components/ui/button";
@@ -96,7 +96,6 @@ const ROUTE_TITLES: Record<string, string> = {
   "/claims": "Returns",
   "/buying": "Buying",
   "/visits": "Shop visits",
-  "/reports": "Reports",
   "/company": "Company",
   "/reports": "Reports",
   "/performance": "Performance",
