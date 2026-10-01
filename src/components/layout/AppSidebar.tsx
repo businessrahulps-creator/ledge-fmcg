@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Landmark,
   Wallet,
+  ListTodo,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,6 +48,7 @@ type NavItem = {
 
 const workNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: House },
+  { title: "Today's work", url: "/today", icon: ListTodo, cap: "see_money" },
   { title: "Orders", url: "/orders", icon: ClipboardList },
   { title: "Money to Collect", url: "/billing", icon: Wallet, cap: "see_money" },
   { title: "Returns", url: "/claims", icon: RotateCcw, cap: "see_money" },
