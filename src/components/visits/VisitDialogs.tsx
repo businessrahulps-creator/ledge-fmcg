@@ -67,7 +67,7 @@ export function AddVisitDialog({ open, onOpenChange, dealerId, dealerName }: {
             {outcome === "promised_payment" && (
               <div className="space-y-1.5">
                 <Label htmlFor="visit-promise-amount">Amount (₹)</Label>
-                <NumberInput id="visit-promise-amount" value={amount} onChange={setAmount} min={0} />
+                <NumberInput id="visit-promise-amount" value={amount} onValueChange={v => setAmount(v ?? 0)} min={0} />
               </div>
             )}
           </div>
