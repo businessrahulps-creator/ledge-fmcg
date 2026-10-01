@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
+import { addDaysToKey } from "@/utils/dateKey";
 import { Link } from "react-router-dom";
-import { Area, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useApi } from "@/services/api";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useBusinessDay } from "@/hooks/useBusinessDay";
@@ -85,7 +86,7 @@ function PairedBars({ items }: { items: PairItem[] }) {
 }
 
 const notReadyText = (r: ForecastNotReady) =>
-  r.reason === "no_sales" ? "No sales yet. Once you have sales in 5 different weeks, we'll estimate the next 4 weeks."
+  r.reason === "no_sales" ? "No sales yet. We'll estimate the next 4 weeks once you have a few weeks of sales."
   : r.reason === "few_sale_weeks" ? `You have sales in ${r.have} of the ${r.need} weeks needed for a fair estimate. Keep adding orders.`
   : `We need ${r.need} weeks since your first sale; you have ${r.have}. Check back soon.`;
 
@@ -97,11 +98,9 @@ function ForecastPanel({ today }: { today: string }) {
     return <Panel title="Sales likely in the next 4 weeks"><Empty text={notReadyText(f)} /></Panel>;
   }
   const wk = f.total / 4;
-  const wLow = f.range ? f.range.low / 4 : null;
-  const wHigh = f.range ? f.range.high / 4 : null;
   const data = [
     ...f.history.map(w => ({ label: shortDate(w.end), actual: w.sales })),
-    ...f.next.map(w => ({ label: shortDate(w.end), expected: w.expected, range: wLow !== null ? [wLow, wHigh] as [number, number] : undefined })),
+    ...f.next.map(w => ({ label: shortDate(w.end), expected: w.expected })),
   ];
   (data[f.history.length - 1] as any).expected = f.history[f.history.length - 1].sales;
   return (
@@ -122,14 +121,13 @@ function ForecastPanel({ today }: { today: string }) {
               formatter={(v: any, name: string) => [Array.isArray(v) ? `${formatCurrency(v[0])} – ${formatCurrency(v[1])}` : formatCurrency(v), name === "actual" ? "Sales" : name === "expected" ? "Likely" : "Likely range"]}
               contentStyle={{ fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))" }}
             />
-            {f.range && <Area dataKey="range" stroke="none" fill="hsl(var(--muted-foreground))" fillOpacity={0.15} isAnimationActive={false} />}
             <Line dataKey="actual" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} isAnimationActive={false} />
             <Line dataKey="expected" stroke="hsl(var(--foreground))" strokeWidth={2} strokeDasharray="5 4" dot={false} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] text-muted-foreground">Solid line: real sales per week. Dashed line: likely sales.{f.range && " Grey band: likely range."}</p>
+        <p className="text-[11px] text-muted-foreground">Solid line: real sales per week. Dashed line: likely sales per week.</p>
         <button type="button" onClick={() => setShowTable(v => !v)} aria-expanded={showTable} className="text-xs underline underline-offset-2 text-foreground">
           {showTable ? "Hide weekly numbers" : "Show weekly numbers"}
         </button>
@@ -145,7 +143,7 @@ function ForecastPanel({ today }: { today: string }) {
               ))}
               {f.next.map(w => (
                 <tr key={w.end} className="border-t border-border"><td className="py-1">{shortDate(w.start)} – {shortDate(w.end)}</td><td className="py-1 text-right text-muted-foreground">—</td>
-                  <td className="py-1 text-right num tabular-nums">{formatCurrency(wk)}{wLow !== null && <span className="text-muted-foreground"> ({compact(wLow)}–{compact(wHigh!)})</span>}</td></tr>
+                  <td className="py-1 text-right num tabular-nums">{formatCurrency(wk)}</td></tr>
               ))}
             </tbody>
           </table>
@@ -199,7 +197,7 @@ export default function BusinessCharts() {
 
       <Panel
         title="Who is buying less?"
-        takeaway={`Recent: ${shortDate(less.mid)}–${shortDate(less.to)} compared with before: ${shortDate(less.from)}–${shortDate(less.mid)}. New dealers not included.`}
+        takeaway={`Recent: ${shortDate(addDaysToKey(less.mid, 1))}–${shortDate(less.to)} compared with before: ${shortDate(less.from)}–${shortDate(less.mid)}. New dealers not included.`}
         seeAll="/today"
       >
         {less.items.length ? <PairedBars items={less.items} /> : <Empty text="No regular dealer is buying less than before." />}
