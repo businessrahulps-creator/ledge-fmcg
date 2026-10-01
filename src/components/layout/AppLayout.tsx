@@ -371,7 +371,7 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
             )}
           </AnimatePresence>
 
-          <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-20 md:p-6 md:pb-6">
+          <main ref={mainRef} className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 pb-20 md:p-6 md:pb-6 md:bg-[hsl(var(--surface-quiet))]">
             <div className="mx-auto max-w-5xl min-w-0">
               {loadError && (
                 <div
