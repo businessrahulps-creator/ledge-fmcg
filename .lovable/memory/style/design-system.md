@@ -3,6 +3,8 @@ name: Design system tokens (V2 ground truth)
 description: Live V2 token reference — Midnight/Forest/Terracotta/Bone, Playfair+Inter, 6px radius, Fluent depth/motion. Source: src/index.css
 type: design
 ---
+**SUPERSEDED Oct 2026:** app is now monochrome — background/card 0 0% 100%, foreground/primary 0 0% 9%, muted 0 0% 96%, border 0 0% 90%, success 142 64% 30%, warning 25 85% 42%, radius 12px, flat shadows, Inter headings (--font-heading = Inter; .lp-theme resets to Playfair). Hero bands are white bordered panels. Sentence-case labels, no uppercase tracked micro-labels. Reference: user's analytics screenshot (white, black, hairlines, segmented pills, greyscale charts). Cream/Bone/Midnight below is historical.
+
 Single source of truth for V2 tokens. Pulled directly from `src/index.css`.
 Anything that contradicts this file is wrong — fix the file or fix the code.
 
