@@ -316,7 +316,7 @@ export default function Orders() {
               value: insights.pendingPayment,
               zero: insights.pendingPayment === 0,
               insight: insights.pendingPaymentValue > 0
-                ? <InsightLine tone="down" fallback={`${formatCurrency(insights.pendingPaymentValue)} outstanding`} />
+                ? <InsightLine tone="down" fallback={`${formatCurrency(insights.pendingPaymentValue)} order value, not fully paid`} />
                 : <InsightLine tone="up" fallback="All settled" />,
             },
           ]}
