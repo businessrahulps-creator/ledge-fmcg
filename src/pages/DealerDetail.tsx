@@ -46,6 +46,7 @@ import {
 import { sumDue } from "@/lib/receivables";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useCan } from "@/hooks/useCan";
+import { UsageMeter } from "@/components/ui/usage-meter";
 
 
 export default function DealerDetail() {
@@ -261,7 +262,7 @@ export default function DealerDetail() {
                     </div>
 
                     <div className="glass-card p-3">
-                      <span className="text-[10px] text-muted-foreground">Credit Limit</span>
+                      <span className="text-[10px] text-muted-foreground">Credit limit</span>
                       <p className="mt-0.5 text-sm font-semibold num">{limit > 0 ? formatCurrency(limit) : "No limit set"}</p>
                     </div>
                     <div className="glass-card p-3">
@@ -271,6 +272,12 @@ export default function DealerDetail() {
                       </p>
                     </div>
                   </div>
+
+                  {limit > 0 && (
+                    <div className="glass-card p-3">
+                      <UsageMeter used={totalOut} limit={limit} label="Credit limit used" format={formatCurrency} />
+                    </div>
+                  )}
 
                   {/* Segmented bucket bar */}
                   <div className="glass-card p-3">
