@@ -30,3 +30,14 @@
 - [ ] Custom date range starts 05:30 IST; comparison windows overlap
 - [ ] 192 legacy 13-Apr bills: header tax rounded to rupee (grand totals correct; bills immutable — leave)
 - [ ] 225 stock rows: opening stock never recorded in history (add opening entries, quantities unchanged)
+
+## Reports (one place to download anything)
+- [x] /reports screen: grouped catalogue, search, favourites, dates (IST), compare, live preview, recent downloads
+- [x] PDF (existing letterhead pipeline + sections/subtotals/totals/note/landscape), Excel (typed, multi-sheet, info sheet), CSV (UTF-8), WhatsApp share
+- [x] Reports: Sales x5, Money x4, Stock x3, Buying x3, GST x4, Shop visits
+- [x] Tally: ledger names, checks, XML + Excel, only-new tracking, export history
+- [ ] Not yet: money-to-collect by age buckets, dealer/supplier statements, day book, slow-moving stock, salesperson vs target, area filter; background (worker) PDF for very large reports
+- [ ] Astra review of report totals vs app screens; import sample XML into a real TallyPrime
+
+## Vyapar ideas (plan declined — waiting for user's choice)
+- [ ] WhatsApp reminders + UPI link, Vyapar import, quotations, challans, expenses, small-printer bills

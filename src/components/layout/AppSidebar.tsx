@@ -18,6 +18,7 @@ import {
   ListTodo,
   ShoppingBasket,
   Store,
+  FileBarChart,
 } from "lucide-react";
 import {
   Sidebar,
