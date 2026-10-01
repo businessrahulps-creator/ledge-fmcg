@@ -206,6 +206,7 @@ export interface DataContextType {
     lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
     reason: string,
     godownId?: string | null,
+    idempotencyKey?: string,
   ) => Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null>;
   resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
