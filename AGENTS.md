@@ -4,3 +4,5 @@
 - Shop visits (CRM) lives in shop_visits + shop_prospects with company-scoped RLS; converting a new shop to a dealer goes through `convert_prospect_to_dealer_atomic`, and a promise to pay writes an intel_actions "promised" row so Today's work brings the dealer back on the promised day. Why: one dealer record, no duplicate customer table, reuse Today's work rules.
 - Buying access uses its own `manage_buying` capability (default owner + accountant), checked in buying RPCs, RLS and UI — why: buying is separate from seeing sales money.
 - Orders are sent only via `dispatch_and_bill_order_atomic`; the old `dispatch_order_atomic` is revoked from clients — why: it skipped stock and credit checks.
+- Menu items, order and names come from `src/components/layout/nav-config.ts`, shared by the computer sidebar, phone bottom bar and phone Menu, with Dashboard always first — why: the two menus drifted when built separately.
+- Page titles use `.h1-display` via PageHeader; small buttons carry `touch-target` (44px on touch screens); dialogs open ≤200ms with a strong ease-out, no slide — why: one consistent spacing/motion system.
