@@ -26,6 +26,7 @@ import { useReceivables } from "@/hooks/useReceivables";
 import { sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket } from "@/lib/aging";
 import { SignalCard } from "@/components/ui/signal-card";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
+import { TodayStrip } from "@/components/intelligence/TodayStrip";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -296,6 +297,8 @@ export default function Dashboard() {
             }}
           />
         )}
+
+        {canSeeMoney && <TodayStrip />}
 
         {/* Hero: greeting + This Month + sparkline as ONE composed block */}
         <motion.section
