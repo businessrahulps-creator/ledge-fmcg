@@ -79,7 +79,7 @@ export default function ShopVisits() {
     const open = v.visits.filter(x => x.promiseStatus === "open" && x.promiseDate);
     const term = q.trim().toLowerCase();
     const list = open.filter(x => !term || (dealerName.get(x.distributorId) || "").toLowerCase().includes(term));
-    const sorted = list.sort((a, b) => a.promiseDate!.localeCompare(b.promiseDate!));
+    const sorted = list.sort((a, b) => a.promiseDate!.localeCompare(b.promiseDate!) || a.id.localeCompare(b.id));
     return {
       late: sorted.filter(x => x.promiseDate! < today),
       due: sorted.filter(x => x.promiseDate === today),
@@ -95,8 +95,11 @@ export default function ShopVisits() {
       .filter(p => !term || [p.name, p.area, p.ownerName, p.shopType].some(s => s.toLowerCase().includes(term)));
   }, [v.prospects, q, stageFilter]);
 
+  const [converting, setConverting] = useState<string | null>(null);
   const convert = async (id: string, name: string) => {
-    const dealerId = await v.convert(id);
+    if (converting) return;
+    setConverting(id);
+    const dealerId = await v.convert(id).finally(() => setConverting(null));
     if (dealerId) {
       toast.success(`${name} is now a dealer`);
       navigate(`/orders/new?dealer=${dealerId}`);
@@ -115,7 +118,7 @@ export default function ShopVisits() {
               {dealerName.get(x.distributorId) || "Dealer"}
             </Link>
             <p className="text-sm text-muted-foreground">
-              {x.outcome === "promised_payment" ? `Will pay ${formatCurrency(x.promiseAmount || 0)}` : "Will place an order"}
+              {x.outcome === "promised_payment" ? (canSeeMoney && x.promiseAmount ? `Will pay ${formatCurrency(x.promiseAmount)}` : "Will pay") : "Will place an order"}
               {" · "}<span className={cn(late && "text-destructive font-medium")}>
                 {x.promiseDate === today ? "today" : late ? `was due ${formatIndianDate(x.promiseDate)}` : formatIndianDate(x.promiseDate)}
               </span>
@@ -278,7 +281,7 @@ export default function ShopVisits() {
                     <div className="flex flex-wrap gap-2">
                       {(p.stage === "found" || p.stage === "talked") && (
                         <>
-                          <Button size="sm" onClick={() => convert(p.id, p.name)}>Make dealer</Button>
+                          <Button size="sm" disabled={converting === p.id} onClick={() => convert(p.id, p.name)}>{converting === p.id ? "Making dealer…" : "Make dealer"}</Button>
                           {p.stage === "found" && (
                             <Button size="sm" variant="outline" onClick={async () => { if (await v.setStage(p.id, "talked")) toast.success("Moved to Talked to them"); }}>Talked to them</Button>
                           )}

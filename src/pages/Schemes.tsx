@@ -474,7 +474,7 @@ export default function Schemes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Products</SelectItem>
-                    {products.map(p => (
+                    {products.filter(p => p.itemKind !== "raw_material").map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>

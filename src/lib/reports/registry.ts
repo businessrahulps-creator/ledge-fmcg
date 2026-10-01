@@ -131,8 +131,18 @@ export const REPORTS: ReportDef[] = [
       { key: "limit", header: "Credit limit", type: "money" }, { key: "unpaid", header: "Unpaid", type: "money", total: true },
     ],
     fetch: async p => {
-      const d = await fetchAll((a, b) => { let q = db.from("distributors").select("name,location,contact,credit_limit,outstanding_amount").gt("outstanding_amount", 0); if (p.area) q = q.eq("location", p.area); return q.order("outstanding_amount", { ascending: false }).range(a, b); });
-      return one(d.map((x: any) => ({ dealer: x.name, area: x.location, phone: x.contact, limit: r2(x.credit_limit), unpaid: r2(x.outstanding_amount) })));
+      const [ev, d] = await Promise.all([
+        dealerEvents(p.area),
+        fetchAll((a, b) => db.from("distributors").select("id,location,contact,credit_limit").range(a, b)),
+      ]);
+      const info = new Map(d.map((x: any) => [x.id, x]));
+      const m = new Map<string, ReportRow>();
+      for (const e of ev) {
+        const x: any = info.get(e.dealerId);
+        const r = m.get(e.dealerId) ?? { dealer: e.dealer, area: x?.location ?? "", phone: x?.contact ?? "", limit: r2(x?.credit_limit), unpaid: 0 };
+        r.unpaid = r2(n(r.unpaid) + e.dr - e.cr); m.set(e.dealerId, r);
+      }
+      return one([...m.values()].filter(r => n(r.unpaid) > 0).sort((a, b) => n(b.unpaid) - n(a.unpaid)));
     },
     summary: rows => [
       { label: "Dealers who owe", value: rows.length, kind: "number" },
@@ -438,7 +448,7 @@ export const REPORTS: ReportDef[] = [
       { key: "sgst", header: "SGST", type: "money", total: true }, { key: "igst", header: "IGST", type: "money", total: true },
     ],
     fetch: async p => {
-      const lines = await fetchAll((a, b) => db.from("invoice_lines").select("hsn_code,gst_rate,quantity,taxable_value,cgst_amount,sgst_amount,igst_amount,invoices!inner(invoice_date)").gte("invoices.invoice_date", p.from).lte("invoices.invoice_date", p.to).range(a, b));
+      const lines = await fetchAll((a, b) => db.from("invoice_lines").select("hsn_code,gst_rate,quantity,taxable_value,cgst_amount,sgst_amount,igst_amount,invoices!inner(invoice_date,doc_type,status)").eq("invoices.doc_type", "gst_invoice").neq("invoices.status", "draft").gte("invoices.invoice_date", p.from).lte("invoices.invoice_date", p.to).range(a, b));
       const m = new Map<string, ReportRow>();
       for (const l of lines as any[]) {
         const k = `${l.hsn_code || "—"}|${n(l.gst_rate)}`;
@@ -593,7 +603,7 @@ async function stockRows(): Promise<ReportRow[]> {
 }
 
 export async function salesBills(p: ReportParams) {
-  return fetchAll((a, b) => db.from("invoices").select("id,invoice_number,invoice_date,buyer_name,buyer_gstin,buyer_state_code,place_of_supply_state_code,subtotal,cgst_amount,sgst_amount,igst_amount,round_off,grand_total").eq("doc_type", "gst_invoice").gte("invoice_date", p.from).lte("invoice_date", p.to).order("invoice_date").order("invoice_number").range(a, b)) as Promise<any[]>;
+  return fetchAll((a, b) => db.from("invoices").select("id,invoice_number,invoice_date,buyer_name,buyer_gstin,buyer_state_code,place_of_supply_state_code,subtotal,cgst_amount,sgst_amount,igst_amount,round_off,grand_total").eq("doc_type", "gst_invoice").neq("status", "draft").gte("invoice_date", p.from).lte("invoice_date", p.to).order("invoice_date").order("invoice_number").range(a, b)) as Promise<any[]>;
 }
 
 export { fetchAll as fetchAllRows };

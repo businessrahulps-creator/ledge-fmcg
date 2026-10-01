@@ -8,6 +8,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { addDaysToKey, todayKey } from "@/utils/dateKey";
+import { useCan } from "@/hooks/useCan";
 import { OUTCOME_LABEL, useShopVisits, type VisitOutcome } from "@/hooks/useShopVisits";
 
 const OUTCOMES: VisitOutcome[] = ["gave_order", "paid", "promised_payment", "promised_order", "enough_stock", "owner_away", "shop_closed", "other"];
@@ -17,6 +18,7 @@ export function AddVisitDialog({ open, onOpenChange, dealerId, dealerName }: {
   open: boolean; onOpenChange: (v: boolean) => void; dealerId: string | null; dealerName: string;
 }) {
   const { addVisit } = useShopVisits();
+  const canSeeMoney = useCan("see_money");
   const [outcome, setOutcome] = useState<VisitOutcome | null>(null);
   const [note, setNote] = useState("");
   const [date, setDate] = useState(addDaysToKey(todayKey(), 3));
@@ -31,7 +33,7 @@ export function AddVisitDialog({ open, onOpenChange, dealerId, dealerName }: {
   const save = async () => {
     if (!dealerId || !outcome || saving) return;
     if (isPromise && (!date || date < todayKey())) { toast.error("Pick today or a later date for the promise."); return; }
-    if (outcome === "promised_payment" && !(amount > 0)) { toast.error("Enter how much they promised to pay."); return; }
+    if (outcome === "promised_payment" && canSeeMoney && !(amount > 0)) { toast.error("Enter how much they promised to pay."); return; }
     if (outcome === "other" && !note.trim()) { toast.error("Write a short note."); return; }
     setSaving(true);
     const ok = await addVisit({ distributorId: dealerId, outcome, note, promiseDate: date, promiseAmount: amount });
@@ -64,7 +66,7 @@ export function AddVisitDialog({ open, onOpenChange, dealerId, dealerName }: {
               <Label htmlFor="visit-promise-date">{outcome === "promised_payment" ? "Will pay on" : "Will order on"}</Label>
               <Input id="visit-promise-date" type="date" min={todayKey()} value={date} onChange={e => setDate(e.target.value)} />
             </div>
-            {outcome === "promised_payment" && (
+            {outcome === "promised_payment" && canSeeMoney && (
               <div className="space-y-1.5">
                 <Label htmlFor="visit-promise-amount">Amount (₹)</Label>
                 <NumberInput id="visit-promise-amount" value={amount} onValueChange={v => setAmount(v ?? 0)} min={0} />

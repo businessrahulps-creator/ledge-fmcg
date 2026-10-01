@@ -42,6 +42,8 @@ function byRateFromLines(lines: any[], key: string, taxableKey = "taxable_value"
   };
 }
 
+const impliedRate = (x: any) => { const t = n(x.subtotal); return t > 0 ? Math.round(((n(x.cgst_amount) + n(x.sgst_amount)) || n(x.igst_amount)) / t * 100) : 0; };
+
 export interface TallyBundle { input: TallyInput; ids: string[]; counts: Record<string, number> }
 
 export async function loadTallyBundle(p: ReportParams, choice: TallyChoice, companyName: string, ledgers: TallyLedgers): Promise<TallyBundle> {
@@ -50,8 +52,8 @@ export async function loadTallyBundle(p: ReportParams, choice: TallyChoice, comp
   const input: TallyInput = { companyName, ledgers };
 
   if (choice.sales) {
-    const inv = await fetchAllRows((a, b) => db.from("invoices").select("id,invoice_number,invoice_date,buyer_name,subtotal,cgst_amount,sgst_amount,igst_amount,round_off,grand_total,gst_rate").eq("doc_type", "gst_invoice").gte("invoice_date", p.from).lte("invoice_date", p.to).order("invoice_date").range(a, b));
-    const lines = await fetchAllRows((a, b) => db.from("invoice_lines").select("invoice_id,gst_rate,taxable_value,invoices!inner(invoice_date)").gte("invoices.invoice_date", p.from).lte("invoices.invoice_date", p.to).range(a, b));
+    const inv = await fetchAllRows((a, b) => db.from("invoices").select("id,invoice_number,invoice_date,buyer_name,subtotal,cgst_amount,sgst_amount,igst_amount,round_off,grand_total,gst_rate").eq("doc_type", "gst_invoice").neq("status", "draft").gte("invoice_date", p.from).lte("invoice_date", p.to).order("invoice_date").range(a, b));
+    const lines = await fetchAllRows((a, b) => db.from("invoice_lines").select("invoice_id,gst_rate,taxable_value,invoices!inner(invoice_date,doc_type,status)").eq("invoices.doc_type", "gst_invoice").neq("invoices.status", "draft").gte("invoices.invoice_date", p.from).lte("invoices.invoice_date", p.to).range(a, b));
     const rates = byRateFromLines(lines, "invoice_id");
     input.sales = fresh(inv.map((x: any): TaxDoc => ({ id: x.id, number: x.invoice_number, date: x.invoice_date, party: x.buyer_name, byRate: rates(x.id, n(x.gst_rate), n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: n(x.round_off), total: n(x.grand_total) })));
   }
@@ -59,7 +61,7 @@ export async function loadTallyBundle(p: ReportParams, choice: TallyChoice, comp
     const cn = await fetchAllRows((a, b) => db.from("credit_notes").select("id,credit_note_number,note_date,reason,subtotal,cgst_amount,sgst_amount,igst_amount,round_off,grand_total,distributors(name)").gte("note_date", p.from).lte("note_date", p.to).order("note_date").range(a, b));
     const lines = await fetchAllRows((a, b) => db.from("credit_note_lines").select("credit_note_id,gst_rate,taxable_value,credit_notes!inner(note_date)").gte("credit_notes.note_date", p.from).lte("credit_notes.note_date", p.to).range(a, b));
     const rates = byRateFromLines(lines, "credit_note_id");
-    input.creditNotes = fresh(cn.map((x: any): TaxDoc => ({ id: x.id, number: x.credit_note_number, date: x.note_date, party: x.distributors?.name ?? "", byRate: rates(x.id, 0, n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: n(x.round_off), total: n(x.grand_total), narration: x.reason })));
+    input.creditNotes = fresh(cn.map((x: any): TaxDoc => ({ id: x.id, number: x.credit_note_number, date: x.note_date, party: x.distributors?.name ?? "", byRate: rates(x.id, impliedRate(x), n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: n(x.round_off), total: n(x.grand_total), narration: x.reason })));
   }
   if (choice.receipts) {
     const r = await fetchAllRows((a, b) => db.from("invoice_payments").select("id,paid_on,amount,mode,reference,distributors(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
@@ -69,7 +71,7 @@ export async function loadTallyBundle(p: ReportParams, choice: TallyChoice, comp
     const pb = await fetchAllRows((a, b) => db.from("purchase_bills").select("id,supplier_bill_no,bill_date,supplier_name,subtotal,cgst_amount,sgst_amount,igst_amount,grand_total,notes").neq("status", "cancelled").gte("bill_date", p.from).lte("bill_date", p.to).order("bill_date").range(a, b));
     const lines = await fetchAllRows((a, b) => db.from("purchase_bill_lines").select("bill_id,gst_rate,taxable_value,purchase_bills!inner(bill_date)").gte("purchase_bills.bill_date", p.from).lte("purchase_bills.bill_date", p.to).range(a, b));
     const rates = byRateFromLines(lines, "bill_id");
-    input.purchases = fresh(pb.map((x: any): TaxDoc => ({ id: x.id, number: x.supplier_bill_no, date: x.bill_date, party: x.supplier_name, byRate: rates(x.id, 0, n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: 0, total: n(x.grand_total), narration: x.notes })));
+    input.purchases = fresh(pb.map((x: any): TaxDoc => ({ id: x.id, number: x.supplier_bill_no, date: x.bill_date, party: x.supplier_name, byRate: rates(x.id, impliedRate(x), n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: 0, total: n(x.grand_total), narration: x.notes })));
   }
   if (choice.supplierPayments) {
     const sp = await fetchAllRows((a, b) => db.from("supplier_payments").select("id,paid_on,amount,mode,reference,suppliers(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));

@@ -43,3 +43,12 @@
 
 ## Vyapar ideas (plan declined — waiting for user's choice)
 - [ ] WhatsApp reminders + UPI link, Vyapar import, quotations, challans, expenses, small-printer bills
+
+## QA pass (1 Oct 2026) - needs owner decision
+- [ ] Salespeople can read dealer unpaid amounts, payments and credit notes straight from the database (screens hide them). Tighten database access? Dealer lists for visits must keep working.
+- [ ] Buying is open to sales managers too (they have money access). Restrict to owner + accountant?
+- [ ] Suppliers without GSTIN always get CGST+SGST; add a "State" picker for them?
+- [ ] Cancel purchase bill checks the supplier's total balance, not payments on that bill
+- [ ] Order-wide "buy X get Y" offers value free items at the order's priciest product
+- [ ] Retrying an advance payment after a network drop shows an error (no double payment)
+- [ ] Old "send" path without stock/credit checks still exists in code (no button uses it)
