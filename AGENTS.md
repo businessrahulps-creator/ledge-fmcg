@@ -6,3 +6,4 @@
 - Orders are sent only via `dispatch_and_bill_order_atomic`; the old `dispatch_order_atomic` is revoked from clients — why: it skipped stock and credit checks.
 - Menu items, order and names come from `src/components/layout/nav-config.ts`, shared by the computer sidebar, phone bottom bar and phone Menu, with Dashboard always first — why: the two menus drifted when built separately.
 - Page titles use `.h1-display` via PageHeader; small buttons carry `touch-target` (44px on touch screens); dialogs open ≤200ms with a strong ease-out, no slide — why: one consistent spacing/motion system.
+- Undoing a send (reverse_dispatch_for_order) is refused once the order has a GST bill, and the app calls it before saving the order status. Why: GST bills can only be corrected with returns and credit notes.
