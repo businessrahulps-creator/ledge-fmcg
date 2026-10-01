@@ -113,7 +113,9 @@ export function taxEntries(d: TaxDoc, L: TallyLedgers, kind: "sale" | "credit" |
   const entries: Entry[] = [{ ledger: d.party, debit: partySide * d.total }];
   for (const b of d.byRate) entries.push({ ledger: rateName(prefix, b.rate), debit: s * b.taxable });
   entries.push({ ledger: tc, debit: s * d.cgst }, { ledger: ts, debit: s * d.sgst }, { ledger: ti, debit: s * d.igst });
-  // Whatever is left balances through round off, so every voucher adds up to zero.
+  // Round each line to the paisa first (that's what gets printed), then
+  // balance whatever is left through round off, so the voucher adds up to zero.
+  for (const e of entries) e.debit = Math.round(e.debit * 100) / 100;
   const diff = Math.round(entries.reduce((x, e) => x + e.debit, 0) * 100) / 100;
   if (Math.abs(diff) >= 0.005) entries.push({ ledger: L.roundOff, debit: -diff });
   return entries;
