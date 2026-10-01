@@ -127,7 +127,7 @@ export default function Today() {
             ] as const).map(([k, label, min, max]) => (
               <label key={k} className="block space-y-1.5">
                 <span className="text-sm font-medium">{label}</span>
-                <NumberInput value={draft[k]} min={min} max={max} onChange={(v: number) => setDraft(d => ({ ...d, [k]: v }))} />
+                <NumberInput value={draft[k]} min={min} max={max} onValueChange={(v) => setDraft(d => ({ ...d, [k]: v ?? min }))} />
               </label>
             ))}
             <div className="flex justify-end gap-2 pt-2">
