@@ -172,6 +172,7 @@ export function useBillingDomain(deps: BillingDeps) {
     lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
     reason: string,
     godownId?: string | null,
+    idempotencyKey?: string,
   ): Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null> => {
     if (!navigator.onLine) {
       toast.error("Cannot record returns offline", { description: "Please reconnect and try again." });
@@ -185,6 +186,7 @@ export function useBillingDomain(deps: BillingDeps) {
           .map(l => ({ invoice_line_id: l.invoiceLineId, good_qty: l.goodQty || 0, damaged_qty: l.damagedQty || 0 })),
         p_reason: sanitizeInput(reason || ""),
         p_godown_id: godownId || null,
+        p_idempotency_key: idempotencyKey ?? null,
       });
       if (error) throw error;
       const res = data as { credit_note_number: string; grand_total: number; restocked: boolean };

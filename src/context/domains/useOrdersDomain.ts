@@ -1,3 +1,4 @@
+import { todayKey } from "@/utils/dateKey";
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -395,12 +396,12 @@ export function useOrdersDomain(deps: OrdersDeps) {
   }, [deps.companyId, deps.persistEntityToCache]);
 
   const previewOrderNumber = useCallback(() => {
-    const year = new Date().getFullYear();
+    const year = Number(todayKey().slice(0, 4));
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 
   const nextOrderNumber = useCallback(() => {
-    const year = new Date().getFullYear();
+    const year = Number(todayKey().slice(0, 4));
     return `${orderPrefix}-${year}-${String(orderSequence).padStart(4, "0")}`;
   }, [orderPrefix, orderSequence]);
 

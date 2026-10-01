@@ -1,3 +1,4 @@
+import { istCalendarNow } from "@/utils/dateKey";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { cn } from "@/lib/utils";
@@ -88,7 +89,7 @@ export default function Dashboard() {
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => istCalendarNow(), []);
   const todayIso = toIsoDate(today);
   const last7Dates = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);

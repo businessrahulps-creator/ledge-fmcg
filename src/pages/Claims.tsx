@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
 import { SignalCard } from "@/components/ui/signal-card";
@@ -273,6 +273,9 @@ function NewClaimDialog({
   );
   const returnTotal = returnValue + returnTax;
 
+  // One key per return attempt: a retry after a dropped connection replays the
+  // first save instead of filing the return twice.
+  const returnKeyRef = useRef<string | null>(null);
   const handleSubmit = async () => {
     if (!selectedOrder || !selectedBill) return;
     if (!alreadyReturned) {
@@ -285,13 +288,17 @@ function NewClaimDialog({
       return;
     }
     setSubmitting(true);
+    if (!returnKeyRef.current) returnKeyRef.current = crypto.randomUUID();
     const res = await api.claims.recordReturn(
       selectedOrder.id,
       payload.map(l => ({ invoiceLineId: l.invoiceLineId, goodQty: l.goodQty, damagedQty: l.damagedQty })),
       reason,
+      undefined,
+      returnKeyRef.current,
     );
     setSubmitting(false);
     if (res) {
+      returnKeyRef.current = null;
       if (selectedBillId) forgetInvoiceLines(selectedBillId);
       toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
         description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,

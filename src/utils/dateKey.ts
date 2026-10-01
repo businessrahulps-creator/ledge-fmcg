@@ -30,3 +30,13 @@ export const addDaysToKey = (key: string, days: number): string => {
   const [y, m, d] = key.split("-").map(Number);
   return toDateKey(new Date(y, m - 1, d + days));
 };
+
+/**
+ * A Date whose local calendar fields (year, month, day) are today's India
+ * date — for calendar arithmetic like "start of this month" or "this week".
+ * Use only for building day keys, never for comparing real instants.
+ */
+export const istCalendarNow = (): Date => {
+  const [y, m, d] = todayKey().split("-").map(Number);
+  return new Date(y, m - 1, d, 12);
+};

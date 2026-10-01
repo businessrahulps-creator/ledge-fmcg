@@ -20,13 +20,13 @@ import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 import { EntityCard } from "@/components/ui/entity-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
-import { toDateKey, todayKey } from "@/utils/dateKey";
+import { toDateKey, todayKey, istCalendarNow } from "@/utils/dateKey";
 
 type PeriodType = "daily" | "weekly" | "monthly";
 
 function getMonthOptions() {
   const opts: { value: string; label: string }[] = [];
-  const now = new Date();
+  const now = istCalendarNow();
   for (let i = -2; i <= 3; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const value = toDateKey(d);
@@ -38,7 +38,7 @@ function getMonthOptions() {
 
 function getDailyOptions() {
   const opts: { value: string; label: string }[] = [];
-  const now = new Date();
+  const now = istCalendarNow();
   for (let i = -7; i <= 7; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     const value = toDateKey(d);
@@ -59,7 +59,7 @@ function getMonday(d: Date) {
 
 function getWeeklyOptions() {
   const opts: { value: string; label: string }[] = [];
-  const now = new Date();
+  const now = istCalendarNow();
   const thisMonday = getMonday(now);
   for (let i = -2; i <= 2; i++) {
     const monday = new Date(thisMonday);
@@ -88,7 +88,7 @@ function getPeriodEnd(periodType: PeriodType, periodStart: string) {
 }
 
 function getDefaultPeriodStart(periodType: PeriodType) {
-  const now = new Date();
+  const now = istCalendarNow();
   if (periodType === "daily") return todayKey();
   if (periodType === "weekly") return toDateKey(getMonday(now));
   return toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));

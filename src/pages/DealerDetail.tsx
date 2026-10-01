@@ -1,4 +1,4 @@
-import { toDateKey, addDaysToKey } from "@/utils/dateKey";
+import { toDateKey, addDaysToKey, istCalendarNow } from "@/utils/dateKey";
 import { useState, useMemo } from "react";
 import {
   AlertDialog,
@@ -435,7 +435,7 @@ export default function DealerDetail() {
             {/* Targets */}
             {(() => {
               const allTargets = api.targets.list();
-              const now = new Date();
+              const now = istCalendarNow();
               const today = toDateKey(now);
               const dayOfWeek = now.getDay();
               const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
