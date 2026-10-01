@@ -30,7 +30,7 @@ function memoLast<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) =
 
 const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice) =>
   buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice } as any) as ReceivableRow[]);
-const agingFor = memoLast((rows: ReceivableRow[], distributors: any) => agingFromReceivables(rows, distributors));
+const agingFor = memoLast((rows: ReceivableRow[], distributors: any) => agingFromReceivables(rows, distributors, { settleToBalance: true }));
 const advancesFor = memoLast((orders: any, invoices: any, receivedByOrder: any) =>
   advancesByDealer(orders, invoices, receivedByOrder));
 const statusFor = memoLast((orders: any, invoices: any, rbi: any, rbo: any, cbi: any) =>

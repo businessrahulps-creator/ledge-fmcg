@@ -228,7 +228,7 @@ export default function Dashboard() {
 
   // Credit at Risk — unpaid GST bills, aged, computed from orders + distributors
   const agingRows = useMemo(
-    () => sortByRisk(agingFromReceivables(receivableRows, distributors)),
+    () => sortByRisk(agingFromReceivables(receivableRows, distributors, { settleToBalance: true })),
     [receivableRows, distributors, today],
   );
   const totalOutstandingAll = useMemo(

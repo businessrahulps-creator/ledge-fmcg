@@ -187,6 +187,8 @@ const BUCKET_FIELD: Record<AgingBucket, keyof Pick<DealerReceivableAging,
 export function agingFromReceivables(
   rows: ReceivableRow[],
   distributors: Array<{ id: string; name: string; creditLimit?: number; outstandingAmount?: number }>,
+  /** Pass true only when `rows` is every open bill (not a filtered view). */
+  opts: { settleToBalance?: boolean } = {},
 ): DealerReceivableAging[] {
   const canonical = new Map(distributors.map(d => [d.id, d.outstandingAmount]));
   const byDealer = new Map<string, DealerReceivableAging>();
@@ -214,7 +216,7 @@ export function agingFromReceivables(
   const AGE_FLOOR: Record<(typeof OLDEST_FIRST)[number], number> = { bucket_90_plus: 91, bucket_61_90: 61, bucket_31_60: 31, bucket_0_30: 0 };
   for (const a of byDealer.values()) {
     const bal = canonical.get(a.distributorId);
-    if (typeof bal !== "number" || !Number.isFinite(bal)) continue;
+    if (!opts.settleToBalance || typeof bal !== "number" || !Number.isFinite(bal)) continue;
     let spare = a.totalOutstanding - Math.max(0, bal);
     if (spare <= 0.005) continue;
     for (const f of OLDEST_FIRST) {
