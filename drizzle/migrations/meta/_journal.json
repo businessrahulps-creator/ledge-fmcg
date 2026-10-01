@@ -141,6 +141,13 @@
       "when": 1790846300996,
       "tag": "0019_shop_visits_crm",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790850521394,
+      "tag": "0020_reports_tally_export",
+      "breakpoints": true
     }
   ]
 }

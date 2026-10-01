@@ -712,6 +712,53 @@ export type Database = {
         }
         Relationships: []
       }
+      export_log: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_ids: string[]
+          format: string
+          id: string
+          params: Json
+          report_id: string
+          row_count: number
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_ids?: string[]
+          format: string
+          id?: string
+          params?: Json
+          report_id: string
+          row_count?: number
+          user_id?: string
+          user_name?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_ids?: string[]
+          format?: string
+          id?: string
+          params?: Json
+          report_id?: string
+          row_count?: number
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       godowns: {
         Row: {
           address: string
@@ -2642,6 +2689,35 @@ export type Database = {
             foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tally_settings: {
+        Row: {
+          company_id: string
+          ledgers: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          ledgers?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          ledgers?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tally_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
