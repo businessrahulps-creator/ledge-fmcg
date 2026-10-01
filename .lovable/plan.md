@@ -37,7 +37,8 @@ Every item adds something new and changes nothing that already works.
 - E-invoice / e-way bill filing with the government: kept out of scope earlier, because it needs a registered tax partner.
 - Batch / expiry: worth doing for pharma and agri sellers, but it changes how stock works, so it should be planned separately.
 
-## Suggested order to build
+## Schedule: this week
+Once approved, all seven items go on the roadmap for this week, built in this order:
 Phase 1: #1 reminders, #5 import, and the new "Why switch" landing section.
 Phase 2: #2 quotations, #3 challans.
 Phase 3: #4 GST reports, #6 expenses, #7 small-printer bills.
