@@ -5,6 +5,7 @@ import { ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 
 import { useApi } from "@/services/api";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useBusinessDay } from "@/hooks/useBusinessDay";
+import { useBuying } from "@/hooks/useBuying";
 import { formatCurrency } from "@/data/mock-data";
 import {
   forecastNext4Weeks, topUnpaidDealers, buyingLessPairs, topReturnedProducts, stockRunway,
@@ -162,6 +163,7 @@ export default function BusinessCharts() {
   const claims = api.claims.list();
   const { rows } = useReceivables();
   const today = useBusinessDay();
+  const buying = useBuying();
 
   const unpaid = useMemo(() => topUnpaidDealers(rows), [rows]);
   const less = useMemo(() => buyingLessPairs(orders, today), [orders, today]);
@@ -193,6 +195,12 @@ export default function BusinessCharts() {
         seeAll="/billing"
       >
         {unpaid.items.length ? <RankedBars items={unpaid.items} format={i => formatCurrency(i.value)} /> : <Empty text="Nobody owes you money right now." />}
+        {buying.suppliers.length > 0 && (
+          <Link to="/buying?tab=pay" className="mt-3 flex items-baseline justify-between gap-2 border-t border-border pt-3 text-sm hover:underline">
+            <span className="text-muted-foreground">Money you owe suppliers</span>
+            <span className="num tabular-nums font-medium">{formatCurrency(buying.totalOwed)}</span>
+          </Link>
+        )}
       </Panel>
 
       <Panel

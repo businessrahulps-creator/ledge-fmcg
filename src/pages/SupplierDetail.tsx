@@ -35,7 +35,7 @@ export default function SupplierDetail() {
       <PageHeader
         title={s.name}
         subtitle={[s.phone, s.address].filter(Boolean).join(" · ") || "Supplier"}
-        breadcrumbs={[{ label: "Buying", href: "/buying?tab=suppliers" }, { label: s.name }] as any}
+        breadcrumbs={[{ label: "Buying", to: "/buying?tab=suppliers" }, { label: s.name }]}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setEditOpen(true)}>Edit</Button>

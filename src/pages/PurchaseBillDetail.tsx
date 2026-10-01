@@ -66,7 +66,7 @@ export default function PurchaseBillDetail() {
       <PageHeader
         title={`Bill ${bill.supplierBillNo}`}
         subtitle={`${bill.supplierName} · ${fmtDate(bill.billDate)} · ${godowns.find(g => g.id === bill.godownId)?.name || "Godown"}`}
-        breadcrumbs={[{ label: "Buying", href: "/buying" }, { label: `Bill ${bill.supplierBillNo}` }] as any}
+        breadcrumbs={[{ label: "Buying", to: "/buying" }, { label: `Bill ${bill.supplierBillNo}` }]}
         actions={!cancelled && (
           <div className="flex gap-2">
             {canReturn && <Button variant="outline" onClick={() => setReturnOpen(true)}>Return to supplier</Button>}
