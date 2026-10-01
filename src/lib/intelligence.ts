@@ -383,3 +383,126 @@ export function monthForecast(orders: Order[], today: string): MonthForecast | n
   const expected = soFar + mean * remaining;
   return { soFar, expected, low: Math.max(soFar, expected - spread), high: expected + spread, lastMonthSameDay, day: d, daysInMonth };
 }
+
+// ── My Business charts ────────────────────────────────────────────────────
+export interface WeekPoint { start: string; end: string; sales: number }
+
+/** Sales per 7-day block, oldest first, ending yesterday (today is unfinished). */
+export function weeklySales(orders: Order[], today: string, weeks = 26): WeekPoint[] {
+  const end0 = addDaysToKey(today, -1);
+  const pts: WeekPoint[] = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const end = addDaysToKey(end0, -7 * i);
+    pts.push({ start: addDaysToKey(end, -6), end, sales: 0 });
+  }
+  const first = pts[0].start;
+  for (const o of orders) {
+    if (!isLive(o) || o.date < first || o.date > end0) continue;
+    const idx = weeks - 1 - Math.floor(dayDiff(o.date, end0) / 7);
+    if (idx >= 0 && idx < weeks) pts[idx].sales += orderNet(o);
+  }
+  return pts;
+}
+
+export interface WeekForecast {
+  history: WeekPoint[];          // last 8 complete weeks
+  next: { start: string; end: string; expected: number; low: number; high: number }[];
+  total: number; low: number; high: number;
+  uncertain: boolean;
+}
+
+/**
+ * Next 4 weeks = average of the last 8 weeks. The range comes from how wrong
+ * the same method was on earlier weeks (backtest), so it is honest, not guessed.
+ * Returns null when there are fewer than 6 weeks of sales history.
+ */
+export function forecastNext4Weeks(orders: Order[], today: string): WeekForecast | null {
+  const all = weeklySales(orders, today, 26);
+  const firstIdx = all.findIndex(w => w.sales > 0);
+  if (firstIdx < 0) return null;
+  const usable = all.slice(firstIdx);
+  if (usable.length < 6 || usable.filter(w => w.sales > 0).length < 5) return null;
+  const history = usable.slice(-8);
+  const mean = history.reduce((n, w) => n + w.sales, 0) / history.length;
+  if (mean <= 0) return null;
+  const errs: number[] = [];
+  for (let i = 4; i < usable.length - 1; i++) {
+    const win = usable.slice(Math.max(0, i - 8), i);
+    const m = win.reduce((n, w) => n + w.sales, 0) / win.length;
+    if (m > 0) errs.push(Math.abs(usable[i].sales - m) / m);
+  }
+  const sd = Math.sqrt(history.reduce((n, w) => n + (w.sales - mean) ** 2, 0) / history.length);
+  errs.sort((a, b) => a - b);
+  const errPct = errs.length >= 3 ? errs[Math.floor(errs.length * 0.8)] : sd / mean;
+  const last = history[history.length - 1].end;
+  const next = [1, 2, 3, 4].map(k => {
+    const end = addDaysToKey(last, 7 * k);
+    return { start: addDaysToKey(end, -6), end, expected: mean, low: Math.max(0, mean * (1 - errPct)), high: mean * (1 + errPct) };
+  });
+  // Weekly errors partly cancel over 4 weeks → spread grows with √4, not 4.
+  const total = mean * 4;
+  const spread = mean * errPct * 2;
+  return { history, next, total, low: Math.max(0, total - spread), high: total + spread, uncertain: sd / mean > 0.5 };
+}
+
+export interface BarItem { id: string; label: string; value: number; note?: string; link?: string }
+
+/** Top dealers by unpaid amount, from the same bill-by-bill rows as the Unpaid tile. */
+export function topUnpaidDealers(rows: ReceivableRow[], limit = 5): { items: BarItem[]; total: number; dealers: number } {
+  const m = new Map<string, { name: string; due: number; bills: number }>();
+  for (const r of rows) {
+    if (r.due <= 0) continue;
+    const cur = m.get(r.distributorId) || { name: r.distributorName, due: 0, bills: 0 };
+    cur.due += r.due; cur.bills += 1;
+    m.set(r.distributorId, cur);
+  }
+  const all = [...m.entries()].sort((a, b) => b[1].due - a[1].due);
+  return {
+    items: all.slice(0, limit).map(([id, v]) => ({
+      id, label: v.name, value: Math.round(v.due * 100) / 100,
+      note: `${v.bills} bill${v.bills === 1 ? "" : "s"}`, link: `/distributors/${id}`,
+    })),
+    total: Math.round(all.reduce((n, [, v]) => n + v.due, 0) * 100) / 100,
+    dealers: all.length,
+  };
+}
+
+export interface PairItem { id: string; label: string; before: number; now: number; link: string }
+
+/** Dealers buying less: previous 30 days vs last 30 days, ranked by rupee drop. New dealers skipped. */
+export function buyingLessPairs(orders: Order[], today: string, limit = 5): PairItem[] {
+  const recentFrom = addDaysToKey(today, -30);
+  const priorFrom = addDaysToKey(today, -60);
+  const m = new Map<string, { name: string; before: number; now: number; first: string }>();
+  for (const o of orders) {
+    if (!isLive(o) || o.date > today) continue;
+    const cur = m.get(o.distributorId) || { name: o.distributorName, before: 0, now: 0, first: o.date };
+    if (o.date < cur.first) cur.first = o.date;
+    if (o.date > recentFrom) cur.now += orderNet(o);
+    else if (o.date > priorFrom) cur.before += orderNet(o);
+    m.set(o.distributorId, cur);
+  }
+  return [...m.entries()]
+    .filter(([, v]) => v.first <= priorFrom && v.before > v.now)
+    .sort((a, b) => (b[1].before - b[1].now) - (a[1].before - a[1].now))
+    .slice(0, limit)
+    .map(([id, v]) => ({ id, label: v.name, before: v.before, now: v.now, link: `/distributors/${id}` }));
+}
+
+export interface ClaimLite { status: string; createdAt: string; lines: { productId: string; productName: string; quantity: number }[] }
+
+/** Products returned most (by quantity) in the last `days` days. Rejected returns don't count. */
+export function topReturnedProducts(claims: ClaimLite[], today: string, days = 90, limit = 5): BarItem[] {
+  const from = addDaysToKey(today, -days);
+  const m = new Map<string, { name: string; qty: number }>();
+  for (const c of claims) {
+    if (c.status === "rejected" || c.createdAt.slice(0, 10) <= from) continue;
+    for (const l of c.lines) {
+      const cur = m.get(l.productId) || { name: l.productName, qty: 0 };
+      cur.qty += l.quantity;
+      m.set(l.productId, cur);
+    }
+  }
+  return [...m.entries()].filter(([, v]) => v.qty > 0).sort((a, b) => b[1].qty - a[1].qty).slice(0, limit)
+    .map(([id, v]) => ({ id, label: v.name, value: v.qty }));
+}

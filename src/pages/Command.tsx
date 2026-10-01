@@ -41,7 +41,7 @@ import { formatCurrencyPdf } from "@/utils/exportPdf";
 import type { CommandPdfProps } from "@/components/pdf/CommandPdf";
 import { DashboardSkeleton } from "@/components/ui/page-skeleton";
 import "@/styles/command-print.css";
-import { ForecastCard } from "@/components/intelligence/ForecastCard";
+const BusinessCharts = lazy(() => import("@/components/intelligence/BusinessCharts"));
 
 type TabId = "overview" | "people" | "products" | "drill";
 
@@ -402,7 +402,9 @@ export default function Command() {
             ready={!api.loading}
           />
         )}
-        {safeTab === "overview" && <ForecastCard />}
+        {safeTab === "overview" && (
+          <Suspense fallback={null}><BusinessCharts /></Suspense>
+        )}
 
         <SignalBar
           signals={signals}
