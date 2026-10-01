@@ -80,10 +80,6 @@ export default function Reports() {
     def, sections, periodLabel, madeBy, include,
     summary: summary.map((s, i) => {
       const p = prevSummary?.[i];
-      if (!compare || !p || p.label !== s.label) return s;
-      return s; // printed values stay exact; the change is shown in the label below
-    }).map((s, i) => {
-      const p = prevSummary?.[i];
       if (!compare || !p) return s;
       const diff = s.value - p.value;
       return { ...s, label: `${s.label} (${diff >= 0 ? "up" : "down"} ${summaryText({ ...s, value: Math.abs(diff) })})` };
