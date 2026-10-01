@@ -50,7 +50,7 @@ export function ChapterCard({ chapter, state, celebrating, onClick, index }: Pro
         interactive ? "border-border/80 shadow-depth-2 hover:shadow-depth-8 cursor-pointer" : "border-border/60 shadow-depth-2",
         !interactive ? "cursor-default" : "",
         // Brand placement (PR-A): Terracotta left-bar marks the active chapter.
-        state === "active" ? "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-warning" : "",
+        state === "active" ? "before:absolute before:inset-y-0 before:left-0 before:w-[2px] before:bg-foreground" : "",
       ].join(" ")}
       style={{ perspective: 1000 }}
       aria-current={state === "active" ? "step" : undefined}

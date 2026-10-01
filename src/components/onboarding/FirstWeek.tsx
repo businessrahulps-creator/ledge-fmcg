@@ -156,20 +156,11 @@ export function FirstWeek() {
           transition={{ duration: 0.45, ease: [0.1, 0.9, 0.2, 1] }}
           className="relative rounded-md border border-border bg-card shadow-depth-2 overflow-hidden"
         >
-          {/* Striped-mark watermark — paper-feel anchor */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-md opacity-[0.04]"
-            style={{
-              background: "repeating-linear-gradient(135deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px)",
-            }}
-          />
-
           {/* Header */}
           <div className="relative px-5 pt-5 sm:px-6 sm:pt-6">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h2 className="font-heading text-[22px] sm:text-2xl leading-tight text-foreground">
+                <h2 className="font-heading font-semibold tracking-tight text-[20px] sm:text-[22px] leading-tight text-foreground">
                   Your first week with Ledge
                 </h2>
                 <p className="text-[13px] text-muted-foreground mt-1">

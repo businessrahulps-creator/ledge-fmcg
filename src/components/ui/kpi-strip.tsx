@@ -43,15 +43,15 @@ function KpiStripImpl({ cells, className, reconciledAt }: KpiStripProps) {
         const Inner = (
           <>
             <div className="flex items-center gap-1">
-              <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-muted-foreground/80">{c.label}</p>
+              <p className="text-[13px] font-medium text-muted-foreground">{c.label}</p>
               {c.explain && !c.zero && (
                 <ExplainButton metric={c.label} value={c.explain.value} context={c.explain.context} />
               )}
             </div>
             <p
               className={cn(
-                "font-heading text-[20px] sm:text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num tabular-nums mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
-                c.zero && "text-muted-foreground/55",
+                "font-heading text-[20px] sm:text-[22px] md:text-[24px] font-semibold tracking-[-0.02em] leading-[1.05] num tabular-nums mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                c.zero && "text-foreground",
               )}
             >
               <AnimatedNumber value={c.value} />

@@ -1,7 +1,7 @@
 # Project Memory
 
 ## Core
-Ledge V2 brand: Midnight `#0F1F3A` (primary), Forest (success), Terracotta (accent/warning), Bone (bg). Playfair Display H1/H2 only + Inter everywhere else. 6px radius. Fluent 2 depth/motion/density tokens. No glassmorphism in `/app`. Dark mode archived. Mobile-first PWA for Indian FMCG distribution. Lovable Cloud + RLS. No Google OAuth. Max font weight `font-semibold`. All colors via semantic tokens — no raw hex in components.
+App is monochrome (Oct 2026): white bg/cards, near-black primary, neutral grey hairlines, colour only for status (green/red/warning). Inter everywhere in app; Playfair only on landing (.lp-theme). Cream/Midnight retired. Sentence-case labels. 12px radius, flat shadows. No glassmorphism. Mobile-first PWA for Indian distribution. Lovable Cloud + RLS. Max font weight `font-semibold`. All colors via semantic tokens — no raw hex in components.
 
 ## Memories
 - [Ledge Ops admin panel](mem://features/ledge-ops-admin) — /ops internal platform admin: platform_staff, ops_* definer RPCs, audit log, read-only v1

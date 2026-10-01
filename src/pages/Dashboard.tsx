@@ -461,7 +461,7 @@ export default function Dashboard() {
                       )}
                     </div>
                     <p className={cn(
-                      "font-heading text-[26px] md:text-[28px] font-medium tracking-[-0.015em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                      "font-heading text-[26px] md:text-[28px] font-semibold tracking-[-0.02em] num leading-[1.05] mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                       s.zero && "text-muted-foreground/35"
                     )}><AnimatedNumber value={s.value} /></p>
                     {/* Brand placement (PR-B): Forest underline marks "money in" on Delivered Revenue. */}
@@ -596,7 +596,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <p className={cn(
-                    "font-heading text-[22px] md:text-[24px] font-medium tracking-[-0.015em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
+                    "font-heading text-[22px] md:text-[24px] font-semibold tracking-[-0.02em] leading-[1.05] num mt-1.5 whitespace-nowrap overflow-hidden text-ellipsis",
                     isZero && "text-muted-foreground/35"
                   )}><AnimatedNumber value={kpi.value} /></p>
                 </div>

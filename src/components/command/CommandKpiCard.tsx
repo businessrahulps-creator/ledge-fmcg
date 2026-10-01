@@ -43,12 +43,12 @@ function CommandKpiCardInner({ label, value, pct, inverse, hint, spark, href, in
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+        <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
         {href && (
           <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
         )}
       </div>
-      <p className="font-heading text-[22px] sm:text-[26px] leading-tight num tabular-nums mt-1 text-foreground truncate">{value}</p>
+      <p className="font-heading font-semibold tracking-tight text-[22px] sm:text-[26px] leading-tight num tabular-nums mt-1 text-foreground truncate">{value}</p>
       <div className="mt-1.5 flex items-end justify-between gap-2">
         <div className="min-w-0 flex-1">
           <DeltaPill pct={pct} inverse={inverse} />

@@ -15,7 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        heading: ['"Playfair Display"', "Georgia", "serif"],
+        // Resolves per scope: Inter in the app, Playfair inside .lp-theme.
+        heading: ["var(--font-heading)"],
         body: ["Inter", "system-ui", "sans-serif"],
         // Legacy aliases kept so landing page keeps rendering until its own rebrand PR
         geist: ["Geist", "system-ui", "sans-serif"],

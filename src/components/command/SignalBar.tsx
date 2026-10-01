@@ -87,7 +87,7 @@ export function SignalBar({
       </div>
 
       {signals.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border bg-muted/20 px-4 py-5 text-center">
+        <div className="rounded-lg border border-border bg-card px-4 py-5 text-center">
           <CheckCircle2 className="mx-auto h-5 w-5 text-success" />
           <p className="mt-1.5 text-sm text-foreground">All clear for this period.</p>
           <p className="text-xs text-muted-foreground">No risks or alerts to act on right now.</p>
