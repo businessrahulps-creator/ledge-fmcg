@@ -226,8 +226,9 @@ describe("useOrdersDomain", () => {
 
   });
 
-  it("deleteOrder online — cascading delete", async () => {
+  it("deleteOrder online — one all-or-nothing server call", async () => {
     const deps = makeDeps();
+    mockRpc.mockResolvedValue({ data: { ok: true }, error: null });
     const deleteChain = createChainMock({ data: [{ id: "o1" }], error: null });
     mockFrom.mockReturnValue(deleteChain);
 
@@ -243,10 +244,8 @@ describe("useOrdersDomain", () => {
 
     expect(deleted!).toBe(true);
     expect(result.current.orders).toHaveLength(0);
-    expect(mockFrom).toHaveBeenCalledWith("stock_deductions");
-    expect(mockFrom).toHaveBeenCalledWith("order_schemes");
-    expect(mockFrom).toHaveBeenCalledWith("order_lines");
-    expect(mockFrom).toHaveBeenCalledWith("orders");
+    expect(mockRpc).toHaveBeenCalledWith("delete_order_atomic", { p_order_id: "o1" });
+    expect(mockFrom).not.toHaveBeenCalledWith("stock_deductions");
     expect(deps.safeRefetchStockItems).toHaveBeenCalled();
   });
 
