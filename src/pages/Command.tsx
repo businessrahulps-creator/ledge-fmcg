@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,10 +8,11 @@ import { PeriodSelector } from "@/components/command/PeriodSelector";
 import { SignalBar } from "@/components/command/SignalBar";
 import { CommandMemoryStrip } from "@/components/command/CommandMemoryStrip";
 import { OverviewTab } from "@/components/command/tabs/OverviewTab";
-import { PeopleTab } from "@/components/command/tabs/PeopleTab";
-import { ProductsTab } from "@/components/command/tabs/ProductsTab";
-import { DrillDownTab } from "@/components/command/tabs/DrillDownTab";
-import { WhatsAppBlastSheet } from "@/components/command/WhatsAppBlastSheet";
+// Only the Overview tab is needed on arrival; the rest load when opened.
+const PeopleTab = lazy(() => import("@/components/command/tabs/PeopleTab").then((m) => ({ default: m.PeopleTab })));
+const ProductsTab = lazy(() => import("@/components/command/tabs/ProductsTab").then((m) => ({ default: m.ProductsTab })));
+const DrillDownTab = lazy(() => import("@/components/command/tabs/DrillDownTab").then((m) => ({ default: m.DrillDownTab })));
+const WhatsAppBlastSheet = lazy(() => import("@/components/command/WhatsAppBlastSheet").then((m) => ({ default: m.WhatsAppBlastSheet })));
 import { SavedViewsMenu, PinnedViewChips } from "@/components/command/SavedViewsMenu";
 import { PrintButton } from "@/components/command/PrintButton";
 import { ExportPdfButton } from "@/components/command/ExportPdfButton";
@@ -182,7 +183,8 @@ export default function Command() {
 
   // Build PDF snapshot data
   const products = api.products?.list?.() ?? [];
-  const pdfData: CommandPdfProps = useMemo(() => {
+  // Built only when "Download PDF" is clicked — not on every render.
+  const buildPdfData = useCallback((): CommandPdfProps => {
     const periodOrders = ordersInPeriod(orders, range);
     const orderCount = periodOrders.length;
     // Average order value must divide dispatched revenue by the same dispatched
@@ -299,7 +301,7 @@ export default function Command() {
       })),
       showLeaderboards: !isAccountant,
     };
-  }, [orders, distributors, salespersons, targets, products, range, period, revenue, signals, companyName, api.companyInfo, isAccountant]);
+  }, [orders, distributors, salespersons, targets, products, range, period, revenue, signals, companyName, api.companyInfo, isAccountant, receipts, receivableRows, payStatusMap]);
 
   // Density + shortcuts + cheat sheet
   const { density, toggle: toggleDensity } = useDensityPreference();
@@ -369,7 +371,7 @@ export default function Command() {
               >
                 {density === "dense" ? "Compact" : "Comfortable"}
               </button>
-              <ExportPdfButton ref={exportPdfRef} data={pdfData} period={period} />
+              <ExportPdfButton ref={exportPdfRef} getData={buildPdfData} period={period} />
               <div className="inline-flex items-center gap-1 rounded-md border border-border bg-card p-0.5">
                 <PrintButton onClick={() => window.print()} />
                 <PrintSettingsMenu />
@@ -414,15 +416,17 @@ export default function Command() {
         />
 
         {renderedBlast && (
-          <WhatsAppBlastSheet
-            open={!!blastSignalId}
-            onClose={() => setBlastSignalId(null)}
-            title={renderedBlast.title}
-            description={renderedBlast.description}
-            dealers={renderedBlast.dealers}
-            orders={orders}
-            defaultTemplate={renderedBlast.defaultTemplate}
-          />
+          <Suspense fallback={null}>
+            <WhatsAppBlastSheet
+              open={!!blastSignalId}
+              onClose={() => setBlastSignalId(null)}
+              title={renderedBlast.title}
+              description={renderedBlast.description}
+              dealers={renderedBlast.dealers}
+              orders={orders}
+              defaultTemplate={renderedBlast.defaultTemplate}
+            />
+          </Suspense>
         )}
 
         <Tabs value={safeTab} onValueChange={(v) => updateParam({ tab: v as TabId })} className="w-full min-w-0 space-y-4 md:space-y-6">
@@ -448,9 +452,11 @@ export default function Command() {
           </div>
 
           <TabsContent value="overview"><OverviewTab range={range} period={period} /></TabsContent>
-          {!isAccountant && <TabsContent value="people"><PeopleTab range={range} /></TabsContent>}
-          {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
-          <TabsContent value="drill"><DrillDownTab /></TabsContent>
+          <Suspense fallback={<div className="h-64 animate-pulse rounded-md bg-muted/50" aria-busy="true" />}>
+            {!isAccountant && <TabsContent value="people"><PeopleTab range={range} /></TabsContent>}
+            {!isAccountant && <TabsContent value="products"><ProductsTab range={range} /></TabsContent>}
+            <TabsContent value="drill"><DrillDownTab /></TabsContent>
+          </Suspense>
         </Tabs>
       </section>
       <KeyboardCheatSheet open={cheatOpen} onClose={() => setCheatOpen(false)} />

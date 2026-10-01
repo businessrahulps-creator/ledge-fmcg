@@ -1,7 +1,6 @@
 import { forwardRef, useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
-import { downloadPdf, pdfFilename } from "@/utils/exportPdf";
-import { CommandPdf, type CommandPdfProps } from "@/components/pdf/CommandPdf";
+import type { CommandPdfProps } from "@/components/pdf/CommandPdf";
 import type { CommandPeriod } from "@/lib/command-signals";
 import {
   MARGIN_PT,
@@ -10,12 +9,13 @@ import {
 } from "@/hooks/usePrintPreferences";
 
 interface Props {
-  data: CommandPdfProps;
+  /** Built only when the user asks for the PDF — never on every render. */
+  getData: () => CommandPdfProps;
   period: CommandPeriod;
 }
 
 export const ExportPdfButton = forwardRef<HTMLButtonElement, Props>(function ExportPdfButton(
-  { data, period },
+  { getData, period },
   ref,
 ) {
   const [busy, setBusy] = useState(false);
@@ -25,10 +25,15 @@ export const ExportPdfButton = forwardRef<HTMLButtonElement, Props>(function Exp
     if (busy) return;
     setBusy(true);
     try {
+      // The PDF engine is heavy; load it only when someone clicks.
+      const [{ downloadPdf, pdfFilename }, { CommandPdf }] = await Promise.all([
+        import("@/utils/exportPdf"),
+        import("@/components/pdf/CommandPdf"),
+      ]);
       await downloadPdf(
         pdfFilename("command", period),
         <CommandPdf
-          {...data}
+          {...getData()}
           pageSize={PDF_PAGE_SIZE[pageSize]}
           pagePadding={MARGIN_PT[margin]}
         />,

@@ -76,7 +76,7 @@ const ric: IdleCb =
  * warm only what the user is most likely to click — never the whole app.
  */
 const likelyNext: Record<string, string[]> = {
-  "/dashboard": ["/orders", "/billing", "/distributors"],
+  "/dashboard": ["/orders", "/billing", "/command", "/distributors"],
   "/orders": ["/orders/new", "/billing"],
   "/orders/new": ["/orders"],
   "/distributors": ["/orders/new"],
