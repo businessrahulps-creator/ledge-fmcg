@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useEffect, useState, useCallback, createContext, useContext } from "react";
+import { ReactNode, useRef, useEffect, useLayoutEffect, useState, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link, Outlet } from "react-router-dom";
