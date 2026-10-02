@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useEffect, useState, useCallback, createContext, useContext } from "react";
+import { ReactNode, useRef, useEffect, useLayoutEffect, useState, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Link, Outlet } from "react-router-dom";
@@ -119,6 +119,14 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
     el.addEventListener("scroll", handler, { passive: true });
     return () => el.removeEventListener("scroll", handler);
   }, []);
+
+  // The frame persists across pages, so reset scroll on every page change.
+  useLayoutEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0 });
+    window.scrollTo(0, 0);
+    setScrolled(false);
+  }, [location.pathname]);
+
 
   // Record route visits for the Cmd+K "Recent" section.
   useEffect(() => {
