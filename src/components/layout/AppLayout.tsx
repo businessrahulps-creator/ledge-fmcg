@@ -120,6 +120,14 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
     return () => el.removeEventListener("scroll", handler);
   }, []);
 
+  // The frame persists across pages, so reset scroll on every page change.
+  useLayoutEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0 });
+    window.scrollTo(0, 0);
+    setScrolled(false);
+  }, [location.pathname]);
+
+
   // Record route visits for the Cmd+K "Recent" section.
   useEffect(() => {
     const path = location.pathname;
