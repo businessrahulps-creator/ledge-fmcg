@@ -462,7 +462,7 @@ export default function Orders() {
                           onClick={() => navigate(`/orders/${order.id}`)}
                           onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
                           onFocus={() => prefetchRoute(`/orders/${order.id}`)}
-                          className="list-row-cv group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
+                          className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
                         >
                           <td className="px-4 py-3.5 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
                           <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
