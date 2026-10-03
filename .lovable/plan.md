@@ -1,36 +1,32 @@
-# One 16:9 creative: "Tested like it matters"
+# Run the 36-point security audit on Ledge
 
-A single landscape image (1920x1080) showing that Ledge has been tested hard and improved after every round. It uses the same clean black-and-white style with a green accent as the last set.
+## Is it worth it?
 
-## Headline and message
+Yes. It's a good, standard checklist, and it's read-only, so it's safe to run. About two-thirds of it overlaps with tests we've already done: other businesses' data, roles, double taps, harmful text in exports, money rules on the server. Those should come back PASS quickly, with proof attached.
 
-- **Headline:** "Tested hard. Built to hold."
-- **Subline:** "Every order, bill and rupee in Ledge goes through hundreds of checks before it reaches you."
-- **Footer:** "Every issue found was fixed, re-tested and locked in with a new check."
+Its value is in the parts we haven't checked yet:
+- **Rate limits** on login, signup, password reset and AI features (item 28)
+- **Leaked-password protection** (item 24/04). I can now switch it on for you directly.
+- **Content Security Policy** for harmful script on pages (item 19)
+- **Source maps** that expose internal code in the live app (item 36)
+- **Error messages** that leak internal details (item 12)
+- **Edge functions**: CORS, input checks and sign-in checks on each one (items 16, 27, 34)
+- **Logs and the error log**: no tokens or personal data stored (item 35)
+- **Test sign-in files**: make sure the screen-test session files never reach the code store (items 11, 13)
 
-## The layout
+## What I'll do
 
-A layered "shield" or stack on the left, with six testing groups as tiles on the right. Each tile has an icon, a bold label and one plain line. Every tile is something we actually did.
+1. Go through all 36 items against the code, database rules and live settings. Each one gets PASS, FAIL, UNKNOWN or N/A, with the exact file or setting as proof. Nothing is marked PASS without evidence.
+2. Fix the small, safe FAILs straight away: switch on leaked-password protection, tighten any loose function checks, hide internal error details, turn off source maps if they're exposed. Re-check each one after fixing.
+3. List anything bigger for your decision instead of changing it quietly. For example, custom rate limits need their own setup.
+4. Run the 380 automatic checks again, plus a quick screen test, to make sure nothing broke.
 
-1. **380 automatic checks** — "Run on every change: prices, GST, balances, stock."
-2. **Security attack tests** — "Tried to see another business's data, raise our own access, and slip in harmful text. Holes found were closed."
-3. **Double-tap and rush tests** — "Same payment sent twice, two people on one order at once. No double entries."
-4. **Money always adds up** — "Bills minus payments minus returns always equals what's owed, across every dealer."
-5. **Real-screen robot tests** — "An AI tester uses Ledge like a person on phone and computer: book, send, bill, collect."
-6. **Edge-case drills** — "Indian time, year-end dates, multiple godowns, Tally files in local languages."
+## What you'll get
 
-A strip at the bottom shows the loop: **Test → Find → Fix → Re-test**.
-
-Optional small badge: "Hosted on Lovable — SOC 2 Type II · ISO 27001 platform". It names Lovable, never Ledge.
-
-## Accuracy rules
-
-- Only tests that really ran. No "100% bug-free", "unhackable" or "bank-grade". "Built to hold" and "rock solid" are positioning, not guarantees.
-- 380 is the current count of automatic checks. The number will grow, so it can be changed to "380+" if you prefer.
-- After it's made, I read every word on the image by eye, and redo it if anything is misspelled or overstated.
+A plain-words scorecard of all 36 items, what was fixed, and what still needs a decision. It will be saved to your Files so you can share it.
 
 ## Technical details
 
-- Premium image model, 1920x1080, with every label spelled out word for word in the prompt.
-- Saved to your Files and shown in chat with a short caption.
-- No app changes.
+- Sources: `src/`, `supabase/functions/*`, `drizzle/migrations/*`, RLS and grants through read-only SQL, the existing security scan results, the built `dist/` for source maps, and `vite.config.ts`.
+- Auth settings are changed with the auth configuration tool (HIBP). No production data is changed.
+- The report is saved to `/mnt/documents/ledge-security-audit.md`.
