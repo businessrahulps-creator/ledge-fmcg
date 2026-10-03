@@ -179,7 +179,8 @@ export function useOrdersDomain(deps: OrdersDeps) {
       });
       if (error) throw error;
       const res = data as { already_done?: boolean; invoice_number?: string } | null;
-      await Promise.all([safeRefetch(), deps.safeRefetchStockItems(), deps.refetchInvoices?.() ?? Promise.resolve()]);
+      // The order is already sent and billed; a slow refresh must not report failure.
+      await Promise.allSettled([safeRefetch(), deps.safeRefetchStockItems(), deps.refetchInvoices?.() ?? Promise.resolve()]);
       const order = ordersRef.current.find(o => o.id === orderId);
       deps.log("order", orderId, "dispatched", `Dispatched & billed ${order?.orderNumber || orderId}${res?.invoice_number ? ` — bill ${res.invoice_number}` : ""}`);
       return { success: true, invoiceNumber: res?.invoice_number, alreadyDone: res?.already_done };
@@ -191,7 +192,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       });
       return { success: false, error: err?.message || "Unknown error" };
     }
-  }, [safeRefetch, deps.safeRefetchStockItems, deps.log]);
+  }, [safeRefetch, deps.safeRefetchStockItems, deps.refetchInvoices, deps.log]);
 
   /** Cancels an order that has not left the warehouse yet. */
   const cancelOrder = useCallback(async (orderId: string, reason: string): Promise<boolean> => {
