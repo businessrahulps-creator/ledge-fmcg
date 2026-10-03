@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import type { User, Session } from "@supabase/supabase-js";
 import { logError } from "@/utils/errorLog";
 
@@ -50,6 +51,7 @@ function profilesEqual(a: Profile | null, b: Profile | null) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUserState] = useState<User | null>(null);
   const [session, setSessionState] = useState<Session | null>(null);
   const [profile, setProfileState] = useState<Profile | null>(null);
@@ -271,11 +273,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userIdRef.current = null;
     profileRef.current = null;
     recoveryAttemptedRef.current.clear();
+    // Never reuse the previous session's permissions on the next sign-in.
+    queryClient.removeQueries({ queryKey: ["capabilities"] });
     setUserState(null);
     setSessionState(null);
     setProfileState(null);
     setUserRole(null);
-  }, []);
+  }, [queryClient]);
 
   const companyId = profile?.company_id ?? null;
 

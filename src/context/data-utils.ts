@@ -284,6 +284,7 @@ export async function batchIn(table: string, column: string, ids: string[]) {
             .from(table as any)
             .select("*")
             .in(column, chunk)
+            .order("id")
             .range(from, to) as any;
           if (error) throw error;
           return (data || []) as any[];

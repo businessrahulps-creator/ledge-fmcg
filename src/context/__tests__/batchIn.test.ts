@@ -11,6 +11,7 @@ vi.mock("@/integrations/supabase/client", () => {
     const state: { column?: string; ids?: string[] } = {};
     const chain: any = {
       select: vi.fn(() => chain),
+      order: vi.fn(() => chain),
       in: vi.fn((column: string, ids: string[]) => {
         state.column = column;
         state.ids = ids;
@@ -136,7 +137,7 @@ describe("batchIn pagination", () => {
     (supabase.from as any).mockImplementationOnce(() => ({
       select: () => ({
         in: () => ({
-          range: () => Promise.resolve({ data: null, error: { message: "boom" } }),
+          order: () => ({ range: () => Promise.resolve({ data: null, error: { message: "boom" } }) }),
         }),
       }),
     }));

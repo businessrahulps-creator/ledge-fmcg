@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Product, Scheme } from "@/data/mock-data";
 import { cacheData } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapProduct, mapScheme } from "@/context/data-utils";
+import { makeOfflineCrud, mapProduct, mapScheme, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { fmtAmount } from "@/utils/activityLog";
 
@@ -27,6 +27,7 @@ export function useCatalogDomain(deps: DomainDeps) {
       min_order_value: s.minOrderValue, min_qty: s.minQty,
       product_id: s.productId || null, dealer_id: s.dealerId || null,
       is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
+      is_combinable: s.isCombinable ?? true,
     }),
     "scheme", s => s.name,
   ), [deps.companyId, deps.persistEntityToCache, deps.log]);
@@ -34,7 +35,8 @@ export function useCatalogDomain(deps: DomainDeps) {
   const safeRefetchProducts = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const { data } = await supabase.from("products").select("*").eq("company_id", deps.companyId).order("name").range(0, 9999);
+      // Paged: the server returns at most 1,000 rows per request.
+      const data = await fetchAllChunked<any>(() => supabase.from("products").select("*").eq("company_id", deps.companyId).order("name").order("id"), 1000, 200, "products");
       if (data) {
         const mapped = data.map(mapProduct);
         setProducts(mapped);
@@ -46,7 +48,7 @@ export function useCatalogDomain(deps: DomainDeps) {
   const safeRefetchSchemes = useCallback(async () => {
     if (!deps.companyId) return;
     try {
-      const { data } = await supabase.from("schemes").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).range(0, 9999);
+      const data = await fetchAllChunked<any>(() => supabase.from("schemes").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).order("id"), 1000, 200, "schemes");
       if (data) {
         const mapped = data.map(mapScheme);
         setSchemes(mapped);

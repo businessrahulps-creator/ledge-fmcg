@@ -20,11 +20,11 @@ export function useCan(capability: CapabilityKey): boolean {
  * `ready` so nobody sees "no access" before their role is known.
  */
 export function useCanState(capability: CapabilityKey): { allowed: boolean; ready: boolean } {
-  const { user } = useAuth();
+  const { user, companyId } = useAuth();
   const userId = user?.id ?? null;
 
   const { data, isFetched, isError } = useQuery({
-    queryKey: ["capabilities", userId],
+    queryKey: ["capabilities", userId, companyId],
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
