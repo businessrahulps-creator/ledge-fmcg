@@ -510,7 +510,7 @@ export default function Orders() {
                     onClick={() => navigate(`/orders/${order.id}`)}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/orders/${order.id}`); } }}
                     onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
-                    className="flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
+                    className="list-row-cv flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">

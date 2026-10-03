@@ -152,8 +152,16 @@ export function saveText(text: string, filename: string, type: string) {
   save(new Blob([text], { type }), filename);
 }
 
+/** Let the browser paint (spinner, pressed button) before heavy work. */
+export function yieldToMain(): Promise<void> {
+  const s = (globalThis as any).scheduler;
+  if (s?.yield) return s.yield();
+  return new Promise((r) => setTimeout(r, 0));
+}
+
 export async function runExport(label: string, fn: () => Promise<number> | number) {
   try {
+    await yieldToMain();
     const count = await fn();
     if (count > 0) toast.success(`${label} ready`, { description: `${count} row${count === 1 ? "" : "s"}.` });
     return count;
