@@ -7,10 +7,15 @@ import { expect } from "e2e";
  * hard check. Records created here are named "E2E" so they're easy to clean up.
  */
 
-test("take an order, send it and make the bill", { session: "owner" }, async ({ app, agent }) => {
+test("take an order, send it and make the bill", { session: "owner" }, async ({ app, agent, browser }) => {
+  const dialogs: string[] = [];
+  await browser.onDialog(async (d) => { dialogs.push(d.message); await d.accept(); });
   await app.open("/orders/new");
   await agent.act("create an order for any dealer with 1 unit of any product, add note 'E2E test', and save it");
   await agent.assert("the order was saved and its detail page or a success message is showing");
+  // A saved order is not "unsaved work": leaving must not ask.
+  await browser.waitForURL(/\/orders(\/|$|\?)/, { timeout: 10_000 });
+  expect(dialogs).toHaveLength(0);
   await agent.act("open that order and use 'Send & make bill'");
   await agent.assert("the order now shows as Sent and has a GST bill number");
 });
@@ -54,5 +59,6 @@ test("reports download as PDF, Excel and CSV", { session: "owner" }, async ({ ap
 test("buying page shows supplier balances", { session: "owner" }, async ({ app, agent, screen }) => {
   await app.open("/buying");
   await expect(screen.getByText(/supplier/i).first()).toBeVisible();
+  await expect(screen.getByText(/Loading/i)).not.toBeVisible({ timeout: 20_000 });
   await agent.assert("the page lists suppliers with how much is owed to each");
 });
