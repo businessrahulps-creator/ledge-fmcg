@@ -60,27 +60,30 @@ export function useOrdersDomain(deps: OrdersDeps) {
   const safeRefetch = useCallback(() => {
     if (!deps.companyId) return Promise.resolve();
     if (refetchTimer.current) clearTimeout(refetchTimer.current);
+    const cId = deps.companyId;
     return new Promise<void>((resolve) => {
+      // Debounced: every caller waiting inside the window is released together
+      // (before, a second call left the first caller's promise hanging forever).
+      refetchWaiters.current.push(resolve);
       refetchTimer.current = setTimeout(async () => {
         refetchTimer.current = null;
+        const waiters = refetchWaiters.current.splice(0);
         try {
+          // Lines + offers arrive embedded with their order (one round trip,
+          // same shape as the startup load).
           const ordersData = await fetchAllChunked<any>(
-            () => supabase.from("orders").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }),
+            () => supabase.from("orders").select("*, order_lines(*), order_schemes(*)").eq("company_id", cId).order("created_at", { ascending: false }).order("id"),
             1000, 200, "orders",
           );
-          if (!ordersData) { resolve(); return; }
-          const orderIds = ordersData.map(o => o.id);
-          // batchIn handles both id-chunking (500) and page-pagination internally,
-          // and runs both in parallel — keeps the silent-row-limit bug from sneaking back in.
-          const [allLines, allOrderSchemes] = await Promise.all([
-            batchIn("order_lines", "order_id", orderIds),
-            batchIn("order_schemes", "order_id", orderIds),
-          ]);
+          if (!ordersData) return;
+          const allLines = ordersData.flatMap((o: any) => o.order_lines || []);
+          const allOrderSchemes = ordersData.flatMap((o: any) => o.order_schemes || []);
           const mapped = mapOrders(ordersData, allLines, allOrderSchemes);
           setOrders(mapped);
-          if (deps.companyId) cacheData(deps.companyId, "orders", mapped);
-        } catch { /* ignore */ }
-        resolve();
+          cacheData(cId, "orders", mapped);
+        } catch { /* ignore */ } finally {
+          waiters.forEach(w => w());
+        }
       }, 500);
     });
   }, [deps.companyId]);
@@ -300,13 +303,15 @@ export function useOrdersDomain(deps: OrdersDeps) {
         const { error: insErr } = await supabase.from("order_lines").insert(lineRows);
         if (insErr) { handleSupabaseError(insErr, { source: "crud:order_lines.insert", title: "Failed to insert line items", context: { id } }); return; }
       }
-      await supabase.from("order_schemes").delete().eq("order_id", id);
+      const { error: schDelErr } = await supabase.from("order_schemes").delete().eq("order_id", id);
+      if (schDelErr) { handleSupabaseError(schDelErr, { source: "crud:order_schemes.delete", title: "Failed to update offers on this order", context: { id } }); return; }
       if (updates.appliedSchemes && updates.appliedSchemes.length > 0) {
         const schemeRows = updates.appliedSchemes.map(s => ({
           order_id: id, scheme_id: s.schemeId || null,
           scheme_name: s.schemeName, scheme_label: s.schemeLabel || "", savings: s.savings,
         }));
-        await supabase.from("order_schemes").insert(schemeRows);
+        const { error: schInsErr } = await supabase.from("order_schemes").insert(schemeRows);
+        if (schInsErr) { handleSupabaseError(schInsErr, { source: "crud:order_schemes.insert", title: "Failed to save offers on this order", context: { id } }); return; }
       }
     }
 
@@ -371,6 +376,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
 
   const setOrderPrefix = useCallback(async (prefix: string) => {
     if (!deps.companyId) return;
+    const previous = orderPrefixRef.current;
     setOrderPrefixState(prefix);
     if (!navigator.onLine) {
       deps.persistEntityToCache("orderPrefix", prefix);
@@ -378,7 +384,11 @@ export function useOrdersDomain(deps: OrdersDeps) {
       toast("Saved offline — will sync when back online", { duration: 3000 });
       return;
     }
-    await supabase.from("companies").update({ order_prefix: prefix }).eq("id", deps.companyId);
+    const { error } = await supabase.from("companies").update({ order_prefix: prefix }).eq("id", deps.companyId);
+    if (error) {
+      setOrderPrefixState(previous);
+      handleSupabaseError(error, { source: "crud:companies.order_prefix", title: "Couldn't change the order number start" });
+    }
   }, [deps.companyId, deps.persistEntityToCache]);
 
   const previewOrderNumber = useCallback(() => {

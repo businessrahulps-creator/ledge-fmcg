@@ -190,7 +190,9 @@ export function useBillingDomain(deps: BillingDeps) {
       });
       if (error) throw error;
       const res = data as { credit_note_number: string; grand_total: number; restocked: boolean };
-      await Promise.all([safeRefetchClaims(), safeRefetchInvoices(), deps.safeRefetchStockItems()]);
+      // The return is saved at this point. A failed screen refresh must not be
+      // reported as a failed return (that invites a duplicate attempt).
+      await Promise.allSettled([safeRefetchClaims(), safeRefetchInvoices(), deps.safeRefetchStockItems()]);
       return { creditNoteNumber: res.credit_note_number, grandTotal: Number(res.grand_total), restocked: !!res.restocked };
     } catch (err: any) {
       handleSupabaseError(err, { source: "rpc:record_return_and_credit_atomic", title: "Could not record this return", context: { orderId } });

@@ -131,14 +131,16 @@ export function useStockDomain(deps: DomainDeps, getProducts?: () => Product[]) 
     if (!deps.companyId) return;
     try {
       const [siData, prodData, gdData] = await Promise.all([
-        fetchAllChunked<any>(() => supabase.from("stock_items").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
+        fetchAllChunked<any>(() => supabase.from("stock_items").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).order("id"), 1000, 200, "stock_items"),
         fetchAllChunked<any>(() => supabase.from("products").select("*").eq("company_id", deps.companyId).order("name"), 1000, 200, "products"),
         fetchAllChunked<any>(() => supabase.from("godowns").select("*").eq("company_id", deps.companyId).order("name"), 1000, 200, "godowns"),
       ]);
       // Use the canonical mapStockItem helper for consistency with other refetch paths.
       const freshProducts = prodData.map(mapProduct);
       const freshGodowns = gdData.map(mapGodown);
-      const mapped = siData.map(si => mapStockItem(si, freshProducts, freshGodowns));
+      const prodMap = new Map(freshProducts.map(p => [p.id, p]));
+      const gdMap = new Map(freshGodowns.map(g => [g.id, g]));
+      const mapped = siData.map(si => mapStockItem(si, prodMap, gdMap));
       setStockItems(mapped);
       cacheData(deps.companyId, "stockItems", mapped);
     } catch { /* ignore */ }
