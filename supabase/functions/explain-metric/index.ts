@@ -37,7 +37,18 @@ Deno.serve(async (req) => {
     const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
     if (claimsErr || !claims?.claims?.sub) return jsonRes({ error: "Unauthorized" }, 401);
 
-    const { metric, value, context = [] } = (await req.json()) as ExplainInput;
+    let body: ExplainInput;
+    try { body = (await req.json()) as ExplainInput; } catch { return jsonRes({ error: "Invalid request" }, 400); }
+    const { metric, value, context = [] } = body ?? ({} as ExplainInput);
+    // Bound every field so one caller can't send huge prompts and burn AI credits.
+    if (
+      typeof metric !== "string" || metric.length < 1 || metric.length > 120 ||
+      typeof value !== "string" || value.length > 120 ||
+      !Array.isArray(context) || context.length > 10 ||
+      context.some((c) => typeof c !== "string" || c.length > 300)
+    ) {
+      return jsonRes({ error: "Invalid request" }, 400);
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonRes({ error: "AI not configured" }, 500);
 
