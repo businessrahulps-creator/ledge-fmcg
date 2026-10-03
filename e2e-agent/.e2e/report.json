@@ -1,0 +1,436 @@
+{
+  "schemaVersion": "report-1",
+  "run": {
+    "id": "01a10074-9e6a-77d9-9f08-3241b8589139",
+    "specVersion": "0.1",
+    "runner": {
+      "name": "e2e",
+      "version": "0.16.0"
+    },
+    "status": "error",
+    "exitCode": 3,
+    "startedAt": "2026-10-03T06:30:23.305Z",
+    "finishedAt": "2026-10-03T06:30:24.828Z",
+    "project": {
+      "id": "unportable-74c64b188ab0c80952b5e49400ab74e8",
+      "configDigest": "0ea24be9c11d294e10187d159d4c1746e0a16d6074514f09a81e62b36baddd3a"
+    },
+    "environment": {
+      "ci": false,
+      "trustNoticeShown": false,
+      "os": "linux 4.19.0-gvisor",
+      "arch": "x64",
+      "runtime": "node v22.22.0"
+    },
+    "vcs": {
+      "commit": "b03d965b45a8050a72e038c878024ed8a03a03cd",
+      "branch": "edit/edt-71014fde-6a35-46f8-af7f-0cf517c3e563",
+      "dirty": false
+    },
+    "targets": [
+      {
+        "id": "computer",
+        "index": 0,
+        "platform": "web",
+        "baseOrigin": "http://localhost:8080",
+        "environment": "test",
+        "engine": {
+          "name": "web",
+          "version": "0.11.2",
+          "spiVersion": 1
+        },
+        "capabilities": [
+          "actions",
+          "artifacts",
+          "browser",
+          "keyboard",
+          "location",
+          "observation",
+          "pointer",
+          "state"
+        ],
+        "artifactCapabilities": [
+          "screenshot",
+          "trace",
+          "video"
+        ],
+        "stateCapability": true
+      },
+      {
+        "id": "phone",
+        "index": 1,
+        "platform": "web",
+        "baseOrigin": "http://localhost:8080",
+        "environment": "test",
+        "engine": {
+          "name": "web",
+          "version": "0.11.2",
+          "spiVersion": 1
+        },
+        "capabilities": [
+          "actions",
+          "artifacts",
+          "browser",
+          "keyboard",
+          "location",
+          "observation",
+          "pointer",
+          "state"
+        ],
+        "artifactCapabilities": [
+          "screenshot",
+          "trace",
+          "video"
+        ],
+        "stateCapability": true
+      }
+    ],
+    "serialGroups": [],
+    "results": [
+      {
+        "id": "2b8afe0ab85d36d73982f0a74c6306a270d5c03b25c2fbcf5f0b0663af11ebaa",
+        "testId": "setup::tests/auth.setup.e2e.ts::sign%20in%20as%20owner",
+        "kind": "setup",
+        "declarationIndex": 0,
+        "titlePath": [
+          "sign in as owner"
+        ],
+        "file": "tests/auth.setup.e2e.ts",
+        "source": {
+          "file": "tests/auth.setup.e2e.ts",
+          "line": 21,
+          "column": 6
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": true,
+        "status": "failed",
+        "attempts": [
+          {
+            "id": "01a10074-eae1-7501-b824-099a84b37107",
+            "index": 0,
+            "status": "failed",
+            "startedAt": "2026-10-03T06:30:24.738Z",
+            "durationMs": 51,
+            "artifacts": [],
+            "error": {
+              "category": "infrastructure",
+              "code": "ENGINE_FAILURE",
+              "message": "browser launch failed: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-8YDimC --remote-debugging-pipe --no-startup-window\n<launched> pid=3410\n[pid=3410][err] /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n  - <launching> /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-8YDimC --remote-debugging-pipe --no-startup-window\n  - <launched> pid=3410\n  - [pid=3410][err] /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\n  - [pid=3410] <gracefully close start>\n  - [pid=3410] <kill>\n  - [pid=3410] <will force kill>\n  - [pid=3410] exception while trying to kill process: Error: kill ESRCH\n  - [pid=3410] <process did exit: exitCode=127, signal=null>\n  - [pid=3410] starting temporary directories cleanup\n  - [pid=3410] finished temporary directories cleanup\n  - [pid=3410] <gracefully close end>\n",
+              "retryable": false,
+              "phase": "launch"
+            },
+            "secondaryErrors": [],
+            "cleanup": "complete",
+            "steps": []
+          }
+        ]
+      },
+      {
+        "id": "79dab6acd58a962b8f5b688f9ef0c20cd2cdcf14082783d5a65037e1efe68b27",
+        "testId": "tests/money-flows.e2e.ts::take%20an%20order%2C%20send%20it%20and%20make%20the%20bill",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "take an order, send it and make the bill"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 10,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "86c184aba541790dafc80b8d617eeb56c6d0db84ef572dacca563b1e4d2268b4",
+        "testId": "tests/money-flows.e2e.ts::paying%20more%20than%20what%20is%20due%20is%20refused",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "paying more than what is due is refused"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 18,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "fc3e82e11f04872b41ba7a4afd2b4c1cc200a777f2c69c924267440d714c826e",
+        "testId": "tests/money-flows.e2e.ts::cancelled%20orders%20cannot%20take%20payment",
+        "kind": "test",
+        "declarationIndex": 2,
+        "titlePath": [
+          "cancelled orders cannot take payment"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 24,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "254495b228194b833e2b6b754f2643aa45d3b2dd616c820ca1aac5a71d3c126b",
+        "testId": "tests/money-flows.e2e.ts::unpaid%20total%20matches%20between%20Dashboard%20and%20Money%20to%20collect",
+        "kind": "test",
+        "declarationIndex": 3,
+        "titlePath": [
+          "unpaid total matches between Dashboard and Money to collect"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 30,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "da629105d88f6d181afe0db6af1434067e0af275c9fd74d8fe34fca8abb57b07",
+        "testId": "tests/money-flows.e2e.ts::shop%20visit%20with%20a%20promise%20shows%20under%20Promises",
+        "kind": "test",
+        "declarationIndex": 4,
+        "titlePath": [
+          "shop visit with a promise shows under Promises"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 43,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "2d2ed6dbfb0e95214057d152504adb9e9aceb1a8218b22b59815097185ae668e",
+        "testId": "tests/money-flows.e2e.ts::reports%20download%20as%20PDF%2C%20Excel%20and%20CSV",
+        "kind": "test",
+        "declarationIndex": 5,
+        "titlePath": [
+          "reports download as PDF, Excel and CSV"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 50,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "f7778053c3700bf866220f04e48b6b19aaf1ac9c8f1806cf4f1d22abd454601c",
+        "testId": "tests/money-flows.e2e.ts::buying%20page%20shows%20supplier%20balances",
+        "kind": "test",
+        "declarationIndex": 6,
+        "titlePath": [
+          "buying page shows supplier balances"
+        ],
+        "file": "tests/money-flows.e2e.ts",
+        "source": {
+          "file": "tests/money-flows.e2e.ts",
+          "line": 56,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "56bf65de06147720c2971558f8df7fc8426b3c8e865ab6063f9a82cf8d6f2a7b",
+        "testId": "tests/navigation.e2e.ts::every%20menu%20page%20opens%20without%20sideways%20scrolling",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "every menu page opens without sideways scrolling"
+        ],
+        "file": "tests/navigation.e2e.ts",
+        "source": {
+          "file": "tests/navigation.e2e.ts",
+          "line": 22,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": true,
+        "status": "skipped",
+        "skip": {
+          "cause": "setup-failed",
+          "reason": "setup for session \"owner\" failed",
+          "relatedId": "setup::tests/auth.setup.e2e.ts::sign%20in%20as%20owner"
+        },
+        "attempts": []
+      },
+      {
+        "id": "6cdfc43cdeb976c0543859ff87b938bfb949fb8c4a7d092d243f5af204966a10",
+        "testId": "tests/navigation.e2e.ts::a%20new%20page%20opens%20at%20the%20top%20after%20scrolling%20a%20long%20list",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "a new page opens at the top after scrolling a long list"
+        ],
+        "file": "tests/navigation.e2e.ts",
+        "source": {
+          "file": "tests/navigation.e2e.ts",
+          "line": 33,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": true,
+        "status": "skipped",
+        "skip": {
+          "cause": "setup-failed",
+          "reason": "setup for session \"owner\" failed",
+          "relatedId": "setup::tests/auth.setup.e2e.ts::sign%20in%20as%20owner"
+        },
+        "attempts": []
+      },
+      {
+        "id": "0a91c7f754a950db41e5e1891504dc686949cc64cdd1da34b75770a76b28cc6b",
+        "testId": "tests/navigation.e2e.ts::leaving%20a%20half-filled%20order%20asks%20first%3B%20opening%20Menu%20does%20not",
+        "kind": "test",
+        "declarationIndex": 2,
+        "titlePath": [
+          "leaving a half-filled order asks first; opening Menu does not"
+        ],
+        "file": "tests/navigation.e2e.ts",
+        "source": {
+          "file": "tests/navigation.e2e.ts",
+          "line": 50,
+          "column": 1
+        },
+        "targetId": "computer",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": true,
+        "status": "skipped",
+        "skip": {
+          "cause": "setup-failed",
+          "reason": "setup for session \"owner\" failed",
+          "relatedId": "setup::tests/auth.setup.e2e.ts::sign%20in%20as%20owner"
+        },
+        "attempts": []
+      }
+    ],
+    "errors": [],
+    "summary": {
+      "discovered": 11,
+      "selected": 4,
+      "executed": 1,
+      "passed": 0,
+      "failed": 1,
+      "flaky": 0,
+      "skipped": 10
+    },
+    "limits": {
+      "maxAgentContextBytes": 16384,
+      "maxLedgerBytes": 8192,
+      "maxObservationBytes": 262144,
+      "maxEventsPerStep": 1000,
+      "maxModelTokensPerCall": 64000
+    },
+    "usage": {
+      "discoveredResults": 11,
+      "maxAgentContextBytes": 0,
+      "maxLedgerBytes": 0,
+      "maxObservationBytes": 0,
+      "artifactBytes": 0,
+      "downloads": 0,
+      "events": 0,
+      "modelTokens": 0,
+      "maxModelCallsInStep": 0,
+      "maxActionStepsInStep": 0
+    }
+  }
+}
