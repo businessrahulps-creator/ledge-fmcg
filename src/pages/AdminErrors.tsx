@@ -33,7 +33,7 @@ const SEVERITY_TONE: Record<string, string> = {
 export default function AdminErrors() {
   const { user, loading } = useAuth();
   const canViewLogs = useCan("view_error_logs");
-  const capPending = useIsFetching({ queryKey: ["capability", user?.id ?? null, "view_error_logs"] }) > 0;
+  const capPending = useIsFetching({ queryKey: ["capabilities", user?.id ?? null] }) > 0;
   const [rows, setRows] = useState<ErrorRow[] | null>(null);
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [expanded, setExpanded] = useState<string | null>(null);
