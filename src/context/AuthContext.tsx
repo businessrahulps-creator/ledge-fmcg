@@ -51,6 +51,7 @@ function profilesEqual(a: Profile | null, b: Profile | null) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUserState] = useState<User | null>(null);
   const [session, setSessionState] = useState<Session | null>(null);
   const [profile, setProfileState] = useState<Profile | null>(null);
