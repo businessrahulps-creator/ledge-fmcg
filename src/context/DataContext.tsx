@@ -108,9 +108,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const stock = useStockDomain(deps, () => catalog.rawProducts);
   const targets = useTargetsDomain(deps);
 
+  // Billing is built after orders, so sending an order reaches its bill
+  // reload through a ref (set below) instead of waiting for realtime.
+  const refetchInvoicesRef = useRef<(() => Promise<void>) | null>(null);
   const ordersDeps = useMemo(() => ({
     ...deps,
     safeRefetchStockItems: stock.safeRefetchStockItems,
+    refetchInvoices: () => refetchInvoicesRef.current?.() ?? Promise.resolve(),
   }), [deps, stock.safeRefetchStockItems]);
 
   const orders = useOrdersDomain(ordersDeps);
@@ -124,6 +128,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }), [deps, orders.orders, stock.safeRefetchStockItems, dealers.safeRefetch, orders.safeRefetch]);
 
   const billing = useBillingDomain(billingDeps);
+  refetchInvoicesRef.current = billing.safeRefetchInvoices;
 
   // Clear data only when the user is truly signed out. A transient `companyId`
   // gap (profile refresh, token refresh) must NOT wipe already-loaded data,
