@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:screens": "cd e2e-agent && E2E_TELEMETRY_DISABLED=1 e2e run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -78,6 +79,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^4.0.83",
+    "@e2e-dev/web": "^0.11.2",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.16",
@@ -87,9 +90,11 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
+    "ai": "^7.0.127",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
+    "e2e": "^0.16.0",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

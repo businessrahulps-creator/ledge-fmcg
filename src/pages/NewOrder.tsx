@@ -81,6 +81,8 @@ export default function NewOrder() {
     { id: crypto.randomUUID(), productId: "", quantity: 1, unitPrice: 0 },
   ]);
   const [isSaving, setIsSaving] = useState(false);
+  // Once the order is booked the form is no longer "unsaved work".
+  const [saved, setSaved] = useState(false);
   const savingRef = useRef(false);
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
@@ -115,7 +117,7 @@ export default function NewOrder() {
 
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
-  useUnsavedChangesGuard(isDirty && !isSaving);
+  useUnsavedChangesGuard(isDirty && !isSaving && !saved);
 
   // Leaving this screen — with Back or anything else — must not throw the order
   // away. The half-written order is kept for this session and offered back.
@@ -399,6 +401,7 @@ export default function NewOrder() {
     setIsSaving(false);
 
     if (result.success) {
+      setSaved(true);
       try { sessionStorage.removeItem(ORDER_DRAFT_KEY); } catch { /* ignore */ }
       // Advance taken at the counter — recorded against the order, never blocking the booking.
       const advance = Number(advanceAmount || 0);

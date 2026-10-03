@@ -9,3 +9,4 @@
 - Undoing a send (reverse_dispatch_for_order) is refused once the order has a GST bill, and the app calls it before saving the order status. Why: GST bills can only be corrected with returns and credit notes.
 - Deleting an order goes only through `delete_order_atomic`; stock_deductions has no client write access, and triggers keep dealer balances/totals and product total_sold/avg_cost server-owned (credit-limit changes need override_credit_limit or manage_team) — why: direct writes let non-owners restore stock or lift credit limits.
 - CSV exports prefix text starting with = + - @ with an apostrophe; Tally XML strips control characters — why: formula injection and invalid XML.
+- Screen tests live in e2e-agent/ (TesterArmy e2e): plain-English agent steps must be followed by a hard assertion, sessions come from `lovable auth-session`, telemetry off, `.e2e/` artifacts never committed — why: the AI never decides pass/fail alone and traces hold sign-in tokens.

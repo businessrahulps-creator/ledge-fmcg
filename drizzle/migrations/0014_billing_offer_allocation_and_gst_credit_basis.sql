@@ -201,7 +201,7 @@ BEGIN
     )
     UPDATE tmp_book_lines t SET disc = t.disc + r.share FROM r WHERE t.ctid = r.rid;
   END LOOP;
-  UPDATE tmp_book_lines SET disc = LEAST(GREATEST(disc, 0), amount);
+  UPDATE tmp_book_lines SET disc = LEAST(GREATEST(disc, 0), amount) WHERE true;
   SELECT COALESCE(SUM(disc), 0) INTO v_final_savings FROM tmp_book_lines;
 
   v_ceiling := CASE
