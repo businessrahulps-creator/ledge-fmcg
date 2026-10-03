@@ -137,6 +137,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (authReady && !user) {
       // Invalidate any load still in flight so it can't refill data after sign-out.
       ++fetchTokenRef.current;
+      // Next account must load like a fresh start (spinner, retry, error) and
+      // must never see the previous business's details.
+      hasHydratedRef.current = false;
+      setIsOfflineData(false);
+      setCompanyInfo({
+        name: "", address: "", gstin: "", logoUrl: "", phone: "", email: "",
+        pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", invoicePrefix: "INV",
+      });
       orders.setOrders([]);
       dealers.setDistributors([]);
       salespersons.setSalespersons([]);

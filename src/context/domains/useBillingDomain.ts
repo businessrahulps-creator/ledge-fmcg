@@ -136,7 +136,7 @@ export function useBillingDomain(deps: BillingDeps) {
   const safeRefetchInvoices = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const data = await fetchAllChunked<InvoiceRow>(() =>
-      supabase.from("invoices").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+      supabase.from("invoices").select("*").eq("company_id", deps.companyId).order("created_at", { ascending: false }).order("id")
     );
     setInvoices(data.map(mapInvoiceRow));
   }, [deps.companyId]);
@@ -162,7 +162,7 @@ export function useBillingDomain(deps: BillingDeps) {
   const safeRefetchClaims = useCallback(async () => {
     if (!deps.companyId || !navigator.onLine) return;
     const data = await fetchAllChunked<ClaimRow>(() =>
-      supabase.from("claims").select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false })
+      supabase.from("claims").select("*, claim_lines(*)").eq("company_id", deps.companyId).order("created_at", { ascending: false }).order("id")
     );
     setClaims(data.map(mapClaimRow));
   }, [deps.companyId]);
@@ -198,7 +198,7 @@ export function useBillingDomain(deps: BillingDeps) {
       handleSupabaseError(err, { source: "rpc:record_return_and_credit_atomic", title: "Could not record this return", context: { orderId } });
       return null;
     }
-  }, [deps.safeRefetchStockItems]);
+  }, [deps.safeRefetchStockItems, safeRefetchClaims, safeRefetchInvoices]);
 
   /**
    * Pieces already sent back on earlier credit notes for one bill, per bill line.
@@ -259,8 +259,9 @@ export function useBillingDomain(deps: BillingDeps) {
     return (data || []) as PaymentRecord[];
   }, []);
 
+  // Runs after a payment is already saved — a failed refresh must not look like a failed payment.
   const refreshMoney = useCallback(async () => {
-    await Promise.all([safeRefetchInvoices(), deps.safeRefetchDealers(), deps.safeRefetchOrders()]);
+    await Promise.allSettled([safeRefetchInvoices(), deps.safeRefetchDealers(), deps.safeRefetchOrders()]);
   }, [safeRefetchInvoices, deps.safeRefetchDealers, deps.safeRefetchOrders]);
 
   /** Record money received against a bill, or an advance against an order. */
