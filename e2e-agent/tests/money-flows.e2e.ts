@@ -12,7 +12,7 @@ test("take an order, send it and make the bill", { session: "owner" }, async ({ 
   await browser.onDialog(async (d) => { dialogs.push(d.message); await d.accept(); });
   await app.open("/orders/new");
   await agent.act("create an order for any dealer with 1 unit of any product, add note 'E2E test', and save it");
-  await agent.assert("the order was saved and its detail page or a success message is showing");
+  await agent.assert("the order was saved: the Orders list, the order page or a success message is showing");
   // A saved order is not "unsaved work": leaving must not ask.
   await browser.waitForURL(/\/orders(\/|$|\?)/, { timeout: 10_000 });
   expect(dialogs).toHaveLength(0);
@@ -60,5 +60,5 @@ test("buying page shows supplier balances", { session: "owner" }, async ({ app, 
   await app.open("/buying");
   await expect(screen.getByText(/supplier/i).first()).toBeVisible();
   await expect(screen.getByText(/Loading/i)).not.toBeVisible({ timeout: 20_000 });
-  await agent.assert("the page lists suppliers with how much is owed to each");
+  await agent.assert("the page shows how much money you owe suppliers");
 });
