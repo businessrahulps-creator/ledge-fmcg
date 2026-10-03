@@ -3197,6 +3197,10 @@ export type Database = {
         Args: { p_delivered_on?: string; p_note?: string; p_order_id: string }
         Returns: Json
       }
+      my_capabilities: {
+        Args: never
+        Returns: Database["public"]["Enums"]["capability_key"][]
+      }
       ops_company_detail: { Args: { p_company_id: string }; Returns: Json }
       ops_guard: {
         Args: { p_action: string; p_target_id?: string; p_target_type?: string }

@@ -7,8 +7,9 @@ export type CapabilityKey = Database["public"]["Enums"]["capability_key"];
 
 /**
  * Returns whether the current user has the given capability.
- * Reads from has_capability() RPC (override beats role default).
- * Returns false while loading or when unauthenticated.
+ * All capabilities load in ONE request (my_capabilities → has_capability per
+ * key on the server, override beats role default) and are shared by every
+ * caller. Returns false while loading or when unauthenticated.
  */
 export function useCan(capability: CapabilityKey): boolean {
   return useCanState(capability).allowed;
@@ -23,19 +24,16 @@ export function useCanState(capability: CapabilityKey): { allowed: boolean; read
   const userId = user?.id ?? null;
 
   const { data, isFetched, isError } = useQuery({
-    queryKey: ["capability", userId, capability],
+    queryKey: ["capabilities", userId],
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("has_capability", {
-        _user_id: userId!,
-        _capability: capability,
-      });
+      const { data, error } = await supabase.rpc("my_capabilities");
       if (error) throw error;
-      return !!data;
+      return new Set<string>((data as string[] | null) ?? []);
     },
   });
 
-  return { allowed: data === true, ready: !userId || isFetched || isError };
+  return { allowed: !!data?.has(capability), ready: !userId || isFetched || isError };
 }

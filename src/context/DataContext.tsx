@@ -259,10 +259,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const phase2 = (async () => {
       const [stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
         fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
-        fetchAllChunked(() => supabase.from("orders").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "orders"),
+        fetchAllChunked(() => supabase.from("orders").select("*, order_lines(*), order_schemes(*)").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "orders"),
         fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "secondary_sales"),
         fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "targets"),
-        fetchAllChunked(() => supabase.from("claims").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "claims"),
+        fetchAllChunked(() => supabase.from("claims").select("*, claim_lines(*)").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "claims"),
         fetchAllChunked(() => supabase.from("invoices").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
@@ -287,17 +287,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const prods = phase1Out?.prods || [];
       const gds = phase1Out?.gds || [];
 
-      const claimIds = (claimsRes as any[]).map((c: any) => c.id);
-      const orderIds = (ordersRes as any[]).map((o: any) => o.id);
-
-      // Bill line items are deliberately NOT fetched here — they are only needed
-      // when a single bill is opened (PDF, WhatsApp, return form) and are loaded
-      // on demand by @/lib/invoice-lines.
-      const [claimLinesData, allLines, allOrderSchemes] = await Promise.all([
-        batchIn("claim_lines", "claim_id", claimIds),
-        batchIn("order_lines", "order_id", orderIds),
-        batchIn("order_schemes", "order_id", orderIds),
-      ]);
+      // Lines arrive embedded in their order / return (one round trip instead
+      // of a second wave of big id-list requests after orders finish).
+      const claimLinesData = (claimsRes as any[]).flatMap((c: any) => c.claim_lines || []);
+      const allLines = (ordersRes as any[]).flatMap((o: any) => o.order_lines || []);
+      const allOrderSchemes = (ordersRes as any[]).flatMap((o: any) => o.order_schemes || []);
       if (token !== fetchTokenRef.current) return;
 
       // Map everything before touching state — so a mapping crash can't half-commit.

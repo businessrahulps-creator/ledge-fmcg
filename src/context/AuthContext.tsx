@@ -94,8 +94,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfileState(next);
   }, []);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  // Start-up fires both the auth listener and getSession; share one in-flight
+  // load per user instead of fetching profile and role twice.
+  const inflightProfileRef = useRef<{ userId: string; p: Promise<void> } | null>(null);
+  const fetchProfile = useCallback((userId: string): Promise<void> => {
+    const cur = inflightProfileRef.current;
+    if (cur && cur.userId === userId) return cur.p;
+    const p = fetchProfileOnce(userId).finally(() => {
+      if (inflightProfileRef.current?.p === p) inflightProfileRef.current = null;
+    });
+    inflightProfileRef.current = { userId, p };
+    return p;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchProfileOnce = async (userId: string) => {
     let loadedProfile: Profile | null = null;
+    // Role does not depend on the profile — ask for both at once.
+    const rolePromise = supabase.from("user_roles").select("role").eq("user_id", userId).single();
     try {
       try {
         const { data } = await supabase
@@ -152,11 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Fetch role
       try {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .single();
+        const { data: roleData } = await rolePromise;
         if (roleData && mountedRef.current) {
           setUserRole((prev) => (prev === roleData.role ? prev : roleData.role));
         }
@@ -166,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       if (mountedRef.current) setProfileLoaded(true);
     }
-  }, [applyProfile]);
+  };
 
   const refreshProfile = useCallback(async () => {
     const uid = userIdRef.current;
