@@ -52,12 +52,14 @@ test("a new page opens at the top after scrolling a long list", { session: "owne
 test("leaving a half-filled order asks first; opening Menu does not", { session: "owner" }, async ({ app, browser, agent }) => {
   const dialogs: string[] = [];
   await browser.onDialog(async (d) => {
-    dialogs.push(d.message());
+    dialogs.push(d.message);
     await d.dismiss();
   });
   await app.open("/orders/new");
   await agent.act("pick any dealer in the new order form");
   expect(dialogs).toHaveLength(0);
-  await agent.act("go to the Dashboard page using the menu");
-  await agent.assert("the app asked before leaving, or we are still on the new order form");
+  // Leaving for another page must ask first; Cancel keeps the half-filled order.
+  await browser.locator('a[href="/dashboard"]:visible').first().click();
+  await expect.poll(() => dialogs.length).toBe(1);
+  await expect(browser).toHaveURL(/\/orders\/new/);
 });
