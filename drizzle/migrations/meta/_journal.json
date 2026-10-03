@@ -218,6 +218,13 @@
       "when": 1791024897509,
       "tag": "0030_speed_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791026473722,
+      "tag": "0031_sold_excludes_cancelled_and_credit_cap",
+      "breakpoints": true
     }
   ]
 }
