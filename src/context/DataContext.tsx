@@ -135,6 +135,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // otherwise pages flash empty mid-session.
   useEffect(() => {
     if (authReady && !user) {
+      // Invalidate any load still in flight so it can't refill data after sign-out.
+      ++fetchTokenRef.current;
       orders.setOrders([]);
       dealers.setDistributors([]);
       salespersons.setSalespersons([]);
@@ -150,8 +152,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [authReady, user]);
 
-  // Load from IDB cache (offline fallback)
-  const loadFromCache = useCallback(async (cId: string) => {
+  // Load from IDB cache (offline fallback). `isCurrent` is checked after the
+  // slow cache read and before committing, so a stale read for a previous
+  // account/business never overwrites the current one.
+  const loadFromCache = useCallback(async (cId: string, isCurrent: () => boolean = () => true) => {
     const [cOrders, cDist, cSp, cProd, cLoc, cStock, cPrefix, cSeq, cSchemes] = await Promise.all([
       getCachedData<Order[]>(cId, "orders"),
       getCachedData<Distributor[]>(cId, "distributors"),
@@ -163,6 +167,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getCachedData<number>(cId, "orderSequence"),
       getCachedData<Scheme[]>(cId, "schemes"),
     ]);
+    if (!isCurrent()) return false;
     let loaded = false;
     if (cOrders) { orders.setOrders(cOrders); loaded = true; }
     if (cDist) { dealers.setDistributors(cDist); loaded = true; }
@@ -222,8 +227,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     // ---------- Phase 1: critical reference data ----------
     const phase1 = (async () => {
-      const { data: company } = await supabase
+      const { data: company, error: companyError } = await supabase
         .from("companies").select("order_prefix, next_order_sequence, name, address, gstin, logo_url, phone, email, pan, state_code, bank_name, bank_account, bank_account_name, bank_ifsc, invoice_prefix, next_invoice_sequence").eq("id", cId).single();
+      // A failed business-details read must not count as a good load (it would
+      // cache fallback order numbering).
+      if (companyError) throw companyError;
 
       const [distRes, spRes, prodRes, godownRes, schemesRes, balanceRes] = await Promise.all([
         fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
@@ -267,6 +275,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
     })();
+    // If phase 1 fails first, phase 2 is never awaited — keep its failure from
+    // surfacing as an unhandled rejection (the real error is handled below).
+    phase2.catch(() => {});
 
     try {
       // On cold start, apply phase-1 as soon as it's ready so first paint isn't
@@ -295,7 +306,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (token !== fetchTokenRef.current) return;
 
       // Map everything before touching state — so a mapping crash can't half-commit.
-      const sis = (stockRes as any[]).map(si => mapStockItem(si, prods, gds));
+      const prodMap = new Map<string, any>(prods.map((p: any) => [p.id, p]));
+      const gdMap = new Map<string, any>(gds.map((g: any) => [g.id, g]));
+      const sis = (stockRes as any[]).map(si => mapStockItem(si, prodMap, gdMap));
       const mappedSS = (ssRes as any[]).map((s: any) => mapSecondarySale(s));
       const mappedTargets = (targetsRes as any[]).map((t: any) => mapTarget(t));
       const mappedClaims = (claimsRes as any[]).map((c: any) => mapClaim(c, claimLinesData));
@@ -343,8 +356,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       // Retry failed too — show the last saved copy if we have one (flagged as
       // stale), otherwise say plainly that the load failed instead of zeros.
-      const hadCache = await loadFromCache(cId);
-      if (!hadCache) setLoadError(true);
+      const hadCache = await loadFromCache(cId, () => token === fetchTokenRef.current);
+      if (!hadCache && token === fetchTokenRef.current) setLoadError(true);
     } finally {
       if (!retrying && token === fetchTokenRef.current) {
         setLoading(false);
@@ -372,7 +385,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     // Cache-first: paint instantly from IDB, then refresh in background.
     (async () => {
-      const hadCache = await loadFromCache(companyId);
+      const hadCache = await loadFromCache(companyId, () => !cancelled && token === fetchTokenRef.current);
       if (cancelled || token !== fetchTokenRef.current) return;
       if (hadCache) {
         // Page can render now; fetch fresh data in background without blocking UI.
