@@ -1,16 +1,16 @@
 {
   "schemaVersion": "report-1",
   "run": {
-    "id": "01a10074-9e6a-77d9-9f08-3241b8589139",
+    "id": "01a10075-4c39-7b3b-ac9f-f5f6d534099c",
     "specVersion": "0.1",
     "runner": {
       "name": "e2e",
       "version": "0.16.0"
     },
-    "status": "error",
-    "exitCode": 3,
-    "startedAt": "2026-10-03T06:30:23.305Z",
-    "finishedAt": "2026-10-03T06:30:24.828Z",
+    "status": "failed",
+    "exitCode": 1,
+    "startedAt": "2026-10-03T06:30:50.473Z",
+    "finishedAt": "2026-10-03T06:30:59.717Z",
     "project": {
       "id": "unportable-74c64b188ab0c80952b5e49400ab74e8",
       "configDigest": "0ea24be9c11d294e10187d159d4c1746e0a16d6074514f09a81e62b36baddd3a"
@@ -23,7 +23,7 @@
       "runtime": "node v22.22.0"
     },
     "vcs": {
-      "commit": "b03d965b45a8050a72e038c878024ed8a03a03cd",
+      "commit": "f252c749b418126e2487b4d911106f3961b31a13",
       "branch": "edit/edt-71014fde-6a35-46f8-af7f-0cf517c3e563",
       "dirty": false
     },
@@ -110,22 +110,165 @@
         "status": "failed",
         "attempts": [
           {
-            "id": "01a10074-eae1-7501-b824-099a84b37107",
+            "id": "01a10075-5377-7d6f-932d-73c96013d56d",
             "index": 0,
             "status": "failed",
-            "startedAt": "2026-10-03T06:30:24.738Z",
-            "durationMs": 51,
-            "artifacts": [],
+            "startedAt": "2026-10-03T06:30:51.511Z",
+            "durationMs": 8147,
+            "artifacts": [
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:artifact:0",
+                "kind": "log",
+                "mediaType": "text/plain",
+                "redaction": "complete",
+                "producer": {
+                  "kind": "attempt"
+                },
+                "path": "computer/setup__tests_auth.setup.e2e.ts__sign_20in_20as_20owner-3db8e73c/default/attempt-0/failure/screen.txt",
+                "size": 8010,
+                "sha256": "c84a6a283282fde8c9b41a69f077415df233ed203f603d2d4ea60cd235595553"
+              },
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:artifact:1",
+                "kind": "trace",
+                "mediaType": "application/zip",
+                "redaction": "not-required",
+                "producer": {
+                  "kind": "attempt"
+                },
+                "path": "computer/setup__tests_auth.setup.e2e.ts__sign_20in_20as_20owner-3db8e73c/default/attempt-0/trace/trace.zip",
+                "size": 9793006,
+                "sha256": "3c7db770714c84b3d003967336601704f6b83bced78f37cc5dd93bba8b436d67"
+              }
+            ],
             "error": {
-              "category": "infrastructure",
-              "code": "ENGINE_FAILURE",
-              "message": "browser launch failed: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-8YDimC --remote-debugging-pipe --no-startup-window\n<launched> pid=3410\n[pid=3410][err] /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n  - <launching> /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-8YDimC --remote-debugging-pipe --no-startup-window\n  - <launched> pid=3410\n  - [pid=3410][err] /opt/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\n  - [pid=3410] <gracefully close start>\n  - [pid=3410] <kill>\n  - [pid=3410] <will force kill>\n  - [pid=3410] exception while trying to kill process: Error: kill ESRCH\n  - [pid=3410] <process did exit: exitCode=127, signal=null>\n  - [pid=3410] starting temporary directories cleanup\n  - [pid=3410] finished temporary directories cleanup\n  - [pid=3410] <gracefully close end>\n",
+              "category": "test",
+              "code": "ASSERTION_FAILED",
+              "message": "expect.toBeVisible failed\nlocator: getByRole(\"heading\", name: /Dashboard/i).first()\nexpected: visible\nobserved: no node (match count 0)",
               "retryable": false,
-              "phase": "launch"
+              "phase": "body",
+              "details": {
+                "locator": "getByRole(\"heading\", name: /Dashboard/i).first()",
+                "expected": "visible",
+                "observed": "no node",
+                "matches": 0
+              },
+              "source": {
+                "file": "tests/auth.setup.e2e.ts",
+                "line": 33,
+                "column": 3
+              }
             },
             "secondaryErrors": [],
             "cleanup": "complete",
-            "steps": []
+            "failure": {
+              "url": "http://localhost:8080/dashboard",
+              "screen": "01a10075-5377-7d6f-932d-73c96013d56d:artifact:0"
+            },
+            "steps": [
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:0",
+                "index": 0,
+                "kind": "app",
+                "api": "app.open",
+                "label": "/",
+                "status": "passed",
+                "startedAt": "2026-10-03T06:30:52.082Z",
+                "durationMs": 767,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/auth.setup.e2e.ts",
+                  "line": 23,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:1",
+                "index": 1,
+                "kind": "resource",
+                "api": "browser.evaluate",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-03T06:30:52.850Z",
+                "durationMs": 24,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/auth.setup.e2e.ts",
+                  "line": 24,
+                  "column": 17
+                }
+              },
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:2",
+                "index": 2,
+                "kind": "app",
+                "api": "app.open",
+                "label": "/dashboard",
+                "status": "passed",
+                "startedAt": "2026-10-03T06:30:52.875Z",
+                "durationMs": 475,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/auth.setup.e2e.ts",
+                  "line": 31,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:3",
+                "index": 3,
+                "kind": "assertion",
+                "api": "expect.toHaveURL",
+                "label": "/\\/dashboard/",
+                "status": "passed",
+                "startedAt": "2026-10-03T06:30:53.354Z",
+                "durationMs": 1,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/auth.setup.e2e.ts",
+                  "line": 32,
+                  "column": 25
+                }
+              },
+              {
+                "id": "01a10075-5377-7d6f-932d-73c96013d56d:4",
+                "index": 4,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"heading\", name: /Dashboard/i).first()",
+                "status": "failed",
+                "startedAt": "2026-10-03T06:30:53.359Z",
+                "durationMs": 5100,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/auth.setup.e2e.ts",
+                  "line": 33,
+                  "column": 77
+                },
+                "error": {
+                  "category": "test",
+                  "code": "ASSERTION_FAILED",
+                  "message": "expect.toBeVisible failed\nlocator: getByRole(\"heading\", name: /Dashboard/i).first()\nexpected: visible\nobserved: no node (match count 0)",
+                  "retryable": false,
+                  "details": {
+                    "locator": "getByRole(\"heading\", name: /Dashboard/i).first()",
+                    "expected": "visible",
+                    "observed": "no node",
+                    "matches": 0
+                  },
+                  "source": {
+                    "file": "tests/auth.setup.e2e.ts",
+                    "line": 33,
+                    "column": 3
+                  }
+                }
+              }
+            ]
           }
         ]
       },
@@ -425,7 +568,7 @@
       "maxAgentContextBytes": 0,
       "maxLedgerBytes": 0,
       "maxObservationBytes": 0,
-      "artifactBytes": 0,
+      "artifactBytes": 9801016,
       "downloads": 0,
       "events": 0,
       "modelTokens": 0,
