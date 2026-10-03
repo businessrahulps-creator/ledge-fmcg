@@ -20,6 +20,8 @@ interface OrdersDeps extends DomainDeps {
 export function useOrdersDomain(deps: OrdersDeps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderPrefix, setOrderPrefixState] = useState("ORD");
+  const orderPrefixRef = useRef(orderPrefix);
+  orderPrefixRef.current = orderPrefix;
   const [orderSequence, setOrderSequence] = useState(1);
   const ordersRef = useRef(orders);
   ordersRef.current = orders;
