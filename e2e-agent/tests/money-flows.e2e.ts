@@ -31,7 +31,7 @@ test("unpaid total matches between Dashboard and Money to collect", { session: "
   const rupees = (s: string) => Number((s.match(/₹\s?[\d,]+/)?.[0] ?? "").replace(/[₹,\s]/g, ""));
   await app.open("/dashboard");
   await browser.waitForURL(/dashboard/);
-  const dash = rupees(await browser.locator("text=/outstanding across/i").first().innerText({ timeout: 20_000 }).catch(() => ""));
+  const dash = rupees(await browser.locator("h2:has-text(\"to collect\"), h3:has-text(\"to collect\")").first().innerText({ timeout: 20_000 }).catch(() => ""));
   await app.open("/reports");
   // Reports preview shows the same figure for "Money to collect".
   await browser.locator("text=/Money to collect/i").first().click();

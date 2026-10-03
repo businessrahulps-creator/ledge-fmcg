@@ -30,6 +30,6 @@ test.setup("sign in as owner", { sessions: ["owner"] }, async ({ app, browser, s
   );
   await app.open("/dashboard");
   await expect(browser).toHaveURL(/\/dashboard/);
-  await expect(screen.getByRole("heading", { name: /Dashboard/i }).first()).toBeVisible();
+  await expect(screen.getByRole("heading", { name: /to collect/i }).first()).toBeVisible();
   await session.save("owner");
 });

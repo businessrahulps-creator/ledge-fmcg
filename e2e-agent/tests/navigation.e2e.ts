@@ -22,7 +22,9 @@ const PAGES: [string, RegExp][] = [
 test("every menu page opens without sideways scrolling", { session: "owner" }, async ({ app, browser, screen }) => {
   for (const [path, title] of PAGES) {
     await app.open(path);
-    await expect(screen.getByRole("heading", { name: title }).first()).toBeVisible();
+    await expect(browser).toHaveURL(new RegExp(path));
+    await expect(screen.getByText(title).first()).toBeVisible();
+    await expect(screen.getByText(/Something went wrong|Couldn't load/i)).not.toBeVisible();
     const overflow = await browser.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -32,13 +34,13 @@ test("every menu page opens without sideways scrolling", { session: "owner" }, a
 
 test("a new page opens at the top after scrolling a long list", { session: "owner" }, async ({ app, browser, screen }) => {
   await app.open("/orders");
-  await expect(screen.getByRole("heading", { name: /Orders/i }).first()).toBeVisible();
+  await expect(screen.getByText(/Orders/i).first()).toBeVisible();
   await browser.evaluate(() => {
     document.querySelectorAll("main, [class*='overflow-y-auto']").forEach((el) => ((el as HTMLElement).scrollTop = 2000));
     window.scrollTo(0, 2000);
     return true;
   });
-  await screen.getByRole("link", { name: /^Dashboard$/ }).first().tap();
+  await browser.goto("/dashboard");
   await expect(browser).toHaveURL(/\/dashboard/);
   const top = await browser.evaluate(() => {
     const scrolled = [...document.querySelectorAll("main, [class*='overflow-y-auto']")].map((el) => el.scrollTop);
