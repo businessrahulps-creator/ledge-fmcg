@@ -14,6 +14,7 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 interface OrdersDeps extends DomainDeps {
   safeRefetchStockItems: () => Promise<void>;
+  refetchInvoices?: () => Promise<void>;
 }
 
 export function useOrdersDomain(deps: OrdersDeps) {
@@ -172,7 +173,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
       });
       if (error) throw error;
       const res = data as { already_done?: boolean; invoice_number?: string } | null;
-      await Promise.all([safeRefetch(), deps.safeRefetchStockItems()]);
+      await Promise.all([safeRefetch(), deps.safeRefetchStockItems(), deps.refetchInvoices?.() ?? Promise.resolve()]);
       const order = ordersRef.current.find(o => o.id === orderId);
       deps.log("order", orderId, "dispatched", `Dispatched & billed ${order?.orderNumber || orderId}${res?.invoice_number ? ` — bill ${res.invoice_number}` : ""}`);
       return { success: true, invoiceNumber: res?.invoice_number, alreadyDone: res?.already_done };
