@@ -137,7 +137,7 @@ describe("batchIn pagination", () => {
     (supabase.from as any).mockImplementationOnce(() => ({
       select: () => ({
         in: () => ({
-          range: () => Promise.resolve({ data: null, error: { message: "boom" } }),
+          order: () => ({ range: () => Promise.resolve({ data: null, error: { message: "boom" } }) }),
         }),
       }),
     }));
