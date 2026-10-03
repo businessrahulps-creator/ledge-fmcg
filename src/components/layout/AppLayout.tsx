@@ -11,7 +11,25 @@ import { useAuth } from "@/context/AuthContext";
 import { useCan, useCanState, type CapabilityKey } from "@/hooks/useCan";
 import ledgeLogoAsset from "@/assets/ledge-logo.webp";
 import { TopProgress } from "@/components/ui/top-progress";
-import { CommandPalette } from "@/components/CommandPalette";
+import { lazy, Suspense } from "react";
+
+// Search palette (cmdk) loads after first paint so it stays out of the
+// startup download. It mounts on idle, so Ctrl+K works moments after load.
+const CommandPalette = lazy(() =>
+  import("@/components/CommandPalette").then((m) => ({ default: m.CommandPalette })),
+);
+function IdleCommandPalette() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const w = window as any;
+    const id = w.requestIdleCallback
+      ? w.requestIdleCallback(() => setReady(true), { timeout: 1500 })
+      : window.setTimeout(() => setReady(true), 300);
+    return () => (w.cancelIdleCallback ? w.cancelIdleCallback(id) : window.clearTimeout(id));
+  }, []);
+  if (!ready) return null;
+  return <Suspense fallback={null}><CommandPalette /></Suspense>;
+}
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts";
 import { signalNavDone, signalNavStart } from "@/components/NavProgress";
 import { prefetchRoute } from "@/lib/route-prefetch";
@@ -226,7 +244,7 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <TopProgress active={isRefreshing && online} />
-      <CommandPalette />
+      <IdleCommandPalette />
       <KeyboardShortcuts />
       <div data-app-shell className="flex h-dvh w-full overflow-hidden bg-background">
         <div className="hidden md:block">

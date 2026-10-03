@@ -42,6 +42,9 @@ export default defineConfig(({ mode }) => {
           if (id.includes("node_modules")) {
             if (id.includes("lucide-react")) return "vendor-icons";
             if (id.includes("date-fns")) return "vendor-datefns";
+            // Stable libraries in their own long-cached file so app updates
+            // don't force phones to re-download them.
+            if (id.includes("@supabase/")) return "vendor-supabase";
           }
         },
       },

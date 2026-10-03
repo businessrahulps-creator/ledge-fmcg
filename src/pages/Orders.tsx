@@ -462,7 +462,7 @@ export default function Orders() {
                           onClick={() => navigate(`/orders/${order.id}`)}
                           onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
                           onFocus={() => prefetchRoute(`/orders/${order.id}`)}
-                          className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
+                          className="list-row-cv group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
                         >
                           <td className="px-4 py-3.5 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
                           <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
@@ -510,7 +510,7 @@ export default function Orders() {
                     onClick={() => navigate(`/orders/${order.id}`)}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/orders/${order.id}`); } }}
                     onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
-                    className="flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
+                    className="list-row-cv flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">
