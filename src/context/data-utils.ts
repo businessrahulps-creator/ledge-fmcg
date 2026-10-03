@@ -85,9 +85,14 @@ export function mapGodown(g: any): GodownLocation {
   return { id: g.id, name: g.name, address: g.address, isActive: g.is_active };
 }
 
-export function mapStockItem(si: any, prods: Product[], gds: GodownLocation[]): StockItem {
-  const prod = prods.find(p => p.id === si.product_id);
-  const gd = gds.find(g => g.id === si.godown_id);
+export function mapStockItem(
+  si: any,
+  prods: Product[] | Map<string, Product>,
+  gds: GodownLocation[] | Map<string, GodownLocation>,
+): StockItem {
+  // Maps give O(1) lookups when mapping thousands of stock rows at once.
+  const prod = prods instanceof Map ? prods.get(si.product_id) : prods.find(p => p.id === si.product_id);
+  const gd = gds instanceof Map ? gds.get(si.godown_id) : gds.find(g => g.id === si.godown_id);
   return {
     id: si.id, productId: si.product_id, godownId: si.godown_id,
     productName: prod?.name || "", sku: prod?.sku || "", unit: prod?.unit || "",

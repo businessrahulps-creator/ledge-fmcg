@@ -111,7 +111,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfileOnce = async (userId: string) => {
     let loadedProfile: Profile | null = null;
     // Role does not depend on the profile — ask for both at once.
-    const rolePromise = supabase.from("user_roles").select("role").eq("user_id", userId).single();
+    // Promise.resolve() starts the request now — the query builder is lazy and
+    // would otherwise only fire when awaited after the profile finished.
+    const rolePromise = Promise.resolve(
+      supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+    );
+    rolePromise.catch(() => {});
     try {
       try {
         const { data } = await supabase
