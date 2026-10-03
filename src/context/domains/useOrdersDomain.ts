@@ -25,6 +25,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
   ordersRef.current = orders;
 
   const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refetchWaiters = useRef<Array<() => void>>([]);
 
   /**
    * Refresh ONE order (plus its lines and schemes) and merge it in place.

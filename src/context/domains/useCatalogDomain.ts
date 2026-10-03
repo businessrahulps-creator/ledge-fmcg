@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Product, Scheme } from "@/data/mock-data";
 import { cacheData } from "@/lib/offline-store";
 import { sanitizeInput } from "@/utils/sanitize";
-import { makeOfflineCrud, mapProduct, mapScheme } from "@/context/data-utils";
+import { makeOfflineCrud, mapProduct, mapScheme, fetchAllChunked } from "@/context/data-utils";
 import type { DomainDeps } from "@/context/data-types";
 import { fmtAmount } from "@/utils/activityLog";
 
