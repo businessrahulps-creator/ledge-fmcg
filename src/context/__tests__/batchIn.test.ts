@@ -11,6 +11,7 @@ vi.mock("@/integrations/supabase/client", () => {
     const state: { column?: string; ids?: string[] } = {};
     const chain: any = {
       select: vi.fn(() => chain),
+      order: vi.fn(() => chain),
       in: vi.fn((column: string, ids: string[]) => {
         state.column = column;
         state.ids = ids;
