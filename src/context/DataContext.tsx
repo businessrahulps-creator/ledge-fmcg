@@ -234,11 +234,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (companyError) throw companyError;
 
       const [distRes, spRes, prodRes, godownRes, schemesRes, balanceRes] = await Promise.all([
-        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name"), 1000, 200, "distributors"),
-        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name"), 1000, 200, "salespersons"),
-        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name"), 1000, 200, "products"),
-        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name"), 1000, 200, "godowns"),
-        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "schemes"),
+        fetchAllChunked(() => supabase.from("distributors").select("*").eq("company_id", cId).order("name").order("id"), 1000, 200, "distributors"),
+        fetchAllChunked(() => supabase.from("salespersons").select("*").eq("company_id", cId).order("name").order("id"), 1000, 200, "salespersons"),
+        fetchAllChunked(() => supabase.from("products").select("*").eq("company_id", cId).order("name").order("id"), 1000, 200, "products"),
+        fetchAllChunked(() => supabase.from("godowns").select("*").eq("company_id", cId).order("name").order("id"), 1000, 200, "godowns"),
+        fetchAllChunked(() => supabase.from("schemes").select("*").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "schemes"),
         // Canonical amount owed: billed − received − credited, straight from the database view.
         fetchAllChunked(() => supabase.from("dealer_balances").select("distributor_id, balance_due").eq("company_id", cId).order("distributor_id"), 1000, 200, "dealer_balances"),
       ]);
@@ -266,12 +266,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // ---------- Phase 2: heavy data (runs in parallel) ----------
     const phase2 = (async () => {
       const [stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes] = await Promise.all([
-        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "stock_items"),
+        fetchAllChunked(() => supabase.from("stock_items").select("*").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "stock_items"),
         fetchAllChunked(() => supabase.from("orders").select("*, order_lines(*), order_schemes(*)").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "orders"),
-        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "secondary_sales"),
-        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "targets"),
+        fetchAllChunked(() => supabase.from("secondary_sales").select("*").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "secondary_sales"),
+        fetchAllChunked(() => supabase.from("targets").select("*").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "targets"),
         fetchAllChunked(() => supabase.from("claims").select("*, claim_lines(*)").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "claims"),
-        fetchAllChunked(() => supabase.from("invoices").select("*").eq("company_id", cId).order("created_at", { ascending: false }), 1000, 200, "invoices"),
+        fetchAllChunked(() => supabase.from("invoices").select("*").eq("company_id", cId).order("created_at", { ascending: false }).order("id"), 1000, 200, "invoices"),
       ]);
       return { stockRes, ordersRes, ssRes, targetsRes, claimsRes, invoicesRes };
     })();
