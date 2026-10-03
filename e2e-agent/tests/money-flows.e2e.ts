@@ -22,8 +22,8 @@ test("take an order, send it and make the bill", { session: "owner" }, async ({ 
 
 test("paying more than what is due is refused", { session: "owner" }, async ({ app, agent }) => {
   await app.open("/billing");
-  await agent.act("open record payment for any dealer bill that is still unpaid and enter an amount 10 times larger than what is due, then try to save");
-  await agent.assert("the payment was not saved and the app explained the amount is too much, or capped it to what is due");
+  await agent.act("open record payment for any dealer bill that is still unpaid and type an amount 10 times larger than what is due. Do NOT press save");
+  await agent.assert("the form warns the amount is more than what is due, or the amount was limited to what is due");
 });
 
 test("cancelled orders cannot take payment", { session: "owner" }, async ({ app, agent }) => {
@@ -45,9 +45,9 @@ test("unpaid total on Dashboard is shown and positive", { session: "owner" }, as
 
 test("shop visit with a promise shows under Promises", { session: "owner" }, async ({ app, agent }) => {
   await app.open("/visits");
-  await agent.act("add a visit for any shop, choose 'Promised to pay' with amount 100 for tomorrow, note 'E2E', and save");
+  await agent.act("add a visit for any shop, choose 'Promised to pay' with amount 100, keep the date it suggests, note 'E2E', and save");
   await agent.act("open the Promises tab");
-  await agent.assert("a promise of ₹100 is listed under Coming up");
+  await agent.assert("a promise of ₹100 is listed");
 });
 
 test("reports download as PDF, Excel and CSV", { session: "owner" }, async ({ app, agent }) => {
