@@ -6,6 +6,8 @@ import { House, ClipboardList, Package, MoreHorizontal, Settings, WifiOff, Refre
 import { useData } from "@/context/DataContext";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { NotificationCenter } from "./NotificationCenter";
+import { ProfileMenu } from "./ProfileMenu";
+import { RoleAvatar, roleStyle } from "./RoleAvatar";
 import { LiveClock } from "./LiveClock";
 import { useAuth } from "@/context/AuthContext";
 import { useCan, useCanState, type CapabilityKey } from "@/hooks/useCan";
@@ -284,14 +286,6 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
               <div className="hidden sm:inline-flex">
                 <LiveClock />
               </div>
-              {userRole && (
-                <>
-                  <span className="hidden sm:inline-block h-3.5 w-px bg-border/70" aria-hidden />
-                  <span className="hidden sm:inline-flex items-center text-[11px] font-medium capitalize text-muted-foreground/90">
-                    {userRole.replace("_", " ")}
-                  </span>
-                </>
-              )}
               <span className="hidden sm:inline-block h-3.5 w-px bg-border/70" aria-hidden />
               {/* Desktop Install App button */}
               {showDesktopInstall && (
@@ -338,6 +332,7 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
                   PWA offline mode is paused (mem://features/offline-mode-paused);
                   Activity log route remains reachable directly via /activity. */}
               <NotificationCenter />
+              <ProfileMenu />
             </div>
           </header>
 
@@ -485,8 +480,8 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
                   <SheetHeader className="px-5 pb-3 shrink-0 text-left space-y-0">
                     <SheetTitle className="sr-only">Menu</SheetTitle>
                     <div className="flex items-center gap-3">
-                      <div className="relative h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex items-center justify-center font-semibold text-[15px] tracking-[-0.01em] shadow-depth-2">
-                        {(profile?.full_name || profile?.email || "?").trim().charAt(0).toUpperCase()}
+                      <div className="relative shrink-0">
+                        <RoleAvatar role={userRole} name={profile?.full_name || profile?.email || "?"} size="md" />
                         <span
                           className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${online ? "bg-success" : "bg-muted-foreground/50"}`}
                           aria-hidden
@@ -497,11 +492,9 @@ function AppLayoutFrame({ children }: { children: ReactNode }) {
                           {profile?.full_name || "Welcome"}
                         </p>
                         <p className="text-[12px] text-muted-foreground truncate flex items-center gap-1.5">
-                          {userRole && (
-                            <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-1.5 py-px text-[10px] font-medium uppercase tracking-[0.04em]">
-                              {userRole}
-                            </span>
-                          )}
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 text-primary px-1.5 py-px text-[10px] font-medium">
+                            {roleStyle(userRole).label}
+                          </span>
                           <span className="truncate">{profile?.email || "Not signed in"}</span>
                         </p>
                       </div>
