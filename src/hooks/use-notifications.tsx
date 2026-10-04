@@ -211,8 +211,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       .from("notifications")
       .update({ read: true })
       .eq("company_id", companyId)
+      .eq("user_id", user?.id ?? "")
       .eq("read", false);
-  }, [companyId]);
+  }, [companyId, user?.id]);
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markManyAsRead, markAllAsRead }}>
