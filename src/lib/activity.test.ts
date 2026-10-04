@@ -37,7 +37,7 @@ describe("activityLink / groupOf", () => {
 });
 
 describe("groupNotifications", () => {
-  const n = (id: string, groupKey: string) => ({ id, groupKey, type: "order_placed" as const, title: "", description: "", timestamp: new Date(), read: false, link: "" });
+  const n = (id: string, groupKey: string) => ({ id, groupKey, type: "order_placed" as const, title: "", description: "", timestamp: new Date(), read: false, link: "", important: true });
   it("bundles same key, keeps order", () => {
     const g = groupNotifications([n("1", "a"), n("2", "b"), n("3", "a"), n("4", "")]);
     expect(g.map(x => x.items.map(i => i.id))).toEqual([["1", "3"], ["2"], ["4"]]);

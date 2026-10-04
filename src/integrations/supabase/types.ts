@@ -1226,6 +1226,7 @@ export type Database = {
           id: string
           link: string
           message: string
+          priority: string
           read: boolean
           title: string
           type: string
@@ -1239,6 +1240,7 @@ export type Database = {
           id?: string
           link?: string
           message: string
+          priority?: string
           read?: boolean
           title: string
           type?: string
@@ -1252,6 +1254,7 @@ export type Database = {
           id?: string
           link?: string
           message?: string
+          priority?: string
           read?: boolean
           title?: string
           type?: string

@@ -42,13 +42,20 @@ export function groupNotifications(list: Notification[]): Group[] {
 }
 
 export function NotificationCenter() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markManyAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [tabPick, setTab] = useState<"important" | "all">("important");
   const navigate = useNavigate();
   // Matches the Activity page's own access rule (money access).
   const canSeeActivity = useCan("see_money") === true;
-  const groups = useMemo(() => groupNotifications(notifications), [notifications]);
+  // Losing money access drops you back to Important straight away.
+  const tab = canSeeActivity ? tabPick : "important";
+  const allCount = notifications.filter(n => !n.read).length;
+  const groups = useMemo(
+    () => groupNotifications(tab === "important" ? notifications.filter(n => n.important) : notifications),
+    [notifications, tab],
+  );
 
   const openOne = (n: Notification) => {
     if (!n.read) markAsRead(n.id);
@@ -81,18 +88,35 @@ export function NotificationCenter() {
       <PopoverContent align="end" className="w-[calc(100vw-2rem)] max-w-[360px] p-0" sideOffset={8}>
         <div className="flex items-center justify-between border-b px-4 py-3">
           <h3 className="text-sm font-semibold">Notifications</h3>
-          {unreadCount > 0 && (
+          {(unreadCount > 0 || allCount > 0) && (
             <button onClick={markAllAsRead} className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
               <CheckCheck className="h-3.5 w-3.5" />
               Mark all read
             </button>
           )}
         </div>
+        {canSeeActivity && (
+          <div role="tablist" className="flex gap-1 border-b px-3 py-2">
+            {([["important", "Important"], ["all", "All activity"]] as const).map(([k, label]) => (
+              <button
+                key={k}
+                role="tab"
+                aria-selected={tab === k}
+                onClick={() => { setTab(k); setExpanded(null); }}
+                className={`touch-target rounded-md px-3 py-1 text-xs font-medium transition-colors ${tab === k ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {label}
+                {k === "important" && unreadCount > 0 && ` (${unreadCount})`}
+                {k === "all" && allCount > 0 && ` (${allCount > 99 ? "99+" : allCount})`}
+              </button>
+            ))}
+          </div>
+        )}
         <ScrollArea className="max-h-[420px]">
           {groups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
               <Bell className="h-8 w-8" strokeWidth={1} />
-              <p className="text-sm">No notifications yet</p>
+              <p className="text-sm">{tab === "all" ? "Nothing has happened yet" : "No notifications yet"}</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -107,7 +131,7 @@ export function NotificationCenter() {
                   <div key={g.key}>
                     <button
                       onClick={() => {
-                        if (isGroup) { setExpanded(isOpen ? null : g.key); g.items.forEach(n => !n.read && markAsRead(n.id)); }
+                        if (isGroup) { setExpanded(isOpen ? null : g.key); markManyAsRead(g.items.filter(n => !n.read).map(n => n.id)); }
                         else openOne(first);
                       }}
                       className={`flex w-full items-start gap-3 border-l-2 px-4 py-3 text-left transition-colors hover:bg-muted/50 ${config.colorClass} ${unread ? "bg-muted/30" : ""}`}
@@ -118,7 +142,7 @@ export function NotificationCenter() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className={`text-sm leading-tight ${unread ? "font-semibold" : "font-medium"}`}>
-                            {isGroup ? `${g.items.length} ${config.many}` : first.title}
+                            {isGroup ? (first.important ? `${g.items.length} ${config.many}` : `${g.items.length}× ${first.title}`) : first.title}
                           </p>
                           {unread && <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />}
                         </div>

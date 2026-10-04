@@ -31,6 +31,7 @@ export interface Notification {
   read: boolean;
   link: string;
   groupKey: string;
+  important: boolean;
 }
 
 interface NotificationContextValue {
@@ -38,6 +39,7 @@ interface NotificationContextValue {
   unreadCount: number;
   addNotification: (type: NotificationType, title: string, description: string) => void;
   markAsRead: (id: string) => void;
+  markManyAsRead: (ids: string[]) => void;
   markAllAsRead: () => void;
 }
 
@@ -54,6 +56,7 @@ interface DbNotification {
   user_id: string;
   link?: string;
   group_key?: string;
+  priority?: string;
 }
 
 function mapDbToNotif(row: DbNotification): Notification {
@@ -66,6 +69,7 @@ function mapDbToNotif(row: DbNotification): Notification {
     read: row.read,
     link: row.link || "",
     groupKey: row.group_key || "",
+    important: row.priority !== "normal",
   };
 }
 
@@ -73,7 +77,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user, companyId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read && n.important).length;
 
   // Fetch on mount / when companyId changes, with offline cache fallback
   // Realtime: pause when offline, resume when online
@@ -91,17 +95,25 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const load = async () => {
       try {
-        const { data } = await supabase
-          .from("notifications")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(100);
+        // Important alerts load on their own, so lots of everyday activity can't push
+        // an unread important alert out of the list (and off the badge).
+        const [imp, all] = await Promise.all([
+          supabase.from("notifications").select("*").eq("priority", "important")
+            .order("created_at", { ascending: false }).limit(100),
+          supabase.from("notifications").select("*")
+            .order("created_at", { ascending: false }).limit(200),
+        ]);
         if (!alive) return;
-        if (data) {
-          const mapped = data.map(mapDbToNotif);
-          setNotifications(mapped);
-          cacheData(companyId, "notifications", mapped);
-        }
+        if (imp.error && all.error) throw imp.error;
+        const byId = new Map<string, Notification>();
+        [...(imp.data ?? []), ...(all.data ?? [])].forEach((r) => byId.set(r.id, mapDbToNotif(r as DbNotification)));
+        // Keep anything that arrived live while this request was running.
+        setNotifications((prev) => {
+          prev.forEach((n) => { if (!byId.has(n.id)) byId.set(n.id, n); });
+          const merged = Array.from(byId.values()).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          cacheData(companyId, "notifications", merged);
+          return merged;
+        });
       } catch {
         // Offline — load from cache
         if (!navigator.onLine) {
@@ -183,6 +195,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     await supabase.from("notifications").update({ read: true }).eq("id", id);
   }, []);
 
+  const markManyAsRead = useCallback(async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const set = new Set(ids);
+    setNotifications((prev) => prev.map((n) => (set.has(n.id) ? { ...n, read: true } : n)));
+    for (let i = 0; i < ids.length; i += 200) {
+      await supabase.from("notifications").update({ read: true }).in("id", ids.slice(i, i + 200));
+    }
+  }, []);
+
   const markAllAsRead = useCallback(async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     if (!companyId) return;
@@ -190,11 +211,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       .from("notifications")
       .update({ read: true })
       .eq("company_id", companyId)
+      .eq("user_id", user?.id ?? "")
       .eq("read", false);
-  }, [companyId]);
+  }, [companyId, user?.id]);
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markAsRead, markManyAsRead, markAllAsRead }}>
       {children}
     </NotificationContext.Provider>
   );

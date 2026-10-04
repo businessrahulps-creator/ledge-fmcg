@@ -127,9 +127,10 @@ export default function Activity() {
     const ch = supabase.channel(`activity-page:${companyId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_log", filter: `company_id=eq.${companyId}` },
         () => {
-          if (to !== todayKey()) return;
+          // Totals always refresh (a payment dated earlier can change a past period);
+          // the list only reloads when the period includes today.
           window.clearTimeout(t);
-          t = window.setTimeout(() => { if (rowsRef.current.length <= PAGE) load(null); loadSummary(); }, 400);
+          t = window.setTimeout(() => { if (to === todayKey() && rowsRef.current.length <= PAGE) load(null); loadSummary(); }, 400);
         })
       .subscribe();
     return () => { window.clearTimeout(t); supabase.removeChannel(ch); };
