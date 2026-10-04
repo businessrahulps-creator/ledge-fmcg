@@ -351,6 +351,13 @@
       "when": 1791111060400,
       "tag": "0049_order_save_idem_review_fixes",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791111105369,
+      "tag": "0050_void_payment_lock_order_first",
+      "breakpoints": true
     }
   ]
 }
