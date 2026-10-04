@@ -153,7 +153,10 @@ export function readyOrders(input: {
     if (age < settings.lateDays) continue;
     const need = new Map<string, number>();
     for (const l of o.lines) need.set(l.productId, (need.get(l.productId) || 0) + l.quantity);
-    const short = [...need].filter(([pid, q]) => stockAt(pid, o.godownId) < q);
+    const nameOf = new Map(o.lines.map(l => [l.productId, l.productName] as const));
+    const short = [...need]
+      .filter(([pid, q]) => stockAt(pid, o.godownId) < q)
+      .map(([productId, quantity]) => ({ productId, quantity, productName: nameOf.get(productId) || "" }));
     const ready = short.length === 0;
     cards.push({
       kind: "order",
