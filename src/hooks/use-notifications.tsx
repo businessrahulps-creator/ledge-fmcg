@@ -3,10 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { cacheData, getCachedData } from "@/lib/offline-store";
 
-export type NotificationType = "order_placed" | "stock_alert" | "stock_low" | "team_update" | "credit_risk" | "order_pending" | "general";
+export type NotificationType =
+  | "order_placed" | "order_cancelled" | "order_failed" | "money_in" | "money_out" | "credit_note"
+  | "stock_alert" | "stock_low" | "team_update" | "credit_risk" | "order_pending" | "general";
 
 const notificationTypes = new Set<NotificationType>([
   "order_placed",
+  "order_cancelled",
+  "order_failed",
+  "money_in",
+  "money_out",
+  "credit_note",
   "stock_alert",
   "stock_low",
   "team_update",
@@ -22,6 +29,8 @@ export interface Notification {
   description: string;
   timestamp: Date;
   read: boolean;
+  link: string;
+  groupKey: string;
 }
 
 interface NotificationContextValue {
@@ -43,6 +52,8 @@ interface DbNotification {
   created_at: string;
   company_id: string;
   user_id: string;
+  link?: string;
+  group_key?: string;
 }
 
 function mapDbToNotif(row: DbNotification): Notification {
@@ -53,6 +64,8 @@ function mapDbToNotif(row: DbNotification): Notification {
     description: row.message,
     timestamp: new Date(row.created_at),
     read: row.read,
+    link: row.link || "",
+    groupKey: row.group_key || "",
   };
 }
 
@@ -79,7 +92,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           .from("notifications")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(50);
+          .limit(100);
         if (data) {
           const mapped = data.map(mapDbToNotif);
           setNotifications(mapped);

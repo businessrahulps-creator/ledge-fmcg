@@ -17,36 +17,60 @@ export type Database = {
       activity_log: {
         Row: {
           action: string
+          after: Json | null
+          amount: number | null
+          before: Json | null
+          changed_fields: string[]
           company_id: string
           created_at: string
           entity_id: string
           entity_type: string
           id: string
           metadata: Json
+          money_direction: string | null
+          outcome: string
+          request_id: string | null
+          source: string
           summary: string
           user_id: string
           user_name: string
         }
         Insert: {
           action: string
+          after?: Json | null
+          amount?: number | null
+          before?: Json | null
+          changed_fields?: string[]
           company_id: string
           created_at?: string
           entity_id: string
           entity_type: string
           id?: string
           metadata?: Json
+          money_direction?: string | null
+          outcome?: string
+          request_id?: string | null
+          source?: string
           summary: string
           user_id: string
           user_name?: string
         }
         Update: {
           action?: string
+          after?: Json | null
+          amount?: number | null
+          before?: Json | null
+          changed_fields?: string[]
           company_id?: string
           created_at?: string
           entity_id?: string
           entity_type?: string
           id?: string
           metadata?: Json
+          money_direction?: string | null
+          outcome?: string
+          request_id?: string | null
+          source?: string
           summary?: string
           user_id?: string
           user_name?: string
@@ -1195,9 +1219,12 @@ export type Database = {
       }
       notifications: {
         Row: {
+          activity_id: string | null
           company_id: string
           created_at: string
+          group_key: string
           id: string
+          link: string
           message: string
           read: boolean
           title: string
@@ -1205,9 +1232,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_id?: string | null
           company_id: string
           created_at?: string
+          group_key?: string
           id?: string
+          link?: string
           message: string
           read?: boolean
           title: string
@@ -1215,9 +1245,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_id?: string | null
           company_id?: string
           created_at?: string
+          group_key?: string
           id?: string
+          link?: string
           message?: string
           read?: boolean
           title?: string
@@ -3056,6 +3089,10 @@ export type Database = {
         Returns: undefined
       }
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
+      activity_summary: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       adjust_stock_atomic: {
         Args: {
           p_godown_id: string
@@ -3193,6 +3230,18 @@ export type Database = {
         }[]
       }
       is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
+      log_failed_attempt: {
+        Args: {
+          p_action: string
+          p_amount?: number
+          p_entity_id?: string
+          p_entity_type: string
+          p_outcome: string
+          p_reason: string
+          p_summary: string
+        }
+        Returns: undefined
+      }
       mark_order_delivered_atomic: {
         Args: { p_delivered_on?: string; p_note?: string; p_order_id: string }
         Returns: Json

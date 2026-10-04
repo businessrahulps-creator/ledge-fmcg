@@ -418,7 +418,7 @@ export default function NewOrder() {
         });
       }
       trackFirstOrderCreated();
-      addNotification("order_placed", "New Order Created", `${result.orderNumber} for ${dealer?.name} — ${formatCurrency(netOrderTotal)}`);
+      // The bell alert for a new order is sent by the server's activity history.
 
       if (isFirstEverOrder) {
         // Milestone: first order ever in this workspace

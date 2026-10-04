@@ -119,11 +119,6 @@ export function TeamRoster({ companyId }: Props) {
         toast.success(
           `${pickerFor.name || "Member"} is now ${article(JOB_BY_ROLE[newRole].label)} ${JOB_BY_ROLE[newRole].label}`,
         );
-        addNotification(
-          "team_update",
-          "Team role changed",
-          `${pickerFor.name} is now ${JOB_BY_ROLE[newRole].label}.`,
-        );
         setPickerFor(null);
         await refresh();
       }
@@ -144,7 +139,6 @@ export function TeamRoster({ companyId }: Props) {
         handleSupabaseError(error, { source: "team:member.delete", title: "Couldn't remove member" });
       } else {
         toast.success(`${removeFor.name} has been removed from the team.`);
-        addNotification("team_update", "Team member removed", `${removeFor.name} was removed.`);
         setRemoveFor(null);
         await refresh();
       }

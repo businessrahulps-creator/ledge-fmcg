@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { logError } from "@/utils/errorLog";
+import { logFailedAttempt } from "@/utils/activityLog";
 
 /**
  * Translate raw Supabase / Postgres errors into a single user-friendly toast,
@@ -26,6 +27,7 @@ export function handleSupabaseError(error: unknown, opts: HandleSupabaseErrorOpt
   const friendly = toFriendlyMessage(error);
   toast.error(opts.title, { description: friendly });
   logError({ source: opts.source, error, context: opts.context });
+  logFailedAttempt(opts.source, error, friendly, opts.context);
 }
 
 /** Map common Supabase / Postgres error shapes to a one-line, user-friendly message. */

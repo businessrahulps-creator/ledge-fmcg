@@ -225,6 +225,13 @@
       "when": 1791026473722,
       "tag": "0031_sold_excludes_cancelled_and_credit_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791101253845,
+      "tag": "0032_server_activity_audit",
+      "breakpoints": true
     }
   ]
 }
