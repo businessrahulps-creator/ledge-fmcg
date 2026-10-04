@@ -49,9 +49,9 @@ export function NotificationCenter() {
   const navigate = useNavigate();
   // Matches the Activity page's own access rule (money access).
   const canSeeActivity = useCan("see_money") === true;
-  const allCount = notifications.filter(n => !n.important && !n.read).length;
+  const allCount = notifications.filter(n => !n.read).length;
   const groups = useMemo(
-    () => groupNotifications(notifications.filter(n => (tab === "important" ? n.important : !n.important))),
+    () => groupNotifications(tab === "important" ? notifications.filter(n => n.important) : notifications),
     [notifications, tab],
   );
 
