@@ -126,7 +126,7 @@
 .lpx-body { font-size: 14.5px; line-height: 1.6; color: hsl(var(--mono-muted)); }
 .lpx-stat {
   font-family: "Playfair Display", Georgia, serif; font-weight: 600;
-  font-size: 32px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  font-size: clamp(24px, 7vw, 32px); white-space: nowrap; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
 }
 @media (min-width: 768px) { .lpx-stat { font-size: 40px; } }
 
