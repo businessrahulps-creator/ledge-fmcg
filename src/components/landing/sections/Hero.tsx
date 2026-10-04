@@ -10,7 +10,7 @@ export function Hero() {
           <div className="lg:col-span-6">
 
             <Reveal>
-              <Title as="h1" id="hero-title" hero text="Orders. Payments. Stock. Invoices. Reports. One mobile app." lines={["Orders. Payments. Stock.", "Invoices. Reports.", "One mobile app."]} />
+              <Title as="h1" id="hero-title" hero text="Orders. Payments. Stock. Invoices. Reports. One mobile app." lines={["Orders. Payments.", "Stock. Invoices.", "Reports.", "One mobile app."]} />
             </Reveal>
 
             <Reveal delay={0.15}>
