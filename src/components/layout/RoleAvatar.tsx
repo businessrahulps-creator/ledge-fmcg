@@ -1,4 +1,7 @@
+import { lazy, Suspense } from "react";
 import { Crown, ChartNoAxesCombined, Wallet, ShoppingBag, Eye, type LucideIcon } from "lucide-react";
+
+const OwnerBot = lazy(() => import("./OwnerBot"));
 
 interface RoleStyle { label: string; tile: string; Icon: LucideIcon }
 
@@ -16,6 +19,20 @@ export function roleStyle(role: string | null | undefined): RoleStyle {
 }
 
 export function RoleAvatar({ role, name, size = "sm" }: { role: string | null | undefined; name: string; size?: "sm" | "md" }) {
+  if (role === "super_admin") {
+    const px = size === "md" ? 44 : 32;
+    return (
+      <span className="inline-flex shrink-0 items-center justify-center" style={{ width: px, height: px }} aria-hidden>
+        <Suspense fallback={<InitialAvatar role={role} name={name} size={size} />}>
+          <OwnerBot size={px} />
+        </Suspense>
+      </span>
+    );
+  }
+  return <InitialAvatar role={role} name={name} size={size} />;
+}
+
+function InitialAvatar({ role, name, size = "sm" }: { role: string | null | undefined; name: string; size?: "sm" | "md" }) {
   const s = roleStyle(role);
   const box = size === "md" ? "h-11 w-11 text-[15px]" : "h-8 w-8 text-[13px]";
   const badge = size === "md" ? "h-5 w-5" : "h-4 w-4";
