@@ -64,7 +64,7 @@ export async function loadTallyBundle(p: ReportParams, choice: TallyChoice, comp
     input.creditNotes = fresh(cn.map((x: any): TaxDoc => ({ id: x.id, number: x.credit_note_number, date: x.note_date, party: x.distributors?.name ?? "", byRate: rates(x.id, impliedRate(x), n(x.subtotal)), cgst: n(x.cgst_amount), sgst: n(x.sgst_amount), igst: n(x.igst_amount), roundOff: n(x.round_off), total: n(x.grand_total), narration: x.reason })));
   }
   if (choice.receipts) {
-    const r = await fetchAllRows((a, b) => db.from("invoice_payments").select("id,paid_on,amount,mode,reference,distributors(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
+    const r = await fetchAllRows((a, b) => db.from("invoice_payments").select("id,paid_on,amount,mode,reference,distributors(name)").in("status", ["posted", "refund_due", "refunded"]).gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
     input.receipts = fresh(r.map((x: any): MoneyDoc => ({ id: x.id, date: x.paid_on, party: x.distributors?.name ?? "", amount: n(x.amount), mode: x.mode, reference: x.reference })));
   }
   if (choice.purchases) {

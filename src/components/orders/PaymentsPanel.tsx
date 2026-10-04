@@ -73,10 +73,15 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+  // True after an unconfirmed save: reopening the box must reuse the same save ID.
+  const keepKey = useRef(false);
+  const lastPayload = useRef("");
   const [extraAction, setExtraAction] = useState<"apply_other_bills" | "dealer_credit" | "refund" | null>(null);
 
   const api = useApi();
   const anchorId = invoiceId || orderId || "";
+  const anchorRef = useRef(anchorId);
+  anchorRef.current = anchorId;
   // Hold the stable function itself — `api` is a fresh object every render.
   const listPayments = api.payments.list;
 
@@ -132,6 +137,14 @@ export function PaymentsPanel({
       toast.error("Choose what to do with the extra money");
       return;
     }
+    // A retry may reuse the save ID only for the exact same payment; any change is a new payment.
+    const payload = JSON.stringify([value, mode, paidOn, mode === "cash" ? "" : reference, note, extra > 0 ? extraAction : null]);
+    let key = submitKey;
+    if (keepKey.current && lastPayload.current !== payload) {
+      key = crypto.randomUUID(); setSubmitKey(key);
+    }
+    lastPayload.current = payload;
+    const anchorAtSave = anchorId;
     setSaving(true);
     const ok = await api.payments.record({
       invoiceId,
@@ -143,11 +156,21 @@ export function PaymentsPanel({
       note,
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
-      idempotencyKey: `${anchorId}:${submitKey}`,
+      idempotencyKey: `${anchorId}:${key}`,
       extraAction: extra > 0 ? extraAction : null,
     });
     setSaving(false);
-    if (!ok) return;
+    if (!ok) {
+      // The save may have gone through even though the reply was lost. Keep the
+      // same save ID for the next try (the server then returns the same payment)
+      // and reload so a payment that did save shows up straight away.
+      keepKey.current = true;
+      if (anchorRef.current === anchorAtSave) await load();
+      return;
+    }
+    // The person moved to another bill while this saved: don't reload this panel with old data.
+    if (anchorRef.current !== anchorAtSave) { keepKey.current = false; return; }
+    keepKey.current = false;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
     setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setExtraAction(null);
@@ -182,7 +205,7 @@ export function PaymentsPanel({
         {cancelled ? (
           <p className="text-xs text-muted-foreground">This order was cancelled, so payments can't be added.</p>
         ) : canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setExtraAction(null); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); if (!keepKey.current) setSubmitKey(crypto.randomUUID()); setExtraAction(null); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
