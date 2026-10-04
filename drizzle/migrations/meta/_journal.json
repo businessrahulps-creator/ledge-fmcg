@@ -337,6 +337,13 @@
       "when": 1791110868932,
       "tag": "0047_payment_lock_order_first",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1791110932320,
+      "tag": "0048_dealer_balances_faster",
+      "breakpoints": true
     }
   ]
 }
