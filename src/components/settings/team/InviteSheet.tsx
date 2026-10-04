@@ -1,3 +1,4 @@
+import { RoleAvatar } from "@/components/layout/RoleAvatar";
 import { useMemo, useState } from "react";
 import { Mail, Check, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -165,7 +166,6 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                 <Label className="text-xs">What will they do?</Label>
                 <div className="space-y-2">
                   {INVITABLE_JOBS.map((j) => {
-                    const Icon = j.icon;
                     const selected = j.role === role;
                     return (
                       <button
@@ -180,16 +180,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                         )}
                       >
                         <div className="flex items-start gap-3">
-                          <div
-                            className={cn(
-                              "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
-                              selected
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-foreground/70",
-                            )}
-                          >
-                            <Icon className="h-4 w-4" strokeWidth={1.75} />
-                          </div>
+                          <RoleAvatar role={j.role} name={j.label} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-semibold">{j.label}</p>
