@@ -24,7 +24,7 @@ export const NAV = {
   targets: { title: "Targets", url: "/targets", icon: Target },
   dealers: { title: "Dealers", url: "/distributors", icon: UserRound },
   team: { title: "Sales Team", url: "/salespersons", icon: UserCheck },
-  company: { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
+  company: { title: "Company", url: "/company", icon: Landmark, cap: "manage_business" },
   business: { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
   activity: { title: "Activity", url: "/activity", icon: History, cap: "see_money" },
   reports: { title: "Reports", url: "/reports", icon: FileBarChart },

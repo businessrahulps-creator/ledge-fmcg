@@ -15,7 +15,7 @@ interface UseOverrideEditorOpts {
   onSaved?: () => void;
 }
 
-function defaultsForRole(defaults: DefaultsMap, role: RosterMember["role"]): CapState {
+export function defaultsForRole(defaults: DefaultsMap, role: RosterMember["role"]): CapState {
   const out: CapState = {};
   for (const { key } of TOGGLEABLE_CAPS) {
     const roles = defaults.get(key);
@@ -89,41 +89,16 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
     if (!member || saving) return;
     setSaving(true);
     try {
-      const toUpsert: Array<{ user_id: string; capability: CapabilityKey; granted: boolean }> = [];
-      const toDelete: CapabilityKey[] = [];
-
+      const overrides: Record<string, boolean> = {};
       for (const { key } of TOGGLEABLE_CAPS) {
-        const desired = !!current[key];
-        const def = !!roleDefaults[key];
-        if (desired === def) {
-          toDelete.push(key);
-        } else {
-          toUpsert.push({ user_id: member.userId, capability: key, granted: desired });
-        }
+        if (!!current[key] !== !!roleDefaults[key]) overrides[key] = !!current[key];
       }
-
-      const ops: Promise<{ error: unknown }>[] = [];
-      if (toDelete.length > 0) {
-        ops.push(
-          supabase
-            .from("user_capability_overrides")
-            .delete()
-            .eq("user_id", member.userId)
-            .in("capability", toDelete) as unknown as Promise<{ error: unknown }>,
-        );
-      }
-      if (toUpsert.length > 0) {
-        ops.push(
-          supabase
-            .from("user_capability_overrides")
-            .upsert(toUpsert, { onConflict: "user_id,capability" }) as unknown as Promise<{ error: unknown }>,
-        );
-      }
-
-      const results = await Promise.all(ops);
-      const failure = results.find((r) => r.error);
-      if (failure?.error) {
-        handleSupabaseError(failure.error, {
+      const { error } = await supabase.rpc("set_member_access_atomic", {
+        p_user: member.userId,
+        p_overrides: overrides,
+      });
+      if (error) {
+        handleSupabaseError(error, {
           source: "team:overrides.save",
           title: "Couldn't update access",
         });

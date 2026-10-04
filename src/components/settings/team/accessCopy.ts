@@ -1,4 +1,5 @@
 import type { Database } from "@/integrations/supabase/types";
+import { IndianRupee, ShoppingCart, Package, Tag, Map, ShoppingBag, ShieldAlert, Building2, type LucideIcon } from "lucide-react";
 import { JOB_BY_ROLE, type AppRole } from "./jobs";
 
 export type CapabilityKey = Database["public"]["Enums"]["capability_key"];
@@ -7,25 +8,19 @@ export interface ToggleableCap {
   key: CapabilityKey;
   label: string;
   sub?: string;
+  icon: LucideIcon;
 }
 
-/** Order matters — this is the exact order shown in the drawer. */
+/** The access "areas" an owner can switch on/off per person. Order = order shown. Server list: _access_toggleable(). */
 export const TOGGLEABLE_CAPS: ToggleableCap[] = [
-  { key: "place_orders", label: "Can place orders" },
-  { key: "manage_stock", label: "Can manage stock and warehouses" },
-  { key: "manage_schemes", label: "Can manage schemes and discounts" },
-  {
-    key: "see_money",
-    label: "Can see money",
-    sub: "Invoices, payments, outstanding",
-  },
-  {
-    key: "see_all_dealers",
-    label: "Can see all dealers",
-    sub: "Not just their own",
-  },
-  { key: "override_credit_limit", label: "Can override credit limits" },
-  { key: "manage_buying", label: "Can buy from suppliers", sub: "Purchase bills, supplier payments" },
+  { key: "see_money", label: "Money", sub: "Bills, collecting payments, returns, dues", icon: IndianRupee },
+  { key: "manage_buying", label: "Buying", sub: "Suppliers, purchase bills, supplier payments", icon: ShoppingCart },
+  { key: "manage_stock", label: "Stock & godowns", sub: "Add and adjust stock, godowns", icon: Package },
+  { key: "manage_schemes", label: "Offers & schemes", sub: "Create and edit offers", icon: Tag },
+  { key: "see_all_dealers", label: "All dealers", sub: "See every dealer, not just their own", icon: Map },
+  { key: "place_orders", label: "Place orders", sub: "Make new orders", icon: ShoppingBag },
+  { key: "override_credit_limit", label: "Approve credit limits", sub: "Let an order go past a dealer's limit", icon: ShieldAlert },
+  { key: "manage_business", label: "Business settings", sub: "Company details, GST, bank, invoice settings", icon: Building2 },
 ];
 
 export interface OwnerOnlyCap {
@@ -50,6 +45,7 @@ export const SHORT_CAP_LABEL: Record<CapabilityKey, string> = {
   manage_team: "manage the team",
   manage_billing: "manage billing",
   manage_buying: "buy from suppliers",
+  manage_business: "edit business settings",
   view_error_logs: "view error logs",
   see_own_performance_only: "see only their own numbers",
 };

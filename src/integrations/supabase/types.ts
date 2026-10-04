@@ -2812,6 +2812,7 @@ export type Database = {
       team_invites: {
         Row: {
           accepted_at: string | null
+          capability_overrides: Json
           company_id: string
           created_at: string
           email: string
@@ -2824,6 +2825,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          capability_overrides?: Json
           company_id: string
           created_at?: string
           email: string
@@ -2836,6 +2838,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          capability_overrides?: Json
           company_id?: string
           created_at?: string
           email?: string
@@ -3074,6 +3077,17 @@ export type Database = {
       }
     }
     Functions: {
+      _access_clean: {
+        Args: {
+          p_overrides: Json
+          p_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Json
+      }
+      _access_toggleable: {
+        Args: never
+        Returns: Database["public"]["Enums"]["capability_key"][]
+      }
       _buying_move_stock: {
         Args: {
           p_company: string
@@ -3414,12 +3428,25 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: Json
       }
-      send_team_invite: {
-        Args: {
-          p_email: string
-          p_role: Database["public"]["Enums"]["app_role"]
-        }
-        Returns: string
+      send_team_invite:
+        | {
+            Args: {
+              p_email: string
+              p_role: Database["public"]["Enums"]["app_role"]
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_email: string
+              p_overrides: Json
+              p_role: Database["public"]["Enums"]["app_role"]
+            }
+            Returns: string
+          }
+      set_member_access_atomic: {
+        Args: { p_overrides: Json; p_user: string }
+        Returns: Json
       }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
@@ -3456,6 +3483,7 @@ export type Database = {
         | "see_own_performance_only"
         | "place_orders"
         | "manage_buying"
+        | "manage_business"
       delivery_status: "pending" | "dispatched" | "delivered"
       invite_status: "pending" | "accepted" | "expired"
       payment_mode: "cash" | "bank_transfer" | "cheque" | "upi"
@@ -3606,6 +3634,7 @@ export const Constants = {
         "see_own_performance_only",
         "place_orders",
         "manage_buying",
+        "manage_business",
       ],
       delivery_status: ["pending", "dispatched", "delivered"],
       invite_status: ["pending", "accepted", "expired"],

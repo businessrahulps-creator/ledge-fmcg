@@ -41,11 +41,13 @@ export function AppSidebar() {
   const canManageBilling = useCan("manage_billing");
   const canManageTeam = useCan("manage_team");
   const canManageBuying = useCan("manage_buying");
+  const canManageBusiness = useCan("manage_business");
   const allowed: Record<string, boolean> = {
     see_money: canSeeMoney,
     manage_billing: canManageBilling,
     manage_team: canManageTeam,
     manage_buying: canManageBuying,
+    manage_business: canManageBusiness,
   };
   const visible = (items: NavItem[]) => items.filter(i => !i.cap || allowed[i.cap]);
 
