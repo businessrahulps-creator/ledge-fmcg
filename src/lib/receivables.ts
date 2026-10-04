@@ -266,7 +266,8 @@ export function collectedInPeriod(
   to: Date,
 ): number {
   const total = receipts.reduce((sum, r) => {
-    if (r.status !== "posted") return sum;
+    // Money that reached us counts, even if some must be given back (that leaves as its own money-out).
+    if (r.status === "voided") return sum;
     const d = new Date(`${(r.paidOn || "").slice(0, 10)}T00:00:00`);
     if (Number.isNaN(d.getTime()) || d < from || d > to) return sum;
     return sum + (r.amount || 0);

@@ -3,6 +3,7 @@ import type { ReportDef, ReportParams, ReportRow, ReportSection } from "./types"
 
 /** Money that reached us: kept, still to give back, or already given back (that leaves as its own "money out" line). */
 const MONEY_RECEIVED = ["posted", "refund_due", "refunded"];
+const nextDayIST = (day: string) => { const d = new Date(`${day}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 1); return `${d.toISOString().slice(0, 10)}T00:00:00+05:30`; };
 const istDate = (ts: string) => new Date(new Date(ts).getTime() + 330 * 60000).toISOString().slice(0, 10);
 import { r2, sumBy } from "./format";
 
@@ -165,7 +166,7 @@ export const REPORTS: ReportDef[] = [
       { key: "mode", header: "Mode" }, { key: "reference", header: "Reference" }, { key: "amount", header: "Amount", type: "money", total: true },
     ],
     fetch: async p => {
-      const rows = await fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,reference,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
+      const rows = await fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,reference,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").order("id").range(a, b));
       return one(rows.map((x: any) => ({ date: x.paid_on, dealer: x.distributors?.name ?? "", mode: modeWord[x.mode] ?? x.mode, reference: x.reference, amount: r2(x.amount) })));
     },
     summary: rows => [
@@ -292,8 +293,8 @@ export const REPORTS: ReportDef[] = [
     fetch: async p => {
       const [bills, pay, back, cn, pb, sp] = await Promise.all([
         salesBills(p),
-        fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
-        fetchAll((a, b) => db.from("invoice_payments").select("refunded_at,amount,distributors(name)").eq("status", "refunded").gte("refunded_at", `${p.from}T00:00:00+05:30`).lte("refunded_at", `${p.to}T23:59:59.999+05:30`).range(a, b)),
+        fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).order("id").range(a, b)),
+        fetchAll((a, b) => db.from("invoice_payments").select("refunded_at,amount,distributors(name)").eq("status", "refunded").gte("refunded_at", `${p.from}T00:00:00+05:30`).lt("refunded_at", nextDayIST(p.to)).order("id").range(a, b)),
         fetchAll((a, b) => db.from("credit_notes").select("credit_note_number,note_date,grand_total,distributors(name)").gte("note_date", p.from).lte("note_date", p.to).range(a, b)),
         fetchAll((a, b) => db.from("purchase_bills").select("bill_date,supplier_name,supplier_bill_no,grand_total").neq("status", "cancelled").gte("bill_date", p.from).lte("bill_date", p.to).range(a, b)),
         fetchAll((a, b) => db.from("supplier_payments").select("paid_on,amount,mode,suppliers(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
