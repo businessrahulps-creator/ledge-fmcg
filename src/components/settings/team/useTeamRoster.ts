@@ -13,6 +13,8 @@ export interface RosterMember {
   roleId: string;
   updatedAt: string | null;
   hasOverrides: boolean;
+  /** capability -> granted, only where it differs from the job's normal access */
+  overrides: Record<string, boolean>;
 }
 
 /** capability_key -> set of roles that have it by default */
@@ -61,18 +63,24 @@ export function useTeamRoster(companyId: string | null) {
         const userIds = profiles.map((p) => p.user_id);
         const [{ data: roles }, { data: overrides }] = await Promise.all([
           supabase.from("user_roles").select("id, user_id, role").in("user_id", userIds),
-          supabase.from("user_capability_overrides").select("user_id").in("user_id", userIds),
+          supabase.from("user_capability_overrides").select("user_id, capability, granted").in("user_id", userIds),
         ]);
 
         const roleMap = new Map<string, { roleId: string; role: AppRole }>(
           (roles || []).map((r) => [r.user_id, { roleId: r.id, role: r.role as AppRole }]),
         );
-        const overrideSet = new Set<string>((overrides || []).map((o) => o.user_id));
+        const overrideMap = new Map<string, Record<string, boolean>>();
+        (overrides || []).forEach((o) => {
+          const m = overrideMap.get(o.user_id) ?? {};
+          m[o.capability as string] = o.granted;
+          overrideMap.set(o.user_id, m);
+        });
 
         const list: RosterMember[] = profiles
           .filter((p) => roleMap.has(p.user_id))
           .map((p) => {
             const r = roleMap.get(p.user_id)!;
+            const ov = overrideMap.get(p.user_id) ?? {};
             return {
               id: p.id,
               userId: p.user_id,
@@ -82,7 +90,8 @@ export function useTeamRoster(companyId: string | null) {
               role: r.role,
               roleId: r.roleId,
               updatedAt: p.updated_at ?? null,
-              hasOverrides: overrideSet.has(p.user_id),
+              hasOverrides: Object.keys(ov).length > 0,
+              overrides: ov,
             };
           });
         setMembers(list);

@@ -327,10 +327,19 @@ function RosterCard({
             </button>
           </div>
         )}
-        <div className="hidden">
-        </div>
-
-        <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{job.oneLiner}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+          {member.hasOverrides && !isOwner && defaults.size > 0
+            ? buildAccessSummary(
+                member.name || member.email,
+                member.role,
+                new Set(
+                  TOGGLEABLE_CAPS.map((c) => c.key).filter((k) =>
+                    k in member.overrides ? member.overrides[k] : !!defaults.get(k)?.has(member.role),
+                  ),
+                ),
+              )
+            : job.oneLiner}
+        </p>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
           <span className="truncate">{member.email}</span>
