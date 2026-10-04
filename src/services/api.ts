@@ -18,7 +18,7 @@ export function useApi() {
       update: (id: string, updates: Partial<Order>) => data.updateOrder(id, updates),
       delete: (id: string) => data.deleteOrder(id),
       dispatchAndBill: data.dispatchAndBill,
-      cancel: (id: string, reason: string) => data.cancelOrder(id, reason),
+      cancel: (id: string, reason: string, advanceAction?: "apply_to_dues" | "refund" | null) => data.cancelOrder(id, reason, advanceAction),
       markDelivered: (id: string, note?: string) => data.markDelivered(id, note),
       updateStatus: (id: string, status: Partial<Pick<Order, "paymentStatus" | "deliveryStatus">>) =>
         data.updateOrder(id, status),
@@ -90,6 +90,7 @@ export function useApi() {
       list: data.listPayments,
       record: data.recordPayment,
       void: data.voidPayment,
+      markGivenBack: data.markMoneyGivenBack,
     },
   };
 }

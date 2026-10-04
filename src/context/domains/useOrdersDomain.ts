@@ -196,13 +196,15 @@ export function useOrdersDomain(deps: OrdersDeps) {
   }, [safeRefetch, deps.safeRefetchStockItems, deps.refetchInvoices, deps.log]);
 
   /** Cancels an order that has not left the warehouse yet. */
-  const cancelOrder = useCallback(async (orderId: string, reason: string): Promise<boolean> => {
+  const cancelOrder = useCallback(async (orderId: string, reason: string, advanceAction?: "apply_to_dues" | "refund" | null): Promise<boolean> => {
     if (!navigator.onLine) {
       toast.error("You need to be online to cancel an order");
       return false;
     }
     try {
-      const { error } = await supabase.rpc("cancel_order_atomic", { p_order_id: orderId, p_reason: reason });
+      const { error } = await supabase.rpc("cancel_order_atomic", {
+        p_order_id: orderId, p_reason: reason, ...(advanceAction ? { p_advance_action: advanceAction } : {}),
+      });
       if (error) throw error;
       await safeRefetch();
       const order = ordersRef.current.find(o => o.id === orderId);

@@ -104,6 +104,7 @@ export default function OrderDetail() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelAdvanceAction, setCancelAdvanceAction] = useState<"apply_to_dues" | "refund" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -363,13 +364,22 @@ export default function OrderDetail() {
       toast.error("Please write a short reason for cancelling.");
       return;
     }
+    if (money.received > 0 && !cancelAdvanceAction) {
+      toast.error("Choose what to do with the advance money.");
+      return;
+    }
     setCancelLoading(true);
-    const ok = await api.orders.cancel(order.id, cancelReason.trim());
+    const ok = await api.orders.cancel(order.id, cancelReason.trim(), money.received > 0 ? cancelAdvanceAction : null);
     setCancelLoading(false);
     if (ok) {
-      toast.success("Order cancelled", { description: `${order.orderNumber} has been cancelled.` });
+      toast.success("Order cancelled", {
+        description: cancelAdvanceAction === "refund" && money.received > 0
+          ? `${order.orderNumber} was cancelled. ${formatCurrency(money.received)} is marked to give back.`
+          : `${order.orderNumber} has been cancelled.`,
+      });
       setCancelOpen(false);
       setCancelReason("");
+      setCancelAdvanceAction(null);
     }
   };
 
@@ -992,6 +1002,27 @@ export default function OrderDetail() {
               rows={3}
             />
           </div>
+          {received > 0 && (
+            <div className="space-y-2" role="radiogroup" aria-label="What to do with the advance money">
+              <Label>{formatCurrency(received)} advance was paid on this order. What should happen to it?</Label>
+              {([
+                { value: "apply_to_dues", title: "Keep it against what the dealer owes", detail: "It lowers their unpaid amount on other bills." },
+                { value: "refund", title: "Give it back to the dealer", detail: "It shows as money to give back until you mark it given." },
+              ] as const).map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={cancelAdvanceAction === opt.value}
+                  onClick={() => setCancelAdvanceAction(opt.value)}
+                  className={`touch-target w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${cancelAdvanceAction === opt.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"}`}
+                >
+                  <span className="block font-medium">{opt.title}</span>
+                  <span className="block text-xs text-muted-foreground">{opt.detail}</span>
+                </button>
+              ))}
+            </div>
+          )}
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelLoading}>Keep order</Button>
             <Button variant="destructive" onClick={handleCancelOrder} loading={cancelLoading}>

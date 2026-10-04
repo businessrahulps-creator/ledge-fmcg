@@ -946,6 +946,7 @@ export type Database = {
           company_id: string
           created_at: string
           distributor_id: string
+          extra_kind: string
           id: string
           idempotency_key: string | null
           invoice_id: string | null
@@ -953,9 +954,12 @@ export type Database = {
           note: string
           order_id: string | null
           paid_on: string
+          parent_payment_id: string | null
           posted_at: string
           posted_by: string | null
           reference: string
+          refunded_at: string | null
+          refunded_by: string | null
           status: string
           void_reason: string
           voided_at: string | null
@@ -966,6 +970,7 @@ export type Database = {
           company_id: string
           created_at?: string
           distributor_id: string
+          extra_kind?: string
           id?: string
           idempotency_key?: string | null
           invoice_id?: string | null
@@ -973,9 +978,12 @@ export type Database = {
           note?: string
           order_id?: string | null
           paid_on?: string
+          parent_payment_id?: string | null
           posted_at?: string
           posted_by?: string | null
           reference?: string
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           void_reason?: string
           voided_at?: string | null
@@ -986,6 +994,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           distributor_id?: string
+          extra_kind?: string
           id?: string
           idempotency_key?: string | null
           invoice_id?: string | null
@@ -993,9 +1002,12 @@ export type Database = {
           note?: string
           order_id?: string | null
           paid_on?: string
+          parent_payment_id?: string | null
           posted_at?: string
           posted_by?: string | null
           reference?: string
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           void_reason?: string
           voided_at?: string | null
@@ -1056,6 +1068,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_parent_payment_id_fkey"
+            columns: ["parent_payment_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -1419,6 +1438,7 @@ export type Database = {
       orders: {
         Row: {
           booked_at: string | null
+          cancel_advance_action: string
           cancel_reason: string
           cancelled_at: string | null
           cancelled_by: string | null
@@ -1447,6 +1467,7 @@ export type Database = {
         }
         Insert: {
           booked_at?: string | null
+          cancel_advance_action?: string
           cancel_reason?: string
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1475,6 +1496,7 @@ export type Database = {
         }
         Update: {
           booked_at?: string | null
+          cancel_advance_action?: string
           cancel_reason?: string
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -3088,6 +3110,20 @@ export type Database = {
         Args: { p_product: string }
         Returns: undefined
       }
+      _place_extra_money: {
+        Args: {
+          p_action: string
+          p_amount: number
+          p_company: string
+          p_dealer: string
+          p_mode: Database["public"]["Enums"]["payment_mode"]
+          p_note: string
+          p_paid_on: string
+          p_parent: string
+          p_reference: string
+        }
+        Returns: Json
+      }
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
       activity_summary: {
         Args: { p_from: string; p_to: string }
@@ -3134,7 +3170,11 @@ export type Database = {
             Returns: Json
           }
       cancel_order_atomic: {
-        Args: { p_order_id: string; p_reason: string }
+        Args: {
+          p_advance_action?: string
+          p_order_id: string
+          p_reason: string
+        }
         Returns: Json
       }
       cancel_purchase_bill_atomic: {
@@ -3264,6 +3304,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_money_given_back_atomic: {
+        Args: { p_note?: string; p_payment_id: string }
+        Returns: Json
+      }
       mark_order_delivered_atomic: {
         Args: { p_delivered_on?: string; p_note?: string; p_order_id: string }
         Returns: Json
@@ -3354,6 +3398,7 @@ export type Database = {
       record_invoice_payment_atomic: {
         Args: {
           p_amount: number
+          p_extra_action?: string
           p_idempotency_key?: string
           p_invoice_id: string
           p_mode: Database["public"]["Enums"]["payment_mode"]
@@ -3366,6 +3411,7 @@ export type Database = {
       record_order_payment_atomic: {
         Args: {
           p_amount: number
+          p_extra_action?: string
           p_idempotency_key?: string
           p_mode: Database["public"]["Enums"]["payment_mode"]
           p_note?: string
