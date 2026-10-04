@@ -167,6 +167,7 @@ export default function Company() {
         .eq("id", companyId);
       if (error) {
         handleSupabaseError(error, { source: "crud:companies.removeLogo", title: "Failed to remove logo", context: { companyId } });
+        setLogoUploading(false);
         return;
       }
       setLogoUrl("");
@@ -194,9 +195,9 @@ export default function Company() {
       logError({ source: "crud:companies.update", error: "Workspace not set up (companyId missing)", severity: "warning" });
       return;
     }
-    if (values.orderPrefix !== savedPrefix) {
-      api.orders.setPrefix(sanitizeInput(values.orderPrefix));
-    }
+    if (savingRef.current) return;
+    savingRef.current = true;
+    try {
     const payload = {
       name: sanitizeInput(values.companyName),
       address: sanitizeInput(values.companyAddress || ""),
@@ -211,10 +212,17 @@ export default function Company() {
       bank_ifsc: sanitizeInput(values.bankIfsc),
       invoice_prefix: sanitizeInput(values.invoicePrefix),
     };
-    const { error } = await supabase.from("companies").update(payload).eq("id", companyId);
+    const { data: saved, error } = await supabase.from("companies").update(payload).eq("id", companyId).select("id");
     if (error) {
       handleSupabaseError(error, { source: "crud:companies.update", title: "Couldn't save company details", context: { companyId } });
       return;
+    }
+    if (!saved || saved.length === 0) {
+      toast.error("Couldn't save company details", { description: "You no longer have access to business settings. Ask the owner." });
+      return;
+    }
+    if (values.orderPrefix !== savedPrefix) {
+      api.orders.setPrefix(sanitizeInput(values.orderPrefix));
     }
     updateCompanyInfo({
       name: payload.name,
@@ -233,6 +241,9 @@ export default function Company() {
     // Reset RHF baseline so isDirty becomes false.
     reset(values);
     toast.success("Settings saved", { description: "Company profile has been updated." });
+    } finally {
+      savingRef.current = false;
+    }
   };
 
   const errMsg = (k: keyof CompanyFormValues) => errors[k]?.message as string | undefined;
