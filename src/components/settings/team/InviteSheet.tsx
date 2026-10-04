@@ -66,6 +66,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
   };
 
   const handleClose = (next: boolean) => {
+    if (!next && submitting) return;
     if (!next) reset();
     onOpenChange(next);
   };
@@ -83,6 +84,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
   const handleSubmit = async () => {
     const parsed = emailSchema.safeParse(email);
     if (!parsed.success) { setStep(1); return; }
+    if (submitting || defaults.size === 0) return;
     setSubmitting(true);
     const token = await sendInvite(parsed.data, role, diffFromDefaults(current, roleDefaults));
     setSubmitting(false);
@@ -130,7 +132,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                   current={current}
                   roleDefaults={roleDefaults}
                   jobLabel={JOB_BY_ROLE[role].label}
-                  onChange={(k, v) => setAreas({ ...current, [k]: v })}
+                  onChange={(k, v) => { if (!submitting) setAreas({ ...current, [k]: v }); }}
                 />
                 <p className="mt-4 text-[11px] text-muted-foreground">
                   Team, plan and billing always stay with the owner. You can change this any time from the team list.

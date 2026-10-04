@@ -31,6 +31,7 @@ function firstName(full: string): string {
 export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEditorOpts) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [initial, setInitial] = useState<CapState>({});
   const [current, setCurrent] = useState<CapState>({});
 
@@ -43,6 +44,7 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
     let alive = true;
     if (!member) return;
     setLoading(true);
+    setLoadFailed(false);
     supabase
       .from("user_capability_overrides")
       .select("capability, granted")
@@ -54,6 +56,9 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
             source: "team:overrides.load",
             title: "Couldn't load access settings",
           });
+          setLoadFailed(true);
+          setLoading(false);
+          return;
         }
         const overrides: CapState = {};
         (data || []).forEach((row) => {
@@ -86,7 +91,7 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
   }, [current, initial]);
 
   const save = useCallback(async () => {
-    if (!member || saving) return;
+    if (!member || saving || loadFailed || loading || defaults.size === 0) return false;
     setSaving(true);
     try {
       const overrides: Record<string, boolean> = {};
@@ -120,5 +125,7 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
     }
   }, [member, current, roleDefaults, saving, onSaved]);
 
-  return { loading, saving, current, initial, roleDefaults, setCap, reset, dirty, save };
+  return {
+    loading: loading || loadFailed || defaults.size === 0,
+    loadFailed, saving, current, initial, roleDefaults, setCap, reset, dirty, save };
 }

@@ -74,7 +74,7 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
                 What can {(member.name || "this person").split(/\s+/)[0]} do?
               </SheetTitle>
               <SheetDescription className="mt-0.5 text-xs text-muted-foreground">
-                {job.label}. Switch areas on or off — changes apply straight away.
+                {job.label}. Switch areas on or off — changes apply when you save.
               </SheetDescription>
             </div>
           </div>
