@@ -249,8 +249,8 @@
 .lpx-card--ink .lpx-check { background: hsl(0 0% 100%); color: hsl(var(--mono-ink)); }
 
 /* Founder quote */
-.lpx-quote { font-family: "Playfair Display", Georgia, serif; font-size: 22px; line-height: 1.5; letter-spacing: -0.01em; }
-@media (min-width: 768px) { .lpx-quote { font-size: 28px; } }
+.lpx-quote { font-family: "Playfair Display", Georgia, serif; font-weight: 400; font-size: 19px; line-height: 1.55; letter-spacing: 0; max-width: 52ch; }
+@media (min-width: 768px) { .lpx-quote { font-size: 22px; } }
 
 /* Arc component fit-ups inside the landing */
 .lpx .lpx-arc-fill > * { width: 100%; }
