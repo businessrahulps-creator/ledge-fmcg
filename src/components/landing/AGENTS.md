@@ -1,0 +1,1 @@
+- Landing sections use the shared black-and-white kit (kit.tsx + ledge-mono.css) and vendored uiarc pieces from src/components/arc, scoped under .arc-root.lpx; no gradients (guarded by brand-placement test) — why: every section must match the next.
