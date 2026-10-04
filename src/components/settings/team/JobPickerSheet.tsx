@@ -142,7 +142,7 @@ export function JobPickerSheet({
             <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 p-3 text-xs text-warning-foreground">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" strokeWidth={1.75} />
               <span>
-                They'll be able to manage billing and remove team members, including you.
+                They'll get full owner access, the same as you. This can't be undone from the app.
               </span>
             </div>
           )}
