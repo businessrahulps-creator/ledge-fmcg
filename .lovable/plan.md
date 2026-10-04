@@ -5,7 +5,7 @@ Rebuild every section of the public landing page below the menu, so it looks lik
 
 ## How we get there
 1. **Astra reviews the whole library (maximum setting).** Astra goes through every uiarc component, around 100 of them, plus the pro illustration section. For each one it decides whether it fits a landing page for Indian distributors, and which section it should go in. Fable 5.1 then reviews Astra's picks for taste and how easy they are to read.
-   - **Pro components:** we won't copy their code, because it's paid work under its maker's licence. Copying it could get your business into legal trouble. Instead, I'll draw our own original black-and-white illustrations that do the same job, matched to your business. They'll feel just as polished, and you'll own them outright. If you'd rather have the real pro versions, buying a uiarc Pro licence lets us use them properly.
+   - **Pro components, used with the maker's permission:** we'll include the pro illustrations and recolour them to black and white. Where the pro code shows on the site, I'll take it from there. If any piece is locked behind a sign-in, I'll ask you to paste its code or have your friend share it.
 2. **One look, locked, and every section matching.** Black ink on white, with greys for depth. No coloured backgrounds and no gradients. One dark section in the middle and one at the end for rhythm. The fonts stay the same as the app. Every section follows the same building blocks, so each one leads naturally into the next and nothing looks out of place:
    - the same page width and spacing between sections;
    - each section opens the same way: a small label, a headline and one line of text;
