@@ -141,7 +141,7 @@ export function LedgeFlowHub() {
       const si = STORIES.findIndex((s) => t >= s.start && t < s.end);
       if (si !== lastStory) { lastStory = si; setStoryIdx(si); }
 
-      // Hub pulse + counter at each story's arrival.
+      // Hub pulse + counter at each story’s arrival.
       const key = loop * 10 + STORIES.findIndex((s) => t >= s.hubAt && t < s.end);
       const hubStory = STORIES.findIndex((s) => t >= s.hubAt && t < s.end);
       if (hubStory >= 0 && key !== pulsedFor) {
@@ -209,7 +209,7 @@ export function LedgeFlowHub() {
       ref={wrapRef}
       className="lpx-flow"
       role="img"
-      aria-label="How Ledge works: a sales rep's order, a dealer's payment and a return all go into Ledge, which updates godown stock, the GST bill and the owner's dashboard."
+      aria-label="How Ledge works: a sales rep’s order, a dealer’s payment and a return all go into Ledge, which updates godown stock, the GST bill and the owner’s dashboard."
     >
       <div className="lpx-flow__stage" style={{ width: L.w, height: L.h, transform: `scale(${scale})`, marginBottom: (scale - 1) * L.h }}>
         <svg width={L.w} height={L.h} viewBox={`0 0 ${L.w} ${L.h}`} className="lpx-flow__svg" aria-hidden>
