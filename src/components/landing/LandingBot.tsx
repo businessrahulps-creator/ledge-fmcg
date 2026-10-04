@@ -27,8 +27,8 @@ export function LandingBot({ id, size = 44, working }: { id: LandingBotKey; size
             size={size}
             state={spec.sleeping ? "sleeping" : isWorking ? "working" : "default"}
             jumpEvery={0}
-            turn={0.6}
-            speed={0.8}
+            turn={0.4}
+            speed={0.55}
             paused={reduced}
             seed={seed}
           />

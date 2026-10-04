@@ -60,9 +60,9 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={spring.default}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 pt-3 md:pt-4 pointer-events-none ${onDark ? "lp-nav--on-dark" : ""}`}
         aria-label="Primary"
       >
@@ -71,12 +71,12 @@ export function Navbar() {
         <motion.div
           className="hidden md:flex items-center justify-center mx-auto px-4 pointer-events-none"
           animate={{ maxWidth: scrolled ? 920 : 1280 }}
-          transition={{ type: "spring", stiffness: 220, damping: 28 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.div
             className="flex items-center w-full pointer-events-auto"
             animate={{ gap: scrolled ? 0 : 12 }}
-            transition={{ type: "spring", stiffness: 220, damping: 28 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Left capsule */}
             <motion.div
@@ -86,7 +86,7 @@ export function Navbar() {
                 borderBottomRightRadius: scrolled ? 0 : 9999,
                 paddingRight: scrolled ? 8 : 12,
               }}
-              transition={{ type: "spring", stiffness: 220, damping: 28 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
               <Link to="/" className="flex items-center gap-2 pr-2" aria-label="Ledge home">
                 <img
@@ -112,7 +112,7 @@ export function Navbar() {
             <motion.div
               className="flex-1"
               animate={{ flexGrow: scrolled ? 0 : 1, width: scrolled ? 0 : "auto" }}
-              transition={{ type: "spring", stiffness: 220, damping: 28 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             />
 
             {/* Right capsule */}
@@ -124,7 +124,7 @@ export function Navbar() {
                 paddingLeft: scrolled ? 8 : 8,
                 marginLeft: scrolled ? -1 : 0,
               }}
-              transition={{ type: "spring", stiffness: 220, damping: 28 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="flex items-center gap-1">
                 {desktopLinks.map((l) => (

@@ -1,2 +1,3 @@
 - Landing sections use the shared black-and-white kit (kit.tsx + ledge-mono.css) and vendored uiarc pieces from src/components/arc, scoped under .arc-root.lpx; no gradients (guarded by brand-placement test) — why: every section must match the next.
 - Landing helper bots come from the single LANDING_BOTS map (bots.ts) via LandingBot; each shape once, in-app role shapes excluded (test-guarded) — why: bots are the page's only colour and must not repeat.
+- Landing motion: one weighty vocabulary (kit.tsx EASE/REVEAL_S/DUR + --lpx-ease in CSS); no springs with bounce, no fast snaps — why: owner wants slow, controlled, premium motion.

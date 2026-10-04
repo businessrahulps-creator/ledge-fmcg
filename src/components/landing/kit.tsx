@@ -69,9 +69,11 @@ export function SectionHead({ num, eyebrow, title, lines, lede, align = "center"
 }
 
 /** One calm motion vocabulary for the whole page (Apple-style: strong ease-out, no bounce, plays once). */
-export const EASE = [0.23, 1, 0.32, 1] as const;
-export const REVEAL_S = 0.6;
-export const STAGGER_S = 0.07;
+export const EASE = [0.16, 1, 0.3, 1] as const;
+export const REVEAL_S = 1.0;
+export const STAGGER_S = 0.12;
+/** One duration scale: press, hover, panel, reveal. */
+export const DUR = { press: 0.16, hover: 0.32, panel: 0.5, reveal: REVEAL_S } as const;
 
 /** Headline text. Static: titles never animate word by word. */
 export function Title({ as: Tag = "h2", id, text, lines, hero }: { as?: "h1" | "h2"; id?: string; text: string; lines?: string[]; hero?: boolean }) {
@@ -89,9 +91,9 @@ export function Reveal({ children, delay = 0, index = 0, className }: { children
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: REVEAL_S, ease: EASE, delay: delay + Math.min(index, 5) * STAGGER_S }}
     >
       {children}

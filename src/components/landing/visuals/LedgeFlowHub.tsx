@@ -134,7 +134,7 @@ export function LedgeFlowHub() {
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      if (visible && inView) clock += dt;
+      if (visible && inView) clock += dt * (LOOP / 12); // 12s real loop: slower, weightier
       const t = clock % LOOP;
       const loop = Math.floor(clock / LOOP);
 
@@ -153,9 +153,9 @@ export function LedgeFlowHub() {
       const ring = hubRingRef.current;
       if (ring) {
         const s = STORIES[hubStory];
-        const p = s ? clamp01((t - s.hubAt) / 0.5) : 1;
-        ring.style.opacity = String(s ? 0.55 * (1 - easeOut(p)) : 0);
-        ring.style.transform = `scale(${1 + 0.18 * easeOut(p)})`;
+        const p = s ? clamp01((t - s.hubAt) / 0.6) : 1;
+        ring.style.opacity = String(s ? 0.4 * (1 - easeOut(p)) : 0);
+        ring.style.transform = `scale(${1 + 0.1 * easeOut(p)})`;
       }
 
       // Dots + lines.
