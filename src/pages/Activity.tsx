@@ -14,6 +14,7 @@ import { todayKey, addDaysToKey } from "@/utils/dateKey";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { csvSafeText } from "@/lib/reports/exporters";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
+import { toast } from "sonner";
 import {
   ACTIVITY_GROUPS, activityLink, cashImpact, describeChanges, groupOf, periodRange, type ActivityRow, type Period,
 } from "@/lib/activity";
@@ -140,8 +141,17 @@ export default function Activity() {
     return () => { window.clearTimeout(t); supabase.removeChannel(ch); };
   }, [companyId, to, load, loadSummary]);
 
-  // Names stay in the Person list after you pick one (reset only when the period/business changes).
+  // Person list = everyone in the team + anyone seen in entries (e.g. people who have left).
   const [peopleSeen, setPeopleSeen] = useState<string[]>([]);
+  const [teamNames, setTeamNames] = useState<string[]>([]);
+  useEffect(() => {
+    if (!companyId) return;
+    let alive = true;
+    supabase.from("profiles").select("full_name").eq("company_id", companyId).then(({ data }) => {
+      if (alive) setTeamNames((data ?? []).map(p => p.full_name).filter(Boolean));
+    });
+    return () => { alive = false; };
+  }, [companyId]);
   useEffect(() => { setPeopleSeen([]); }, [companyId, from, to]);
   useEffect(() => {
     setPeopleSeen(prev => {
@@ -149,25 +159,35 @@ export default function Activity() {
       return next.size === prev.length ? prev : Array.from(next).sort();
     });
   }, [rows]);
-  const people = useMemo(() => (person !== "all" && !peopleSeen.includes(person) ? [...peopleSeen, person] : peopleSeen), [peopleSeen, person]);
+  const people = useMemo(() => {
+    const s = new Set([...teamNames, ...peopleSeen]);
+    if (person !== "all") s.add(person);
+    return Array.from(s).sort((a, b) => a.localeCompare(b));
+  }, [teamNames, peopleSeen, person]);
 
   const [exporting, setExporting] = useState(false);
   const download = async () => {
     if (!companyId) return;
     setExporting(true);
     try {
-      // Fetch every entry in the period (not just what's on screen), up to 20,000.
+      // Fetch every entry in the period (not just what's on screen), up to the limit.
+      const LIMIT = 50000;
       const all: ActivityRow[] = [];
       let cursor: Cursor = null;
+      let cut = false;
       for (;;) {
         const { data, error } = await buildQuery(cursor, 1000);
         if (error) throw error;
         const list = (data ?? []) as unknown as ActivityRow[];
         all.push(...list);
-        if (list.length < 1000 || all.length >= 20000) break;
+        if (list.length < 1000) break;
+        if (all.length >= LIMIT) { cut = true; break; }
         const last = list[list.length - 1];
         cursor = { at: last.created_at, id: last.id };
       }
+      if (cut) toast.warning(`Only the newest ${LIMIT.toLocaleString("en-IN")} entries were downloaded`, {
+        description: "Pick a shorter date range to get the rest.",
+      });
       const head = ["When (IST)", "Who", "What", "Type", "Result", "Money", ...(canMoney ? ["Amount"] : []), "Changes", "Reason"];
       const fmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
       const esc = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
