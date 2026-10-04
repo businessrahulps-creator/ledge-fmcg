@@ -51,54 +51,81 @@ export default function Activity() {
   const [hasMore, setHasMore] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
 
-  const { from, to } = useMemo(() => periodRange(period, todayKey(), customFrom, customTo), [period, customFrom, customTo]);
+  // India-time "today", refreshed at midnight / when the tab comes back.
+  const [today, setToday] = useState(todayKey());
+  useEffect(() => {
+    const tick = () => setToday(prev => (prev === todayKey() ? prev : todayKey()));
+    const id = window.setInterval(tick, 60_000);
+    window.addEventListener("focus", tick);
+    return () => { window.clearInterval(id); window.removeEventListener("focus", tick); };
+  }, []);
 
-  const load = useCallback(async (cursor: string | null) => {
+  const { from, to } = useMemo(() => periodRange(period, today, customFrom, customTo), [period, today, customFrom, customTo]);
+
+  // Each new filter/business bumps this; late replies from old requests are ignored.
+  const genRef = useRef(0);
+  const filterKey = `${companyId}|${from}|${to}|${group}|${person}|${failedOnly}`;
+
+  type Cursor = { at: string; id: string } | null;
+  const load = useCallback(async (cursor: Cursor) => {
     if (!companyId) return;
+    const gen = cursor ? genRef.current : ++genRef.current;
     setLoading(true);
     try {
-      // IST day boundaries
+      // IST day boundaries, half-open: [from 00:00, day after `to` 00:00)
       let q = supabase.from("activity_log").select("*")
         .eq("company_id", companyId)
         .gte("created_at", `${from}T00:00:00+05:30`)
-        .lte("created_at", `${to}T23:59:59.999+05:30`)
+        .lt("created_at", `${addDaysToKey(to, 1)}T00:00:00+05:30`)
         .order("created_at", { ascending: false }).order("id", { ascending: false })
         .limit(PAGE);
       if (group !== "all") q = q.in("entity_type", ACTIVITY_GROUPS[group].types);
       if (person !== "all") q = q.eq("user_name", person);
       if (failedOnly) q = q.neq("outcome", "ok");
-      if (cursor) q = q.lt("created_at", cursor);
+      // Entries saved at the same instant are not skipped between pages.
+      if (cursor) q = q.or(`created_at.lt.${cursor.at},and(created_at.eq.${cursor.at},id.lt.${cursor.id})`);
       const { data, error } = await q;
       if (error) throw error;
+      if (gen !== genRef.current) return;
       const list = (data ?? []) as unknown as ActivityRow[];
       setHasMore(list.length === PAGE);
-      setRows(prev => (cursor ? [...prev, ...list] : list));
+      setRows(prev => (cursor ? [...prev, ...list.filter(r => !prev.some(p => p.id === r.id))] : list));
     } catch (e) {
-      handleSupabaseError(e, { source: "activity:list", title: "Couldn't load activity" });
+      if (gen === genRef.current) handleSupabaseError(e, { source: "activity:list", title: "Couldn't load activity" });
     } finally {
-      setLoading(false);
+      if (gen === genRef.current) setLoading(false);
     }
-  }, [companyId, from, to, group, person, failedOnly]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey]);
 
-  useEffect(() => { load(null); }, [load]);
-
-  useEffect(() => {
+  const sumGenRef = useRef(0);
+  const loadSummary = useCallback(() => {
     if (!companyId) return;
+    const gen = ++sumGenRef.current;
     supabase.rpc("activity_summary", { p_from: from, p_to: to }).then(({ data, error }) => {
+      if (gen !== sumGenRef.current) return;
       if (error) { handleSupabaseError(error, { source: "activity:summary", title: "Couldn't load the totals" }); return; }
       setSummary(data as unknown as Summary);
     });
   }, [companyId, from, to]);
 
-  // Live: new entries appear at the top while you watch.
+  useEffect(() => { setRows([]); load(null); }, [load]);
+  useEffect(() => { setSummary(null); loadSummary(); }, [loadSummary]);
+
+  // Live: new entries and totals update while you watch (debounced).
   useEffect(() => {
     if (!companyId) return;
+    let t: number | undefined;
     const ch = supabase.channel(`activity-page:${companyId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_log", filter: `company_id=eq.${companyId}` },
-        () => { if (to === todayKey()) load(null); })
+        () => {
+          if (to !== todayKey()) return;
+          window.clearTimeout(t);
+          t = window.setTimeout(() => { load(null); loadSummary(); }, 400);
+        })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [companyId, to, load]);
+    return () => { window.clearTimeout(t); supabase.removeChannel(ch); };
+  }, [companyId, to, load, loadSummary]);
 
   const people = useMemo(() => Array.from(new Set(rows.map(r => r.user_name).filter(Boolean))).sort(), [rows]);
 
@@ -198,11 +225,14 @@ export default function Activity() {
                           {r.outcome !== "ok" && <span className="mr-1 font-semibold text-destructive">{r.outcome === "unknown" ? "Not sure if saved:" : "Failed:"}</span>}
                           {link ? <Link to={link} className="hover:underline">{r.summary}</Link> : r.summary}
                         </p>
-                        {r.amount != null && (canMoney || r.entity_type === "order") && (
-                          <span className={`num text-sm font-medium ${r.money_direction === "in" ? "text-success" : "text-foreground"}`}>
-                            {r.money_direction === "in" ? "+" : r.money_direction === "out" ? "−" : ""}{formatCurrency(Math.abs(Number(r.amount)))}
-                          </span>
-                        )}
+                        {r.amount != null && (canMoney || r.entity_type === "order") && (() => {
+                          const cash = cashImpact(r);
+                          return (
+                            <span className={`num text-sm font-medium ${cash != null && cash > 0 ? "text-success" : "text-foreground"}`}>
+                              {cash == null ? "" : cash > 0 ? "+" : cash < 0 ? "−" : ""}{formatCurrency(Math.abs(Number(r.amount)))}
+                            </span>
+                          );
+                        })()}
                       </div>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {r.user_name || "System"} · <SmartTime date={r.created_at} />
@@ -232,7 +262,7 @@ export default function Activity() {
           </ul>
           {hasMore && (
             <div className="border-t border-border p-2">
-              <Button variant="ghost" size="sm" className="w-full" disabled={loading} onClick={() => load(rows[rows.length - 1]?.created_at ?? null)}>
+              <Button variant="ghost" size="sm" className="w-full" disabled={loading} onClick={() => { const last = rows[rows.length - 1]; if (last) load({ at: last.created_at, id: last.id }); }}>
                 {loading ? "Loading…" : "Load more"}
               </Button>
             </div>
