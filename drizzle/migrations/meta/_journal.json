@@ -267,6 +267,13 @@
       "when": 1791104807078,
       "tag": "0037_bell_final_pass",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1791106381798,
+      "tag": "0038_capability_manage_business",
+      "breakpoints": true
     }
   ]
 }
