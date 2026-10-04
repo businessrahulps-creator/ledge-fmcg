@@ -61,7 +61,8 @@ function toFriendlyMessage(error: unknown): string {
   }
   // Business-rule refusals raised by our own database functions (RAISE EXCEPTION
   // → P0001) are already written as plain sentences for the user.
-  const raw = String(err?.message || "").trim();
+  // Machine prefixes like "EXTRA_CHOICE_NEEDED:" are for the app, not the person.
+  const raw = String(err?.message || "").trim().replace(/^[A-Z_]+_NEEDED:\s*/, "");
   if (code === "P0001" && raw && raw.length <= 200 && !/[_{}]|sql|relation|column/i.test(raw)) {
     return raw;
   }
