@@ -28,8 +28,17 @@ function memoLast<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) =
   };
 }
 
-const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice) =>
-  buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice } as any) as ReceivableRow[]);
+const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer) =>
+  buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer } as any) as ReceivableRow[]);
+/** Posted money not tied to a bill or order = dealer credit (owner chose "keep as dealer credit"). */
+const dealerCreditFor = memoLast((receipts: any[]) => {
+  const m = new Map<string, number>();
+  for (const r of receipts) {
+    if (r.status !== "posted" || r.invoiceId || r.orderId || !r.distributorId) continue;
+    m.set(r.distributorId, Math.round(((m.get(r.distributorId) || 0) + Number(r.amount || 0)) * 100) / 100);
+  }
+  return m;
+});
 const agingFor = memoLast((rows: ReceivableRow[], distributors: any) => agingFromReceivables(rows, distributors, { settleToBalance: true }));
 const advancesFor = memoLast((orders: any, invoices: any, receivedByOrder: any) =>
   advancesByDealer(orders, invoices, receivedByOrder));
@@ -50,9 +59,10 @@ export function useReceivables() {
     receipts, creditNotes, receivedByInvoice, receivedByOrder, creditedByInvoice, loading, reload,
   } = useCollections(companyId);
 
+  const dealerCredit = useMemo(() => dealerCreditFor(receipts), [receipts]);
   const rows = useMemo(
-    () => rowsFor(invoices, orders, receivedByInvoice, creditedByInvoice),
-    [invoices, orders, receivedByInvoice, creditedByInvoice],
+    () => rowsFor(invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit),
+    [invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit],
   );
   const aging = useMemo(() => agingFor(rows, distributors), [rows, distributors]);
   const advances = useMemo(

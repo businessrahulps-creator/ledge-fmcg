@@ -40,6 +40,8 @@ export interface ReceivablesInput {
   orders: Order[];
   receivedByInvoice: Map<string, number>;
   creditedByInvoice: Map<string, number>;
+  /** Dealer credit (extra money kept on the dealer, not tied to a bill), used up oldest bill first. */
+  dealerCreditByDealer?: Map<string, number>;
   today?: Date;
 }
 
@@ -55,6 +57,7 @@ export function buildReceivables({
   orders,
   receivedByInvoice,
   creditedByInvoice,
+  dealerCreditByDealer,
   today = new Date(),
 }: ReceivablesInput): ReceivableRow[] {
   const ordersById = new Map(orders.map(o => [o.id, o]));
@@ -86,6 +89,22 @@ export function buildReceivables({
       ageDays,
       bucket: bucketize(ageDays),
     });
+  }
+
+  // Dealer credit pays the oldest bills first, so a bill isn't shown overdue
+  // when the dealer already has money sitting with us.
+  if (dealerCreditByDealer && dealerCreditByDealer.size) {
+    const pool = new Map(dealerCreditByDealer);
+    const oldestFirst = [...rows].sort((a, b) => a.invoiceDate.localeCompare(b.invoiceDate) || a.invoiceNumber.localeCompare(b.invoiceNumber));
+    for (const r of oldestFirst) {
+      const left = pool.get(r.distributorId) || 0;
+      if (left <= 0) continue;
+      const use = Math.min(left, r.due);
+      r.received = Math.round((r.received + use) * 100) / 100;
+      r.due = Math.round((r.due - use) * 100) / 100;
+      pool.set(r.distributorId, Math.round((left - use) * 100) / 100);
+    }
+    return rows.filter(r => r.due > 0).sort((a, b) => b.ageDays - a.ageDays);
   }
 
   return rows.sort((a, b) => b.ageDays - a.ageDays);
