@@ -239,6 +239,13 @@
       "when": 1791102379732,
       "tag": "0033_activity_audit_qa_fixes",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1791102446521,
+      "tag": "0034_activity_audit_qa_fixes_2",
+      "breakpoints": true
     }
   ]
 }
