@@ -68,3 +68,15 @@
 - [ ] Paisa rounding alignment (offers, purchase GST, advances) — needs per-case review
 - [ ] Dashboard totals from server (dashboard_summary)
 - [ ] After publish: stop signed-in use of old 8-arg order save
+
+## Oct 4 pass: pending fixes, seed to today, Astra
+- [x] Payment retry after a lost reply reuses the same save ID (only when nothing changed)
+- [x] To-give-back money counts as collected; given back shows as money out (reports, day book, Tally, Activity)
+- [x] Dealer credit, kept advances and returns after paying clear oldest bills (no false overdue)
+- [x] Seed data 20 Sep to 4 Oct through the app's normal saves, all tagged [seed], every action shows in Activity
+- [x] Activity: one entry per action (no ₹0 "created" + "updated" pair, no doubled buying entries)
+- [x] Astra pass: retry payload binding, stale panel reload, report ordering, refund day boundary, money-collected helper
+- [ ] Paisa rounding (offer discounts, purchase GST, advances): one shared rule
+- [ ] Server-side dashboard/money totals (speed)
+- [ ] Payment box and bill chips don't yet use dealer credit (Astra #2)
+- [ ] Unpaid-by-age "oldest" after settling, and refresh at midnight (Astra #8, #9)
