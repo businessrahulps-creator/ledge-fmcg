@@ -54,6 +54,7 @@
 - [x] Old "send" path without stock/credit checks still exists in code (no button uses it)
 
 ## Activity final pass (Oct 2026)
-- [ ] Every recorded action shows in the bell (Important / All tabs, badge for important only)
-- [ ] Re-check 14 earlier Activity fixes live
-- [ ] Astra + Fable new-bug review, fix real findings
+- [x] Every recorded action shows in the bell (Important / All tabs, badge for important only)
+- [x] Re-check 14 earlier Activity fixes live
+- [x] Astra + Fable new-bug review, fix real findings
+- [ ] Bell reaching a second team member (needs a second person invited)
