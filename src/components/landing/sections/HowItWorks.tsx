@@ -1,119 +1,59 @@
-import { Smartphone, LayoutDashboard, Truck } from "lucide-react";
-import { motion } from "framer-motion";
-import { AnimateIn } from "../AnimateIn";
-import { ease, duration } from "@/lib/motion";
-import {
-  OrderBuildVisual,
-  StockHealthVisual,
-  DispatchInvoiceVisual,
-} from "../visuals/StepMicroVisuals";
+import { useEffect, useRef, useState } from "react";
+import { useInView, useReducedMotion } from "framer-motion";
+import { Stepper } from "@/components/arc/stepper/stepper";
+import { OrderBuildVisual, StockHealthVisual, DispatchInvoiceVisual } from "../visuals/StepMicroVisuals";
+import { Section, SectionHead, Reveal } from "../kit";
 
 const steps = [
-  {
-    badge: "01",
-    icon: Smartphone,
-    title: "Field team places an order in 60 seconds.",
-    description: "Pick dealer, add products, submit. Sequential order number, instantly.",
-    Visual: OrderBuildVisual,
-  },
-  {
-    badge: "02",
-    icon: LayoutDashboard,
-    title: "Your stock health stays in the green.",
-    description: "Per-SKU, per-godown health bars. Low stock surfaces before the dealer call.",
-    Visual: StockHealthVisual,
-  },
-  {
-    badge: "03",
-    icon: Truck,
-    title: "Dispatch → stock deducts → GST invoice generates.",
-    description: "One tap. Accountant skips Tally. CGST/SGST/IGST calculated automatically.",
-    Visual: DispatchInvoiceVisual,
-  },
+  { badge: "01", title: "Field team places an order in 60 seconds.", short: "Order", description: "Pick dealer, add products, submit. Sequential order number, instantly.", Visual: OrderBuildVisual },
+  { badge: "02", title: "Your stock health stays in the green.", short: "Stock", description: "Per-SKU, per-godown health bars. Low stock surfaces before the dealer call.", Visual: StockHealthVisual },
+  { badge: "03", title: "Dispatch → stock deducts → GST invoice generates.", short: "Bill", description: "One tap. Accountant skips Tally. CGST/SGST/IGST calculated automatically.", Visual: DispatchInvoiceVisual },
 ];
 
 export function HowItWorks() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-120px" });
+  const reduce = useReducedMotion();
+  const [current, setCurrent] = useState(reduce ? steps.length : 0);
+
+  useEffect(() => {
+    if (!inView || reduce) return;
+    const timers = steps.map((_, i) => window.setTimeout(() => setCurrent(i + 1), 700 * (i + 1)));
+    return () => timers.forEach(clearTimeout);
+  }, [inView, reduce]);
+
   return (
-    <section id="how-it-works" className="relative lp-section-paper lp-rhythm overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1]">
-              Three things happen.
-              <br />
-              All in under 60 seconds.
-            </h2>
-          </div>
-        </AnimateIn>
+    <Section id="how-it-works" ground="grey" labelledBy="how-title">
+      <SectionHead
+        num="02"
+        eyebrow="How it works"
+        id="how-title"
+        title="Three things happen. All in under 60 seconds."
+        lines={["Three things happen.", "All in under 60 seconds."]}
+      />
 
-        <div className="relative">
-          {/* Progress rail - horizontal on desktop, vertical on mobile.
-              The one Electric accent this section gets. */}
-          <div
-            aria-hidden
-            className="pointer-events-none hidden md:block absolute left-0 right-0 top-[22px] h-px bg-border"
-          >
-            <motion.div
-              className="h-px w-full bg-primary origin-left"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: duration.hero, ease: ease.emphasized }}
-            />
-          </div>
-          <div
-            aria-hidden
-            className="pointer-events-none md:hidden absolute left-[21px] top-0 bottom-0 w-px bg-border"
-          >
-            <motion.div
-              className="w-px h-full bg-primary origin-top"
-              initial={{ scaleY: 0 }}
-              whileInView={{ scaleY: 1 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: duration.hero, ease: ease.emphasized }}
-            />
-          </div>
-
-
-          <div className="relative grid grid-cols-1 md:grid-cols-3 items-stretch gap-10 md:gap-8 lg:gap-10">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.badge}
-                className="relative pl-14 md:pl-0 flex flex-col h-full"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{
-                  duration: duration.medium,
-                  ease: ease.decelerate,
-                  delay: 0.12 + i * 0.12,
-                }}
-              >
-                {/* Node */}
-                <div className="absolute left-0 top-0 md:relative md:mb-6">
-                  <span className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-secondary border border-border text-foreground">
-                    <step.icon size={17} strokeWidth={2} />
-                  </span>
-                </div>
-
-                <span className="font-heading font-semibold text-[11.5px] text-muted-foreground tracking-[0.18em] block">
-                  STEP {step.badge}
-                </span>
-                <h3 className="font-heading font-semibold text-[20px] md:text-[22px] text-foreground tracking-[-0.02em] leading-[1.22] mt-2.5">
-                  {step.title}
-                </h3>
-                <p className="font-body text-[14.5px] text-muted-foreground leading-[1.55] mt-2.5">
-                  {step.description}
-                </p>
-
-                <div className="mt-6 flex-1 flex">
-                  <step.Visual />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+      <div ref={ref} className="max-w-3xl mx-auto mb-12 md:mb-14">
+        <Stepper
+          label="From order to bill"
+          completeLabel="Order placed, stock updated, bill sent"
+          current={current}
+          details="current"
+          steps={steps.map((s) => ({ label: s.short, description: s.title }))}
+        />
       </div>
-    </section>
+
+      <div className="lpx-grid lpx-grid-3">
+        {steps.map((s, i) => (
+          <Reveal key={s.badge} delay={i * 0.08}>
+            <div className="lpx-card lpx-card--hover">
+              <span className="text-[11.5px] font-semibold tracking-[0.18em] lpx-muted">STEP {s.badge}</span>
+              <h3 className="lpx-h3 mt-3 text-[19px]">{s.title}</h3>
+              <p className="lpx-body mt-2">{s.description}</p>
+              <div className="mt-6 flex-1 flex"><s.Visual /></div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </Section>
   );
 }
