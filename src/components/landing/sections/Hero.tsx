@@ -8,10 +8,6 @@ export function Hero() {
       <div className="lpx-container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
           <div className="lg:col-span-6">
-            <span className="lpx-eyebrow flex">
-              <span className="hidden sm:inline">The operating system for India’s distribution businesses</span>
-              <span className="sm:hidden">OS for India’s distributors</span>
-            </span>
 
             <Reveal>
               <Title as="h1" id="hero-title" hero text="Orders. Payments. Stock. Invoices. Reports. One mobile app." lines={["Orders. Payments. Stock.", "Invoices. Reports.", "One mobile app."]} />
