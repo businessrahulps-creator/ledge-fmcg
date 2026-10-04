@@ -281,6 +281,20 @@
       "when": 1791106424374,
       "tag": "0039_member_access_areas",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791108221778,
+      "tag": "0040_team_access_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791108513851,
+      "tag": "0041_accept_invite_rejoin",
+      "breakpoints": true
     }
   ]
 }

@@ -36,7 +36,7 @@ interface Props {
 export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }: Props) {
   const isMobile = useIsMobile();
   const job = JOB_BY_ROLE[member.role];
-  const { loading, saving, current, roleDefaults, setCap, dirty, save } = useOverrideEditor({
+  const { loading, loadFailed, saving, current, roleDefaults, setCap, dirty, save } = useOverrideEditor({
     member,
     defaults,
     onSaved: () => {
@@ -74,14 +74,16 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
                 What can {(member.name || "this person").split(/\s+/)[0]} do?
               </SheetTitle>
               <SheetDescription className="mt-0.5 text-xs text-muted-foreground">
-                {job.label}. Switch areas on or off — changes apply straight away.
+                {job.label}. Switch areas on or off — changes apply when you save.
               </SheetDescription>
             </div>
           </div>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-5">
-          {loading ? (
+          {loadFailed ? (
+            <p className="p-5 text-sm text-muted-foreground">Couldn't load their access. Close this and try again.</p>
+          ) : loading ? (
             <div className="space-y-2">
               {TOGGLEABLE_CAPS.map((c) => (
                 <div key={c.key} className="h-14 animate-pulse rounded-md bg-muted/40" />

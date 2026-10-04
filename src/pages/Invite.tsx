@@ -61,7 +61,7 @@ export default function Invite() {
       }
 
       const signedInEmail = (user.email || "").toLowerCase();
-      if (signedInEmail !== preview.email.toLowerCase()) {
+      if (!preview.email || signedInEmail !== preview.email.toLowerCase()) {
         setView({ kind: "email_mismatch", preview, signedInEmail });
         return;
       }

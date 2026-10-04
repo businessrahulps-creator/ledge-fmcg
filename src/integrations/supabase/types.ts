@@ -3143,6 +3143,13 @@ export type Database = {
         Args: { p_bill_id: string; p_reason: string }
         Returns: Json
       }
+      change_member_role_atomic: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user: string
+        }
+        Returns: Json
+      }
       check_aging_transitions: { Args: never; Returns: Json }
       convert_prospect_to_dealer_atomic: {
         Args: { p_prospect_id: string }

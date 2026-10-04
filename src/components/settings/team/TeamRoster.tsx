@@ -110,15 +110,18 @@ export function TeamRoster({ companyId }: Props) {
     if (!pickerFor) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("user_roles")
-        .update({ role: newRole })
-        .eq("id", pickerFor.roleId);
+      const { data, error } = await supabase.rpc("change_member_role_atomic", {
+        p_user: pickerFor.userId,
+        p_role: newRole,
+      });
       if (error) {
         handleSupabaseError(error, { source: "team:role.update", title: "Couldn't change job" });
       } else {
         toast.success(
           `${pickerFor.name || "Member"} is now ${article(JOB_BY_ROLE[newRole].label)} ${JOB_BY_ROLE[newRole].label}`,
+          (data as { custom_access_cleared?: boolean } | null)?.custom_access_cleared
+            ? { description: "Their custom access was reset to the new job's areas." }
+            : undefined,
         );
         setPickerFor(null);
         await refresh();
@@ -288,7 +291,8 @@ function RosterCard({
   const job = JOB_BY_ROLE[member.role];
   const Icon = job.icon;
 
-  const lockedPill = isSelf || isLastOwner;
+  const isOwner = member.role === "super_admin";
+  const lockedPill = isSelf || isLastOwner || isOwner;
   const updatedAt = member.updatedAt ? new Date(member.updatedAt) : null;
   const isInactive =
     !!updatedAt && Date.now() - updatedAt.getTime() > INACTIVE_THRESHOLD_MS;
@@ -349,7 +353,7 @@ function RosterCard({
           <button
             type="button"
             disabled={lockedPill}
-            onClick={onChangeJob}
+            onClick={lockedPill ? undefined : onChangeJob}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-[background-color,border-color] duration-fast ease-fluent",
               lockedPill
@@ -359,8 +363,8 @@ function RosterCard({
             title={
               isSelf
                 ? "You can't change your own job"
-                : isLastOwner
-                  ? "Can't demote the last Owner"
+                : isOwner
+                  ? "An owner's job can't be changed"
                   : "Tap to change job"
             }
           >
@@ -371,10 +375,10 @@ function RosterCard({
         </div>
       </div>
 
-      {!isSelf && (
+      {!isSelf && !isOwner && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+            <Button variant="ghost" size="icon" className="touch-target h-8 w-8 shrink-0" aria-label={`More actions for ${member.name || member.email}`}>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

@@ -66,6 +66,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
   };
 
   const handleClose = (next: boolean) => {
+    if (!next && submitting) return;
     if (!next) reset();
     onOpenChange(next);
   };
@@ -83,6 +84,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
   const handleSubmit = async () => {
     const parsed = emailSchema.safeParse(email);
     if (!parsed.success) { setStep(1); return; }
+    if (submitting || defaults.size === 0) return;
     setSubmitting(true);
     const token = await sendInvite(parsed.data, role, diffFromDefaults(current, roleDefaults));
     setSubmitting(false);
@@ -130,7 +132,7 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                   current={current}
                   roleDefaults={roleDefaults}
                   jobLabel={JOB_BY_ROLE[role].label}
-                  onChange={(k, v) => setAreas({ ...current, [k]: v })}
+                  onChange={(k, v) => { if (!submitting) setAreas({ ...current, [k]: v }); }}
                 />
                 <p className="mt-4 text-[11px] text-muted-foreground">
                   Team, plan and billing always stay with the owner. You can change this any time from the team list.
@@ -215,9 +217,9 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                   {step === 2 ? <><ArrowLeft className="h-4 w-4" /> Back</> : "Cancel"}
                 </Button>
                 {step === 1 ? (
-                  <Button className="flex-1" onClick={goNext} disabled={!email}>Next: choose access</Button>
+                  <Button className="flex-1" onClick={goNext} disabled={!email || defaults.size === 0}>Next: choose access</Button>
                 ) : (
-                <Button className="flex-1" onClick={handleSubmit} disabled={submitting || !email}>
+                <Button className="flex-1" onClick={handleSubmit} disabled={submitting || !email || defaults.size === 0}>
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> Sending…
