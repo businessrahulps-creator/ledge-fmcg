@@ -102,12 +102,12 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
       for (const { key } of TOGGLEABLE_CAPS) {
         if (!!initial[key] !== !!roleDefaults[key]) expected[key] = !!initial[key];
       }
-      const { error } = await supabase.rpc("set_member_access_checked" as never, {
+      const { error } = await supabase.rpc("set_member_access_checked", {
         p_user: member.userId,
         p_overrides: overrides,
         p_expected: expected,
         p_expected_role: member.role,
-      } as never);
+      });
       if (error) {
         handleSupabaseError(error, {
           source: "team:overrides.save",
