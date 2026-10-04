@@ -1,7 +1,7 @@
 import { Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { spring, staggerContainer, fadeUp } from "@/lib/motion";
+import { staggerContainer, fadeUp } from "@/lib/motion";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
@@ -35,7 +35,7 @@ export function Footer() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={spring.premium}
+          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
           className="mb-14 md:mb-16 max-w-md"
         >
           <Link to="/" aria-label="Ledge home" className="inline-flex items-center">
@@ -91,7 +91,7 @@ export function Footer() {
           variants={staggerContainer(0.06)}
         >
           {columns.map((col) => (
-            <motion.div key={col.title} variants={fadeUp} transition={spring.default}>
+            <motion.div key={col.title} variants={fadeUp} transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}>
               <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-foreground/70 uppercase mb-4">
                 {col.title}
               </h4>
@@ -126,7 +126,7 @@ export function Footer() {
           {/* Status & Infrastructure column */}
           <motion.div
             variants={fadeUp}
-            transition={spring.default}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col gap-3"
           >
             <h4 className="font-body font-semibold text-[12px] tracking-[0.08em] text-foreground/70 uppercase mb-1">

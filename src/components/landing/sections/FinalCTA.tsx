@@ -1,7 +1,6 @@
 import { ArrowRight } from "lucide-react";
-import { InViewTitle } from "@/components/arc/in-view-title/in-view-title";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { Btn, Reveal } from "../kit";
+import { Btn, Reveal, Title } from "../kit";
 
 export function FinalCTA() {
   return (
@@ -9,17 +8,12 @@ export function FinalCTA() {
       <div className="lpx-container">
         <div className="max-w-3xl mx-auto text-center">
           <span className="lpx-eyebrow">
-            <span className="lpx-dot lpx-dot--live" aria-hidden />
+            <span className="lpx-dot" aria-hidden />
             Used by Indian businesses across 12 states
           </span>
-          <InViewTitle
-            as="h2"
-            id="final-title"
-            variant="blur"
-            text="One app. Every role. Total clarity."
-            lines={["One app. Every role.", "Total clarity."]}
-            className="lpx-title lpx-title--hero"
-          />
+          <Reveal>
+            <Title id="final-title" hero text="One app. Every role. Total clarity." lines={["One app. Every role.", "Total clarity."]} />
+          </Reveal>
           <Reveal delay={0.1}>
             <p className="lpx-lede">
               Run your distribution business from one app. Start free for 30&nbsp;days.

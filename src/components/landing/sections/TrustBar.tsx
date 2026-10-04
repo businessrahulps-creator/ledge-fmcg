@@ -16,7 +16,7 @@ export function TrustBar() {
       <div className="lpx-container">
         <div className="lpx-marquee" aria-label="Businesses using Ledge">
           <div className="lpx-marquee__track">
-            {[...companies, ...companies].map((name, i) => (
+            {companies.map((name, i) => (
               <span key={i} aria-hidden={i >= companies.length} className="font-heading text-[18px] md:text-[20px] font-semibold lpx-faint whitespace-nowrap">
                 {name}
               </span>

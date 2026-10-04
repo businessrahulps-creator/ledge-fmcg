@@ -1,10 +1,5 @@
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ShoppingCart, IndianRupee, PackageMinus, FileText, Truck } from "lucide-react";
-import { InViewTitle } from "@/components/arc/in-view-title/in-view-title";
-import { AnimatedCounter } from "@/components/arc/animated-counter/animated-counter";
-import { AnnouncementBar } from "@/components/arc/announcement-bar/announcement-bar";
-import { Btn, Reveal } from "../kit";
+import { Btn, Reveal, Title } from "../kit";
 
 type FeedEvent = { id: number; icon: typeof ShoppingCart; title: string; meta: string; amount: string; solid?: boolean };
 
@@ -20,13 +15,7 @@ const SOURCE: Omit<FeedEvent, "id">[] = [
 
 /** Live "today" feed: the hero’s product picture, built in the Arc realtime-stream style. */
 function LiveFeed() {
-  const reduce = useReducedMotion();
-  const [events, setEvents] = useState<FeedEvent[]>(() => SOURCE.slice(0, 4).map((e, i) => ({ ...e, id: i })));
-  const [orders, setOrders] = useState(46);
-  const [collected, setCollected] = useState(824600);
-
-  // Sample screen only · no pretend live activity (keeps the page honest).
-  void setEvents; void setOrders; void setCollected; void useEffect;
+  const events: FeedEvent[] = SOURCE.slice(0, 4).map((e, i) => ({ ...e, id: i }));
 
   return (
     <div className="lpx-card lpx-card--pad-lg" role="img" aria-label="Sample screen showing a day of orders, payments, stock and bills in Ledge">
@@ -41,26 +30,17 @@ function LiveFeed() {
       <div className="grid grid-cols-2 gap-3 mt-5" aria-hidden>
         <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Orders today</div>
-          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}><AnimatedCounter value={orders} locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}>46</div>
         </div>
         <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Money collected</div>
-          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}>₹8,24,600</div>
         </div>
       </div>
 
       <ul className="lpx-feed mt-4" aria-hidden>
-        <AnimatePresence initial={false}>
-          {events.map((e) => (
-            <motion.li
-              key={e.id}
-              layout={!reduce}
-              initial={reduce ? false : { opacity: 0, y: -12, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-              transition={{ type: "spring", stiffness: 340, damping: 34 }}
-              className="lpx-feed__row"
-            >
+                  {events.map((e) => (
+            <li key={e.id} className="lpx-feed__row">
               <span className={`lpx-feed__glyph ${e.solid ? "lpx-feed__glyph--solid" : ""}`}>
                 <e.icon size={16} strokeWidth={1.9} />
               </span>
@@ -69,9 +49,8 @@ function LiveFeed() {
                 <span className="block text-[12px] lpx-muted truncate">{e.meta}</span>
               </span>
               <span className="text-[13px] font-semibold lpx-num whitespace-nowrap">{e.amount}</span>
-            </motion.li>
+            </li>
           ))}
-        </AnimatePresence>
       </ul>
     </div>
   );
@@ -83,37 +62,14 @@ export function Hero() {
       <div className="lpx-container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
           <div className="lg:col-span-7">
-            <Reveal>
-              <div className="max-w-[460px]">
-                <AnnouncementBar
-                  id="lp-copilot"
-                  label="News"
-                  tone="neutral"
-                  dismissible={false}
-                  controls={false}
-                  autoPlay
-                  interval={6000}
-                  messages={[
-                    { id: "copilot", message: "Ledge Co-Pilot is coming. Founding members get early access free.", action: { label: "Claim a spot", href: "#intelligence" } },
-                    { id: "gst", message: "GST bills, credit notes and Tally export are built in.", action: { label: "See features", href: "#features" } },
-                  ]}
-                />
-              </div>
-            </Reveal>
-
-            <span className="lpx-eyebrow mt-8 flex">
+            <span className="lpx-eyebrow flex">
               <span className="hidden sm:inline">The operating system for India’s distribution businesses</span>
               <span className="sm:hidden">OS for India’s distributors</span>
             </span>
 
-            <InViewTitle
-              as="h1"
-              id="hero-title"
-              variant="word"
-              text="Orders. Payments. Stock. Invoices. Reports. One mobile app."
-              lines={["Orders. Payments. Stock.", "Invoices. Reports.", "One mobile app."]}
-              className="lpx-title lpx-title--hero"
-            />
+            <Reveal>
+              <Title as="h1" id="hero-title" hero text="Orders. Payments. Stock. Invoices. Reports. One mobile app." lines={["Orders. Payments. Stock.", "Invoices. Reports.", "One mobile app."]} />
+            </Reveal>
 
             <Reveal delay={0.15}>
               <p className="lpx-lede" style={{ marginInline: 0 }}>
