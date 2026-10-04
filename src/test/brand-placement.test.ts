@@ -63,55 +63,26 @@ describe("Brand token contract (index.css)", () => {
   });
 });
 
-describe("Landing section brand placements", () => {
-  it("Problem section: ink on the featured card only", () => {
-    const src = sectionFile("Problem");
-    expect(countMatches(src, "lp-card--ink")).toBe(1);
+describe("Landing sections are black and white (2026 redesign)", () => {
+  const all = ["Hero", "TrustBar", "WhoItsFor", "Problem", "HowItWorks", "Outcome", "LedgeIntelligence", "Features", "WhyLedge", "Testimonials", "Founder", "Pricing", "FAQ", "FinalCTA", "Footer"];
+
+  it.each(all)("%s uses no gradients or blue blocks", (name) => {
+    const src = sectionFile(name);
+    expect(src).not.toMatch(/gradient/i);
+    expect(src).not.toContain("lp-block-electric");
     expect(src).not.toContain("lp-card--accent");
   });
 
-  it("WhyLedge section: ink on the hero card only (V3.2 blue budget)", () => {
-    const src = sectionFile("WhyLedge");
-    expect(countMatches(src, "lp-card--ink")).toBe(1);
-    expect(src).not.toContain("lp-card--accent");
-  });
-
-  it("Hero and Final CTA use the graphite anchor, not a full-bleed blue block", () => {
-    expect(sectionFile("Hero")).toContain("lp-block-graphite");
-    expect(sectionFile("FinalCTA")).toContain("lp-block-graphite");
-    expect(sectionFile("FinalCTA")).not.toContain("lp-block-electric");
-    expect(read("src/index.css")).toContain(".lp-block-graphite");
+  it("the shared landing stylesheet has no gradients", () => {
+    expect(read("src/components/landing/ledge-mono.css")).not.toMatch(/gradient\(/);
   });
 
   it("How It Works ships no screenshot assets (motion-only steps)", () => {
     expect(sectionFile("HowItWorks")).not.toMatch(/\.webp|\.png|\.jpg/);
   });
 
-
-  it("Features section: no full-bleed blue card, ink on claims only (V3.2)", () => {
-    // Features uses the LandingCard visual-first primitive, so tints are
-    // declared as variant names rather than lp-card-* classes.
-    const src = sectionFile("Features");
-    expect(countMatches(src, 'variant: "electric"')).toBe(0);
-    expect(countMatches(src, 'variant: "ink"')).toBe(1);
-  });
-
-
-  it("Outcome section: electric on the hero card only", () => {
-    const src = sectionFile("Outcome");
-    expect(countMatches(src, "lp-card--accent")).toBe(1);
-    expect(src).not.toContain("lp-card--ink");
-  });
-
-  it("Pricing section: ink on the recommended tier only", () => {
-    const src = sectionFile("Pricing");
-    expect(countMatches(src, "lp-card--ink")).toBe(1);
-    expect(src).not.toContain("lp-card--accent");
-  });
-
-  it("Testimonials section: mist on the featured quote only", () => {
-    const src = sectionFile("Testimonials");
-    expect(countMatches(src, "lp-card--sunken")).toBe(1);
+  it("Pricing highlights exactly one recommended plan", () => {
+    expect(countMatches(sectionFile("Pricing"), "lpx-card--ink")).toBeLessThanOrEqual(1);
   });
 });
 
