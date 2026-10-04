@@ -1,4 +1,4 @@
-/** One bot per landing moment — every shape appears once only (guarded by a test). */
+/** One bot per landing moment: every shape appears once only (guarded by a test). */
 export type LandingBotType =
   | "clover" | "flower" | "blob" | "ghost" | "star" | "droid" | "mech" | "alien"
   | "hexagon" | "cat" | "cloud" | "pill" | "puddle";
