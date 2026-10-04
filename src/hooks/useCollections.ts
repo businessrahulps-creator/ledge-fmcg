@@ -60,6 +60,8 @@ type Store = {
   listeners: Set<() => void>;
   inflight: Promise<void> | null;
   loaded: boolean;
+  /** A forced reload asked for while another load was running — run once more after it. */
+  rerun: boolean;
 };
 
 const stores = new Map<string, Store>();
@@ -67,7 +69,7 @@ const stores = new Map<string, Store>();
 function getStore(companyId: string): Store {
   let s = stores.get(companyId);
   if (!s) {
-    s = { snapshot: { receipts: [], creditNotes: [], loading: true }, listeners: new Set(), inflight: null, loaded: false };
+    s = { snapshot: { receipts: [], creditNotes: [], loading: true }, listeners: new Set(), inflight: null, loaded: false, rerun: false };
     stores.set(companyId, s);
   }
   return s;
@@ -80,7 +82,14 @@ function publish(store: Store, next: Partial<CollectionsSnapshot>) {
 
 async function loadCollections(companyId: string, force: boolean): Promise<void> {
   const store = getStore(companyId);
-  if (store.inflight) return store.inflight;
+  if (store.inflight) {
+    // A save that just finished needs a fresh read, not the one already on its way.
+    if (force) {
+      store.rerun = true;
+      return store.inflight.then(() => (store.rerun ? (store.rerun = false, loadCollections(companyId, true)) : undefined));
+    }
+    return store.inflight;
+  }
   if (store.loaded && !force) return;
   publish(store, { loading: true });
   const run = (async () => {
@@ -92,13 +101,15 @@ async function loadCollections(companyId: string, force: boolean): Promise<void>
           .from("invoice_payments")
           .select("id, amount, mode, paid_on, reference, note, status, void_reason, invoice_id, order_id, distributor_id")
           .eq("company_id", companyId)
-          .order("paid_on", { ascending: false })),
+          .order("paid_on", { ascending: false })
+          .order("id", { ascending: true })),
       fetchAllPages(() =>
         supabase
           .from("credit_notes")
           .select("id, credit_note_number, note_date, grand_total, reason, invoice_id, order_id, distributor_id")
           .eq("company_id", companyId)
-          .order("note_date", { ascending: false })),
+          .order("note_date", { ascending: false })
+          .order("id", { ascending: true })),
     ]);
     const next: Partial<CollectionsSnapshot> = { loading: false };
     if (paymentsRes.error) {
@@ -111,7 +122,7 @@ async function loadCollections(companyId: string, force: boolean): Promise<void>
         paidOn: r.paid_on,
         reference: r.reference || "",
         note: r.note || "",
-        status: r.status as "posted" | "voided",
+        status: r.status as ReceiptRow["status"],
         voidReason: r.void_reason || "",
         invoiceId: r.invoice_id,
         orderId: r.order_id,
@@ -132,7 +143,8 @@ async function loadCollections(companyId: string, force: boolean): Promise<void>
         distributorId: n.distributor_id,
       }));
     }
-    store.loaded = true;
+    // Only a complete load counts; a failed part is retried on the next visit.
+    store.loaded = !paymentsRes.error && !notesRes.error;
     publish(store, next);
   })();
   store.inflight = run.finally(() => { store.inflight = null; });
