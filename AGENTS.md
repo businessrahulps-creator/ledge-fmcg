@@ -7,7 +7,7 @@
 - Menu items, order and names come from `src/components/layout/nav-config.ts`, shared by the computer sidebar, phone bottom bar and phone Menu, with Dashboard always first — why: the two menus drifted when built separately.
 - Page titles use `.h1-display` via PageHeader; small buttons get `touch-target` (44px touch); dialogs open ≤200ms ease-out, no slide — why: one spacing/motion system.
 - No undo-send after a GST bill. Why: bills change only via credit notes.
-- Overpay/cancel-with-advance need owner's choice; extras = child invoice_payments, refund_due/refunded status; money RPCs lock per company. Why: no guesses/races.
+- Overpay/cancel-with-advance need owner choice; extras = child invoice_payments, refund_due/refunded status; money RPCs lock per company. Why: no guesses/races.
 - Deleting an order goes only through `delete_order_atomic`; stock_deductions has no client write access, and triggers keep dealer balances/totals and product total_sold/avg_cost server-owned (credit-limit changes need override_credit_limit or manage_team) — why: direct writes let non-owners restore stock or lift credit limits.
 - CSV exports prefix = + - @ with '; Tally XML strips control chars — why: injection, bad XML.
 - Screen tests live in e2e-agent/ (TesterArmy e2e): plain-English agent steps must be followed by a hard assertion, sessions come from `lovable auth-session`, telemetry off, `.e2e/` artifacts never committed — why: AI never decides pass/fail alone; traces hold tokens.
