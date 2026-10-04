@@ -73,6 +73,7 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
+  const { paymentStatus: sharedPaymentStatus, loading: receivablesLoading } = useReceivables();
   const canOverrideCredit = useCan("override_credit_limit");
   const canSeeMoney = useCan("see_money");
   const { companyInfo } = api;
@@ -438,8 +439,12 @@ export default function OrderDetail() {
     || api.stock.locations.list().find(g => g.id === order.godownId)?.name
     || "Not set";
   /* Money chip comes from real receipts, so chip, balance and journey always agree. */
+  // Same rule as the order lists: dealer credit covering the bill counts too.
+  const sharedStatus = receivablesLoading ? undefined : sharedPaymentStatus.get(order.id);
   const moneyStatus: "paid" | "partial" | "pending" =
-    settled ? "paid" : received > 0 ? "partial" : "pending";
+    settled ? "paid"
+      : sharedStatus === "paid" && hasBill ? "paid"
+      : received > 0 || sharedStatus === "partial" ? "partial" : "pending";
 
   const journey: JourneyStep[] = [
     { label: "Booked", detail: formatIndianDate(order.date), state: "done" },
