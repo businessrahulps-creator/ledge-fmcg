@@ -241,6 +241,7 @@ export function TeamRoster({ companyId }: Props) {
         onOpenChange={setInviteOpen}
         companyName={companyName}
         onInviteSent={refresh}
+        defaults={defaults}
       />
 
       {overrideFor && (
@@ -313,15 +314,24 @@ function RosterCard({
             </span>
           )}
           {member.hasOverrides && member.role !== "super_admin" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-medium text-success">
+              <Sparkles className="h-3 w-3" strokeWidth={2} />
+              Custom access
+            </span>
+          )}
+        </div>
+        {member.role !== "super_admin" && !isSelf && (
+          <div className="mt-2">
             <button
               type="button"
               onClick={onOpenOverrides}
-              className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent transition-colors hover:bg-accent/25"
+              className="touch-target inline-flex items-center gap-1.5 rounded-md border border-border/70 px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
             >
-              <Sparkles className="h-3 w-3" strokeWidth={2} />
-              Customised
+              Change access
             </button>
-          )}
+          </div>
+        )}
+        <div className="hidden">
         </div>
 
         <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{job.oneLiner}</p>
