@@ -31,6 +31,7 @@ export interface Notification {
   read: boolean;
   link: string;
   groupKey: string;
+  important: boolean;
 }
 
 interface NotificationContextValue {
@@ -54,6 +55,7 @@ interface DbNotification {
   user_id: string;
   link?: string;
   group_key?: string;
+  priority?: string;
 }
 
 function mapDbToNotif(row: DbNotification): Notification {
@@ -66,6 +68,7 @@ function mapDbToNotif(row: DbNotification): Notification {
     read: row.read,
     link: row.link || "",
     groupKey: row.group_key || "",
+    important: row.priority !== "normal",
   };
 }
 
@@ -73,7 +76,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user, companyId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read && n.important).length;
 
   // Fetch on mount / when companyId changes, with offline cache fallback
   // Realtime: pause when offline, resume when online
@@ -95,7 +98,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           .from("notifications")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(100);
+          .limit(300);
         if (!alive) return;
         if (data) {
           const mapped = data.map(mapDbToNotif);
