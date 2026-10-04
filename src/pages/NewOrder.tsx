@@ -455,6 +455,9 @@ export default function NewOrder() {
     // If !result.success, toast was already shown by DataContext
   };
 
+  // Changing the order means a new save attempt (a fresh save ID).
+  useEffect(() => { saveKeyRef.current = crypto.randomUUID(); }, [lines, selectedDealer]);
+
   const handleSave = () => {
     setAttemptedSave(true);
 
