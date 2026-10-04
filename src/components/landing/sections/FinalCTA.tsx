@@ -1,3 +1,4 @@
+import { LandingBot } from "../LandingBot";
 import { ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { Btn, Reveal, Title } from "../kit";
@@ -7,6 +8,7 @@ export function FinalCTA() {
     <section className="lpx-section lpx-dark arc-dark" aria-labelledby="final-title">
       <div className="lpx-container">
         <div className="max-w-3xl mx-auto text-center">
+          <Reveal><LandingBot id="final" size={52} /></Reveal>
           <span className="lpx-eyebrow">
             <span className="lpx-dot" aria-hidden />
             Used by Indian businesses across 12 states

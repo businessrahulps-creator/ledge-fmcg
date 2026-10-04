@@ -1,3 +1,4 @@
+import { LandingBot } from "../LandingBot";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { UserRound, Store, RotateCcw, Warehouse, FileText, LayoutDashboard, type LucideIcon } from "lucide-react";
@@ -255,6 +256,7 @@ export function LedgeFlowHub() {
           );
         })}
 
+        <div className="lpx-flow__hubbot" style={{ left: L.w / 2, top: cy - L.hub / 2 }}><LandingBot id="hero" size={L.compact ? 30 : 40} /></div>
         <div className="lpx-flow__hubwrap" style={{ width: L.hub, height: L.hub, left: L.w / 2 - L.hub / 2, top: cy - L.hub / 2 }}>
           <div ref={hubRingRef} className="lpx-flow__ring" aria-hidden />
           <div className="lpx-flow__hub">
