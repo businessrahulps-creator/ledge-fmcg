@@ -128,7 +128,8 @@ export function advancesByDealer(
   );
   const map = new Map<string, number>();
   for (const o of orders) {
-    if (billedOrderIds.has(o.id)) continue;
+    // Money kept on a cancelled order is dealer credit (used against old bills), not an advance.
+    if (billedOrderIds.has(o.id) || o.cancelledAt) continue;
     const held = receivedByOrder.get(o.id) || 0;
     if (held <= 0) continue;
     map.set(o.distributorId, (map.get(o.distributorId) || 0) + held);
