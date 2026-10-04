@@ -1,3 +1,6 @@
+import { istDateKey } from "@/utils/dateKey";
+/** Timestamp -> India calendar day; plain dates pass through. */
+const istKey = (v: string): string => (v.length > 10 ? istDateKey(new Date(v)) : v);
 import type { Order } from "@/data/mock-data";
 
 /** Net revenue value for a single order (after scheme discounts). */
@@ -19,7 +22,7 @@ export const bookedRevenue = (orders: Order[]): number =>
 
 /** Date key for time-series. Delivered orders use delivered_at; pipeline uses order date. */
 export const revenueDate = (o: Order): string =>
-  (isDelivered(o) && o.deliveredAt) ? o.deliveredAt.slice(0, 10) : o.date;
+  (isDelivered(o) && o.deliveredAt) ? istKey(o.deliveredAt) : o.date;
 
 export type RevenueMode = "delivered" | "booked";
 
@@ -27,4 +30,4 @@ export const orderInScope = (o: Order, mode: RevenueMode): boolean =>
   mode === "delivered" ? isDelivered(o) : (isDelivered(o) || isBooked(o));
 
 export const orderDateForMode = (o: Order, mode: RevenueMode): string =>
-  mode === "delivered" ? ((o.deliveredAt || o.dispatchDate || o.date).slice(0, 10)) : o.date;
+  mode === "delivered" ? (o.deliveredAt ? istKey(o.deliveredAt) : (o.dispatchDate || o.date).slice(0, 10)) : o.date;

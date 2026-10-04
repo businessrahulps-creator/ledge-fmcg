@@ -105,7 +105,7 @@ export function advancesByDealer(
   receivedByOrder: Map<string, number>,
 ): Map<string, number> {
   const billedOrderIds = new Set(
-    invoices.filter(i => i.docType === "gst_invoice" && i.sourceOrderId).map(i => i.sourceOrderId as string),
+    invoices.filter(i => i.docType === "gst_invoice" && i.status !== "draft" && i.sourceOrderId).map(i => i.sourceOrderId as string),
   );
   const map = new Map<string, number>();
   for (const o of orders) {

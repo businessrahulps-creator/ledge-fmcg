@@ -21,19 +21,38 @@ let store = { company: "", snap: EMPTY, listeners: new Set<() => void>(), inflig
 const emit = () => store.listeners.forEach(l => l());
 const n = (v: unknown) => Number(v) || 0;
 
+/** Every row for the business, 1,000 at a time, in a stable order. */
+async function all(table: string, company: string, order: [string, boolean][]): Promise<{ data: any[]; error: any }> {
+  const out: any[] = [];
+  for (let from = 0; ; from += 1000) {
+    let q = (supabase.from as any)(table).select("*").eq("company_id", company);
+    for (const [col, asc] of order) q = q.order(col, { ascending: asc });
+    const { data, error } = await q.order("id").range(from, from + 999);
+    if (error) return { data: [], error };
+    out.push(...(data || []));
+    if (!data || data.length < 1000) return { data: out, error: null };
+  }
+}
+
 async function load(company: string) {
   if (store.inflight) return store.inflight;
   store.snap = { ...store.snap, loading: true }; emit();
   store.inflight = (async () => {
     const [s, b, r, p] = await Promise.all([
-      supabase.from("suppliers").select("*").eq("company_id", company).order("name").range(0, 4999),
-      supabase.from("purchase_bills").select("*").eq("company_id", company).order("bill_date", { ascending: false }).order("created_at", { ascending: false }).range(0, 9999),
-      supabase.from("purchase_returns").select("*").eq("company_id", company).range(0, 9999),
-      supabase.from("supplier_payments").select("*").eq("company_id", company).order("paid_on", { ascending: false }).range(0, 9999),
+      all("suppliers", company, [["name", true]]),
+      all("purchase_bills", company, [["bill_date", false], ["created_at", false]]),
+      all("purchase_returns", company, [["created_at", false]]),
+      all("supplier_payments", company, [["paid_on", false], ["created_at", false]]),
     ]);
-    const err = s.error || b.error || r.error || p.error;
-    if (err) handleSupabaseError(err, { source: "buying:load", title: "Couldn't load your buying records" });
     if (store.company !== company) return;
+    const err = s.error || b.error || r.error || p.error;
+    if (err) {
+      // Keep the last complete picture: a half-loaded set would show wrong balances.
+      handleSupabaseError(err, { source: "buying:load", title: "Couldn't load your buying records" });
+      store.snap = { ...store.snap, loading: false };
+      emit();
+      return;
+    }
     store.snap = {
       loading: false, loaded: true,
       suppliers: (s.data || []).map((x: any) => ({ id: x.id, name: x.name, phone: x.phone, gstin: x.gstin, stateCode: x.state_code, address: x.address, openingBalance: n(x.opening_balance), createdAt: x.created_at })),
