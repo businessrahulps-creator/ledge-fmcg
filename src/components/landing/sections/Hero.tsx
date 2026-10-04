@@ -18,14 +18,14 @@ const SOURCE: Omit<FeedEvent, "id">[] = [
   { icon: IndianRupee, title: "Payment received · Hari & Sons", meta: "Cash · 2 bills cleared", amount: "₹1,12,300", solid: true },
 ];
 
-/** Live "today" feed: the hero's product picture, built in the Arc realtime-stream style. */
+/** Live "today" feed: the hero’s product picture, built in the Arc realtime-stream style. */
 function LiveFeed() {
   const reduce = useReducedMotion();
   const [events, setEvents] = useState<FeedEvent[]>(() => SOURCE.slice(0, 4).map((e, i) => ({ ...e, id: i })));
   const [orders, setOrders] = useState(46);
   const [collected, setCollected] = useState(824600);
 
-  // Sample screen only — no pretend live activity (keeps the page honest).
+  // Sample screen only · no pretend live activity (keeps the page honest).
   void setEvents; void setOrders; void setCollected; void useEffect;
 
   return (
