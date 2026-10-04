@@ -19,7 +19,7 @@ export function useTodaysWork() {
   const distributors = api.dealers.list();
   const products = api.products.list();
   const stockItems = api.stock.items.list();
-  const { rows, receipts, loading: moneyLoading } = useReceivables();
+  const { rows, receipts, advances, loading: moneyLoading } = useReceivables();
 
   const [actions, setActions] = useState<IntelAction[]>([]);
   const [settings, setSettings] = useState<IntelSettings>(DEFAULT_INTEL_SETTINGS);
@@ -58,7 +58,7 @@ export function useTodaysWork() {
     const visible = (cards: IntelCard[]) =>
       cards.filter(c => !isHidden(c, actions, today, c.dealerId ? lastEvent.get(c.dealerId) : undefined));
 
-    const collect = visible(collectQueue({ rows, distributors, orders, receipts: posted, today }));
+    const collect = visible(collectQueue({ rows, distributors, orders, receipts: posted, today, advances }));
     const ordersCards = visible(readyOrders({ orders, stockItems, settings, today }));
     const dealers = visible(decliningDealers({ orders, distributors, settings, today }));
     const stock = stockRunway({ orders, stockItems, products, settings, today });
@@ -66,7 +66,7 @@ export function useTodaysWork() {
     const slow = visible(stock.slow);
     const top = rankTop3([...collect, ...ordersCards, ...low, ...dealers]);
     return { collect, orders: ordersCards, dealers, low, slow, top };
-  }, [rows, receipts, distributors, orders, stockItems, products, settings, actions, today]);
+  }, [rows, receipts, advances, distributors, orders, stockItems, products, settings, actions, today]);
 
   const act = useCallback(async (card: IntelCard, state: IntelAction["state"], untilDate?: string, promisedAmount?: number) => {
     if (!companyId) return false;
