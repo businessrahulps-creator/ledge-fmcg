@@ -116,7 +116,7 @@ export function receivablesForDealer(rows: ReceivableRow[], distributorId: strin
 }
 
 export const sumDue = (rows: ReceivableRow[]): number =>
-  Math.round(rows.reduce((s, r) => s + r.due, 0) * 100) / 100;
+  roundPaise(rows.reduce((s, r) => s + r.due, 0));
 
 /** Advance money sitting on orders that have not been billed yet. */
 export function advancesByDealer(
