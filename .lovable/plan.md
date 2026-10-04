@@ -19,6 +19,13 @@ Each fix gets a live test against the real backend or the browser, not just a co
 ## 2. Bell reaching another person
 If I can, I'll add a temporary second team member to the test business. Then I check that alerts arrive for them, bundle repeats, stay hidden from people without money access, and never alert you about your own actions. I remove the test member afterwards. If adding one isn't possible, I'll say so.
 
+## 2b. Every action shows in the bell
+Right now the bell only alerts on important events. After this change, every recorded action also appears in the bell: edits, stock changes, offers, dealers, products, shop visits, settings and so on.
+- **Same access rules as Activity:** anyone without money access won't see entries that carry amounts.
+- **Your own actions show too,** marked "You". Repeats bundle, like "12 stock changes today", so the bell doesn't flood.
+- **Two tabs in the bell:** "Important" (orders, money, failures, team) with the red count badge, and "All activity" for everything else. Everything is captured, and only the important ones keep pinging you.
+- Each alert opens the right page.
+
 ## 3. New-bug hunt, two separate reviews
 - **Astra:** reviews the database side (recording, alerts, totals, permissions) for gaps, wrong numbers and data leaks.
 - **Fable 5.1:** reviews the Activity page, the bell, Download and the phone layout, and also tries to break the fixes above.
@@ -31,5 +38,7 @@ If I can, I'll add a temporary second team member to the test business. Then I c
 
 ## Technical notes
 - New migrations only, with nothing breaking. History stays locked from editing.
+- Bell: `tg_activity_notify` fans out every activity_log row, filtered by capability. Add a `priority` column to notifications (important or normal, default normal). Bundling uses group_key per entity type, user and IST day. Only important rows add to the unread badge.
+- Roadmap: add this task to roadmap.md once building starts.
 - Live database tests go through the REST API with a session from `lovable auth-session`. Browser tests use Playwright scripts in /tmp/browser/activity.
 - GST documents and money balances are never changed. Any test money entries are reversed with audited voids.
