@@ -118,13 +118,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           // Keep the list bounded: all loaded important alerts + the newest 300 others.
           let others = 0;
           const merged = sorted.filter((n) => n.important || ++others <= 300);
-          cacheData(companyId, `notifications:${userId}`, merged);
+          cacheData(companyId, "notifications", merged);
           return merged;
         });
       } catch {
         // Offline — load from cache
         if (!navigator.onLine) {
-          const cached = await getCachedData<Notification[]>(companyId, `notifications:${userId}`);
+          const cached = await getCachedData<Notification[]>(companyId, "notifications");
           if (cached && alive) setNotifications(cached);
         }
       }
