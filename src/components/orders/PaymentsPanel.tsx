@@ -244,7 +244,8 @@ export function PaymentsPanel({
           {coveredByCredit >= balance
             ? <>This bill is covered by the dealer's spare money (dealer credit) of {formatCurrency(coveredByCredit)}. Nothing more needs collecting.</>
             : <>{formatCurrency(coveredByCredit)} of this is covered by the dealer's spare money (dealer credit). Left to collect: {formatCurrency(roundPaise(balance - coveredByCredit))}.</>}
-      </div>
+        </div>
+      )}
 
       {loading ? (
         <p className="px-4 py-6 text-center text-xs text-muted-foreground">Loading payments…</p>
