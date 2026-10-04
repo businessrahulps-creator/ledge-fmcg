@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { WA_GREEN, WA_GREEN_DARK, WA_TEXT } from "@/components/landing/constants";
 import awsLogo from "@/assets/aws-logo.png";
 import ledgeLogo from "@/assets/ledge-logo.webp";
 
@@ -71,12 +70,11 @@ export function Footer() {
               href="https://wa.me/918714249485?text=Hi%20Ledge%2C%20I%27d%20like%20to%20learn%20more"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-[color,background-color,border-color,box-shadow] duration-200"
-              style={{ backgroundColor: `${WA_GREEN}1a`, borderColor: `${WA_GREEN}4d`, borderWidth: 1, borderStyle: "solid" }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card border border-border shadow-depth-2 transition-[color,background-color,border-color,box-shadow] duration-200"
               aria-label="Chat with Ledge on WhatsApp"
             >
-              <WhatsAppIcon className="w-3.5 h-3.5" style={{ color: WA_GREEN_DARK }} />
-              <span className="font-body text-[13px] font-medium tracking-[-0.005em]" style={{ color: WA_TEXT }}>
+              <WhatsAppIcon className="w-3.5 h-3.5"  />
+              <span className="font-body text-[13px] font-medium tracking-[-0.005em] text-foreground">
                 WhatsApp Sales
               </span>
             </a>

@@ -54,7 +54,7 @@ export function Outcome() {
             data={weeks}
             label="Money collected each week"
             period="the first 12 weeks"
-            unit=" lakh"
+            unit=""
             valueLabel="Total"
             averageLabel="Weekly average"
             categoryLabel="Week"
