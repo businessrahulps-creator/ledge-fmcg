@@ -42,13 +42,15 @@ export function groupNotifications(list: Notification[]): Group[] {
 }
 
 export function NotificationCenter() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markManyAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [tab, setTab] = useState<"important" | "all">("important");
+  const [tabPick, setTab] = useState<"important" | "all">("important");
   const navigate = useNavigate();
   // Matches the Activity page's own access rule (money access).
   const canSeeActivity = useCan("see_money") === true;
+  // Losing money access drops you back to Important straight away.
+  const tab = canSeeActivity ? tabPick : "important";
   const allCount = notifications.filter(n => !n.read).length;
   const groups = useMemo(
     () => groupNotifications(tab === "important" ? notifications.filter(n => n.important) : notifications),
@@ -129,7 +131,7 @@ export function NotificationCenter() {
                   <div key={g.key}>
                     <button
                       onClick={() => {
-                        if (isGroup) { setExpanded(isOpen ? null : g.key); g.items.forEach(n => !n.read && markAsRead(n.id)); }
+                        if (isGroup) { setExpanded(isOpen ? null : g.key); markManyAsRead(g.items.filter(n => !n.read).map(n => n.id)); }
                         else openOne(first);
                       }}
                       className={`flex w-full items-start gap-3 border-l-2 px-4 py-3 text-left transition-colors hover:bg-muted/50 ${config.colorClass} ${unread ? "bg-muted/30" : ""}`}

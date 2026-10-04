@@ -89,15 +89,16 @@ export function cashImpact(r: Pick<ActivityRow, "money_direction" | "amount">): 
 export function activityLink(r: Pick<ActivityRow, "entity_type" | "entity_id" | "action" | "metadata">): string | null {
   if (r.action === "deleted") return null;
   const z = "00000000-0000-0000-0000-000000000000";
+  const hasId = !!r.entity_id && r.entity_id !== z;
   switch (r.entity_type) {
-    case "order": return r.entity_id && r.entity_id !== z ? `/orders/${r.entity_id}` : null;
+    case "order": return hasId ? `/orders/${r.entity_id}` : "/orders";
     case "invoice": return r.metadata?.order_id ? `/orders/${r.metadata.order_id}` : "/billing";
     case "payment": return r.metadata?.order_id ? `/orders/${r.metadata.order_id}` : "/billing";
     case "credit_note": case "claim": return "/claims";
-    case "dealer": return `/distributors/${r.entity_id}`;
-    case "salesperson": return `/salespersons/${r.entity_id}`;
-    case "purchase_bill": return `/buying/bills/${r.entity_id}`;
-    case "supplier": return `/buying/suppliers/${r.entity_id}`;
+    case "dealer": return hasId ? `/distributors/${r.entity_id}` : "/distributors";
+    case "salesperson": return hasId ? `/salespersons/${r.entity_id}` : "/salespersons";
+    case "purchase_bill": return hasId ? `/buying/bills/${r.entity_id}` : "/buying";
+    case "supplier": return hasId ? `/buying/suppliers/${r.entity_id}` : "/buying";
     case "supplier_payment": case "purchase_return": return "/buying";
     case "product": case "stock": case "warehouse": return "/stock";
     case "scheme": return "/schemes";
