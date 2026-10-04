@@ -18,10 +18,11 @@ export interface InvitePreview {
  */
 export function useInvite() {
   const sendInvite = useCallback(
-    async (email: string, role: AppRole): Promise<string | null> => {
+    async (email: string, role: AppRole, overrides: Record<string, boolean> = {}): Promise<string | null> => {
       const { data, error } = await supabase.rpc("send_team_invite", {
         p_email: email,
         p_role: role,
+        p_overrides: overrides,
       });
       if (error) {
         handleSupabaseError(error, {
