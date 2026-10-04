@@ -17,7 +17,7 @@ export function Pricing() {
   const yearly = period === "yearly";
   return (
     <Section id="pricing" ground="light" labelledBy="pricing-title">
-      <SectionHead
+      <SectionHead bot="pricing"
         num="09"
         eyebrow="Pricing"
         id="pricing-title"

@@ -24,7 +24,7 @@ export function HowItWorks() {
 
   return (
     <Section id="how-it-works" ground="grey" labelledBy="how-title">
-      <SectionHead
+      <SectionHead bot="how"
         num="02"
         eyebrow="How it works"
         id="how-title"

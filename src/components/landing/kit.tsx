@@ -1,3 +1,5 @@
+import { LandingBot } from "./LandingBot";
+import type { LandingBotKey } from "./bots";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
@@ -43,12 +45,14 @@ interface HeadProps {
   lede?: ReactNode;
   align?: "center" | "left";
   id?: string;
+  bot?: LandingBotKey;
 }
 
 /** The one section header: numbered eyebrow, serif headline that blurs in, one line of text. */
-export function SectionHead({ num, eyebrow, title, lines, lede, align = "center", id }: HeadProps) {
+export function SectionHead({ num, eyebrow, title, lines, lede, align = "center", id, bot }: HeadProps) {
   return (
     <div className={`lpx-head ${align === "left" ? "lpx-head--left" : ""}`}>
+      {bot && <Reveal><LandingBot id={bot} /></Reveal>}
       <span className="lpx-eyebrow">
         {num && <span className="lpx-eyebrow__num">{num}</span>}
         {num && <span aria-hidden>/</span>}

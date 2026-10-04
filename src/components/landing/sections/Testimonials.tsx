@@ -16,7 +16,7 @@ const testimonials = [
 export function Testimonials() {
   return (
     <Section ground="light" labelledBy="voices-title">
-      <SectionHead num="07" eyebrow="Customers" id="voices-title" title="Owners who stopped guessing." />
+      <SectionHead bot="voices" num="07" eyebrow="Customers" id="voices-title" title="Owners who stopped guessing." />
       <Reveal>
         <div className="flex justify-center -mt-4 mb-10 md:mb-12">
           <AvatarGroup members={testimonials.map((t) => ({ name: t.name, src: t.avatar }))} max={4} size="md" label="People who use Ledge" />

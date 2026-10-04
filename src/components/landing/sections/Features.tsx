@@ -21,7 +21,7 @@ const features = [
 export function Features() {
   return (
     <Section id="features" ground="light" labelledBy="features-title">
-      <SectionHead
+      <SectionHead bot="features"
         num="05"
         eyebrow="Features"
         id="features-title"

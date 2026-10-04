@@ -16,7 +16,7 @@ const SPOTS_TOTAL = 100;
 export function LedgeIntelligence() {
   return (
     <Section id="intelligence" ground="dark" labelledBy="intel-title">
-      <SectionHead
+      <SectionHead bot="copilot"
         num="04"
         eyebrow="Ledge Intelligence"
         id="intel-title"
