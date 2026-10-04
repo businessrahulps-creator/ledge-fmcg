@@ -67,7 +67,7 @@
 - [x] Dealer balance lookup faster (identical numbers)
 - [x] Paisa rounding alignment
 - [ ] Dashboard totals from server (dashboard_summary)
-- [ ] After publish: stop signed-in use of old 8-arg order save
+- [x] After publish: old 8-arg order save switched off
 
 ## Oct 4 pass: pending fixes, seed to today, Astra
 - [x] Payment retry after a lost reply reuses the same save ID (only when nothing changed)
