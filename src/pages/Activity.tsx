@@ -83,7 +83,7 @@ export default function Activity() {
       if (person !== "all") q = q.eq("user_name", person);
       if (failedOnly) q = q.neq("outcome", "ok");
       // Entries saved at the same instant are not skipped between pages.
-      if (cursor) q = q.or(`created_at.lt.${cursor.at},and(created_at.eq.${cursor.at},id.lt.${cursor.id})`);
+      if (cursor) q = q.or(`created_at.lt."${cursor.at}",and(created_at.eq."${cursor.at}",id.lt.${cursor.id})`);
       const { data, error } = await q;
       if (error) throw error;
       if (gen !== genRef.current) return;
