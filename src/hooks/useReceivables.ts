@@ -51,7 +51,7 @@ const dealerCreditFor = memoLast((receipts: any[], invoices: any[], orders: any[
   for (const inv of invoices) {
     if (inv.docType !== "gst_invoice" || inv.status === "draft") continue;
     const extra = (rbi.get(inv.id) || 0) + (cbi.get(inv.id) || 0) - Number(inv.grandTotal || 0);
-    add((byId.get(inv.sourceOrderId) as any)?.distributorId, Math.round(extra * 100) / 100);
+    add((byId.get(inv.sourceOrderId) as any)?.distributorId, roundPaise(extra));
   }
   return m;
 });

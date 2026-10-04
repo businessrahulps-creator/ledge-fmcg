@@ -255,7 +255,7 @@ export function agingFromReceivables(
     .filter(a => a.totalOutstanding > 0.005)
     .map(a => ({
       ...a,
-      totalOutstanding: Math.round(a.totalOutstanding * 100) / 100,
+      totalOutstanding: roundPaise(a.totalOutstanding),
       worstBucket: bucketize(a.oldestAgeDays),
     }));
 }
@@ -273,5 +273,5 @@ export function collectedInPeriod(
     if (Number.isNaN(d.getTime()) || d < from || d > to) return sum;
     return sum + (r.amount || 0);
   }, 0);
-  return Math.round(total * 100) / 100;
+  return roundPaise(total);
 }
