@@ -21,6 +21,7 @@ import {
   type CapabilityKey,
 } from "./accessCopy";
 import { CapabilityToggleRow } from "./CapabilityToggleRow";
+import { AccessAreaList } from "./AccessAreaList";
 import { useOverrideEditor } from "./useOverrideEditor";
 
 interface Props {
@@ -78,10 +79,10 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
             </div>
             <div className="min-w-0 flex-1">
               <SheetTitle className="text-base leading-tight">
-                Fine-tune {member.name || "this member"}'s access
+                What can {(member.name || "this person").split(/\s+/)[0]} do?
               </SheetTitle>
               <SheetDescription className="mt-0.5 text-xs text-muted-foreground">
-                Currently {job.label}. Toggle what they can and can't do.
+                {job.label}. Switch areas on or off — changes apply straight away.
               </SheetDescription>
             </div>
           </div>
@@ -96,33 +97,16 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
             </div>
           ) : (
             <>
-              <div className="space-y-2">
-                {TOGGLEABLE_CAPS.map((cap) => (
-                  <CapabilityToggleRow
-                    key={cap.key}
-                    label={cap.label}
-                    description={cap.sub}
-                    checked={!!current[cap.key]}
-                    defaultOn={!!roleDefaults[cap.key]}
-                    onChange={(v) => setCap(cap.key, v)}
-                  />
-                ))}
-              </div>
+              <AccessAreaList current={current} roleDefaults={roleDefaults} jobLabel={job.label} onChange={setCap} />
 
               <div className="mt-6">
                 <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                   <Sparkles className="h-3 w-3" strokeWidth={2} />
-                  Owner-only
+                  Only the owner
                 </p>
                 <div className="space-y-2">
                   {OWNER_ONLY_CAPS.map((cap) => (
-                    <CapabilityToggleRow
-                      key={cap.key}
-                      label={cap.label}
-                      checked={false}
-                      defaultOn={false}
-                      locked
-                    />
+                    <CapabilityToggleRow key={cap.key} label={cap.label} checked={false} defaultOn={false} locked />
                   ))}
                 </div>
               </div>
@@ -133,21 +117,27 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
         <div className="border-t border-border/60 bg-background/95 p-4 backdrop-blur">
           <div className="mb-3 rounded-md bg-muted/40 p-3">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-              In plain English
+              In plain words
             </p>
-            <p className="mt-1 text-sm leading-snug text-foreground">{summary}</p>
+            <p className="mt-1 text-sm leading-snug text-foreground" aria-live="polite">{summary}</p>
           </div>
           <div className="flex items-center justify-between gap-2">
-            <Button variant="ghost" size="compact" onClick={() => onOpenChange(false)} disabled={saving}>
-              Cancel
-            </Button>
             <Button
+              variant="ghost"
               size="compact"
-              onClick={() => void save()}
-              disabled={!dirty || saving || loading}
+              onClick={() => { for (const { key } of TOGGLEABLE_CAPS) setCap(key, !!roleDefaults[key]); }}
+              disabled={saving || loading}
             >
-              {saving ? "Saving…" : "Save changes"}
+              Reset to {job.label}
             </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="compact" onClick={() => onOpenChange(false)} disabled={saving}>
+                Cancel
+              </Button>
+              <Button size="compact" onClick={() => void save()} disabled={!dirty || saving || loading}>
+                {saving ? "Saving…" : "Save"}
+              </Button>
+            </div>
           </div>
         </div>
       </SheetContent>

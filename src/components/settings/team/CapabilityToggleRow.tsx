@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, type LucideIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
@@ -7,19 +7,16 @@ interface Props {
   description?: string;
   checked: boolean;
   defaultOn: boolean;
+  /** e.g. "Accountant" — shown as "Included with Accountant". */
+  jobLabel?: string;
+  icon?: LucideIcon;
   locked?: boolean;
   lockedReason?: string;
   onChange?: (value: boolean) => void;
 }
 
 export function CapabilityToggleRow({
-  label,
-  description,
-  checked,
-  defaultOn,
-  locked = false,
-  lockedReason,
-  onChange,
+  label, description, checked, defaultOn, jobLabel, icon: Icon, locked = false, lockedReason, onChange,
 }: Props) {
   if (locked) {
     return (
@@ -37,32 +34,32 @@ export function CapabilityToggleRow({
     );
   }
 
-  const differsFromDefault = checked !== defaultOn;
+  const badge = checked
+    ? defaultOn ? { text: jobLabel ? `Included with ${jobLabel}` : "Included", tone: "bg-muted text-muted-foreground" }
+                : { text: "Extra", tone: "bg-success/15 text-success" }
+    : defaultOn ? { text: "Removed", tone: "bg-destructive/10 text-destructive" } : null;
 
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-start gap-3 rounded-md border border-border/70 bg-card p-3 transition-[background-color,border-color] duration-fast ease-fluent hover:border-primary/40 hover:bg-primary/5",
+        "flex cursor-pointer items-center gap-3 rounded-md border bg-card p-3 transition-[background-color,border-color] duration-fast ease-fluent hover:border-primary/40",
+        checked ? "border-primary/40 bg-primary/[0.03]" : "border-border/70",
       )}
     >
+      {Icon && (
+        <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors",
+          checked ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/60")}>
+          <Icon className="h-4 w-4" strokeWidth={1.8} />
+        </span>
+      )}
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <p className="text-sm font-medium">{label}</p>
-          {differsFromDefault && (
-            <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium text-accent">
-              {checked ? "added" : "removed"}
-            </span>
-          )}
+          {badge && <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-medium", badge.tone)}>{badge.text}</span>}
         </div>
-        {description && (
-          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{description}</p>}
       </div>
-      <Switch
-        checked={checked}
-        onCheckedChange={(v) => onChange?.(!!v)}
-        className="mt-0.5 shrink-0"
-      />
+      <Switch checked={checked} onCheckedChange={(v) => onChange?.(!!v)} className="shrink-0" aria-label={label} />
     </label>
   );
 }
