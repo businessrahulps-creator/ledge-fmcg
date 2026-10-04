@@ -61,7 +61,7 @@ const primaryMobileFallback = MOBILE_FALLBACK;
 // Phone Menu shows the same groups, in the same order, as the computer menu.
 const moreGroups: Array<{ label: string; items: MobileNavItem[] }> = [
   ...NAV_GROUPS.map(g => ({ label: g.label ?? "Main", items: g.items })),
-  { label: "Account", items: NAV_FOOTER },
+  { label: "Account", items: [...NAV_FOOTER, NAV.settings] },
 ];
 
 const allMoreItems = moreGroups.flatMap((g) => g.items).filter(i => !MOBILE_PRIMARY.some(p => p.url === i.url));
