@@ -58,3 +58,13 @@
 - [x] Re-check 14 earlier Activity fixes live
 - [x] Astra + Fable new-bug review, fix real findings
 - [ ] Bell reaching a second team member (needs a second person invited)
+
+## Oct 4 2026 pass
+- [x] Repeat order save returns same order
+- [x] Order/bill payments lock in one order (incl. payment cancel)
+- [x] Today's work: advances subtracted; stock Done returns after 7 days
+- [x] Bell cache per person
+- [x] Dealer balance lookup faster (identical numbers)
+- [ ] Paisa rounding alignment (offers, purchase GST, advances) — needs per-case review
+- [ ] Dashboard totals from server (dashboard_summary)
+- [ ] After publish: stop signed-in use of old 8-arg order save

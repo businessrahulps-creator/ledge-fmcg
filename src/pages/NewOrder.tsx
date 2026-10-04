@@ -84,6 +84,9 @@ export default function NewOrder() {
   // Once the order is booked the form is no longer "unsaved work".
   const [saved, setSaved] = useState(false);
   const savingRef = useRef(false);
+  // One save ID per order attempt: if the confirmation is lost and Save is tapped
+  // again, the server hands back the same order instead of making a second copy.
+  const saveKeyRef = useRef<string>(crypto.randomUUID());
   const [selectedGodown, setSelectedGodown] = useState("");
   const [attemptedSave, setAttemptedSave] = useState(false);
   /** Set once the person has been told this order is ahead of available stock. */
@@ -396,7 +399,7 @@ export default function NewOrder() {
 
 
     const isFirstEverOrder = existingOrders.length === 0;
-    const result = await addOrder(order);
+    const result = await addOrder({ ...order, idempotencyKey: saveKeyRef.current } as typeof order);
     savingRef.current = false;
     setIsSaving(false);
 
@@ -451,6 +454,9 @@ export default function NewOrder() {
     }
     // If !result.success, toast was already shown by DataContext
   };
+
+  // Changing the order means a new save attempt (a fresh save ID).
+  useEffect(() => { saveKeyRef.current = crypto.randomUUID(); }, [lines, selectedDealer]);
 
   const handleSave = () => {
     setAttemptedSave(true);

@@ -82,8 +82,10 @@ export function collectQueue(input: {
   orders: Order[];
   receipts: ReceiptLite[];
   today: string;
+  /** Advance money held per dealer (paid before a bill) — counts against what they owe. */
+  advances?: Map<string, number>;
 }): IntelCard[] {
-  const { rows, distributors, orders, receipts, today } = input;
+  const { rows, distributors, orders, receipts, today, advances } = input;
   const dealers = new Map(distributors.map(d => [d.id, d]));
   const sp = salespersonByDealer(orders);
   const lastPaid = new Map<string, string>();
@@ -101,6 +103,14 @@ export function collectQueue(input: {
     a.oldest = Math.max(a.oldest, r.ageDays);
     a.bills += 1;
     agg.set(r.distributorId, a);
+  }
+  // Advance money settles the oldest bills first.
+  if (advances) for (const [id, a] of agg) {
+    const adv = advances.get(id) || 0;
+    if (adv <= 0) continue;
+    a.due = Math.max(0, a.due - adv);
+    a.over30 = Math.min(a.over30, a.due);
+    if (a.due <= 0.5) agg.delete(id);
   }
   const cards: IntelCard[] = [];
   for (const [id, a] of agg) {
@@ -341,6 +351,8 @@ export function isHidden(card: IntelCard, actions: IntelAction[], today: string,
     return !!latest.untilDate && latest.untilDate >= today;
   }
   const actedOn = latest.createdAt.slice(0, 10);
+  // Stock cards have no money events, so "Done" lasts 7 days, then the card can come back.
+  if (!card.dealerId) return dayDiff(actedOn, today) < 7;
   return !(lastEvent && lastEvent > actedOn);
 }
 

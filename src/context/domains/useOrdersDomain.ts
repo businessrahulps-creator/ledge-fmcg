@@ -122,12 +122,13 @@ export function useOrdersDomain(deps: OrdersDeps) {
         })),
         p_scheme_savings: order.schemeSavings || 0,
         p_remarks: sanitizeInput(order.dispatchRemarks || ""),
+        p_idempotency_key: (order as Order & { idempotencyKey?: string }).idempotencyKey || crypto.randomUUID(),
       });
       if (rpcError) throw rpcError;
       const booked = rpcData as { order_id: string; order_number: string; seq: number } | null;
       if (!booked?.order_id) throw new Error("Booking returned no order");
 
-      setOrderSequence(booked.seq + 1);
+      if (Number.isFinite(booked.seq)) setOrderSequence(booked.seq + 1);
 
       const newOrder: Order = {
         ...order,
