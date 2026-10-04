@@ -3,7 +3,7 @@ import { LANDING_BOTS, type LandingBotKey } from "./bots";
 
 const BotAvatar = lazy(() => import("bot-avatars").then((m) => ({ default: m.BotAvatar })));
 
-/** A calm, colourful helper bot — loads only near the screen, no idle jumps, still for reduced motion. */
+/** A calm, colourful helper bot: loads only near the screen, no idle jumps, still for reduced motion. */
 export function LandingBot({ id, size = 44, working }: { id: LandingBotKey; size?: number; working?: boolean }) {
   const spec = LANDING_BOTS[id] as { type: string; label: string; working?: boolean; sleeping?: boolean };
   const ref = useRef<HTMLSpanElement>(null);
@@ -27,8 +27,8 @@ export function LandingBot({ id, size = 44, working }: { id: LandingBotKey; size
             size={size}
             state={spec.sleeping ? "sleeping" : isWorking ? "working" : "default"}
             jumpEvery={0}
-            turn={0.6}
-            speed={0.8}
+            turn={0.4}
+            speed={0.55}
             paused={reduced}
             seed={seed}
           />
