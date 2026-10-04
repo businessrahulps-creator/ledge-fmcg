@@ -30,7 +30,8 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 import { JOB_BY_ROLE, capLabels, type AppRole } from "./jobs";
-import { useTeamRoster, rolesDefaultCaps, type RosterMember } from "./useTeamRoster";
+import { useTeamRoster, rolesDefaultCaps, type RosterMember, type DefaultsMap } from "./useTeamRoster";
+import { buildAccessSummary, TOGGLEABLE_CAPS } from "./accessCopy";
 import { JobPickerSheet } from "./JobPickerSheet";
 import { InviteSheet } from "./InviteSheet";
 import { OverrideDrawer } from "./OverrideDrawer";
@@ -193,6 +194,7 @@ export function TeamRoster({ companyId }: Props) {
             onChangeJob={() => openPicker(m)}
             onOpenOverrides={() => setOverrideFor(m)}
             onRemove={() => setRemoveFor(m)}
+            defaults={defaults}
           />
         ))}
       </div>
@@ -278,6 +280,7 @@ interface RosterCardProps {
   onChangeJob: () => void;
   onOpenOverrides: () => void;
   onRemove: () => void;
+  defaults: DefaultsMap;
 }
 
 function RosterCard({
@@ -287,6 +290,7 @@ function RosterCard({
   onChangeJob,
   onOpenOverrides,
   onRemove,
+  defaults,
 }: RosterCardProps) {
   const job = JOB_BY_ROLE[member.role];
   const Icon = job.icon;

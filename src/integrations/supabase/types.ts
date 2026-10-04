@@ -3455,6 +3455,15 @@ export type Database = {
         Args: { p_overrides: Json; p_user: string }
         Returns: Json
       }
+      set_member_access_checked: {
+        Args: {
+          p_expected: Json
+          p_expected_role: Database["public"]["Enums"]["app_role"]
+          p_overrides: Json
+          p_user: string
+        }
+        Returns: Json
+      }
       setup_new_company: {
         Args: { p_company_name: string; p_full_name: string }
         Returns: string
