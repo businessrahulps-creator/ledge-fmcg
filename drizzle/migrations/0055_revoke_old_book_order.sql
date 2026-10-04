@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.book_order_atomic(date,uuid,uuid,jsonb,uuid,jsonb,numeric,text) FROM PUBLIC, anon, authenticated;
+COMMENT ON FUNCTION public.book_order_atomic(date,uuid,uuid,jsonb,uuid,jsonb,numeric,text) IS 'DEPRECATED: replaced by the 9-arg version with p_idempotency_key';

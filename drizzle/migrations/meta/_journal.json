@@ -386,6 +386,13 @@
       "when": 1791113470327,
       "tag": "0054_activity_single_entry_per_action",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1791114790094,
+      "tag": "0055_revoke_old_book_order",
+      "breakpoints": true
     }
   ]
 }
