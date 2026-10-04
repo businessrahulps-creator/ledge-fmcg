@@ -217,9 +217,9 @@ export function InviteSheet({ open, onOpenChange, companyName, onInviteSent, def
                   {step === 2 ? <><ArrowLeft className="h-4 w-4" /> Back</> : "Cancel"}
                 </Button>
                 {step === 1 ? (
-                  <Button className="flex-1" onClick={goNext} disabled={!email}>Next: choose access</Button>
+                  <Button className="flex-1" onClick={goNext} disabled={!email || defaults.size === 0}>Next: choose access</Button>
                 ) : (
-                <Button className="flex-1" onClick={handleSubmit} disabled={submitting || !email}>
+                <Button className="flex-1" onClick={handleSubmit} disabled={submitting || !email || defaults.size === 0}>
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> Sending…

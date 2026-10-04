@@ -110,15 +110,18 @@ export function TeamRoster({ companyId }: Props) {
     if (!pickerFor) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("user_roles")
-        .update({ role: newRole })
-        .eq("id", pickerFor.roleId);
+      const { data, error } = await supabase.rpc("change_member_role_atomic", {
+        p_user: pickerFor.userId,
+        p_role: newRole,
+      });
       if (error) {
         handleSupabaseError(error, { source: "team:role.update", title: "Couldn't change job" });
       } else {
         toast.success(
           `${pickerFor.name || "Member"} is now ${article(JOB_BY_ROLE[newRole].label)} ${JOB_BY_ROLE[newRole].label}`,
+          (data as { custom_access_cleared?: boolean } | null)?.custom_access_cleared
+            ? { description: "Their custom access was reset to the new job's areas." }
+            : undefined,
         );
         setPickerFor(null);
         await refresh();
