@@ -80,3 +80,4 @@
 - [ ] Server-side dashboard/money totals (speed)
 - [x] Payment box and bill chips use dealer credit (Astra #2)
 - [x] Unpaid-by-age "oldest" after settling, and refresh at midnight (Astra #8, #9)
+- [x] Order page tag counts dealer credit (Part paid)
