@@ -37,9 +37,10 @@ async function fetchAllPages(build: () => any): Promise<{ data: any[]; error: an
     if (error) return { data: rows, error };
     const batch = data || [];
     rows.push(...batch);
-    if (batch.length < PAGE) break;
+    if (batch.length < PAGE) return { data: rows, error: null };
   }
-  return { data: rows, error: null };
+  // Never report a cut-off list as complete — totals would quietly be wrong.
+  return { data: rows, error: new Error("Too many records to load at once.") };
 }
 
 type CollectionsSnapshot = {
