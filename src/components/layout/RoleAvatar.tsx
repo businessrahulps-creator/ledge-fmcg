@@ -35,7 +35,7 @@ export function roleStyle(role: string | null | undefined): RoleStyle {
 export function RoleAvatar({ role, name, size = "sm" }: { role: string | null | undefined; name: string; size?: "sm" | "md" }) {
   const bot = role ? ROLE_BOT[role] : undefined;
   if (bot) {
-    const px = size === "lg" ? 44 : size === "md" ? 44 : 32;
+    const px = size === "md" ? 44 : 32;
     return (
       <span className="inline-flex shrink-0 items-center justify-center" style={{ width: px, height: px }} aria-hidden>
         <Suspense fallback={<InitialAvatar role={role} name={name} size={size} />}>

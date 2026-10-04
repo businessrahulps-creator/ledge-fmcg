@@ -287,13 +287,6 @@ function RosterCard({
 }: RosterCardProps) {
   const job = JOB_BY_ROLE[member.role];
   const Icon = job.icon;
-  const initials = (member.name || member.email || "?")
-    .split(/\s+/)
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   const lockedPill = isSelf || isLastOwner;
   const updatedAt = member.updatedAt ? new Date(member.updatedAt) : null;

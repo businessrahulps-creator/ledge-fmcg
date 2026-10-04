@@ -56,13 +56,6 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
     [member.name, member.role, activeSet],
   );
 
-  const initials = (member.name || member.email || "?")
-    .split(/\s+/)
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
