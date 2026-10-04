@@ -1,6 +1,6 @@
 import {
   House, ClipboardList, UserRound, Package, ChartNoAxesCombined, Settings, UserCheck,
-  Gift, Target, RotateCcw, Landmark, Wallet, ListTodo, ShoppingBasket, Store, FileBarChart,
+  Gift, Target, RotateCcw, Landmark, Wallet, ListTodo, ShoppingBasket, Store, FileBarChart, History,
 } from "lucide-react";
 import type { CapabilityKey } from "@/hooks/useCan";
 
@@ -26,6 +26,7 @@ export const NAV = {
   team: { title: "Sales Team", url: "/salespersons", icon: UserCheck },
   company: { title: "Company", url: "/company", icon: Landmark, cap: "manage_billing" },
   business: { title: "My Business", url: "/command", icon: ChartNoAxesCombined, cap: "see_money" },
+  activity: { title: "Activity", url: "/activity", icon: History, cap: "see_money" },
   reports: { title: "Reports", url: "/reports", icon: FileBarChart },
   settings: { title: "Settings", url: "/settings", icon: Settings, cap: "manage_team" },
 } satisfies Record<string, NavItem>;
@@ -36,7 +37,7 @@ export const NAV_GROUPS: NavGroup[] = [
   { label: "Work", items: [NAV.today, NAV.orders, NAV.visits, NAV.billing, NAV.returns, NAV.buying] },
   { label: "Products", items: [NAV.stock, NAV.schemes, NAV.targets] },
   { label: "People", items: [NAV.dealers, NAV.team, NAV.company] },
-  { label: "Insights", items: [NAV.business, NAV.reports] },
+  { label: "Insights", items: [NAV.business, NAV.activity, NAV.reports] },
 ];
 
 export const NAV_FOOTER: NavItem[] = [NAV.settings];
