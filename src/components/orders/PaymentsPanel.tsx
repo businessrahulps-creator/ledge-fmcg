@@ -1,4 +1,5 @@
 import { roundPaise } from "@/lib/money";
+import { useReceivables } from "@/hooks/useReceivables";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -116,6 +117,13 @@ export function PaymentsPanel({
   const balance = Math.max(0, roundPaise(docTotal - credited - received));
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
+  // Spare dealer money (dealer credit) already counts against the oldest bills.
+  const { rows: openBills, loading: billsLoading } = useReceivables();
+  const coveredByCredit = (() => {
+    if (!invoiceId || billsLoading || balance <= 0) return 0;
+    const open = openBills.find(r => r.invoiceId === invoiceId);
+    return Math.max(0, roundPaise(balance - (open ? open.due : 0)));
+  })();
   const extraAmount = Math.max(0, roundPaise(Number(amount || 0) - balance));
 
   const giveBack = async (row: PaymentRow) => {
@@ -230,6 +238,12 @@ export function PaymentsPanel({
             </p>
           </div>
         ))}
+      </div>
+      {coveredByCredit > 0 && (
+        <div className="border-b border-border bg-success/10 px-4 py-2 text-xs text-foreground">
+          {coveredByCredit >= balance
+            ? <>This bill is covered by the dealer's spare money (dealer credit) of {formatCurrency(coveredByCredit)}. Nothing more needs collecting.</>
+            : <>{formatCurrency(coveredByCredit)} of this is covered by the dealer's spare money (dealer credit). Left to collect: {formatCurrency(roundPaise(balance - coveredByCredit))}.</>}
       </div>
 
       {loading ? (
