@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { InViewTitle } from "@/components/arc/in-view-title/in-view-title";
 
 /**
  * Landing kit (monochrome v5). Every section is built from these pieces so
@@ -55,7 +54,7 @@ export function SectionHead({ num, eyebrow, title, lines, lede, align = "center"
         {num && <span aria-hidden>/</span>}
         {eyebrow}
       </span>
-      <InViewTitle as="h2" id={id} text={title} lines={lines} variant="blur" className="lpx-title" />
+      <Reveal><Title as="h2" id={id} text={title} lines={lines} /></Reveal>
       {lede && (
         <Reveal delay={0.1}>
           <p className="lpx-lede">{lede}</p>
@@ -65,17 +64,31 @@ export function SectionHead({ num, eyebrow, title, lines, lede, align = "center"
   );
 }
 
-/** The one entrance: a short rise and fade. Turns off for reduced motion. */
-export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
+/** One calm motion vocabulary for the whole page (Apple-style: strong ease-out, no bounce, plays once). */
+export const EASE = [0.23, 1, 0.32, 1] as const;
+export const REVEAL_S = 0.6;
+export const STAGGER_S = 0.07;
+
+/** Headline text. Static: titles never animate word by word. */
+export function Title({ as: Tag = "h2", id, text, lines, hero }: { as?: "h1" | "h2"; id?: string; text: string; lines?: string[]; hero?: boolean }) {
+  return (
+    <Tag id={id} className={`lpx-title ${hero ? "lpx-title--hero" : ""}`} aria-label={lines ? text : undefined}>
+      {lines ? lines.map((l, i) => <span key={i} className="block" aria-hidden>{l}</span>) : text}
+    </Tag>
+  );
+}
+
+/** The one entrance: a gentle 16px rise and fade, once. Off for reduced motion. */
+export function Reveal({ children, delay = 0, index = 0, className }: { children: ReactNode; delay?: number; index?: number; className?: string }) {
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1], delay }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: REVEAL_S, ease: EASE, delay: delay + Math.min(index, 5) * STAGGER_S }}
     >
       {children}
     </motion.div>

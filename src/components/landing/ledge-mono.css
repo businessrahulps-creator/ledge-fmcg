@@ -137,7 +137,7 @@
   border: 1px solid hsl(var(--mono-line));
   border-radius: 20px;
   padding: 24px;
-  transition: border-color .2s ease, transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
+  transition: border-color .2s cubic-bezier(.23,1,.32,1);
 }
 .lpx-card--hover:hover { border-color: hsl(var(--mono-ink)); }
 .lpx-card--ink { background: hsl(var(--mono-ink)); color: hsl(0 0% 98%); border-color: hsl(var(--mono-ink)); --mono-muted: 0 0% 68%; --mono-line: 0 0% 20%; }
@@ -173,7 +173,7 @@
 .lpx-dot--live { position: relative; }
 .lpx-dot--live::after {
   content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 1px solid currentColor; opacity: .5;
-  animation: lpx-ping 2s cubic-bezier(.22,1,.36,1) infinite;
+  
 }
 @keyframes lpx-ping { from { transform: scale(.6); opacity: .6; } to { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .lpx-dot--live::after { animation: none; } }
@@ -184,7 +184,7 @@
   min-height: 48px; padding: 0 24px; border-radius: 999px;
   font-family: "Inter", system-ui, sans-serif; font-size: 15px; font-weight: 600;
   background: hsl(var(--mono-ink)); color: hsl(0 0% 100%); border: 1px solid hsl(var(--mono-ink));
-  transition: transform .12s ease, background-color .2s ease, border-color .2s ease;
+  transition: transform .1s ease-out, background-color .2s cubic-bezier(.23,1,.32,1), border-color .2s cubic-bezier(.23,1,.32,1);
 }
 .lpx-btn:hover { background: hsl(0 0% 20%); }
 .lpx-btn:active { transform: scale(.97); }
@@ -225,7 +225,7 @@
 
 /* Marquee (logos) */
 .lpx-marquee { overflow: hidden; }
-.lpx-marquee__track { display: flex; gap: 40px; width: max-content; animation: lpx-marquee 40s linear infinite; }
+.lpx-marquee__track { display: flex; gap: 40px; width: max-content; flex-wrap: wrap; justify-content: center; width: auto; row-gap: 16px; }
 .lpx-marquee:hover .lpx-marquee__track { animation-play-state: paused; }
 @keyframes lpx-marquee { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .lpx-marquee__track { animation: none; flex-wrap: wrap; justify-content: center; width: auto; } }
