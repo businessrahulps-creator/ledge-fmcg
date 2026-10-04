@@ -25,37 +25,27 @@ function LiveFeed() {
   const [orders, setOrders] = useState(46);
   const [collected, setCollected] = useState(824600);
 
-  useEffect(() => {
-    if (reduce) return;
-    let n = 4;
-    const t = window.setInterval(() => {
-      const next = { ...SOURCE[n % SOURCE.length], id: n };
-      n += 1;
-      setEvents((prev) => [next, ...prev].slice(0, 4));
-      if (next.icon === ShoppingCart) setOrders((o) => o + 1);
-      if (next.icon === IndianRupee) setCollected((c) => c + Number(next.amount.replace(/[^\d]/g, "")));
-    }, 2800);
-    return () => window.clearInterval(t);
-  }, [reduce]);
+  // Sample screen only — no pretend live activity (keeps the page honest).
+  void setEvents; void setOrders; void setCollected; void useEffect;
 
   return (
-    <div className="lpx-card lpx-card--pad-lg" role="img" aria-label="A live view of today's orders, payments, stock and bills in Ledge">
+    <div className="lpx-card lpx-card--pad-lg" role="img" aria-label="Sample screen showing a day of orders, payments, stock and bills in Ledge">
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-2.5 text-[13px] font-semibold">
-          <span className="lpx-dot lpx-dot--live" aria-hidden />
-          Today, live
+          <span className="lpx-dot" aria-hidden />
+          Sample day
         </span>
-        <span className="text-[12px] lpx-faint lpx-num">Rahul Ps Traders</span>
+        <span className="text-[12px] lpx-faint lpx-num">Example business</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-5" aria-hidden>
-        <div className="lpx-well">
+        <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Orders today</div>
-          <div className="lpx-stat mt-2 text-[28px] md:text-[30px]"><AnimatedCounter value={orders} locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 text-[22px] sm:text-[26px]"><AnimatedCounter value={orders} locale="en-IN" /></div>
         </div>
-        <div className="lpx-well">
+        <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Money collected</div>
-          <div className="lpx-stat mt-2 text-[28px] md:text-[30px]"><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 text-[22px] sm:text-[26px] truncate"><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
         </div>
       </div>
 
