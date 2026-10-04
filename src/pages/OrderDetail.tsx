@@ -1,3 +1,4 @@
+import { useReceivables } from "@/hooks/useReceivables";
 import { CopyButton } from "@/components/ui/copy-button";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
