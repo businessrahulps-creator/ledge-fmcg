@@ -90,7 +90,9 @@ export default function Dashboard() {
   const orders = api.orders.list();
   const distributors = api.dealers.list();
   const products = api.products.list();
-  const today = useMemo(() => istCalendarNow(), []);
+  const istDay = useIstDay();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const today = useMemo(() => istCalendarNow(), [istDay]);
   const todayIso = toIsoDate(today);
   const last7Dates = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);

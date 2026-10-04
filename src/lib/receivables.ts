@@ -156,6 +156,8 @@ export function paymentStatusByOrder(
   receivedByInvoice: Map<string, number>,
   receivedByOrder: Map<string, number>,
   creditedByInvoice: Map<string, number>,
+  /** Still-due per open bill after dealer credit (from buildReceivables). When given, it decides "paid". */
+  dueAfterCreditByInvoice?: Map<string, number>,
 ): Map<string, DerivedPaymentStatus> {
   const invByOrder = new Map<string, Invoice>();
   for (const inv of invoices) {
@@ -170,8 +172,10 @@ export function paymentStatusByOrder(
       const billed = Number(inv.grandTotal || 0);
       const received = receivedByInvoice.get(inv.id) || 0;
       const credited = creditedByInvoice.get(inv.id) || 0;
-      const due = roundPaise(billed - received - credited);
-      map.set(o.id, due <= 0 ? "paid" : received > 0 ? "partial" : "pending");
+      const raw = roundPaise(billed - received - credited);
+      const due = dueAfterCreditByInvoice ? (dueAfterCreditByInvoice.get(inv.id) ?? 0) : raw;
+      const someMoney = received > 0 || due < raw;
+      map.set(o.id, due <= 0 ? "paid" : someMoney ? "partial" : "pending");
     } else {
       map.set(o.id, (receivedByOrder.get(o.id) || 0) > 0 ? "partial" : "pending");
     }
