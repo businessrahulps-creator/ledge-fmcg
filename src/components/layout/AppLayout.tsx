@@ -53,7 +53,7 @@ import {
 
 import { ChevronRight } from "lucide-react";
 
-import { NAV_GROUPS, NAV_FOOTER, MOBILE_PRIMARY, MOBILE_FALLBACK, type NavItem } from "./nav-config";
+import { NAV, NAV_GROUPS, NAV_FOOTER, MOBILE_PRIMARY, MOBILE_FALLBACK, type NavItem } from "./nav-config";
 
 type MobileNavItem = NavItem;
 const primaryMobileNav = MOBILE_PRIMARY;
