@@ -46,9 +46,8 @@ export function NotificationCenter() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const navigate = useNavigate();
-  const canTeam = useCan("manage_team");
-  const canMoney = useCan("see_money");
-  const canSeeActivity = canMoney && canTeam !== undefined;
+  // Matches the Activity page's own access rule (money access).
+  const canSeeActivity = useCan("see_money") === true;
   const groups = useMemo(() => groupNotifications(notifications), [notifications]);
 
   const openOne = (n: Notification) => {
