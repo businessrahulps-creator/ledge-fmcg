@@ -6,7 +6,7 @@
 - Orders are sent only via `dispatch_and_bill_order_atomic`; the old `dispatch_order_atomic` is revoked from clients — why: it skipped stock and credit checks.
 - Menu items, order and names come from `src/components/layout/nav-config.ts`, shared by the computer sidebar, phone bottom bar and phone Menu, with Dashboard always first — why: the two menus drifted when built separately.
 - Page titles use `.h1-display` via PageHeader; small buttons get `touch-target` (44px touch); dialogs open ≤200ms ease-out, no slide — why: one spacing/motion system.
-- Undo-send refused once a GST bill exists. Why: bills change only via credit notes.
+- No undo-send after a GST bill. Why: bills change only via credit notes.
 - Overpay/cancel-with-advance need owner's choice; extras = child invoice_payments, refund_due/refunded status; money RPCs hold a company lock. Why: no guessing/races.
 - Deleting an order goes only through `delete_order_atomic`; stock_deductions has no client write access, and triggers keep dealer balances/totals and product total_sold/avg_cost server-owned (credit-limit changes need override_credit_limit or manage_team) — why: direct writes let non-owners restore stock or lift credit limits.
 - CSV exports prefix = + - @ with '; Tally XML strips control chars — why: injection, bad XML.
