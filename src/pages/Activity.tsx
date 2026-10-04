@@ -84,9 +84,12 @@ export default function Activity() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey]);
 
+  // True while "Load more" is fetching, so a live refresh can't throw that page away.
+  const moreRef = useRef(false);
   const load = useCallback(async (cursor: Cursor) => {
     if (!companyId) return;
     const gen = cursor ? genRef.current : ++genRef.current;
+    if (cursor) moreRef.current = true;
     setLoading(true);
     try {
       const { data, error } = await buildQuery(cursor, PAGE);
@@ -99,6 +102,7 @@ export default function Activity() {
       if (gen === genRef.current) handleSupabaseError(e, { source: "activity:list", title: "Couldn't load activity" });
     } finally {
       if (gen === genRef.current) setLoading(false);
+      if (cursor) moreRef.current = false;
     }
   }, [companyId, buildQuery]);
 
@@ -130,7 +134,7 @@ export default function Activity() {
           // Totals always refresh (a payment dated earlier can change a past period);
           // the list only reloads when the period includes today.
           window.clearTimeout(t);
-          t = window.setTimeout(() => { if (to === todayKey() && rowsRef.current.length <= PAGE) load(null); loadSummary(); }, 400);
+          t = window.setTimeout(() => { if (to === todayKey() && rowsRef.current.length <= PAGE && !moreRef.current) load(null); loadSummary(); }, 400);
         })
       .subscribe();
     return () => { window.clearTimeout(t); supabase.removeChannel(ch); };

@@ -109,8 +109,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         [...(imp.data ?? []), ...(all.data ?? [])].forEach((r) => byId.set(r.id, mapDbToNotif(r as DbNotification)));
         // Keep anything that arrived live while this request was running.
         setNotifications((prev) => {
-          prev.forEach((n) => { if (!byId.has(n.id)) byId.set(n.id, n); });
-          const merged = Array.from(byId.values()).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          prev.forEach((n) => {
+            const f = byId.get(n.id);
+            if (!f) byId.set(n.id, n);
+            else if (n.read && !f.read) byId.set(n.id, { ...f, read: true }); // read on screen wins over an older reply
+          });
+          const sorted = Array.from(byId.values()).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          // Keep the list bounded: all loaded important alerts + the newest 300 others.
+          let others = 0;
+          const merged = sorted.filter((n) => n.important || ++others <= 300);
           cacheData(companyId, "notifications", merged);
           return merged;
         });
@@ -134,7 +141,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             const row = payload.new as DbNotification;
             setNotifications((prev) => {
               if (prev.some((n) => n.id === row.id)) return prev;
-              return [mapDbToNotif(row), ...prev];
+              const next = [mapDbToNotif(row), ...prev];
+              let others = 0;
+              return next.filter((n) => n.important || ++others <= 300);
             });
           }
         )

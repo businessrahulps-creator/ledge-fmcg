@@ -86,8 +86,10 @@ export function cashImpact(r: Pick<ActivityRow, "money_direction" | "amount">): 
 }
 
 /** Where tapping an entry should go, or null when there's no page for it. */
-export function activityLink(r: Pick<ActivityRow, "entity_type" | "entity_id" | "action" | "metadata">): string | null {
+export function activityLink(r: Pick<ActivityRow, "entity_type" | "entity_id" | "action" | "metadata"> & { outcome?: string | null }): string | null {
   if (r.action === "deleted") return null;
+  // A refused save never created the thing, so there's no page to open.
+  if (r.outcome && r.outcome !== "ok") return null;
   const z = "00000000-0000-0000-0000-000000000000";
   const hasId = !!r.entity_id && r.entity_id !== z;
   switch (r.entity_type) {
@@ -95,12 +97,12 @@ export function activityLink(r: Pick<ActivityRow, "entity_type" | "entity_id" | 
     case "invoice": return r.metadata?.order_id ? `/orders/${r.metadata.order_id}` : "/billing";
     case "payment": return r.metadata?.order_id ? `/orders/${r.metadata.order_id}` : "/billing";
     case "credit_note": case "claim": return "/claims";
-    case "dealer": return hasId ? `/distributors/${r.entity_id}` : "/distributors";
+    case "dealer": case "distributor": return hasId ? `/distributors/${r.entity_id}` : "/distributors";
     case "salesperson": return hasId ? `/salespersons/${r.entity_id}` : "/salespersons";
     case "purchase_bill": return hasId ? `/buying/bills/${r.entity_id}` : "/buying";
     case "supplier": return hasId ? `/buying/suppliers/${r.entity_id}` : "/buying";
     case "supplier_payment": case "purchase_return": return "/buying";
-    case "product": case "stock": case "warehouse": return "/stock";
+    case "product": case "stock": case "stock_item": case "warehouse": return "/stock";
     case "scheme": return "/schemes";
     case "target": return "/targets";
     case "visit": case "prospect": return "/visits";
