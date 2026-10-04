@@ -1434,6 +1434,7 @@ export type Database = {
           driver_name: string
           godown_id: string | null
           id: string
+          idempotency_key: string | null
           order_number: string
           payment_mode: Database["public"]["Enums"]["payment_mode"]
           payment_status: Database["public"]["Enums"]["payment_status"]
@@ -1461,6 +1462,7 @@ export type Database = {
           driver_name?: string
           godown_id?: string | null
           id?: string
+          idempotency_key?: string | null
           order_number: string
           payment_mode?: Database["public"]["Enums"]["payment_mode"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -1488,6 +1490,7 @@ export type Database = {
           driver_name?: string
           godown_id?: string | null
           id?: string
+          idempotency_key?: string | null
           order_number?: string
           payment_mode?: Database["public"]["Enums"]["payment_mode"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -3122,19 +3125,34 @@ export type Database = {
       }
       aging_bucket_rank: { Args: { b: string }; Returns: number }
       amount_in_words_inr: { Args: { p_amount: number }; Returns: string }
-      book_order_atomic: {
-        Args: {
-          p_applied_schemes?: Json
-          p_date: string
-          p_distributor_id: string
-          p_godown_id?: string
-          p_lines: Json
-          p_remarks?: string
-          p_salesperson_id: string
-          p_scheme_savings?: number
-        }
-        Returns: Json
-      }
+      book_order_atomic:
+        | {
+            Args: {
+              p_applied_schemes?: Json
+              p_date: string
+              p_distributor_id: string
+              p_godown_id?: string
+              p_lines: Json
+              p_remarks?: string
+              p_salesperson_id: string
+              p_scheme_savings?: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_applied_schemes: Json
+              p_date: string
+              p_distributor_id: string
+              p_godown_id: string
+              p_idempotency_key: string
+              p_lines: Json
+              p_remarks: string
+              p_salesperson_id: string
+              p_scheme_savings: number
+            }
+            Returns: Json
+          }
       cancel_order_atomic: {
         Args: { p_order_id: string; p_reason: string }
         Returns: Json
