@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { periodRange, describeChanges, activityLink, groupOf } from "./activity";
+import { periodRange, describeChanges, activityLink, groupOf, cashImpact } from "./activity";
 import { groupNotifications } from "@/components/layout/NotificationCenter";
 
 describe("periodRange (IST date keys)", () => {
@@ -41,5 +41,19 @@ describe("groupNotifications", () => {
   it("bundles same key, keeps order", () => {
     const g = groupNotifications([n("1", "a"), n("2", "b"), n("3", "a"), n("4", "")]);
     expect(g.map(x => x.items.map(i => i.id))).toEqual([["1", "3"], ["2"], ["4"]]);
+  });
+});
+
+describe("cashImpact (signed money effect)", () => {
+  it("payment in is +, cancelled payment in is −", () => {
+    expect(cashImpact({ money_direction: "in", amount: 100 })).toBe(100);
+    expect(cashImpact({ money_direction: "in", amount: -100 })).toBe(-100);
+  });
+  it("payment out is −, cancelled payment out is +", () => {
+    expect(cashImpact({ money_direction: "out", amount: 50 })).toBe(-50);
+    expect(cashImpact({ money_direction: "out", amount: -50 })).toBe(50);
+  });
+  it("non-cash entries have no sign", () => {
+    expect(cashImpact({ money_direction: null, amount: 900 })).toBeNull();
   });
 });

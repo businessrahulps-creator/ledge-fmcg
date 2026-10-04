@@ -85,6 +85,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const userId = user.id;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    // Ignore replies that arrive after the account/business changed.
+    let alive = true;
+    setNotifications([]);
 
     const load = async () => {
       try {
@@ -93,6 +96,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(100);
+        if (!alive) return;
         if (data) {
           const mapped = data.map(mapDbToNotif);
           setNotifications(mapped);
@@ -102,7 +106,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         // Offline — load from cache
         if (!navigator.onLine) {
           const cached = await getCachedData<Notification[]>(companyId, "notifications");
-          if (cached) setNotifications(cached);
+          if (cached && alive) setNotifications(cached);
         }
       }
     };
@@ -153,6 +157,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     window.addEventListener("online", handleOnline);
 
     return () => {
+      alive = false;
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
       if (channel) supabase.removeChannel(channel);

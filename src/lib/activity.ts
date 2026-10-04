@@ -78,6 +78,13 @@ export function describeChanges(r: Pick<ActivityRow, "before" | "after" | "chang
     }));
 }
 
+/** Signed effect on cash: + came in, − went out (a cancelled receipt is −). Null when not a cash entry. */
+export function cashImpact(r: Pick<ActivityRow, "money_direction" | "amount">): number | null {
+  if (!r.money_direction || r.amount == null) return null;
+  const n = Number(r.amount);
+  return r.money_direction === "out" ? -n : n;
+}
+
 /** Where tapping an entry should go, or null when there's no page for it. */
 export function activityLink(r: Pick<ActivityRow, "entity_type" | "entity_id" | "action" | "metadata">): string | null {
   if (r.action === "deleted") return null;
