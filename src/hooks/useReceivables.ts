@@ -1,3 +1,4 @@
+import { roundPaise } from "@/lib/money";
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApi } from "@/services/api";
@@ -39,7 +40,7 @@ const dealerCreditFor = memoLast((receipts: any[], invoices: any[], orders: any[
   const m = new Map<string, number>();
   const add = (dealer: string | undefined, amt: number) => {
     if (!dealer || !(amt > 0.004)) return;
-    m.set(dealer, Math.round(((m.get(dealer) || 0) + amt) * 100) / 100);
+    m.set(dealer, roundPaise((m.get(dealer) || 0) + amt));
   };
   for (const r of receipts) {
     if (r.status !== "posted" || r.invoiceId || r.orderId) continue;

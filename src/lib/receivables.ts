@@ -1,3 +1,4 @@
+import { roundPaise } from "@/lib/money";
 /**
  * Receivables — the single truth for "what a dealer still owes us".
  *
@@ -70,7 +71,7 @@ export function buildReceivables({
     const billed = Number(inv.grandTotal || 0);
     const received = receivedByInvoice.get(inv.id) || 0;
     const credited = creditedByInvoice.get(inv.id) || 0;
-    const due = Math.max(0, Math.round((billed - received - credited) * 100) / 100);
+    const due = Math.max(0, roundPaise(billed - received - credited));
     // Keep bills with even a few paise left — they are genuinely short paid.
     if (due <= 0) continue;
     const ageDays = dayDiff(inv.invoiceDate, today);
@@ -100,9 +101,9 @@ export function buildReceivables({
       const left = pool.get(r.distributorId) || 0;
       if (left <= 0) continue;
       const use = Math.min(left, r.due);
-      r.received = Math.round((r.received + use) * 100) / 100;
-      r.due = Math.round((r.due - use) * 100) / 100;
-      pool.set(r.distributorId, Math.round((left - use) * 100) / 100);
+      r.received = roundPaise(r.received + use);
+      r.due = roundPaise(r.due - use);
+      pool.set(r.distributorId, roundPaise(left - use));
     }
     return rows.filter(r => r.due > 0).sort((a, b) => b.ageDays - a.ageDays);
   }
@@ -169,7 +170,7 @@ export function paymentStatusByOrder(
       const billed = Number(inv.grandTotal || 0);
       const received = receivedByInvoice.get(inv.id) || 0;
       const credited = creditedByInvoice.get(inv.id) || 0;
-      const due = Math.round((billed - received - credited) * 100) / 100;
+      const due = roundPaise(billed - received - credited);
       map.set(o.id, due <= 0 ? "paid" : received > 0 ? "partial" : "pending");
     } else {
       map.set(o.id, (receivedByOrder.get(o.id) || 0) > 0 ? "partial" : "pending");

@@ -1,3 +1,4 @@
+import { roundPaise } from "@/lib/money";
 /**
  * Centralized Order Pricing Engine
  * ─────────────────────────────────
@@ -49,7 +50,7 @@ export function computeOrderPricing(
   // this is the preview. Keep the two in step.
   const today = referenceDate || todayKey();
   const validLines = lines.filter(l => l.productId && l.quantity > 0);
-  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const r2 = roundPaise;
   const lineAmount = (l: PricingLineInput) => r2(l.quantity * l.unitPrice);
   const grossTotal = r2(validLines.reduce((sum, l) => sum + lineAmount(l), 0));
   const totalQty = validLines.reduce((sum, l) => sum + l.quantity, 0);
@@ -133,7 +134,7 @@ export function computeOrderPricing(
  */
 export function allocateLineDiscounts(lines: PricingLineInput[], applied: AppliedScheme[]): number[] {
   const valid = lines.filter(l => l.productId && l.quantity > 0);
-  const r2 = (n: number) => Math.round(n * 100) / 100;
+  const r2 = roundPaise;
   const amounts = valid.map(l => r2(l.quantity * l.unitPrice));
   const disc = valid.map(() => 0);
   for (const a of applied) {

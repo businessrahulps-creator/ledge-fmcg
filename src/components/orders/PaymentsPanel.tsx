@@ -1,3 +1,4 @@
+import { roundPaise } from "@/lib/money";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -112,10 +113,10 @@ export function PaymentsPanel({
     () => rows.filter(r => r.status === "posted").reduce((s, r) => s + Number(r.amount || 0), 0),
     [rows],
   );
-  const balance = Math.max(0, Math.round((docTotal - credited - received) * 100) / 100);
+  const balance = Math.max(0, roundPaise(docTotal - credited - received));
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
-  const extraAmount = Math.max(0, Math.round((Number(amount || 0) - balance) * 100) / 100);
+  const extraAmount = Math.max(0, roundPaise(Number(amount || 0) - balance));
 
   const giveBack = async (row: PaymentRow) => {
     setSaving(true);
@@ -132,7 +133,7 @@ export function PaymentsPanel({
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
     // More than the balance: the owner decides where the extra goes — the app never guesses.
-    const extra = Math.round((value - balance) * 100) / 100;
+    const extra = roundPaise(value - balance);
     if (extra > 0 && !extraAction) {
       toast.error("Choose what to do with the extra money");
       return;
