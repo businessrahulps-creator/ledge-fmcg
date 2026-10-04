@@ -255,3 +255,30 @@
 
 /* Arc counters inherit the size of the stat they sit in. */
 .lpx [class*="counter"] { font-size: inherit; font-family: inherit; font-weight: inherit; }
+
+/* --- Hero flow picture (LedgeFlowHub) -------------------------------------------- */
+.lpx-flow { position: relative; width: 100%; border: 1px solid hsl(var(--mono-line, 0 0% 90%)); border-radius: 20px; background: hsl(0 0% 97%); padding: 40px 24px 40px; overflow: hidden; }
+.lpx-flow__stage { position: relative; margin-inline: auto; transform-origin: top left; }
+.lpx-flow__svg { position: absolute; inset: 0; overflow: visible; }
+.lpx-flow__line { fill: none; stroke: hsl(0 0% 74%); stroke-width: 1.25; transition: stroke .35s cubic-bezier(.23,1,.32,1), stroke-width .35s cubic-bezier(.23,1,.32,1); }
+.lpx-flow__line.is-on { stroke: hsl(0 0% 38%); stroke-width: 1.6; }
+.lpx-flow__socket { fill: hsl(0 0% 100%); stroke: hsl(0 0% 72%); stroke-width: 1.25; transition: stroke .25s cubic-bezier(.23,1,.32,1), fill .25s cubic-bezier(.23,1,.32,1); }
+.lpx-flow__socket.is-on { stroke: hsl(0 0% 20%); fill: hsl(0 0% 20%); }
+.lpx-flow__dot { fill: hsl(0 0% 12%); }
+.lpx-flow__node { position: absolute; display: flex; align-items: center; gap: 12px; padding: 0 14px; background: hsl(0 0% 100%); border: 1px solid hsl(0 0% 90%); border-radius: 14px; transition: border-color .35s cubic-bezier(.23,1,.32,1), box-shadow .35s cubic-bezier(.23,1,.32,1); }
+.lpx-flow__node.is-on { border-color: hsl(0 0% 45%); box-shadow: 0 0 0 3px hsl(0 0% 0% / .04); }
+.lpx-flow__node.is-compact { gap: 8px; padding: 0 10px; border-radius: 12px; }
+.lpx-flow__icon { flex: none; color: hsl(0 0% 25%); }
+.lpx-flow__name { display: block; font-size: 15px; font-weight: 600; line-height: 1.2; color: hsl(0 0% 8%); white-space: nowrap; }
+.lpx-flow__status { display: block; font-size: 12.5px; line-height: 1.35; color: hsl(0 0% 45%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; animation: lpx-flow-swap .3s cubic-bezier(.23,1,.32,1); }
+.is-compact .lpx-flow__name { font-size: 12.5px; }
+.is-compact .lpx-flow__status { font-size: 10.5px; }
+.lpx-flow__hublabel .lpx-flow__status { min-height: 18px; }
+.lpx-flow__node.is-on .lpx-flow__status { color: hsl(0 0% 15%); }
+@keyframes lpx-flow-swap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.lpx-flow__hubwrap { position: absolute; }
+.lpx-flow__hub { position: absolute; inset: 0; display: grid; place-items: center; background: hsl(0 0% 100%); border: 1px solid hsl(0 0% 86%); border-radius: 22px; box-shadow: 0 0 0 8px hsl(0 0% 100% / .7), 0 0 0 9px hsl(0 0% 90%); color: hsl(0 0% 8%); }
+.lpx-flow__ring { position: absolute; inset: -9px; border-radius: 28px; border: 1.5px solid hsl(0 0% 20%); opacity: 0; will-change: transform, opacity; }
+.lpx-flow__hublabel { position: absolute; text-align: center; }
+.lpx-flow__hublabel .lpx-flow__name { font-size: 16px; }
+@media (prefers-reduced-motion: reduce) { .lpx-flow__status { animation: none; } .lpx-flow__line, .lpx-flow__node { transition: none; } }
