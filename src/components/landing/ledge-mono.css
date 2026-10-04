@@ -257,7 +257,7 @@
 .lpx [class*="counter"] { font-size: inherit; font-family: inherit; font-weight: inherit; }
 
 /* --- Hero flow picture (LedgeFlowHub) -------------------------------------------- */
-.lpx-flow { position: relative; width: 100%; border: 1px solid hsl(var(--mono-line, 0 0% 90%)); border-radius: 20px; background: hsl(0 0% 97%); padding: 40px 24px 64px; overflow: hidden; }
+.lpx-flow { position: relative; width: 100%; border: 1px solid hsl(var(--mono-line, 0 0% 90%)); border-radius: 20px; background: hsl(0 0% 97%); padding: 40px 24px 40px; overflow: hidden; }
 .lpx-flow__stage { position: relative; margin-inline: auto; transform-origin: top left; }
 .lpx-flow__svg { position: absolute; inset: 0; overflow: visible; }
 .lpx-flow__line { fill: none; stroke: hsl(0 0% 78%); stroke-width: 1.25; transition: stroke .35s cubic-bezier(.23,1,.32,1), stroke-width .35s cubic-bezier(.23,1,.32,1); }

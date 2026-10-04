@@ -28,7 +28,7 @@ const LOOP = 9;
 const STORIES: Story[] = [
   {
     start: 0, end: 2.8, hubAt: 0.9, hub: "Order posted",
-    status: { rep: "Order ORD-1042", godown: "−12 pcs out", gst: "INV-508 sent" },
+    status: { rep: "ORD-1042 booked", godown: "−12 pcs out", gst: "INV-508 sent" },
     segs: [
       { from: "rep", to: "hub", start: 0, end: 0.9 },
       { from: "hub", to: "godown", start: 1.2, end: 2.1 },
@@ -45,7 +45,7 @@ const STORIES: Story[] = [
   },
   {
     start: 6, end: 8.8, hubAt: 6.9, hub: "Claim approved",
-    status: { ret: "Claim CLM-77", gst: "Credit note", godown: "+3 pcs back" },
+    status: { ret: "CLM-77 raised", gst: "Credit note", godown: "+3 pcs back" },
     segs: [
       { from: "ret", to: "hub", start: 6, end: 6.9 },
       { from: "hub", to: "gst", start: 7.2, end: 8.1 },
