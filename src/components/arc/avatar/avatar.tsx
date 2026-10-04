@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "../next-image";
 import { useLayoutEffect, useRef, useState, type HTMLAttributes } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "../motion-tokens";
