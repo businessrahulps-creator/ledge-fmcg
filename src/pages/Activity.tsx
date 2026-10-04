@@ -67,24 +67,29 @@ export default function Activity() {
   const filterKey = `${companyId}|${from}|${to}|${group}|${person}|${failedOnly}`;
 
   type Cursor = { at: string; id: string } | null;
+  const buildQuery = useCallback((cursor: Cursor, size: number) => {
+    // IST day boundaries, half-open: [from 00:00, day after `to` 00:00)
+    let q = supabase.from("activity_log").select("*")
+      .eq("company_id", companyId!)
+      .gte("created_at", `${from}T00:00:00+05:30`)
+      .lt("created_at", `${addDaysToKey(to, 1)}T00:00:00+05:30`)
+      .order("created_at", { ascending: false }).order("id", { ascending: false })
+      .limit(size);
+    if (group !== "all") q = q.in("entity_type", ACTIVITY_GROUPS[group].types);
+    if (person !== "all") q = q.eq("user_name", person);
+    if (failedOnly) q = q.neq("outcome", "ok");
+    // Entries saved at the same instant are not skipped between pages.
+    if (cursor) q = q.or(`created_at.lt."${cursor.at}",and(created_at.eq."${cursor.at}",id.lt.${cursor.id})`);
+    return q;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey]);
+
   const load = useCallback(async (cursor: Cursor) => {
     if (!companyId) return;
     const gen = cursor ? genRef.current : ++genRef.current;
     setLoading(true);
     try {
-      // IST day boundaries, half-open: [from 00:00, day after `to` 00:00)
-      let q = supabase.from("activity_log").select("*")
-        .eq("company_id", companyId)
-        .gte("created_at", `${from}T00:00:00+05:30`)
-        .lt("created_at", `${addDaysToKey(to, 1)}T00:00:00+05:30`)
-        .order("created_at", { ascending: false }).order("id", { ascending: false })
-        .limit(PAGE);
-      if (group !== "all") q = q.in("entity_type", ACTIVITY_GROUPS[group].types);
-      if (person !== "all") q = q.eq("user_name", person);
-      if (failedOnly) q = q.neq("outcome", "ok");
-      // Entries saved at the same instant are not skipped between pages.
-      if (cursor) q = q.or(`created_at.lt."${cursor.at}",and(created_at.eq."${cursor.at}",id.lt.${cursor.id})`);
-      const { data, error } = await q;
+      const { data, error } = await buildQuery(cursor, PAGE);
       if (error) throw error;
       if (gen !== genRef.current) return;
       const list = (data ?? []) as unknown as ActivityRow[];
@@ -95,8 +100,7 @@ export default function Activity() {
     } finally {
       if (gen === genRef.current) setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterKey]);
+  }, [companyId, buildQuery]);
 
   const sumGenRef = useRef(0);
   const loadSummary = useCallback(() => {
@@ -112,7 +116,11 @@ export default function Activity() {
   useEffect(() => { setRows([]); load(null); }, [load]);
   useEffect(() => { setSummary(null); loadSummary(); }, [loadSummary]);
 
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+
   // Live: new entries and totals update while you watch (debounced).
+  // If you've tapped "Load more", the list isn't reset under you — only the totals refresh.
   useEffect(() => {
     if (!companyId) return;
     let t: number | undefined;
@@ -121,7 +129,7 @@ export default function Activity() {
         () => {
           if (to !== todayKey()) return;
           window.clearTimeout(t);
-          t = window.setTimeout(() => { load(null); loadSummary(); }, 400);
+          t = window.setTimeout(() => { if (rowsRef.current.length <= PAGE) load(null); loadSummary(); }, 400);
         })
       .subscribe();
     return () => { window.clearTimeout(t); supabase.removeChannel(ch); };
@@ -129,22 +137,44 @@ export default function Activity() {
 
   const people = useMemo(() => Array.from(new Set(rows.map(r => r.user_name).filter(Boolean))).sort(), [rows]);
 
-  const download = () => {
-    const head = ["When (IST)", "Who", "What", "Type", "Result", "Money", "Amount", "Changes", "Reason"];
-    const fmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
-    const esc = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-    const lines = [head.join(",")];
-    for (const r of rows) lines.push([
-      fmt.format(new Date(r.created_at)), csvSafeText(r.user_name || "System"), csvSafeText(r.summary),
-      ACTIVITY_GROUPS[groupOf(r.entity_type)]?.label ?? r.entity_type,
-      r.outcome === "ok" ? "Done" : r.outcome === "unknown" ? "Not sure if saved" : "Failed",
-      r.money_direction === "in" ? "In" : r.money_direction === "out" ? "Out" : "",
-      r.amount ?? "", csvSafeText(describeChanges(r).map(c => `${c.field}: ${c.from} → ${c.to}`).join("; ")),
-      csvSafeText(String(r.metadata?.reason ?? "")),
-    ].map(esc).join(","));
-    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = `activity_${from}_to_${to}.csv`; a.click();
+  const [exporting, setExporting] = useState(false);
+  const download = async () => {
+    if (!companyId) return;
+    setExporting(true);
+    try {
+      // Fetch every entry in the period (not just what's on screen), up to 20,000.
+      const all: ActivityRow[] = [];
+      let cursor: Cursor = null;
+      for (;;) {
+        const { data, error } = await buildQuery(cursor, 1000);
+        if (error) throw error;
+        const list = (data ?? []) as unknown as ActivityRow[];
+        all.push(...list);
+        if (list.length < 1000 || all.length >= 20000) break;
+        const last = list[list.length - 1];
+        cursor = { at: last.created_at, id: last.id };
+      }
+      const head = ["When (IST)", "Who", "What", "Type", "Result", "Money", ...(canMoney ? ["Amount"] : []), "Changes", "Reason"];
+      const fmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" });
+      const esc = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+      const lines = [head.join(",")];
+      for (const r of all) lines.push([
+        fmt.format(new Date(r.created_at)), csvSafeText(r.user_name || "System"), csvSafeText(r.summary),
+        ACTIVITY_GROUPS[groupOf(r.entity_type)]?.label ?? r.entity_type,
+        r.outcome === "ok" ? "Done" : r.outcome === "unknown" ? "Not sure if saved" : "Failed",
+        r.money_direction === "in" ? "In" : r.money_direction === "out" ? "Out" : "",
+        ...(canMoney ? [r.amount ?? ""] : []),
+        csvSafeText(describeChanges(r).map(c => `${c.field}: ${c.from} → ${c.to}`).join("; ")),
+        csvSafeText(String(r.metadata?.reason ?? "")),
+      ].map(esc).join(","));
+      const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = `activity_${from}_to_${to}.csv`; a.click();
+    } catch (e) {
+      handleSupabaseError(e, { source: "activity:export", title: "Couldn't download the activity" });
+    } finally {
+      setExporting(false);
+    }
   };
 
   const money = (n: number | null | undefined) => (n == null ? "—" : formatCurrency(n));
