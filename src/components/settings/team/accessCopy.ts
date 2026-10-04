@@ -45,6 +45,7 @@ export const SHORT_CAP_LABEL: Record<CapabilityKey, string> = {
   manage_team: "manage the team",
   manage_billing: "manage billing",
   manage_buying: "buy from suppliers",
+  manage_business: "edit business settings",
   view_error_logs: "view error logs",
   see_own_performance_only: "see only their own numbers",
 };
