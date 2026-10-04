@@ -52,7 +52,7 @@ export function logFailedAttempt(source: string, error: unknown, reason: string,
   if (!t) return;
   const entityId = typeof context?.orderId === "string" ? context.orderId
     : typeof context?.invoiceId === "string" ? context.invoiceId : null;
-  void (supabase.rpc as any)("log_failed_attempt", {
+  void Promise.resolve((supabase.rpc as any)("log_failed_attempt", {
     p_entity_type: t.entity,
     p_action: t.action,
     p_summary: t.label,
@@ -60,7 +60,7 @@ export function logFailedAttempt(source: string, error: unknown, reason: string,
     p_reason: reason.slice(0, 300),
     p_entity_id: entityId,
     p_amount: null,
-  }).then(({ error: e }: { error: unknown }) => {
+  })).then(({ error: e }: { error: unknown }) => {
     if (e) logError({ source: "audit:log_failed_attempt", error: e, severity: "warning" });
   });
 }

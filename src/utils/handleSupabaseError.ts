@@ -27,7 +27,8 @@ export function handleSupabaseError(error: unknown, opts: HandleSupabaseErrorOpt
   const friendly = toFriendlyMessage(error);
   toast.error(opts.title, { description: friendly });
   logError({ source: opts.source, error, context: opts.context });
-  logFailedAttempt(opts.source, error, friendly, opts.context);
+  // Best-effort audit entry; must never break the error toast.
+  try { logFailedAttempt(opts.source, error, friendly, opts.context); } catch { /* ignore */ }
 }
 
 /** Map common Supabase / Postgres error shapes to a one-line, user-friendly message. */
