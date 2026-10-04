@@ -34,13 +34,13 @@ export function PaymentReport() {
 
   const periodFiltered = filterByTimePeriod(orders, period);
   const scoped = applyRevenueScope(periodFiltered, scope);
-  // Money actually collected in the same window — posted receipts only.
+  // Money actually collected in the same window — everything not cancelled (to-give-back money was still received).
   const { rows: receivableRows, receipts, paymentStatus: paymentStatusByOrderId } = useReceivables();
   const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
   const filtered = filter === "all" ? scoped : scoped.filter((o) => payStatus(o.id) === filter);
   const collectedInRange = useMemo(
     () => filterByTimePeriod(receipts.map(r => ({ ...r, date: r.paidOn })), period)
-      .reduce((s, r) => (r.status === "posted" ? s + r.amount : s), 0),
+      .reduce((s, r) => (r.status !== "voided" ? s + r.amount : s), 0),
     [receipts, period],
   );
 

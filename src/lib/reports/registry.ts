@@ -1,5 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { ReportDef, ReportParams, ReportRow, ReportSection } from "./types";
+
+/** Money that reached us: kept, still to give back, or already given back (that leaves as its own "money out" line). */
+const MONEY_RECEIVED = ["posted", "refund_due", "refunded"];
+const istDate = (ts: string) => new Date(new Date(ts).getTime() + 330 * 60000).toISOString().slice(0, 10);
 import { r2, sumBy } from "./format";
 
 /* Reports read straight from the database (company rules apply), page by page,
@@ -161,7 +165,7 @@ export const REPORTS: ReportDef[] = [
       { key: "mode", header: "Mode" }, { key: "reference", header: "Reference" }, { key: "amount", header: "Amount", type: "money", total: true },
     ],
     fetch: async p => {
-      const rows = await fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,reference,distributors(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
+      const rows = await fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,reference,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).order("paid_on").range(a, b));
       return one(rows.map((x: any) => ({ date: x.paid_on, dealer: x.distributors?.name ?? "", mode: modeWord[x.mode] ?? x.mode, reference: x.reference, amount: r2(x.amount) })));
     },
     summary: rows => [
@@ -286,9 +290,10 @@ export const REPORTS: ReportDef[] = [
       { key: "out", header: "Money out", type: "money", total: true }, { key: "billed", header: "Bill value", type: "money", total: true },
     ],
     fetch: async p => {
-      const [bills, pay, cn, pb, sp] = await Promise.all([
+      const [bills, pay, back, cn, pb, sp] = await Promise.all([
         salesBills(p),
-        fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,distributors(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("invoice_payments").select("paid_on,amount,mode,distributors(name)").in("status", MONEY_RECEIVED).gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
+        fetchAll((a, b) => db.from("invoice_payments").select("refunded_at,amount,distributors(name)").eq("status", "refunded").gte("refunded_at", `${p.from}T00:00:00+05:30`).lte("refunded_at", `${p.to}T23:59:59.999+05:30`).range(a, b)),
         fetchAll((a, b) => db.from("credit_notes").select("credit_note_number,note_date,grand_total,distributors(name)").gte("note_date", p.from).lte("note_date", p.to).range(a, b)),
         fetchAll((a, b) => db.from("purchase_bills").select("bill_date,supplier_name,supplier_bill_no,grand_total").neq("status", "cancelled").gte("bill_date", p.from).lte("bill_date", p.to).range(a, b)),
         fetchAll((a, b) => db.from("supplier_payments").select("paid_on,amount,mode,suppliers(name)").eq("status", "posted").gte("paid_on", p.from).lte("paid_on", p.to).range(a, b)),
@@ -296,6 +301,7 @@ export const REPORTS: ReportDef[] = [
       const rows: ReportRow[] = [
         ...bills.map((x: any) => ({ date: x.invoice_date, type: "Sales bill", ref: x.invoice_number, party: x.buyer_name, in: null, out: null, billed: r2(x.grand_total) })),
         ...pay.map((x: any) => ({ date: x.paid_on, type: `Payment in (${modeWord[x.mode] ?? x.mode})`, ref: "", party: x.distributors?.name ?? "", in: r2(x.amount), out: null, billed: null })),
+        ...back.map((x: any) => ({ date: istDate(x.refunded_at), type: "Money given back", ref: "", party: x.distributors?.name ?? "", in: null, out: r2(x.amount), billed: null })),
         ...cn.map((x: any) => ({ date: x.note_date, type: "Credit note", ref: x.credit_note_number, party: x.distributors?.name ?? "", in: null, out: null, billed: -r2(x.grand_total) })),
         ...pb.map((x: any) => ({ date: x.bill_date, type: "Purchase bill", ref: x.supplier_bill_no, party: x.supplier_name, in: null, out: null, billed: null })),
         ...sp.map((x: any) => ({ date: x.paid_on, type: `Paid supplier (${modeWord[x.mode] ?? x.mode})`, ref: "", party: x.suppliers?.name ?? "", in: null, out: r2(x.amount), billed: null })),
