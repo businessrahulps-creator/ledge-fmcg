@@ -43,6 +43,7 @@ export default function Company() {
 
   const [logoUrl, setLogoUrl] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
+  const savingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPrefixConfirm, setShowPrefixConfirm] = useState(false);
 
