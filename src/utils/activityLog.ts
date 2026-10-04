@@ -60,9 +60,9 @@ export function logFailedAttempt(source: string, error: unknown, reason: string,
     p_reason: reason.slice(0, 300),
     p_entity_id: entityId,
     p_amount: null,
-  })).then(({ error: e }: { error: unknown }) => {
-    if (e) logError({ source: "audit:log_failed_attempt", error: e, severity: "warning" });
-  });
+  })).then((res: { error?: unknown } | undefined) => {
+    if (res?.error) logError({ source: "audit:log_failed_attempt", error: res.error, severity: "warning" });
+  }, () => { /* best effort */ });
 }
 
 /** Format ₹ amount for summaries */
