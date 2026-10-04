@@ -41,11 +41,11 @@ function LiveFeed() {
       <div className="grid grid-cols-2 gap-3 mt-5" aria-hidden>
         <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Orders today</div>
-          <div className="lpx-stat mt-2 text-[22px] sm:text-[26px]"><AnimatedCounter value={orders} locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 text-[18px] sm:text-[24px]"><AnimatedCounter value={orders} locale="en-IN" /></div>
         </div>
         <div className="lpx-well min-w-0">
           <div className="text-[11.5px] lpx-muted">Money collected</div>
-          <div className="lpx-stat mt-2 text-[22px] sm:text-[26px] truncate"><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
+          <div className="lpx-stat mt-2 text-[18px] sm:text-[24px] whitespace-nowrap"><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
         </div>
       </div>
 
