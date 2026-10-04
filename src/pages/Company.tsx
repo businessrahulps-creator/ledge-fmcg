@@ -36,7 +36,7 @@ const upper = (re: RegExp, max: number) => (v: string) =>
 
 export default function Company() {
   const api = useApi();
-  const canEditCompany = useCan("manage_billing");
+  const canEditCompany = useCan("manage_business");
   const { companyId } = useAuth();
   const { updateCompanyInfo } = api;
   const savedPrefix = api.orders.prefix();
