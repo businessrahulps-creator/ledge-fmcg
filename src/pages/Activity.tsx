@@ -135,7 +135,16 @@ export default function Activity() {
     return () => { window.clearTimeout(t); supabase.removeChannel(ch); };
   }, [companyId, to, load, loadSummary]);
 
-  const people = useMemo(() => Array.from(new Set(rows.map(r => r.user_name).filter(Boolean))).sort(), [rows]);
+  // Names stay in the Person list after you pick one (reset only when the period/business changes).
+  const [peopleSeen, setPeopleSeen] = useState<string[]>([]);
+  useEffect(() => { setPeopleSeen([]); }, [companyId, from, to]);
+  useEffect(() => {
+    setPeopleSeen(prev => {
+      const next = new Set(prev); rows.forEach(r => r.user_name && next.add(r.user_name));
+      return next.size === prev.length ? prev : Array.from(next).sort();
+    });
+  }, [rows]);
+  const people = useMemo(() => (person !== "all" && !peopleSeen.includes(person) ? [...peopleSeen, person] : peopleSeen), [peopleSeen, person]);
 
   const [exporting, setExporting] = useState(false);
   const download = async () => {
