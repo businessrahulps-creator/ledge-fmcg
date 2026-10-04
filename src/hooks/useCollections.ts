@@ -9,7 +9,7 @@ export type ReceiptRow = {
   paidOn: string;
   reference: string;
   note: string;
-  status: "posted" | "voided";
+  status: "posted" | "voided" | "refund_due" | "refunded";
   voidReason: string;
   invoiceId: string | null;
   orderId: string | null;
