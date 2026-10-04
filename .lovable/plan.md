@@ -10,6 +10,7 @@
 ## 2. Seed data up to today
 - Fill the business with realistic sample activity from the last date that has data up to today (4 Oct 2026). That covers orders, dispatches, GST bills, payments (including overpayments, refunds and cancellations with advance money), credit notes, returns, buying bills, supplier payments, stock moves, shop visits and targets.
 - All of it goes through the same save steps the app uses, so stock, balances and Activity stay correct.
+- Every sample action shows on the Activity page with its person, time and before/after, and money moves show in the top totals. I'll check this afterwards by comparing the count of sample entries with the Activity rows.
 - Every sample entry is tagged so it can be found and told apart from real entries.
 
 ## 3. Cross-check logic and calculations
