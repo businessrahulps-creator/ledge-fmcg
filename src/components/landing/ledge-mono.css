@@ -262,3 +262,6 @@
 .lpx .lpx-arc-fill > * { width: 100%; }
 
 @media (min-width: 768px) { .lpx-card { padding: 32px; } }
+
+/* Arc counters inherit the size of the stat they sit in. */
+.lpx [class*="counter"] { font-size: inherit; font-family: inherit; font-weight: inherit; }
