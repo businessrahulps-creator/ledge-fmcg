@@ -1,7 +1,21 @@
 import { lazy, Suspense } from "react";
 import { Crown, ChartNoAxesCombined, Wallet, ShoppingBag, Eye, type LucideIcon } from "lucide-react";
 
-const OwnerBot = lazy(() => import("./OwnerBot"));
+const RoleBot = lazy(() => import("./RoleBot"));
+
+const ROLE_BOT: Record<string, { type: "square" | "circle" | "triangle" | "drop" | "pebble"; sleeping?: boolean }> = {
+  super_admin: { type: "square" },
+  sales_manager: { type: "circle" },
+  accountant: { type: "triangle" },
+  salesperson: { type: "drop" },
+  viewer: { type: "pebble", sleeping: true },
+};
+
+function seedFrom(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return (h % 1000) / 1000;
+}
 
 interface RoleStyle { label: string; tile: string; Icon: LucideIcon }
 
@@ -19,12 +33,13 @@ export function roleStyle(role: string | null | undefined): RoleStyle {
 }
 
 export function RoleAvatar({ role, name, size = "sm" }: { role: string | null | undefined; name: string; size?: "sm" | "md" }) {
-  if (role === "super_admin") {
-    const px = size === "md" ? 44 : 32;
+  const bot = role ? ROLE_BOT[role] : undefined;
+  if (bot) {
+    const px = size === "lg" ? 44 : size === "md" ? 44 : 32;
     return (
       <span className="inline-flex shrink-0 items-center justify-center" style={{ width: px, height: px }} aria-hidden>
         <Suspense fallback={<InitialAvatar role={role} name={name} size={size} />}>
-          <OwnerBot size={px} />
+          <RoleBot type={bot.type} sleeping={bot.sleeping} size={px} seed={seedFrom(name)} />
         </Suspense>
       </span>
     );

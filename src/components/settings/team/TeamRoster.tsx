@@ -1,3 +1,4 @@
+import { RoleAvatar } from "@/components/layout/RoleAvatar";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { MoreHorizontal, Sparkles, Lock, UserPlus, Clock } from "lucide-react";
@@ -301,9 +302,7 @@ function RosterCard({
 
   return (
     <div className="flex items-start gap-3 rounded-md border border-border/70 bg-card p-3 shadow-depth-2 transition-[box-shadow,border-color] duration-normal ease-fluent md:p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary md:h-11 md:w-11 md:text-sm">
-        {initials}
-      </div>
+      <RoleAvatar role={member.role} name={member.name || member.email || "?"} size="md" />
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">

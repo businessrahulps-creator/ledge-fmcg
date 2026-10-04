@@ -1,3 +1,4 @@
+import { RoleAvatar } from "@/components/layout/RoleAvatar";
 import { useMemo } from "react";
 import { Sparkles } from "lucide-react";
 
@@ -74,9 +75,7 @@ export function OverrideDrawer({ open, onOpenChange, member, defaults, onSaved }
       >
         <SheetHeader className="border-b border-border/60 p-5 text-left">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-              {initials}
-            </div>
+            <RoleAvatar role={member.role} name={member.name || member.email || "?"} size="md" />
             <div className="min-w-0 flex-1">
               <SheetTitle className="text-base leading-tight">
                 What can {(member.name || "this person").split(/\s+/)[0]} do?
