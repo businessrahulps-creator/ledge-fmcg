@@ -6,8 +6,8 @@
 - Orders are sent only via `dispatch_and_bill_order_atomic`; the old `dispatch_order_atomic` is revoked from clients — why: it skipped stock and credit checks.
 - Menu items, order and names come from `src/components/layout/nav-config.ts`, shared by the computer sidebar, phone bottom bar and phone Menu, with Dashboard always first — why: the two menus drifted when built separately.
 - Page titles use `.h1-display` via PageHeader; small buttons get `touch-target` (44px touch); dialogs open ≤200ms ease-out, no slide — why: one spacing/motion system.
-- Undo-send is refused once a GST bill exists; app calls it before saving status. Why: GST bills change only via returns/credit notes.
-- Extra money (overpay, advance on cancel) needs the owner's choice in the RPC; parts are child invoice_payments (parent_payment_id), refunds use status refund_due/refunded; money RPCs take a per-company advisory lock. Why: no guessing, no races.
+- Undo-send refused once a GST bill exists. Why: bills change only via credit notes.
+- Overpay/cancel-with-advance needs the owner's choice; extra parts are child invoice_payments, refunds = status refund_due/refunded; money RPCs take a company advisory lock. Why: no guessing/races.
 - Deleting an order goes only through `delete_order_atomic`; stock_deductions has no client write access, and triggers keep dealer balances/totals and product total_sold/avg_cost server-owned (credit-limit changes need override_credit_limit or manage_team) — why: direct writes let non-owners restore stock or lift credit limits.
 - CSV exports prefix = + - @ with an apostrophe; Tally XML strips control chars — why: formula injection, invalid XML.
 - Screen tests live in e2e-agent/ (TesterArmy e2e): plain-English agent steps must be followed by a hard assertion, sessions come from `lovable auth-session`, telemetry off, `.e2e/` artifacts never committed — why: AI never decides pass/fail alone; traces hold tokens.
