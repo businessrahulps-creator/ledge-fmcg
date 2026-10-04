@@ -13,7 +13,7 @@ const items = [
 export function FAQ() {
   return (
     <Section id="faq" ground="grey" labelledBy="faq-title">
-      <SectionHead num="10" eyebrow="Questions" id="faq-title" title="Answers, before you ask." />
+      <SectionHead bot="faq" num="10" eyebrow="Questions" id="faq-title" title="Answers, before you ask." />
       <Reveal>
         <div className="lpx-card max-w-3xl mx-auto lpx-arc-fill">
           <Accordion items={items} defaultOpen={0} size="lg" />

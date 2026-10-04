@@ -282,3 +282,8 @@
 .lpx-flow__hublabel { position: absolute; text-align: center; }
 .lpx-flow__hublabel .lpx-flow__name { font-size: 16px; }
 @media (prefers-reduced-motion: reduce) { .lpx-flow__status { animation: none; } .lpx-flow__line, .lpx-flow__node { transition: none; } }
+
+/* Helper bots: the only colour on the page, small and calm */
+.lpx-bot { display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; flex: none; }
+.lpx-head--left .lpx-bot { align-self: flex-start; }
+.lpx-flow__hubbot { position: absolute; left: 50%; top: 0; transform: translate(-50%, -78%); pointer-events: none; z-index: 2; }

@@ -20,7 +20,7 @@ const weeks = [3.1, 3.4, 3.2, 3.9, 4.2, 4.0, 4.6, 4.9, 5.1, 5.0, 5.6, 5.9].map((
 export function Outcome() {
   return (
     <Section ground="light" labelledBy="outcome-title">
-      <SectionHead
+      <SectionHead bot="outcome"
         num="03"
         eyebrow="Outcome"
         id="outcome-title"

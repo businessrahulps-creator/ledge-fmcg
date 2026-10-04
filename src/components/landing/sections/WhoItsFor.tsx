@@ -6,7 +6,7 @@ const industries = ["FMCG", "Building materials", "Agri-inputs", "Pharma distrib
 export function WhoItsFor() {
   return (
     <Section ground="grey" tight labelledBy="who-its-for">
-      <SectionHead
+      <SectionHead bot="who"
         id="who-its-for"
         eyebrow="Who it’s for"
         title="If you sell through dealers, Ledge fits."

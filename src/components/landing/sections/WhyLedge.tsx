@@ -13,7 +13,7 @@ const legacy = ["Tally", "Zoho Books", "Vyapar", "Khatabook"];
 export function WhyLedge() {
   return (
     <Section ground="grey" labelledBy="why-title">
-      <SectionHead
+      <SectionHead bot="why"
         num="06"
         eyebrow="Why Ledge"
         id="why-title"

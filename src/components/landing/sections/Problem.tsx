@@ -11,7 +11,7 @@ const cards = [
 export function Problem() {
   return (
     <Section ground="light" labelledBy="problem-title">
-      <SectionHead
+      <SectionHead bot="problem"
         num="01"
         eyebrow="The problem"
         id="problem-title"

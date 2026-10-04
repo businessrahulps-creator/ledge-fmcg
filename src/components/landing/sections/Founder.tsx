@@ -3,7 +3,7 @@ import { Section, SectionHead, Reveal } from "../kit";
 export function Founder() {
   return (
     <Section id="founder" ground="grey" labelledBy="founder-title">
-      <SectionHead num="08" eyebrow="From the founder" id="founder-title" title="Built in India, for the way you work." />
+      <SectionHead bot="founder" num="08" eyebrow="From the founder" id="founder-title" title="Built in India, for the way you work." />
       <Reveal>
         <figure className="lpx-card lpx-card--pad-lg max-w-3xl mx-auto">
           <blockquote className="lpx-quote">
