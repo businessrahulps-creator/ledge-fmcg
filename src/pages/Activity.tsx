@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Download, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,7 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { csvSafeText } from "@/lib/reports/exporters";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import {
-  ACTIVITY_GROUPS, activityLink, describeChanges, groupOf, periodRange, type ActivityRow, type Period,
+  ACTIVITY_GROUPS, activityLink, cashImpact, describeChanges, groupOf, periodRange, type ActivityRow, type Period,
 } from "@/lib/activity";
 
 interface Summary {
