@@ -73,6 +73,8 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
+  // True after an unconfirmed save: reopening the box must reuse the same save ID.
+  const keepKey = useRef(false);
   const [extraAction, setExtraAction] = useState<"apply_other_bills" | "dealer_credit" | "refund" | null>(null);
 
   const api = useApi();
@@ -147,7 +149,15 @@ export function PaymentsPanel({
       extraAction: extra > 0 ? extraAction : null,
     });
     setSaving(false);
-    if (!ok) return;
+    if (!ok) {
+      // The save may have gone through even though the reply was lost. Keep the
+      // same save ID for the next try (the server then returns the same payment)
+      // and reload so a payment that did save shows up straight away.
+      keepKey.current = true;
+      await load();
+      return;
+    }
+    keepKey.current = false;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
     setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setExtraAction(null);
@@ -182,7 +192,7 @@ export function PaymentsPanel({
         {cancelled ? (
           <p className="text-xs text-muted-foreground">This order was cancelled, so payments can't be added.</p>
         ) : canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setExtraAction(null); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); if (!keepKey.current) setSubmitKey(crypto.randomUUID()); setExtraAction(null); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
