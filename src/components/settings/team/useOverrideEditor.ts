@@ -98,9 +98,15 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
       for (const { key } of TOGGLEABLE_CAPS) {
         if (!!current[key] !== !!roleDefaults[key]) overrides[key] = !!current[key];
       }
-      const { error } = await supabase.rpc("set_member_access_atomic", {
+      const expected: Record<string, boolean> = {};
+      for (const { key } of TOGGLEABLE_CAPS) {
+        if (!!initial[key] !== !!roleDefaults[key]) expected[key] = !!initial[key];
+      }
+      const { error } = await supabase.rpc("set_member_access_checked", {
         p_user: member.userId,
         p_overrides: overrides,
+        p_expected: expected,
+        p_expected_role: member.role,
       });
       if (error) {
         handleSupabaseError(error, {
@@ -123,7 +129,7 @@ export function useOverrideEditor({ member, defaults, onSaved }: UseOverrideEdit
     } finally {
       setSaving(false);
     }
-  }, [member, current, roleDefaults, saving, onSaved]);
+  }, [member, current, initial, roleDefaults, saving, loadFailed, loading, defaults, onSaved]);
 
   return {
     loading: loading || loadFailed || defaults.size === 0,

@@ -295,6 +295,13 @@
       "when": 1791108513851,
       "tag": "0041_accept_invite_rejoin",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1791108874488,
+      "tag": "0042_member_access_conflict_check",
+      "breakpoints": true
     }
   ]
 }
