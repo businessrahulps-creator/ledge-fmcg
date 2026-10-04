@@ -170,13 +170,6 @@
 .lpx-chip--solid { background: hsl(var(--mono-ink)); color: hsl(0 0% 98%); border-color: hsl(var(--mono-ink)); font-weight: 600; }
 
 .lpx-dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; display: inline-block; }
-.lpx-dot--live { position: relative; }
-.lpx-dot--live::after {
-  content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 1px solid currentColor; opacity: .5;
-  
-}
-@keyframes lpx-ping { from { transform: scale(.6); opacity: .6; } to { transform: scale(1.6); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .lpx-dot--live::after { animation: none; } }
 
 /* --- Buttons ---------------------------------------------------------------------- */
 .lpx-btn {
@@ -226,9 +219,6 @@
 /* Marquee (logos) */
 .lpx-marquee { overflow: hidden; }
 .lpx-marquee__track { display: flex; gap: 40px; width: max-content; flex-wrap: wrap; justify-content: center; width: auto; row-gap: 16px; }
-.lpx-marquee:hover .lpx-marquee__track { animation-play-state: paused; }
-@keyframes lpx-marquee { to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) { .lpx-marquee__track { animation: none; flex-wrap: wrap; justify-content: center; width: auto; } }
 
 /* Live feed (hero) */
 .lpx-feed { overflow: hidden; }
