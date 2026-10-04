@@ -113,6 +113,8 @@ export interface PaymentRecord {
   note: string;
   status: string;
   void_reason: string;
+  extra_kind?: string;
+  parent_payment_id?: string | null;
 }
 
 export interface RecordPaymentInput {
@@ -124,6 +126,8 @@ export interface RecordPaymentInput {
   reference?: string;
   note?: string;
   idempotencyKey: string;
+  /** What to do with money above what is due — the owner chooses, never the app. */
+  extraAction?: "apply_other_bills" | "dealer_credit" | "refund" | null;
 }
 
 export function useBillingDomain(deps: BillingDeps) {
@@ -249,7 +253,7 @@ export function useBillingDomain(deps: BillingDeps) {
     if (!id) return [];
     const { data, error } = await supabase
       .from("invoice_payments")
-      .select("id, amount, mode, paid_on, reference, note, status, void_reason")
+      .select("id, amount, mode, paid_on, reference, note, status, void_reason, extra_kind, parent_payment_id")
       .eq(column, id)
       .order("paid_on", { ascending: false });
     if (error) {
@@ -277,6 +281,7 @@ export function useBillingDomain(deps: BillingDeps) {
       p_reference: sanitizeInput(input.reference || ""),
       p_note: sanitizeInput(input.note || ""),
       p_idempotency_key: input.idempotencyKey,
+      ...(input.extraAction ? { p_extra_action: input.extraAction } : {}),
     };
     const { error } = input.invoiceId
       ? await supabase.rpc("record_invoice_payment_atomic", { p_invoice_id: input.invoiceId, ...shared })
@@ -307,10 +312,23 @@ export function useBillingDomain(deps: BillingDeps) {
     return true;
   }, [refreshMoney]);
 
+  /** Owner handed back money that was waiting to be given back. */
+  const markMoneyGivenBack = useCallback(async (paymentId: string, note = ""): Promise<boolean> => {
+    const { error } = await supabase.rpc("mark_money_given_back_atomic", {
+      p_payment_id: paymentId, p_note: sanitizeInput(note),
+    });
+    if (error) {
+      handleSupabaseError(error, { source: "rpc:mark_money_given_back_atomic", title: "Couldn't mark this money as given back", context: { paymentId } });
+      return false;
+    }
+    await refreshMoney();
+    return true;
+  }, [refreshMoney]);
+
   return {
     invoices, setInvoices, claims, setClaims,
     recordReturn, resolveClaim, listReturnedQuantities,
-    listPayments, recordPayment, voidPayment,
+    listPayments, recordPayment, voidPayment, markMoneyGivenBack,
     safeRefetchInvoices, safeRefetchClaims, refetchInvoiceById,
   };
 }

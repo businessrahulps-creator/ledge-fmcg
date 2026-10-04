@@ -164,7 +164,7 @@ export interface DataContextType {
       overrideCredit?: boolean;
     },
   ) => Promise<{ success: boolean; invoiceNumber?: string; alreadyDone?: boolean; error?: string }>;
-  cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
+  cancelOrder: (orderId: string, reason: string, advanceAction?: "apply_to_dues" | "refund" | null) => Promise<boolean>;
   markDelivered: (orderId: string, note?: string) => Promise<boolean>;
 
   addDistributor: (d: Distributor) => Promise<boolean>;
@@ -215,6 +215,7 @@ export interface DataContextType {
   listPayments: (anchor: { invoiceId?: string | null; orderId?: string | null }) => Promise<PaymentRecord[]>;
   recordPayment: (input: RecordPaymentInput) => Promise<boolean>;
   voidPayment: (paymentId: string, reason: string) => Promise<boolean>;
+  markMoneyGivenBack: (paymentId: string, note?: string) => Promise<boolean>;
 
   nextOrderNumber: () => string;
   previewOrderNumber: () => string;
@@ -290,6 +291,7 @@ export interface TransactionalContextType {
   listPayments: DataContextType["listPayments"];
   recordPayment: DataContextType["recordPayment"];
   voidPayment: DataContextType["voidPayment"];
+  markMoneyGivenBack: DataContextType["markMoneyGivenBack"];
 
 
   nextOrderNumber: DataContextType["nextOrderNumber"];

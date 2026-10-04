@@ -620,6 +620,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     listPayments: billing.listPayments,
     recordPayment: billing.recordPayment,
     voidPayment: billing.voidPayment,
+    markMoneyGivenBack: billing.markMoneyGivenBack,
     nextOrderNumber: orders.nextOrderNumber, previewOrderNumber: orders.previewOrderNumber,
   }), [
     orders.orders, billing.invoices, billing.claims,
@@ -632,7 +633,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     targets.addSecondarySale, targets.deleteSecondarySale,
     targets.addTarget, targets.updateTarget, targets.deleteTarget,
     billing.recordReturn, billing.resolveClaim, billing.listReturnedQuantities,
-    billing.listPayments, billing.recordPayment, billing.voidPayment,
+    billing.listPayments, billing.recordPayment, billing.voidPayment, billing.markMoneyGivenBack,
     orders.nextOrderNumber, orders.previewOrderNumber,
   ]);
 

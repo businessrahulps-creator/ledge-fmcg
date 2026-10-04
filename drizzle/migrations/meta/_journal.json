@@ -358,6 +358,20 @@
       "when": 1791111105369,
       "tag": "0050_void_payment_lock_order_first",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1791111776497,
+      "tag": "0051_owner_decides_extra_money",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1791112253373,
+      "tag": "0052_extra_money_astra_fixes",
+      "breakpoints": true
     }
   ]
 }

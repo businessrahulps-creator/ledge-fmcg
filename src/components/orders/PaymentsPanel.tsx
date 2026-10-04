@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { useCollections } from "@/hooks/useCollections";
 import { todayKey } from "@/utils/dateKey";
 import { toast } from "sonner";
 import { IndianRupee, Ban } from "lucide-react";
@@ -17,6 +19,17 @@ import { cn } from "@/lib/utils";
 import type { PaymentRecord } from "@/context/data-types";
 
 type PaymentRow = PaymentRecord;
+
+const EXTRA_CHOICES = [
+  { value: "apply_other_bills", title: "Use it for their other unpaid bills", detail: "Oldest bills first. Anything left stays as dealer credit." },
+  { value: "dealer_credit", title: "Keep it as dealer credit", detail: "It lowers what they owe on future bills." },
+  { value: "refund", title: "Give the extra back", detail: "It shows as money to give back until you mark it given." },
+] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  refund_due: "To give back",
+  refunded: "Given back",
+};
 
 const modes = [
   { value: "cash", label: "Cash" },
@@ -60,39 +73,63 @@ export function PaymentsPanel({
   const [voidTarget, setVoidTarget] = useState<PaymentRow | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [submitKey, setSubmitKey] = useState(() => crypto.randomUUID());
-  const [clamped, setClamped] = useState(false);
+  const [extraAction, setExtraAction] = useState<"apply_other_bills" | "dealer_credit" | "refund" | null>(null);
 
   const api = useApi();
   const anchorId = invoiceId || orderId || "";
   // Hold the stable function itself — `api` is a fresh object every render.
   const listPayments = api.payments.list;
 
+  const { companyId } = useAuth();
+  const { creditedByInvoice, reload: reloadCollections } = useCollections(companyId);
+  // Credit notes lower what a bill can still collect — same rule as the server.
+  const credited = invoiceId ? (creditedByInvoice.get(invoiceId) || 0) : 0;
+
+  // Only the newest request for the current bill/order may fill the list.
+  const loadSeq = useRef(0);
   const load = useCallback(async () => {
+    const seq = ++loadSeq.current;
     if (!anchorId) { setRows([]); setLoading(false); return; }
     setLoading(true);
     const data = await listPayments({ invoiceId, orderId });
+    if (seq !== loadSeq.current) return;
     setLoading(false);
     setRows(data);
   }, [anchorId, invoiceId, orderId, listPayments]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    // A different bill or order: drop anything typed for the previous one.
+    setRows([]); setOpen(false); setVoidTarget(null); setAmount(null); setExtraAction(null);
+    load();
+  }, [load]);
 
   const received = useMemo(
     () => rows.filter(r => r.status === "posted").reduce((s, r) => s + Number(r.amount || 0), 0),
     [rows],
   );
-  const balance = Math.max(0, Math.round((docTotal - received) * 100) / 100);
+  const balance = Math.max(0, Math.round((docTotal - credited - received) * 100) / 100);
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
+  const extraAmount = Math.max(0, Math.round((Number(amount || 0) - balance) * 100) / 100);
+
+  const giveBack = async (row: PaymentRow) => {
+    setSaving(true);
+    const ok = await api.payments.markGivenBack(row.id);
+    setSaving(false);
+    if (!ok) return;
+    toast.success(`${formatCurrency(Number(row.amount))} marked as given back`);
+    await load();
+    void reloadCollections();
+    onChanged?.();
+  };
 
   const recordPayment = async () => {
     const value = Number(amount || 0);
     if (value <= 0) { toast.error("Enter the amount received"); return; }
-    // More than the balance is refused outright — the server will not take it either.
-    if (value > balance) {
-      toast.error("That is more than what is due", {
-        description: `Only ${formatCurrency(balance)} is due on ${docLabel}. Record ${formatCurrency(balance)} or less.`,
-      });
+    // More than the balance: the owner decides where the extra goes — the app never guesses.
+    const extra = Math.round((value - balance) * 100) / 100;
+    if (extra > 0 && !extraAction) {
+      toast.error("Choose what to do with the extra money");
       return;
     }
     setSaving(true);
@@ -107,13 +144,15 @@ export function PaymentsPanel({
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
       idempotencyKey: `${anchorId}:${submitKey}`,
+      extraAction: extra > 0 ? extraAction : null,
     });
     setSaving(false);
     if (!ok) return;
     toast.success(`${formatCurrency(value)} recorded against ${docLabel}`);
     setOpen(false);
-    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setClamped(false);
+    setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setExtraAction(null);
     await load();
+    void reloadCollections();
     onChanged?.();
   };
 
@@ -127,6 +166,7 @@ export function PaymentsPanel({
     toast.success("Payment cancelled — the record stays in the history");
     setVoidTarget(null); setVoidReason("");
     await load();
+    void reloadCollections();
     onChanged?.();
   };
 
@@ -142,7 +182,7 @@ export function PaymentsPanel({
         {cancelled ? (
           <p className="text-xs text-muted-foreground">This order was cancelled, so payments can't be added.</p>
         ) : canRecord && balance > 0 && (
-          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setClamped(false); setOpen(true); }}>
+          <Button size="sm" onClick={() => { setAmount(balance); setSubmitKey(crypto.randomUUID()); setExtraAction(null); setOpen(true); }}>
             <IndianRupee className="h-3.5 w-3.5" />
             Record payment
           </Button>
@@ -176,7 +216,7 @@ export function PaymentsPanel({
         <ul className="divide-y divide-border/60">
           {rows.map(r => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-xs">
-              <span className={cn("num font-semibold tabular-nums", r.status === "voided" && "line-through text-muted-foreground")}>
+              <span className={cn("num font-semibold tabular-nums", (r.status === "voided" || r.status === "refunded") && "line-through text-muted-foreground")}>
                 {formatCurrency(Number(r.amount))}
               </span>
               <span className="capitalize text-muted-foreground">{r.mode.replace("_", " ")}</span>
@@ -187,7 +227,20 @@ export function PaymentsPanel({
                   Cancelled{r.void_reason ? ` — ${r.void_reason}` : ""}
                 </span>
               )}
-              {canRecord && r.status === "posted" && (
+              {r.extra_kind === "other_bill" && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">Extra from another payment</span>
+              )}
+              {STATUS_LABEL[r.status] && (
+                <span className={cn("rounded-full px-2 py-0.5 text-[10px]", r.status === "refund_due" ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground")}>
+                  {STATUS_LABEL[r.status]}
+                </span>
+              )}
+              {canRecord && r.status === "refund_due" && (
+                <Button variant="outline" size="sm" className="ml-auto h-7 px-2 text-[11px]" disabled={saving} onClick={() => giveBack(r)}>
+                  Mark given back
+                </Button>
+              )}
+              {canRecord && r.status === "posted" && r.extra_kind !== "other_bill" && (
                 <Button
                   variant="ghost" size="sm" className="ml-auto h-7 px-2 text-[11px]"
                   onClick={() => { setVoidTarget(r); setVoidReason(""); }}
@@ -214,17 +267,29 @@ export function PaymentsPanel({
             <div className="space-y-1.5">
               <Label className="text-xs">Amount received (₹) *</Label>
               <NumberInput
-                allowDecimal min={0} max={balance} value={amount}
-                // Clearing the note only when the value drops below the due amount:
-                // on a clamp this fires with v === balance, so the note survives.
-                onValueChange={v => { setAmount(v); if ((v ?? 0) < balance) setClamped(false); }}
-                onClampedToMax={() => setClamped(true)}
+                allowDecimal min={0} value={amount}
+                onValueChange={v => { setAmount(v); if ((v ?? 0) <= balance) setExtraAction(null); }}
                 className="h-10 rounded-lg"
               />
-              {clamped && (
-                <p className="text-xs text-muted-foreground">
-                  Only {formatCurrency(balance)} is due on {docLabel}, so the amount has been set to {formatCurrency(balance)}.
-                </p>
+              {extraAmount > 0 && (
+                <div className="space-y-2 pt-1" role="radiogroup" aria-label="What to do with the extra money">
+                  <p className="text-xs font-medium">
+                    That is {formatCurrency(extraAmount)} more than what is due. What should happen to the extra?
+                  </p>
+                  {EXTRA_CHOICES.map(opt => (
+                    <button
+                      key={opt.value} type="button" role="radio" aria-checked={extraAction === opt.value}
+                      onClick={() => setExtraAction(opt.value)}
+                      className={cn(
+                        "touch-target w-full rounded-md border px-3 py-2 text-left text-xs transition-colors",
+                        extraAction === opt.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+                      )}
+                    >
+                      <span className="block text-sm font-medium">{opt.title}</span>
+                      <span className="block text-muted-foreground">{opt.detail}</span>
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3">
