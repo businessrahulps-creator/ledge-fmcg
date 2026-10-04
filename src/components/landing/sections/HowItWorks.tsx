@@ -38,7 +38,7 @@ export function HowItWorks() {
           completeLabel="Order placed, stock updated, bill sent"
           current={current}
           details="current"
-          steps={steps.map((s) => ({ label: s.short, description: s.title }))}
+          steps={steps.map((s) => ({ id: s.badge, label: s.short, description: s.title }))}
         />
       </div>
 
