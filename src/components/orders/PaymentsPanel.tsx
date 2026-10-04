@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { useCollections } from "@/hooks/useCollections";
 import { todayKey } from "@/utils/dateKey";
 import { toast } from "sonner";
 import { IndianRupee, Ban } from "lucide-react";
@@ -78,21 +80,34 @@ export function PaymentsPanel({
   // Hold the stable function itself — `api` is a fresh object every render.
   const listPayments = api.payments.list;
 
+  const { companyId } = useAuth();
+  const { creditedByInvoice, reload: reloadCollections } = useCollections(companyId);
+  // Credit notes lower what a bill can still collect — same rule as the server.
+  const credited = invoiceId ? (creditedByInvoice.get(invoiceId) || 0) : 0;
+
+  // Only the newest request for the current bill/order may fill the list.
+  const loadSeq = useRef(0);
   const load = useCallback(async () => {
+    const seq = ++loadSeq.current;
     if (!anchorId) { setRows([]); setLoading(false); return; }
     setLoading(true);
     const data = await listPayments({ invoiceId, orderId });
+    if (seq !== loadSeq.current) return;
     setLoading(false);
     setRows(data);
   }, [anchorId, invoiceId, orderId, listPayments]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    // A different bill or order: drop anything typed for the previous one.
+    setRows([]); setOpen(false); setVoidTarget(null); setAmount(null); setExtraAction(null);
+    load();
+  }, [load]);
 
   const received = useMemo(
     () => rows.filter(r => r.status === "posted").reduce((s, r) => s + Number(r.amount || 0), 0),
     [rows],
   );
-  const balance = Math.max(0, Math.round((docTotal - received) * 100) / 100);
+  const balance = Math.max(0, Math.round((docTotal - credited - received) * 100) / 100);
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
   const extraAmount = Math.max(0, Math.round((Number(amount || 0) - balance) * 100) / 100);
@@ -104,6 +119,7 @@ export function PaymentsPanel({
     if (!ok) return;
     toast.success(`${formatCurrency(Number(row.amount))} marked as given back`);
     await load();
+    void reloadCollections();
     onChanged?.();
   };
 
@@ -136,6 +152,7 @@ export function PaymentsPanel({
     setOpen(false);
     setAmount(null); setReference(""); setNote(""); setSubmitKey(crypto.randomUUID()); setExtraAction(null);
     await load();
+    void reloadCollections();
     onChanged?.();
   };
 
@@ -149,6 +166,7 @@ export function PaymentsPanel({
     toast.success("Payment cancelled — the record stays in the history");
     setVoidTarget(null); setVoidReason("");
     await load();
+    void reloadCollections();
     onChanged?.();
   };
 
@@ -222,7 +240,7 @@ export function PaymentsPanel({
                   Mark given back
                 </Button>
               )}
-              {canRecord && r.status === "posted" && (
+              {canRecord && r.status === "posted" && r.extra_kind !== "other_bill" && (
                 <Button
                   variant="ghost" size="sm" className="ml-auto h-7 px-2 text-[11px]"
                   onClick={() => { setVoidTarget(r); setVoidReason(""); }}
