@@ -1,3 +1,4 @@
+import { roundPaise } from "@/lib/money";
 /**
  * Receivables — the single truth for "what a dealer still owes us".
  *
@@ -70,7 +71,7 @@ export function buildReceivables({
     const billed = Number(inv.grandTotal || 0);
     const received = receivedByInvoice.get(inv.id) || 0;
     const credited = creditedByInvoice.get(inv.id) || 0;
-    const due = Math.max(0, Math.round((billed - received - credited) * 100) / 100);
+    const due = Math.max(0, roundPaise(billed - received - credited));
     // Keep bills with even a few paise left — they are genuinely short paid.
     if (due <= 0) continue;
     const ageDays = dayDiff(inv.invoiceDate, today);
@@ -100,9 +101,9 @@ export function buildReceivables({
       const left = pool.get(r.distributorId) || 0;
       if (left <= 0) continue;
       const use = Math.min(left, r.due);
-      r.received = Math.round((r.received + use) * 100) / 100;
-      r.due = Math.round((r.due - use) * 100) / 100;
-      pool.set(r.distributorId, Math.round((left - use) * 100) / 100);
+      r.received = roundPaise(r.received + use);
+      r.due = roundPaise(r.due - use);
+      pool.set(r.distributorId, roundPaise(left - use));
     }
     return rows.filter(r => r.due > 0).sort((a, b) => b.ageDays - a.ageDays);
   }
@@ -115,7 +116,7 @@ export function receivablesForDealer(rows: ReceivableRow[], distributorId: strin
 }
 
 export const sumDue = (rows: ReceivableRow[]): number =>
-  Math.round(rows.reduce((s, r) => s + r.due, 0) * 100) / 100;
+  roundPaise(rows.reduce((s, r) => s + r.due, 0));
 
 /** Advance money sitting on orders that have not been billed yet. */
 export function advancesByDealer(
@@ -155,6 +156,8 @@ export function paymentStatusByOrder(
   receivedByInvoice: Map<string, number>,
   receivedByOrder: Map<string, number>,
   creditedByInvoice: Map<string, number>,
+  /** Still-due per open bill after dealer credit (from buildReceivables). When given, it decides "paid". */
+  dueAfterCreditByInvoice?: Map<string, number>,
 ): Map<string, DerivedPaymentStatus> {
   const invByOrder = new Map<string, Invoice>();
   for (const inv of invoices) {
@@ -169,8 +172,10 @@ export function paymentStatusByOrder(
       const billed = Number(inv.grandTotal || 0);
       const received = receivedByInvoice.get(inv.id) || 0;
       const credited = creditedByInvoice.get(inv.id) || 0;
-      const due = Math.round((billed - received - credited) * 100) / 100;
-      map.set(o.id, due <= 0 ? "paid" : received > 0 ? "partial" : "pending");
+      const raw = roundPaise(billed - received - credited);
+      const due = dueAfterCreditByInvoice ? (dueAfterCreditByInvoice.get(inv.id) ?? 0) : raw;
+      const someMoney = received > 0 || due < raw;
+      map.set(o.id, due <= 0 ? "paid" : someMoney ? "partial" : "pending");
     } else {
       map.set(o.id, (receivedByOrder.get(o.id) || 0) > 0 ? "partial" : "pending");
     }
@@ -221,40 +226,44 @@ export function agingFromReceivables(
       totalOutstanding: 0, oldestAgeDays: 0, worstBucket: null, partialCount: 0,
     });
   }
+  // Work per bill so "oldest" always names a bill that is still unpaid.
+  const billsByDealer = new Map<string, Array<{ due: number; ageDays: number; partial: boolean }>>();
   for (const r of rows) {
-    const agg = byDealer.get(r.distributorId);
-    if (!agg) continue;
-    agg[BUCKET_FIELD[r.bucket]] += r.due;
-    agg.totalOutstanding += r.due;
-    if (r.ageDays > agg.oldestAgeDays) agg.oldestAgeDays = r.ageDays;
-    if (r.received > 0) agg.partialCount += 1;
+    if (!byDealer.has(r.distributorId)) continue;
+    const list = billsByDealer.get(r.distributorId) ?? [];
+    list.push({ due: r.due, ageDays: r.ageDays, partial: r.received > 0 });
+    billsByDealer.set(r.distributorId, list);
   }
-  // Payments not linked to a bill (advances) and overpaid bills still reduce
-  // what the dealer owes. Settle that spare credit against the oldest money
-  // first so the total equals the canonical dealer balance.
-  const OLDEST_FIRST = ["bucket_90_plus", "bucket_61_90", "bucket_31_60", "bucket_0_30"] as const;
-  const AGE_FLOOR: Record<(typeof OLDEST_FIRST)[number], number> = { bucket_90_plus: 91, bucket_61_90: 61, bucket_31_60: 31, bucket_0_30: 0 };
-  for (const a of byDealer.values()) {
-    const bal = canonical.get(a.distributorId);
-    if (!opts.settleToBalance || typeof bal !== "number" || !Number.isFinite(bal)) continue;
-    let spare = a.totalOutstanding - Math.max(0, bal);
-    if (spare <= 0.005) continue;
-    for (const f of OLDEST_FIRST) {
-      const take = Math.min(a[f], spare);
-      a[f] -= take; spare -= take; a.totalOutstanding -= take;
-      if (spare <= 0.005) break;
+  for (const [dealerId, bills] of billsByDealer) {
+    const a = byDealer.get(dealerId)!;
+    // Payments not linked to a bill and overpaid bills still reduce what the
+    // dealer owes. Settle that spare credit against the oldest bills first so
+    // the total equals the canonical dealer balance.
+    const bal = canonical.get(dealerId);
+    if (opts.settleToBalance && typeof bal === "number" && Number.isFinite(bal)) {
+      let spare = bills.reduce((s, b) => s + b.due, 0) - Math.max(0, bal);
+      bills.sort((x, y) => y.ageDays - x.ageDays);
+      for (const b of bills) {
+        if (spare <= 0.005) break;
+        const take = Math.min(b.due, spare);
+        b.due = roundPaise(b.due - take);
+        b.partial = true;
+        spare -= take;
+      }
     }
-    const top = OLDEST_FIRST.find(f => a[f] > 0.005);
-    if (top && a.oldestAgeDays > 0) {
-      const ceil = top === "bucket_90_plus" ? Infinity : top === "bucket_61_90" ? 90 : top === "bucket_31_60" ? 60 : 30;
-      a.oldestAgeDays = Math.max(AGE_FLOOR[top], Math.min(a.oldestAgeDays, ceil));
+    for (const b of bills) {
+      if (b.due <= 0.005) continue;
+      a[BUCKET_FIELD[bucketize(b.ageDays)]] += b.due;
+      a.totalOutstanding += b.due;
+      if (b.ageDays > a.oldestAgeDays) a.oldestAgeDays = b.ageDays;
+      if (b.partial) a.partialCount += 1;
     }
   }
   return [...byDealer.values()]
     .filter(a => a.totalOutstanding > 0.005)
     .map(a => ({
       ...a,
-      totalOutstanding: Math.round(a.totalOutstanding * 100) / 100,
+      totalOutstanding: roundPaise(a.totalOutstanding),
       worstBucket: bucketize(a.oldestAgeDays),
     }));
 }
@@ -272,5 +281,5 @@ export function collectedInPeriod(
     if (Number.isNaN(d.getTime()) || d < from || d > to) return sum;
     return sum + (r.amount || 0);
   }, 0);
-  return Math.round(total * 100) / 100;
+  return roundPaise(total);
 }

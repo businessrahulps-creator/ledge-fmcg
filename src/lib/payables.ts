@@ -1,10 +1,11 @@
+import { roundPaise } from "@/lib/money";
 /**
  * Buying maths — pure and mirrored by the database. The server is the source
  * of truth (it recalculates everything on save); these power previews/lists.
  */
 // Must match the rates record_purchase_bill_atomic accepts.
 export const GST_RATES = [0, 0.25, 3, 5, 12, 18, 28] as const;
-const r2 = (n: number) => Math.round(n * 100) / 100;
+const r2 = roundPaise;
 
 export interface DraftLine { quantity: number; rate: number; gstRate: number }
 export interface LineCalc { taxable: number; cgst: number; sgst: number; igst: number; total: number }
