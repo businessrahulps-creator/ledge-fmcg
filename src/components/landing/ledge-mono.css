@@ -260,9 +260,9 @@
 .lpx-flow { position: relative; width: 100%; border: 1px solid hsl(var(--mono-line, 0 0% 90%)); border-radius: 20px; background: hsl(0 0% 97%); padding: 40px 24px 40px; overflow: hidden; }
 .lpx-flow__stage { position: relative; margin-inline: auto; transform-origin: top left; }
 .lpx-flow__svg { position: absolute; inset: 0; overflow: visible; }
-.lpx-flow__line { fill: none; stroke: hsl(0 0% 78%); stroke-width: 1.25; transition: stroke .35s cubic-bezier(.23,1,.32,1), stroke-width .35s cubic-bezier(.23,1,.32,1); }
+.lpx-flow__line { fill: none; stroke: hsl(0 0% 74%); stroke-width: 1.25; transition: stroke .35s cubic-bezier(.23,1,.32,1), stroke-width .35s cubic-bezier(.23,1,.32,1); }
 .lpx-flow__line.is-on { stroke: hsl(0 0% 38%); stroke-width: 1.6; }
-.lpx-flow__socket { fill: hsl(0 0% 100%); stroke: hsl(0 0% 72%); stroke-width: 1.25; transition: stroke .35s ease, fill .35s ease; }
+.lpx-flow__socket { fill: hsl(0 0% 100%); stroke: hsl(0 0% 72%); stroke-width: 1.25; transition: stroke .25s cubic-bezier(.23,1,.32,1), fill .25s cubic-bezier(.23,1,.32,1); }
 .lpx-flow__socket.is-on { stroke: hsl(0 0% 20%); fill: hsl(0 0% 20%); }
 .lpx-flow__dot { fill: hsl(0 0% 12%); }
 .lpx-flow__node { position: absolute; display: flex; align-items: center; gap: 12px; padding: 0 14px; background: hsl(0 0% 100%); border: 1px solid hsl(0 0% 90%); border-radius: 14px; transition: border-color .35s cubic-bezier(.23,1,.32,1), box-shadow .35s cubic-bezier(.23,1,.32,1); }
@@ -273,7 +273,7 @@
 .lpx-flow__status { display: block; font-size: 12.5px; line-height: 1.35; color: hsl(0 0% 45%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; animation: lpx-flow-swap .3s cubic-bezier(.23,1,.32,1); }
 .is-compact .lpx-flow__name { font-size: 12.5px; }
 .is-compact .lpx-flow__status { font-size: 10.5px; }
-.lpx-flow__hublabel .lpx-flow__status { white-space: normal; }
+.lpx-flow__hublabel .lpx-flow__status { min-height: 18px; }
 .lpx-flow__node.is-on .lpx-flow__status { color: hsl(0 0% 15%); }
 @keyframes lpx-flow-swap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 .lpx-flow__hubwrap { position: absolute; }

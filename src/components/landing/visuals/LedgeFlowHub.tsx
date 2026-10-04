@@ -27,29 +27,29 @@ interface Story { start: number; end: number; hubAt: number; hub: string; status
 const LOOP = 9;
 const STORIES: Story[] = [
   {
-    start: 0, end: 2.8, hubAt: 0.9, hub: "Order posted",
-    status: { rep: "ORD-1042 booked", godown: "−12 pcs out", gst: "INV-508 sent" },
+    start: 0, end: 2.8, hubAt: 0.9, hub: "Order",
+    status: { rep: "ORD-1042", godown: "−12 pcs", gst: "INV-508" },
     segs: [
       { from: "rep", to: "hub", start: 0, end: 0.9 },
       { from: "hub", to: "godown", start: 1.2, end: 2.1 },
-      { from: "hub", to: "gst", start: 1.2, end: 2.1 },
+      { from: "hub", to: "gst", start: 1.35, end: 2.25 },
     ],
   },
   {
-    start: 3, end: 5.8, hubAt: 3.9, hub: "Payment matched",
-    status: { dealer: "₹48,000 paid", owner: "Dues updated" },
+    start: 3, end: 5.8, hubAt: 3.9, hub: "Payment",
+    status: { dealer: "₹48,000", owner: "Dues −₹48K" },
     segs: [
       { from: "dealer", to: "hub", start: 3, end: 3.9 },
       { from: "hub", to: "owner", start: 4.2, end: 5.1 },
     ],
   },
   {
-    start: 6, end: 8.8, hubAt: 6.9, hub: "Claim approved",
-    status: { ret: "CLM-77 raised", gst: "Credit note", godown: "+3 pcs back" },
+    start: 6, end: 8.8, hubAt: 6.9, hub: "Claim",
+    status: { ret: "CLM-77", gst: "CN-21", godown: "+3 pcs" },
     segs: [
       { from: "ret", to: "hub", start: 6, end: 6.9 },
       { from: "hub", to: "gst", start: 7.2, end: 8.1 },
-      { from: "hub", to: "godown", start: 7.2, end: 8.1 },
+      { from: "hub", to: "godown", start: 7.35, end: 8.25 },
     ],
   },
 ];
@@ -265,10 +265,10 @@ export function LedgeFlowHub() {
             </svg>
           </div>
         </div>
-        <div className="lpx-flow__hublabel" style={{ top: cy + L.hub / 2 + 12, width: L.compact ? 110 : 132, left: L.w / 2 - (L.compact ? 55 : 66) }}>
+        <div className="lpx-flow__hublabel" style={{ top: cy + L.hub / 2 + 12, width: 120, left: L.w / 2 - 60 }}>
           <span className="lpx-flow__name">Ledge</span>
           <span className="lpx-flow__status lpx-num" key={story?.hub ?? "idle"}>
-            {story ? story.hub : `${count.toLocaleString("en-IN")} processed today`}
+            {story ? story.hub : `${count.toLocaleString("en-IN")} today`}
           </span>
         </div>
       </div>
