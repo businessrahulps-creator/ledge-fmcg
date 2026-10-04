@@ -1,98 +1,45 @@
-import { AnimateIn } from "../AnimateIn";
-import { PressableCard } from "../PressableCard";
-import { useReducedMotion } from "framer-motion";
+import { Carousel } from "@/components/arc/carousel/carousel";
+import { AvatarGroup } from "@/components/arc/avatar-group/avatar-group";
 import arnav from "@/assets/landing/testimonial-arnav.webp";
 import priya from "@/assets/landing/testimonial-priya.webp";
 import dev from "@/assets/landing/testimonial-dev.webp";
 import rohan from "@/assets/landing/testimonial-rohan.webp";
+import { Section, SectionHead, Reveal } from "../kit";
 
 const testimonials = [
-  {
-    quote: "I check the dashboard before I start my day. That’s it. The whole operation used to live in my head.",
-    name: "Arnav Sethi",
-    role: "Owner, Aryan Beverages, Pune",
-    avatar: arnav,
-  },
-  {
-    quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn’t been opened once.",
-    name: "Priya Anand",
-    role: "Operations Head, Coastal Naturals, Kochi",
-    avatar: priya,
-  },
-  {
-    quote: "Caught a critical low on our top SKU four days early. Festival season went perfectly.",
-    name: "Dev Sharma",
-    role: "Warehouse Lead, Nova Retail Co., Chennai",
-    avatar: dev,
-  },
-  {
-    quote: "I open the dealer profile in the car. I walk in knowing everything. Dealers notice.",
-    name: "Rohan Nair",
-    role: "Senior Sales Executive, Sterling FMCG, Bangalore",
-    avatar: rohan,
-  },
+  { quote: "I check the dashboard before I start my day. That’s it. The whole operation used to live in my head.", name: "Arnav Sethi", role: "Owner, Aryan Beverages, Pune", avatar: arnav },
+  { quote: "I showed my team Ledge on Monday. By Wednesday, the Excel file hadn’t been opened once.", name: "Priya Anand", role: "Operations Head, Coastal Naturals, Kochi", avatar: priya },
+  { quote: "Caught a critical low on our top SKU four days early. Festival season went perfectly.", name: "Dev Sharma", role: "Warehouse Lead, Nova Retail Co., Chennai", avatar: dev },
+  { quote: "I open the dealer profile in the car. I walk in knowing everything. Dealers notice.", name: "Rohan Nair", role: "Senior Sales Executive, Sterling FMCG, Bangalore", avatar: rohan },
 ];
 
 export function Testimonials() {
-  const _reduce = useReducedMotion();
-
   return (
-    <section className="relative lp-section-paper lp-rhythm overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1]">
-              Owners who stopped guessing.
-            </h2>
-          </div>
-        </AnimateIn>
-
-        {/* Motion v3 - cards are still on entrance. Hover = unified 120ms intent. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 max-w-5xl mx-auto lp-grid-stretch">
-          {testimonials.map((t, i) => {
-            const isFeatured = i === 0;
-            return (
-              <PressableCard key={t.name} className="relative h-full">
-                {/* Tilted depth layers (skip for tinted feature card) */}
-                {!isFeatured && (
-                  <>
-                    <div aria-hidden className="absolute inset-0 lp-card opacity-40 -rotate-2 translate-x-1.5 translate-y-1.5 pointer-events-none" />
-                    <div aria-hidden className="absolute inset-0 lp-card opacity-70 rotate-1 -translate-x-1 translate-y-0.5 pointer-events-none" />
-                  </>
-                )}
-                {/* Front card */}
-                <div className={`relative ${isFeatured ? "lp-card lp-card--sunken" : "lp-card"} p-7 md:p-8 h-full flex flex-col overflow-hidden`}>
-                  <span
-                    aria-hidden
-                    className="absolute -top-6 -left-2 font-heading text-[120px] leading-none text-foreground/[0.05] select-none pointer-events-none"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                  >
-                    &ldquo;
-                  </span>
-
-                  <p className="relative font-body text-[16px] md:text-[17px] text-foreground leading-[1.6] tracking-[-0.005em] flex-1">
-                    {t.quote}
-                  </p>
-                  <div className="relative mt-6 pt-5 border-t border-border flex items-center gap-3.5">
-                    <img
-                      src={t.avatar}
-                      alt={t.name}
-                      width={64}
-                      height={64}
-                      loading="lazy"
-                      className="w-12 h-12 rounded-full object-cover border border-border shadow-depth-2"
-                    />
-                    <div>
-                      <p className="font-body font-semibold text-[14.5px] text-foreground">{t.name}</p>
-                      <p className="font-body text-[12.5px] text-muted-foreground mt-0.5">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </PressableCard>
-            );
-          })}
+    <Section ground="light" labelledBy="voices-title">
+      <SectionHead num="07" eyebrow="Customers" id="voices-title" title="Owners who stopped guessing." />
+      <Reveal>
+        <div className="flex justify-center -mt-4 mb-10 md:mb-12">
+          <AvatarGroup members={testimonials.map((t) => ({ name: t.name, src: t.avatar }))} max={4} size="md" label="People who use Ledge" />
         </div>
-      </div>
-    </section>
+      </Reveal>
+      <Reveal delay={0.08}>
+        <Carousel label="What customers say" slideSize="min(86cqw, 420px)">
+          {testimonials.map((t) => (
+            <figure key={t.name} className="lpx-card lpx-card--flat h-full">
+              <blockquote className="font-heading text-[19px] md:text-[21px] leading-[1.5] tracking-[-0.01em] flex-1">
+                “{t.quote}”
+              </blockquote>
+              <figcaption className="mt-6 pt-5 flex items-center gap-3.5 border-t" style={{ borderColor: "hsl(var(--mono-line))" }}>
+                <img src={t.avatar} alt="" width={48} height={48} loading="lazy" className="w-12 h-12 rounded-full object-cover grayscale" />
+                <span>
+                  <span className="block text-[14.5px] font-semibold">{t.name}</span>
+                  <span className="block text-[13px] lpx-muted mt-0.5">{t.role}</span>
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </Carousel>
+      </Reveal>
+    </Section>
   );
 }

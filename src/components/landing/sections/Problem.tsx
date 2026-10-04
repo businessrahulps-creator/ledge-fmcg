@@ -1,80 +1,40 @@
-import { useRef } from "react";
-import { motion } from "framer-motion";
-import { MessageCircle, Table, Compass, Laptop, AlertCircle } from "lucide-react";
-import { useParallaxY } from "@/lib/motion";
-import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
+import { MessageCircle, Table, Compass, Laptop } from "lucide-react";
+import { Section, SectionHead, Reveal } from "../kit";
 
 const cards = [
-  {
-    icon: MessageCircle,
-    title: "Lost Orders",
-    description: "WhatsApp chits. Half get lost. You still don’t know what sold today.",
-  },
-  {
-    icon: Table,
-    title: "Payment Chaos",
-    description: "Cash, UPI, cheque. No single source of truth. Always one version behind.",
-  },
-  {
-    icon: Compass,
-    title: "Blind Stock",
-    description: "Empty shelf? You find out last - when the dealer calls to complain.",
-  },
-  {
-    icon: Laptop,
-    title: "Excel Nights",
-    description: "Two days to build one report. Every week. Your weekends are gone.",
-  },
+  { icon: MessageCircle, title: "Lost Orders", description: "WhatsApp chits. Half get lost. You still don’t know what sold today.", tag: "9:40 AM" },
+  { icon: Table, title: "Payment Chaos", description: "Cash, UPI, cheque. No single source of truth. Always one version behind.", tag: "1:15 PM" },
+  { icon: Compass, title: "Blind Stock", description: "Empty shelf? You find out last - when the dealer calls to complain.", tag: "5:30 PM" },
+  { icon: Laptop, title: "Excel Nights", description: "Two days to build one report. Every week. Your weekends are gone.", tag: "11:47 PM · Sunday" },
 ];
 
 export function Problem() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const noiseY = useParallaxY(sectionRef, 15);
-
   return (
-    <section ref={sectionRef} className="relative lp-section-soft lp-rhythm overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground leading-[1.1] tracking-[-0.022em]">
-              The old way is bleeding you dry.
-            </h2>
-            <p className="font-body text-[15px] md:text-[17px] text-muted-foreground mt-5 leading-[1.55]">
-              You’re running on yesterday’s data. Your competitors aren’t.
-            </p>
-          </div>
-        </AnimateIn>
-
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-6xl mx-auto lp-grid-stretch" staggerTime={0.05}>
-          {cards.map((card, i) => {
-            const isFeatured = i === 3; // "Excel Nights" - emotional peak
-            return (
-              <StaggerItem key={card.title}>
-                <div className={`${isFeatured ? "lp-card lp-card--ink" : "lp-card"} p-7 h-full flex flex-col`}>
-                  {isFeatured ? (
-                    <div className="mb-5">
-                      <span className="lp-pill lp-pill--warn">
-                        <span className="lp-pill__tile"><AlertCircle size={12} strokeWidth={2.5} /></span>
-                        <span className="lp-pill__label num-tabular">11:47 PM · Sunday</span>
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="lp-icon-tile mb-5" style={{ width: 36, height: 36 }}>
-                      <card.icon size={17} strokeWidth={1.75} className="text-foreground" />
-                    </div>
-                  )}
-                  <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-tight">
-                    {card.title}
-                  </h3>
-                  <p className="font-body text-[14px] text-muted-foreground leading-[1.55]">
-                    {card.description}
-                  </p>
+    <Section ground="light" labelledBy="problem-title">
+      <SectionHead
+        num="01"
+        eyebrow="The problem"
+        id="problem-title"
+        title="The old way is bleeding you dry."
+        lede="You’re running on yesterday’s data. Your competitors aren’t."
+      />
+      <div className="lpx-grid lpx-grid-4">
+        {cards.map((c, i) => {
+          const ink = i === cards.length - 1;
+          return (
+            <Reveal key={c.title} delay={i * 0.06}>
+              <div className={`lpx-card ${ink ? "lpx-card--ink" : "lpx-card--hover"}`}>
+                <div className="flex items-center justify-between">
+                  <span className="lpx-icon"><c.icon size={18} strokeWidth={1.75} /></span>
+                  <span className="text-[11.5px] font-semibold lpx-muted lpx-num">{c.tag}</span>
                 </div>
-              </StaggerItem>
-            );
-          })}
-        </StaggerContainer>
+                <h3 className="lpx-h3 mt-8">{c.title}</h3>
+                <p className="lpx-body mt-2">{c.description}</p>
+              </div>
+            </Reveal>
+          );
+        })}
       </div>
-    </section>
+    </Section>
   );
 }

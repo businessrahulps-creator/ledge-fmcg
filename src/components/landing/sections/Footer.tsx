@@ -28,22 +28,6 @@ const columns = [
 export function Footer() {
   return (
     <footer className="relative lp-footer lp-section-paper pt-20 md:pt-24 pb-10 border-t border-border overflow-hidden">
-      {/* Layered ambient wash - Midnight + Terracotta */}
-      <div
-        aria-hidden
-        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] pointer-events-none opacity-70"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 30%, hsl(var(--accent) / 0.06) 0%, hsl(var(--primary) / 0.04) 45%, transparent 75%)",
-        }}
-      />
-      {/* Top hairline gradient */}
-      <div
-        aria-hidden
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent pointer-events-none"
-      />
-      {/* Subtle film grain */}
-      <div className="lp-noise absolute inset-0 pointer-events-none opacity-40" aria-hidden />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-10">
         {/* Brand block - top */}

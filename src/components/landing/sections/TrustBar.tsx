@@ -1,14 +1,7 @@
-// Motion v3 - stillness for stats. Logos still marquee; stats are simply present.
 import { WifiOff, FileCheck2, MapPin } from "lucide-react";
+import { Reveal } from "../kit";
 
-const companies = [
-  "Aryan Beverages",
-  "Nova Retail Co.",
-  "Coastal Naturals",
-  "Horizon Foods",
-  "Sterling FMCG",
-  "Crest Agencies",
-];
+const companies = ["Aryan Beverages", "Nova Retail Co.", "Coastal Naturals", "Horizon Foods", "Sterling FMCG", "Crest Agencies"];
 
 const stats = [
   { value: "2–3 hrs", label: "Wasted daily per salesperson - on paperwork, not selling" },
@@ -19,64 +12,35 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <section className="lp-section-paper lp-rhythm-sm border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        {/* Logo Marquee - soft pill chips */}
-        <div
-          className="overflow-hidden group relative"
-          style={{
-            maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
-          }}
-        >
-          <div className="flex gap-3 animate-marquee w-max items-center group-hover:[animation-play-state:paused]">
+    <section className="lpx-section lpx-section--tight lpx-light lpx-ruled" aria-label="Who uses Ledge and what it fixes">
+      <div className="lpx-container">
+        <div className="lpx-marquee" aria-label="Businesses using Ledge">
+          <div className="lpx-marquee__track">
             {[...companies, ...companies].map((name, i) => (
-              <span
-                key={i}
-                className="font-body text-[13px] md:text-[14px] font-medium text-muted-foreground whitespace-nowrap shrink-0 px-4 py-2 rounded-full bg-card border border-border shadow-depth-2"
-              >
+              <span key={i} aria-hidden={i >= companies.length} className="font-heading text-[18px] md:text-[20px] font-semibold lpx-faint whitespace-nowrap">
                 {name}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Product-truth chips - moved out of the hero so the hero keeps one message. */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
-          <span className="lp-pill">
-            <span className="lp-pill__tile"><WifiOff size={12} strokeWidth={2.5} /></span>
-            <span className="lp-pill__label">Offline-ready</span>
-          </span>
-          <span className="lp-pill">
-            <span className="lp-pill__tile"><FileCheck2 size={12} strokeWidth={2.5} /></span>
-            <span className="lp-pill__label">GST-ready</span>
-          </span>
-          <span className="lp-pill">
-            <span className="lp-pill__tile"><MapPin size={12} strokeWidth={2.5} /></span>
-            <span className="lp-pill__label">Built in Kerala</span>
-          </span>
+          <span className="lpx-chip"><WifiOff size={14} strokeWidth={2} /> Offline-ready</span>
+          <span className="lpx-chip"><FileCheck2 size={14} strokeWidth={2} /> GST-ready</span>
+          <span className="lpx-chip"><MapPin size={14} strokeWidth={2} /> Built in Kerala</span>
         </div>
 
-        {/* Stat Row - with hairline dividers + gradient numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 max-w-5xl mx-auto mt-14 md:mt-16">
-          {stats.map((stat, i) => (
-            <div
-              key={stat.value}
-              className={`text-center px-4 ${
-                i > 0 ? "md:border-l md:border-border" : ""
-              }`}
-            >
-              <div className="font-heading font-semibold text-[26px] md:text-[32px] text-foreground tracking-[-0.025em] leading-none">
-                {stat.value}
+        <Reveal delay={0.05}>
+          <div className="lpx-stats mt-12">
+            {stats.map((s) => (
+              <div key={s.value}>
+                <div className="lpx-stat">{s.value}</div>
+                <p className="text-[13px] lpx-muted mt-3 leading-[1.5]">{s.label}</p>
               </div>
-              <div className="font-body text-[12px] md:text-[13px] text-muted-foreground mt-2.5 tracking-tight">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <p className="font-body text-[11.5px] text-muted-foreground/80 text-center mt-8">
+            ))}
+          </div>
+        </Reveal>
+        <p className="text-[12px] lpx-faint text-center mt-6">
           Figures from our own interviews with distributors and super-stockists across South India.
         </p>
       </div>

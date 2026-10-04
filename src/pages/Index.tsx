@@ -15,8 +15,11 @@ import { WhyLedge } from "@/components/landing/sections/WhyLedge";
 import { Testimonials } from "@/components/landing/sections/Testimonials";
 import { Founder } from "@/components/landing/sections/Founder";
 import { Pricing } from "@/components/landing/sections/Pricing";
+import { FAQ } from "@/components/landing/sections/FAQ";
 import { FinalCTA } from "@/components/landing/sections/FinalCTA";
 import { Footer } from "@/components/landing/sections/Footer";
+import "@/components/arc/foundation.css";
+import "@/components/landing/ledge-mono.css";
 
 export default function Index() {
   const { user, loading, authReady } = useAuth();
@@ -39,7 +42,7 @@ export default function Index() {
       />
       <a href="#main-content" className="lp-skip-link">Skip to Content</a>
       <Navbar />
-      <main id="main-content">
+      <main id="main-content" className="arc-root lpx" data-accent="neutral">
         <Hero />
         <TrustBar />
         <WhoItsFor />
@@ -52,6 +55,7 @@ export default function Index() {
         <Testimonials />
         <Founder />
         <Pricing />
+        <FAQ />
         <FinalCTA />
       </main>
       <Footer />

@@ -1,5 +1,4 @@
-import { AnimateIn, StaggerContainer, StaggerItem } from "../AnimateIn";
-import { LandingCard, type LandingCardVariant } from "../LandingCard";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/arc/tabs/tabs";
 import {
   DealerRosterVisual,
   StockHealthVisual,
@@ -8,104 +7,55 @@ import {
   GstInvoiceVisual,
   ClaimTimelineVisual,
 } from "../visuals/FeatureVisuals";
+import { Section, SectionHead, Reveal } from "../kit";
 
-type Card = {
-  key: string;
-  visual: React.ReactNode;
-  lede: string;
-  caption: string;
-  variant: LandingCardVariant;
-  /** lg column span out of 6 */
-  span: string;
-  wellMinHeight?: number;
-};
-
-const cards: Card[] = [
-  {
-    key: "dealers",
-    visual: <DealerRosterVisual />,
-    lede: "Know every dealer.",
-    caption: "Full history, credit and behaviour in one profile - no digging.",
-    variant: "mist",
-    span: "lg:col-span-3",
-    wellMinHeight: 208,
-  },
-  {
-    key: "stock",
-    visual: <StockHealthVisual />,
-    lede: "See stock before it hurts.",
-    caption: "Green, amber, red - per SKU, per godown, updated live.",
-    variant: "mist",
-    span: "lg:col-span-3",
-    wellMinHeight: 208,
-  },
-  {
-    key: "schemes",
-    visual: <SchemeArcVisual />,
-    lede: "Schemes track themselves.",
-    caption: "Always accurate. No end-of-month surprises.",
-    variant: "mist",
-    span: "lg:col-span-2",
-  },
-  {
-    key: "team",
-    visual: <TeamBarsVisual />,
-    lede: "Watch the team, live.",
-    caption: "Every rep’s orders and targets against plan.",
-    variant: "mist",
-    span: "lg:col-span-2",
-  },
-  {
-    key: "gst",
-    visual: <GstInvoiceVisual />,
-    lede: "GST in one tap.",
-    caption: "Invoices, estimates and credit notes - CGST, SGST, IGST done.",
-    variant: "mist",
-    span: "lg:col-span-2",
-  },
-  {
-    key: "claims",
-    visual: <ClaimTimelineVisual />,
-    lede: "Claims settled cleanly.",
-    caption: "A full paper trail from submitted to paid - no arguments.",
-    variant: "ink",
-    span: "lg:col-span-6",
-    wellMinHeight: 0,
-  },
+const features = [
+  { key: "dealers", tab: "Dealers", visual: <DealerRosterVisual />, lede: "Know every dealer.", caption: "Full history, credit and behaviour in one profile - no digging." },
+  { key: "stock", tab: "Stock", visual: <StockHealthVisual />, lede: "See stock before it hurts.", caption: "Green, amber, red - per SKU, per godown, updated live." },
+  { key: "schemes", tab: "Schemes", visual: <SchemeArcVisual />, lede: "Schemes track themselves.", caption: "Always accurate. No end-of-month surprises." },
+  { key: "team", tab: "Team", visual: <TeamBarsVisual />, lede: "Watch the team, live.", caption: "Every rep’s orders and targets against plan." },
+  { key: "gst", tab: "GST bills", visual: <GstInvoiceVisual />, lede: "GST in one tap.", caption: "Invoices, estimates and credit notes - CGST, SGST, IGST done." },
+  { key: "claims", tab: "Claims", visual: <ClaimTimelineVisual />, lede: "Claims settled cleanly.", caption: "A full paper trail from submitted to paid - no arguments." },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="relative lp-section-paper lp-rhythm-lg overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6 md:px-8 lg:px-10">
-        <AnimateIn variant="blurFadeUp">
-          <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-            <span className="lp-eyebrow">Features</span>
-            <h2 className="font-heading font-semibold text-[30px] md:text-[40px] text-foreground tracking-[-0.022em] leading-[1.1] mt-6">
-              Simple tools.
-              <br />
-              Extraordinary results.
-            </h2>
-          </div>
-        </AnimateIn>
+    <Section id="features" ground="light" labelledBy="features-title">
+      <SectionHead
+        num="05"
+        eyebrow="Features"
+        id="features-title"
+        title="Simple tools. Extraordinary results."
+        lines={["Simple tools.", "Extraordinary results."]}
+        lede="Dealers, stock, schemes, team, GST bills and claims - kept together in one app."
+      />
 
-        <StaggerContainer
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5 lg:gap-6 lp-grid-stretch"
-          staggerTime={0.05}
-        >
-          {cards.map((c) => (
-            <StaggerItem key={c.key} className={c.span}>
-              <LandingCard
-                visual={c.visual}
-                lede={c.lede}
-                caption={c.caption}
-                variant={c.variant}
-                wellMinHeight={c.wellMinHeight}
-              />
-            </StaggerItem>
+      <Reveal>
+        <Tabs defaultValue="dealers" className="lpx-tabs">
+          <div className="flex justify-center mb-6 md:mb-8">
+            <TabsList aria-label="Ledge features">
+              {features.map((f) => (
+                <TabsTrigger key={f.key} value={f.key}>{f.tab}</TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          {features.map((f) => (
+            <TabsContent key={f.key} value={f.key}>
+              <div className="lpx-card">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                  <div className="md:col-span-5">
+                    <h3 className="font-heading text-[28px] md:text-[34px] font-semibold leading-[1.1] tracking-[-0.02em]">{f.lede}</h3>
+                    <p className="lpx-body mt-4 text-[16px]">{f.caption}</p>
+                  </div>
+                  <div className="md:col-span-7">
+                    <div className="lpx-well min-h-[240px] flex flex-col justify-center">{f.visual}</div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
           ))}
-        </StaggerContainer>
-      </div>
-    </section>
+        </Tabs>
+      </Reveal>
+    </Section>
   );
 }

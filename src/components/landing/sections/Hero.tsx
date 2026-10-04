@@ -1,153 +1,142 @@
-import { useRef } from "react";
-import { motion, useTransform, useReducedMotion, useMotionTemplate } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { spring, useParallaxY, useScrollScrub, ease, duration } from "@/lib/motion";
-import { BrowserFrame } from "../DeviceFrames";
-import { CapsuleCTA } from "../CapsuleCTA";
-import { CursorAura } from "../CursorAura";
-import heroFlow from "@/assets/landing/hero-flow.webp";
-import { ShaderBackdrop } from "@/components/landing/visuals/ShaderBackdrop";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, ShoppingCart, IndianRupee, PackageMinus, FileText, Truck } from "lucide-react";
+import { InViewTitle } from "@/components/arc/in-view-title/in-view-title";
+import { AnimatedCounter } from "@/components/arc/animated-counter/animated-counter";
+import { AnnouncementBar } from "@/components/arc/announcement-bar/announcement-bar";
+import { Btn, Reveal } from "../kit";
 
-/** Hero entrances - Motion v2: emphasized decelerate, ranked distances. */
-const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 16, filter: "blur(4px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  transition: { duration: duration.medium, ease: ease.decelerate, delay },
-});
+type FeedEvent = { id: number; icon: typeof ShoppingCart; title: string; meta: string; amount: string; solid?: boolean };
 
-export function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
+const SOURCE: Omit<FeedEvent, "id">[] = [
+  { icon: ShoppingCart, title: "New order · Kayamkulam Traders", meta: "Anil, sales rep · 24 items", amount: "₹38,420" },
+  { icon: IndianRupee, title: "Payment received · Sree Agencies", meta: "UPI · bill ABD-0099", amount: "₹72,476", solid: true },
+  { icon: PackageMinus, title: "Running low · Coconut oil 1L", meta: "Kochi godown · 18 left", amount: "Reorder" },
+  { icon: FileText, title: "GST bill sent · Malabar Stores", meta: "CGST + SGST worked out", amount: "₹54,910" },
+  { icon: Truck, title: "Out for delivery · 6 orders", meta: "Vehicle KL-07 · Route 3", amount: "6 stops" },
+  { icon: ShoppingCart, title: "New order · Thrissur Mart", meta: "Priya, sales rep · 11 items", amount: "₹19,880" },
+  { icon: IndianRupee, title: "Payment received · Hari & Sons", meta: "Cash · 2 bills cleared", amount: "₹1,12,300", solid: true },
+];
+
+/** Live "today" feed: the hero’s product picture, built in the Arc realtime-stream style. */
+function LiveFeed() {
   const reduce = useReducedMotion();
-  const gridY = useParallaxY(sectionRef, 30);
-  /** Scroll-scrubbed progress through the hero - drives device lift + ambient light drift. */
-  const scrub = useScrollScrub(sectionRef, ["start start", "end start"]);
-  const deviceY = useTransform(scrub, [0, 1], reduce ? [0, 0] : [0, -64]);
-  const deviceScale = useTransform(scrub, [0, 1], reduce ? [1, 1] : [1, 0.96]);
-  const lightX = useTransform(scrub, [0, 1], reduce ? [50, 50] : [45, 58]);
-  const lightY = useTransform(scrub, [0, 1], reduce ? [50, 50] : [42, 62]);
-  const lightOpacity = useTransform(scrub, [0, 1], reduce ? [0.4, 0.4] : [0.7, 0.2]);
-  const lightBg = useMotionTemplate`radial-gradient(ellipse 800px 600px at ${lightX}% ${lightY}%, hsl(var(--primary) / 0.10) 0%, transparent 60%)`;
+  const [events, setEvents] = useState<FeedEvent[]>(() => SOURCE.slice(0, 4).map((e, i) => ({ ...e, id: i })));
+  const [orders, setOrders] = useState(46);
+  const [collected, setCollected] = useState(824600);
 
+  // Sample screen only · no pretend live activity (keeps the page honest).
+  void setEvents; void setOrders; void setCollected; void useEffect;
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center px-6 md:px-8 lg:px-10 lp-block-ink lp-block-graphite pt-24 md:pt-28 pb-20 md:pb-24 overflow-hidden">
-      <ShaderBackdrop preset="hero" />
+    <div className="lpx-card lpx-card--pad-lg" role="img" aria-label="Sample screen showing a day of orders, payments, stock and bills in Ledge">
+      <div className="flex items-center justify-between">
+        <span className="inline-flex items-center gap-2.5 text-[13px] font-semibold">
+          <span className="lpx-dot" aria-hidden />
+          Sample day
+        </span>
+        <span className="text-[12px] lpx-faint lpx-num">Example business</span>
+      </div>
 
-      {/* Soft dot grid, masked - subtle parallax */}
-      <motion.div style={{ y: gridY, willChange: "transform" }} className="absolute inset-0 lp-grid-soft lp-parallax pointer-events-none" />
+      <div className="grid grid-cols-2 gap-3 mt-5" aria-hidden>
+        <div className="lpx-well min-w-0">
+          <div className="text-[11.5px] lpx-muted">Orders today</div>
+          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}><AnimatedCounter value={orders} locale="en-IN" /></div>
+        </div>
+        <div className="lpx-well min-w-0">
+          <div className="text-[11.5px] lpx-muted">Money collected</div>
+          <div className="lpx-stat mt-2 whitespace-nowrap" style={{ fontSize: "clamp(20px, 5.4vw, 30px)" }}><AnimatedCounter value={collected} prefix="₹" locale="en-IN" /></div>
+        </div>
+      </div>
 
-      {/* Motion v3 - single pointer-reactive ambient gradient. Replaces per-button magnetic noise. */}
-      <CursorAura tint="hsl(var(--primary) / 0.10)" size={640} />
+      <ul className="lpx-feed mt-4" aria-hidden>
+        <AnimatePresence initial={false}>
+          {events.map((e) => (
+            <motion.li
+              key={e.id}
+              layout={!reduce}
+              initial={reduce ? false : { opacity: 0, y: -12, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", stiffness: 340, damping: 34 }}
+              className="lpx-feed__row"
+            >
+              <span className={`lpx-feed__glyph ${e.solid ? "lpx-feed__glyph--solid" : ""}`}>
+                <e.icon size={16} strokeWidth={1.9} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[13.5px] font-semibold truncate">{e.title}</span>
+                <span className="block text-[12px] lpx-muted truncate">{e.meta}</span>
+              </span>
+              <span className="text-[13px] font-semibold lpx-num whitespace-nowrap">{e.amount}</span>
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </ul>
+    </div>
+  );
+}
 
-      {/* Scroll-decay ambient light overlay - drifts as you leave the hero. */}
-      <motion.div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: lightBg, opacity: lightOpacity, willChange: "opacity, background" }}
-      />
+export function Hero() {
+  return (
+    <section className="lpx-section lpx-light pt-28 md:pt-36" aria-labelledby="hero-title">
+      <div className="lpx-container">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+          <div className="lg:col-span-7">
+            <Reveal>
+              <div className="max-w-[460px]">
+                <AnnouncementBar
+                  id="lp-copilot"
+                  label="News"
+                  tone="neutral"
+                  dismissible={false}
+                  controls={false}
+                  autoPlay
+                  interval={6000}
+                  messages={[
+                    { id: "copilot", message: "Ledge Co-Pilot is coming. Founding members get early access free.", action: { label: "Claim a spot", href: "#intelligence" } },
+                    { id: "gst", message: "GST bills, credit notes and Tally export are built in.", action: { label: "See features", href: "#features" } },
+                  ]}
+                />
+              </div>
+            </Reveal>
 
-
-      <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
-        {/* Left - Text */}
-        <div className="lg:col-span-7">
-          <motion.div {...fadeUp(0)}>
-            <span className="lp-eyebrow">
+            <span className="lpx-eyebrow mt-8 flex">
               <span className="hidden sm:inline">The operating system for India’s distribution businesses</span>
               <span className="sm:hidden">OS for India’s distributors</span>
             </span>
-          </motion.div>
 
-          <motion.h1
-            className="font-heading font-semibold text-[40px] md:text-[52px] text-foreground leading-[1.08] tracking-[-0.025em] mt-7"
-            {...fadeUp(0.08)}
-          >
-            Orders. Payments. Stock.
-            <br />
-            Invoices. Reports. One mobile app.
-          </motion.h1>
+            <InViewTitle
+              as="h1"
+              id="hero-title"
+              variant="word"
+              text="Orders. Payments. Stock. Invoices. Reports. One mobile app."
+              lines={["Orders. Payments. Stock.", "Invoices. Reports.", "One mobile app."]}
+              className="lpx-title lpx-title--hero"
+            />
 
-          <motion.p
-            className="font-body text-[17px] md:text-[19px] text-muted-foreground leading-[1.55] max-w-xl mt-7"
-            {...fadeUp(0.16)}
-          >
-            Built for Indian manufacturers, distributors and wholesalers who sell through dealers and a field team.
-            FMCG, building materials, agri-inputs, pharma, auto parts, electricals. Recover the <span className="font-semibold text-foreground">5–10% that quietly leaks between your godown and your field</span>.
-          </motion.p>
+            <Reveal delay={0.15}>
+              <p className="lpx-lede" style={{ marginInline: 0 }}>
+                Built for Indian manufacturers, distributors and wholesalers who sell through dealers and a field team.
+                FMCG, building materials, agri-inputs, pharma, auto parts, electricals. Recover the{" "}
+                <span className="lpx-strong">5–10% that quietly leaks between your godown and your field</span>.
+              </p>
+            </Reveal>
 
-          <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-7 mt-10" {...fadeUp(0.24)}>
-            <CapsuleCTA to="/signup">Start Free Trial</CapsuleCTA>
-            <motion.a
-              href="#how-it-works"
-              whileHover={{ x: 2 }}
-              transition={spring.snappy}
-              className="font-body font-semibold text-[14.5px] text-foreground inline-flex items-center gap-1.5 group"
-            >
-              See how it works
-              <ArrowRight size={15} strokeWidth={2.2} className="text-muted-foreground group-hover:text-accent transition-colors" />
-            </motion.a>
-          </motion.div>
-
-        </div>
-
-        {/* Right - Dashboard Mockup with 3-layer treatment + scroll-scrubbed lift */}
-        <motion.div
-          className="lg:col-span-5 w-full"
-          style={{ perspective: "1400px", y: deviceY, scale: deviceScale, willChange: "transform" }}
-        >
-          <motion.div
-            initial={{ x: 30, opacity: 0, rotateY: 0, rotateX: 0 }}
-            animate={{ x: 0, opacity: 1, rotateY: -5, rotateX: 3 }}
-            transition={{ duration: duration.long, ease: ease.emphasized, delay: 0.2 }}
-          >
-            <motion.div
-              animate={reduce ? undefined : { y: [0, -6, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="relative"
-            >
-
-              {/* Layer 1 - neutral graphite ambient shadow */}
-              <div
-                aria-hidden
-                className="absolute -inset-8 rounded-[2.5rem] blur-3xl opacity-30 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 50% 50%, hsl(var(--primary) / 0.18) 0%, transparent 65%)",
-                }}
-              />
-              {/* Layer 2 - Bone-tinted glass stage */}
-              <div className="relative lp-card-glass p-3 md:p-4 rounded-lp-xs">
-                {/* Layer 3 - browser frame with real product UI */}
-                <BrowserFrame url="app.ledge.in/dashboard">
-                  <div className="relative">
-                    <img
-                      src={heroFlow}
-                      alt="Orders, invoices, payments and stock flowing into the Ledge mobile app"
-                      width={1440}
-                      height={1080}
-                      fetchPriority="high"
-                      decoding="async"
-                      className="block w-full h-auto"
-                    />
-                    {/* Proof chip - anchored inside the frame like a real product notification */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...spring.gentle as object, delay: 0.6 }}
-                      className="absolute bottom-3 right-3 z-10"
-                    >
-                      <span className="lp-proof-chip">
-                        <span className="lp-proof-chip__dot" />
-                        ₹2.4Cr tracked this&nbsp;week
-                      </span>
-                    </motion.div>
-                  </div>
-                </BrowserFrame>
+            <Reveal delay={0.25}>
+              <div className="flex flex-col sm:flex-row gap-3 mt-10">
+                <Btn to="/signup">Start Free Trial <ArrowRight size={16} strokeWidth={2.2} /></Btn>
+                <Btn to="#how-it-works" ghost>See how it works</Btn>
               </div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      </div>
+              <p className="text-[13px] lpx-faint mt-5">30-day free trial · No card · Cancel anytime</p>
+            </Reveal>
+          </div>
 
+          <Reveal delay={0.2} className="lg:col-span-5">
+            <LiveFeed />
+          </Reveal>
+        </div>
+      </div>
     </section>
   );
 }
