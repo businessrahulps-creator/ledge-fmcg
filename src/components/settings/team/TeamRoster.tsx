@@ -354,7 +354,6 @@ function RosterCard({
             type="button"
             disabled={lockedPill}
             onClick={lockedPill ? undefined : onChangeJob}
-            disabled={lockedPill}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-[background-color,border-color] duration-fast ease-fluent",
               lockedPill
