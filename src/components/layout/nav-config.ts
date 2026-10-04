@@ -40,7 +40,8 @@ export const NAV_GROUPS: NavGroup[] = [
   { label: "Insights", items: [NAV.business, NAV.activity, NAV.reports] },
 ];
 
-export const NAV_FOOTER: NavItem[] = [NAV.settings];
+// Settings lives in the top-bar account menu on computers (ProfileMenu); phone Menu lists it via its own groups.
+export const NAV_FOOTER: NavItem[] = [];
 
 /** Phone bottom bar (Menu button is added after these). Dashboard first. */
 export const MOBILE_PRIMARY: NavItem[] = [NAV.dashboard, NAV.orders, NAV.stock, NAV.business];
