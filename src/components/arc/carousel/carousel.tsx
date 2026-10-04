@@ -330,7 +330,7 @@ export function Carousel({ label, children, index: controlledIndex, defaultIndex
 function Slide({ id, index, progress, active, label, children }: { id: string; index: number; progress: MotionValue<number>; active: boolean; label: string; children: ReactNode }) {
   const scale = useTransform(progress, [index - 1, index, index + 1], [SCALE, 1, SCALE]);
   const opacity = useTransform(progress, [index - 1, index, index + 1], [DIM, 1, DIM]);
-  return <motion.div id={id} className={styles.slide} role="tabpanel" aria-roledescription="slide" aria-label={label} inert={!active} style={{ scale, opacity }}>{children}</motion.div>;
+  return <motion.div id={id} className={styles.slide} role="tabpanel" aria-roledescription="slide" aria-label={label} {...((!active) ? { inert: "" } : {})} style={{ scale, opacity }}>{children}</motion.div>;
 }
 
 /** Each indicator grows toward a pill as the track nears its slide, so the pill hands over continuously instead of hopping. */

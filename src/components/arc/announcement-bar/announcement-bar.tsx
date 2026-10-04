@@ -152,7 +152,7 @@ function Face({ announcement, direction, reduced, position, total, onSize, onAct
     ? <a className={styles.cta} href={action.href} onClick={() => { action.onClick?.(); onAction?.(announcement); }}>{action.label}<ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" /></a>
     : <button type="button" className={styles.cta} onClick={() => { action.onClick?.(); onAction?.(announcement); }}>{action.label}<ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" /></button> : null;
   return <motion.div ref={ref} className={styles.face} custom={direction} variants={reduced ? fadeVariants : faceVariants} initial="hidden" animate="shown" exit="gone"
-    role={total > 1 ? "group" : undefined} aria-roledescription={total > 1 ? "slide" : undefined} aria-label={total > 1 ? `${position} of ${total}` : undefined} inert={!present || undefined}>
+    role={total > 1 ? "group" : undefined} aria-roledescription={total > 1 ? "slide" : undefined} aria-label={total > 1 ? `${position} of ${total}` : undefined} {...((!present || undefined) ? { inert: "" } : {})}>
     <p className={styles.message}>
       <span className={styles.text}>{announcement.message}</span>
       {countdown ? <Countdown to={countdown.to} label={countdown.label} reduced={reduced} onEnd={() => onCountdownEnd?.(announcement)} /> : null}

@@ -119,7 +119,7 @@ export function ExpandableCard({ title, description, children, defaultExpanded =
         <motion.span className={styles.arrow} initial={false} animate={{ rotate: expanded ? 180 : 0 }} transition={reduceMotion ? still : boxTransition(expanded, hold)}><NavArrowDown width={18} height={18} aria-hidden="true" /></motion.span>
       </button>
       {/* The panel stays mounted so a second click mid-animation reverses from where it is; inert keeps closed details out of reach. */}
-      <motion.div id={panelId} className={styles.panel} inert={!expanded} initial={false} animate={{ height: expanded ? "auto" : 0 }} transition={reduceMotion ? still : boxTransition(expanded, hold)}>
+      <motion.div id={panelId} className={styles.panel} {...((!expanded) ? { inert: "" } : {})} initial={false} animate={{ height: expanded ? "auto" : 0 }} transition={reduceMotion ? still : boxTransition(expanded, hold)}>
         <motion.div className={styles.panelInner} style={innerWidth === undefined ? undefined : { width: innerWidth - 2 }} initial={false} animate={{ opacity: expanded ? 1 : 0 }} transition={reduceMotion ? still : contentTransition(expanded)}>{children}</motion.div>
       </motion.div>
     </motion.article>
