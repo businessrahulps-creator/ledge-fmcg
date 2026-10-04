@@ -65,7 +65,7 @@
 - [x] Today's work: advances subtracted; stock Done returns after 7 days
 - [x] Bell cache per person
 - [x] Dealer balance lookup faster (identical numbers)
-- [ ] Paisa rounding alignment (offers, purchase GST, advances) — needs per-case review
+- [x] Paisa rounding alignment
 - [ ] Dashboard totals from server (dashboard_summary)
 - [ ] After publish: stop signed-in use of old 8-arg order save
 
@@ -76,7 +76,7 @@
 - [x] Seed data 20 Sep to 4 Oct through the app's normal saves, all tagged [seed], every action shows in Activity
 - [x] Activity: one entry per action (no ₹0 "created" + "updated" pair, no doubled buying entries)
 - [x] Astra pass: retry payload binding, stale panel reload, report ordering, refund day boundary, money-collected helper
-- [ ] Paisa rounding (offer discounts, purchase GST, advances): one shared rule
+- [x] Paisa rounding: one shared rule (roundPaise, same as the database)
 - [ ] Server-side dashboard/money totals (speed)
-- [ ] Payment box and bill chips don't yet use dealer credit (Astra #2)
-- [ ] Unpaid-by-age "oldest" after settling, and refresh at midnight (Astra #8, #9)
+- [x] Payment box and bill chips use dealer credit (Astra #2)
+- [x] Unpaid-by-age "oldest" after settling, and refresh at midnight (Astra #8, #9)
