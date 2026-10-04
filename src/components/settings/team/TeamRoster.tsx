@@ -291,7 +291,8 @@ function RosterCard({
   const job = JOB_BY_ROLE[member.role];
   const Icon = job.icon;
 
-  const lockedPill = isSelf || isLastOwner;
+  const isOwner = member.role === "super_admin";
+  const lockedPill = isSelf || isLastOwner || isOwner;
   const updatedAt = member.updatedAt ? new Date(member.updatedAt) : null;
   const isInactive =
     !!updatedAt && Date.now() - updatedAt.getTime() > INACTIVE_THRESHOLD_MS;
@@ -362,8 +363,8 @@ function RosterCard({
             title={
               isSelf
                 ? "You can't change your own job"
-                : isLastOwner
-                  ? "Can't demote the last Owner"
+                : isOwner
+                  ? "An owner's job can't be changed"
                   : "Tap to change job"
             }
           >
@@ -374,10 +375,10 @@ function RosterCard({
         </div>
       </div>
 
-      {!isSelf && (
+      {!isSelf && !isOwner && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+            <Button variant="ghost" size="icon" className="touch-target h-8 w-8 shrink-0" aria-label={`More actions for ${member.name || member.email}`}>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

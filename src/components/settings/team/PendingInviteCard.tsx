@@ -98,7 +98,7 @@ export function PendingInviteCard({ invite, companyName, onResend, onCancel }: P
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" disabled={busy}>
+          <Button variant="ghost" size="icon" className="touch-target h-8 w-8 shrink-0" disabled={busy} aria-label="More actions for this invite">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

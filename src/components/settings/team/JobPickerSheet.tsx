@@ -147,6 +147,9 @@ export function JobPickerSheet({
             </div>
           )}
           <p className="text-xs text-foreground/80">{previewLine}</p>
+          {!noChange && (
+            <p className="text-[11px] text-muted-foreground">Any custom access is reset to the new job's areas.</p>
+          )}
           {disabledMessage && (
             <p className="text-[11px] text-muted-foreground">{disabledMessage}</p>
           )}
