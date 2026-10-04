@@ -30,12 +30,27 @@ function memoLast<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) =
 
 const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer) =>
   buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer } as any) as ReceivableRow[]);
-/** Posted money not tied to a bill or order = dealer credit (owner chose "keep as dealer credit"). */
-const dealerCreditFor = memoLast((receipts: any[]) => {
+/**
+ * Dealer credit = money with us that no open bill is using:
+ * extra kept as dealer credit (no bill/order), advances kept on cancelled orders
+ * ("keep against dues"), and bills paid + credited past their total (return after paying).
+ */
+const dealerCreditFor = memoLast((receipts: any[], invoices: any[], orders: any[], rbi: Map<string, number>, cbi: Map<string, number>, rbo: Map<string, number>) => {
   const m = new Map<string, number>();
+  const add = (dealer: string | undefined, amt: number) => {
+    if (!dealer || !(amt > 0.004)) return;
+    m.set(dealer, Math.round(((m.get(dealer) || 0) + amt) * 100) / 100);
+  };
   for (const r of receipts) {
-    if (r.status !== "posted" || r.invoiceId || r.orderId || !r.distributorId) continue;
-    m.set(r.distributorId, Math.round(((m.get(r.distributorId) || 0) + Number(r.amount || 0)) * 100) / 100);
+    if (r.status !== "posted" || r.invoiceId || r.orderId) continue;
+    add(r.distributorId, Number(r.amount || 0));
+  }
+  const byId = new Map(orders.map((o: any) => [o.id, o]));
+  for (const o of orders) if (o.cancelledAt) add(o.distributorId, rbo.get(o.id) || 0);
+  for (const inv of invoices) {
+    if (inv.docType !== "gst_invoice" || inv.status === "draft") continue;
+    const extra = (rbi.get(inv.id) || 0) + (cbi.get(inv.id) || 0) - Number(inv.grandTotal || 0);
+    add((byId.get(inv.sourceOrderId) as any)?.distributorId, Math.round(extra * 100) / 100);
   }
   return m;
 });
@@ -59,7 +74,10 @@ export function useReceivables() {
     receipts, creditNotes, receivedByInvoice, receivedByOrder, creditedByInvoice, loading, reload,
   } = useCollections(companyId);
 
-  const dealerCredit = useMemo(() => dealerCreditFor(receipts), [receipts]);
+  const dealerCredit = useMemo(
+    () => dealerCreditFor(receipts, invoices, orders, receivedByInvoice, creditedByInvoice, receivedByOrder),
+    [receipts, invoices, orders, receivedByInvoice, creditedByInvoice, receivedByOrder],
+  );
   const rows = useMemo(
     () => rowsFor(invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit),
     [invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit],
