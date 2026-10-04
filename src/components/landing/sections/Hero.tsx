@@ -7,7 +7,7 @@ export function Hero() {
     <section className="lpx-section lpx-light pt-28 md:pt-36" aria-labelledby="hero-title">
       <div className="lpx-container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-6">
             <span className="lpx-eyebrow flex">
               <span className="hidden sm:inline">The operating system for India’s distribution businesses</span>
               <span className="sm:hidden">OS for India’s distributors</span>
@@ -34,7 +34,7 @@ export function Hero() {
             </Reveal>
           </div>
 
-          <Reveal delay={0.2} className="lg:col-span-5">
+          <Reveal delay={0.2} className="lg:col-span-6">
             <LedgeFlowHub />
           </Reveal>
         </div>

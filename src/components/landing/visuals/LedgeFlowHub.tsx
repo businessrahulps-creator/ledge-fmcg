@@ -28,7 +28,7 @@ const LOOP = 9;
 const STORIES: Story[] = [
   {
     start: 0, end: 2.8, hubAt: 0.9, hub: "Order posted",
-    status: { rep: "Order ORD-1042", godown: "Stock −12 pcs", gst: "Invoice INV-508" },
+    status: { rep: "Order ORD-1042", godown: "−12 pcs out", gst: "INV-508 sent" },
     segs: [
       { from: "rep", to: "hub", start: 0, end: 0.9 },
       { from: "hub", to: "godown", start: 1.2, end: 2.1 },
@@ -37,7 +37,7 @@ const STORIES: Story[] = [
   },
   {
     start: 3, end: 5.8, hubAt: 3.9, hub: "Payment matched",
-    status: { dealer: "Paid ₹48,000", owner: "Dues updated" },
+    status: { dealer: "₹48,000 paid", owner: "Dues updated" },
     segs: [
       { from: "dealer", to: "hub", start: 3, end: 3.9 },
       { from: "hub", to: "owner", start: 4.2, end: 5.1 },
@@ -45,7 +45,7 @@ const STORIES: Story[] = [
   },
   {
     start: 6, end: 8.8, hubAt: 6.9, hub: "Claim approved",
-    status: { ret: "Claim CLM-77", gst: "Credit note CN-21", godown: "Stock +3 back" },
+    status: { ret: "Claim CLM-77", gst: "Credit note", godown: "+3 pcs back" },
     segs: [
       { from: "ret", to: "hub", start: 6, end: 6.9 },
       { from: "hub", to: "gst", start: 7.2, end: 8.1 },
@@ -58,8 +58,8 @@ const STORIES: Story[] = [
 const LINE_IDS: NodeId[] = ["rep", "dealer", "ret", "godown", "gst", "owner"];
 
 interface Layout { w: number; h: number; cardW: number; cardH: number; hub: number; rows: number[]; compact: boolean }
-const WIDE: Layout = { w: 560, h: 400, cardW: 168, cardH: 60, hub: 84, rows: [90, 200, 310], compact: false };
-const NARROW: Layout = { w: 340, h: 380, cardW: 104, cardH: 52, hub: 64, rows: [90, 190, 290], compact: true };
+const WIDE: Layout = { w: 560, h: 372, cardW: 158, cardH: 60, hub: 84, rows: [56, 176, 296], compact: false };
+const NARROW: Layout = { w: 340, h: 330, cardW: 108, cardH: 52, hub: 60, rows: [50, 160, 270], compact: true };
 
 const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -68,7 +68,7 @@ const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 function linePath(L: Layout, id: NodeId) {
   const n = NODES.find((x) => x.id === id)!;
   const y = L.rows[n.row];
-  const cy = L.h / 2 - 10;
+  const cy = L.rows[1];
   const hubL = L.w / 2 - L.hub / 2;
   const hubR = L.w / 2 + L.hub / 2;
   if (n.side === "L") {
@@ -85,7 +85,7 @@ export function LedgeFlowHub() {
   const reduce = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(560);
-  const L = width < 470 ? NARROW : WIDE;
+  const L = width < 420 ? NARROW : WIDE;
   const scale = Math.min(1, width / L.w);
 
   const pathRefs = useRef<Partial<Record<NodeId, SVGPathElement | null>>>({});
@@ -202,7 +202,7 @@ export function LedgeFlowHub() {
 
   const story = storyIdx >= 0 ? STORIES[storyIdx] : null;
   const segCount = STORIES.reduce((n, s) => n + s.segs.length, 0);
-  const cy = L.h / 2 - 10;
+  const cy = L.rows[1];
 
   return (
     <div
@@ -265,7 +265,7 @@ export function LedgeFlowHub() {
             </svg>
           </div>
         </div>
-        <div className="lpx-flow__hublabel" style={{ top: cy + L.hub / 2 + 12, width: L.compact ? 140 : 180, left: L.w / 2 - (L.compact ? 70 : 90) }}>
+        <div className="lpx-flow__hublabel" style={{ top: cy + L.hub / 2 + 12, width: L.compact ? 110 : 132, left: L.w / 2 - (L.compact ? 55 : 66) }}>
           <span className="lpx-flow__name">Ledge</span>
           <span className="lpx-flow__status lpx-num" key={story?.hub ?? "idle"}>
             {story ? story.hub : `${count.toLocaleString("en-IN")} processed today`}
