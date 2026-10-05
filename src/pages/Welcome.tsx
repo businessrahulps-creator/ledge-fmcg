@@ -167,6 +167,18 @@ export default function Welcome() {
   return (
     <AuthShell progress={progress} ribbonLabel={ribbonLabel}>
       <div ref={panelRef} className="space-y-6">
+        {user?.email && (
+          <p className="text-[13px] text-muted-foreground">
+            Signed in as <span className="text-foreground">{user.email}</span>.{" "}
+            <button
+              type="button"
+              className="underline underline-offset-2 touch-target"
+              onClick={async () => { await supabase.auth.signOut(); navigate("/", { replace: true }); }}
+            >
+              Not you? Sign out
+            </button>
+          </p>
+        )}
         <ActTransition actKey={`step-${step}`} className="space-y-6">
           {step === 0 && (
             <>

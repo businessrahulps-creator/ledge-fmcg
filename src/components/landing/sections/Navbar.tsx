@@ -7,6 +7,7 @@ import { MorphHamburger } from "@/components/landing/MorphHamburger";
 import { MobileMenuOverlay } from "@/components/landing/MobileMenuOverlay";
 import { NavCommandPalette } from "@/components/landing/NavCommandPalette";
 import { Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const desktopLinks = [
   { label: "Features", href: "#features" },
@@ -18,6 +19,7 @@ const isMac =
   typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 export function Navbar() {
+  const { user, companyId } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [onDark, setOnDark] = useState(true);
   const [open, setOpen] = useState(false);
@@ -144,12 +146,14 @@ export function Navbar() {
                 <kbd>{isMac ? "⌘" : "Ctrl"}</kbd>
                 <kbd>K</kbd>
               </button>
-              <Link to="/login" className="lp-nav-link">
-                Sign in
-              </Link>
+              {!user && (
+                <Link to="/login" className="lp-nav-link">
+                  Sign in
+                </Link>
+              )}
               <motion.div whileTap={{ scale: 0.97 }} transition={spring.snappy} className="ml-1">
-                <Link to="/signup" className="lp-nav-cta">
-                  Start Free Trial
+                <Link to={user ? (companyId ? "/dashboard" : "/welcome") : "/signup"} className="lp-nav-cta">
+                  {user ? (companyId ? "Open Ledge" : "Finish setup") : "Start Free Trial"}
                 </Link>
               </motion.div>
             </motion.div>

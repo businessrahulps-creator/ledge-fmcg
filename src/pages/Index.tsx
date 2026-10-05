@@ -1,6 +1,3 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-
 import { SeoHead } from "@/components/SeoHead";
 import { Navbar } from "@/components/landing/sections/Navbar";
 import { Hero } from "@/components/landing/sections/Hero";
@@ -21,16 +18,9 @@ import { Footer } from "@/components/landing/sections/Footer";
 import "@/components/arc/foundation.css";
 import "@/components/landing/ledge-mono.css";
 
+// The landing page never redirects: signed-in visitors get "Open Ledge" / "Finish setup" in the menu.
 export default function Index() {
-  const { user, loading, authReady } = useAuth();
 
-  // The landing page is public: never gate first paint on the session lookup.
-  // Inside the Lovable preview the session is brokered over postMessage and can
-  // take seconds to resolve — visitors would just see a splash screen.
-  // We only redirect once auth has actually resolved and a user exists.
-  if (!loading && authReady && user) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
 
   return (
