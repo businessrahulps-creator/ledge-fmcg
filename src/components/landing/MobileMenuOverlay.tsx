@@ -23,6 +23,7 @@ const navLinks = [
  * fading overlay can never block the page.
  */
 export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
+  const { user, companyId } = useAuth();
   const reduce = useReducedMotion();
   const firstFocusRef = useRef<HTMLAnchorElement>(null);
 
