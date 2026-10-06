@@ -400,6 +400,13 @@
       "when": 1791282037783,
       "tag": "0056_my_pending_invite",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1791284010247,
+      "tag": "0057_realtime_money_tables",
+      "breakpoints": true
     }
   ]
 }
