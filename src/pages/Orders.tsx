@@ -51,10 +51,10 @@ export default function Orders() {
   const orders = api.orders.list();
   const invoices = api.invoices.list();
   // Payment chips come from the receipts ledger, never from orders.payment_status.
-  const { paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const { paymentStatus: paymentStatusByOrderId, ready: moneyReady } = useReceivables();
   const payStatus = useCallback(
-    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
-    [paymentStatusByOrderId],
+    (id: string) => (moneyReady ? paymentStatusByOrderId.get(id) ?? "pending" : null),
+    [paymentStatusByOrderId, moneyReady],
   );
   const godowns = api.stock.locations.list().filter(g => g.isActive);
   const [searchParams] = useSearchParams();

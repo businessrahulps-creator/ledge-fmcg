@@ -31,13 +31,27 @@ const statusIcons: Record<StatusType, LucideIcon> = {
 };
 
 interface StatusBadgeProps {
-  status: StatusType;
+  /** null = real figures still loading: shows a quiet placeholder, never a guess. */
+  status: StatusType | null;
   className?: string;
   /** "pending" means different things for money vs goods — say which. */
   kind?: "payment" | "delivery";
 }
 
 function StatusBadgeImpl({ status, className, kind = "payment" }: StatusBadgeProps) {
+  if (status === null) {
+    return (
+      <span
+        data-status-badge
+        aria-label="Checking payment"
+        className={cn("inline-block h-[19px] w-[72px] animate-pulse rounded-full border border-border bg-muted", className)}
+      />
+    );
+  }
+  return <StatusPill status={status} className={className} kind={kind} />;
+}
+
+function StatusPill({ status, className, kind = "payment" }: { status: StatusType; className?: string; kind?: "payment" | "delivery" }) {
   const Icon = statusIcons[status];
   const reduce = useReducedMotion();
   const prevRef = useRef(status);

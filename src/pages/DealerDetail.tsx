@@ -67,8 +67,8 @@ export default function DealerDetail() {
 
   // Money for this dealer comes from bills, posted receipts and credit notes — never order flags.
   const canManageDealers = useCan("see_all_dealers");
-  const { rows: receivableRows, receipts, creditNotes, advances, paymentStatus: paymentStatusByOrderId } = useReceivables();
-  const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
+  const { rows: receivableRows, receipts, creditNotes, advances, paymentStatus: paymentStatusByOrderId, ready: moneyReady } = useReceivables();
+  const payStatus = (oid: string) => (moneyReady ? paymentStatusByOrderId.get(oid) ?? "pending" : null);
   const invoices = api.invoices.list();
   const dealerOrderIds = useMemo(() => new Set(dealerOrders.map(o => o.id)), [dealerOrders]);
   const dealerInvoices = useMemo(

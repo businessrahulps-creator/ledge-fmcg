@@ -74,7 +74,7 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
-  const { paymentStatus: sharedPaymentStatus, loading: receivablesLoading } = useReceivables();
+  const { paymentStatus: sharedPaymentStatus, ready: moneyReady } = useReceivables();
   const canOverrideCredit = useCan("override_credit_limit");
   const canSeeMoney = useCan("see_money");
   const { companyInfo } = api;
@@ -441,9 +441,10 @@ export default function OrderDetail() {
     || "Not set";
   /* Money chip comes from real receipts, so chip, balance and journey always agree. */
   // Same rule as the order lists: dealer credit covering the bill counts too.
-  const sharedStatus = receivablesLoading ? undefined : sharedPaymentStatus.get(order.id);
-  const moneyStatus: "paid" | "partial" | "pending" =
-    settled ? "paid"
+  const sharedStatus = moneyReady ? sharedPaymentStatus.get(order.id) : undefined;
+  const moneyStatus: "paid" | "partial" | "pending" | null =
+    !moneyReady ? null
+    : settled ? "paid"
       : sharedStatus === "paid" && hasBill ? "paid"
       : received > 0 || sharedStatus === "partial" ? "partial" : "pending";
 

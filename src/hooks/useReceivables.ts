@@ -74,7 +74,7 @@ export function useReceivables() {
   const invoices = api.invoices.list();
   const distributors = api.dealers.list();
   const {
-    receipts, creditNotes, receivedByInvoice, receivedByOrder, creditedByInvoice, loading, reload,
+    receipts, creditNotes, receivedByInvoice, receivedByOrder, creditedByInvoice, loading, ready, reload,
   } = useCollections(companyId);
 
   const dealerCredit = useMemo(
@@ -99,6 +99,6 @@ export function useReceivables() {
   return {
     rows, aging, advances, receipts, creditNotes, paymentStatus, dealerCredit,
     receivedByInvoice, receivedByOrder, creditedByInvoice,
-    loading, reload,
+    loading, ready, reload,
   };
 }
