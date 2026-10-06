@@ -61,6 +61,14 @@ const statusColors: Record<string, string> = {
 /** Half-written order, kept for this browser session only. */
 const ORDER_DRAFT_KEY = "ledge:newOrderDraft";
 
+type AdvanceExtraAction = "apply_other_bills" | "dealer_credit" | "refund";
+const ADVANCE_EXTRA_CHOICES: { value: AdvanceExtraAction; title: string; detail: string }[] = [
+  { value: "apply_other_bills", title: "Use it for their other unpaid bills", detail: "Oldest bills first. Anything left stays as dealer credit." },
+  { value: "dealer_credit", title: "Keep it as dealer credit", detail: "It lowers what they owe on future bills." },
+  { value: "refund", title: "Give the extra back", detail: "It shows as money to give back until you mark it given." },
+];
+const cn = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
+
 export default function NewOrder() {
   const navigate = useNavigate();
   const api = useApi();
@@ -254,6 +262,8 @@ export default function NewOrder() {
     }),
     [lines, gstRateFor, totalSchemeSavings, appliedSchemes],
   );
+  // Advance beyond the bill (with GST): extra money the owner must place.
+  const advanceExtra = Math.max(0, Math.round((Number(advanceAmount || 0) - orderBillEquivalent) * 100) / 100);
   const projectedOutstanding = projectedExposure(
     selectedDealerObj?.outstandingAmount || 0,
     orderBillEquivalent,
