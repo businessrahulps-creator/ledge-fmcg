@@ -47,9 +47,39 @@ type CollectionsSnapshot = {
   receipts: ReceiptRow[];
   creditNotes: CreditNoteRow[];
   loading: boolean;
+  /** True once real figures exist (a finished load or the copy remembered on this device). */
+  ready: boolean;
 };
 
-const EMPTY: CollectionsSnapshot = { receipts: [], creditNotes: [], loading: false };
+const EMPTY: CollectionsSnapshot = { receipts: [], creditNotes: [], loading: false, ready: false };
+
+const CACHE_PREFIX = "ledge:collections:";
+
+function readCache(companyId: string): Pick<CollectionsSnapshot, "receipts" | "creditNotes"> | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_PREFIX + companyId);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    return Array.isArray(v?.receipts) && Array.isArray(v?.creditNotes) ? v : null;
+  } catch { return null; }
+}
+
+function writeCache(companyId: string, snap: CollectionsSnapshot) {
+  try {
+    sessionStorage.setItem(CACHE_PREFIX + companyId, JSON.stringify({ receipts: snap.receipts, creditNotes: snap.creditNotes }));
+  } catch { /* storage full or blocked — figures still load normally */ }
+}
+
+/** Forget remembered money figures (sign-out / business switch). */
+export function clearCollectionsCache() {
+  stores.clear();
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith(CACHE_PREFIX)) sessionStorage.removeItem(k);
+    }
+  } catch { /* ignore */ }
+}
 
 /**
  * One shared load per workspace. Several parts of a page read collections at
@@ -70,7 +100,8 @@ const stores = new Map<string, Store>();
 function getStore(companyId: string): Store {
   let s = stores.get(companyId);
   if (!s) {
-    s = { snapshot: { receipts: [], creditNotes: [], loading: true }, listeners: new Set(), inflight: null, loaded: false, rerun: false };
+    const cached = readCache(companyId);
+    s = { snapshot: cached ? { ...cached, loading: true, ready: true } : { receipts: [], creditNotes: [], loading: true, ready: false }, listeners: new Set(), inflight: null, loaded: false, rerun: false };
     stores.set(companyId, s);
   }
   return s;
@@ -146,7 +177,9 @@ async function loadCollections(companyId: string, force: boolean): Promise<void>
     }
     // Only a complete load counts; a failed part is retried on the next visit.
     store.loaded = !paymentsRes.error && !notesRes.error;
+    if (store.loaded) next.ready = true;
     publish(store, next);
+    if (store.loaded) writeCache(companyId, store.snapshot);
   })();
   store.inflight = run.finally(() => { store.inflight = null; });
   return store.inflight;
@@ -171,7 +204,7 @@ export function useCollections(companyId?: string | null) {
     return () => { store.listeners.delete(sync); };
   }, [companyId]);
 
-  const { receipts, creditNotes, loading } = snapshot;
+  const { receipts, creditNotes, loading, ready } = snapshot;
 
   const load = useCallback(async () => {
     if (!companyId) return;
@@ -214,6 +247,7 @@ export function useCollections(companyId?: string | null) {
     receivedByOrder,
     creditedByInvoice,
     loading,
+    ready,
     reload: load,
   };
 }

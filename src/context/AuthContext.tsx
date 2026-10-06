@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
+import { clearCollectionsCache } from "@/hooks/useCollections";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User, Session } from "@supabase/supabase-js";
@@ -275,6 +276,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     recoveryAttemptedRef.current.clear();
     // Never reuse the previous session's permissions on the next sign-in.
     queryClient.removeQueries({ queryKey: ["capabilities"] });
+    clearCollectionsCache();
     setUserState(null);
     setSessionState(null);
     setProfileState(null);

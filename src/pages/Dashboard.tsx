@@ -105,10 +105,10 @@ export default function Dashboard() {
   const firstName = profile?.full_name?.split(" ")[0];
 
   // Money owed comes from the receipts ledger, never from orders.payment_status.
-  const { rows: receivableRows, paymentStatus: paymentStatusByOrderId } = useReceivables();
+  const { rows: receivableRows, paymentStatus: paymentStatusByOrderId, ready: moneyReady } = useReceivables();
   const payStatus = useCallback(
-    (id: string) => paymentStatusByOrderId.get(id) ?? "pending",
-    [paymentStatusByOrderId],
+    (id: string) => (moneyReady ? paymentStatusByOrderId.get(id) ?? "pending" : null),
+    [paymentStatusByOrderId, moneyReady],
   );
 
   // This Month aggregates (memoized — recompute only when orders change)
