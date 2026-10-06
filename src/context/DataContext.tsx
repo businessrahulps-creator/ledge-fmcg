@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from "react";
+import { reloadCollections } from "@/hooks/useCollections";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -511,6 +512,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices', filter: `company_id=eq.${companyId}` }, (payload) => queueRow('invoices', changedId(payload), billing.refetchInvoiceById, billing.safeRefetchInvoices))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'targets', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('targets', targets.safeRefetchTargets))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'secondary_sales', filter: `company_id=eq.${companyId}` }, () => debouncedRefetch('secondary_sales', targets.safeRefetchSecondarySales))
+        // Money from any device: refresh receipts/credit notes and dealer balances within a second.
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'invoice_payments', filter: `company_id=eq.${companyId}` }, () => { debouncedRefetch('collections', () => reloadCollections(companyId)); debouncedRefetch('distributors', dealers.safeRefetch); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_notes', filter: `company_id=eq.${companyId}` }, () => { debouncedRefetch('collections', () => reloadCollections(companyId)); debouncedRefetch('distributors', dealers.safeRefetch); })
         .subscribe((status) => {
           // A dropped live connection retries on its own — console only, it is not a failure to review.
           if (status === 'CHANNEL_ERROR') console.warn("[realtime] channel error — will retry", { companyId });
@@ -518,7 +522,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
 
     const handleOffline = () => { if (channel) { supabase.removeChannel(channel); channel = null; } };
-    const handleOnline = () => { subscribe(); };
+    // Back online: resubscribe and catch up on anything missed while offline.
+    const handleOnline = () => { subscribe(); void reloadCollections(companyId); dealers.safeRefetch(); };
 
     subscribe();
     window.addEventListener('offline', handleOffline);
