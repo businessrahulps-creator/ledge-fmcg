@@ -1,0 +1,1 @@
+- Screen tests live in e2e-agent/ (TesterArmy e2e): plain-English agent steps must be followed by a hard assertion, sessions come from `lovable auth-session`, telemetry off, `.e2e/` artifacts never committed — why: AI never decides pass/fail alone; traces hold tokens.

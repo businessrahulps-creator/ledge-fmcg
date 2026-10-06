@@ -16,6 +16,7 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { ActTransition } from "@/components/auth/ActTransition";
 import { useFocusFirstField } from "@/components/auth/useFocusFirstField";
 import ledgeMark from "@/assets/ledge-mark.webp";
+import { fetchMyPendingInvite } from "@/components/onboarding/NoCompanyGuard";
 
 const ROLES = [
   { id: "founder", label: "Founder / Owner" },
@@ -82,6 +83,16 @@ export default function Welcome() {
       setStep(1);
     }
   }, [user, companyId, authReady, profileLoaded, navigate, step]);
+
+  // Invited people join their team instead of setting up a new business.
+  useEffect(() => {
+    if (!authReady || !profileLoaded || !user || companyId) return;
+    let alive = true;
+    fetchMyPendingInvite().then((token) => {
+      if (alive && token) navigate(`/invite/${token}`, { replace: true });
+    });
+    return () => { alive = false; };
+  }, [authReady, profileLoaded, user, companyId, navigate]);
 
   // ── Step 0: create company ────────────────────────────────────────────────
   const onCompanySubmit = async ({ companyName }: z.infer<typeof companyStepSchema>) => {
