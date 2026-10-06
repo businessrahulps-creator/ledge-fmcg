@@ -61,6 +61,14 @@ const statusColors: Record<string, string> = {
 /** Half-written order, kept for this browser session only. */
 const ORDER_DRAFT_KEY = "ledge:newOrderDraft";
 
+type AdvanceExtraAction = "apply_other_bills" | "dealer_credit" | "refund";
+const ADVANCE_EXTRA_CHOICES: { value: AdvanceExtraAction; title: string; detail: string }[] = [
+  { value: "apply_other_bills", title: "Use it for their other unpaid bills", detail: "Oldest bills first. Anything left stays as dealer credit." },
+  { value: "dealer_credit", title: "Keep it as dealer credit", detail: "It lowers what they owe on future bills." },
+  { value: "refund", title: "Give the extra back", detail: "It shows as money to give back until you mark it given." },
+];
+const cn = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
+
 export default function NewOrder() {
   const navigate = useNavigate();
   const api = useApi();
@@ -117,6 +125,7 @@ export default function NewOrder() {
   const [advanceAmount, setAdvanceAmount] = useState<number | null>(null);
   const [advanceMode, setAdvanceMode] = useState("cash");
   const [advanceRef, setAdvanceRef] = useState("");
+  const [advanceExtraAction, setAdvanceExtraAction] = useState<AdvanceExtraAction | null>(null);
 
   // Warn on tab close while form is dirty (in-app nav not blocked by design).
   const isDirty = selectedDealer !== "" || lines.some(l => l.productId !== "");
@@ -253,6 +262,8 @@ export default function NewOrder() {
     }),
     [lines, gstRateFor, totalSchemeSavings, appliedSchemes],
   );
+  // Advance beyond the bill (with GST): extra money the owner must place.
+  const advanceExtra = Math.max(0, Math.round((Number(advanceAmount || 0) - orderBillEquivalent) * 100) / 100);
   const projectedOutstanding = projectedExposure(
     selectedDealerObj?.outstandingAmount || 0,
     orderBillEquivalent,
@@ -347,6 +358,14 @@ export default function NewOrder() {
       return;
     }
 
+    // Advance bigger than the order: the owner decides where the extra goes — never guessed.
+    if (advanceExtra > 0 && !advanceExtraAction) {
+      toast.error("Choose what to do with the extra money", {
+        description: `The advance is ${formatCurrency(advanceExtra)} more than this order.`,
+      });
+      return;
+    }
+
     // Booking ahead of stock is allowed, but never by accident: the person has to
     // see it once and press Save again before the order goes in.
     if (stockWarnings.size > 0 && !shortStockAck) {
@@ -418,6 +437,7 @@ export default function NewOrder() {
           reference: advanceMode === "cash" ? "" : advanceRef,
           note: "Advance received at booking",
           idempotencyKey: `${result.orderId}:booking-advance`,
+          extraAction: advanceExtra > 0 ? advanceExtraAction : null,
         });
       }
       trackFirstOrderCreated();
@@ -769,6 +789,29 @@ export default function NewOrder() {
                     Still to collect after this: {formatCurrency(Math.max(0, orderBillEquivalent - Number(advanceAmount || 0)))}
                     <span className="ml-1 opacity-80">(bill with GST {formatCurrency(orderBillEquivalent)})</span>
                   </p>
+                )}
+                {advanceExtra > 0 && (
+                  <div className="mt-3 space-y-2 rounded-md border border-warning/40 bg-warning/10 p-3" role="radiogroup" aria-label="What to do with the extra money">
+                    <p className="text-xs font-medium text-foreground">
+                      That is {formatCurrency(advanceExtra)} more than this order. What should happen to the extra?
+                    </p>
+                    {ADVANCE_EXTRA_CHOICES.map((c) => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={advanceExtraAction === c.value}
+                        onClick={() => setAdvanceExtraAction(c.value)}
+                        className={cn(
+                          "touch-target w-full rounded-md border bg-card px-3 py-2 text-left transition-colors",
+                          advanceExtraAction === c.value ? "border-primary ring-1 ring-primary" : "border-border hover:bg-muted/50",
+                        )}
+                      >
+                        <span className="block text-xs font-semibold text-foreground md:text-sm">{c.title}</span>
+                        <span className="block text-[11px] text-muted-foreground md:text-xs">{c.detail}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </section>
             )}
