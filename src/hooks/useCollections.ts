@@ -70,6 +70,11 @@ function writeCache(companyId: string, snap: CollectionsSnapshot) {
   } catch { /* storage full or blocked — figures still load normally */ }
 }
 
+/** Fetch fresh money figures for every screen (live-update hook). */
+export function reloadCollections(companyId: string) {
+  return loadCollections(companyId, true);
+}
+
 /** Forget remembered money figures (sign-out / business switch). */
 export function clearCollectionsCache() {
   stores.clear();
