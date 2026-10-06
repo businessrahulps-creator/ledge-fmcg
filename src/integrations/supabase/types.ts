@@ -3316,6 +3316,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["capability_key"][]
       }
+      my_pending_invite: { Args: never; Returns: string }
       ops_company_detail: { Args: { p_company_id: string }; Returns: Json }
       ops_guard: {
         Args: { p_action: string; p_target_id?: string; p_target_type?: string }
