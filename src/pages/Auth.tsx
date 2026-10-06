@@ -141,12 +141,15 @@ export default function Auth() {
   // ── Email sign up ────────────────────────────────────────────────────────
   const onSignUp = async ({ fullName, email, password }: SignupValues) => {
     try {
+      let back = params.get("redirect");
+      if (!back) { try { back = sessionStorage.getItem("ledge:postAuthRedirect"); } catch { /* ignore */ } }
+      const safeBack = back && back.startsWith("/") && !back.startsWith("//") ? back : null;
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/auth?verified=1`,
+          emailRedirectTo: `${window.location.origin}/auth?verified=1${safeBack ? `&redirect=${encodeURIComponent(safeBack)}` : ""}`,
         },
       });
       if (authError) throw authError;
@@ -162,7 +165,8 @@ export default function Auth() {
       }
 
       await refreshProfile();
-      navigate("/welcome", { replace: true });
+      if (safeBack) { try { sessionStorage.removeItem("ledge:postAuthRedirect"); } catch { /* ignore */ } }
+      navigate(safeBack ?? "/welcome", { replace: true });
     } catch (err: any) {
       toast.error("Couldn't create your account", { description: err.message });
       logError({ source: "auth:signup", error: err });

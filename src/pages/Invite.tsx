@@ -276,7 +276,7 @@ function SignedOutInviteCard({ preview, token }: { preview: InvitePreview; token
           className="block"
         >
           <Button variant="outline" className="w-full">
-            Continue with email
+            Create your account to join {preview.company_name}
           </Button>
         </Link>
       </div>
