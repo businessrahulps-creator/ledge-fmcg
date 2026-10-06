@@ -40,7 +40,7 @@ import { useReceivables } from "@/hooks/useReceivables";
 import { todayKey } from "@/utils/dateKey";
 
 /** Presentation only: "part paid" -> "Part paid" for PDF exports. */
-const titleCase = (v: string) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : v);
+const titleCase = (v: string | null) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : v);
 
 
 export default function Orders() {
@@ -286,7 +286,7 @@ export default function Orders() {
                     o.salesperson,
                     formatCurrency(o.total - (o.schemeSavings || 0)),
                     o.paymentMode.replace("_", " "),
-                    payStatus(o.id),
+                    payStatus(o.id) ?? "",
                     o.deliveryStatus,
                     formatIndianDate(o.dispatchDate),
                     o.vehicle || "",
@@ -576,7 +576,7 @@ export default function Orders() {
                 o.distributorName,
                 o.salesperson,
                 formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
-                titleCase(payStatus(o.id)),
+                titleCase(payStatus(o.id) ?? ""),
                 titleCase(o.deliveryStatus),
               ]),
             });
