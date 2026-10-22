@@ -431,7 +431,8 @@ export default function NewOrder() {
       // Cash change handed back at the counter: only the order amount is kept and saved.
       const cashChange = advanceExtra > 0 && isCashChange(advanceMode, advanceExtraAction);
       const split = cashChange ? splitCashOverpay(tendered, orderBillEquivalent) : { save: tendered, change: 0 };
-      const advance = split.save;
+      // Full cash goes to the server, which keeps only what is due on the order.
+      const advance = tendered;
       if (advance > 0 && result.orderId) {
         // Goes through the billing data layer so the dealer's balance updates everywhere.
         await api.payments.record({
@@ -444,7 +445,7 @@ export default function NewOrder() {
             ? `Advance received at booking · Cash received ${formatCurrency(tendered)}, change given ${formatCurrency(split.change)}`
             : "Advance received at booking",
           idempotencyKey: `${result.orderId}:booking-advance`,
-          extraAction: advanceExtra > 0 && !cashChange ? advanceExtraAction : null,
+          extraAction: advanceExtra > 0 ? (cashChange ? "cash_change" : advanceExtraAction) : null,
         });
       }
       trackFirstOrderCreated();

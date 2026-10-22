@@ -149,14 +149,15 @@ export function PaymentsPanel({
     }
     // Cash change handed back at the counter: only the amount due is kept and saved.
     const cashChange = tenderedExtra > 0 && isCashChange(mode, extraAction);
-    const { save, change } = cashChange ? splitCashOverpay(tendered, balance) : { save: tendered, change: 0 };
-    const value = save;
-    const extra = cashChange ? 0 : tenderedExtra;
+    const { change } = cashChange ? splitCashOverpay(tendered, balance) : { change: 0 };
+    // Send the full cash; the server keeps only what is truly due (handles a stale balance).
+    const value = tendered;
+    const extra = tenderedExtra;
     const saveNote = cashChange
       ? [note, `Cash received ${formatCurrency(tendered)}, change given ${formatCurrency(change)}`].filter(Boolean).join(" · ")
       : note;
     // A retry may reuse the save ID only for the exact same payment; any change is a new payment.
-    const payload = JSON.stringify([value, mode, paidOn, mode === "cash" ? "" : reference, saveNote, extra > 0 ? extraAction : null]);
+    const payload = JSON.stringify([value, mode, paidOn, mode === "cash" ? "" : reference, saveNote, extra > 0 ? (cashChange ? "cash_change" : extraAction) : null]);
     let key = submitKey;
     if (keepKey.current && lastPayload.current !== payload) {
       key = crypto.randomUUID(); setSubmitKey(key);
@@ -175,7 +176,7 @@ export function PaymentsPanel({
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
       idempotencyKey: `${anchorId}:${key}`,
-      extraAction: extra > 0 ? extraAction : null,
+      extraAction: extra > 0 ? (cashChange ? "cash_change" : extraAction) : null,
     });
     setSaving(false);
     if (!ok) {
