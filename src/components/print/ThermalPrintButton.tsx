@@ -36,6 +36,11 @@ export function ThermalPrintButton({ order, invoice, seller, buyerGstin, buyerAd
     if (busy.current) return;
     busy.current = true; setWorking(true);
     const write = openThermalPrint();
+    if (!write) {
+      busy.current = false; setWorking(false);
+      toast.error("Your browser blocked the print page", { description: "Allow pop-ups for Ledge, then tap Print receipt again." });
+      return;
+    }
     try {
       const receipt = invoice
         ? receiptFromInvoice(await withInvoiceLines(invoice), order.orderNumber)

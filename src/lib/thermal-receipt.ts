@@ -38,10 +38,11 @@ export function receiptFromInvoice(inv: Invoice, orderNumber?: string): Receipt 
   }
   if (r2(inv.roundOff) !== 0) totals.push({ label: "Round off", value: r2(inv.roundOff) });
   totals.push({ label: "TOTAL", value: r2(inv.grandTotal), bold: true });
-  const isBill = inv.docType === "gst_invoice";
+  const draft = inv.status === "draft";
+  const isBill = inv.docType === "gst_invoice" && !draft;
   const pos = inv.buyerStateCode || inv.sellerStateCode;
   return {
-    title: isBill ? "TAX INVOICE" : inv.docType.toUpperCase().replace(/_/g, " "),
+    title: draft ? "DRAFT — NOT A BILL" : isBill ? "TAX INVOICE" : inv.docType.toUpperCase().replace(/_/g, " "),
     isBill,
     number: inv.invoiceNumber,
     date: formatIndianDate(inv.invoiceDate),
