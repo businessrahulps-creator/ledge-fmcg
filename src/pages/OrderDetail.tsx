@@ -25,6 +25,7 @@ import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts } f
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
+import { ThermalPrintButton } from "@/components/print/ThermalPrintButton";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { billStatusView } from "@/lib/bill-status";
 import type { Invoice } from "@/context/DataContext";
@@ -820,6 +821,17 @@ export default function OrderDetail() {
                 <span className="hidden sm:inline">Order confirmation (not a bill)</span>
               </Button>
             )}
+
+            <ThermalPrintButton
+              order={order}
+              invoice={finalInvoice}
+              seller={{
+                name: companyInfo.name, address: companyInfo.address, phone: companyInfo.phone, gstin: companyInfo.gstin,
+                bank: companyInfo.bankAccount ? `${companyInfo.bankName} A/c ${companyInfo.bankAccount} IFSC ${companyInfo.bankIfsc}` : undefined,
+              }}
+              buyerGstin={distributors.find(d => d.id === order.distributorId)?.gstin}
+              paid={moneyReady ? { paid: received, balance } : null}
+            />
 
             <Button
               size="sm"

@@ -1,0 +1,31 @@
+import { describe, it, expect } from "vitest";
+import { receiptFromInvoice, receiptFromOrder } from "@/lib/thermal-receipt";
+
+const inv: any = {
+  docType: "gst_invoice", invoiceNumber: "INV-1", invoiceDate: "2026-10-22", supplyType: "intra_state",
+  subtotal: 2100, cgstAmount: 52.5, sgstAmount: 52.5, igstAmount: 0, roundOff: 0.0, grandTotal: 2205,
+  amountInWords: "x", sellerName: "S", sellerAddress: "", sellerPhone: "", sellerGstin: "", buyerName: "B", buyerGstin: "",
+  sellerBankAccount: "", lines: [{ productName: "Atta", quantity: 5, unitPrice: 420, taxableValue: 2100, lineTotal: 2205 }],
+};
+
+describe("thermal receipt", () => {
+  it("copies saved GST bill total and split", () => {
+    const r = receiptFromInvoice(inv);
+    expect(r.isBill).toBe(true);
+    expect(r.total).toBe(2205);
+    expect(r.totals.map(t => t.label)).toEqual(["Taxable value", "CGST", "SGST", "TOTAL"]);
+  });
+  it("uses IGST for inter-state bills", () => {
+    const r = receiptFromInvoice({ ...inv, supplyType: "inter_state", igstAmount: 105 });
+    expect(r.totals.find(t => t.label === "IGST")?.value).toBe(105);
+    expect(r.totals.some(t => t.label === "CGST")).toBe(false);
+  });
+  it("order slip is never labelled a bill and subtracts offers once", () => {
+    const order: any = { orderNumber: "ORD-1", date: "2026-10-22", distributorName: "B", total: 1000, schemeSavings: 50,
+      lines: [{ productName: "Tea", quantity: 2, unitPrice: 500, lineTotal: 1000 }] };
+    const r = receiptFromOrder(order, { name: "S", address: "", phone: "", gstin: "" });
+    expect(r.isBill).toBe(false);
+    expect(r.title).toContain("NOT A BILL");
+    expect(r.total).toBe(950);
+  });
+});
