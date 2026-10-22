@@ -39,7 +39,7 @@ export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: numb
   .c { text-align: center } .b { font-weight: 700 } .big { font-size: 1.2em } .sm { font-size: .88em }
   hr { border: 0; border-top: 1px dashed #000; margin: 2mm 0 }
   .row { display: flex; justify-content: space-between; gap: 2mm }
-  table { width: 100%; border-collapse: collapse } th, td { text-align: right; padding: .3mm 0; vertical-align: top }
+  table { width: 100%; border-collapse: collapse } th, td { text-align: right; padding: .3mm 0 .3mm 1.5mm; vertical-align: top; white-space: nowrap } td.l, th.l { white-space: normal; padding-left: 0 }
   .l { text-align: left; word-break: break-word } th { border-bottom: 1px solid #000 }
   </style></head><body>${Array.from({ length: prefs.copies }, () => one).join("")}</body></html>`;
 }
