@@ -29,3 +29,19 @@ describe("thermal receipt", () => {
     expect(r.total).toBe(950);
   });
 });
+
+describe("thermal receipt fixes", () => {
+  it("item amounts add up to taxable value", () => {
+    const r = receiptFromInvoice(inv);
+    expect(r.rows.reduce((a, x) => a + x.amount, 0)).toBe(2100);
+    expect(r.rows[0].amount).toBe(5 * 420);
+  });
+  it("refuses a bill with no items", () => {
+    expect(() => receiptFromInvoice({ ...inv, lines: [] })).toThrow("Couldn't load the bill items");
+  });
+  it("prints Indian date and place of supply", () => {
+    const r = receiptFromInvoice({ ...inv, buyerStateCode: "29", sellerStateCode: "32" });
+    expect(r.date).not.toBe("2026-10-22");
+    expect(r.placeOfSupply).toBe("State code 29");
+  });
+});

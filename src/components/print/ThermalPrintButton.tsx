@@ -10,7 +10,7 @@ import type { Order } from "@/data/mock-data";
 import { withInvoiceLines } from "@/lib/invoice-lines";
 import { EmptyBillError, receiptFromInvoice, receiptFromOrder, type Seller } from "@/lib/thermal-receipt";
 import { useThermalPrintPrefs } from "@/hooks/useThermalPrintPrefs";
-import { openThermalPrint, receiptHtml } from "./printThermal";
+import { openThermalPrint, printThermal, receiptHtml } from "./printThermal";
 import { useRef, useState } from "react";
 
 interface Props {
@@ -42,7 +42,7 @@ export function ThermalPrintButton({ order, invoice, seller, buyerGstin, buyerAd
         : receiptFromOrder(order, seller, buyerGstin, { buyerAddress });
       write(receiptHtml(receipt, prefs, paid));
     } catch (e) {
-      write("<p style='font:14px sans-serif;padding:16px'>Couldn't load the bill. Close this and try again.</p>");
+      if (write !== printThermal) write("<p style='font:14px sans-serif;padding:16px'>Couldn't load the bill. Close this and try again.</p>");
       toast.error(e instanceof EmptyBillError ? e.message : "Couldn't open printing", { description: "Check your internet and try again." });
     } finally {
       setTimeout(() => { busy.current = false; setWorking(false); }, 1500);
