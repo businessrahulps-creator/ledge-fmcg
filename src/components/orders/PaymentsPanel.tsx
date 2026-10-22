@@ -1,3 +1,4 @@
+import { splitCashOverpay, isCashChange } from "@/lib/cash-change";
 import { roundPaise } from "@/lib/money";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -332,10 +333,15 @@ export function PaymentsPanel({
                         extraAction === opt.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
                       )}
                     >
-                      <span className="block text-sm font-medium">{opt.title}</span>
-                      <span className="block text-muted-foreground">{opt.detail}</span>
+                      <span className="block text-sm font-medium">{mode === "cash" && opt.value === "refund" ? "Give change now" : opt.title}</span>
+                      <span className="block text-muted-foreground">{mode === "cash" && opt.value === "refund" ? "Hand the change back now. Only the amount due is saved." : opt.detail}</span>
                     </button>
                   ))}
+                  {isCashChange(mode, extraAction) && (
+                    <p className="text-xs font-medium text-foreground">
+                      Saving {formatCurrency(balance)} · give {formatCurrency(extraAmount)} change
+                    </p>
+                  )}
                 </div>
               )}
             </div>
