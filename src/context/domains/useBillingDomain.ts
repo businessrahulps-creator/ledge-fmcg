@@ -127,7 +127,7 @@ export interface RecordPaymentInput {
   note?: string;
   idempotencyKey: string;
   /** What to do with money above what is due — the owner chooses, never the app. */
-  extraAction?: "apply_other_bills" | "dealer_credit" | "refund" | null;
+  extraAction?: "apply_other_bills" | "dealer_credit" | "refund" | "cash_change" | null;
 }
 
 export function useBillingDomain(deps: BillingDeps) {
