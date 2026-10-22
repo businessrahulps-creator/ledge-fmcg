@@ -42,7 +42,7 @@ describe("thermal receipt fixes", () => {
   it("prints Indian date and place of supply", () => {
     const r = receiptFromInvoice({ ...inv, buyerStateCode: "29", sellerStateCode: "32" });
     expect(r.date).not.toBe("2026-10-22");
-    expect(r.placeOfSupply).toBe("State code 29");
+    expect(r.placeOfSupply).toBe("Karnataka (29)");
   });
 });
 
