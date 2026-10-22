@@ -16,10 +16,12 @@ export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: numb
     <div class="row"><span>No. ${esc(r.number)}</span><span>${esc(r.date)}</span></div>
     ${r.orderNumber ? `<div>Order ${esc(r.orderNumber)}</div>` : ""}
     <div>To: <b>${esc(r.buyerName)}</b></div>
+    ${r.buyerAddress ? `<div class="sm">${esc(r.buyerAddress)}</div>` : ""}
     ${r.buyerGstin ? `<div>GSTIN ${esc(r.buyerGstin)}</div>` : ""}
+    ${r.placeOfSupply ? `<div class="sm">Place of supply: ${esc(r.placeOfSupply)}</div>` : ""}
     <hr/>
     <table><thead><tr><th class="l">Item</th><th>Qty</th><th>Rate</th><th>Amt</th></tr></thead><tbody>
-    ${r.rows.map(x => `<tr><td class="l">${esc(x.name)}</td><td>${x.qty}</td><td>${money(x.rate)}</td><td>${money(x.amount)}</td></tr>`).join("")}
+    ${r.rows.map(x => `<tr><td class="l">${esc(x.name)}${x.hsn || x.gstRate != null ? `<div class="sm">${x.hsn ? `HSN ${esc(x.hsn)}` : ""}${x.hsn && x.gstRate != null ? " · " : ""}${x.gstRate != null ? `GST ${x.gstRate}%` : ""}</div>` : ""}</td><td>${x.qty}</td><td>${money(x.rate)}</td><td>${money(x.amount)}</td></tr>`).join("")}
     </tbody></table>
     <hr/>
     ${r.totals.map(t => `<div class="row ${t.bold ? "b big" : ""}"><span>${esc(t.label)}</span><span>${t.bold ? "₹" : ""}${money(t.value)}</span></div>`).join("")}
@@ -27,6 +29,7 @@ export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: numb
     ${paid ? `<div class="row"><span>Paid ₹${money(paid.paid)}</span><span class="b">Balance ₹${money(paid.balance)}</span></div>` : ""}
     <hr/>
     ${prefs.showBank && r.bank ? `<div class="sm c">${esc(r.bank)}</div>` : ""}
+    ${r.signatory ? `<div class="sm" style="text-align:right;margin-top:8mm">For ${esc(r.sellerName)}<br/>Authorised signatory</div>` : ""}
     ${prefs.footer ? `<div class="c">${esc(prefs.footer)}</div>` : ""}
   </div>`;
   const w = prefs.width;
@@ -44,18 +47,32 @@ export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: numb
   </style></head><body>${Array.from({ length: prefs.copies }, () => one).join("")}</body></html>`;
 }
 
-/** Prints through a hidden frame so the app itself isn't printed. Call from a click. */
+const isAppleTouch = () =>
+  /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+/** Call synchronously from the click; returns a writer for when the receipt is ready. */
+export function openThermalPrint(): (html: string) => void {
+  if (isAppleTouch()) {
+    // iOS Safari prints the parent page from hidden frames — use its own tab.
+    const w = window.open("", "_blank");
+    return (html) => {
+      if (!w) return;
+      w.document.open(); w.document.write(html); w.document.close();
+      setTimeout(() => { w.focus(); w.print(); }, 300);
+    };
+  }
+  return printThermal;
+}
+
+/** Prints through a hidden frame so the app itself isn't printed. */
 export function printThermal(html: string) {
+  document.querySelectorAll("iframe[data-thermal-print]").forEach(f => f.remove());
   const frame = document.createElement("iframe");
+  frame.setAttribute("data-thermal-print", "");
   frame.setAttribute("aria-hidden", "true");
   frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
   document.body.appendChild(frame);
   const doc = frame.contentDocument!;
   doc.open(); doc.write(html); doc.close();
-  const go = () => {
-    frame.contentWindow?.focus();
-    frame.contentWindow?.print();
-    setTimeout(() => frame.remove(), 60_000);
-  };
-  if (doc.readyState === "complete") setTimeout(go, 50); else frame.onload = go;
+  setTimeout(() => { frame.contentWindow?.focus(); frame.contentWindow?.print(); }, 100);
 }

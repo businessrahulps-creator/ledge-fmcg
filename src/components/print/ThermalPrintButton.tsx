@@ -8,36 +8,50 @@ import { Label } from "@/components/ui/label";
 import type { Invoice } from "@/context/data-types";
 import type { Order } from "@/data/mock-data";
 import { withInvoiceLines } from "@/lib/invoice-lines";
-import { receiptFromInvoice, receiptFromOrder, type Seller } from "@/lib/thermal-receipt";
+import { EmptyBillError, receiptFromInvoice, receiptFromOrder, type Seller } from "@/lib/thermal-receipt";
 import { useThermalPrintPrefs } from "@/hooks/useThermalPrintPrefs";
-import { printThermal, receiptHtml } from "./printThermal";
+import { openThermalPrint, printThermal, receiptHtml } from "./printThermal";
+import { useRef, useState } from "react";
 
 interface Props {
   order: Order;
   invoice?: Invoice;
   seller: Seller;
   buyerGstin?: string;
+  buyerAddress?: string;
+  cancelled?: boolean;
   /** Only pass once payment figures have loaded. */
   paid?: { paid: number; balance: number } | null;
 }
 
-export function ThermalPrintButton({ order, invoice, seller, buyerGstin, paid }: Props) {
+export function ThermalPrintButton({ order, invoice, seller, buyerGstin, buyerAddress, cancelled, paid }: Props) {
   const { prefs, update } = useThermalPrintPrefs();
 
+  const busy = useRef(false);
+  const [working, setWorking] = useState(false);
+
+  if (cancelled && !invoice) return null;
+
   const print = async () => {
+    if (busy.current) return;
+    busy.current = true; setWorking(true);
+    const write = openThermalPrint();
     try {
       const receipt = invoice
         ? receiptFromInvoice(await withInvoiceLines(invoice), order.orderNumber)
-        : receiptFromOrder(order, seller, buyerGstin);
-      printThermal(receiptHtml(receipt, prefs, paid));
-    } catch {
-      toast.error("Couldn't open printing", { description: "Try again in a moment." });
+        : receiptFromOrder(order, seller, buyerGstin, { buyerAddress });
+      write(receiptHtml(receipt, prefs, paid));
+    } catch (e) {
+      if (write !== printThermal) write("<p style='font:14px sans-serif;padding:16px'>Couldn't load the bill. Close this and try again.</p>");
+      toast.error(e instanceof EmptyBillError ? e.message : "Couldn't open printing", { description: "Check your internet and try again." });
+    } finally {
+      setTimeout(() => { busy.current = false; setWorking(false); }, 1500);
     }
   };
 
   return (
     <div className="inline-flex">
-      <Button variant="outline" size="sm" className="rounded-r-none touch-target" onClick={print}
+      <Button variant="outline" size="sm" className="rounded-r-none touch-target" onClick={print} disabled={working}
         title={invoice ? "Print bill on receipt printer" : "Print order slip on receipt printer"}>
         <Printer className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Print receipt</span>
