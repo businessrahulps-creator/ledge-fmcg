@@ -407,6 +407,13 @@
       "when": 1791284010247,
       "tag": "0057_realtime_money_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1792649826781,
+      "tag": "0058_cash_change_no_refund_due",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { splitCashOverpay, isCashChange } from "@/lib/cash-change";
 import { roundPaise } from "@/lib/money";
 import { useReceivables } from "@/hooks/useReceivables";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -138,16 +139,24 @@ export function PaymentsPanel({
   };
 
   const recordPayment = async () => {
-    const value = Number(amount || 0);
-    if (value <= 0) { toast.error("Enter the amount received"); return; }
+    const tendered = Number(amount || 0);
+    if (tendered <= 0) { toast.error("Enter the amount received"); return; }
     // More than the balance: the owner decides where the extra goes — the app never guesses.
-    const extra = roundPaise(value - balance);
-    if (extra > 0 && !extraAction) {
+    const tenderedExtra = roundPaise(tendered - balance);
+    if (tenderedExtra > 0 && !extraAction) {
       toast.error("Choose what to do with the extra money");
       return;
     }
+    // Cash change handed back at the counter: only the amount due is kept and saved.
+    const cashChange = tenderedExtra > 0 && isCashChange(mode, extraAction);
+    const { save, change } = cashChange ? splitCashOverpay(tendered, balance) : { save: tendered, change: 0 };
+    const value = save;
+    const extra = cashChange ? 0 : tenderedExtra;
+    const saveNote = cashChange
+      ? [note, `Cash received ${formatCurrency(tendered)}, change given ${formatCurrency(change)}`].filter(Boolean).join(" · ")
+      : note;
     // A retry may reuse the save ID only for the exact same payment; any change is a new payment.
-    const payload = JSON.stringify([value, mode, paidOn, mode === "cash" ? "" : reference, note, extra > 0 ? extraAction : null]);
+    const payload = JSON.stringify([value, mode, paidOn, mode === "cash" ? "" : reference, saveNote, extra > 0 ? extraAction : null]);
     let key = submitKey;
     if (keepKey.current && lastPayload.current !== payload) {
       key = crypto.randomUUID(); setSubmitKey(key);
@@ -162,7 +171,7 @@ export function PaymentsPanel({
       mode: mode as "cash" | "bank_transfer" | "cheque" | "upi",
       paidOn,
       reference: mode === "cash" ? "" : reference,
-      note,
+      note: saveNote,
       // One key per open dialog: a double click can't double-post, but two
       // genuine same-day payments of the same amount are still allowed.
       idempotencyKey: `${anchorId}:${key}`,
@@ -324,10 +333,15 @@ export function PaymentsPanel({
                         extraAction === opt.value ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
                       )}
                     >
-                      <span className="block text-sm font-medium">{opt.title}</span>
-                      <span className="block text-muted-foreground">{opt.detail}</span>
+                      <span className="block text-sm font-medium">{mode === "cash" && opt.value === "refund" ? "Give change now" : opt.title}</span>
+                      <span className="block text-muted-foreground">{mode === "cash" && opt.value === "refund" ? "Hand the change back now. Only the amount due is saved." : opt.detail}</span>
                     </button>
                   ))}
+                  {isCashChange(mode, extraAction) && (
+                    <p className="text-xs font-medium text-foreground">
+                      Saving {formatCurrency(balance)} · give {formatCurrency(extraAmount)} change
+                    </p>
+                  )}
                 </div>
               )}
             </div>

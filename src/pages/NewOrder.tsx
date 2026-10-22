@@ -1,3 +1,4 @@
+import { splitCashOverpay, isCashChange } from "@/lib/cash-change";
 import React from "react";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -426,7 +427,11 @@ export default function NewOrder() {
       setSaved(true);
       try { sessionStorage.removeItem(ORDER_DRAFT_KEY); } catch { /* ignore */ }
       // Advance taken at the counter — recorded against the order, never blocking the booking.
-      const advance = Number(advanceAmount || 0);
+      const tendered = Number(advanceAmount || 0);
+      // Cash change handed back at the counter: only the order amount is kept and saved.
+      const cashChange = advanceExtra > 0 && isCashChange(advanceMode, advanceExtraAction);
+      const split = cashChange ? splitCashOverpay(tendered, orderBillEquivalent) : { save: tendered, change: 0 };
+      const advance = split.save;
       if (advance > 0 && result.orderId) {
         // Goes through the billing data layer so the dealer's balance updates everywhere.
         await api.payments.record({
@@ -435,9 +440,11 @@ export default function NewOrder() {
           mode: advanceMode as "cash" | "bank_transfer" | "cheque" | "upi",
           paidOn: orderDate,
           reference: advanceMode === "cash" ? "" : advanceRef,
-          note: "Advance received at booking",
+          note: cashChange
+            ? `Advance received at booking · Cash received ${formatCurrency(tendered)}, change given ${formatCurrency(split.change)}`
+            : "Advance received at booking",
           idempotencyKey: `${result.orderId}:booking-advance`,
-          extraAction: advanceExtra > 0 ? advanceExtraAction : null,
+          extraAction: advanceExtra > 0 && !cashChange ? advanceExtraAction : null,
         });
       }
       trackFirstOrderCreated();
@@ -807,10 +814,15 @@ export default function NewOrder() {
                           advanceExtraAction === c.value ? "border-primary ring-1 ring-primary" : "border-border hover:bg-muted/50",
                         )}
                       >
-                        <span className="block text-xs font-semibold text-foreground md:text-sm">{c.title}</span>
-                        <span className="block text-[11px] text-muted-foreground md:text-xs">{c.detail}</span>
+                        <span className="block text-xs font-semibold text-foreground md:text-sm">{advanceMode === "cash" && c.value === "refund" ? "Give change now" : c.title}</span>
+                        <span className="block text-[11px] text-muted-foreground md:text-xs">{advanceMode === "cash" && c.value === "refund" ? "Hand the change back now. Only the order amount is saved." : c.detail}</span>
                       </button>
                     ))}
+                    {isCashChange(advanceMode, advanceExtraAction) && (
+                      <p className="text-xs font-medium text-foreground">
+                        Saving {formatCurrency(orderBillEquivalent)} · give {formatCurrency(advanceExtra)} change
+                      </p>
+                    )}
                   </div>
                 )}
               </section>
