@@ -42,7 +42,7 @@ describe("thermal receipt fixes", () => {
   it("prints Indian date and place of supply", () => {
     const r = receiptFromInvoice({ ...inv, buyerStateCode: "29", sellerStateCode: "32" });
     expect(r.date).not.toBe("2026-10-22");
-    expect(r.placeOfSupply).toBe("State code 29");
+    expect(r.placeOfSupply).toBe("Karnataka (29)");
   });
 });
 
@@ -51,5 +51,19 @@ describe("draft bills", () => {
     const r = receiptFromInvoice({ ...inv, status: "draft" });
     expect(r.isBill).toBe(false);
     expect(r.title).toContain("NOT A BILL");
+  });
+});
+
+import { receiptHtml } from "@/components/print/printThermal";
+describe("credit notes on receipt", () => {
+  const prefs = { width: 80 as const, showBank: false, footer: "", copies: 1 as const };
+  it("shows the credit-note amount so paid + credit + balance = total", () => {
+    const html = receiptHtml(receiptFromInvoice(inv), prefs, { paid: 1000, balance: 905 });
+    expect(html).toContain("Less credit notes");
+    expect(html).toContain("300.00");
+  });
+  it("no credit line when nothing was credited", () => {
+    const html = receiptHtml(receiptFromInvoice(inv), prefs, { paid: 1000, balance: 1205 });
+    expect(html).not.toContain("Less credit notes");
   });
 });

@@ -2,6 +2,7 @@ import type { Receipt } from "@/lib/thermal-receipt";
 import type { ThermalPrefs } from "@/hooks/useThermalPrintPrefs";
 
 const esc = (s: string) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const r2 = (n: number) => Math.round(n * 100) / 100;
 const money = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: number; balance: number } | null): string {
@@ -26,6 +27,7 @@ export function receiptHtml(r: Receipt, prefs: ThermalPrefs, paid?: { paid: numb
     <hr/>
     ${r.totals.map(t => `<div class="row ${t.bold ? "b big" : ""}"><span>${esc(t.label)}</span><span>${t.bold ? "₹" : ""}${money(t.value)}</span></div>`).join("")}
     ${r.amountInWords ? `<div class="sm">${esc(r.amountInWords)}</div>` : ""}
+    ${paid && paid.balance > 0 && r2(r.total - paid.paid - paid.balance) > 0 ? `<div class="row"><span>Less credit notes</span><span>${money(r2(r.total - paid.paid - paid.balance))}</span></div>` : ""}
     ${paid ? `<div class="row"><span>Paid ₹${money(paid.paid)}</span><span class="b">Balance ₹${money(paid.balance)}</span></div>` : ""}
     <hr/>
     ${prefs.showBank && r.bank ? `<div class="sm c">${esc(r.bank)}</div>` : ""}
