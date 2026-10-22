@@ -831,7 +831,9 @@ export default function OrderDetail() {
                 bank: companyInfo.bankAccount ? `${companyInfo.bankName} A/c ${companyInfo.bankAccount} IFSC ${companyInfo.bankIfsc}` : undefined,
               }}
               buyerGstin={distributors.find(d => d.id === order.distributorId)?.gstin}
-              paid={moneyReady ? { paid: received, balance } : null}
+              buyerAddress={distributors.find(d => d.id === order.distributorId)?.address}
+              cancelled={!!order.cancelledAt}
+              paid={moneyLoaded ? { paid: money.received, balance: Math.max(0, money.balance) } : null}
             />
 
             <Button
