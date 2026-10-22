@@ -124,7 +124,8 @@ export default function OrderDetail() {
   }, []);
 
   const [money, setMoney] = useState({ received: 0, balance: 0 });
-  const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => setMoney(t), []);
+  const [moneyLoaded, setMoneyLoaded] = useState(false);
+  const handleMoneyTotals = useCallback((t: { received: number; balance: number }) => { setMoney(t); setMoneyLoaded(true); }, []);
 
   type DispatchImpactRow = { product_id: string; product_name: string; required_qty: number; current_qty: number; after_qty: number; will_go_negative: boolean };
   const [dispatchPreview, setDispatchPreview] = useState<{ open: boolean; rows: DispatchImpactRow[]; loading: boolean }>({ open: false, rows: [], loading: false });
