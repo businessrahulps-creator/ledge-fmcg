@@ -51,12 +51,12 @@ const isAppleTouch = () =>
   /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 /** Call synchronously from the click; returns a writer for when the receipt is ready. */
-export function openThermalPrint(): (html: string) => void {
+export function openThermalPrint(): ((html: string) => void) | null {
   if (isAppleTouch()) {
     // iOS Safari prints the parent page from hidden frames — use its own tab.
     const w = window.open("", "_blank");
+    if (!w) return null;
     return (html) => {
-      if (!w) return;
       w.document.open(); w.document.write(html); w.document.close();
       setTimeout(() => { w.focus(); w.print(); }, 300);
     };

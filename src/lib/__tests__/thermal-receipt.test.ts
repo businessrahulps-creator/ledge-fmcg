@@ -45,3 +45,11 @@ describe("thermal receipt fixes", () => {
     expect(r.placeOfSupply).toBe("State code 29");
   });
 });
+
+describe("draft bills", () => {
+  it("a draft GST bill never prints as a Tax Invoice", () => {
+    const r = receiptFromInvoice({ ...inv, status: "draft" });
+    expect(r.isBill).toBe(false);
+    expect(r.title).toContain("NOT A BILL");
+  });
+});
