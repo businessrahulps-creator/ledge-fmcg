@@ -149,11 +149,10 @@ export function PaymentsPanel({
     }
     // Cash change handed back at the counter: only the amount due is kept and saved.
     const cashChange = tenderedExtra > 0 && isCashChange(mode, extraAction);
-    const { save, change } = cashChange ? splitCashOverpay(tendered, balance) : { save: tendered, change: 0 };
+    const { change } = cashChange ? splitCashOverpay(tendered, balance) : { save: tendered, change: 0 };
     // Send the full cash; the server keeps only what is truly due (handles a stale balance).
     const value = tendered;
     const extra = tenderedExtra;
-    void save;
     const saveNote = cashChange
       ? [note, `Cash received ${formatCurrency(tendered)}, change given ${formatCurrency(change)}`].filter(Boolean).join(" · ")
       : note;
