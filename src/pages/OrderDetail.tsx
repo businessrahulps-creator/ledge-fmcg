@@ -495,7 +495,7 @@ export default function OrderDetail() {
                   label: "Bill total",
                   value: formatCurrency(finalInvoice.grandTotal),
                   primary: true,
-                  note: `${formatCurrency(finalInvoice.subtotal)} + ${formatCurrency(finalInvoice.totalTax)} GST`,
+                  note: finalInvoice.supplyType === "bill_of_supply" ? "Bill of supply · no GST" : `${formatCurrency(finalInvoice.subtotal)} + ${formatCurrency(finalInvoice.totalTax)} GST`,
                 }
               : {
                   label: (order.schemeSavings || 0) > 0 ? "Order total (after schemes)" : "Order total",
@@ -700,7 +700,7 @@ export default function OrderDetail() {
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold md:text-base">Documents</h2>
             <p className="text-right text-xs text-muted-foreground">
-              The GST bill is created automatically when you dispatch this order.
+              {companyInfo.gstin?.trim() ? "The GST bill is created automatically when you dispatch this order." : "The bill is created automatically when you dispatch this order."}
             </p>
           </div>
           {orderDocs.length > 0 ? (
@@ -718,7 +718,7 @@ export default function OrderDetail() {
                   >
                     <div className="min-w-0">
                       <p className="truncate font-mono text-xs font-medium text-primary">{doc.invoiceNumber}</p>
-                      <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{doc.docType.replace("_", " ")}</p>
+                      <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{doc.supplyType === "bill_of_supply" && doc.docType === "gst_invoice" ? "Bill of supply" : doc.docType.replace("_", " ")}</p>
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="font-mono text-sm font-semibold tabular-nums">{formatCurrency(doc.grandTotal)}</p>
@@ -744,7 +744,7 @@ export default function OrderDetail() {
                 <tbody>
                   {orderDocs.map(doc => (
                     <tr key={doc.id} className="border-b border-border/50">
-                      <td className="px-4 py-3 capitalize">{doc.docType.replace("_", " ")}</td>
+                      <td className="px-4 py-3 capitalize">{doc.supplyType === "bill_of_supply" && doc.docType === "gst_invoice" ? "Bill of supply" : doc.docType.replace("_", " ")}</td>
                       <td className="px-4 py-3 font-mono font-medium">
                         <button
                           type="button"
@@ -787,7 +787,7 @@ export default function OrderDetail() {
             {finalInvoice ? (
               <Button variant="outline" size="sm" onClick={() => viewBill(finalInvoice)}>
                 <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">View GST bill</span>
+                <span className="hidden sm:inline">{finalInvoice?.supplyType === "bill_of_supply" ? "View bill" : "View GST bill"}</span>
               </Button>
             ) : (
               <Button
