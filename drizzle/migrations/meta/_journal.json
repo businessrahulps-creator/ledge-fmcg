@@ -421,6 +421,13 @@
       "when": 1792649960963,
       "tag": "0059_cash_change_server_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1793775040516,
+      "tag": "0060_bill_of_supply_without_gst",
+      "breakpoints": true
     }
   ]
 }
