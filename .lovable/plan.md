@@ -1,23 +1,25 @@
-# Fix: "Dispatch & bill" fails for businesses without a state
+# Fix: "Dispatch & bill" blocked for businesses without GST
 
 ## What's wrong
-The client (Podaran Tilo Juice) pressed Dispatch & bill 5 times on ORD-2026-0001. Every try failed with "Some required information is missing". The real reason is in the error records: the GST bill needs a **place of supply** (a state). Ledge works it out from the dealer's GST number, then the dealer's state, then the business's own state. This business has **no GST number and no state**, and dealer Ajmeer has neither, so there's no state to use and the bill is refused. Stock, items and payment are all fine.
+Podaran Tilo Juice pressed Dispatch & bill 5 times on ORD-2026-0001. Each try failed with "Some required information is missing". The real reason: a GST bill needs a state (place of supply). This business has no GST number and no state, and dealer Ajmeer has neither, so the bill was refused. Stock, items and payment are all fine.
 
-The message the client saw doesn't say what's missing, so they couldn't fix it themselves.
+## What we'll build
+GST should never stop an order going out.
 
-## Fix
-1. **Ask for the state right there.** When the business has no state set, Dispatch & bill opens a short "Which state is your business in?" picker (Indian states with codes). Saving it updates My Business, then dispatch continues in one go. Owner-only (manage_business); others see "Ask the owner to add your business state in My Business".
-2. **Dealer state is optional.** If the dealer has no GST number or state, the bill uses the business's state (same-state GST: CGST + SGST), as it does today.
-3. **Clear message from the server.** The dispatch save checks for a missing state up front and refuses with "Add your business state in My Business before billing" instead of the database's not-null error. Nothing is half-saved (same all-or-nothing save).
-4. **Correct reason in Activity.** The "Order not sent" entry records the real reason.
-5. **Warn earlier.** My Business shows a "State needed for GST bills" note when empty; Today's work/setup checklist includes it.
+1. **Business without a GST number → "Bill of supply".** Dispatch & bill still works in one step: stock goes out, the order is marked Sent, and a plain bill is created with no CGST/SGST/IGST. Bill total = item prices (after offers). It has its own numbering (e.g. BOS/2026-27/0001), separate from GST bills.
+2. **Business with a GST number** works exactly as today. If the dealer has no GST number or state, the bill uses the business's state (CGST + SGST).
+3. **The bill page, PDF, WhatsApp share and thermal receipt** show "BILL OF SUPPLY" and no tax lines. Payments, balances, returns (credit notes without tax), reports and Activity treat it like any other bill.
+4. **Order totals:** when the business has no GST number, new orders don't add GST; existing booked orders (like ORD-2026-0001) are billed at their item prices without tax, and the money already received is matched against that bill. Any extra goes through the usual owner choice (other bills / dealer credit / give back).
+5. **Clear messages:** if anything still blocks dispatch, the message says exactly what (e.g. "Add your business state in My Business"), and Activity records that real reason.
+6. **My Business:** a short note "No GST number — Ledge will make Bills of supply. Add a GST number any time to start GST bills." Adding one later only affects new bills; old bills never change.
 
 ## Not changed
-No state is guessed or filled in for the client. GST bills stay unchanged once made. No change to stock, payments or numbering.
+GST bills stay unchanged once made. No guessing of GST numbers or states. Stock, payment locking and duplicate-save protection stay the same.
 
 ## Technical details
-- Migration: in `dispatch_and_bill_order_atomic`, after computing `v_pos`, `RAISE EXCEPTION 'business_state_missing' USING HINT=...` when `v_pos` is null; same guard for `v_seller_state` null. Pass through the identical body otherwise.
-- Map `business_state_missing` in `handleSupabaseError` to the plain message.
-- Dispatch dialog in OrderDetail: pre-check `company.state_code`/GSTIN; inline state Select saving via existing company update path, then call the RPC.
-- Vitest: error mapping test + "missing state blocks dispatch" rule test.
-- Verify: Playwright on a test company with no state; confirm prompt, save, bill created with intra-state GST.
+- Migration: `dispatch_and_bill_order_atomic` — if `NULLIF(company.gstin,'')` is null: `doc_type='bill_of_supply'`, all tax = 0, `supply_type='exempt'`-style value, `place_of_supply_state_code` = dealer/company state or `''` (column NOT NULL; use empty string), line taxable = line_total, number from `document_sequences` doc_type `bill_of_supply`. Otherwise current path, plus `RAISE` a named `business_state_missing` error instead of the null violation. Check `invoices.doc_type`/`supply_type` constraints and widen them additively.
+- `order_bill_equivalent`/`preview_dispatch_impact`/credit notes: zero GST when company unregistered.
+- Client: NewOrder/booking tax preview uses company GST status; invoice view, PDF, `thermal-receipt.ts` titles switch on `doc_type`; Tally export marks bills of supply as non-GST sales.
+- `handleSupabaseError`: map `business_state_missing`.
+- Vitest: unregistered → zero tax and total = items; registered with no dealer state → intra-state; receipt title "BILL OF SUPPLY".
+- Verify: Playwright on a test business without GST — book, dispatch & bill, open bill, print receipt; then retry ORD-2026-0001 pattern on a copy. Record rule in AGENTS.md.
