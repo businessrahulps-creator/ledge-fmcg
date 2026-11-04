@@ -65,7 +65,7 @@ export function receiptFromInvoice(inv: Invoice, orderNumber?: string): Receipt 
     placeOfSupply: placeOfSupply(pos),
     rows: inv.lines.map(l => ({
       name: l.productName, qty: l.quantity, rate: r2(l.unitPrice),
-      amount: r2(l.taxableValue), hsn: l.hsnCode || undefined, gstRate: l.gstRate ?? inv.gstRate,
+      amount: r2(l.taxableValue), hsn: l.hsnCode || undefined, gstRate: bos ? null : (l.gstRate ?? inv.gstRate),
     })),
     totals,
     total: r2(inv.grandTotal),
