@@ -152,7 +152,7 @@ export function buildInvoiceSummary(inv: InvoiceShareData): string {
     : "";
 
   return [
-    `📄 *${docLabel[inv.docType] || "Invoice"} ${inv.invoiceNumber}*`,
+    `📄 *${inv.supplyType === "bill_of_supply" && inv.docType === "gst_invoice" ? "Bill of Supply" : (docLabel[inv.docType] || "Invoice")} ${inv.invoiceNumber}*`,
     inv.sellerName ? `From: ${inv.sellerName}` : "",
     "",
     `👤 Buyer: ${inv.buyerName}`,
