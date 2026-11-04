@@ -242,17 +242,19 @@ export default function NewOrder() {
   const ASSUMED_GST_RATE = 18;
   const gstRateFor = useCallback(
     (productId: string) => {
+      // No GST number on the business: bills are Bills of supply, no tax added.
+      if (!api.companyInfo.gstin?.trim()) return 0;
       const rate = products.find(p => p.id === productId)?.gstRate;
       return rate === null || rate === undefined ? ASSUMED_GST_RATE : Number(rate);
     },
-    [products],
+    [products, api.companyInfo.gstin],
   );
   const missingGstProducts = useMemo(() => {
     const names = new Set<string>();
     for (const l of lines) {
       if (!l.productId) continue;
       const p = products.find(x => x.id === l.productId);
-      if (p && (p.gstRate === null || p.gstRate === undefined)) names.add(p.name);
+      if (p && api.companyInfo.gstin?.trim() && (p.gstRate === null || p.gstRate === undefined)) names.add(p.name);
     }
     return [...names];
   }, [lines, products]);

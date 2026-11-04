@@ -67,3 +67,12 @@ describe("credit notes on receipt", () => {
     expect(html).not.toContain("Less credit notes");
   });
 });
+
+describe("bill of supply (business without GST)", () => {
+  it("prints BILL OF SUPPLY with no tax lines", () => {
+    const r = receiptFromInvoice({ ...inv, supplyType: "bill_of_supply", cgstAmount: 0, sgstAmount: 0, igstAmount: 0, totalTax: 0 } as any);
+    expect(r.title).toBe("BILL OF SUPPLY");
+    expect(r.totals.some(t => /GST/.test(t.label))).toBe(false);
+    expect(r.rows.every(x => x.gstRate === null)).toBe(true);
+  });
+});

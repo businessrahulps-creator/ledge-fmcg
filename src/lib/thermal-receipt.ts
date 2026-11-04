@@ -39,19 +39,23 @@ export class EmptyBillError extends Error {
 export function receiptFromInvoice(inv: Invoice, orderNumber?: string): Receipt {
   if (!inv.lines || inv.lines.length === 0) throw new EmptyBillError();
   const totals: Receipt["totals"] = [{ label: "Taxable value", value: r2(inv.subtotal) }];
-  if (inv.supplyType === "inter_state") {
+  const bos = inv.supplyType === "bill_of_supply";
+  if (bos) {
+    // Business has no GST number: no tax lines at all.
+  } else if (inv.supplyType === "inter_state") {
     totals.push({ label: "IGST", value: r2(inv.igstAmount) });
   } else {
     totals.push({ label: "CGST", value: r2(inv.cgstAmount) });
     totals.push({ label: "SGST", value: r2(inv.sgstAmount) });
   }
+  if (bos) totals[0] = { label: "Items total", value: r2(inv.subtotal) };
   if (r2(inv.roundOff) !== 0) totals.push({ label: "Round off", value: r2(inv.roundOff) });
   totals.push({ label: "TOTAL", value: r2(inv.grandTotal), bold: true });
   const draft = inv.status === "draft";
   const isBill = inv.docType === "gst_invoice" && !draft;
   const pos = inv.buyerStateCode || inv.sellerStateCode;
   return {
-    title: draft ? "DRAFT — NOT A BILL" : isBill ? "TAX INVOICE" : inv.docType.toUpperCase().replace(/_/g, " "),
+    title: draft ? "DRAFT — NOT A BILL" : isBill ? (bos ? "BILL OF SUPPLY" : "TAX INVOICE") : inv.docType.toUpperCase().replace(/_/g, " "),
     isBill,
     number: inv.invoiceNumber,
     date: formatIndianDate(inv.invoiceDate),
@@ -61,7 +65,7 @@ export function receiptFromInvoice(inv: Invoice, orderNumber?: string): Receipt 
     placeOfSupply: placeOfSupply(pos),
     rows: inv.lines.map(l => ({
       name: l.productName, qty: l.quantity, rate: r2(l.unitPrice),
-      amount: r2(l.taxableValue), hsn: l.hsnCode || undefined, gstRate: l.gstRate ?? inv.gstRate,
+      amount: r2(l.taxableValue), hsn: l.hsnCode || undefined, gstRate: bos ? null : (l.gstRate ?? inv.gstRate),
     })),
     totals,
     total: r2(inv.grandTotal),

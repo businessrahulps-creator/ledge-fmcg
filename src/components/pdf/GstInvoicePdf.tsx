@@ -59,7 +59,8 @@ export interface InvoicePdfData {
 }
 
 export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
-  const isGst = data.docType === "gst_invoice" || data.docType === "credit_note";
+  const isBos = data.supplyType === "bill_of_supply";
+  const isGst = !isBos && (data.docType === "gst_invoice" || data.docType === "credit_note");
   const isIntraState = data.supplyType === "intra_state";
   const lineRates = Array.from(new Set(
     data.lines.map(l => (l.gstRate ?? null)).filter((r): r is number => r !== null)
@@ -72,7 +73,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
     <Document>
       <Page size="A4" style={s.page}>
         <PdfHeader
-          title={docTypeLabels[data.docType] || "Invoice"}
+          title={isBos ? (data.docType === "credit_note" ? "Credit Note" : "Bill of Supply") : (docTypeLabels[data.docType] || "Invoice")}
           subtitle={data.invoiceNumber}
           companyName={data.sellerName || "Company Name"}
           companyAddress={data.sellerAddress}
@@ -105,7 +106,7 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
               </View>
               <View style={s.metaRow}>
                 <Text style={s.metaLabel}>Supply Type</Text>
-                <Text style={s.metaValue}>{isIntraState ? "Intra-State" : "Inter-State"}</Text>
+                <Text style={s.metaValue}>{isBos ? "Not registered for GST" : isIntraState ? "Intra-State" : "Inter-State"}</Text>
               </View>
               {isGst && (
                 <View style={s.metaRow}>

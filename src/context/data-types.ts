@@ -62,7 +62,7 @@ export interface Invoice {
   sellerBankAccount: string;
   sellerBankIfsc: string;
   sellerLogoUrl: string;
-  supplyType: "intra_state" | "inter_state";
+  supplyType: "intra_state" | "inter_state" | "bill_of_supply";
   gstRate: number;
   subtotal: number;
   cgstAmount: number;

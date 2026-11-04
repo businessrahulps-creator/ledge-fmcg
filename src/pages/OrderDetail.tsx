@@ -266,6 +266,7 @@ export default function OrderDetail() {
     if (!dealer || creditCeiling(dealer) === null) { executeSaveOrder(); return; }
     // No rate set doesn't mean tax-free — assume 18% so exposure is never understated.
     const gstRateFor = (productId: string) => {
+      if (!companyInfo.gstin?.trim()) return 0;
       const rate = products.find(p => p.id === productId)?.gstRate;
       return rate === null || rate === undefined ? 18 : Number(rate);
     };
