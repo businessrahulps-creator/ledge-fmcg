@@ -428,6 +428,13 @@
       "when": 1793775040516,
       "tag": "0060_bill_of_supply_without_gst",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1793775233080,
+      "tag": "0061_order_lines_gross_amount_always_set",
+      "breakpoints": true
     }
   ]
 }
