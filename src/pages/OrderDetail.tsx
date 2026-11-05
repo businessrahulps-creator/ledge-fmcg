@@ -28,6 +28,7 @@ import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
 import { ThermalPrintButton } from "@/components/print/ThermalPrintButton";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { billStatusView } from "@/lib/bill-status";
+import { pendingOrderGstProducts } from "@/lib/order-billing";
 import type { Invoice } from "@/context/DataContext";
 import { creditCeiling, creditBlockMessage, exceedsCredit } from "@/lib/credit";
 import { useCan } from "@/hooks/useCan";
@@ -431,13 +432,8 @@ export default function OrderDetail() {
   const delivered = order.deliveryStatus === "delivered";
   const settled = balance <= 0 && received > 0;
   const canEdit = !dispatched && !hasBill;
-  /* A bill can't be raised while any product on it is missing a confirmed GST rate. */
-  const gstPending = hasBill
-    ? []
-    : Array.from(new Set(order.lines.map(l => l.productId)))
-        .map(id => products.find(p => p.id === id))
-        .filter(p => p && (p.gstRate === null || p.gstRate === undefined || !p.gstRateConfirmed))
-        .map(p => p!.name);
+  /* Only GST-registered businesses need confirmed rates before billing. */
+  const gstPending = pendingOrderGstProducts(companyInfo.gstin, hasBill, order.lines, products);
   const gstBlocked = gstPending.length > 0;
   const warehouseName = godowns.find(g => g.id === order.godownId)?.name
     || api.stock.locations.list().find(g => g.id === order.godownId)?.name
@@ -547,7 +543,9 @@ export default function OrderDetail() {
               {gstBlocked
                 ? `GST rate not confirmed for ${gstPending.slice(0, 3).join(", ")}${gstPending.length > 3 ? ` and ${gstPending.length - 3} more` : ""}. Confirm it in Stock to bill this order.`
                 : !dispatched
-                  ? "Dispatch takes stock out and creates the final GST bill in one step."
+                  ? companyInfo.gstin?.trim()
+                    ? "Dispatch takes stock out and creates the final GST bill in one step."
+                    : "Dispatch takes stock out and creates a Bill of supply without GST in one step."
                   : !hasBill
                     ? "The goods have gone out but no bill was raised. Raising it now won't touch stock again."
                     : !delivered

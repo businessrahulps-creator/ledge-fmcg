@@ -18,3 +18,4 @@
 - Orders and order lines may only link to the same business's dealers, salespeople, godowns and products (DB triggers), and app users can't set payment_status directly — why: RLS checked only company_id, so foreign links and forged paid status got through.
 - New orders save via the 9-arg `book_order_atomic` with a per-attempt save ID (orders.idempotency_key); money RPCs lock order before bill — why: no duplicate orders, no deadlocks.
 - /welcome never shows while `my_pending_invite()` finds a matching invite (NoCompanyGuard + Welcome redirect to it; sign-up and email-confirm keep the invite redirect) — why: invitees were making empty businesses.
+- OrderDetail's GST-rate gate uses the tested pendingOrderGstProducts rule matching dispatch_and_bill_order_atomic — why: no-GST bills must not be blocked by product tax settings.
