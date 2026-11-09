@@ -59,6 +59,22 @@ describe("useDealersDomain", () => {
     expect(result.current.rawDistributors).toHaveLength(1);
   });
 
+  it("saves credit days on the dealer only", async () => {
+    const chain = createChainMock({ data: { id: "d-new" }, error: null });
+    mockFrom.mockReturnValue(chain);
+    const { result } = renderHook(() => useDealersDomain(createMockDeps()));
+    await act(async () => { await result.current.add(makeDealer({ creditDays: 45 })); });
+    expect(chain.insert).toHaveBeenCalledWith(expect.objectContaining({ credit_days: 45 }));
+  });
+
+  it("cash-only saving clears credit days", async () => {
+    const chain = createChainMock({ data: { id: "d-new" }, error: null });
+    mockFrom.mockReturnValue(chain);
+    const { result } = renderHook(() => useDealersDomain(createMockDeps()));
+    await act(async () => { await result.current.add(makeDealer({ creditDays: 30, creditMode: "cash_only" })); });
+    expect(chain.insert).toHaveBeenCalledWith(expect.objectContaining({ credit_days: null }));
+  });
+
   it("delete dealer online — removes from state", async () => {
     const deps = createMockDeps();
     const chain = createChainMock({ data: null, error: null });

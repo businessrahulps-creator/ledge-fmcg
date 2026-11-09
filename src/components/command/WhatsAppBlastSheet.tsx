@@ -6,6 +6,9 @@ import { Send, MessageCircle, Info } from "lucide-react";
 import { formatCurrency } from "@/data/mock-data";
 import type { Distributor, Order } from "@/data/mock-data";
 import { toast } from "sonner";
+import type { ReceivableRow } from "@/lib/receivables";
+import { collectionTermsText } from "@/lib/collection-reminder";
+import { dealerCreditDays } from "@/lib/credit-terms";
 
 interface Props {
   open: boolean;
@@ -19,6 +22,7 @@ interface Props {
   orders: Order[];
   /** Default message template — use {dealer_name}, {outstanding}, {last_order_date} merge fields. */
   defaultTemplate: string;
+  collectionRows?: ReceivableRow[];
 }
 
 function lastOrderDate(orders: Order[], dealerId: string): string | null {
@@ -34,7 +38,7 @@ function render(template: string, vars: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_m, key) => vars[key] ?? `{${key}}`);
 }
 
-export function WhatsAppBlastSheet({ open, onClose, title, description, dealers, orders, defaultTemplate }: Props) {
+export function WhatsAppBlastSheet({ open, onClose, title, description, dealers, orders, defaultTemplate, collectionRows = [] }: Props) {
   const [template, setTemplate] = useState(defaultTemplate);
 
   // Re-seed the textarea whenever the parent swaps the default template
@@ -52,6 +56,7 @@ export function WhatsAppBlastSheet({ open, onClose, title, description, dealers,
       const vars = {
         dealer_name: d.name,
         outstanding: formatCurrency(d.outstandingAmount || 0),
+        collection_terms: collectionTermsText(dealerCreditDays(d), collectionRows.filter(r => r.distributorId === d.id)),
         last_order_date: last
           ? new Date(last).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
           : "no order on record",
@@ -65,7 +70,7 @@ export function WhatsAppBlastSheet({ open, onClose, title, description, dealers,
         hasPhone: phone.length >= 10,
       };
     });
-  }, [dealers, orders, template]);
+  }, [dealers, orders, template, collectionRows]);
 
   const reachable = rendered.filter((r) => r.hasPhone);
 

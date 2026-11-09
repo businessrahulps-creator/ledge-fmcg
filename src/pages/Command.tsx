@@ -143,7 +143,7 @@ export default function Command() {
         description: `${dealers.length} dealer${dealers.length === 1 ? "" : "s"} have outstanding balance and stopped ordering.`,
         dealers,
         defaultTemplate:
-          "Hi {dealer_name}, a friendly reminder — outstanding balance is {outstanding}. Your last order was on {last_order_date}. Please share a settlement date so we can resume supply.",
+          "Hi {dealer_name}, a friendly reminder — outstanding balance is {outstanding}. Your last order was on {last_order_date}. Please share a settlement date so we can resume supply.\n{collection_terms}",
       };
     }
     if (blastSignalId === "credit-risk") {
@@ -155,7 +155,7 @@ export default function Command() {
         description: `${dealers.length} dealer${dealers.length === 1 ? "" : "s"} are at 90%+ of credit limit.`,
         dealers,
         defaultTemplate:
-          "Hi {dealer_name}, you're nearing your credit limit (outstanding {outstanding}). Please clear part of the balance to keep orders flowing.",
+          "Hi {dealer_name}, you're nearing your credit limit (outstanding {outstanding}). Please clear part of the balance to keep orders flowing.\n{collection_terms}",
       };
     }
     return null;
@@ -428,6 +428,7 @@ export default function Command() {
               description={renderedBlast.description}
               dealers={renderedBlast.dealers}
               orders={orders}
+              collectionRows={receivableRows}
               defaultTemplate={renderedBlast.defaultTemplate}
             />
           </Suspense>

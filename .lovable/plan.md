@@ -8,7 +8,7 @@
 
 ## Where it shows up
 - **Dealer page & dealer list:** "30 days credit". If a bill is past its days, a "Late by 12 days" tag and the late amount appear.
-- **Bills / unpaid list:** each bill gets a **Due on** date (bill date + credit days) and a "Late" tag once that date has gone by.
+- **Internal dealer unpaid list only:** each bill gets a **Due on** date (bill date + credit days) and a "Late" tag once that date has gone by. The Billing interface is unchanged.
 - **Today's work:** the "money to collect" card says "₹X is past the 30-day credit time" instead of always using 30 days. Dealers with no fixed days keep today's wording.
 - **Dealer statement PDF and payment reminders:** show the credit days and the due date for each bill.
 - **Activity:** changes to credit days are recorded with before and after values, like credit limit changes are now.
@@ -24,6 +24,6 @@
 - Types: add `creditDays: number | null` to the Distributor type; map it in `data-utils.ts` and `useDealersDomain.ts` (save and load), and add it to the `exportBackup` fields.
 - `src/lib/receivables.ts`: add `dueDate` and `daysLate` to `ReceivableRow` when the dealer has creditDays. Work them out after the dealer-credit step. Add a pure helper `dueDateFor(invoiceDate, creditDays)` in a new `src/lib/credit-terms.ts`.
 - `src/lib/intelligence.ts`: the collect rule uses each dealer's creditDays to decide what counts as late, and falls back to 30 when it is null (today's behaviour).
-- UI: Distributors.tsx form (NumberInput, integer 1–365, chips), DealerDetail, the receivables / Billing rows, DealerStatementPdf and reminder text.
+- UI: Distributors.tsx form (NumberInput, integer 1–365, chips), DealerDetail internal receivables rows, DealerStatementPdf and collection reminder text. Do not change Billing.tsx, OrderDetail.tsx, NewOrder.tsx, invoice PDFs, thermal printouts, or invoice share text.
 - Tests: due date = bill date + days; a bill exactly on its due date is not late and is late the next day; a paid-off bill is never late; null days means never late; values outside 1–365 are rejected; the intelligence card uses the dealer's days.
 - Record a rule in AGENTS.md: credit days are display-only and never block saving.
