@@ -5,7 +5,7 @@ import { collectQueue } from "../intelligence";
 import type { Invoice } from "@/context/data-types";
 import type { Order, Distributor } from "@/data/mock-data";
 
-const invoice = { id: "i", invoiceNumber: "B1", invoiceDate: "2026-10-01", grandTotal: 1000, docType: "gst_invoice", status: "posted", sourceOrderId: "o", buyerName: "Dealer" } as Invoice;
+const invoice = { id: "i", invoiceNumber: "B1", invoiceDate: "2026-10-01", grandTotal: 1000, docType: "gst_invoice", status: "posted", sourceOrderId: "o", buyerName: "Dealer" } as unknown as Invoice;
 const order = { id: "o", distributorId: "d", distributorName: "Dealer" } as Order;
 const dealer = { id: "d", name: "Dealer", creditDays: 15, creditMode: "unlimited" } as Distributor;
 const input = { invoices: [invoice], orders: [order], distributors: [dealer], receivedByInvoice: new Map<string, number>(), creditedByInvoice: new Map<string, number>(), today: new Date("2026-11-01T06:00:00Z") };
