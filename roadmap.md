@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Credit Days — internal collections only
-- [ ] Add nullable dealer days, validation and credit-limit permission guard.
-- [ ] Add dealer controls, internal due-date display, statements and reminders.
-- [ ] Update collection rules without changing balances or age buckets.
-- [ ] Verify rules, saving/readback, audit and invoice-scope boundaries.
+- [x] Add nullable dealer days, validation and credit-limit permission guard.
+- [x] Add dealer controls, internal due-date display, statements and reminders.
+- [x] Update collection rules without changing balances or age buckets.
+- [x] Verify rules, saving/readback, audit and invoice-scope boundaries.
 
 ## Arc free components rollout (no paid/Pro parts; built into Ledge's own primitives)
 - [x] Button: press scale + `loading` spinner
