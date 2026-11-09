@@ -7,6 +7,7 @@ import type { Order, Distributor, Product } from "@/data/mock-data";
 import type { StockItem } from "@/data/godown-data";
 import type { ReceivableRow } from "@/lib/receivables";
 import { addDaysToKey } from "@/utils/dateKey";
+import { dealerCreditDays, dueDateFor, daysLateFor } from "@/lib/credit-terms";
 
 export interface IntelSettings {
   /** An order is "waiting too long" after this many days unsent. */
@@ -99,7 +100,8 @@ export function collectQueue(input: {
     if (r.due <= 0.5) continue;
     const a = agg.get(r.distributorId) || { due: 0, over30: 0, oldest: 0, bills: 0 };
     a.due += r.due;
-    if (r.ageDays > 30) a.over30 += r.due;
+    const days = dealerCreditDays(dealers.get(r.distributorId));
+    if (days == null ? r.ageDays > 30 : daysLateFor(dueDateFor(r.invoiceDate, days), r.due, today) > 0) a.over30 += r.due;
     a.oldest = Math.max(a.oldest, r.ageDays);
     a.bills += 1;
     agg.set(r.distributorId, a);
@@ -132,7 +134,9 @@ export function collectQueue(input: {
       score: a.over30 * (1 + a.oldest / 30),
       why: [
         `${a.bills} unpaid bill${a.bills === 1 ? "" : "s"} add up to ${inr(a.due)}.`,
-        `${inr(a.over30)} of it is from bills older than 30 days.`,
+        dealerCreditDays(d) == null
+          ? `${inr(a.over30)} of it is from bills older than 30 days.`
+          : `${inr(a.over30)} is past the ${dealerCreditDays(d)}-day credit time.`,
         `Oldest unpaid bill: ${a.oldest} days. ${sinceText[0].toUpperCase()}${sinceText.slice(1)}.`,
         limitText + ".",
       ],

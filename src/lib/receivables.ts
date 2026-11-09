@@ -1,4 +1,5 @@
 import { roundPaise } from "@/lib/money";
+import { dueDateFor, daysLateFor, dealerCreditDays } from "@/lib/credit-terms";
 /**
  * Receivables — the single truth for "what a dealer still owes us".
  *
@@ -34,6 +35,8 @@ export interface ReceivableRow {
   due: number;
   ageDays: number;
   bucket: AgingBucket;
+  dueDate?: string | null;
+  daysLate?: number;
 }
 
 export interface ReceivablesInput {
@@ -43,6 +46,7 @@ export interface ReceivablesInput {
   creditedByInvoice: Map<string, number>;
   /** Dealer credit (extra money kept on the dealer, not tied to a bill), used up oldest bill first. */
   dealerCreditByDealer?: Map<string, number>;
+  distributors?: Array<{ id: string; creditDays?: number | null; creditMode?: string }>;
   today?: Date;
 }
 
@@ -59,9 +63,11 @@ export function buildReceivables({
   receivedByInvoice,
   creditedByInvoice,
   dealerCreditByDealer,
+  distributors = [],
   today = new Date(),
 }: ReceivablesInput): ReceivableRow[] {
   const ordersById = new Map(orders.map(o => [o.id, o]));
+  const dealersById = new Map(distributors.map(d => [d.id, d]));
   const rows: ReceivableRow[] = [];
 
   for (const inv of invoices) {
@@ -105,10 +111,13 @@ export function buildReceivables({
       r.due = roundPaise(r.due - use);
       pool.set(r.distributorId, roundPaise(left - use));
     }
-    return rows.filter(r => r.due > 0).sort((a, b) => b.ageDays - a.ageDays);
   }
 
-  return rows.sort((a, b) => b.ageDays - a.ageDays);
+  // Terms are metadata only, calculated after the existing credit allocation.
+  return rows.filter(r => r.due > 0).map(r => {
+    const dueDate = dueDateFor(r.invoiceDate, dealerCreditDays(dealersById.get(r.distributorId)));
+    return { ...r, dueDate, daysLate: daysLateFor(dueDate, r.due, today) };
+  }).sort((a, b) => b.ageDays - a.ageDays);
 }
 
 export function receivablesForDealer(rows: ReceivableRow[], distributorId: string): ReceivableRow[] {

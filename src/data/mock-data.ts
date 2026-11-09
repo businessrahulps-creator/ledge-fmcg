@@ -15,6 +15,8 @@ export interface Distributor {
   totalOrders: number;
   totalValue: number;
   creditLimit: number;
+  /** Internal collection terms only; null/absent means no fixed days. */
+  creditDays?: number | null;
   /** unlimited | limited | cash_only — 0 no longer means "no ceiling". */
   creditMode?: 'unlimited' | 'limited' | 'cash_only';
   outstandingAmount: number;
