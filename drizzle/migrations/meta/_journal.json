@@ -435,6 +435,13 @@
       "when": 1793775233080,
       "tag": "0061_order_lines_gross_amount_always_set",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1794208054552,
+      "tag": "0062_dealer_internal_credit_days",
+      "breakpoints": true
     }
   ]
 }
