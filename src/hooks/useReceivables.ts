@@ -30,8 +30,8 @@ function memoLast<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) =
   };
 }
 
-const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer, _day: string) =>
-  buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer, today: new Date() } as any) as ReceivableRow[]);
+const rowsFor = memoLast((invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer, distributors, _day: string) =>
+  buildReceivables({ invoices, orders, receivedByInvoice, creditedByInvoice, dealerCreditByDealer, distributors, today: new Date() } as any) as ReceivableRow[]);
 /**
  * Dealer credit = money with us that no open bill is using:
  * extra kept as dealer credit (no bill/order), advances kept on cancelled orders
@@ -82,8 +82,8 @@ export function useReceivables() {
     [receipts, invoices, orders, receivedByInvoice, creditedByInvoice, receivedByOrder],
   );
   const rows = useMemo(
-    () => rowsFor(invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit, istDay),
-    [invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit, istDay],
+    () => rowsFor(invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit, distributors, istDay),
+    [invoices, orders, receivedByInvoice, creditedByInvoice, dealerCredit, distributors, istDay],
   );
   const aging = useMemo(() => agingFor(rows, distributors), [rows, distributors]);
   const advances = useMemo(

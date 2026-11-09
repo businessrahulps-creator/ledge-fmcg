@@ -45,7 +45,7 @@ export function periodRange(p: Period, today: string, customFrom: string, custom
 }
 
 const FIELD_LABELS: Record<string, string> = {
-  name: "Name", credit_limit: "Credit limit", credit_mode: "Credit rule", base_price: "Price", gst_rate: "GST rate",
+  name: "Name", credit_limit: "Credit limit", credit_days: "Credit days", credit_mode: "Credit rule", base_price: "Price", gst_rate: "GST rate",
   hsn_code: "HSN code", unit: "Unit", sku: "Product code", total: "Order total", delivery_status: "Sending status",
   payment_status: "Payment status", status: "Status", cancelled_at: "Cancelled", cancel_reason: "Cancel reason",
   dispatch_date: "Send date", vehicle: "Vehicle", driver_name: "Driver", dispatch_remarks: "Send note",

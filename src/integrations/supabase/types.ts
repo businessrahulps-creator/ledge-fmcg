@@ -586,6 +586,7 @@ export type Database = {
           company_id: string
           contact: string
           created_at: string
+          credit_days: number | null
           credit_limit: number
           credit_mode: string
           email: string
@@ -609,6 +610,7 @@ export type Database = {
           company_id: string
           contact?: string
           created_at?: string
+          credit_days?: number | null
           credit_limit?: number
           credit_mode?: string
           email?: string
@@ -632,6 +634,7 @@ export type Database = {
           company_id?: string
           contact?: string
           created_at?: string
+          credit_days?: number | null
           credit_limit?: number
           credit_mode?: string
           email?: string

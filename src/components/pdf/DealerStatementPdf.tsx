@@ -5,6 +5,8 @@ import { pdfStyles as s, pdfInk } from "./PdfStyles";
 import { bold } from "./PdfFonts";
 import { formatMoneyPdf } from "@/utils/exportPdf";
 import type { DealerScorecard, ChurnRisk } from "@/utils/dealerScorecard";
+import type { ReceivableRow } from "@/lib/receivables";
+import { formatIndianDate } from "@/utils/formatDate";
 
 interface DealerStatementPdfProps {
   companyName: string;
@@ -16,9 +18,11 @@ interface DealerStatementPdfProps {
     location: string;
     contact: string;
     creditLimit: number;
+    creditDays?: number | null;
     outstandingAmount: number;
   };
   scorecard: DealerScorecard;
+  collections?: ReceivableRow[];
   orders: Array<{
     orderNumber: string;
     date: string;
@@ -42,6 +46,7 @@ export function DealerStatementPdf({
   dealer,
   scorecard,
   orders,
+  collections = [],
 }: DealerStatementPdfProps) {
   const gross = orders.reduce((sum, o) => sum + o.total, 0);
   const savings = orders.reduce((sum, o) => sum + o.schemeSavings, 0);
@@ -95,9 +100,30 @@ export function DealerStatementPdf({
                 {riskLabels[scorecard.churnRisk]}
               </Text>
             </View>
+            {dealer.creditDays != null && <View style={s.metaRow}>
+              <Text style={s.metaLabel}>Credit days</Text>
+              <Text style={s.metaValue}>{dealer.creditDays} days</Text>
+            </View>}
           </View>
         </View>
 
+        {dealer.creditDays != null && collections.length > 0 && <>
+          <Text style={s.sectionTitle} minPresenceAhead={60}>Collection dates — current credit time</Text>
+          <View style={s.table}>
+            <View style={s.tableHeader}>
+              <Text style={[s.tableHeaderCell, { width: "32%" }]}>Bill</Text>
+              <Text style={[s.tableHeaderCell, { width: "25%" }]}>Due on</Text>
+              <Text style={[s.tableHeaderCell, { width: "23%", textAlign: "right" }]}>Unpaid</Text>
+              <Text style={[s.tableHeaderCell, { width: "20%" }]}>Days late</Text>
+            </View>
+            {collections.map(r => <View key={r.invoiceId} style={s.tableRow} wrap={false}>
+              <Text style={[s.tableCell, { width: "32%" }]}>{r.invoiceNumber}</Text>
+              <Text style={[s.tableCell, { width: "25%" }]}>{r.dueDate ? formatIndianDate(r.dueDate) : "—"}</Text>
+              <Text style={[s.tableCellRight, { width: "23%" }]}>{formatMoneyPdf(r.due)}</Text>
+              <Text style={[s.tableCell, { width: "20%" }]}>{r.daysLate ?? 0}</Text>
+            </View>)}
+          </View>
+        </>}
         {/* Scorecard */}
         <Text style={s.sectionTitle} minPresenceAhead={60}>Performance scorecard</Text>
         <View style={s.table}>

@@ -7,6 +7,8 @@ import type { Order, Distributor, Product } from "@/data/mock-data";
 import type { StockItem } from "@/data/godown-data";
 import type { ReceivableRow } from "@/lib/receivables";
 import { addDaysToKey } from "@/utils/dateKey";
+import { dealerCreditDays, dueDateFor, daysLateFor } from "@/lib/credit-terms";
+import { collectionTermsText } from "@/lib/collection-reminder";
 
 export interface IntelSettings {
   /** An order is "waiting too long" after this many days unsent. */
@@ -95,11 +97,25 @@ export function collectQueue(input: {
     if (!cur || r.paidOn > cur) lastPaid.set(r.distributorId, r.paidOn);
   }
   const agg = new Map<string, { due: number; over30: number; oldest: number; bills: number }>();
+  // Local collection preview only: never change the canonical money rows.
+  const termRows = rows.map(r => ({ ...r }));
+  const termAdvance = new Map(advances);
+  for (const r of [...termRows].sort((a, b) => a.invoiceDate.localeCompare(b.invoiceDate) || a.invoiceNumber.localeCompare(b.invoiceNumber))) {
+    const days = dealerCreditDays(dealers.get(r.distributorId));
+    if (days == null) continue;
+    const available = Math.max(0, termAdvance.get(r.distributorId) || 0);
+    const use = Math.min(available, r.due);
+    r.due -= use;
+    termAdvance.set(r.distributorId, available - use);
+    r.dueDate = dueDateFor(r.invoiceDate, days);
+    r.daysLate = daysLateFor(r.dueDate, r.due, today);
+  }
   for (const r of rows) {
     if (r.due <= 0.5) continue;
     const a = agg.get(r.distributorId) || { due: 0, over30: 0, oldest: 0, bills: 0 };
     a.due += r.due;
-    if (r.ageDays > 30) a.over30 += r.due;
+    const days = dealerCreditDays(dealers.get(r.distributorId));
+    if (days == null ? r.ageDays > 30 : daysLateFor(dueDateFor(r.invoiceDate, days), r.due, today) > 0) a.over30 += r.due;
     a.oldest = Math.max(a.oldest, r.ageDays);
     a.bills += 1;
     agg.set(r.distributorId, a);
@@ -111,6 +127,13 @@ export function collectQueue(input: {
     a.due = Math.max(0, a.due - adv);
     a.over30 = Math.min(a.over30, a.due);
     if (a.due <= 0.5) agg.delete(id);
+  }
+  for (const [id, a] of agg) {
+    if (dealerCreditDays(dealers.get(id)) == null) continue;
+    const unpaid = termRows.filter(r => r.distributorId === id && r.due > 0.5);
+    a.over30 = unpaid.filter(r => (r.daysLate ?? 0) > 0).reduce((s, r) => s + r.due, 0);
+    a.oldest = Math.max(0, ...unpaid.map(r => r.ageDays));
+    a.bills = unpaid.length;
   }
   const cards: IntelCard[] = [];
   for (const [id, a] of agg) {
@@ -132,13 +155,17 @@ export function collectQueue(input: {
       score: a.over30 * (1 + a.oldest / 30),
       why: [
         `${a.bills} unpaid bill${a.bills === 1 ? "" : "s"} add up to ${inr(a.due)}.`,
-        `${inr(a.over30)} of it is from bills older than 30 days.`,
+        dealerCreditDays(d) == null
+          ? `${inr(a.over30)} of it is from bills older than 30 days.`
+          : `${inr(a.over30)} is past the ${dealerCreditDays(d)}-day credit time.`,
         `Oldest unpaid bill: ${a.oldest} days. ${sinceText[0].toUpperCase()}${sinceText.slice(1)}.`,
         limitText + ".",
       ],
       link: `/distributors/${id}`,
       phone: d?.contact,
-      meta: { due: Math.round(a.due), over30: Math.round(a.over30), oldest: a.oldest },
+      meta: { due: Math.round(a.due), over30: Math.round(a.over30), oldest: a.oldest,
+        collectionTerms: collectionTermsText(dealerCreditDays(d), termRows.filter(r => r.distributorId === id)),
+      },
     });
   }
   return cards.sort((x, y) => y.score - x.score || (y.meta!.due as number) - (x.meta!.due as number));

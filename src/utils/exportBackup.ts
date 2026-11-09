@@ -41,8 +41,8 @@ export async function exportFullBackup() {
 
   // --- Dealers ---
   const dealers = await fetchAll("distributors", () => supabase.from("distributors").select("*").order("name"));
-  if (addSheet(XLSX, wb, "Dealers", ["Name", "Location", "Contact", "Email", "GSTIN", "PAN", "Outstanding (₹)", "Credit Limit (₹)", "Total Orders", "Total Value (₹)"],
-    dealers.map((d) => [s(d.name), s(d.location), s(d.contact), s(d.email), s(d.gstin), s(d.pan), n(d.outstanding_amount), n(d.credit_limit), n(d.total_orders), n(d.total_value)]))) sheetCount++;
+  if (addSheet(XLSX, wb, "Dealers", ["Name", "Location", "Contact", "Email", "GSTIN", "PAN", "Outstanding (₹)", "Credit Limit (₹)", "Credit Days", "Total Orders", "Total Value (₹)"],
+    dealers.map((d) => [s(d.name), s(d.location), s(d.contact), s(d.email), s(d.gstin), s(d.pan), n(d.outstanding_amount), n(d.credit_limit), s(d.credit_days), n(d.total_orders), n(d.total_value)]))) sheetCount++;
 
   // --- Products ---
   const products = await fetchAll("products", () => supabase.from("products").select("*").order("name"));
