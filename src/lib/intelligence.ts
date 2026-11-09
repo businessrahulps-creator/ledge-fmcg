@@ -97,6 +97,19 @@ export function collectQueue(input: {
     if (!cur || r.paidOn > cur) lastPaid.set(r.distributorId, r.paidOn);
   }
   const agg = new Map<string, { due: number; over30: number; oldest: number; bills: number }>();
+  // Local collection preview only: never change the canonical money rows.
+  const termRows = rows.map(r => ({ ...r }));
+  const termAdvance = new Map(advances);
+  for (const r of [...termRows].sort((a, b) => a.invoiceDate.localeCompare(b.invoiceDate) || a.invoiceNumber.localeCompare(b.invoiceNumber))) {
+    const days = dealerCreditDays(dealers.get(r.distributorId));
+    if (days == null) continue;
+    const available = Math.max(0, termAdvance.get(r.distributorId) || 0);
+    const use = Math.min(available, r.due);
+    r.due -= use;
+    termAdvance.set(r.distributorId, available - use);
+    r.dueDate = dueDateFor(r.invoiceDate, days);
+    r.daysLate = daysLateFor(r.dueDate, r.due, today);
+  }
   for (const r of rows) {
     if (r.due <= 0.5) continue;
     const a = agg.get(r.distributorId) || { due: 0, over30: 0, oldest: 0, bills: 0 };
@@ -114,6 +127,13 @@ export function collectQueue(input: {
     a.due = Math.max(0, a.due - adv);
     a.over30 = Math.min(a.over30, a.due);
     if (a.due <= 0.5) agg.delete(id);
+  }
+  for (const [id, a] of agg) {
+    if (dealerCreditDays(dealers.get(id)) == null) continue;
+    const unpaid = termRows.filter(r => r.distributorId === id && r.due > 0.5);
+    a.over30 = unpaid.filter(r => (r.daysLate ?? 0) > 0).reduce((s, r) => s + r.due, 0);
+    a.oldest = Math.max(0, ...unpaid.map(r => r.ageDays));
+    a.bills = unpaid.length;
   }
   const cards: IntelCard[] = [];
   for (const [id, a] of agg) {
@@ -144,7 +164,7 @@ export function collectQueue(input: {
       link: `/distributors/${id}`,
       phone: d?.contact,
       meta: { due: Math.round(a.due), over30: Math.round(a.over30), oldest: a.oldest,
-        collectionTerms: collectionTermsText(dealerCreditDays(d), rows.filter(r => r.distributorId === id)),
+        collectionTerms: collectionTermsText(dealerCreditDays(d), termRows.filter(r => r.distributorId === id)),
       },
     });
   }

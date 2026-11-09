@@ -52,4 +52,12 @@ describe("Internal credit days", () => {
     expect(queue(60)[0].meta?.over30).toBe(0);
     expect(queue(null)[0].meta?.over30).toBe(1000);
   });
+  it("collection preview clears oldest late money with an advance without changing balances", () => {
+    const rows = buildReceivables({ ...input, invoices: [{ ...invoice, grandTotal: 100 }, { ...invoice, id: "new", invoiceNumber: "B2", invoiceDate: "2026-10-25", grandTotal: 900 }] });
+    const cards = collectQueue({ rows, distributors: [dealer], orders: [], receipts: [], today: "2026-11-01", advances: new Map([["d", 100]]) });
+    expect(cards[0].meta?.over30).toBe(0);
+    expect(cards[0].meta?.due).toBe(900);
+    expect(cards[0].meta?.oldest).toBe(7);
+    expect(sumDue(rows)).toBe(1000);
+  });
 });
