@@ -8,6 +8,7 @@ import type { StockItem } from "@/data/godown-data";
 import type { ReceivableRow } from "@/lib/receivables";
 import { addDaysToKey } from "@/utils/dateKey";
 import { dealerCreditDays, dueDateFor, daysLateFor } from "@/lib/credit-terms";
+import { collectionTermsText } from "@/lib/collection-reminder";
 
 export interface IntelSettings {
   /** An order is "waiting too long" after this many days unsent. */
@@ -142,7 +143,9 @@ export function collectQueue(input: {
       ],
       link: `/distributors/${id}`,
       phone: d?.contact,
-      meta: { due: Math.round(a.due), over30: Math.round(a.over30), oldest: a.oldest },
+      meta: { due: Math.round(a.due), over30: Math.round(a.over30), oldest: a.oldest,
+        collectionTerms: collectionTermsText(dealerCreditDays(d), rows.filter(r => r.distributorId === id)),
+      },
     });
   }
   return cards.sort((x, y) => y.score - x.score || (y.meta!.due as number) - (x.meta!.due as number));

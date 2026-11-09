@@ -43,6 +43,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useUndoableAction } from "@/lib/use-undoable-action";
+import { useReceivables } from "@/hooks/useReceivables";
+import { validCreditDays, dealerCreditDays } from "@/lib/credit-terms";
+import { collectionTermsText } from "@/lib/collection-reminder";
 
 export default function Distributors() {
   const api = useApi();
@@ -96,10 +99,14 @@ export default function Distributors() {
   }, [items]);
 
   const canManageDealers = useCan("see_all_dealers");
+  const canOverrideCredit = useCan("override_credit_limit");
+  const canManageTeam = useCan("manage_team");
+  const canEditCreditDays = canOverrideCredit || canManageTeam;
+  const { rows: collectionRows, ready: collectionsReady } = useReceivables();
 
   const openNew = () => {
     if (!canManageDealers) return;
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditMode: 'unlimited', outstandingAmount: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditDays: null, creditMode: 'unlimited', outstandingAmount: 0 });
     setIsNew(true);
   };
 
@@ -118,6 +125,10 @@ export default function Distributors() {
     if (saving) return;
     if (!editItem?.name.trim()) {
       toast.error("Name required", { description: "Please enter a dealer name." });
+      return;
+    }
+    if (!validCreditDays(editItem.creditDays)) {
+      toast.error("Check credit days", { description: "Enter whole days from 1 to 365, or leave it empty." });
       return;
     }
     // Two dealers with the same name are easy to mix up later — say so once.
@@ -159,7 +170,7 @@ export default function Distributors() {
     }
     // Canonicalize phone before persisting (strip +91, spaces, dashes)
     const normalizedPhone = normalizeIndianPhone(editItem.contact);
-    const itemToSave = { ...editItem, contact: normalizedPhone || editItem.contact.trim() };
+    const itemToSave = { ...editItem, creditDays: dealerCreditDays(editItem), contact: normalizedPhone || editItem.contact.trim() };
     setSaving(true);
     try {
       const ok = isNew ? await addDistributor(itemToSave) : await updateDistributor(itemToSave);
@@ -269,6 +280,8 @@ export default function Distributors() {
 
         <div className="grid items-stretch gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {paginatedDealers.map((d) => {
+            const days = dealerCreditDays(d);
+            const lateAmount = collectionsReady ? collectionRows.filter(r => r.distributorId === d.id && (r.daysLate ?? 0) > 0).reduce((s, r) => s + r.due, 0) : 0;
             const limit = d.creditLimit || 0;
             const outstanding = d.outstandingAmount || 0;
             const hasCredit = limit > 0 || outstanding > 0;
@@ -323,7 +336,8 @@ export default function Distributors() {
                   e.stopPropagation();
                   const phone = (d.contact || "").replace(/[^\d+]/g, "").replace(/^\+?91?/, "");
                   const amount = formatCurrency(outstanding);
-                  const msg = `Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`;
+                  const terms = collectionsReady ? collectionTermsText(days, collectionRows.filter(r => r.distributorId === d.id)) : "";
+                  const msg = [`Namaste ${d.name} ji, ${amount} pending. Please pay when convenient. Thank you.`, terms].filter(Boolean).join("\n");
                   const url = phone
                     ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
                     : `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -344,7 +358,7 @@ export default function Distributors() {
                 avatar={<EntityAvatar name={d.name} size="md" />}
                 title={d.name}
                 subtitle={d.location || undefined}
-                tertiary={d.contact || undefined}
+                tertiary={[d.contact, days == null ? "" : `${days} days credit`, lateAmount > 0 ? `${formatCurrency(lateAmount)} late` : ""].filter(Boolean).join(" · ") || undefined}
                 hero={hero}
                 cells={cells}
                 primaryAction={primaryAction}
@@ -413,7 +427,7 @@ export default function Distributors() {
                       <Label className="text-xs md:text-sm">Credit</Label>
                       <Select
                         value={editItem.creditMode ?? "unlimited"}
-                        onValueChange={(v) => setEditItem({ ...editItem, creditMode: v as "unlimited" | "limited" | "cash_only" })}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditMode: v as "unlimited" | "limited" | "cash_only", creditDays: v === "cash_only" ? null : editItem.creditDays })}
                       >
                         <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -434,6 +448,22 @@ export default function Distributors() {
                         onValueChange={(v) => setEditItem({ ...editItem, creditLimit: v ?? 0 })}
                         placeholder="e.g. 50,000" className="h-10 rounded-lg"
                       />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <Label htmlFor="dealer-credit-days" className="text-xs md:text-sm">Credit Duration (Days)</Label>
+                      <NumberInput id="dealer-credit-days" min={1} max={365} allowEmpty
+                        disabled={!canEditCreditDays || editItem.creditMode === "cash_only"}
+                        value={editItem.creditDays ?? null}
+                        onValueChange={(v) => setEditItem({ ...editItem, creditDays: v })}
+                        placeholder="No fixed days" className="h-10 rounded-lg" />
+                      <div className="flex flex-wrap gap-1">
+                        {[15, 30, 45, 60].map(days => (
+                          <Button key={days} type="button" size="sm" variant={editItem.creditDays === days ? "secondary" : "ghost"}
+                            className="touch-target px-2" aria-pressed={editItem.creditDays === days}
+                            disabled={!canEditCreditDays || editItem.creditMode === "cash_only"}
+                            onClick={() => setEditItem({ ...editItem, creditDays: days })}>{days}</Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -49,6 +49,7 @@ import { useReceivables } from "@/hooks/useReceivables";
 import { useCan } from "@/hooks/useCan";
 import { UsageMeter } from "@/components/ui/usage-meter";
 import { CopyButton } from "@/components/ui/copy-button";
+import { dealerCreditDays } from "@/lib/credit-terms";
 
 
 export default function DealerDetail() {
@@ -174,9 +175,11 @@ export default function DealerDetail() {
                     location: dealer.location,
                     contact: dealer.contact,
                     creditLimit: dealer.creditLimit,
+                    creditDays: dealerCreditDays(dealer),
                     outstandingAmount: dealer.outstandingAmount,
                   },
                   scorecard: sc,
+                  collections: moneyReady ? dealerReceivables : [],
                   orders: dealerOrders.filter(o => !o.cancelledAt).map(o => ({
                     orderNumber: o.orderNumber,
                     date: o.date,
@@ -223,6 +226,7 @@ export default function DealerDetail() {
                 return (
                   <div className={`col-span-2 glass-card ${borderColor} p-3 md:p-4`}>
                     <span className="text-xs text-muted-foreground">Unpaid / credit limit</span>
+                    <p className="text-xs text-muted-foreground mt-1">{dealerCreditDays(dealer) == null ? "No fixed credit days" : `${dealerCreditDays(dealer)} days credit`}</p>
                     <p className={`mt-0.5 text-sm font-semibold md:text-base ${textColor}`}>
                       {formatCurrency(outstanding)} / {limit > 0 ? formatCurrency(limit) : "Unlimited"}
                     </p>
@@ -252,6 +256,9 @@ export default function DealerDetail() {
               return (
                 <div className="space-y-3">
                   <h3 className="text-xs font-semibold md:text-sm">Unpaid bills &amp; ageing</h3>
+                  {moneyReady && outRows.some(r => (r.daysLate ?? 0) > 0) && (
+                    <p className="text-sm text-warning font-medium">{formatCurrency(sumDue(outRows.filter(r => (r.daysLate ?? 0) > 0)))} past credit time</p>
+                  )}
                   <div className="grid grid-cols-3 gap-2 md:gap-3">
                     <div className="glass-card p-3">
                       <span className="text-[10px] text-muted-foreground">Still to collect</span>
@@ -328,6 +335,8 @@ export default function DealerDetail() {
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
                               {formatIndianDate(r.invoiceDate)} · bill {formatCurrency(r.billed)}
                             </p>
+                            {r.dueDate && <p className="mt-1 text-xs text-muted-foreground">Due on {formatIndianDate(r.dueDate)}</p>}
+                            {(r.daysLate ?? 0) > 0 && <p className="text-xs text-warning">Late by {r.daysLate} days</p>}
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="num text-sm font-semibold">{formatCurrency(r.due)}</p>
@@ -361,7 +370,10 @@ export default function DealerDetail() {
                               onClick={() => r.orderId && navigate(`/orders/${r.orderId}`)}
                             >
                               <td className={cn("relative px-4 py-3 font-medium text-primary", tone.leftBar)}>{r.invoiceNumber}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.invoiceDate)}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(r.invoiceDate)}
+                                {r.dueDate && <p className="mt-1 text-xs">Due on {formatIndianDate(r.dueDate)}</p>}
+                                {(r.daysLate ?? 0) > 0 && <p className="text-xs text-warning">Late by {r.daysLate} days</p>}
+                              </td>
                               <td className="px-4 py-3 text-right num">{formatCurrency(r.billed)}</td>
                               <td className="px-4 py-3 text-right num">{formatCurrency(r.received + r.credited)}</td>
                               <td className="px-4 py-3 text-right font-semibold num">{formatCurrency(r.due)}</td>

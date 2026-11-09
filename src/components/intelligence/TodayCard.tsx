@@ -33,7 +33,7 @@ export function TodayCard({
   const [promiseDate, setPromiseDate] = useState(addDaysToKey(today, 7));
   const phone = digits(card.phone);
   const due = Number(card.meta?.due || 0);
-  const message = `Namaste ${card.title}, this is a friendly reminder from ${companyName || "us"}. Your unpaid amount is ₹${due.toLocaleString("en-IN")}. Please share when you can pay. Thank you.`;
+  const message = [`Namaste ${card.title}, this is a friendly reminder from ${companyName || "us"}. Your unpaid amount is ₹${due.toLocaleString("en-IN")}. Please share when you can pay. Thank you.`, card.meta?.collectionTerms].filter(Boolean).join("\n");
 
   return (
     <article className="rounded-md border border-border bg-card p-4">
