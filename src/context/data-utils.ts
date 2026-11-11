@@ -151,7 +151,7 @@ export function mapClaim(c: any, claimLines: any[]): Claim {
   return {
     id: c.id, orderId: c.order_id, orderNumber: c.order_number || "",
     distributorId: c.distributor_id, distributorName: c.distributor_name || "",
-    claimType: c.claim_type as Claim["claimType"], status: c.status as Claim["status"],
+    claimType: c.claim_type as Claim["claimType"], status: (c.status === "pending" ? "open" : c.status) as Claim["status"],
     reason: c.reason || "", resolutionNotes: c.resolution_notes || "",
     restoreStock: c.restore_stock || false, totalClaimValue: Number(c.total_claim_value || 0),
     lines: linesFor(claimLines, "claim_id", c.id)
