@@ -297,6 +297,7 @@ function NewClaimDialog({
     return {
       invoiceLineId: l.id as string,
       productName: l.productName,
+      productId: l.productId,
       billedQty: l.quantity,
       returnedQty,
       remainingQty,
