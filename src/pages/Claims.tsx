@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { QuickAddUnit } from "@/components/stock/ProductUnitsEditor";
 import { useSearchParams } from "react-router-dom";
 import { RotateCcw, PackageX, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2, Plus, Search, AlertTriangle } from "lucide-react";
 import { SignalCard } from "@/components/ui/signal-card";
@@ -220,6 +221,7 @@ function NewClaimDialog({
     return () => { cancelled = true; };
   }, [selectedBillId]);
 
+  const [unitsReload, setUnitsReload] = useState(0);
   // Other units for the products on this bill (archived ones are never offered).
   const billProductIds = useMemo(
     () => Array.from(new Set(billLines.map(l => l.productId).filter((x): x is string => !!x))).sort().join(","),
@@ -239,7 +241,7 @@ function NewClaimDialog({
         setProductUnits(map);
       });
     return () => { cancelled = true; };
-  }, [billProductIds]);
+  }, [billProductIds, unitsReload]);
 
   const eligibleOrders = useMemo(() =>
     orders.filter(o => billByOrderId.has(o.id)),
@@ -501,6 +503,9 @@ function NewClaimDialog({
                           <span className="shrink-0 text-xs text-muted-foreground">Unit: {line.mainUnitName}</span>
                         )}
                       </div>
+                      {line.productId && (
+                        <QuickAddUnit productId={line.productId} mainUnit={line.mainUnitName} onAdded={() => setUnitsReload(n => n + 1)} />
+                      )}
                       <div className="grid grid-cols-3 gap-2">
                         {field("Good", line.entered.good, setGood)}
                         {field("Damaged, credit", line.entered.damaged, setDamaged)}

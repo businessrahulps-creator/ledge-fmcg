@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type React from "react";
 import { Plus, Archive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
@@ -28,8 +29,10 @@ export async function saveDraftUnits(productId: string, drafts: DraftUnit[]): Pr
   return !error;
 }
 
-export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange }: {
+export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange, commitRef }: {
   productId?: string; mainUnit: string;
+  /** Parent calls this on Save so a typed-but-not-added unit is never lost. Returns drafts incl. pending. */
+  commitRef?: React.MutableRefObject<(() => Promise<DraftUnit[] | false>) | null>;
   /** Add Product mode: no product yet, units are held here and saved after. */
   drafts?: DraftUnit[]; onDraftsChange?: (d: DraftUnit[]) => void;
 }) {
@@ -73,6 +76,14 @@ export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange
     setName(""); setFactor(null); load();
   };
 
+  if (commitRef) commitRef.current = async () => {
+    const list = drafts || [];
+    if (!trimmed && !factor) return list;
+    if (!canAdd) return false;
+    if (isDraft) { const next = [...list, { unit_name: trimmed, conversion_factor: factor! }]; onDraftsChange?.(next); setName(""); setFactor(null); return next; }
+    await add(); return list;
+  };
+
   const archive = async (id: string) => {
     if (isDraft) { onDraftsChange?.((drafts || []).filter((_, i) => `draft-${i}` !== id)); return; }
     setBusy(true);
@@ -110,6 +121,38 @@ export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange
         </Button>
       </div>
       {clash && trimmed && <p className="text-[11px] text-destructive">This product already has a unit with that name.</p>}
+    </div>
+  );
+}
+
+/** Small inline form to add a unit from the Return screen. */
+export function QuickAddUnit({ productId, mainUnit, onAdded }: { productId: string; mainUnit: string; onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [factor, setFactor] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const trimmed = name.trim();
+  const ok = trimmed.length > 0 && trimmed.toLowerCase() !== mainUnit.trim().toLowerCase() && !!factor && factor > 0 && !busy;
+  if (!open) return (
+    <button type="button" onClick={() => setOpen(true)} className="touch-target text-xs font-medium text-primary underline-offset-2 hover:underline">
+      + Add another unit
+    </button>
+  );
+  const save = async () => {
+    if (!ok) return;
+    setBusy(true);
+    const done = await saveDraftUnits(productId, [{ unit_name: trimmed, conversion_factor: factor! }]);
+    setBusy(false);
+    if (!done) { handleSupabaseError({ message: "Could not add this unit" } as any, { source: "product_units:quick_add", title: "Could not add this unit" }); return; }
+    setOpen(false); setName(""); setFactor(null); onAdded();
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <NumberInput allowDecimal min={0} value={factor} onValueChange={v => setFactor(v ?? null)} placeholder="24" className="h-9 w-16 text-sm" aria-label="How many" />
+      <Input value={name} onChange={e => setName(e.target.value)} placeholder="Bottle" maxLength={40} className="h-9 flex-1 text-sm" aria-label="Unit name" />
+      <span className="shrink-0 text-xs text-muted-foreground">= 1 {mainUnit}</span>
+      <Button type="button" size="sm" className="touch-target" disabled={!ok} onClick={save}>Add</Button>
+      <Button type="button" size="sm" variant="ghost" className="touch-target" onClick={() => setOpen(false)}>Cancel</Button>
     </div>
   );
 }
