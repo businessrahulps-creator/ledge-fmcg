@@ -30,6 +30,7 @@ export interface CompanyInfo {
 
 export interface InvoiceLine {
   id?: string;
+  productId?: string | null;
   productName: string;
   hsnCode: string;
   quantity: number;
@@ -108,6 +109,9 @@ export interface ClaimLine {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  /** What was typed on the return, when a different unit was used. */
+  enteredQuantity?: number | null;
+  enteredUnit?: string | null;
 }
 
 export interface Claim {
@@ -203,11 +207,11 @@ export interface DataContextType {
   claims: Claim[];
   recordReturn: (
     orderId: string,
-    lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
+    lines: { invoiceLineId: string; goodQty: number; damagedQty: number; noCreditQty?: number; unitId?: string | null; unitFactorSeen?: number | null }[],
     reason: string,
     godownId?: string | null,
     idempotencyKey?: string,
-  ) => Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null>;
+  ) => Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean } | null>;
   resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
   invoices: Invoice[];

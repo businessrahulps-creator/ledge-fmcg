@@ -91,6 +91,8 @@ function mapClaimRow(c: ClaimRow): Claim {
       quantity: l.quantity,
       unitPrice: l.unit_price,
       lineTotal: l.line_total,
+      enteredQuantity: l.entered_quantity != null ? Number(l.entered_quantity) : null,
+      enteredUnit: l.entered_unit ?? null,
     })),
   } as Claim;
 }
@@ -186,18 +188,26 @@ export function useBillingDomain(deps: BillingDeps) {
       const { data, error } = await supabase.rpc("record_return_and_credit_atomic", {
         p_order_id: orderId,
         p_lines: lines
-          .filter(l => (l.goodQty || 0) + (l.damagedQty || 0) > 0)
-          .map(l => ({ invoice_line_id: l.invoiceLineId, good_qty: l.goodQty || 0, damaged_qty: l.damagedQty || 0 })),
+          .filter(l => (l.goodQty || 0) + (l.damagedQty || 0) + (l.noCreditQty || 0) > 0)
+          .map(l => ({
+            invoice_line_id: l.invoiceLineId,
+            good_qty: l.goodQty || 0,
+            damaged_qty: l.damagedQty || 0,
+            damaged_no_credit_qty: l.noCreditQty || 0,
+            // The server looks the conversion up itself; this only lets it refuse a unit that changed mid-return.
+            unit_id: l.unitId || null,
+            unit_factor_seen: l.unitId ? (l.unitFactorSeen ?? null) : null,
+          })),
         p_reason: sanitizeInput(reason || ""),
         p_godown_id: godownId || null,
         p_idempotency_key: idempotencyKey ?? null,
       });
       if (error) throw error;
-      const res = data as { credit_note_number: string; grand_total: number; restocked: boolean };
+      const res = data as { credit_note_number: string | null; grand_total: number; restocked: boolean };
       // The return is saved at this point. A failed screen refresh must not be
       // reported as a failed return (that invites a duplicate attempt).
       await Promise.allSettled([safeRefetchClaims(), safeRefetchInvoices(), deps.safeRefetchStockItems()]);
-      return { creditNoteNumber: res.credit_note_number, grandTotal: Number(res.grand_total), restocked: !!res.restocked };
+      return { creditNoteNumber: res.credit_note_number ?? null, grandTotal: Number(res.grand_total), restocked: !!res.restocked };
     } catch (err: any) {
       handleSupabaseError(err, { source: "rpc:record_return_and_credit_atomic", title: "Could not record this return", context: { orderId } });
       return null;
@@ -209,17 +219,16 @@ export function useBillingDomain(deps: BillingDeps) {
    * Throws when it cannot be read — the caller must never treat a failure as "nothing returned".
    */
   const listReturnedQuantities = useCallback(async (invoiceId: string): Promise<Record<string, number>> => {
+    // The returns record is the one place that counts each returned piece once:
+    // good, damaged with credit and damaged without credit, old returns included.
     const { data, error } = await supabase
-      .from("credit_notes")
-      .select("id, credit_note_lines(invoice_line_id, quantity)")
+      .from("return_line_ledger")
+      .select("invoice_line_id, base_quantity")
       .eq("invoice_id", invoiceId);
     if (error) throw error;
     const totals: Record<string, number> = {};
-    (data || []).forEach(note => {
-      (note.credit_note_lines || []).forEach(l => {
-        if (!l.invoice_line_id) return;
-        totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + (l.quantity || 0);
-      });
+    (data || []).forEach(l => {
+      totals[l.invoice_line_id] = (totals[l.invoice_line_id] || 0) + Number(l.base_quantity || 0);
     });
     return totals;
   }, []);
