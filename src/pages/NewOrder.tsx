@@ -545,7 +545,7 @@ export default function NewOrder() {
               <div className="grid gap-3 md:grid-cols-3 md:gap-4">
                 <div className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Order Date</Label>
-                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={addDaysToKey(todayKey(), -365)} max={todayKey()} className="date-field h-10 w-full min-w-0 rounded-lg text-left md:h-12" />
+                  <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} min={addDaysToKey(todayKey(), -365)} max={todayKey()} className="date-field h-10 w-full min-w-0 rounded-md text-left" />
                 </div>
                 <div ref={dealerFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Dealer *</Label>
@@ -637,8 +637,8 @@ export default function NewOrder() {
                       transition={{ type: "spring", damping: 20, stiffness: 300 }}
                       className="rounded-lg border border-border/50 bg-muted/20 p-3 md:p-4"
                     >
-                      <div className="grid gap-3 sm:grid-cols-12 sm:items-end">
-                        <div className="space-y-1 sm:col-span-4">
+                      <div className="grid gap-3 sm:grid-cols-12 sm:items-start">
+                        <div className="space-y-1 sm:col-span-5">
                           <Label className="text-xs text-muted-foreground">Product</Label>
                           <EntityPicker
                             value={line.productId}
@@ -656,7 +656,7 @@ export default function NewOrder() {
                               }))}
                           />
                         </div>
-                        <div className="grid grid-cols-3 gap-2 sm:col-span-7 sm:grid-cols-3 sm:gap-3">
+                        <div className="grid grid-cols-3 gap-2 sm:col-span-6 sm:grid-cols-3 sm:gap-3">
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Quantity</Label>
                             <NumberInput
@@ -664,7 +664,7 @@ export default function NewOrder() {
                               min={1}
                               value={line.quantity}
                               onValueChange={(v) => updateLine(line.id, "quantity", v)}
-                              className="h-10 rounded-lg md:h-12"
+                              className="h-10 rounded-md"
                             />
                           </div>
                           <div className="space-y-1">
@@ -675,7 +675,7 @@ export default function NewOrder() {
                               min={0}
                               value={line.unitPrice}
                               onValueChange={(v) => updateLine(line.id, "unitPrice", v ?? 0)}
-                              className="h-10 rounded-lg md:h-12"
+                              className="h-10 rounded-md"
                             />
                             {(() => {
                               const setP = products.find((p) => p.id === line.productId)?.basePrice;
@@ -691,12 +691,12 @@ export default function NewOrder() {
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Total</Label>
-                            <div className="flex h-10 items-center rounded-lg border border-border bg-muted/30 px-3 text-xs font-medium md:h-12 md:text-sm">
+                            <div className="flex h-10 items-center rounded-md border border-border bg-muted/30 px-3 text-sm font-medium num">
                               {formatCurrency(getLineTotal(line))}
                             </div>
                           </div>
                         </div>
-                        <div className="flex justify-end sm:col-span-1">
+                        <div className="flex justify-end sm:col-span-1 sm:pt-5">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -740,7 +740,7 @@ export default function NewOrder() {
                 <div ref={warehouseFieldRef} className="space-y-1.5 md:space-y-2">
                   <Label className="text-xs md:text-sm">Ships from *</Label>
                   <Select value={selectedGodown} onValueChange={setSelectedGodown}>
-                    <SelectTrigger className={`h-10 rounded-lg md:h-12 ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
+                    <SelectTrigger className={`h-10 rounded-md ${attemptedSave && errors.warehouse ? "border-destructive" : ""}`}>
                       <SelectValue placeholder="Select godown" />
                     </SelectTrigger>
                     <SelectContent>
@@ -776,7 +776,7 @@ export default function NewOrder() {
                       min={0}
                       value={advanceAmount}
                       onValueChange={setAdvanceAmount}
-                      className="h-10 rounded-lg md:h-12"
+                      className="h-10 rounded-md"
                     />
                   </div>
                   <div className="space-y-1.5 md:space-y-2">
@@ -801,7 +801,7 @@ export default function NewOrder() {
                       value={advanceRef}
                       onChange={(e) => setAdvanceRef(e.target.value)}
                       placeholder="Cheque or UPI number"
-                      className="h-10 rounded-lg md:h-12"
+                      className="h-10 rounded-md"
                     />
                   </div>
                   )}
