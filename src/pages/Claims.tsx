@@ -486,7 +486,7 @@ function NewClaimDialog({
                             {` · ${formatQty(Math.max(0, line.remainingQty - line.check.totalMain))} left`}
                           </p>
                         </div>
-                        {line.unitOptions.length > 1 && (
+                        {line.unitOptions.length > 1 ? (
                           <select
                             aria-label={`Unit for ${line.productName}`}
                             value={line.unit.id ?? ""}
@@ -497,6 +497,8 @@ function NewClaimDialog({
                               <option key={u.id ?? ""} value={u.id ?? ""}>{u.name}</option>
                             ))}
                           </select>
+                        ) : (
+                          <span className="shrink-0 text-xs text-muted-foreground">Unit: {line.mainUnitName}</span>
                         )}
                       </div>
                       <div className="grid grid-cols-3 gap-2">
