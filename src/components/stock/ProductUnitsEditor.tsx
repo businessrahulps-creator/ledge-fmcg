@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Archive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { handleSupabaseError } from "@/lib/handleSupabaseError";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ interface UnitRow { id: string; unit_name: string; conversion_factor: number }
  * Saves straight away. Units already used in a return can only be archived —
  * the database refuses edits and deletes so saved returns never change.
  */
-export function ProductUnitsEditor({ productId, companyId, mainUnit }: { productId: string; companyId: string; mainUnit: string }) {
+export function ProductUnitsEditor({ productId, mainUnit }: { productId: string; mainUnit: string }) {
   const [units, setUnits] = useState<UnitRow[]>([]);
   const [name, setName] = useState("");
   const [factor, setFactor] = useState<number | null>(null);
@@ -39,8 +39,10 @@ export function ProductUnitsEditor({ productId, companyId, mainUnit }: { product
   const add = async () => {
     if (!canAdd) return;
     setBusy(true);
+    const { data: companyId, error: cErr } = await supabase.rpc("get_company_id");
+    if (cErr || !companyId) { setBusy(false); handleSupabaseError(cErr, { source: "product_units:add", title: "Could not add this unit" }); return; }
     const { error } = await supabase.from("product_units").insert({
-      company_id: companyId, product_id: productId, unit_name: trimmed, conversion_factor: factor!,
+      company_id: companyId as string, product_id: productId, unit_name: trimmed, conversion_factor: factor!,
     });
     setBusy(false);
     if (error) { handleSupabaseError(error, { source: "product_units:add", title: "Could not add this unit" }); return; }
@@ -73,7 +75,7 @@ export function ProductUnitsEditor({ productId, companyId, mainUnit }: { product
         </div>
       ))}
       <div className="flex items-center gap-2">
-        <NumberInput allowDecimal min={0} value={factor ?? undefined} onValueChange={v => setFactor(v ?? null)}
+        <NumberInput allowDecimal min={0} value={factor} onValueChange={v => setFactor(v ?? null)}
           placeholder="24" className="h-9 w-20 text-sm" aria-label="How many" />
         <Input value={name} onChange={e => setName(e.target.value)} placeholder="Bottle" maxLength={40}
           className="h-9 flex-1 text-sm" aria-label="Unit name" />
