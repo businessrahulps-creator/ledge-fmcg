@@ -96,3 +96,4 @@
 - [ ] Phase 4 — app screens
 - [ ] Phase 5 — tests + browser check
 - [ ] Phase 6 — release check
+- [ ] Decide: allow part-units in returns (needs decimal stock) or whole main units only (skip decimal widening)
