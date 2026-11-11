@@ -79,6 +79,7 @@ export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange
   if (commitRef) commitRef.current = async () => {
     const list = drafts || [];
     if (!trimmed && !factor) return list;
+    if (clash) { setName(""); setFactor(null); return list; } // already there — nothing to add
     if (!canAdd) return false;
     if (isDraft) { const next = [...list, { unit_name: trimmed, conversion_factor: factor! }]; onDraftsChange?.(next); setName(""); setFactor(null); return next; }
     await add(); return list;
