@@ -91,7 +91,7 @@
 ## Product units for returns (plan: .lovable/plan/product-units-for-returns-and-claims-final-phased-plan-2026-11-11.md)
 - [x] Phase 0 — dependency audit + baseline totals
 - [x] Phase 1 — decimal-safe readers (awaiting owner review before Phase 2)
-- [ ] Phase 2 — database
+- [~] Phase 2 — database (done except widening stock/claim/credit-note quantity columns: blocked until owner allows column-type changes in Settings → Agent permissions)
 - [ ] Phase 3 — return function
 - [ ] Phase 4 — app screens
 - [ ] Phase 5 — tests + browser check
