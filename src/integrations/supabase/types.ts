@@ -87,33 +87,54 @@ export type Database = {
       }
       claim_lines: {
         Row: {
+          base_quantity: number | null
           claim_id: string
+          conversion_factor: number | null
           created_at: string
+          entered_quantity: number | null
+          entered_unit: string | null
           id: string
+          invoice_line_id: string | null
           line_total: number
           product_id: string
           product_name: string
+          product_unit_id: string | null
           quantity: number
+          return_kind: string | null
           unit_price: number
         }
         Insert: {
+          base_quantity?: number | null
           claim_id: string
+          conversion_factor?: number | null
           created_at?: string
+          entered_quantity?: number | null
+          entered_unit?: string | null
           id?: string
+          invoice_line_id?: string | null
           line_total?: number
           product_id: string
           product_name?: string
+          product_unit_id?: string | null
           quantity?: number
+          return_kind?: string | null
           unit_price?: number
         }
         Update: {
+          base_quantity?: number | null
           claim_id?: string
+          conversion_factor?: number | null
           created_at?: string
+          entered_quantity?: number | null
+          entered_unit?: string | null
           id?: string
+          invoice_line_id?: string | null
           line_total?: number
           product_id?: string
           product_name?: string
+          product_unit_id?: string | null
           quantity?: number
+          return_kind?: string | null
           unit_price?: number
         }
         Relationships: [
@@ -125,10 +146,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "claim_lines_invoice_line_id_fkey"
+            columns: ["invoice_line_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_lines"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "claim_lines_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_lines_product_unit_id_fkey"
+            columns: ["product_unit_id"]
+            isOneToOne: false
+            referencedRelation: "product_units"
             referencedColumns: ["id"]
           },
         ]
@@ -343,9 +378,13 @@ export type Database = {
       }
       credit_note_lines: {
         Row: {
+          base_quantity: number | null
           cgst_amount: number
+          conversion_factor: number | null
           created_at: string
           credit_note_id: string
+          entered_quantity: number | null
+          entered_unit: string | null
           gst_rate: number
           hsn_code: string
           id: string
@@ -354,6 +393,7 @@ export type Database = {
           line_total: number
           product_id: string | null
           product_name: string
+          product_unit_id: string | null
           quantity: number
           restocked_quantity: number
           sgst_amount: number
@@ -362,9 +402,13 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          base_quantity?: number | null
           cgst_amount?: number
+          conversion_factor?: number | null
           created_at?: string
           credit_note_id: string
+          entered_quantity?: number | null
+          entered_unit?: string | null
           gst_rate?: number
           hsn_code?: string
           id?: string
@@ -373,6 +417,7 @@ export type Database = {
           line_total?: number
           product_id?: string | null
           product_name: string
+          product_unit_id?: string | null
           quantity: number
           restocked_quantity?: number
           sgst_amount?: number
@@ -381,9 +426,13 @@ export type Database = {
           unit_price?: number
         }
         Update: {
+          base_quantity?: number | null
           cgst_amount?: number
+          conversion_factor?: number | null
           created_at?: string
           credit_note_id?: string
+          entered_quantity?: number | null
+          entered_unit?: string | null
           gst_rate?: number
           hsn_code?: string
           id?: string
@@ -392,6 +441,7 @@ export type Database = {
           line_total?: number
           product_id?: string | null
           product_name?: string
+          product_unit_id?: string | null
           quantity?: number
           restocked_quantity?: number
           sgst_amount?: number
@@ -419,6 +469,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_note_lines_product_unit_id_fkey"
+            columns: ["product_unit_id"]
+            isOneToOne: false
+            referencedRelation: "product_units"
             referencedColumns: ["id"]
           },
         ]
@@ -1622,6 +1679,54 @@ export type Database = {
         }
         Relationships: []
       }
+      product_units: {
+        Row: {
+          company_id: string
+          conversion_factor: number
+          created_at: string
+          id: string
+          is_archived: boolean
+          product_id: string
+          unit_name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          conversion_factor: number
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          product_id: string
+          unit_name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          conversion_factor?: number
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          product_id?: string
+          unit_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_units_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_units_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           avg_cost: number
@@ -2012,6 +2117,120 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_line_ledger: {
+        Row: {
+          base_quantity: number
+          claim_line_id: string | null
+          company_id: string
+          conversion_factor: number
+          created_at: string
+          created_by: string | null
+          credit_note_line_id: string | null
+          entered_quantity: number
+          entered_unit: string
+          id: string
+          invoice_id: string
+          invoice_line_id: string
+          kind: string
+          product_id: string | null
+          product_unit_id: string | null
+          source: string
+        }
+        Insert: {
+          base_quantity: number
+          claim_line_id?: string | null
+          company_id: string
+          conversion_factor: number
+          created_at?: string
+          created_by?: string | null
+          credit_note_line_id?: string | null
+          entered_quantity: number
+          entered_unit: string
+          id?: string
+          invoice_id: string
+          invoice_line_id: string
+          kind: string
+          product_id?: string | null
+          product_unit_id?: string | null
+          source?: string
+        }
+        Update: {
+          base_quantity?: number
+          claim_line_id?: string | null
+          company_id?: string
+          conversion_factor?: number
+          created_at?: string
+          created_by?: string | null
+          credit_note_line_id?: string | null
+          entered_quantity?: number
+          entered_unit?: string
+          id?: string
+          invoice_id?: string
+          invoice_line_id?: string
+          kind?: string
+          product_id?: string | null
+          product_unit_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_line_ledger_claim_line_id_fkey"
+            columns: ["claim_line_id"]
+            isOneToOne: false
+            referencedRelation: "claim_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_credit_note_line_id_fkey"
+            columns: ["credit_note_line_id"]
+            isOneToOne: false
+            referencedRelation: "credit_note_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_balances"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_invoice_line_id_fkey"
+            columns: ["invoice_line_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_line_ledger_product_unit_id_fkey"
+            columns: ["product_unit_id"]
+            isOneToOne: false
+            referencedRelation: "product_units"
             referencedColumns: ["id"]
           },
         ]
