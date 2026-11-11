@@ -15,14 +15,34 @@ interface UnitRow { id: string; unit_name: string; conversion_factor: number }
  * Saves straight away. Units already used in a return can only be archived —
  * the database refuses edits and deletes so saved returns never change.
  */
-export function ProductUnitsEditor({ productId, mainUnit }: { productId: string; mainUnit: string }) {
-  const [units, setUnits] = useState<UnitRow[]>([]);
+export interface DraftUnit { unit_name: string; conversion_factor: number }
+
+/** Saves units typed on the Add Product form once the product exists. */
+export async function saveDraftUnits(productId: string, drafts: DraftUnit[]): Promise<boolean> {
+  if (!drafts.length) return true;
+  const { data: companyId, error: cErr } = await supabase.rpc("get_company_id");
+  if (cErr || !companyId) return false;
+  const { error } = await supabase.from("product_units").insert(
+    drafts.map(d => ({ company_id: companyId as string, product_id: productId, ...d })),
+  );
+  return !error;
+}
+
+export function ProductUnitsEditor({ productId, mainUnit, drafts, onDraftsChange }: {
+  productId?: string; mainUnit: string;
+  /** Add Product mode: no product yet, units are held here and saved after. */
+  drafts?: DraftUnit[]; onDraftsChange?: (d: DraftUnit[]) => void;
+}) {
+  const isDraft = !productId;
+  const [saved, setUnits] = useState<UnitRow[]>([]);
+  const units: UnitRow[] = isDraft ? (drafts || []).map((d, i) => ({ id: `draft-${i}`, ...d })) : saved;
   const [name, setName] = useState("");
   const [factor, setFactor] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const main = mainUnit.trim() || "main unit";
 
   const load = async () => {
+    if (!productId) return;
     const { data, error } = await supabase.from("product_units")
       .select("id, unit_name, conversion_factor")
       .eq("product_id", productId).eq("is_archived", false).order("created_at");
@@ -38,6 +58,10 @@ export function ProductUnitsEditor({ productId, mainUnit }: { productId: string;
 
   const add = async () => {
     if (!canAdd) return;
+    if (isDraft) {
+      onDraftsChange?.([...(drafts || []), { unit_name: trimmed, conversion_factor: factor! }]);
+      setName(""); setFactor(null); return;
+    }
     setBusy(true);
     const { data: companyId, error: cErr } = await supabase.rpc("get_company_id");
     if (cErr || !companyId) { setBusy(false); handleSupabaseError(cErr, { source: "product_units:add", title: "Could not add this unit" }); return; }
@@ -50,6 +74,7 @@ export function ProductUnitsEditor({ productId, mainUnit }: { productId: string;
   };
 
   const archive = async (id: string) => {
+    if (isDraft) { onDraftsChange?.((drafts || []).filter((_, i) => `draft-${i}` !== id)); return; }
     setBusy(true);
     const { error } = await supabase.from("product_units").update({ is_archived: true }).eq("id", id);
     setBusy(false);

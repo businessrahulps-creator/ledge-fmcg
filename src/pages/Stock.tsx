@@ -20,7 +20,8 @@ import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
 import { useApi } from "@/services/api";
-import { ProductUnitsEditor } from "@/components/stock/ProductUnitsEditor";
+import { ProductUnitsEditor, saveDraftUnits, type DraftUnit } from "@/components/stock/ProductUnitsEditor";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
@@ -90,6 +91,7 @@ export default function Stock() {
   const [gstOnly, setGstOnly] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
+  const [draftUnits, setDraftUnits] = useState<DraftUnit[]>([]);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
   const [editWarehouse, setEditWarehouse] = useState<GodownLocation | null>(null);
@@ -234,6 +236,14 @@ export default function Stock() {
     try {
       const ok = isNewProduct ? await addProduct(editProduct) : await updateProduct(editProduct);
       if (!ok) return; // the CRUD helper already explained what went wrong — keep the form open
+      if (isNewProduct && draftUnits.length) {
+        const { data: created } = await supabase.from("products").select("id")
+          .eq("sku", editProduct.sku.trim()).eq("name", editProduct.name.trim())
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        const unitsOk = created?.id ? await saveDraftUnits(created.id, draftUnits) : false;
+        if (!unitsOk) toast.warning("Product saved, but its other units were not", { description: "Open the product with Edit and add them again." });
+      }
+      setDraftUnits([]);
       toast.success(isNewProduct ? "Product added" : "Product updated", {
         description: `${editProduct.name} has been ${isNewProduct ? "added" : "updated"}.`,
       });
@@ -839,8 +849,8 @@ export default function Stock() {
 
         {canManageStock && (<>
         {/* Add/Edit Product Dialog */}
-        <Dialog open={!!editProduct} onOpenChange={() => setEditProduct(null)}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
+        <Dialog open={!!editProduct} onOpenChange={() => { setEditProduct(null); setDraftUnits([]); }}>
+          <DialogContent className="max-h-[85vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg">{isNewProduct ? "Add Product" : "Edit Product"}</DialogTitle>
               <DialogDescription className="sr-only">{isNewProduct ? "Add a new product" : "Edit product details"}</DialogDescription>
@@ -911,9 +921,11 @@ export default function Stock() {
                       : "Not confirmed yet — bills for this product are blocked until you pick the rate."}
                   </p>
                 </div>
-                {!isNewProduct && editProduct.id && (
+                {isNewProduct ? (
+                  <ProductUnitsEditor mainUnit={editProduct.unit} drafts={draftUnits} onDraftsChange={setDraftUnits} />
+                ) : editProduct.id ? (
                   <ProductUnitsEditor productId={editProduct.id} mainUnit={editProduct.unit} />
-                )}
+                ) : null}
 
               </div>
             )}
