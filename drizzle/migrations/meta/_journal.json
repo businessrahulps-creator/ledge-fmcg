@@ -442,6 +442,13 @@
       "when": 1794208054552,
       "tag": "0062_dealer_internal_credit_days",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1794378754613,
+      "tag": "0063_units_phase1_decimal_safe_readers",
+      "breakpoints": true
     }
   ]
 }

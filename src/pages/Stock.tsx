@@ -13,6 +13,7 @@ import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { roundQty } from "@/lib/quantity";
 import { Label } from "@/components/ui/label";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ListPageSkeleton } from "@/components/ui/page-skeleton";
@@ -127,8 +128,8 @@ export default function Stock() {
   // Compute the resulting quantity based on intent + delta.
   const computedNewQty = useMemo(() => {
     const d = adjustDelta ?? 0;
-    if (adjustIntent === "add") return editOriginalQty + d;
-    if (adjustIntent === "remove") return Math.max(0, editOriginalQty - d);
+    if (adjustIntent === "add") return roundQty(editOriginalQty + d);
+    if (adjustIntent === "remove") return Math.max(0, roundQty(editOriginalQty - d));
     return d; // "set"
   }, [adjustIntent, adjustDelta, editOriginalQty]);
 
@@ -320,7 +321,7 @@ export default function Stock() {
       return;
     }
     const finalQty = computedNewQty;
-    const delta = finalQty - editOriginalQty;
+    const delta = roundQty(finalQty - editOriginalQty);
     const updated: StockItem = { ...editStockItem, quantity: finalQty };
     setSavingStock(true);
     try {
@@ -383,7 +384,7 @@ export default function Stock() {
     try {
       let ok = false;
       if (existing) {
-        ok = await updateStockItem({ ...existing, quantity: existing.quantity + addStockQty });
+        ok = await updateStockItem({ ...existing, quantity: roundQty(existing.quantity + addStockQty) });
       } else {
         const product = products.find((p) => p.id === addStockProductId);
         const warehouse = locations.find((l) => l.id === selectedWarehouse);
