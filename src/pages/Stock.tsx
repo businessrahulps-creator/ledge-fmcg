@@ -92,6 +92,7 @@ export default function Stock() {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [draftUnits, setDraftUnits] = useState<DraftUnit[]>([]);
+  const unitsCommitRef = useRef<(() => Promise<DraftUnit[] | false>) | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
   const [editWarehouse, setEditWarehouse] = useState<GodownLocation | null>(null);
@@ -232,15 +233,20 @@ export default function Stock() {
       });
       return;
     }
+    const pendingUnits = unitsCommitRef.current ? await unitsCommitRef.current() : draftUnits;
+    if (pendingUnits === false) {
+      toast.error("Finish the other unit", { description: "Enter both how many and the unit name, or clear them." });
+      return;
+    }
     setSavingProduct(true);
     try {
       const ok = isNewProduct ? await addProduct(editProduct) : await updateProduct(editProduct);
       if (!ok) return; // the CRUD helper already explained what went wrong — keep the form open
-      if (isNewProduct && draftUnits.length) {
+      if (isNewProduct && pendingUnits.length) {
         const { data: created } = await supabase.from("products").select("id")
           .eq("sku", editProduct.sku.trim()).eq("name", editProduct.name.trim())
           .order("created_at", { ascending: false }).limit(1).maybeSingle();
-        const unitsOk = created?.id ? await saveDraftUnits(created.id, draftUnits) : false;
+        const unitsOk = created?.id ? await saveDraftUnits(created.id, pendingUnits) : false;
         if (!unitsOk) toast.warning("Product saved, but its other units were not", { description: "Open the product with Edit and add them again." });
       }
       setDraftUnits([]);
@@ -922,9 +928,9 @@ export default function Stock() {
                   </p>
                 </div>
                 {isNewProduct ? (
-                  <ProductUnitsEditor mainUnit={editProduct.unit} drafts={draftUnits} onDraftsChange={setDraftUnits} />
+                  <ProductUnitsEditor mainUnit={editProduct.unit} drafts={draftUnits} onDraftsChange={setDraftUnits} commitRef={unitsCommitRef} />
                 ) : editProduct.id ? (
-                  <ProductUnitsEditor productId={editProduct.id} mainUnit={editProduct.unit} />
+                  <ProductUnitsEditor productId={editProduct.id} mainUnit={editProduct.unit} commitRef={unitsCommitRef} />
                 ) : null}
 
               </div>
