@@ -21,6 +21,7 @@ import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
 import { useApi } from "@/services/api";
 import { ProductUnitsEditor, saveDraftUnits, type DraftUnit } from "@/components/stock/ProductUnitsEditor";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
