@@ -175,11 +175,11 @@ export function useBillingDomain(deps: BillingDeps) {
 
   const recordReturn = useCallback(async (
     orderId: string,
-    lines: { invoiceLineId: string; goodQty: number; damagedQty: number }[],
+    lines: { invoiceLineId: string; goodQty: number; damagedQty: number; noCreditQty?: number; unitId?: string | null; unitFactorSeen?: number | null }[],
     reason: string,
     godownId?: string | null,
     idempotencyKey?: string,
-  ): Promise<{ creditNoteNumber: string; grandTotal: number; restocked: boolean } | null> => {
+  ): Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean } | null> => {
     if (!navigator.onLine) {
       toast.error("Cannot record returns offline", { description: "Please reconnect and try again." });
       return null;
