@@ -412,7 +412,7 @@ export default function Stock() {
       });
       setAddStockOpen(false);
       setAddStockProductId("");
-      setAddStockQty(0);
+      setAddStockQty(1);
     } finally {
       setSavingStock(false);
     }
@@ -757,9 +757,9 @@ export default function Stock() {
                             <span className="hidden sm:inline">Download CSV</span>
                           </Button>
                           {canManageStock && (
-                            <Button onClick={() => setAddStockOpen(true)} className="shrink-0">
+                            <Button onClick={() => { setAddStockProductId(""); setAddStockQty(1); setAddStockOpen(true); }} className="shrink-0">
                               <PackagePlus className="h-4 w-4" />
-                              <span className="hidden sm:inline">Add Product</span>
+                              <span className="hidden sm:inline">Add Stock</span>
                               <span className="sm:hidden">Add</span>
                             </Button>
                           )}
@@ -1124,7 +1124,7 @@ export default function Stock() {
         <Dialog open={addStockOpen} onOpenChange={setAddStockOpen}>
           <DialogContent className="max-w-[calc(100vw-2rem)] rounded-md sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-base md:text-lg">Add Stock</DialogTitle>
+              <DialogTitle className="text-base md:text-lg">Add Stock{(() => { const w = locations.find((l) => l.id === selectedWarehouse); return w ? ` — ${w.name}` : ""; })()}</DialogTitle>
               <DialogDescription className="text-xs">
                 Pick a product and enter quantity. If it's already stocked here, this amount will be added to the current quantity.
               </DialogDescription>
@@ -1164,13 +1164,18 @@ export default function Stock() {
                       onValueChange={(v) => setAddStockQty(v ?? 1)}
                       className="h-10 rounded-lg"
                     />
+                    {addStockProductId && addStockQty > 0 && (
+                      <p className="text-xs text-muted-foreground num">
+                        Now {stockedQtyByProduct.get(addStockProductId) ?? 0} → after adding {(stockedQtyByProduct.get(addStockProductId) ?? 0) + addStockQty}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
             })()}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setAddStockOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStock} disabled={!addStockProductId || savingStock}>{savingStock ? "Saving…" : "Add Stock"}</Button>
+              <Button onClick={handleAddStock} disabled={!addStockProductId || addStockQty <= 0 || savingStock}>{savingStock ? "Saving…" : "Add Stock"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
