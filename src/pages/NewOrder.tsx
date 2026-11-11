@@ -652,6 +652,7 @@ export default function NewOrder() {
                                 value: p.id,
                                 label: p.name,
                                 hint: p.sku || undefined,
+                                meta: formatCurrency(p.basePrice),
                               }))}
                           />
                         </div>
@@ -676,6 +677,17 @@ export default function NewOrder() {
                               onValueChange={(v) => updateLine(line.id, "unitPrice", v ?? 0)}
                               className="h-10 rounded-lg md:h-12"
                             />
+                            {(() => {
+                              const setP = products.find((p) => p.id === line.productId)?.basePrice;
+                              if (!line.productId || setP == null) return null;
+                              const diff = line.unitPrice - setP;
+                              return (
+                                <p className={`num text-[11px] leading-tight ${diff < 0 ? "text-warning" : "text-muted-foreground"}`}>
+                                  Set price: {formatCurrency(setP)}
+                                  {diff !== 0 && ` · ${formatCurrency(Math.abs(diff))} ${diff < 0 ? "below" : "above"}`}
+                                </p>
+                              );
+                            })()}
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Total</Label>
