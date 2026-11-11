@@ -176,6 +176,7 @@ export type Database = {
           distributor_id: string
           distributor_name: string
           id: string
+          idempotency_key: string | null
           order_id: string
           order_number: string
           reason: string
@@ -193,6 +194,7 @@ export type Database = {
           distributor_id: string
           distributor_name?: string
           id?: string
+          idempotency_key?: string | null
           order_id: string
           order_number?: string
           reason?: string
@@ -210,6 +212,7 @@ export type Database = {
           distributor_id?: string
           distributor_name?: string
           id?: string
+          idempotency_key?: string | null
           order_id?: string
           order_number?: string
           reason?: string

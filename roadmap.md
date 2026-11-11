@@ -92,7 +92,7 @@
 - [x] Phase 0 — dependency audit + baseline totals
 - [x] Phase 1 — decimal-safe readers (awaiting owner review before Phase 2)
 - [x] Phase 2 — database (whole main units only; no decimal widening; awaiting owner review before Phase 3)
-- [ ] Phase 3 — return function
+- [x] Phase 3 — return function (awaiting owner review before Phase 4)
 - [ ] Phase 4 — app screens
 - [ ] Phase 5 — tests + browser check
 - [ ] Phase 6 — release check
