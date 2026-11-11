@@ -87,3 +87,12 @@
 - [x] Payment box and bill chips use dealer credit (Astra #2)
 - [x] Unpaid-by-age "oldest" after settling, and refresh at midnight (Astra #8, #9)
 - [x] Order page tag counts dealer credit (Part paid)
+
+## Product units for returns (plan: .lovable/plan/product-units-for-returns-and-claims-final-phased-plan-2026-11-11.md)
+- [x] Phase 0 — dependency audit + baseline totals
+- [ ] Phase 1 — decimal-safe readers (waiting for owner approval of Phase 0; old order-level claims decision)
+- [ ] Phase 2 — database
+- [ ] Phase 3 — return function
+- [ ] Phase 4 — app screens
+- [ ] Phase 5 — tests + browser check
+- [ ] Phase 6 — release check
