@@ -67,7 +67,7 @@ describe("useBillingDomain — record return", () => {
 
     expect(mockRpc).toHaveBeenCalledWith("record_return_and_credit_atomic", {
       p_order_id: "order-1",
-      p_lines: [{ invoice_line_id: "il-1", good_qty: 2, damaged_qty: 1 }],
+      p_lines: [{ invoice_line_id: "il-1", good_qty: 2, damaged_qty: 1, damaged_no_credit_qty: 0, unit_id: null, unit_factor_seen: null }],
       p_reason: "Leaking bottles",
       p_godown_id: null,
       p_idempotency_key: null,
