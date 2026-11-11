@@ -1,106 +1,143 @@
 # Product units for returns and claims — final phased plan
 
 ## Scope (unchanged)
-Products can have extra named units (Bottle, Pouch, kg…) linked to the main unit. These units are used **only** in returns and claims, plus a read-only helper on the stock list. Orders, bills, prices, offers, buying, GST, Add Stock, approval steps and permissions all stay as they are.
+Each product can have extra named units (Bottle, Pouch, kg…) linked to its main unit. These units are used **only** for returns and claims, plus a read-only helper line on the stock list. Orders, bills, prices, offers, buying, GST, Add Stock, approval steps and permissions stay exactly as they are.
 
 ---
 
-## 1. One source of truth for returned quantities (no double counting)
+## 1. One record of what's been returned (no double counting)
+Today, only `record_return_and_credit_atomic` handles a return against a bill. Each return writes both a claim line and a credit note line, so adding up both would count it twice. Claims can't be created directly from the app, and `resolve_claim_atomic` only changes the status.
 
-**How returns work today (checked):** only one server function, `record_return_and_credit_atomic`, handles a return against a bill. In one save it writes a claim line **and** a credit note line, so adding up both would count the same return twice. Claims are never created another way (the app can't add claims directly), and `resolve_claim_atomic` only changes the claim's status.
+**New `return_line_ledger`** is the only place that counts how much of each bill line has been returned. It gets one row per bill line per kind of return:
+- **Kind:** good (restocked and credited), damaged with credit, or damaged without credit
+- **What was entered:** quantity, unit, conversion, and the equivalent in the main unit
+- **Links:** to the claim line and, when there is one, the credit note line
 
-**Decision:** add a new table, **`return_line_ledger`**. It is the only place that counts how much of a bill line has been processed. The return function writes one row for each bill line and each type:
-- `kind`: good (put back in stock, credited) / damaged with credit / damaged without credit
-- entered quantity, entered unit, conversion, main-unit quantity
-- links to the claim line and to the credit note line (if there is one). Each link can be used only once.
+Claim lines and credit note lines keep their own snapshot copies so they can show what was entered. They are **never added up** for limits.
 
-Claim lines and credit note lines keep their own copy of these values so old documents can be shown again exactly as saved. They are **never added up** to check the limit.
+**Remaining for a bill line** = billed quantity − sum of the ledger's main-unit quantities for that line, across all three kinds.
 
-**Remaining for a bill line** = billed qty − total main-unit quantity in `return_line_ledger` for that line, across all three types.
-
-**Old records (backfill):**
+**Backfill of old returns:**
 - Each existing credit note line becomes good = `restocked_quantity` and damaged-with-credit = `quantity − restocked_quantity`.
-- Old claim lines made by the same save are **not** added again, because they are the same items.
-- Older claims that are not linked to any bill line can't be matched to a line. They are left out, and the backfill report lists how many.
+- Old claim lines from the same save are **not** added again.
+- Older claims that aren't linked to any bill line can't be matched. They are listed in the backfill report and left out.
 
-## 2. Locking order (the same for every return)
-`record_return_and_credit_atomic` is the only way to process a return, and it is kept that way. Inside one database transaction, it locks in this fixed order:
-1. The business's money lock (the same lock the money functions already use)
+## 2. Locking order
+`record_return_and_credit_atomic` stays the only way to process a return. Inside one transaction it locks, always in this order:
+1. The business's money lock
 2. The bill (`FOR UPDATE`)
 3. The bill's lines (`ORDER BY id FOR UPDATE`)
-4. The stock rows it touches (`ORDER BY product_id, godown_id FOR UPDATE`)
+4. The product units used (`FOR SHARE`)
+5. The stock rows (`ORDER BY product_id, godown_id FOR UPDATE`)
 
-It works out the remaining amount **only after these locks are taken**, by reading `return_line_ledger` again. If two returns are saved at once, the second one waits and then sees the first one's rows. A database rule also refuses any ledger row that would take a line past its billed amount, as a backstop. No other function writes to the ledger, and the app gets no direct write access to it.
+The remaining quantity is worked out from the ledger **only after these locks are taken**. If two returns are saved at once, the second one waits and then sees what the first one saved.
 
-## 3. Precision rule
-- **Conversion** `numeric(18,6)`, must be above 0 (e.g. 24, or 0.5).
-- **Entered quantity** is stored exactly as typed (up to 3 decimals).
-- **Main-unit quantity** = entered ÷ conversion, rounded **once** to 6 decimals and stored in the ledger, stock movement and stock row. That same stored number is used everywhere, so the limit, stock and reports always agree.
-- **Stock columns** (`stock_items.quantity`, `stock_movements.delta`, claim/credit note quantities) become `numeric(18,6)`. Whole numbers carry over exactly.
-- **"Fully returned":** remaining amounts below 0.000001 main units count as zero. That covers leftovers like 7 × (1/7 case).
-- **Money:** credit = ROUND(bill taxable value × entered qty ÷ (billed qty × conversion), 2). It is rounded once, from the entered quantity, never from a rounded main-unit amount. GST is then worked out the same way as now.
-- **On screen only:** quantities show up to 3 decimals with trailing zeros removed. The stored value is never rounded.
+## 3. Precision
+- **Conversion:** `numeric(18,6)`, must be above 0.
+- **Entered quantity:** saved exactly as typed, up to 3 decimals.
+- **Main-unit quantity** = entered ÷ conversion, rounded **once** to 6 decimals. The same saved number is written to the ledger, the stock movement and the stock row.
+- **Stock columns** (`stock_items.quantity`, `stock_movements.delta`, claim and credit note quantities) become `numeric(18,6)`. Existing whole numbers carry over exactly.
+- **Last-piece snap (fixes the 1/7 case):** while the locks are held, if the entered amount equals what's left in that unit (remaining × conversion, rounded to 3 decimals), the saved main-unit amount is set to **exactly the remaining amount**. Example: 7 returns of 1 Bottle at 7 per Case save 0.142857 six times and 0.142858 the last time. That adds up to exactly 1.000000, and the ledger, stock movement and stock row all get the same number.
+- **Fully returned** means remaining ≤ 0.000005, which only absorbs rounding. Because of the snap, real leftovers end at exactly 0. A saved amount can never be more than what's left.
+- **Money:** credit = ROUND(bill taxable value × entered quantity ÷ (billed quantity × conversion), 2). It is rounded once, from the entered quantity, then GST is worked out as it is today.
+- **Display:** up to 3 decimals, with trailing zeros removed. Saved values are never rounded for display.
 
-## 4. Rollback is safe because every reader handles decimals
-Hiding the screens doesn't make going back safe. So this order is required: **every function that reads or writes stock must handle decimals before any decimal value can exist** (step A comes before steps B–D below). After step C, the old return function can never come back, because it treats amounts as whole numbers. "Rollback" means switching the new function to main-units only (conversion = 1). It doesn't mean going back to old code.
+## 3a. Database protections (they hold even if the app is skipped)
+- **No direct writes:** signed-in users can only read their own business's rows. Only the return function can write, and it is closed to public calls. Rows are never edited or deleted. A reversal would be a new row with the opposite sign.
+- **No duplicate links:** each claim line can be linked only once, and so can each credit note line. Damaged-without-credit rows must have no credit note line. The other two kinds must have one.
+- **Valid links:** a check before every insert makes sure:
+  - the bill line belongs to the bill
+  - the bill belongs to the business
+  - the claim line and credit note line belong to the same bill line and product
+  - the business matches
+  Any mismatch is refused.
+- **Limit:** the same check locks the bill line and refuses any row that would take the ledger total over the billed quantity, beyond the 0.000005 rounding allowance.
+- **Values:** quantity and conversion must be above 0, and the kind must be one of the three.
+
+## 3b. Units are checked on the server
+- The app sends the **unit's id** (or "main unit") and the quantity. Any conversion the app sends is ignored.
+- The function loads the unit from `product_units` and checks it belongs to **this business and this bill line's product**. If not, the return is refused. The main unit always means conversion = 1.
+- The unit is locked during the save. Its name and conversion are copied into the ledger, claim line and credit note line.
+- Units are archived, not deleted. A unit's conversion can't be changed once it has been used in a return. To change packaging, add a new unit.
+- If a unit is archived or changed while a return window is open, saving is refused with "This unit changed — please pick it again". Nothing is saved.
+- Units are managed with the existing stock permission. No new permissions.
+
+## 4. Rollback safety
+Every function that reads or writes stock must handle decimals **before** any decimal value can exist (Phase 1 comes before Phases 2–4). After Phase 3, the old return function is never restored, because it treats quantities as whole numbers. Rollback means running the new function with main units only (conversion = 1).
 
 ---
 
-## 5. Phase 0 dependency check (taken from the live database and the app)
+## 5. Dependency audit (live database and the app)
 
-| Item | Current behaviour | Risk once decimals exist | Action | Workflow |
+| Item | Today | Risk with decimals | Action | Workflow |
 |---|---|---|---|---|
-| `tg_audit_row` | Reads stock movement delta as a whole number (`(j->>'delta')::int`) | **Errors on 0.25, which cancels the whole save** | Read it as a decimal | Every stock change, Activity |
-| `dispatch_and_bill_order_atomic` | Stock check uses `SUM(qty)::int` and `MAX(si.quantity)::int` | `::int` **rounds** (4.5 becomes 5), so it could let through more than is in stock, and the save then fails on the "no negative stock" rule | Compare as decimals | Dispatch & bill |
-| `preview_dispatch_impact` | Returns whole numbers only, with `::int` | Shows rounded stock before dispatch | Return decimals (new version, app updated) | Dispatch preview |
-| `adjust_stock_atomic` | Takes a whole-number new total; change is a whole number | The Add Stock / edit total is sent as current + added, so a 120.25 stock would lose its .25 | Add a decimal version and keep `v_delta` as a decimal. Add Stock still sends whole amounts to add | Add Stock, manual edits |
-| `_buying_move_stock` | Whole-number change, adds on top | None (buying amounts stay whole; adding keeps fractions) | Keep the whole-number signature; the stored column becomes decimal | Purchase bill, cancel, return |
-| `reverse_dispatch_for_order` | Adds back whole order amounts | None | Check with a test only | Cancel order |
-| `restore_stock_on_deduction_delete` (trigger) | Adds back `quantity_deducted` (whole number) | None | Test only | Delete order |
-| `delete_order_atomic`, `cancel_order_atomic` | Go through the reverse/restore steps above | None | Test only | Delete/cancel |
-| `delete_godown_atomic` | Checks whether any stock is above 0 | 0.25 still counts as above 0, so it's correct | Test only | Remove godown |
-| `record_return_and_credit_atomic` | Reads good/damaged as whole numbers (`::int`), one ROUND for money | Drops decimals | Rewrite (sections 1–3) | Returns |
-| `resolve_claim_atomic` | Changes status only, no stock | None | No change | Claim approval |
+| `tg_audit_row` | reads `(j->>'delta')::int` | **Errors on 0.25 and cancels the save** | Read as a decimal | Every stock change, Activity |
+| `dispatch_and_bill_order_atomic` | `SUM(qty)::int`, `MAX(si.quantity)::int` | `::int` rounds (4.5→5), so it can let through more than is in stock, and then the save fails | Compare as decimals | Dispatch & bill |
+| `preview_dispatch_impact` | Whole-number outputs (`::int`) | Shows rounded stock | Decimal outputs; app updated | Dispatch preview |
+| `adjust_stock_atomic` | Takes a whole-number new total, whole-number change | Add Stock sends current + added, so 120.25 would lose 0.25 | Decimal version; change kept as a decimal | Add Stock, edit |
+| `_buying_move_stock` | Whole-number change, added on | None | Keep it; column widened | Buying |
+| `reverse_dispatch_for_order` | Adds whole order quantities back | None | Test | Cancel order |
+| `restore_stock_on_deduction_delete` | Adds `quantity_deducted` back | None | Test | Delete order |
+| `delete_order_atomic`, `cancel_order_atomic` | Use the two above | None | Test | Delete/cancel |
+| `delete_godown_atomic` | Checks stock > 0 | Correct | Test | Remove godown |
+| `record_return_and_credit_atomic` | Reads good/damaged as `::int` | Drops fractions | Rewrite (sections 1–3b) | Returns |
+| `resolve_claim_atomic` | Changes status only | None | None | Claim approval |
 | Views `invoice_balances`, `dealer_balances`, `order_aging`, `dealer_aging` | Money only | None | None | Balances |
-| `stock_deductions.quantity_deducted`, `stock_items.threshold` | Whole numbers | Not affected (order amounts stay whole) | Keep as whole numbers | — |
-| App: `data-utils.ts` claim/stock mapping, `useBillingDomain.ts` returned totals | `x \|\| 0`, keeps decimals | Returned totals currently add up claim lines | Read the remaining amount from the ledger | Return dialog |
-| App: `Stock.tsx` totals, health, edit box | Adding up is fine; the edit box takes whole numbers | Saving an edit could drop .25 | The edit box shows the existing decimal and keeps it when only whole units are added | Stock |
-| App: `intelligence.ts` days of stock | `Math.floor(days)`, `Math.round(value)` | For display only | None | Today's work |
-| Reports `registry.ts` (stock, stock value), `exportBackup.ts`, Tally (`tallyData.ts`) | `n()` keeps numbers as they are | CSV may show long decimals | Format with the shared 3-decimal helper; CSV safety rules unchanged | Reports, exports |
-| `Command.tsx`, `ProductsTab.tsx` stock totals | Adding up only | None | Use the shared formatter for display | Command |
+| `stock_deductions.quantity_deducted`, `stock_items.threshold` | Whole numbers | Not affected | Keep | — |
+| App `data-utils.ts`, `useBillingDomain.ts` | Keep decimals; "returned" adds up claim lines | Double counting | Read remaining from the ledger | Return dialog |
+| App `Stock.tsx` totals, health, edit box | Edit box is whole numbers only | Saving could drop the decimal part | Edit box keeps existing decimals | Stock |
+| App `intelligence.ts` | `Math.floor` on days, `Math.round` on value | Display only | None | Today's work |
+| `registry.ts`, `exportBackup.ts`, `tallyData.ts` | `n()` keeps the value | Long decimals in files | Shared 3-decimal formatter; CSV safety kept | Reports, exports |
+| `Command.tsx`, `ProductsTab.tsx` | Add up only | None | Formatter | Command |
 
-**Step 0 deliverable:** before Phase 1, run this check again with a search over all function code (`::int`, `integer`, `ROUND`, `FLOOR`, `TRUNC`) and save the result in the plan archive. Anything new it finds is added to this table.
+Phase 0 runs this search again across all function code (`::int`, `integer`, `ROUND`, `FLOOR`, `TRUNC`) and adds anything new to this table before work starts.
 
 ---
 
-## Migration order
-- **A. Make every reader handle decimals** (no column changes yet): fix `tg_audit_row`, the dispatch stock check, a new `preview_dispatch_impact`, and a decimal version of `adjust_stock_atomic`. Release the matching app reader changes. All of these are safe with whole-number data.
-- **B. Widen the columns** to `numeric(18,6)`. Add the `product_units` table, the `return_line_ledger` table with its limit rule, and the snapshot columns on claim lines and credit note lines (all can be empty). Includes grants, access rules and indexes. Then backfill the ledger and snapshots.
-- **C. New return function** (same name, existing inputs still work, and it accepts unit fields).
-- **D. App:** units on the product window, the stock helper line, and in the return dialog a unit picker, the three amounts and a live "Remaining".
+## All phases
+- **Phase 0 — Audit:** finish the table above and save the "before" totals.
+- **Phase 1 — Make readers decimal-safe:** fix the trigger, the dispatch stock check, the preview, and the decimal stock-adjust version. Release the app's matching reader changes. All of this is safe with whole numbers.
+- **Phase 2 — Database:**
+  - Widen the stock columns to `numeric(18,6)`.
+  - Add `product_units`, with archiving and conversions locked once used.
+  - Add `return_line_ledger` with its protections.
+  - Add snapshot columns to claim lines and credit note lines.
+  - Set access rules, permissions and indexes.
+  - Backfill old returns, then run the data checks.
+- **Phase 3 — Server:** the new return function, with locking, unit checks, last-piece snap and ledger writes. Same name, and the existing inputs still work.
+- **Phase 4 — App:**
+  - Units on the product window
+  - Stock helper line
+  - Return dialog: unit picker, three amounts and live "Remaining"
+  - Claims page shows the entered unit
+  - Shared formatter
+- **Phase 5 — Tests and browser check:** the tests below, then one return on test data in the browser, which is then removed.
+- **Phase 6 — Release and watch:** check Activity, stock and credit totals after release.
 
-## Data checks (before and after B, saved)
-- Row counts, plus SUM of `stock_items.quantity` per business, SUM of `stock_movements.delta`, and SUM of credit note line quantity and money, must match exactly.
-- For each stock row, stock = SUM(movements) wherever that held before the change.
-- Ledger total per bill line ≤ billed qty for every line. Any line already over before the change is listed, not changed.
+## Data-integrity checks (before and after Phase 2, saved)
+- Row counts, the sum of stock quantity per business, the sum of movements, and credit note quantities and money all match exactly.
+- Stock = sum of movements wherever that was true before.
+- For every bill line, the ledger total ≤ billed quantity. Lines that were already over are listed, not changed.
 
 ## Tests (kept in the project)
-- 6 Bottle at 24 = 0.25 Case. 1 of 7 per case, returned 7 times, ends fully returned with no leftover.
-- Credit is rounded once from the entered quantity and includes the bill's discount and GST rate.
-- Remaining counts good + damaged-with-credit + damaged-without-credit, and refuses repeats.
-- Damaged without credit adds ₹0 and still uses up the limit.
-- Only good items go back into stock.
-- A single save that writes both a claim line and a credit note line counts once.
-- Two return saves at the same time (database test, two connections): one goes through and the other is refused.
-- Stock of 0.25: the dispatch check, preview, Activity entry, cancel, delete order, Add Stock and exports all keep 0.25.
-- An old credit note still shows the same after the product's units change.
-- Existing billing, stock, claims and receipt tests pass.
+- 6 Bottle at 24 per Case = 0.25 Case.
+- 1 Bottle at 7 per Case, returned 7 times: the ledger total is exactly 1.000000, stock goes up by exactly 1.000000, remaining = 0, and an 8th return is refused.
+- Credit is rounded once from the entered quantity, using the bill's discount and GST rate.
+- Remaining counts all three kinds, and repeat returns are refused.
+- Damaged without credit gives ₹0 credit but still uses up the remaining quantity.
+- Only good returns restock.
+- One save that writes both a claim line and a credit note line is counted once.
+- Two returns saved at the same time (two connections): one succeeds and one is refused.
+- Database: a direct insert into the ledger, a link to another business, a reused link, and an insert over the limit are all refused.
+- Units: a unit from another business or product is refused; a conversion sent by the app is ignored; an archived or changed unit mid-return is refused; old records stay the same after unit changes.
+- Stock of 0.25 stays 0.25 through dispatch, preview, Activity, cancel, delete order, Add Stock and exports.
+- Existing billing, stock, claims and receipt tests still pass.
 
 ## Rollback limits
-- Steps A, B and the new tables can stay unused with no harm.
-- **The decimal column change is one-way** once any part-unit exists. Going back to whole-number columns would lose data, so it won't be done.
-- After step C, the old return function is **not** restored. The rollback is the new function running in main-units-only mode.
-- Turning off step D only hides the unit choices. Every reader still keeps decimals because of step A.
+- Phases 1–2 and the new tables can sit unused without harm.
+- **Widening the columns is one-way** once any fraction exists. Changing them back would lose data.
+- After Phase 3, the old return function is not restored. Rollback means main units only.
+- Turning off Phase 4 only hides the unit choices. Everything that reads stock still keeps decimals.
 
 ## Not changing
-Orders, invoices and bill printouts, prices, offers, buying documents, GST, the Add Stock flow, claim approval steps and permissions.
+Orders, invoices and printouts, prices, offers, buying documents, GST, the Add Stock flow, claim approval steps and permissions.
