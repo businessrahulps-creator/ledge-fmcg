@@ -141,3 +141,27 @@ Phase 0 runs this search again across all function code (`::int`, `integer`, `RO
 
 ## Not changing
 Orders, invoices and printouts, prices, offers, buying documents, GST, the Add Stock flow, claim approval steps and permissions.
+
+---
+
+## Phase 0 results (2026-11-11, read-only, nothing changed)
+
+### Baseline totals (whole database)
+| Data | Rows | Total |
+|---|---|---|
+| Stock items (quantity) | 452 | 38,433,271 (0 fractional) |
+| Stock movements (delta) | 3,999 | 38,433,372 |
+| Claim lines (quantity) | 65 | 1,239 |
+| Credit note lines (quantity / restocked) | 18 | 646 / 539 |
+| Credit notes (grand total) | 18 | ₹296,338.00 |
+| Claims (claim value) | 59 | ₹515,172.00 |
+| Stock deductions (quantity) | 3,476 | 145,133 |
+| Invoice lines (quantity) | 2,300 | 97,365 |
+Other checks: 11 businesses have stock; 0 bill lines returned beyond the billed quantity; 0 credit note lines without a link to their bill line.
+
+### Findings
+1. **4 stock rows already differ from their movement history** before any change (448 of 452 match). Differences: 99,922 vs 99,937, 6 vs 22, 1,028 vs 1,038, 110 vs 170. These are seed or older data. The rule "stock = sum of movements" is therefore checked only for the 448 rows that match today, and these 4 are listed but not changed.
+2. **42 claims have no credit note and no link to a bill line.** They are seed or older order-level claims: shortage, return and damage, some open and some resolved, worth ₹220,920. They can't be matched to a bill line, so they can't count toward a line's limit. **Owner decision needed:** (a) exclude them, which is the plan default, or (b) block new returns on any order that has an open old-style claim, until that claim is resolved.
+3. **More whole-number functions found, all outside scope.** `book_order_atomic`, `record_purchase_bill_atomic` and `return_purchase_atomic` read order and buying quantities as whole numbers. Orders and buying stay in main units, so this is correct and no change is needed. `book_order_atomic` uses FLOOR for scheme sets, which is unchanged pricing logic. `delete_godown_atomic` has a whole-number counter that counts rows, not quantities, so it's safe.
+4. **App callers confirmed:** `adjust_stock_atomic` is called from `useStockDomain.ts`, `preview_dispatch_impact` from `OrderDetail.tsx`, and the return function from `useBillingDomain.ts`. In `Claims.tsx`, remaining = billed − returned, and returned currently comes from adding up claim lines. Phase 4 switches this to the ledger.
+5. **Audit table in section 5 confirmed.** The only Phase 1 fixes needed are `tg_audit_row`, the dispatch stock check, `preview_dispatch_impact` and a decimal version of `adjust_stock_atomic`.
