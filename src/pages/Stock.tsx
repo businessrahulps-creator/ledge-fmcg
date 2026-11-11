@@ -20,6 +20,7 @@ import { ListPageSkeleton } from "@/components/ui/page-skeleton";
 import { formatCurrency, formatNumber, type Product } from "@/data/mock-data";
 import { getStockHealth, type GodownLocation, type StockItem } from "@/data/godown-data";
 import { useApi } from "@/services/api";
+import { ProductUnitsEditor } from "@/components/stock/ProductUnitsEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
@@ -910,6 +911,9 @@ export default function Stock() {
                       : "Not confirmed yet — bills for this product are blocked until you pick the rate."}
                   </p>
                 </div>
+                {!isNewProduct && editProduct.id && (
+                  <ProductUnitsEditor productId={editProduct.id} mainUnit={editProduct.unit} />
+                )}
 
               </div>
             )}

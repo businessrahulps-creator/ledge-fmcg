@@ -20,6 +20,7 @@ export async function fetchInvoiceLines(invoiceId: string): Promise<InvoiceLine[
   if (error || !data) return [];
   const lines: InvoiceLine[] = data.map((l: any) => ({
     id: l.id,
+    productId: l.product_id ?? null,
     productName: l.product_name || "",
     hsnCode: l.hsn_code || "",
     quantity: l.quantity || 0,

@@ -24,6 +24,9 @@ import type { Claim, Invoice } from "@/context/DataContext";
 import type { Order } from "@/data/mock-data";
 import type { InvoiceLine } from "@/context/data-types";
 import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
+import { supabase } from "@/integrations/supabase/client";
+import { checkReturnLine, type ReturnUnitOption } from "@/lib/return-units";
+import { formatQty } from "@/lib/quantity";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
   return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
@@ -100,7 +103,12 @@ function ClaimCard({
                 {claim.lines.map((line, i) => (
                   <tr key={i} className="border-b border-border/50">
                     <td className="px-3 py-2 font-medium">{line.productName}</td>
-                    <td className="px-3 py-2 text-right text-muted-foreground">{line.quantity}</td>
+                    <td className="px-3 py-2 text-right text-muted-foreground">
+                      {line.quantity}
+                      {line.enteredUnit && line.enteredQuantity != null && (
+                        <span className="block text-[10px]">typed as {formatQty(line.enteredQuantity)} {line.enteredUnit}</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-right text-muted-foreground">{formatCurrency(line.unitPrice)}</td>
                     <td className="px-3 py-2 text-right font-medium">{formatCurrency(line.lineTotal)}</td>
                   </tr>
@@ -155,6 +163,11 @@ function NewClaimDialog({
   const [reason, setReason] = useState("");
   const [good, setGood] = useState<Record<string, number>>({});
   const [damaged, setDamaged] = useState<Record<string, number>>({});
+  const [noCredit, setNoCredit] = useState<Record<string, number>>({});
+  /** Picked unit per bill line ("" = the bill's main unit). */
+  const [unitPick, setUnitPick] = useState<Record<string, string>>({});
+  /** Other units per product, read fresh for this bill. */
+  const [productUnits, setProductUnits] = useState<Record<string, ReturnUnitOption[]>>({});
   const [submitting, setSubmitting] = useState(false);
   /** Pieces already sent back on earlier credit notes, per bill line. */
   const [alreadyReturned, setAlreadyReturned] = useState<Record<string, number> | null>(null);
@@ -207,6 +220,27 @@ function NewClaimDialog({
     return () => { cancelled = true; };
   }, [selectedBillId]);
 
+  // Other units for the products on this bill (archived ones are never offered).
+  const billProductIds = useMemo(
+    () => Array.from(new Set(billLines.map(l => l.productId).filter((x): x is string => !!x))).sort().join(","),
+    [billLines],
+  );
+  useEffect(() => {
+    let cancelled = false;
+    if (!billProductIds) { setProductUnits({}); return; }
+    supabase.from("product_units").select("id, product_id, unit_name, conversion_factor")
+      .in("product_id", billProductIds.split(",")).eq("is_archived", false).order("created_at")
+      .then(({ data }) => {
+        if (cancelled) return;
+        const map: Record<string, ReturnUnitOption[]> = {};
+        (data || []).forEach(u => {
+          (map[u.product_id] ||= []).push({ id: u.id, name: u.unit_name, factor: Number(u.conversion_factor) });
+        });
+        setProductUnits(map);
+      });
+    return () => { cancelled = true; };
+  }, [billProductIds]);
+
   const eligibleOrders = useMemo(() =>
     orders.filter(o => billByOrderId.has(o.id)),
     [orders, billByOrderId]
@@ -228,6 +262,8 @@ function NewClaimDialog({
     setReason("");
     setGood({});
     setDamaged({});
+    setNoCredit({});
+    setUnitPick({});
     onOpenChange(false);
   };
 
@@ -235,6 +271,8 @@ function NewClaimDialog({
     setSelectedOrder(order);
     setGood({});
     setDamaged({});
+    setNoCredit({});
+    setUnitPick({});
     setReason("");
     setStep(2);
   };
@@ -248,19 +286,31 @@ function NewClaimDialog({
 
   const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
     const returnedQty = alreadyReturned?.[l.id as string] ?? 0;
+    const mainUnit: ReturnUnitOption = { id: null, name: l.unit || "main unit", factor: 1 };
+    const unitOptions = [mainUnit, ...(l.productId ? productUnits[l.productId] ?? [] : [])];
+    const unit = unitOptions.find(u => (u.id ?? "") === (unitPick[l.id as string] ?? "")) ?? mainUnit;
+    const remainingQty = Math.max(0, l.quantity - returnedQty);
+    const entered = { good: good[l.id as string] ?? 0, damaged: damaged[l.id as string] ?? 0, noCredit: noCredit[l.id as string] ?? 0 };
+    const check = checkReturnLine(entered, unit.factor, remainingQty);
     return {
       invoiceLineId: l.id as string,
       productName: l.productName,
       billedQty: l.quantity,
       returnedQty,
-      remainingQty: Math.max(0, l.quantity - returnedQty),
+      remainingQty,
+      mainUnitName: mainUnit.name,
+      unitOptions,
+      unit,
+      check,
+      entered,
       unitPrice: l.unitPrice,
       // Credit is raised on what was actually billed for the line — after any
       // discount — not the list price, which would overstate the refund.
       taxablePerPiece: l.quantity > 0 ? (l.taxableValue ?? l.quantity * l.unitPrice) / l.quantity : l.unitPrice,
       gstRate: l.gstRate ?? selectedBill?.gstRate ?? 0,
-      goodQty: good[l.id] ?? 0,
-      damagedQty: damaged[l.id] ?? 0,
+      // Whole main units, for the credit preview (0 while a part-unit is typed).
+      goodQty: check.good ?? 0,
+      damagedQty: check.damaged ?? 0,
     };
   });
 
@@ -282,16 +332,32 @@ function NewClaimDialog({
       toast.error("Still checking what has already come back", { description: "Wait a moment, or reopen this return." });
       return;
     }
-    const payload = returnLines.filter(l => l.goodQty + l.damagedQty > 0);
+    const bad = returnLines.find(l => l.check.partUnit || l.check.overLimit);
+    if (bad) {
+      toast.error(bad.check.partUnit ? `Fix the amount for ${bad.productName}` : `Too many for ${bad.productName}`, {
+        description: bad.check.partUnit
+          ? `Enter a multiple of ${formatQty(bad.unit.factor)} ${bad.unit.name} (1 ${bad.mainUnitName}).`
+          : `Only ${bad.remainingQty} ${bad.mainUnitName} left to return.`,
+      });
+      return;
+    }
+    const payload = returnLines.filter(l => l.check.totalMain > 0);
     if (payload.length === 0) {
-      toast.error("Enter how many pieces are coming back");
+      toast.error("Enter how much is coming back");
       return;
     }
     setSubmitting(true);
     if (!returnKeyRef.current) returnKeyRef.current = crypto.randomUUID();
     const res = await api.claims.recordReturn(
       selectedOrder.id,
-      payload.map(l => ({ invoiceLineId: l.invoiceLineId, goodQty: l.goodQty, damagedQty: l.damagedQty })),
+      payload.map(l => ({
+        invoiceLineId: l.invoiceLineId,
+        goodQty: l.entered.good,
+        damagedQty: l.entered.damaged,
+        noCreditQty: l.entered.noCredit,
+        unitId: l.unit.id,
+        unitFactorSeen: l.unit.id ? l.unit.factor : null,
+      })),
       reason,
       undefined,
       returnKeyRef.current,
@@ -300,9 +366,13 @@ function NewClaimDialog({
     if (res) {
       returnKeyRef.current = null;
       if (selectedBillId) forgetInvoiceLines(selectedBillId);
-      toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
-        description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
-      });
+      if (res.creditNoteNumber) {
+        toast.success(`Return recorded — credit note ${res.creditNoteNumber}`, {
+          description: `${formatCurrency(res.grandTotal)} credited${res.restocked ? " · good stock returned to the warehouse" : ""}`,
+        });
+      } else {
+        toast.success("Return recorded", { description: "No credit given, so no credit note was made." });
+      }
       resetAndClose();
     }
   };
@@ -382,69 +452,75 @@ function NewClaimDialog({
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs">How many pieces are coming back?</Label>
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30 text-left text-muted-foreground">
-                        <th className="px-3 py-2 font-medium">Product</th>
-                        <th className="px-3 py-2 font-medium text-right w-16">Billed</th>
-                        <th className="px-3 py-2 font-medium text-right w-24">Good</th>
-                        <th className="px-3 py-2 font-medium text-right w-24">Damaged</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {linesLoading && returnLines.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                            <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
-                            Loading the items on this bill…
-                          </td>
-                        </tr>
+              <div className="space-y-2">
+                <Label className="text-xs">How much is coming back?</Label>
+                {linesLoading && returnLines.length === 0 && (
+                  <div className="rounded-lg border border-border px-3 py-6 text-center text-xs text-muted-foreground">
+                    <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
+                    Loading the items on this bill…
+                  </div>
+                )}
+                {returnLines.map(line => {
+                  const id = line.invoiceLineId;
+                  const field = (label: string, value: number, set: typeof setGood) => (
+                    <label className="space-y-1">
+                      <span className="block text-[11px] text-muted-foreground">{label}</span>
+                      <NumberInput
+                        allowEmpty={false}
+                        allowDecimal={line.unit.factor !== 1}
+                        min={0}
+                        value={value}
+                        onValueChange={v => set(prev => ({ ...prev, [id]: v ?? 0 }))}
+                        className="h-9 w-full text-sm text-right"
+                      />
+                    </label>
+                  );
+                  return (
+                    <div key={id} className="space-y-2 rounded-lg border border-border p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium">{line.productName}</p>
+                          <p className="text-[11px] text-muted-foreground num">
+                            {line.billedQty} {line.mainUnitName} billed
+                            {line.returnedQty > 0 && ` · ${formatQty(line.returnedQty)} already returned`}
+                            {` · ${formatQty(Math.max(0, line.remainingQty - line.check.totalMain))} left`}
+                          </p>
+                        </div>
+                        {line.unitOptions.length > 1 && (
+                          <select
+                            aria-label={`Unit for ${line.productName}`}
+                            value={line.unit.id ?? ""}
+                            onChange={e => setUnitPick(prev => ({ ...prev, [id]: e.target.value }))}
+                            className="h-9 shrink-0 rounded-md border border-input bg-background px-2 text-sm"
+                          >
+                            {line.unitOptions.map(u => (
+                              <option key={u.id ?? ""} value={u.id ?? ""}>{u.name}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {field("Good", line.entered.good, setGood)}
+                        {field("Damaged, credit", line.entered.damaged, setDamaged)}
+                        {field("Damaged, no credit", line.entered.noCredit, setNoCredit)}
+                      </div>
+                      {line.unit.id && !line.check.partUnit && line.check.totalMain > 0 && (
+                        <p className="text-[11px] text-muted-foreground">= {line.check.totalMain} {line.mainUnitName}</p>
                       )}
-                      {returnLines.map(line => {
-                        // Only what is still returnable: billed, less anything sent back earlier.
-                        const other = (k: "goodQty" | "damagedQty") => line.remainingQty - (k === "goodQty" ? line.damagedQty : line.goodQty);
-                        return (
-                          <tr key={line.invoiceLineId} className="border-b border-border/50">
-                            <td className="px-3 py-2 font-medium">
-                              {line.productName}
-                              {line.returnedQty > 0 && (
-                                <span className="block text-[10px] font-normal text-muted-foreground">
-                                  {line.returnedQty} already returned · {line.remainingQty} left
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-2 text-right text-muted-foreground">{line.billedQty}</td>
-                            <td className="px-3 py-2 text-right">
-                              <NumberInput
-                                allowEmpty={false}
-                                min={0}
-                                max={other("goodQty")}
-                                value={line.goodQty}
-                                onValueChange={v => setGood(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
-                                className="h-7 w-20 text-xs text-right ml-auto"
-                              />
-                            </td>
-                            <td className="px-3 py-2 text-right">
-                              <NumberInput
-                                allowEmpty={false}
-                                min={0}
-                                max={other("damagedQty")}
-                                value={line.damagedQty}
-                                onValueChange={v => setDamaged(prev => ({ ...prev, [line.invoiceLineId]: v ?? 0 }))}
-                                className="h-7 w-20 text-xs text-right ml-auto"
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                      {line.check.partUnit && (
+                        <p className="text-[11px] text-destructive">
+                          Not a whole {line.mainUnitName}. Enter a multiple of {formatQty(line.unit.factor)} {line.unit.name}.
+                        </p>
+                      )}
+                      {line.check.overLimit && (
+                        <p className="text-[11px] text-destructive">Only {formatQty(line.remainingQty)} {line.mainUnitName} left to return.</p>
+                      )}
+                    </div>
+                  );
+                })}
                 <p className="text-[11px] text-muted-foreground">
-                  Good pieces go back into the warehouse. Damaged pieces are credited but stay out of stock.
+                  Good goes back into the warehouse and is credited. Damaged with credit is credited but stays out of stock.
+                  Damaged without credit is only recorded.
                 </p>
               </div>
 
@@ -468,7 +544,7 @@ function NewClaimDialog({
               <Button variant="outline" size="sm" onClick={() => setStep(1)} disabled={submitting}>
                 Back
               </Button>
-              <Button size="sm" onClick={handleSubmit} disabled={submitting || !alreadyReturned}>
+              <Button size="sm" onClick={handleSubmit} disabled={submitting || !alreadyReturned || returnLines.some(l => l.check.partUnit || l.check.overLimit)}>
                 {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
                 {submitting ? "Saving…" : "Record return"}
               </Button>
