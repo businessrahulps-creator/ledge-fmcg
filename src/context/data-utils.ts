@@ -42,7 +42,7 @@ export function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: a
       lines: oLines, total: Number(o.total),
       paymentMode: o.payment_mode as Order["paymentMode"],
       paymentStatus: o.payment_status as Order["paymentStatus"],
-      dispatchDate: o.dispatch_date, deliveredAt: o.delivered_at ?? null, vehicle: o.vehicle, driverName: o.driver_name,
+      dispatchDate: o.dispatch_date, vehicle: o.vehicle, driverName: o.driver_name,
       deliveryStatus: o.delivery_status as Order["deliveryStatus"],
       deliveredAt: o.delivered_at || null,
       cancelledAt: o.cancelled_at || null,

@@ -62,7 +62,6 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
-import { todayKey } from "@/utils/dateKey";
 import { deliveryDateBounds, validateDeliveryDate } from "@/lib/delivery-date";
 import { todayKey } from "@/utils/dateKey";
 
