@@ -158,7 +158,11 @@ function NewClaimDialog({
   api: ReturnType<typeof useApi>;
   presetOrderId?: string | null;
 }) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  /** What the last successful save returned, plus exactly what was sent. Shown on the Saved step. */
+  const [result, setResult] = useState<SavedReturn | null>(null);
+  const savingRef = useRef(false);
+  const presetUsedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reason, setReason] = useState("");
@@ -258,7 +262,10 @@ function NewClaimDialog({
   }, [eligibleOrders, search]);
 
   const resetAndClose = () => {
+    if (savingRef.current) return;
     setStep(1);
+    setResult(null);
+    presetUsedRef.current = false;
     setSearch("");
     setSelectedOrder(null);
     setReason("");
@@ -281,9 +288,9 @@ function NewClaimDialog({
 
   // Opened from an order page: jump straight to that order's return.
   useEffect(() => {
-    if (!open || !presetOrderId || selectedOrder) return;
+    if (!open || !presetOrderId || selectedOrder || presetUsedRef.current) return;
     const match = eligibleOrders.find(o => o.id === presetOrderId);
-    if (match) selectOrder(match);
+    if (match) { presetUsedRef.current = true; selectOrder(match); }
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
   const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
@@ -330,6 +337,7 @@ function NewClaimDialog({
   // first save instead of filing the return twice.
   const returnKeyRef = useRef<string | null>(null);
   const handleSubmit = async () => {
+    if (savingRef.current) return;
     if (!selectedOrder || !selectedBill) return;
     if (!alreadyReturned) {
       toast.error("Still checking what has already come back", { description: "Wait a moment, or reopen this return." });
@@ -349,7 +357,19 @@ function NewClaimDialog({
       toast.error("Enter how much is coming back");
       return;
     }
+    savingRef.current = true;
     setSubmitting(true);
+    const sent = {
+      dealerName: selectedOrder.distributorName,
+      orderNumber: selectedOrder.orderNumber,
+      billNumber: selectedBill.invoiceNumber,
+      lines: payload.map(l => ({
+        productName: l.productName, mainUnit: l.mainUnitName,
+        unitName: l.unit.id ? l.unit.name : null, factor: l.unit.factor,
+        good: l.check.good ?? 0, damaged: l.check.damaged ?? 0, noCredit: l.check.noCredit ?? 0,
+        enteredGood: l.entered.good, enteredDamaged: l.entered.damaged, enteredNoCredit: l.entered.noCredit,
+      })),
+    };
     if (!returnKeyRef.current) returnKeyRef.current = crypto.randomUUID();
     const res = await api.claims.recordReturn(
       selectedOrder.id,
@@ -365,6 +385,7 @@ function NewClaimDialog({
       undefined,
       returnKeyRef.current,
     );
+    savingRef.current = false;
     setSubmitting(false);
     if (res) {
       returnKeyRef.current = null;
@@ -376,15 +397,28 @@ function NewClaimDialog({
       } else {
         toast.success("Return recorded", { description: "No credit given, so no credit note was made." });
       }
-      resetAndClose();
+      setResult({ ...res, ...sent });
+      setStep(3);
     }
+  };
+
+  /** Back to picking a bill; keeps the dealer's name in the search, clears everything else. */
+  const startAnother = () => {
+    const dealer = result?.dealerName ?? "";
+    setResult(null);
+    setSelectedOrder(null);
+    setGood({}); setDamaged({}); setNoCredit({}); setUnitPick({}); setReason("");
+    setSearch(dealer);
+    setStep(1);
   };
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) resetAndClose(); }}>
       {/* Full screen on phones — the return form was too cramped in a small box */}
       <DialogContent className="max-w-lg overflow-y-auto max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:border-0 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-h-[85vh]">
-        {step === 1 ? (
+        {step === 3 && result ? (
+          <SavedReturnView result={result} onAnother={startAnother} onClose={resetAndClose} />
+        ) : step === 1 ? (
           <>
             <DialogHeader>
               <DialogTitle>Record a return</DialogTitle>
