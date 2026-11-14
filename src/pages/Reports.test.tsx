@@ -24,8 +24,8 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const open = async () => {
   render(<MemoryRouter initialEntries={["/reports?r=orders"]}><Reports /></MemoryRouter>);
-  await waitFor(() => expect(screen.getByRole("button", { name: "CSV", exact: true })).toBeEnabled());
-  fireEvent.click(screen.getByRole("button", { name: "Pick dates", exact: true }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "CSV" })).toBeEnabled());
+  fireEvent.click(screen.getByRole("button", { name: "Pick dates" }));
 };
 
 describe("Reports date selection", () => {
@@ -34,9 +34,9 @@ describe("Reports date selection", () => {
     fireEvent.change(screen.getByLabelText("To date"), { target: { value: "2027-02-20" } });
     fireEvent.change(screen.getByLabelText("From date"), { target: { value: "2027-02-10" } });
     await waitFor(() => expect(mocks.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ from: "2027-02-10", to: "2027-02-20" })));
-    await waitFor(() => expect(screen.getByRole("button", { name: "CSV", exact: true })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "CSV" })).toBeEnabled());
     expect(screen.getByText(/Nothing between/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "CSV", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "CSV" }));
     await waitFor(() => expect(mocks.csv).toHaveBeenCalled());
     const ctx = mocks.csv.mock.calls[0][0];
     expect(ctx.sections).toEqual([{ name: "Data", rows: [] }]);
@@ -58,9 +58,9 @@ describe("Reports date selection", () => {
     await open(); let resolve: (value: unknown) => void = () => {};
     mocks.fetch.mockImplementationOnce(() => new Promise(r => { resolve = r; }));
     fireEvent.change(screen.getByLabelText("To date"), { target: { value: "2027-02-20" } });
-    expect(screen.getByRole("button", { name: "CSV", exact: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "CSV" })).toBeDisabled();
     await act(async () => resolve([{ name: "Data", rows: [{ net: 500 }] }]));
-    fireEvent.click(screen.getByRole("button", { name: "CSV", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "CSV" }));
     await waitFor(() => expect(mocks.csv).toHaveBeenCalled());
     expect(mocks.csv.mock.calls[0][0].summary[0].value).toBe(500);
     expect(mocks.csv.mock.calls[0][0].sections[0].rows).toEqual([{ net: 500 }]);
@@ -74,10 +74,10 @@ describe("Reports date selection", () => {
       ["This year", "2026-04-01", "2026-11-14"],
     ];
     for (const [name, from, to] of presets) {
-      fireEvent.click(screen.getByRole("button", { name, exact: true }));
+      fireEvent.click(screen.getByRole("button", { name }));
       await waitFor(() => expect(mocks.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ from, to })));
     }
-    fireEvent.click(screen.getByRole("button", { name: "Pick dates", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Pick dates" }));
     fireEvent.change(screen.getByLabelText("From date"), { target: { value: "2026-01-01" } });
     fireEvent.change(screen.getByLabelText("To date"), { target: { value: "2026-01-31" } });
     await waitFor(() => expect(mocks.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ from: "2026-01-01", to: "2026-01-31" })));
