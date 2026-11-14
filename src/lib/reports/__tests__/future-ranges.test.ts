@@ -14,6 +14,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {
       chain[method] = (...args: any[]) => { query.filters.push([method, args[0], args[1]]); return chain; };
     }
     chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve({ data: (state.data[table] ?? []).filter(row => query.filters.every(([op, key, value]) => {
+      if (!["gte", "lte", "lt", "eq", "neq", "is", "in"].includes(op)) return true;
       const actual = key.split(".").reduce((obj, part) => obj?.[part], row);
       if (op === "gte") return actual >= value;
       if (op === "lte") return actual <= value;

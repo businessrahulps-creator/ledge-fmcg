@@ -109,7 +109,7 @@ export default function Reports() {
     setRecent(next); localStorage.setItem(RECENT_KEY, JSON.stringify(next));
     if (companyId) logExport({ company_id: companyId, user_name: madeBy, report_id: def.id, format, params: { from: range.from, to: range.to }, row_count: count });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [def, sections, summary, prevSummary, include, period, range.from, range.to, recent, companyId, madeBy, compare]);
+  }, [def, sections, summary, prevSummary, include, period, range.from, range.to, recent, companyId, madeBy, compare, loading, error]);
 
   const toggleFav = (id: string) => {
     const next = favs.includes(id) ? favs.filter(f => f !== id) : [...favs, id];
