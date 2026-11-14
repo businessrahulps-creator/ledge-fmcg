@@ -47,7 +47,7 @@ describe("useBillingDomain — record return", () => {
   it("recordReturn — posts good and damaged quantities through the atomic RPC", async () => {
     const deps = makeDeps();
     mockRpc.mockResolvedValueOnce({
-      data: { ok: true, credit_note_number: "CN/2026-27/0001", grand_total: 1180, restocked: true },
+      data: { ok: true, credit_note_number: "CN/2026-27/0001", grand_total: 1180, restocked: true, claim_id: "c-1", taxable_total: 1000, tax_total: 180, round_off: 0, godown_name: "Central" },
       error: null,
     });
     mockFrom.mockImplementation(() => createChainMock({ data: [], error: null }));
@@ -72,7 +72,7 @@ describe("useBillingDomain — record return", () => {
       p_godown_id: null,
       p_idempotency_key: null,
     });
-    expect(res).toEqual({ creditNoteNumber: "CN/2026-27/0001", grandTotal: 1180, restocked: true });
+    expect(res).toEqual({ creditNoteNumber: "CN/2026-27/0001", grandTotal: 1180, restocked: true, claimId: "c-1", taxableTotal: 1000, taxTotal: 180, roundOff: 0, godownName: "Central", replayed: false });
     expect(deps.safeRefetchStockItems).toHaveBeenCalled();
   });
 
