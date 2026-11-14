@@ -148,6 +148,86 @@ function ClaimCard({
   );
 }
 
+type SavedReturn = {
+  creditNoteNumber: string | null; grandTotal: number; restocked: boolean;
+  taxableTotal: number | null; taxTotal: number | null; roundOff: number | null; godownName: string | null; replayed: boolean;
+  dealerName: string; orderNumber: string; billNumber: string;
+  lines: { productName: string; mainUnit: string; unitName: string | null; factor: number;
+    good: number; damaged: number; noCredit: number; enteredGood: number; enteredDamaged: number; enteredNoCredit: number }[];
+};
+
+/** The Saved step: every figure comes from the save response or from exactly what was sent. */
+function SavedReturnView({ result, onAnother, onClose }: { result: SavedReturn; onAnother: () => void; onClose: () => void }) {
+  const sum = (k: "good" | "damaged" | "noCredit") => result.lines.reduce((t, l) => t + l[k], 0);
+  const mainUnits = Array.from(new Set(result.lines.map(l => l.mainUnit)));
+  const unitLabel = mainUnits.length === 1 ? ` ${mainUnits[0]}` : "";
+  const typed = (k: "good" | "damaged" | "noCredit") => {
+    const ek = k === "good" ? "enteredGood" : k === "damaged" ? "enteredDamaged" : "enteredNoCredit";
+    const parts = result.lines.filter(l => l.unitName && l[k] > 0).map(l => `${formatQty(l[ek])} ${l.unitName}`);
+    return parts.length ? ` (typed as ${parts.join(", ")})` : "";
+  };
+  const showSplit = result.creditNoteNumber && result.taxableTotal !== null && result.taxTotal !== null;
+  const row = (label: string, value: string, strong = false) => (
+    <div className={`flex items-center justify-between gap-3 ${strong ? "border-t border-border pt-1.5 text-sm" : "text-muted-foreground"}`}>
+      <span className={strong ? "font-medium text-foreground" : ""}>{label}</span>
+      <span className={`num text-right ${strong ? "font-semibold text-foreground" : ""}`}>{value}</span>
+    </div>
+  );
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 text-success" />
+          <DialogTitle>Return saved</DialogTitle>
+        </div>
+        <DialogDescription>
+          {result.dealerName} · Order {result.orderNumber} · Bill {result.billNumber}
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-3 text-xs">
+        <div className="rounded-lg border border-border px-3 py-2">
+          {result.creditNoteNumber ? (
+            <p className="text-sm">Credit note <span className="font-semibold num">{result.creditNoteNumber}</span></p>
+          ) : (
+            <p className="text-sm font-medium">No credit note issued – damaged goods without credit</p>
+          )}
+        </div>
+        {result.creditNoteNumber && (
+          <div className="space-y-1 rounded-lg border border-border bg-muted/20 px-3 py-2">
+            {showSplit && row("Taxable credit", formatCurrency(result.taxableTotal!))}
+            {showSplit && row("GST", formatCurrency(result.taxTotal!))}
+            {showSplit && !!result.roundOff && row("Round off", formatCurrency(result.roundOff!))}
+            {row("Total credited", formatCurrency(result.grandTotal), true)}
+          </div>
+        )}
+        <div className="space-y-1.5 rounded-lg border border-border px-3 py-2">
+          {row("Good goods restocked", `${formatQty(sum("good"))}${unitLabel}${typed("good")}`)}
+          {sum("good") > 0 && (
+            <p className="text-[11px] text-muted-foreground">
+              {result.restocked
+                ? `Back in ${result.godownName ?? "the order's godown"}`
+                : "Not added to stock (this order has no godown)"}
+            </p>
+          )}
+          {row("Damaged goods with credit", `${formatQty(sum("damaged"))}${unitLabel}${typed("damaged")}`)}
+          {row("Damaged goods without credit", `${formatQty(sum("noCredit"))}${unitLabel}${typed("noCredit")}`)}
+        </div>
+        {result.lines.length > 1 && (
+          <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+            {result.lines.map(l => (
+              <li key={l.productName}>{l.productName}: {l.good} good · {l.damaged} damaged credit · {l.noCredit} no credit ({l.mainUnit})</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <DialogFooter className="gap-2 sm:gap-0">
+        <Button variant="outline" size="sm" onClick={onAnother}>Record another return</Button>
+        <Button size="sm" onClick={onClose}>Close</Button>
+      </DialogFooter>
+    </>
+  );
+}
+
 function NewClaimDialog({
   open, onOpenChange, orders, invoices, api, presetOrderId,
 }: {
