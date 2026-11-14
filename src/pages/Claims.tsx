@@ -148,6 +148,86 @@ function ClaimCard({
   );
 }
 
+type SavedReturn = {
+  creditNoteNumber: string | null; grandTotal: number; restocked: boolean;
+  taxableTotal: number | null; taxTotal: number | null; roundOff: number | null; godownName: string | null; replayed: boolean;
+  dealerName: string; orderNumber: string; billNumber: string;
+  lines: { productName: string; mainUnit: string; unitName: string | null; factor: number;
+    good: number; damaged: number; noCredit: number; enteredGood: number; enteredDamaged: number; enteredNoCredit: number }[];
+};
+
+/** The Saved step: every figure comes from the save response or from exactly what was sent. */
+function SavedReturnView({ result, onAnother, onClose }: { result: SavedReturn; onAnother: () => void; onClose: () => void }) {
+  const sum = (k: "good" | "damaged" | "noCredit") => result.lines.reduce((t, l) => t + l[k], 0);
+  const mainUnits = Array.from(new Set(result.lines.map(l => l.mainUnit)));
+  const unitLabel = mainUnits.length === 1 ? ` ${mainUnits[0]}` : "";
+  const typed = (k: "good" | "damaged" | "noCredit") => {
+    const ek = k === "good" ? "enteredGood" : k === "damaged" ? "enteredDamaged" : "enteredNoCredit";
+    const parts = result.lines.filter(l => l.unitName && l[k] > 0).map(l => `${formatQty(l[ek])} ${l.unitName}`);
+    return parts.length ? ` (typed as ${parts.join(", ")})` : "";
+  };
+  const showSplit = result.creditNoteNumber && result.taxableTotal !== null && result.taxTotal !== null;
+  const row = (label: string, value: string, strong = false) => (
+    <div className={`flex items-center justify-between gap-3 ${strong ? "border-t border-border pt-1.5 text-sm" : "text-muted-foreground"}`}>
+      <span className={strong ? "font-medium text-foreground" : ""}>{label}</span>
+      <span className={`num text-right ${strong ? "font-semibold text-foreground" : ""}`}>{value}</span>
+    </div>
+  );
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 text-success" />
+          <DialogTitle>Return saved</DialogTitle>
+        </div>
+        <DialogDescription>
+          {result.dealerName} · Order {result.orderNumber} · Bill {result.billNumber}
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-3 text-xs">
+        <div className="rounded-lg border border-border px-3 py-2">
+          {result.creditNoteNumber ? (
+            <p className="text-sm">Credit note <span className="font-semibold num">{result.creditNoteNumber}</span></p>
+          ) : (
+            <p className="text-sm font-medium">No credit note issued – damaged goods without credit</p>
+          )}
+        </div>
+        {result.creditNoteNumber && (
+          <div className="space-y-1 rounded-lg border border-border bg-muted/20 px-3 py-2">
+            {showSplit && row("Taxable credit", formatCurrency(result.taxableTotal!))}
+            {showSplit && row("GST", formatCurrency(result.taxTotal!))}
+            {showSplit && !!result.roundOff && row("Round off", formatCurrency(result.roundOff!))}
+            {row("Total credited", formatCurrency(result.grandTotal), true)}
+          </div>
+        )}
+        <div className="space-y-1.5 rounded-lg border border-border px-3 py-2">
+          {row("Good goods restocked", `${formatQty(sum("good"))}${unitLabel}${typed("good")}`)}
+          {sum("good") > 0 && (
+            <p className="text-[11px] text-muted-foreground">
+              {result.restocked
+                ? `Back in ${result.godownName ?? "the order's godown"}`
+                : "Not added to stock (this order has no godown)"}
+            </p>
+          )}
+          {row("Damaged goods with credit", `${formatQty(sum("damaged"))}${unitLabel}${typed("damaged")}`)}
+          {row("Damaged goods without credit", `${formatQty(sum("noCredit"))}${unitLabel}${typed("noCredit")}`)}
+        </div>
+        {result.lines.length > 1 && (
+          <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+            {result.lines.map(l => (
+              <li key={l.productName}>{l.productName}: {l.good} good · {l.damaged} damaged credit · {l.noCredit} no credit ({l.mainUnit})</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <DialogFooter className="gap-2 sm:gap-0">
+        <Button variant="outline" size="sm" onClick={onAnother}>Record another return</Button>
+        <Button size="sm" onClick={onClose}>Close</Button>
+      </DialogFooter>
+    </>
+  );
+}
+
 function NewClaimDialog({
   open, onOpenChange, orders, invoices, api, presetOrderId,
 }: {
@@ -158,7 +238,11 @@ function NewClaimDialog({
   api: ReturnType<typeof useApi>;
   presetOrderId?: string | null;
 }) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  /** What the last successful save returned, plus exactly what was sent. Shown on the Saved step. */
+  const [result, setResult] = useState<SavedReturn | null>(null);
+  const savingRef = useRef(false);
+  const presetUsedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reason, setReason] = useState("");
@@ -258,7 +342,10 @@ function NewClaimDialog({
   }, [eligibleOrders, search]);
 
   const resetAndClose = () => {
+    if (savingRef.current) return;
     setStep(1);
+    setResult(null);
+    presetUsedRef.current = false;
     setSearch("");
     setSelectedOrder(null);
     setReason("");
@@ -281,9 +368,9 @@ function NewClaimDialog({
 
   // Opened from an order page: jump straight to that order's return.
   useEffect(() => {
-    if (!open || !presetOrderId || selectedOrder) return;
+    if (!open || !presetOrderId || selectedOrder || presetUsedRef.current) return;
     const match = eligibleOrders.find(o => o.id === presetOrderId);
-    if (match) selectOrder(match);
+    if (match) { presetUsedRef.current = true; selectOrder(match); }
   }, [open, presetOrderId, selectedOrder, eligibleOrders]);
 
   const returnLines = (billLines.length > 0 ? billLines : selectedBill?.lines ?? []).map(l => {
@@ -330,6 +417,7 @@ function NewClaimDialog({
   // first save instead of filing the return twice.
   const returnKeyRef = useRef<string | null>(null);
   const handleSubmit = async () => {
+    if (savingRef.current) return;
     if (!selectedOrder || !selectedBill) return;
     if (!alreadyReturned) {
       toast.error("Still checking what has already come back", { description: "Wait a moment, or reopen this return." });
@@ -349,7 +437,19 @@ function NewClaimDialog({
       toast.error("Enter how much is coming back");
       return;
     }
+    savingRef.current = true;
     setSubmitting(true);
+    const sent = {
+      dealerName: selectedOrder.distributorName,
+      orderNumber: selectedOrder.orderNumber,
+      billNumber: selectedBill.invoiceNumber,
+      lines: payload.map(l => ({
+        productName: l.productName, mainUnit: l.mainUnitName,
+        unitName: l.unit.id ? l.unit.name : null, factor: l.unit.factor,
+        good: l.check.good ?? 0, damaged: l.check.damaged ?? 0, noCredit: l.check.noCredit ?? 0,
+        enteredGood: l.entered.good, enteredDamaged: l.entered.damaged, enteredNoCredit: l.entered.noCredit,
+      })),
+    };
     if (!returnKeyRef.current) returnKeyRef.current = crypto.randomUUID();
     const res = await api.claims.recordReturn(
       selectedOrder.id,
@@ -365,6 +465,7 @@ function NewClaimDialog({
       undefined,
       returnKeyRef.current,
     );
+    savingRef.current = false;
     setSubmitting(false);
     if (res) {
       returnKeyRef.current = null;
@@ -376,15 +477,28 @@ function NewClaimDialog({
       } else {
         toast.success("Return recorded", { description: "No credit given, so no credit note was made." });
       }
-      resetAndClose();
+      setResult({ ...res, ...sent });
+      setStep(3);
     }
+  };
+
+  /** Back to picking a bill; keeps the dealer's name in the search, clears everything else. */
+  const startAnother = () => {
+    const dealer = result?.dealerName ?? "";
+    setResult(null);
+    setSelectedOrder(null);
+    setGood({}); setDamaged({}); setNoCredit({}); setUnitPick({}); setReason("");
+    setSearch(dealer);
+    setStep(1);
   };
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) resetAndClose(); }}>
       {/* Full screen on phones — the return form was too cramped in a small box */}
       <DialogContent className="max-w-lg overflow-y-auto max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:border-0 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-h-[85vh]">
-        {step === 1 ? (
+        {step === 3 && result ? (
+          <SavedReturnView result={result} onAnother={startAnother} onClose={resetAndClose} />
+        ) : step === 1 ? (
           <>
             <DialogHeader>
               <DialogTitle>Record a return</DialogTitle>

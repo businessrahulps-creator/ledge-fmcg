@@ -211,7 +211,7 @@ export interface DataContextType {
     reason: string,
     godownId?: string | null,
     idempotencyKey?: string,
-  ) => Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean } | null>;
+  ) => Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean; claimId: string | null; taxableTotal: number | null; taxTotal: number | null; roundOff: number | null; godownName: string | null; replayed: boolean } | null>;
   resolveClaim: (claimId: string, notes: string) => Promise<boolean>;
 
   invoices: Invoice[];

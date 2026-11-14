@@ -179,7 +179,7 @@ export function useBillingDomain(deps: BillingDeps) {
     reason: string,
     godownId?: string | null,
     idempotencyKey?: string,
-  ): Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean } | null> => {
+  ): Promise<{ creditNoteNumber: string | null; grandTotal: number; restocked: boolean; claimId: string | null; taxableTotal: number | null; taxTotal: number | null; roundOff: number | null; godownName: string | null; replayed: boolean } | null> => {
     if (!navigator.onLine) {
       toast.error("Cannot record returns offline", { description: "Please reconnect and try again." });
       return null;
@@ -203,11 +203,17 @@ export function useBillingDomain(deps: BillingDeps) {
         p_idempotency_key: idempotencyKey ?? null,
       });
       if (error) throw error;
-      const res = data as { credit_note_number: string | null; grand_total: number; restocked: boolean };
+      const res = data as { credit_note_number: string | null; grand_total: number; restocked: boolean; claim_id?: string | null;
+        taxable_total?: number | null; tax_total?: number | null; round_off?: number | null; godown_name?: string | null; replayed?: boolean };
       // The return is saved at this point. A failed screen refresh must not be
       // reported as a failed return (that invites a duplicate attempt).
       await Promise.allSettled([safeRefetchClaims(), safeRefetchInvoices(), deps.safeRefetchStockItems()]);
-      return { creditNoteNumber: res.credit_note_number ?? null, grandTotal: Number(res.grand_total), restocked: !!res.restocked };
+      const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
+      return {
+        creditNoteNumber: res.credit_note_number ?? null, grandTotal: Number(res.grand_total), restocked: !!res.restocked,
+        claimId: res.claim_id ?? null, taxableTotal: num(res.taxable_total), taxTotal: num(res.tax_total),
+        roundOff: num(res.round_off), godownName: res.godown_name ?? null, replayed: !!res.replayed,
+      };
     } catch (err: any) {
       handleSupabaseError(err, { source: "rpc:record_return_and_credit_atomic", title: "Could not record this return", context: { orderId } });
       return null;
