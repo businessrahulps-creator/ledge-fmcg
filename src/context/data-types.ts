@@ -169,7 +169,7 @@ export interface DataContextType {
     },
   ) => Promise<{ success: boolean; invoiceNumber?: string; alreadyDone?: boolean; error?: string }>;
   cancelOrder: (orderId: string, reason: string, advanceAction?: "apply_to_dues" | "refund" | null) => Promise<boolean>;
-  markDelivered: (orderId: string, note?: string) => Promise<boolean>;
+  markDelivered: (orderId: string, deliveredOn?: string, note?: string) => Promise<boolean>;
 
   addDistributor: (d: Distributor) => Promise<boolean>;
   updateDistributor: (d: Distributor) => Promise<boolean>;

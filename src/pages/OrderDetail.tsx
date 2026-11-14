@@ -62,6 +62,7 @@ import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatIndianDate } from "@/utils/formatDate";
+import { deliveryDateBounds, validateDeliveryDate } from "@/lib/delivery-date";
 import { todayKey } from "@/utils/dateKey";
 
 interface EditLineState {
@@ -302,12 +303,28 @@ export default function OrderDetail() {
     });
   };
 
-  const handleMarkDelivered = async () => {
-    if (!order) return;
+  const [deliverOpen, setDeliverOpen] = useState(false);
+  const [deliverDay, setDeliverDay] = useState("");
+  const [deliverNote, setDeliverNote] = useState("");
+  const deliverSavingRef = useRef(false);
+  const handleMarkDelivered = () => {
+    setDeliverDay(todayKey());
+    setDeliverNote("");
+    setDeliverOpen(true);
+  };
+  const confirmDelivered = async () => {
+    if (!order || deliverSavingRef.current) return;
+    const err = validateDeliveryDate(deliverDay, deliveryDateBounds(order, todayKey()));
+    if (err) { toast.error(err); return; }
+    deliverSavingRef.current = true;
     setIsSaving(true);
-    const ok = await api.orders.markDelivered(order.id);
+    const ok = await api.orders.markDelivered(order.id, deliverDay, deliverNote.trim());
     setIsSaving(false);
-    if (ok) toast.success(`${order.orderNumber} marked delivered.`);
+    deliverSavingRef.current = false;
+    if (ok) {
+      setDeliverOpen(false);
+      toast.success(`${order.orderNumber} marked delivered on ${formatIndianDate(deliverDay)}.`);
+    }
   };
 
   /** One step: stock out + final GST bill + order marked dispatched. */
@@ -459,7 +476,7 @@ export default function OrderDetail() {
       detail: hasBill ? finalInvoice?.invoiceNumber : dispatched ? "Not billed yet" : "On dispatch",
       state: hasBill ? "done" : dispatched ? "current" : "todo",
     },
-    { label: "Delivered", detail: delivered ? "Delivered" : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
+    { label: "Delivered", detail: delivered ? (order.deliveredAt ? formatIndianDate(order.deliveredAt) : "Delivered") : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
     {
       label: "Paid",
       detail: settled ? "Fully received" : received > 0 ? `${formatCurrency(received)} received` : undefined,
@@ -613,6 +630,12 @@ export default function OrderDetail() {
               <p className="fact-label">Sent on</p>
               <p className="fact-value">{formatIndianDate(order.dispatchDate)}</p>
             </div>
+            {delivered && order.deliveredAt && (
+              <div>
+                <p className="fact-label">Delivered on</p>
+                <p className="fact-value">{formatIndianDate(order.deliveredAt)}</p>
+              </div>
+            )}
             <div className="min-w-0">
               <p className="fact-label">Vehicle</p>
               <p className="fact-value truncate">{order.vehicle || "—"}</p>
@@ -1206,6 +1229,37 @@ export default function OrderDetail() {
               {isSaving ? "Working…" : "Dispatch & bill"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    <Dialog open={deliverOpen} onOpenChange={o => { if (!isSaving) setDeliverOpen(o); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Mark delivered</DialogTitle>
+            <DialogDescription>Pick the day the dealer actually got the goods.</DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const bounds = deliveryDateBounds(order, todayKey());
+            const err = validateDeliveryDate(deliverDay, bounds);
+            return (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="deliver-day" className="text-xs">Delivery date</Label>
+                  <Input id="deliver-day" type="date" value={deliverDay} min={bounds.min} max={bounds.max}
+                    onChange={e => setDeliverDay(e.target.value)} className="h-10 rounded-md" />
+                  {err && <p className="text-xs text-destructive">{err}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="deliver-note" className="text-xs">Delivery note (optional)</Label>
+                  <Textarea id="deliver-note" value={deliverNote} maxLength={300} onChange={e => setDeliverNote(e.target.value)}
+                    placeholder="e.g. Received by Ramesh" rows={2} />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" disabled={isSaving} onClick={() => setDeliverOpen(false)}>Cancel</Button>
+                  <Button disabled={isSaving || !!err} onClick={confirmDelivered}>{isSaving ? "Saving…" : "Confirm delivery"}</Button>
+                </DialogFooter>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </AppLayout>

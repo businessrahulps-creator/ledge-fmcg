@@ -217,7 +217,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
   }, [safeRefetch, deps.log]);
 
   /** Proof of delivery only — moves no stock and no money. */
-  const markDelivered = useCallback(async (orderId: string, note = ""): Promise<boolean> => {
+  const markDelivered = useCallback(async (orderId: string, deliveredOn?: string, note = ""): Promise<boolean> => {
     if (!navigator.onLine) {
       toast.error("You need to be online to mark an order delivered");
       return false;
@@ -225,6 +225,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
     try {
       const { error } = await supabase.rpc("mark_order_delivered_atomic", {
         p_order_id: orderId,
+        ...(deliveredOn ? { p_delivered_on: new Date(`${deliveredOn}T12:00:00+05:30`).toISOString() } : {}),
         p_note: sanitizeInput(note || ""),
       });
       if (error) throw error;
