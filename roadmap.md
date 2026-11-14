@@ -38,6 +38,7 @@
 - [ ] 225 stock rows: opening stock never recorded in history (add opening entries, quantities unchanged)
 
 ## Reports (one place to download anything)
+- [ ] Allow future custom dates, keep chronological validation, verify all report filters, summaries/exports, empty periods and unchanged presets.
 - [x] /reports screen: grouped catalogue, search, favourites, dates (IST), compare, live preview, recent downloads
 - [x] PDF (existing letterhead pipeline + sections/subtotals/totals/note/landscape), Excel (typed, multi-sheet, info sheet), CSV (UTF-8), WhatsApp share
 - [x] Reports: Sales x5, Money x4, Stock x3, Buying x3, GST x4, Shop visits
