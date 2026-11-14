@@ -38,6 +38,8 @@
 - [ ] 225 stock rows: opening stock never recorded in history (add opening entries, quantities unchanged)
 
 ## Reports (one place to download anything)
+- [x] Allow future custom dates, keep chronological validation, verify report filters, summaries/exports, empty periods and unchanged presets (37 report tests; build OK).
+- [ ] Signed-in future-date browser check — needs the requesting user to sign in in the preview; no matching account available for managed test sign-in.
 - [x] /reports screen: grouped catalogue, search, favourites, dates (IST), compare, live preview, recent downloads
 - [x] PDF (existing letterhead pipeline + sections/subtotals/totals/note/landscape), Excel (typed, multi-sheet, info sheet), CSV (UTF-8), WhatsApp share
 - [x] Reports: Sales x5, Money x4, Stock x3, Buying x3, GST x4, Shop visits

@@ -86,7 +86,7 @@ export default function Reports() {
   const periodLabel = [baseLabel, def?.filters?.includes("dealer") && dealerName, def?.filters?.includes("area") && area && `Area: ${area}`].filter(Boolean).join(" · ");
   const madeBy = profile?.full_name || user?.email || "";
 
-  const ctx = (): ExportContext | null => def && sections ? ({
+  const ctx = (): ExportContext | null => def && sections && !loading && !error ? ({
     def, sections, periodLabel, madeBy, include,
     summary: summary.map((s, i) => {
       const p = prevSummary?.[i];
@@ -109,7 +109,7 @@ export default function Reports() {
     setRecent(next); localStorage.setItem(RECENT_KEY, JSON.stringify(next));
     if (companyId) logExport({ company_id: companyId, user_name: madeBy, report_id: def.id, format, params: { from: range.from, to: range.to }, row_count: count });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [def, sections, summary, prevSummary, include, period, range.from, range.to, recent, companyId, madeBy, compare]);
+  }, [def, sections, summary, prevSummary, include, period, range.from, range.to, recent, companyId, madeBy, compare, loading, error]);
 
   const toggleFav = (id: string) => {
     const next = favs.includes(id) ? favs.filter(f => f !== id) : [...favs, id];
@@ -181,9 +181,9 @@ export default function Reports() {
                 <SegmentedControl<PeriodId> label="Dates" value={period} onChange={setPeriod} options={PERIODS} className="flex-wrap" />
                 {period === "custom" && (
                   <div className="flex items-center gap-2">
-                    <Input type="date" aria-label="From date" value={custom.from} max={custom.to} onChange={e => e.target.value && setCustom(c => ({ ...c, from: e.target.value }))} className="w-40" />
+                    <Input type="date" aria-label="From date" value={custom.from} max={custom.to} onChange={e => e.target.value && e.target.validity.valid && setCustom(c => ({ ...c, from: e.target.value }))} className="w-40" />
                     <span className="text-sm text-muted-foreground">to</span>
-                    <Input type="date" aria-label="To date" value={custom.to} min={custom.from} max={todayKey()} onChange={e => e.target.value && setCustom(c => ({ ...c, to: e.target.value }))} className="w-40" />
+                    <Input type="date" aria-label="To date" value={custom.to} min={custom.from} onChange={e => e.target.value && e.target.validity.valid && setCustom(c => ({ ...c, to: e.target.value }))} className="w-40" />
                   </div>
                 )}
                 {def?.summary && (
@@ -230,10 +230,10 @@ export default function Reports() {
                   <p className="text-xs text-muted-foreground mt-1">{def.usesDates ? periodLabel : `As on today, ${periodLabel}`}{sections ? ` · ${rows.length} row${rows.length === 1 ? "" : "s"}` : ""}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={() => doExport("pdf")} loading={busy === "pdf"} disabled={!sections || !!busy}><FileText className="h-4 w-4" /> PDF</Button>
-                  <Button variant="outline" onClick={() => doExport("xlsx")} loading={busy === "xlsx"} disabled={!sections || !!busy}><FileSpreadsheet className="h-4 w-4" /> Excel</Button>
-                  <Button variant="outline" onClick={() => doExport("csv")} loading={busy === "csv"} disabled={!sections || !!busy}><FileDown className="h-4 w-4" /> CSV</Button>
-                  <Button variant="outline" onClick={() => doExport("whatsapp")} loading={busy === "whatsapp"} disabled={!sections || !!busy}><Share2 className="h-4 w-4" /> WhatsApp</Button>
+                  <Button onClick={() => doExport("pdf")} loading={busy === "pdf"} disabled={!sections || loading || !!error || !!busy}><FileText className="h-4 w-4" /> PDF</Button>
+                  <Button variant="outline" onClick={() => doExport("xlsx")} loading={busy === "xlsx"} disabled={!sections || loading || !!error || !!busy}><FileSpreadsheet className="h-4 w-4" /> Excel</Button>
+                  <Button variant="outline" onClick={() => doExport("csv")} loading={busy === "csv"} disabled={!sections || loading || !!error || !!busy}><FileDown className="h-4 w-4" /> CSV</Button>
+                  <Button variant="outline" onClick={() => doExport("whatsapp")} loading={busy === "whatsapp"} disabled={!sections || loading || !!error || !!busy}><Share2 className="h-4 w-4" /> WhatsApp</Button>
                 </div>
               </div>
 
