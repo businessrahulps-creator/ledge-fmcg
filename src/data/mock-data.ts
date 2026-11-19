@@ -68,6 +68,8 @@ export interface Salesperson {
   region: string;
   totalOrders: number;
   totalValue: number;
+  /** Login linked to this sales person (only set by team managers). */
+  userId?: string | null;
 }
 
 export interface OrderLine {

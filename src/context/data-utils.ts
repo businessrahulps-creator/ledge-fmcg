@@ -68,7 +68,7 @@ export function mapDistributor(d: any): Distributor {
 }
 
 export function mapSalesperson(s: any): Salesperson {
-  return { id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: s.total_orders ?? 0, totalValue: Number(s.total_value ?? 0) };
+  return { id: s.id, name: s.name, phone: s.phone, email: s.email, region: s.region, totalOrders: s.total_orders ?? 0, totalValue: Number(s.total_value ?? 0), userId: s.user_id ?? null };
 }
 
 export function mapProduct(p: any): Product {

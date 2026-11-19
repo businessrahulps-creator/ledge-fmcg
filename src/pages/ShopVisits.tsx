@@ -1,3 +1,4 @@
+import { formatVisitStamp } from "@/lib/salesperson-identity";
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Phone, Plus, Search } from "lucide-react";
@@ -124,7 +125,7 @@ export default function ShopVisits() {
               </span>
             </p>
             {x.note && <p className="text-sm text-foreground mt-1">“{x.note}”</p>}
-            <p className="text-xs text-muted-foreground mt-1">Noted by {x.createdByName || "someone"} on {formatIndianDate(x.createdAt)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Noted by {x.createdByName || "someone"} · {formatVisitStamp(x.createdAt)}</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">

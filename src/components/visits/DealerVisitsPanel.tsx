@@ -1,3 +1,4 @@
+import { formatVisitStamp } from "@/lib/salesperson-identity";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/data/mock-data";
@@ -35,7 +36,7 @@ export function DealerVisitsPanel({ dealerId, dealerName }: { dealerId: string; 
                   {v.outcome === "promised_payment" && v.promiseAmount ? ` · ${formatCurrency(v.promiseAmount)}` : ""}
                   {v.promiseDate ? ` · by ${formatIndianDate(v.promiseDate)}` : ""}
                 </span>
-                <span className="text-xs text-muted-foreground">{formatIndianDate(v.createdAt)} · {v.createdByName || "someone"}</span>
+                <span className="text-xs text-muted-foreground">{v.createdByName || "someone"} · {formatVisitStamp(v.createdAt)}</span>
               </div>
               {v.promiseStatus !== "none" && <p className="text-xs text-muted-foreground">Promise: {PROMISE_WORD[v.promiseStatus]}</p>}
               {v.note && <p className="text-foreground mt-0.5">“{v.note}”</p>}

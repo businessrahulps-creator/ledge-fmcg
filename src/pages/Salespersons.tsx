@@ -38,6 +38,10 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { handleSupabaseError } from "@/utils/handleSupabaseError";
 
 export default function Salespersons() {
   const api = useApi();
@@ -94,6 +98,23 @@ export default function Salespersons() {
   };
 
   const [saving, setSaving] = useState(false);
+  // Login link: only team managers see and change it; the server checks this too.
+  const canLinkLogin = useCan("manage_team");
+  const { companyId } = useAuth() as any;
+  const [logins, setLogins] = useState<{ userId: string; label: string }[]>([]);
+  const [linkUserId, setLinkUserId] = useState<string>("");
+  useEffect(() => {
+    if (!canLinkLogin || !companyId || !editItem || isNew) return;
+    let live = true;
+    supabase.from("profiles").select("user_id, full_name, email").eq("company_id", companyId).then(({ data }) => {
+      if (!live) return;
+      setLogins((data || []).filter((p: any) => p.user_id).map((p: any) => ({
+        userId: p.user_id, label: p.full_name ? `${p.full_name}${p.email ? ` (${p.email})` : ""}` : (p.email || "Team member"),
+      })));
+    });
+    return () => { live = false; };
+  }, [canLinkLogin, companyId, editItem?.id, isNew]);
+  useEffect(() => { setLinkUserId(editItem?.userId ?? ""); }, [editItem?.id]);
 
   const save = async () => {
     if (saving) return;
@@ -108,6 +129,10 @@ export default function Salespersons() {
     try {
       const ok = isNew ? await addSalesperson(itemToSave) : await updateSalesperson(itemToSave);
       if (!ok) return; // keep the form open; the failure was already explained
+      if (!isNew && canLinkLogin && (linkUserId || null) !== (editItem.userId ?? null)) {
+        const { error } = await supabase.from("salespersons").update({ user_id: linkUserId || null }).eq("id", editItem.id);
+        if (error) { handleSupabaseError(error, { source: "salespersons:link-login", title: "Details saved, but the login link didn't save" }); return; }
+      }
       toast.success(isNew ? "Team member added" : "Team member updated", {
         description: `${itemToSave.name} has been ${isNew ? "added" : "updated"}.`,
       });
@@ -264,6 +289,20 @@ export default function Salespersons() {
                   <Label className="text-xs md:text-sm">Email</Label>
                   <Input value={editItem.email} onChange={(e) => setEditItem({ ...editItem, email: e.target.value })} placeholder="name@company.com" className="h-10 rounded-lg" />
                 </div>
+                {!isNew && canLinkLogin && (
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label htmlFor="sp-login" className="text-xs md:text-sm">Their Ledge login</Label>
+                    <select id="sp-login" value={linkUserId} onChange={(e) => setLinkUserId(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm">
+                      <option value="">Not linked</option>
+                      {logins.map((l) => {
+                        const takenBy = items.find((s) => s.userId === l.userId && s.id !== editItem.id);
+                        return <option key={l.userId} value={l.userId} disabled={!!takenBy}>{l.label}{takenBy ? ` — linked to ${takenBy.name}` : ""}</option>;
+                      })}
+                    </select>
+                    <p className="text-xs text-muted-foreground">Their visits and new shops will be credited to this person.</p>
+                  </div>
+                )}
               </div>
               <DialogFooter className="gap-2 sm:gap-0 mt-4">
                 <Button type="button" variant="outline" onClick={() => setEditItem(null)}>Cancel</Button>

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { handleSupabaseError } from "@/utils/handleSupabaseError";
 import { addDaysToKey } from "@/utils/dateKey";
+import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 
 export type VisitOutcome =
   | "gave_order" | "paid" | "enough_stock" | "owner_away" | "shop_closed"
@@ -83,6 +84,7 @@ export function useShopVisits() {
   useEffect(() => { if (companyId && !store.snap.loaded && !store.inflight) void load(companyId); }, [companyId]);
   const reload = useCallback(() => (companyId ? load(companyId) : Promise.resolve()), [companyId]);
   const myName: string = profile?.full_name || user?.email || "";
+  const mySalespersonId = useCurrentSalesperson()?.id ?? null;
 
   const addVisit = useCallback(async (input: {
     distributorId: string; outcome: VisitOutcome; note: string; promiseDate?: string | null; promiseAmount?: number | null;
@@ -92,6 +94,7 @@ export function useShopVisits() {
     const { data, error } = await supabase.from("shop_visits").insert({
       company_id: companyId, distributor_id: input.distributorId, outcome: input.outcome,
       note: input.note.trim().slice(0, 500), created_by_name: myName,
+      visited_by_salesperson_id: mySalespersonId,
       promise_date: isPromise ? input.promiseDate ?? null : null,
       promise_amount: input.outcome === "promised_payment" ? input.promiseAmount ?? null : null,
       promise_status: isPromise ? "open" : "none",
@@ -109,7 +112,7 @@ export function useShopVisits() {
     }
     store.snap = { ...store.snap, visits: [mapVisit(data), ...store.snap.visits] }; emit();
     return true;
-  }, [companyId, myName]);
+  }, [companyId, myName, mySalespersonId]);
 
   const setPromiseStatus = useCallback(async (id: string, status: "kept" | "broken") => {
     const { error } = await supabase.from("shop_visits").update({ promise_status: status }).eq("id", id);
