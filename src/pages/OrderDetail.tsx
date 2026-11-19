@@ -477,7 +477,7 @@ export default function OrderDetail() {
       detail: hasBill ? finalInvoice?.invoiceNumber : dispatched ? "Not billed yet" : "On dispatch",
       state: hasBill ? "done" : dispatched ? "current" : "todo",
     },
-    { label: "Delivered", detail: delivered ? (order.deliveredAt ? formatIndianDate(order.deliveredAt) : "Delivered") : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
+    { label: "Delivered", detail: delivered ? (order.deliveredAt ? formatIndianDate(order.deliveredAt) : "Delivered") : dispatched ? "Not confirmed yet" : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
     ...(canSeeMoney ? [{
       label: "Paid",
       detail: settled ? "Fully received" : received > 0 ? `${formatCurrency(received)} received` : undefined,

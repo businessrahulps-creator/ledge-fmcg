@@ -109,4 +109,4 @@
 - [x] 1. Returns require money access (server)
 - [x] 2. Hide order money from roles without money access
 - [x] 3. One correct "still to collect" figure on order page
-- [ ] 4. Delivery timeline shows Delivered only after confirmation
+- [x] 4. Delivery timeline shows Delivered only after confirmation
