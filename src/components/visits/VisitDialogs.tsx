@@ -1,3 +1,5 @@
+import { useApi } from "@/services/api";
+import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -90,10 +92,12 @@ export function AddVisitDialog({ open, onOpenChange, dealerId, dealerName }: {
 
 export function AddShopDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { addProspect } = useShopVisits();
-  const blank = { name: "", ownerName: "", phone: "", area: "", shopType: "", note: "" };
+  const roster = useApi().salespersons.list();
+  const me = useCurrentSalesperson();
+  const blank = { name: "", ownerName: "", phone: "", area: "", shopType: "", note: "", foundBy: "" };
   const [f, setF] = useState(blank);
   const [saving, setSaving] = useState(false);
-  useEffect(() => { if (open) { setF(blank); setSaving(false); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (open) { setF({ ...blank, foundBy: me?.id ?? "" }); setSaving(false); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   const set = (k: keyof typeof blank) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF(p => ({ ...p, [k]: e.target.value }));
 
   const save = async () => {
@@ -101,7 +105,7 @@ export function AddShopDialog({ open, onOpenChange }: { open: boolean; onOpenCha
     if (!f.name.trim()) { toast.error("Enter the shop name."); return; }
     if (f.phone && !/^[0-9+\-\s]{6,15}$/.test(f.phone.trim())) { toast.error("Check the phone number."); return; }
     setSaving(true);
-    const ok = await addProspect(f);
+    const ok = await addProspect({ ...f, foundBySalespersonId: f.foundBy || null });
     setSaving(false);
     if (ok) { toast.success("Shop added"); onOpenChange(false); }
   };
@@ -120,6 +124,14 @@ export function AddShopDialog({ open, onOpenChange }: { open: boolean; onOpenCha
             <div className="space-y-1.5"><Label htmlFor="ns-phone">Phone</Label><Input id="ns-phone" inputMode="tel" value={f.phone} onChange={set("phone")} /></div>
             <div className="space-y-1.5"><Label htmlFor="ns-area">Area / town</Label><Input id="ns-area" value={f.area} onChange={set("area")} /></div>
             <div className="space-y-1.5"><Label htmlFor="ns-type">Type of shop</Label><Input id="ns-type" value={f.shopType} onChange={set("shopType")} placeholder="e.g. Hardware, Chemist" /></div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="ns-found">Found by</Label>
+            <select id="ns-found" value={f.foundBy} onChange={e => setF(p => ({ ...p, foundBy: e.target.value }))}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+              <option value="">Direct lead (office)</option>
+              {roster.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
           </div>
           <div className="space-y-1.5"><Label htmlFor="ns-note">Note (optional)</Label><Textarea id="ns-note" rows={2} maxLength={500} value={f.note} onChange={set("note")} /></div>
         </div>

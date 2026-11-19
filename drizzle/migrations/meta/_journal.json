@@ -505,6 +505,13 @@
       "when": 1795075417849,
       "tag": "0071_salesperson_attribution_helper_grant",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1795076527477,
+      "tag": "0072_convert_prospect_carries_attribution",
+      "breakpoints": true
     }
   ]
 }

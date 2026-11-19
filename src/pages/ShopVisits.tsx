@@ -45,6 +45,7 @@ export default function ShopVisits() {
   const today = todayKey();
 
   const dealerName = useMemo(() => new Map(dealers.map(d => [d.id, d.name])), [dealers]);
+  const spName = useMemo(() => new Map(api.salespersons.list().map(s => [s.id, s.name])), [api]);
 
   // One row per dealer: when they last ordered and when someone last visited.
   const rows = useMemo(() => {
@@ -278,7 +279,7 @@ export default function ShopVisits() {
                       <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs text-foreground">{STAGE_LABEL[p.stage as ProspectStage]}</span>
                     </div>
                     {p.note && <p className="text-sm text-foreground">“{p.note}”</p>}
-                    <p className="text-xs text-muted-foreground">Added by {p.createdByName || "someone"} on {formatIndianDate(p.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground">Found by {spName.get(p.foundBySalespersonId ?? "") || "Direct lead"} · added by {p.createdByName || "someone"} on {formatIndianDate(p.createdAt)}</p>
                     <div className="flex flex-wrap gap-2">
                       {(p.stage === "found" || p.stage === "talked") && (
                         <>

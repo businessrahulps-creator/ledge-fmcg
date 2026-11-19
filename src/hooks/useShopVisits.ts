@@ -35,7 +35,7 @@ export interface ShopVisit {
 }
 export interface ShopProspect {
   id: string; name: string; ownerName: string; phone: string; area: string; shopType: string; note: string;
-  stage: ProspectStage; convertedDistributorId: string | null; createdByName: string; createdAt: string; updatedAt: string;
+  stage: ProspectStage; convertedDistributorId: string | null; foundBySalespersonId: string | null; createdByName: string; createdAt: string; updatedAt: string;
 }
 
 interface Snap { visits: ShopVisit[]; prospects: ShopProspect[]; loading: boolean; loaded: boolean }
@@ -50,7 +50,7 @@ const mapVisit = (x: any): ShopVisit => ({
 });
 const mapProspect = (x: any): ShopProspect => ({
   id: x.id, name: x.name, ownerName: x.owner_name, phone: x.phone, area: x.area, shopType: x.shop_type, note: x.note,
-  stage: x.stage, convertedDistributorId: x.converted_distributor_id, createdByName: x.created_by_name,
+  stage: x.stage, convertedDistributorId: x.converted_distributor_id, foundBySalespersonId: x.found_by_salesperson_id ?? null, createdByName: x.created_by_name,
   createdAt: x.created_at, updatedAt: x.updated_at,
 });
 
@@ -121,11 +121,12 @@ export function useShopVisits() {
     return true;
   }, []);
 
-  const addProspect = useCallback(async (input: { name: string; ownerName: string; phone: string; area: string; shopType: string; note: string }) => {
+  const addProspect = useCallback(async (input: { name: string; ownerName: string; phone: string; area: string; shopType: string; note: string; foundBySalespersonId?: string | null }) => {
     if (!companyId) return false;
     const { data, error } = await supabase.from("shop_prospects").insert({
       company_id: companyId, name: input.name.trim(), owner_name: input.ownerName.trim(), phone: input.phone.trim(),
       area: input.area.trim(), shop_type: input.shopType.trim(), note: input.note.trim().slice(0, 500), created_by_name: myName,
+      found_by_salesperson_id: input.foundBySalespersonId ?? null,
     }).select("*").single();
     if (error) { handleSupabaseError(error, { source: "visits:prospect.add", title: "Couldn't save this shop" }); return false; }
     store.snap = { ...store.snap, prospects: [mapProspect(data), ...store.snap.prospects] }; emit();
