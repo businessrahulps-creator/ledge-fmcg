@@ -54,3 +54,20 @@ export function prefillOrderSalesperson(
   // dealer has no (valid) assignee: clear only what we filled ourselves
   return current === lastAuto ? "" : current;
 }
+
+export interface CoverageRow { id: string; name: string; shopsAcquired: number; prospectsFound: number; dealersAssigned: number }
+/**
+ * Coverage & acquisition counts per sales person. Entity counts only —
+ * never revenue (revenue stays on orders.salesperson_id).
+ */
+export function salespersonCoverage(
+  team: { id: string; name: string }[],
+  dealers: { acquiredBySalespersonId?: string | null; assignedSalespersonId?: string | null }[],
+  prospects: { foundBySalespersonId?: string | null }[],
+): CoverageRow[] {
+  const inc = (m: Map<string, number>, k?: string | null) => { if (k) m.set(k, (m.get(k) ?? 0) + 1); };
+  const acq = new Map<string, number>(), asg = new Map<string, number>(), fnd = new Map<string, number>();
+  dealers.forEach(d => { inc(acq, d.acquiredBySalespersonId); inc(asg, d.assignedSalespersonId); });
+  prospects.forEach(p => inc(fnd, p.foundBySalespersonId));
+  return team.map(s => ({ id: s.id, name: s.name, shopsAcquired: acq.get(s.id) ?? 0, prospectsFound: fnd.get(s.id) ?? 0, dealersAssigned: asg.get(s.id) ?? 0 }));
+}

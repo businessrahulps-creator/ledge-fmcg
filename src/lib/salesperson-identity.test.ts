@@ -58,3 +58,20 @@ describe("order sales person prefill", () => {
     expect(pf("", null, "gone", ["sp1"])).toBe("");
   });
 });
+
+import { salespersonCoverage } from "./salesperson-identity";
+describe("sales team coverage counts", () => {
+  const team = [{ id: "a", name: "Ravi" }, { id: "b", name: "Meena" }];
+  it("counts acquired, assigned and found separately", () => {
+    const rows = salespersonCoverage(team,
+      [{ acquiredBySalespersonId: "a", assignedSalespersonId: "b" }, { acquiredBySalespersonId: "a", assignedSalespersonId: "a" }, {}],
+      [{ foundBySalespersonId: "b" }, { foundBySalespersonId: null }]);
+    expect(rows[0]).toMatchObject({ shopsAcquired: 2, dealersAssigned: 1, prospectsFound: 0 });
+    expect(rows[1]).toMatchObject({ shopsAcquired: 0, dealersAssigned: 1, prospectsFound: 1 });
+  });
+  it("reassigning a dealer never changes who acquired it", () => {
+    const rows = salespersonCoverage(team, [{ acquiredBySalespersonId: "a", assignedSalespersonId: "b" }], []);
+    expect(rows[0].shopsAcquired).toBe(1);
+    expect(rows[1].shopsAcquired).toBe(0);
+  });
+});

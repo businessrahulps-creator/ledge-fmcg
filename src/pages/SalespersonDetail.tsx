@@ -13,6 +13,8 @@ import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency } from "@/data/mock-data";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
+import { useShopVisits } from "@/hooks/useShopVisits";
+import { salespersonCoverage } from "@/lib/salesperson-identity";
 import { useReceivables } from "@/hooks/useReceivables";
 import { formatIndianDate } from "@/utils/formatDate";
 
@@ -29,6 +31,9 @@ export default function SalespersonDetail() {
   const payStatus = (oid: string) => paymentStatusByOrderId.get(oid) ?? "pending";
 
   const person = items.find(s => s.id === id);
+  const dealersAll = api.dealers.list();
+  const { prospects } = useShopVisits();
+  const coverage = useMemo(() => person ? salespersonCoverage([person], dealersAll, prospects)[0] : null, [person, dealersAll, prospects]);
   const personOrders = useMemo(() => orders.filter(o => o.salespersonId === id), [orders, id]);
 
   if (!person) {
@@ -164,6 +169,23 @@ export default function SalespersonDetail() {
               <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.totalRevenue30d)}</p>
             </div>
           </div>
+
+          {coverage && (
+            <div className="mt-3 grid grid-cols-3 gap-3 md:gap-4" aria-label="Dealer coverage (counts, not sales)">
+              <div className="glass-card p-3 md:p-4">
+                <span className="text-xs text-muted-foreground">Shops brought in</span>
+                <p className="mt-0.5 text-sm font-semibold md:text-base">{coverage.shopsAcquired}</p>
+              </div>
+              <div className="glass-card p-3 md:p-4">
+                <span className="text-xs text-muted-foreground">New shops found</span>
+                <p className="mt-0.5 text-sm font-semibold md:text-base">{coverage.prospectsFound}</p>
+              </div>
+              <div className="glass-card p-3 md:p-4">
+                <span className="text-xs text-muted-foreground">Dealers looked after</span>
+                <p className="mt-0.5 text-sm font-semibold md:text-base">{coverage.dealersAssigned}</p>
+              </div>
+            </div>
+          )}
 
           <div className="mt-3 grid grid-cols-2 gap-3 md:gap-4">
             <div className="glass-card p-3 md:p-4">

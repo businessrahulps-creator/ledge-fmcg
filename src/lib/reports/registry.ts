@@ -6,6 +6,7 @@ const MONEY_RECEIVED = ["posted", "refund_due", "refunded"];
 const nextDayIST = (day: string) => { const d = new Date(`${day}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 1); return `${d.toISOString().slice(0, 10)}T00:00:00+05:30`; };
 const istDate = (ts: string) => new Date(new Date(ts).getTime() + 330 * 60000).toISOString().slice(0, 10);
 import { r2, sumBy } from "./format";
+import { salespersonCoverage } from "@/lib/salesperson-identity";
 
 /* Reports read straight from the database (company rules apply), page by page,
    so a year of bills never depends on what happens to be loaded in the app. */
@@ -100,6 +101,27 @@ export const REPORTS: ReportDef[] = [
       { key: "net", header: "Value", type: "money", total: true },
     ],
     fetch: async p => one(groupSum(await liveOrders(p, false), "salesperson", ["net"])),
+  },
+  {
+    id: "dealer_coverage", group: "Team", title: "Dealer coverage & new shops", capability: null, usesDates: false,
+    description: "Shops each person brought in, new shops they found, and dealers they look after now. Counts only — not sales value.",
+    columns: [
+      { key: "salesperson", header: "Salesperson", weight: 3 },
+      { key: "acquired", header: "Shops brought in", type: "number", total: true },
+      { key: "found", header: "New shops found", type: "number", total: true },
+      { key: "assigned", header: "Dealers looked after", type: "number", total: true },
+    ],
+    fetch: async () => {
+      const [team, dealers, prospects] = await Promise.all([
+        fetchAll((a, b) => supabase.from("salespersons").select("id,name").order("name").range(a, b)),
+        fetchAll((a, b) => supabase.from("distributors").select("acquired_by_salesperson_id,assigned_salesperson_id").range(a, b)),
+        fetchAll((a, b) => supabase.from("shop_prospects").select("found_by_salesperson_id").range(a, b)),
+      ]);
+      const rows = salespersonCoverage(team,
+        dealers.map((d: any) => ({ acquiredBySalespersonId: d.acquired_by_salesperson_id, assignedSalespersonId: d.assigned_salesperson_id })),
+        prospects.map((p: any) => ({ foundBySalespersonId: p.found_by_salesperson_id })));
+      return one(rows.map(r => ({ salesperson: r.name, acquired: r.shopsAcquired, found: r.prospectsFound, assigned: r.dealersAssigned })));
+    },
   },
   {
     id: "sales_by_product", group: "Sales", title: "Sales by product", capability: "see_money", usesDates: true,
