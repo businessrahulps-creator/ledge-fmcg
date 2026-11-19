@@ -35,3 +35,22 @@ export function acquiredByLabel(name: string | null | undefined, date: string | 
 export function assignedLabel(name: string | null | undefined): string {
   return name ? `Looked after by ${name}` : "Unassigned";
 }
+
+/**
+ * Order form prefill: when a dealer is chosen, suggest the dealer's
+ * assigned sales person. Never overwrite a choice the user made by hand.
+ * `lastAuto` is the value this rule filled last time (null if none).
+ * Returns the value the box should now hold.
+ */
+export function prefillOrderSalesperson(
+  current: string,
+  lastAuto: string | null,
+  assignedId: string | null | undefined,
+  rosterIds: string[],
+): string {
+  const userPicked = current !== "" && current !== lastAuto;
+  if (userPicked) return current;
+  if (assignedId && rosterIds.includes(assignedId)) return assignedId;
+  // dealer has no (valid) assignee: clear only what we filled ourselves
+  return current === lastAuto ? "" : current;
+}

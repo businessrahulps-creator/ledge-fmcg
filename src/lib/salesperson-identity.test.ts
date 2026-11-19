@@ -38,3 +38,23 @@ describe("dealer attribution labels", () => {
     expect(acquiredByLabel("Ravi", "2026-11-12", fmt)).toBe("Acquired by Ravi on 2026-11-12");
   });
 });
+
+import { prefillOrderSalesperson as pf } from "./salesperson-identity";
+describe("order sales person prefill", () => {
+  it("fills empty box with the dealer's assigned person", () => {
+    expect(pf("", null, "sp1", ["sp1", "sp2"])).toBe("sp1");
+  });
+  it("never overwrites a hand-picked person", () => {
+    expect(pf("sp2", null, "sp1", ["sp1", "sp2"])).toBe("sp2");
+  });
+  it("switching dealer replaces our own earlier suggestion", () => {
+    expect(pf("sp1", "sp1", "sp2", ["sp1", "sp2"])).toBe("sp2");
+  });
+  it("unassigned dealer clears only our own suggestion", () => {
+    expect(pf("sp1", "sp1", null, ["sp1"])).toBe("");
+    expect(pf("sp2", "sp1", null, ["sp1", "sp2"])).toBe("sp2");
+  });
+  it("ignores an assignee no longer in the team list", () => {
+    expect(pf("", null, "gone", ["sp1"])).toBe("");
+  });
+});

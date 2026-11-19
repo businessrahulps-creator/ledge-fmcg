@@ -1,3 +1,4 @@
+import { prefillOrderSalesperson } from "@/lib/salesperson-identity";
 import { splitCashOverpay, isCashChange } from "@/lib/cash-change";
 import React from "react";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -224,6 +225,20 @@ export default function NewOrder() {
   const orderTotal = lines.reduce((sum, l) => sum + getLineTotal(l), 0);
 
   const selectedDealerObj = distributors.find(d => d.id === selectedDealer);
+
+  // Phase 5: suggest the dealer's assigned sales person; editable, never overrides a hand pick.
+  // Revenue/targets still come only from the sales person saved on the order.
+  const lastAutoSp = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedDealer) return;
+    const assigned = (selectedDealerObj as any)?.assignedSalespersonId ?? null;
+    setSelectedSalesperson((cur) => {
+      const next = prefillOrderSalesperson(cur, lastAutoSp.current, assigned, salespersons.map((s) => s.id));
+      lastAutoSp.current = next && next === assigned ? next : null;
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDealer, selectedDealerObj?.assignedSalespersonId, salespersons.length]);
   // (credit override capability resolved via useCan above)
 
   // --- Scheme auto-apply (centralized pricing engine) ---
@@ -581,6 +596,9 @@ export default function NewOrder() {
                       hint: s.phone || undefined,
                     }))}
                   />
+                  {selectedSalesperson && lastAutoSp.current === selectedSalesperson && (
+                    <p className="text-xs text-muted-foreground">Filled from the dealer's assigned sales person. You can change it.</p>
+                  )}
                   {attemptedSave && errors.salesperson && (
                     <p className="text-xs text-destructive">Please select a sales person.</p>
                   )}
