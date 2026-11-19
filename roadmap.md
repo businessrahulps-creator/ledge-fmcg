@@ -108,5 +108,5 @@
 ## Role-testing fixes (one at a time, user approves each)
 - [x] 1. Returns require money access (server)
 - [x] 2. Hide order money from roles without money access
-- [ ] 3. One correct "still to collect" figure on order page
+- [x] 3. One correct "still to collect" figure on order page
 - [ ] 4. Delivery timeline shows Delivered only after confirmation

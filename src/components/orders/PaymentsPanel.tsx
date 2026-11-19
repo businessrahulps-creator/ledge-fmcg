@@ -1,3 +1,4 @@
+import { orderBalanceDue } from "@/lib/order-balance";
 import { splitCashOverpay, isCashChange } from "@/lib/cash-change";
 import { roundPaise } from "@/lib/money";
 import { useReceivables } from "@/hooks/useReceivables";
@@ -115,7 +116,7 @@ export function PaymentsPanel({
     () => rows.filter(r => r.status === "posted").reduce((s, r) => s + Number(r.amount || 0), 0),
     [rows],
   );
-  const balance = Math.max(0, roundPaise(docTotal - credited - received));
+  const balance = orderBalanceDue(docTotal, credited, received);
 
   useEffect(() => { onTotals?.({ received, balance }); }, [received, balance, onTotals]);
   // Spare dealer money (dealer credit) already counts against the oldest bills.

@@ -444,7 +444,8 @@ export default function OrderDetail() {
   const hasBill = !!finalInvoice;
   const moneyTarget = hasBill ? finalInvoice.grandTotal : netTotal;
   const received = money.received;
-  const balance = Math.max(0, Math.round((moneyTarget - received) * 100) / 100);
+  // Same figure as the payments box (counts returns/credit notes too).
+  const balance = moneyLoaded ? money.balance : Math.max(0, Math.round((moneyTarget - received) * 100) / 100);
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
   const settled = balance <= 0 && received > 0;
