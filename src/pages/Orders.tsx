@@ -48,6 +48,7 @@ export default function Orders() {
   const { companyInfo } = api;
   const navigate = useNavigate();
   const canPlaceOrders = useCan("place_orders");
+  const canSeeMoney = useCan("see_money");
   const orders = api.orders.list();
   const invoices = api.invoices.list();
   // Payment chips come from the receipts ledger, never from orders.payment_status.
@@ -143,11 +144,11 @@ export default function Orders() {
     const matchesSearch =
       o.orderNumber.toLowerCase().includes(q) ||
       o.distributorName.toLowerCase().includes(q);
-    const matchesPayment = paymentFilter === "all" || payStatus(o.id) === paymentFilter;
+    const matchesPayment = !canSeeMoney || paymentFilter === "all" || payStatus(o.id) === paymentFilter;
     const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
     const matchesNeedsBill = !needsBillOnly || (!o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id));
     return matchesSearch && matchesPayment && matchesDelivery && matchesNeedsBill;
-  }), [orders, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds, payStatus]);
+  }), [orders, canSeeMoney, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds, payStatus]);
 
   const needsBillCount = useMemo(
     () => orders.filter(o => !o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id)).length,
@@ -286,7 +287,7 @@ export default function Orders() {
                     o.salesperson,
                     formatCurrency(o.total - (o.schemeSavings || 0)),
                     o.paymentMode.replace("_", " "),
-                    payStatus(o.id) ?? "",
+                    canSeeMoney ? payStatus(o.id) ?? "" : "",
                     o.deliveryStatus,
                     formatIndianDate(o.dispatchDate),
                     o.vehicle || "",
@@ -336,7 +337,7 @@ export default function Orders() {
               zero: insights.mtdCount === 0,
               insight: <InsightLine delta={insights.countDelta} comparator={prevMonthLabel} />,
             },
-            {
+            ...(canSeeMoney ? [{
               label: "Revenue (MTD)",
               value: formatCurrency(insights.mtdRevenue),
               zero: insights.mtdRevenue === 0,
@@ -349,7 +350,7 @@ export default function Orders() {
               insight: insights.pendingPaymentValue > 0
                 ? <InsightLine tone="down" fallback={`${formatCurrency(insights.pendingPaymentValue)} order value, not fully paid`} />
                 : <InsightLine tone="up" fallback="All settled" />,
-            },
+            }] : []),
           ]}
         />
 
@@ -383,7 +384,7 @@ export default function Orders() {
             />
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+            {canSeeMoney && <Select value={paymentFilter} onValueChange={setPaymentFilter}>
               <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
                 <SelectValue placeholder="Payment" />
               </SelectTrigger>
@@ -393,7 +394,7 @@ export default function Orders() {
                 <SelectItem value="partial">Partly paid</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
-            </Select>
+            </Select>}
             <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
               <SelectTrigger className="h-10 w-full rounded-lg sm:w-44">
                 <SelectValue placeholder="Delivery" />
@@ -473,7 +474,7 @@ export default function Orders() {
                           <td className="px-4 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                           <td className="px-4 py-3.5">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <StatusBadge status={payStatus(order.id)} />
+                              {canSeeMoney && <StatusBadge status={payStatus(order.id)} />}
                               {order.cancelledAt ? (
                                 <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
                               ) : (
@@ -521,7 +522,7 @@ export default function Orders() {
                         {order.distributorName} · {formatIndianDate(order.date)}
                       </p>
                       <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        <StatusBadge status={payStatus(order.id)} />
+                        {canSeeMoney && <StatusBadge status={payStatus(order.id)} />}
                         {order.cancelledAt ? (
                           <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
                         ) : (
@@ -576,7 +577,7 @@ export default function Orders() {
                 o.distributorName,
                 o.salesperson,
                 formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
-                titleCase(payStatus(o.id) ?? ""),
+                canSeeMoney ? titleCase(payStatus(o.id) ?? "") : "",
                 titleCase(o.deliveryStatus),
               ]),
             });

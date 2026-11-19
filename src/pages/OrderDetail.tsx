@@ -477,11 +477,11 @@ export default function OrderDetail() {
       state: hasBill ? "done" : dispatched ? "current" : "todo",
     },
     { label: "Delivered", detail: delivered ? (order.deliveredAt ? formatIndianDate(order.deliveredAt) : "Delivered") : undefined, state: delivered ? "done" : dispatched ? "current" : "todo" },
-    {
+    ...(canSeeMoney ? [{
       label: "Paid",
       detail: settled ? "Fully received" : received > 0 ? `${formatCurrency(received)} received` : undefined,
-      state: settled ? "done" : received > 0 ? "current" : "todo",
-    },
+      state: (settled ? "done" : received > 0 ? "current" : "todo") as JourneyStep["state"],
+    }] : []),
   ];
 
   return (
@@ -498,7 +498,7 @@ export default function OrderDetail() {
           subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
           aside={
             <>
-              <StatusBadge status={moneyStatus} />
+              {canSeeMoney && <StatusBadge status={moneyStatus} />}
               <StatusBadge status={order.deliveryStatus} kind="delivery" />
             </>
           }
@@ -517,18 +517,18 @@ export default function OrderDetail() {
                   note: (order.schemeSavings || 0) > 0 ? `Saved ${formatCurrency(order.schemeSavings)} on schemes` : undefined,
                 },
 
-            {
+            ...(canSeeMoney ? [{
               label: "Money received",
               value: formatCurrency(received),
-              tone: received > 0 ? "good" : "default",
+              tone: (received > 0 ? "good" : "default") as "good" | "default",
               note: hasBill ? `Against bill ${finalInvoice?.invoiceNumber}` : "Advance received on this order",
             },
             {
               label: "Balance to collect",
               value: formatCurrency(balance),
-              tone: balance > 0 ? "attention" : "good",
+              tone: (balance > 0 ? "attention" : "good") as "attention" | "good",
               note: balance > 0 ? "Still to be collected" : "Nothing pending",
-            },
+            }] : []),
           ]}
         />
 
@@ -591,7 +591,7 @@ export default function OrderDetail() {
                 <PackageCheck className="h-3.5 w-3.5" /> Mark delivered
               </Button>
             )}
-            {dispatched && (
+            {dispatched && canSeeMoney && (
               <Button size="sm" variant="outline" onClick={() => navigate(`/claims?order=${order.id}`)}>
                 <RotateCcw className="h-3.5 w-3.5" /> Record return
               </Button>
@@ -704,6 +704,7 @@ export default function OrderDetail() {
           </div>
         )}
 
+        {canSeeMoney && <>
         <Separator />
         <PaymentsPanel
           invoiceId={finalInvoice?.id ?? null}
@@ -715,6 +716,7 @@ export default function OrderDetail() {
           onTotals={handleMoneyTotals}
           onChanged={() => api.refreshAll()}
         />
+        </>}
 
         {/* Billing Documents */}
         <div className="glass-card overflow-hidden">
@@ -745,7 +747,7 @@ export default function OrderDetail() {
                       <p className="font-mono text-sm font-semibold tabular-nums">{formatCurrency(doc.grandTotal)}</p>
                       <span className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${view.className}`}>
                         {view.locked && <Lock className="h-2.5 w-2.5" />}
-                        {view.label}
+                        {canSeeMoney || !view.locked ? view.label : "Final"}
                       </span>
                     </div>
                   </button>
@@ -786,7 +788,7 @@ export default function OrderDetail() {
                               title={view.locked ? "This document is final and cannot be edited." : "Not issued yet."}
                             >
                               {view.locked && <Lock className="h-2.5 w-2.5" />}
-                              {view.label}
+                              {canSeeMoney || !view.locked ? view.label : "Final"}
                             </span>
                           );
                         })()}
