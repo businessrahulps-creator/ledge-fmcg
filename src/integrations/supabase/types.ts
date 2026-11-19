@@ -638,7 +638,10 @@ export type Database = {
       }
       distributors: {
         Row: {
+          acquired_by_salesperson_id: string | null
+          acquisition_date: string | null
           address: string
+          assigned_salesperson_id: string | null
           bank_account: string
           bank_account_name: string
           bank_ifsc: string
@@ -662,7 +665,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acquired_by_salesperson_id?: string | null
+          acquisition_date?: string | null
           address?: string
+          assigned_salesperson_id?: string | null
           bank_account?: string
           bank_account_name?: string
           bank_ifsc?: string
@@ -686,7 +692,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acquired_by_salesperson_id?: string | null
+          acquisition_date?: string | null
           address?: string
+          assigned_salesperson_id?: string | null
           bank_account?: string
           bank_account_name?: string
           bank_ifsc?: string
@@ -710,6 +719,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "distributors_acquired_by_salesperson_id_fkey"
+            columns: ["acquired_by_salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespersons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributors_assigned_salesperson_id_fkey"
+            columns: ["assigned_salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespersons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "distributors_company_id_fkey"
             columns: ["company_id"]
@@ -2265,6 +2288,7 @@ export type Database = {
           total_orders: number
           total_value: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           company_id: string
@@ -2277,6 +2301,7 @@ export type Database = {
           total_orders?: number
           total_value?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           company_id?: string
@@ -2289,6 +2314,7 @@ export type Database = {
           total_orders?: number
           total_value?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2485,6 +2511,7 @@ export type Database = {
           created_at: string
           created_by: string
           created_by_name: string
+          found_by_salesperson_id: string | null
           id: string
           name: string
           note: string
@@ -2501,6 +2528,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           created_by_name?: string
+          found_by_salesperson_id?: string | null
           id?: string
           name: string
           note?: string
@@ -2517,6 +2545,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           created_by_name?: string
+          found_by_salesperson_id?: string | null
           id?: string
           name?: string
           note?: string
@@ -2555,6 +2584,13 @@ export type Database = {
             referencedRelation: "distributors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "shop_prospects_found_by_salesperson_id_fkey"
+            columns: ["found_by_salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespersons"
+            referencedColumns: ["id"]
+          },
         ]
       }
       shop_visits: {
@@ -2571,6 +2607,7 @@ export type Database = {
           promise_date: string | null
           promise_status: string
           updated_at: string
+          visited_by_salesperson_id: string | null
         }
         Insert: {
           company_id: string
@@ -2585,6 +2622,7 @@ export type Database = {
           promise_date?: string | null
           promise_status?: string
           updated_at?: string
+          visited_by_salesperson_id?: string | null
         }
         Update: {
           company_id?: string
@@ -2599,6 +2637,7 @@ export type Database = {
           promise_date?: string | null
           promise_status?: string
           updated_at?: string
+          visited_by_salesperson_id?: string | null
         }
         Relationships: [
           {
@@ -2627,6 +2666,13 @@ export type Database = {
             columns: ["distributor_id"]
             isOneToOne: false
             referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_visits_visited_by_salesperson_id_fkey"
+            columns: ["visited_by_salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespersons"
             referencedColumns: ["id"]
           },
         ]
@@ -3348,6 +3394,10 @@ export type Database = {
           p_reference: string
         }
         Returns: Json
+      }
+      _sp_same_company: {
+        Args: { _company: string; _sp: string }
+        Returns: undefined
       }
       accept_team_invite: { Args: { p_token: string }; Returns: Json }
       activity_summary: {

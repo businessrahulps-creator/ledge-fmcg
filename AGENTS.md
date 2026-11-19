@@ -20,3 +20,4 @@
 - New orders save via the 9-arg `book_order_atomic` with a per-attempt save ID (orders.idempotency_key); money RPCs lock order before bill — why: no duplicate orders, no deadlocks.
 - /welcome never shows while `my_pending_invite()` finds a matching invite (NoCompanyGuard + Welcome redirect to it; sign-up and email-confirm keep the invite redirect) — why: invitees were making empty businesses.
 - OrderDetail's GST-rate gate uses the tested pendingOrderGstProducts rule matching dispatch_and_bill_order_atomic — why: no-GST bills must not be blocked by product tax settings.
+- Dealer attribution: acquired_by/acquisition_date are set only by server functions (clients can't write them); assigned_salesperson_id needs see_all_dealers or manage_team; salesperson links must be same-business (triggers in 0070) — why: acquisition credit is historical and must not be forged; revenue stays on orders.salesperson_id.

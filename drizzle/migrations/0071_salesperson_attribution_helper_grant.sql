@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public._sp_same_company(uuid, uuid) TO authenticated;
