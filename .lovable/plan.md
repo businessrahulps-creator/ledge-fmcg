@@ -1,5 +1,8 @@
 # Fix the four issues found in role testing
 
+## How we'll work
+One fix at a time, in the order below. After each fix I test it and report back; I move to the next only after you say go.
+
 ## What changes for people
 1. **Returns: only people allowed to see money can record them.** Sales Reps and Viewers will be refused by the server, matching the Returns page they already can't open. Owner, Manager and Accountant keep working as today.
 2. **Orders money hidden for roles without money access.** On the Orders list and each order page, Sales Reps and Viewers will no longer see rupee totals, balances or paid/unpaid badges. They still see products, quantities, dealer, dates and delivery status, and Sales Reps can still place orders.
