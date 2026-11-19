@@ -28,6 +28,7 @@ import { sortByRisk, BUCKET_LABEL, BUCKET_SHORT, BUCKET_TONE, type AgingBucket }
 import { SignalCard } from "@/components/ui/signal-card";
 import { ReconcileStamp } from "@/components/ui/reconcile-stamp";
 import { TodayStrip } from "@/components/intelligence/TodayStrip";
+import { dashboardAccess, indiaGreeting } from "@/lib/dashboard-access";
 
 const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -48,18 +49,13 @@ function useTimeAgo(date: Date) {
 
 const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good Morning";
-  if (h < 17) return "Good Afternoon";
-  return "Good Evening";
-}
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const canSeeMoney = useCan("see_money");
   const canPlaceOrders = useCan("place_orders");
+  const canManageBusiness = useCan("manage_business");
+  const access = dashboardAccess(canSeeMoney, canManageBusiness);
   const api = useApi();
   const isLoading = usePageLoading(api.loading);
 
@@ -222,7 +218,7 @@ export default function Dashboard() {
   const { totalRevenue, totalOrders, pendingOrders, dispatchedOrders } = dayAgg;
 
   const kpis = [
-    { label: "Order value", value: formatCurrency(totalRevenue) },
+    ...(access.money ? [{ label: "Order value", value: formatCurrency(totalRevenue) }] : []),
     { label: "Orders", value: totalOrders.toString() },
     { label: "Pending", value: pendingOrders.toString() },
     { label: "Sent", value: dispatchedOrders.toString() },
@@ -248,8 +244,8 @@ export default function Dashboard() {
   // (aging visibility gated by useCan("see_money"))
 
   const topDistributors = useMemo(
-    () => [...distributors].sort((a, b) => b.totalValue - a.totalValue).slice(0, 4),
-    [distributors],
+    () => [...distributors].sort((a, b) => access.money ? b.totalValue - a.totalValue : a.name.localeCompare(b.name)).slice(0, 4),
+    [distributors, access.money],
   );
   const maxDistVal = topDistributors[0]?.totalValue || 1;
 
@@ -282,10 +278,10 @@ export default function Dashboard() {
         </div>
       <div className="space-y-7 md:space-y-8">
         {/* Your First Week — reimagined onboarding momentum card */}
-        <FirstWeek />
+        {access.setup && <FirstWeek />}
 
         {/* AI "Today" briefing — 2-sentence Gemini digest, cached per-day */}
-        {(monthOrderCount > 0 || monthOutstanding > 0 || agingRows.length > 0) && (
+        {access.money && (monthOrderCount > 0 || monthOutstanding > 0 || agingRows.length > 0) && (
           <TodayDigest
             cacheKey={todayIso}
             context={{
@@ -329,7 +325,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="relative inline-block mt-1.5">
-                  <h1 className="h1-display">{getGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
+                  <h1 className="h1-display">{indiaGreeting()}{firstName ? `, ${firstName}` : ""}</h1>
                   <motion.span
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -346,7 +342,7 @@ export default function Dashboard() {
               <p className="text-[13px] text-foreground/75 mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {canSeeMoney && totalOutstandingAll > 0 && (
                   <>
-                    <span className="text-muted-foreground/80">{getGreeting()}{firstName ? `, ${firstName}` : ""}</span>
+                    <span className="text-muted-foreground/80">{indiaGreeting()}{firstName ? `, ${firstName}` : ""}</span>
                     <span className="text-muted-foreground/30">·</span>
                   </>
                 )}
@@ -362,7 +358,7 @@ export default function Dashboard() {
                 })()}
                 {(() => {
                   const overdueCount = agingRows.filter(r => r.worstBucket === "b61" || r.worstBucket === "b90").length;
-                  if (overdueCount === 0) return null;
+                  if (!access.money || overdueCount === 0) return null;
                   return (
                     <>
                       <span className="text-muted-foreground/30">·</span>
@@ -387,7 +383,7 @@ export default function Dashboard() {
           </div>
 
           {/* This Month strip — hairline-separated stat cells, no card border */}
-          <div className="mt-5 grid grid-cols-2 md:grid-cols-4 border-y border-border/60 divide-x divide-border/60">
+          <div className={cn("mt-5 grid grid-cols-2 border-y border-border/60 divide-x divide-border/60", access.money && "md:grid-cols-4")}>
             {(() => {
               const renderDelta = (delta: number | null, suffix = "%") => {
                 if (delta === null) {
@@ -441,7 +437,7 @@ export default function Dashboard() {
                     : renderDelta(deliveredDelta === 0 ? 0 : deliveredDelta, "pp"),
                 },
               ];
-              return cells.map((s, i) => {
+              return cells.filter(s => access.money || (s.label !== "Delivered order value" && s.label !== "Unpaid amount")).map((s, i) => {
                 const ctx = [
                   `${monthOrderCount} orders this month (₹${monthRevenue} revenue)`,
                   `${outstandingOrders.length} unpaid orders, avg ${avgOutstandingDays}d outstanding`,
@@ -463,7 +459,7 @@ export default function Dashboard() {
                   <div key={s.label} className={cn("py-4 px-4", i === 0 && "pl-0", i === 3 && "pr-0")}>
                     <div className="flex items-center gap-1">
                       <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{s.label}</p>
-                      {!s.zero && (
+                      {access.money && !s.zero && (
                         <ExplainButton metric={s.label} value={String(s.value)} context={ctx} />
                       )}
                     </div>
@@ -483,7 +479,7 @@ export default function Dashboard() {
           </div>
 
           {/* 7-day revenue sparkline — full width band directly under strip */}
-          <div className="mt-4">
+          {access.money && <div className="mt-4">
             {allZero ? (
               <p className="text-[10px] text-muted-foreground/40 italic">No sales this week</p>
             ) : (
@@ -529,7 +525,7 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-          </div>
+          </div>}
           </div>
           </div>
         </motion.section>
@@ -586,7 +582,7 @@ export default function Dashboard() {
           </div>
 
           {/* Compact KPI row */}
-          <div className="glass-card grid grid-cols-2 md:grid-cols-4 divide-x divide-border/60">
+          <div className={cn("glass-card grid divide-x divide-border/60", access.money ? "grid-cols-2 md:grid-cols-4" : "grid-cols-3")}>
             {kpis.map((kpi) => {
               const isZero = kpi.value === "0" || kpi.value === "₹0";
               const dailyCtx = [
@@ -598,7 +594,7 @@ export default function Dashboard() {
                 <div key={kpi.label} className="px-4 py-4 min-w-0">
                   <div className="flex items-center gap-1">
                     <p className="text-[10px] text-muted-foreground/70 font-semibold tracking-[0.18em] uppercase">{kpi.label}</p>
-                    {!isZero && (
+                    {access.money && !isZero && (
                       <ExplainButton metric={`${kpi.label} (selected day)`} value={String(kpi.value)} context={dailyCtx} />
                     )}
                   </div>
@@ -660,7 +656,7 @@ export default function Dashboard() {
           {/* Top Dealers */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold md:text-base">Top Dealers</h2>
+              <h2 className="text-sm font-semibold md:text-base">{access.money ? "Top Dealers" : "Dealers"}</h2>
               <Link to="/distributors" className="text-xs text-muted-foreground font-medium hover:text-foreground transition-colors">View all ›</Link>
             </div>
             <div className="glass-card p-4 space-y-3.5">
@@ -670,16 +666,16 @@ export default function Dashboard() {
                 <div key={d.id}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-sm font-medium">{d.name}</span>
-                    <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>
+                    {access.money && <span className="text-xs text-muted-foreground">{formatCurrency(d.totalValue)}</span>}
                   </div>
-                   <div className="h-2 rounded-full bg-muted overflow-hidden">
+                   {access.money && <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(d.totalValue / maxDistVal) * 100}%` }}
                       transition={{ type: "spring", damping: 30, stiffness: 150, delay: 0.2 + index * 0.06 }}
 className="h-full rounded-full bg-foreground/25"
                     />
-                  </div>
+                  </div>}
                 </div>
               ))}
             </div>
@@ -751,8 +747,8 @@ className="h-full rounded-full bg-foreground/50"
                        <th className="px-6 py-3 font-semibold">Dealer</th>
                        <th className="px-6 py-3 font-semibold">Sales Person</th>
                        <th className="px-6 py-3 font-semibold">Date</th>
-                       <th className="px-6 py-3 font-semibold text-right">Amount</th>
-                       <th className="px-6 py-3 font-semibold">Payment</th>
+                       {access.money && <th className="px-6 py-3 font-semibold text-right">Amount</th>}
+                       {access.money && <th className="px-6 py-3 font-semibold">Payment</th>}
                        <th className="px-6 py-3 font-semibold">Delivery</th>
                     </tr>
                   </thead>
@@ -763,8 +759,8 @@ className="h-full rounded-full bg-foreground/50"
                         <td className="px-6 py-4">{order.distributorName}</td>
                         <td className="px-6 py-4 text-muted-foreground">{order.salesperson}</td>
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
-                        <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>
-                        <td className="px-6 py-4"><StatusBadge status={payStatus(order.id)} /></td>
+                        {access.money && <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>}
+                        {access.money && <td className="px-6 py-4"><StatusBadge status={payStatus(order.id)} /></td>}
                         <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
                       </tr>
                     ))}
@@ -784,13 +780,13 @@ className="h-full rounded-full bg-foreground/50"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold">{o.distributorName}</span>
-                        <span className="text-sm font-bold">{formatCurrency(netTotal(o))}</span>
+                        {access.money && <span className="text-sm font-bold">{formatCurrency(netTotal(o))}</span>}
                       </div>
                       <p className="text-[11px] text-muted-foreground mb-2">{o.salesperson}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                         <div className="flex gap-1.5">
-                          <StatusBadge status={payStatus(o.id)} />
+                          {access.money && <StatusBadge status={payStatus(o.id)} />}
                           <StatusBadge status={o.deliveryStatus} />
                         </div>
                       </div>

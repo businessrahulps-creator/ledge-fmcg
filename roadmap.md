@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pre-publish role QA — 19 November
+- [x] Hide Dashboard money from people without money access, restrict setup guide to business managers, use India-time greetings (four signed-in role checks).
+- [x] Test order saves, payments and returns with Manager, Accountant, Sales Rep and Viewer; allowed saves and refused actions checked with tagged records. Sales Rep return refusal FAILED; recorded for follow-up, not silently passed.
+- [x] Run regression tests (534 passed) and record results and remaining release issues in role-qa-results.md. Not published.
+
 ## Credit Days — internal collections only
 - [x] Add nullable dealer days, validation and credit-limit permission guard.
 - [x] Add dealer controls, internal due-date display, statements and reminders.
