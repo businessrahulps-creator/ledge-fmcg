@@ -64,6 +64,9 @@ export function mapDistributor(d: any): Distributor {
     creditLimit: Number(d.credit_limit ?? 0), creditMode: (d.credit_mode ?? 'unlimited'),
     creditDays: d.credit_days == null ? null : Number(d.credit_days),
     outstandingAmount: Number(d.outstanding_amount ?? 0),
+    acquiredBySalespersonId: d.acquired_by_salesperson_id ?? null,
+    acquisitionDate: d.acquisition_date ?? null,
+    assignedSalespersonId: d.assigned_salesperson_id ?? null,
   };
 }
 

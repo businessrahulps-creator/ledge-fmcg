@@ -1,3 +1,5 @@
+import { formatIndianDate } from "@/utils/formatDate";
+import { acquiredByLabel } from "@/lib/salesperson-identity";
 import { useState, useRef, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
@@ -101,12 +103,14 @@ export default function Distributors() {
   const canManageDealers = useCan("see_all_dealers");
   const canOverrideCredit = useCan("override_credit_limit");
   const canManageTeam = useCan("manage_team");
+  const canAssign = canManageDealers || canManageTeam;
+  const salesTeam = api.salespersons.list();
   const canEditCreditDays = canOverrideCredit || canManageTeam;
   const { rows: collectionRows, ready: collectionsReady } = useReceivables();
 
   const openNew = () => {
     if (!canManageDealers) return;
-    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditDays: null, creditMode: 'unlimited', outstandingAmount: 0 });
+    setEditItem({ id: `d${Date.now()}`, name: "", location: "", contact: "", email: "", address: "", gstin: "", pan: "", stateCode: "", bankName: "", bankAccountName: "", bankAccount: "", bankIfsc: "", totalOrders: 0, totalValue: 0, creditLimit: 0, creditDays: null, creditMode: 'unlimited', outstandingAmount: 0, assignedSalespersonId: null, acquiredBySalespersonId: null, acquisitionDate: null });
     setIsNew(true);
   };
 
@@ -417,6 +421,19 @@ export default function Distributors() {
                       <Label className="text-xs md:text-sm">Contact *</Label>
                       <Input type="tel" inputMode="tel" autoComplete="tel" value={editItem.contact} onChange={(e) => setEditItem({ ...editItem, contact: e.target.value })} placeholder="+91 98100 55555" className="h-10 rounded-lg" />
                     </div>
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <Label htmlFor="dealer-assigned" className="text-xs md:text-sm">Assigned sales person</Label>
+                    <select id="dealer-assigned" disabled={!canAssign} value={editItem.assignedSalespersonId ?? ""}
+                      onChange={(e) => setEditItem({ ...editItem, assignedSalespersonId: e.target.value || null })}
+                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm disabled:opacity-60">
+                      <option value="">Unassigned</option>
+                      {salesTeam.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      {isNew ? "Who will look after this dealer. This does not count as bringing them in." : acquiredByLabel(salesTeam.find((s) => s.id === editItem.acquiredBySalespersonId)?.name, editItem.acquisitionDate, formatIndianDate)}
+                      {!canAssign && " Only an owner or manager can change this."}
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-1.5 md:space-y-2">

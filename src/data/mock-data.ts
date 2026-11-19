@@ -20,6 +20,11 @@ export interface Distributor {
   /** unlimited | limited | cash_only — 0 no longer means "no ceiling". */
   creditMode?: 'unlimited' | 'limited' | 'cash_only';
   outstandingAmount: number;
+  /** Who brought this dealer in. Historical; set only by the server. */
+  acquiredBySalespersonId?: string | null;
+  acquisitionDate?: string | null;
+  /** Who looks after this dealer now. */
+  assignedSalespersonId?: string | null;
 }
 
 export interface Scheme {

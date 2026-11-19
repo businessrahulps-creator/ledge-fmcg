@@ -1,3 +1,4 @@
+import { acquiredByLabel, assignedLabel } from "@/lib/salesperson-identity";
 import { toDateKey, addDaysToKey, istCalendarNow } from "@/utils/dateKey";
 import { useState, useMemo } from "react";
 import {
@@ -147,6 +148,8 @@ export default function DealerDetail() {
               <div className="flex items-center gap-3 text-xs text-muted-foreground md:text-sm">
                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{dealer.location}</span>
                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dealer.contact}{dealer.contact && <CopyButton value={dealer.contact} label="phone number" className="h-6 w-6" />}</span>
+                <span>{assignedLabel(api.salespersons.list().find((s) => s.id === dealer.assignedSalespersonId)?.name)}</span>
+                <span>{acquiredByLabel(api.salespersons.list().find((s) => s.id === dealer.acquiredBySalespersonId)?.name, dealer.acquisitionDate, formatIndianDate)}</span>
               </div>
             </div>
           </div>

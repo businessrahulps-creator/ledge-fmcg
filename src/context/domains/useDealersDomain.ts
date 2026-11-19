@@ -17,6 +17,8 @@ export function useDealersDomain(deps: DomainDeps) {
     gstin: sanitizeInput(d.gstin || ""), pan: sanitizeInput(d.pan || ""), state_code: sanitizeInput(d.stateCode || ""),
     bank_name: sanitizeInput(d.bankName || ""), bank_account_name: sanitizeInput(d.bankAccountName || ""),
     bank_account: sanitizeInput(d.bankAccount || ""), bank_ifsc: sanitizeInput(d.bankIfsc || ""),
+    // Acquired-by is never sent: the server sets it only when a found shop becomes a dealer.
+    assigned_salesperson_id: d.assignedSalespersonId ?? null,
   });
 
   const crud = useMemo(() => makeOfflineCrud<Distributor>(

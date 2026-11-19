@@ -26,3 +26,15 @@ describe("formatVisitStamp", () => {
     expect(formatVisitStamp("2026-11-18T19:15:00Z")).toBe("19 Nov 2026, 12:45 AM");
   });
 });
+
+import { acquiredByLabel, assignedLabel } from "./salesperson-identity";
+describe("dealer attribution labels", () => {
+  const fmt = (d: string) => d;
+  it("old dealers with no data show Direct onboarding and Unassigned", () => {
+    expect(acquiredByLabel(null, null, fmt)).toBe("Direct onboarding");
+    expect(assignedLabel(null)).toBe("Unassigned");
+  });
+  it("shows who acquired and when", () => {
+    expect(acquiredByLabel("Ravi", "2026-11-12", fmt)).toBe("Acquired by Ravi on 2026-11-12");
+  });
+});

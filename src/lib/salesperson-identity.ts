@@ -26,3 +26,12 @@ export function formatVisitStamp(iso: string | null | undefined): string {
   const p = Object.fromEntries(STAMP.formatToParts(d).map((x) => [x.type, x.value]));
   return `${p.day} ${p.month} ${p.year}, ${p.hour}:${p.minute} ${String(p.dayPeriod).toUpperCase()}`;
 }
+
+/** Plain labels for dealer attribution; empty values never invent credit. */
+export function acquiredByLabel(name: string | null | undefined, date: string | null | undefined, fmt: (d: string) => string): string {
+  if (!name) return "Direct onboarding";
+  return date ? `Acquired by ${name} on ${fmt(date)}` : `Acquired by ${name}`;
+}
+export function assignedLabel(name: string | null | undefined): string {
+  return name ? `Looked after by ${name}` : "Unassigned";
+}
