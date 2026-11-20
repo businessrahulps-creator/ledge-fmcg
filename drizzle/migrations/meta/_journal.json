@@ -533,6 +533,13 @@
       "when": 1795165535812,
       "tag": "0075_book_order_free_items_and_multi_product_offers",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1795165978428,
+      "tag": "0076_bill_free_lines_first",
+      "breakpoints": true
     }
   ]
 }

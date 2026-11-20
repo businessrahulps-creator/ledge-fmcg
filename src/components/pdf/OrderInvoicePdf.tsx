@@ -1,3 +1,4 @@
+import { isFreeLine, freeName } from "@/lib/free-line";
 import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
@@ -134,9 +135,9 @@ export function OrderInvoicePdf({
           {order.lines.map((line, i) => (
             <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false} minPresenceAhead={28}>
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
-              <Text style={[s.tableCellBold, { width: "45%" }]}>{line.productName}</Text>
+              <Text style={[s.tableCellBold, { width: "45%" }]}>{freeName(line.productName, isFreeLine({ quantity: line.quantity, unitPrice: line.unitPrice, amount: line.lineTotal }))}</Text>
               <Text style={[s.tableCellRight, { width: "15%" }]}>{line.quantity}</Text>
-              <Text style={[s.tableCellRight, { width: "15%" }]}>{formatMoneyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRight, { width: "15%" }]}>{line.unitPrice === 0 ? "Free" : formatMoneyPdf(line.unitPrice)}</Text>
               <Text style={[s.tableCellRightBold, { width: "20%" }]}>{formatMoneyPdf(line.lineTotal)}</Text>
             </View>
           ))}

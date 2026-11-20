@@ -13,7 +13,7 @@ interface CompanyInfo {
 
 export function buildOrderSummary(order: Order, companyName: string): string {
   const lines = order.lines
-    .map((l) => `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.lineTotal)}`)
+    .map((l) => (l.lineTotal === 0 ? `  • ${l.productName} × ${l.quantity} = Free` : `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.lineTotal)}`))
     .join("\n");
 
   return [
@@ -141,7 +141,7 @@ export function buildInvoiceSummary(inv: InvoiceShareData): string {
     credit_note: "Credit Note",
   };
   const lines = inv.lines
-    .map((l) => `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.taxableValue)}`)
+    .map((l) => (l.unitPrice === 0 && l.taxableValue === 0 ? `  • ${l.productName} × ${l.quantity} = Free` : `  • ${l.productName} × ${l.quantity} = ${formatCurrency(l.taxableValue)}`))
     .join("\n");
 
   const isIntra = inv.supplyType === "intra_state";

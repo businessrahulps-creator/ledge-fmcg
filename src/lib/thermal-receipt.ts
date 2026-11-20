@@ -1,3 +1,4 @@
+import { isFreeLine, freeName } from "@/lib/free-line";
 import type { Invoice } from "@/context/data-types";
 import type { Order } from "@/data/mock-data";
 import { formatIndianDate } from "@/utils/formatDate";
@@ -64,7 +65,7 @@ export function receiptFromInvoice(inv: Invoice, orderNumber?: string): Receipt 
     buyerName: inv.buyerName, buyerGstin: inv.buyerGstin, buyerAddress: inv.buyerAddress, buyerStateCode: inv.buyerStateCode,
     placeOfSupply: placeOfSupply(pos),
     rows: inv.lines.map(l => ({
-      name: l.productName, qty: l.quantity, rate: r2(l.unitPrice),
+      name: freeName(l.productName, isFreeLine({ quantity: l.quantity, unitPrice: l.unitPrice, amount: l.taxableValue })), qty: l.quantity, rate: r2(l.unitPrice),
       amount: r2(l.taxableValue), hsn: l.hsnCode || undefined, gstRate: bos ? null : (l.gstRate ?? inv.gstRate),
     })),
     totals,
@@ -92,7 +93,7 @@ export function receiptFromOrder(order: Order, seller: Seller, buyerGstin = "", 
     date: formatIndianDate(order.date),
     sellerName: seller.name, sellerAddress: seller.address, sellerPhone: seller.phone, sellerGstin: seller.gstin,
     buyerName: order.distributorName, buyerGstin, buyerAddress: opts.buyerAddress,
-    rows: order.lines.map(l => ({ name: l.productName, qty: l.quantity, rate: r2(l.unitPrice), amount: r2(l.lineTotal) })),
+    rows: order.lines.map(l => ({ name: freeName(l.productName, isFreeLine({ quantity: l.quantity, unitPrice: l.unitPrice, amount: l.lineTotal, isFree: l.isFree })), qty: l.quantity, rate: r2(l.unitPrice), amount: r2(l.lineTotal) })),
     totals,
     total,
     amountInWords: "",

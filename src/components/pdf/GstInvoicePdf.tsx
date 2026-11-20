@@ -1,3 +1,4 @@
+import { isFreeLine, freeName } from "@/lib/free-line";
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./PdfStyles";
 import { PdfHeader } from "./PdfHeader";
@@ -147,11 +148,11 @@ export function GstInvoicePdf({ data }: { data: InvoicePdfData }) {
           {data.lines.map((line, i) => (
             <View key={i} style={i % 2 === 1 ? s.tableRowAlt : s.tableRow} wrap={false} minPresenceAhead={28}>
               <Text style={[s.tableCell, { width: "5%" }]}>{i + 1}</Text>
-              <Text style={[s.tableCellBold, { width: isGst ? "24%" : "37%" }]}>{line.productName}</Text>
+              <Text style={[s.tableCellBold, { width: isGst ? "24%" : "37%" }]}>{freeName(line.productName, isFreeLine({ quantity: line.quantity, unitPrice: line.unitPrice, amount: line.taxableValue }))}</Text>
               {isGst && <Text style={[s.tableCell, { width: "10%" }]}>{line.hsnCode || "-"}</Text>}
               <Text style={[s.tableCellRight, { width: "7%" }]}>{line.quantity}</Text>
               <Text style={[s.tableCell, { width: "9%", paddingLeft: 6 }]}>{line.unit}</Text>
-              <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{formatMoneyPdf(line.unitPrice)}</Text>
+              <Text style={[s.tableCellRight, { width: isGst ? "13%" : "14%" }]}>{line.unitPrice === 0 ? "Free" : formatMoneyPdf(line.unitPrice)}</Text>
               {isGst && <Text style={[s.tableCellRight, { width: "7%" }]}>{line.gstRate != null ? `${line.gstRate}%` : "-"}</Text>}
               <Text style={[s.tableCellRight, { width: isGst ? "12%" : "15%" }]}>{formatMoneyPdf(line.taxableValue)}</Text>
               <Text style={[s.tableCellRightBold, { width: "13%" }]}>{formatMoneyPdf(line.lineTotal ?? line.taxableValue)}</Text>
