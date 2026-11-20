@@ -19,6 +19,7 @@ import { EntityCard } from "@/components/ui/entity-card";
 import { formatCurrency, type Salesperson } from "@/data/mock-data";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
+import { salesTeamExport, topPerformer } from "@/lib/sales-team-money";
 import { isValidIndianPhone, normalizeIndianPhone } from "@/utils/validators";
 import {
   Dialog,
@@ -83,6 +84,7 @@ export default function Salespersons() {
   const deletePerson = deleteId ? items.find((s) => s.id === deleteId) : null;
 
   const canManageTeam = useCan("manage_team");
+  const canSeeMoney = useCan("see_money");
 
   const openNew = () => {
     if (!canManageTeam) return;
@@ -167,11 +169,8 @@ export default function Salespersons() {
               className="h-10 w-10 sm:h-10 sm:w-auto sm:px-4"
               aria-label="Download CSV"
               onClick={() => {
-                exportXlsx(
-                  xlsxFilename("sales-team"),
-                  ["Name", "Phone", "Email", "Region", "Total Orders", "Total Value"],
-                  filtered.map((s) => [s.name, s.phone, s.email, s.region, String(s.totalOrders), formatCurrency(s.totalValue)])
-                );
+                const exp = salesTeamExport(filtered, canSeeMoney, formatCurrency);
+                exportXlsx(xlsxFilename("sales-team"), exp.headers, exp.rows);
               }}
             >
               <Download className="h-4 w-4" />
@@ -189,12 +188,12 @@ export default function Salespersons() {
         {(() => {
           const totalRevenue = items.reduce((s, m) => s + (m.totalValue || 0), 0);
           const totalOrders = items.reduce((s, m) => s + (m.totalOrders || 0), 0);
-          const top = items.length > 0 ? items.reduce((a, b) => (b.totalValue || 0) > (a.totalValue || 0) ? b : a) : null;
+          const top = topPerformer(items, canSeeMoney);
           return (
             <KpiStrip
               cells={[
                 { label: "Team size", value: items.length, zero: items.length === 0 },
-                { label: "Total revenue", value: formatCurrency(totalRevenue), zero: totalRevenue === 0 },
+                ...(canSeeMoney ? [{ label: "Total revenue", value: formatCurrency(totalRevenue), zero: totalRevenue === 0 }] : []),
                 { label: "Total orders", value: totalOrders, zero: totalOrders === 0 },
                 { label: "Top performer", value: top?.name || "—", zero: !top },
               ]}
@@ -221,13 +220,16 @@ export default function Salespersons() {
                 title={s.name}
                 subtitle={s.region || undefined}
                 tertiary={s.phone || undefined}
-                hero={{
+                hero={canSeeMoney ? {
                   value: formatCurrency(s.totalValue),
                   label: "Lifetime revenue",
+                } : {
+                  value: String(s.totalOrders),
+                  label: "Lifetime orders",
                 }}
                 cells={[
                   { label: "Orders", value: s.totalOrders, zero: s.totalOrders === 0 },
-                  { label: "Avg order", value: avgOrder > 0 ? formatCurrency(avgOrder) : "—", zero: avgOrder === 0 },
+                  ...(canSeeMoney ? [{ label: "Avg order", value: avgOrder > 0 ? formatCurrency(avgOrder) : "—", zero: avgOrder === 0 }] : []),
                   { label: "Dealers", value: dealersServed, zero: dealersServed === 0 },
                 ]}
                 menu={canManageTeam ? [

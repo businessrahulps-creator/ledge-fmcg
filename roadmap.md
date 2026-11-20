@@ -110,3 +110,12 @@
 - [x] 2. Hide order money from roles without money access
 - [x] 3. One correct "still to collect" figure on order page
 - [x] 4. Delivery timeline shows Delivered only after confirmation
+
+## Pre-publish audit fixes (one at a time)
+- [x] SEC-01 Sales Team money hidden
+- [ ] SEC-02 Salesperson detail
+- [ ] SEC-03 Targets
+- [ ] SEC-04 Dealer detail
+- [ ] UI-01 Stock godown value
+- [ ] DOC-01 Returns bill eligibility
+- [ ] Full suite + four-role browser pass + report
