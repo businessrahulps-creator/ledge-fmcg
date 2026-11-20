@@ -1,6 +1,7 @@
 import { SortableTh, useSortedRows } from "@/components/ui/sortable-th";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useCan } from "@/hooks/useCan";
+import { canViewStockValue } from "@/lib/stock-value-access";
 import { useUnsavedChangesGuard } from "@/hooks/use-unsaved-changes-guard";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePagination } from "@/hooks/use-pagination";
@@ -70,6 +71,8 @@ function HealthBadge({ health }: { health: string }) {
 
 export default function Stock() {
   const canManageStock = useCan("manage_stock");
+  const canSeeMoney = useCan("see_money");
+  const canSeeStockValue = canViewStockValue(canManageStock, canSeeMoney);
   const api = useApi();
   const { companyInfo } = api;
   const products = api.products.list();
@@ -467,7 +470,7 @@ export default function Stock() {
                 ? `${stockSummary.criticalCount} product${stockSummary.criticalCount !== 1 ? "s" : ""} almost out — refill before sending more`
                 : `${stockSummary.lowCount} product${stockSummary.lowCount !== 1 ? "s" : ""} running low`
             }
-            subCaption={stockSummary.atRiskValue > 0 ? `≈ ${formatCurrency(stockSummary.atRiskValue)} revenue at risk` : undefined}
+            subCaption={canSeeStockValue && stockSummary.atRiskValue > 0 ? `≈ ${formatCurrency(stockSummary.atRiskValue)} revenue at risk` : undefined}
             value={stockSummary.criticalCount > 0 ? stockSummary.criticalCount : stockSummary.lowCount}
             valueSuffix="products"
           />
@@ -476,7 +479,7 @@ export default function Stock() {
         <KpiStrip
           cells={[
             { label: "Total products", value: isLoading ? "—" : formatNumber(products.length), zero: isLoading || products.length === 0 },
-            ...(!canManageStock ? [] : [{ label: "Stock value", value: isLoading ? "—" : formatCurrency(stockSummary.totalValue), zero: isLoading || stockSummary.totalValue === 0 }]),
+            ...(!canSeeStockValue ? [] : [{ label: "Stock value", value: isLoading ? "—" : formatCurrency(stockSummary.totalValue), zero: isLoading || stockSummary.totalValue === 0 }]),
             { label: "Low stock", value: isLoading ? "—" : formatNumber(stockSummary.lowCount + stockSummary.criticalCount), zero: isLoading || stockSummary.lowCount + stockSummary.criticalCount === 0 },
             { label: "Godowns", value: isLoading ? "—" : formatNumber(activeLocations.length), zero: isLoading || activeLocations.length === 0 },
           ]}
@@ -692,7 +695,7 @@ export default function Stock() {
                       </div>
                       <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4 text-xs md:text-sm">
                         <span className="text-muted-foreground">{stats.totalSKUs} products</span>
-                        <span className="font-semibold">{formatCurrency(stats.totalValue)}</span>
+                        {canSeeStockValue && <span className="font-semibold">{formatCurrency(stats.totalValue)}</span>}
                       </div>
                       {stats.lowStockCount > 0 && (
                         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground md:text-xs">
@@ -754,7 +757,7 @@ export default function Stock() {
                               const whName = locations.find((l) => l.id === selectedWarehouse)?.name || "warehouse";
                               exportXlsx(
                                 xlsxFilename(`inventory-${whName.toLowerCase().replace(/\s+/g, "-")}`),
-                                ["Product Name", "Product code", "Unit", "Quantity", "Alert at", "Health", "Price before GST", "Stock Value"],
+                                ["Product Name", "Product code", "Unit", "Quantity", "Alert at", "Health", "Price before GST", ...(canSeeStockValue ? ["Stock Value"] : [])],
                                 warehouseInventory.map((si) => {
                                   const health = getStockHealth(si.quantity, si.threshold);
                                   return [
@@ -765,7 +768,7 @@ export default function Stock() {
                                     String(si.threshold),
                                     health.charAt(0).toUpperCase() + health.slice(1),
                                     formatCurrency(si.basePrice),
-                                    formatCurrency(si.quantity * si.basePrice),
+                                    ...(canSeeStockValue ? [formatCurrency(si.quantity * si.basePrice)] : []),
                                   ];
                                 })
                               );
@@ -793,7 +796,7 @@ export default function Stock() {
                               <th className="px-6 py-3 font-medium">Product code</th>
                               <th className="px-6 py-3 font-medium text-right">Quantity</th>
                               <th className="px-6 py-3 font-medium text-right">Alert at</th>
-                              <th className="px-6 py-3 font-medium text-right">Est. Value</th>
+                              {canSeeStockValue && <th className="px-6 py-3 font-medium text-right">Est. Value</th>}
                               <th className="px-6 py-3 font-medium">Health</th>
                             </tr>
                           </thead>
@@ -808,9 +811,9 @@ export default function Stock() {
                                     {formatNumber(si.quantity)}
                                   </td>
                                   <td className="px-6 py-4 text-right text-muted-foreground">{si.threshold}</td>
-                                  <td className="px-6 py-4 text-right text-muted-foreground">
+                                  {canSeeStockValue && <td className="px-6 py-4 text-right text-muted-foreground">
                                     {formatCurrency(si.quantity * si.basePrice)}
-                                  </td>
+                                  </td>}
                                   <td className="px-6 py-4"><HealthBadge health={health} /></td>
                                 </tr>
                               );

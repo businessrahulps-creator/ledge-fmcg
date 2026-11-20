@@ -116,6 +116,6 @@
 - [x] SEC-02 Salesperson detail money hidden (automated checks; four-role browser verification pending final pass)
 - [x] SEC-03 Targets money hidden (automated checks; four-role browser verification pending final pass)
 - [x] SEC-04 Dealer detail money hidden (automated checks; four-role browser verification pending final pass)
-- [ ] UI-01 Stock godown value
+- [x] UI-01 Stock godown value (capability tests; four-role browser verification pending final pass)
 - [ ] DOC-01 Returns bill eligibility
 - [ ] Full suite + four-role browser pass + report
