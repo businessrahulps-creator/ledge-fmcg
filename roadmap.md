@@ -120,4 +120,5 @@
 - [x] DOC-01 Returns bill eligibility (25 checks passed; owner selected real BOS/2026-27/0023 through ORD-2026-0032; no return saved)
 - [x] Full suite + owner desktop/phone browser pass + provisional report (576 tests; final-release-verification.md)
 - [x] Accountant live checks — server role verified, five screens desktop/phone, team export, stock quantities/values without Add Stock, real BOS selection; no save
-- [ ] Sales Rep and Viewer live checks + final sign-off — blocked on each account signing into preview; session minting refused for current workspace permissions
+- [x] Sales Rep live checks — server role verified; five screens desktop/phone; team and inventory exports omit totals; ledger falls back to overview; Returns denied; no save
+- [ ] Viewer live checks + final sign-off — blocked on Viewer signing into preview; session minting refused for current workspace permissions

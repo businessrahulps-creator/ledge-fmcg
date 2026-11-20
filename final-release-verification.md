@@ -39,7 +39,19 @@ All six scoped fixes are implemented and committed. The full automated suite pas
 
 ## Still required before full sign-off
 
-Accountant live checks are complete for this scope. Sales Rep and Viewer live checks are **NOT VERIFIED**. Minting another account's session was refused because the requesting workspace account lacks owner/admin permission; the user instead signed into the preview as Accountant. No permissions were changed and no substitute role was mocked. The next check needs Sales Rep signed into the Lovable preview, followed by Viewer.
+### Sales Rep live verification
+
+- Confirmed the injected session's server role is salesperson before checking real records.
+- Sales Team, Rohith detail, Targets and the direct dealer ledger link showed zero rupee values on desktop and phone; Statement PDF was absent.
+- The direct dealer `?tab=ledger` URL rendered Overview selected with no Bills & payments tab. The URL query itself remains unchanged; unauthorized ledger content does not render.
+- Sales Team download contained Name, Phone, Email, Region, Total Orders (two rows); Total Value was absent.
+- Stock godown cards showed no rupee values. Main warehouse inventory retained its Quantity column but omitted Est. Value. Inventory download retained product prices as approved, but omitted Stock Value (nine rows).
+- Catalogue product prices remain visible in Stock as intentionally preserved by the approved scope; this is not total financial secrecy.
+- Direct `/claims` access showed “You don't have access to this” with no Record return button.
+- No document-wide phone overflow on the five audited screens and no JavaScript page errors during the run. Inspected desktop dealer overview and inventory screenshots plus phone salesperson detail.
+- No application code, permissions or transactions changed; no publication performed.
+
+Accountant and Sales Rep live checks are complete for this scope. Viewer live checks are **NOT VERIFIED**. Minting another account's session was refused because the requesting workspace account lacks owner/admin permission; the user instead signed into each tested account through the preview. No permissions were changed and no substitute role was mocked. The next check needs Viewer signed into the Lovable preview.
 
 Check each role's five screens and direct dealer ledger URL; inspect non-money team export for omitted Total Value; confirm no money appears in restricted page views, and check authorized accountant godown values. Automated checks do not replace these live checks.
 
