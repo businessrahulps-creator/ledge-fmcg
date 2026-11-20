@@ -137,9 +137,10 @@ interface InlineTargetRowProps {
   onSave: (target: TargetType) => Promise<boolean>;
   onClear: (id: string) => Promise<boolean>;
   readOnly?: boolean;
+  canSeeMoney: boolean;
 }
 
-function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, onClear, readOnly = false }: InlineTargetRowProps) {
+function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, onClear, readOnly = false, canSeeMoney }: InlineTargetRowProps) {
   const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
   const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
@@ -150,13 +151,13 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
   const ordStatus = getStatus(actualOrders, targetOrd);
   const revPct = targetRev > 0 ? Math.min((actualRevenue / targetRev) * 100, 120) : 0;
   const ordPct = targetOrd > 0 ? Math.min((actualOrders / targetOrd) * 100, 120) : 0;
-  const overallStatus = targetRev > 0 ? revStatus : (targetOrd > 0 ? ordStatus : "no_target");
+  const overallStatus = canSeeMoney && targetRev > 0 ? revStatus : (targetOrd > 0 ? ordStatus : "no_target");
   const sc = STATUS_CONFIG[overallStatus];
 
   const handleSave = useCallback(async () => {
     if (!dirty || readOnly) return;
     // Both fields emptied means "remove this target" — never a silent zero.
-    if (revInput === null && ordInput === null) {
+    if ((canSeeMoney ? revInput === null : !existingTarget?.targetRevenue) && ordInput === null) {
       if (!existingTarget?.id) { setDirty(false); return; }
       const cleared = await onClear(existingTarget.id);
       if (!cleared) return;
@@ -171,13 +172,13 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       entityName,
       periodType,
       periodStart,
-      targetRevenue: targetRev,
+      targetRevenue: canSeeMoney ? targetRev : (existingTarget?.targetRevenue ?? 0),
       targetOrders: targetOrd,
     });
     if (!ok) return; // save failed — stay dirty so the user can retry
     setDirty(false);
     toast.success("Target saved", { description: `${entityName}'s ${periodType} target updated` });
-  }, [dirty, readOnly, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, revInput, ordInput, onSave, onClear]);
+  }, [dirty, readOnly, canSeeMoney, existingTarget, entityType, entityId, entityName, periodStart, periodType, targetRev, targetOrd, revInput, ordInput, onSave, onClear]);
 
   const tier: "success" | "warning" | "destructive" | "muted" =
     overallStatus === "exceeded" || overallStatus === "on_track" ? "success"
@@ -185,8 +186,8 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
     : overallStatus === "needs_attention" ? "destructive"
     : "muted";
 
-  const hasAnyTarget = targetRev > 0 || targetOrd > 0;
-  const heroPct = targetRev > 0
+  const hasAnyTarget = (canSeeMoney && targetRev > 0) || targetOrd > 0;
+  const heroPct = canSeeMoney && targetRev > 0
     ? Math.round((actualRevenue / targetRev) * 100)
     : targetOrd > 0
       ? Math.round((actualOrders / targetOrd) * 100)
@@ -211,11 +212,11 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       }
       hero={hasAnyTarget ? {
         value: `${heroPct}%`,
-        label: targetRev > 0 ? "Of revenue target" : "Of orders target",
+        label: canSeeMoney && targetRev > 0 ? "Of revenue target" : "Of orders target",
       } : undefined}
     >
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
+      <div className={`grid gap-3 ${canSeeMoney ? "grid-cols-2" : "grid-cols-1"}`}>
+        {canSeeMoney && <div className="space-y-1.5">
           <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Sales goal</label>
           <NumberInput
             allowDecimal
@@ -228,7 +229,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
             placeholder="e.g. 100000"
             className="h-8 text-xs rounded-lg"
           />
-          {targetRev > 0 && (
+          {canSeeMoney && targetRev > 0 && (
             <div className="space-y-1">
               <div className="flex justify-between text-[10px]">
                 <span className="text-muted-foreground num">{formatCurrency(actualRevenue)} / {formatCurrency(targetRev)}</span>
@@ -237,7 +238,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
               <Progress value={Math.min(revPct, 100)} className={`h-1.5 ${getProgressColor(revStatus)}`} />
             </div>
           )}
-        </div>
+        </div>}
         <div className="space-y-1.5">
           <label className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 font-semibold">Number of orders goal</label>
           <NumberInput
@@ -275,6 +276,7 @@ export default function Targets() {
   const navigate = useNavigate();
   const api = useApi();
   const canManageTargets = useCan("manage_schemes");
+  const canSeeMoney = useCan("see_money");
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
   const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
@@ -417,7 +419,7 @@ export default function Targets() {
 
           return (
             <div className="space-y-4">
-              {signalTier && (
+              {canSeeMoney && signalTier && (
                 <SignalCard
                   tier={signalTier}
                   icon={AlertTriangle}
@@ -434,9 +436,11 @@ export default function Targets() {
               )}
               <KpiStrip
                 cells={[
+                  ...(canSeeMoney ? [
                   { label: `${PERIOD_TYPE_LABELS[periodType]} target`, value: formatCurrency(totalTargetRev), zero: totalTargetRev === 0 },
                   { label: "Actual revenue", value: formatCurrency(totalActualRev), zero: totalActualRev === 0 },
                   { label: "Overall progress", value: `${overallPct}%`, zero: overallPct === 0 },
+                  ] : []),
                   { label: "Targets set", value: `${spTargets.length + dlTargets.length}/${salespersons.length + dealers.length}`, zero: spTargets.length + dlTargets.length === 0 },
                 ]}
               />
@@ -484,6 +488,7 @@ export default function Targets() {
                     onSave={handleSave}
                     onClear={handleClear}
                     readOnly={!canManageTargets}
+                    canSeeMoney={canSeeMoney}
                   />
                 );
               })
@@ -522,6 +527,7 @@ export default function Targets() {
                     onSave={handleSave}
                     onClear={handleClear}
                     readOnly={!canManageTargets}
+                    canSeeMoney={canSeeMoney}
                   />
                 );
               })
