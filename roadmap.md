@@ -113,12 +113,12 @@
 
 ## Pre-publish audit fixes (one at a time)
 - [x] SEC-01 Sales Team money hidden
-- [x] SEC-02 Salesperson detail money hidden (automated checks; four-role browser verification pending final pass)
-- [x] SEC-03 Targets money hidden (automated checks; four-role browser verification pending final pass)
-- [x] SEC-04 Dealer detail money hidden (automated checks; four-role browser verification pending final pass)
-- [x] UI-01 Stock godown value (capability tests; four-role browser verification pending final pass)
+- [x] SEC-02 Salesperson detail money hidden (automated checks; four-role desktop/phone verification complete)
+- [x] SEC-03 Targets money hidden (automated checks; four-role desktop/phone verification complete)
+- [x] SEC-04 Dealer detail money hidden (automated checks; four-role direct-link verification complete)
+- [x] UI-01 Stock godown value (capability tests; four-role screens and exports verified)
 - [x] DOC-01 Returns bill eligibility (25 checks passed; owner selected real BOS/2026-27/0023 through ORD-2026-0032; no return saved)
 - [x] Full suite + owner desktop/phone browser pass + provisional report (576 tests; final-release-verification.md)
 - [x] Accountant live checks — server role verified, five screens desktop/phone, team export, stock quantities/values without Add Stock, real BOS selection; no save
 - [x] Sales Rep live checks — server role verified; five screens desktop/phone; team and inventory exports omit totals; ledger falls back to overview; Returns denied; no save
-- [ ] Viewer live checks + final sign-off — blocked on Viewer signing into preview; session minting refused for current workspace permissions
+- [x] Viewer live checks + scoped final sign-off — server role verified; desktop/phone screens and exports hide financial totals, retain stock quantities; direct ledger falls back and Returns denied; no save or publication. Broader release remains conditional on risks documented in final-release-verification.md.

@@ -1,19 +1,19 @@
 # Final verification — 20 November 2026
 
-## Verdict: conditional pass; live role verification incomplete
+## Verdict: scoped verification passed; broader release remains conditional
 
-All six scoped fixes are implemented and committed. The full automated suite passes: **65 files, 576 tests**. This is not a completed four-role release sign-off.
+All six scoped fixes are implemented and committed. The full automated suite passes: **65 files, 576 tests**. Owner, Accountant, Sales Rep and Viewer live screen/export checks are complete for these six findings. This is a scoped sign-off, not a claim of strict database-level financial secrecy or a fresh exhaustive transaction audit.
 
 ## Findings
 
 | Finding | Implementation | Verification |
 |---|---|---|
-| SEC-01 Sales Team | Financial displays/export gated; non-money ranking uses orders | Automated permission/export checks pass; owner screen and downloaded export checked |
-| SEC-02 Salesperson detail | Financial summaries, payment indicators, revenue progress and PDF gated | Page permission tests pass; owner desktop/phone checked |
-| SEC-03 Targets | Money inputs/progress hidden; hidden revenue goals preserved on order-target changes | Page/save tests pass; owner desktop/phone checked; no target saved |
-| SEC-04 Dealer detail | Ledger, money summaries, statements and financial share gated | Page/share tests pass; owner direct ledger link checked; restricted-role direct-link live check pending |
-| UI-01 Stock | Valuations require manage_stock OR see_money; quantities unchanged | Four capability combinations tested; owner sees three godown values; restricted-role live checks pending |
-| DOC-01 Returns | GST and BOS issued states explicitly accepted; drafts/cancelled/unknown/unlinked rejected | 19 eligibility checks and six unit checks pass; owner selected ORD-2026-0032 and saw BOS/2026-27/0023 with its remaining quantity; no return saved |
+| SEC-01 Sales Team | Financial displays/export gated; non-money ranking uses orders | Automated checks and all four roles' screens/downloads pass; restricted exports omit Total Value |
+| SEC-02 Salesperson detail | Financial summaries, payment indicators, revenue progress and PDF gated | Page tests and all four roles' desktop/phone checks pass; restricted views omit money and PDF |
+| SEC-03 Targets | Money inputs/progress hidden; hidden revenue goals preserved on order-target changes | Page/save tests and all four roles' desktop/phone checks pass; no live target saved |
+| SEC-04 Dealer detail | Ledger, money summaries, statements and financial share gated | Page/share tests pass; authorized ledger visible; Sales Rep/Viewer direct links render Overview without ledger |
+| UI-01 Stock | Valuations require manage_stock OR see_money; quantities unchanged | Capability tests pass; Owner/Accountant values visible; Sales Rep/Viewer views and downloads omit valuations, retain quantities |
+| DOC-01 Returns | GST and BOS issued states explicitly accepted; drafts/cancelled/unknown/unlinked rejected | 25 checks pass; Owner/Accountant selected real BOS/2026-27/0023 without saving; Sales Rep/Viewer denied Returns access |
 
 ## Browser evidence actually collected
 
@@ -37,7 +37,7 @@ All six scoped fixes are implemented and committed. The full automated suite pas
 - Inspected screenshots of stock inventory, phone salesperson detail and the selected BOS return dialog.
 - No application code changed, transactions saved or publication performed during this Accountant check.
 
-## Still required before full sign-off
+## Restricted-role live verification
 
 ### Sales Rep live verification
 
@@ -51,9 +51,18 @@ All six scoped fixes are implemented and committed. The full automated suite pas
 - No document-wide phone overflow on the five audited screens and no JavaScript page errors during the run. Inspected desktop dealer overview and inventory screenshots plus phone salesperson detail.
 - No application code, permissions or transactions changed; no publication performed.
 
-Accountant and Sales Rep live checks are complete for this scope. Viewer live checks are **NOT VERIFIED**. Minting another account's session was refused because the requesting workspace account lacks owner/admin permission; the user instead signed into each tested account through the preview. No permissions were changed and no substitute role was mocked. The next check needs Viewer signed into the Lovable preview.
+### Viewer live verification
 
-Check each role's five screens and direct dealer ledger URL; inspect non-money team export for omitted Total Value; confirm no money appears in restricted page views, and check authorized accountant godown values. Automated checks do not replace these live checks.
+- Confirmed the injected session's server role is viewer before checking existing records.
+- Checked Sales Team, Rohith detail, Targets, the direct dealer ledger link and Stock at 1280×1800 and 390×844, plus direct Returns access on desktop.
+- Sales Team, salesperson detail, Targets and dealer overview contained zero rupee values; Statement PDF was absent. Direct `?tab=ledger` selected Overview with no Bills & payments tab.
+- Downloaded Sales Team report contained Name, Phone, Email, Region, Total Orders (two rows), with no Total Value.
+- Godown cards showed no valuations. Main warehouse inventory retained Quantity but omitted Est. Value; its download retained Quantity and Price before GST, but omitted Stock Value (nine rows). Catalogue prices remain visible as intentionally approved.
+- Direct `/claims` showed “You don't have access to this” and no Record return button.
+- No document-wide phone overflow on all five screens; no JavaScript page errors. Inspected desktop dealer overview and warehouse inventory screenshots and phone salesperson detail.
+- No application code, permissions or transactions changed; no publication performed.
+
+All four roles' scoped live checks are complete. Earlier session minting was refused; the user signed into each account through the preview instead. No permissions were changed and no substitute role was mocked.
 
 ## Remaining risks outside this scope
 
