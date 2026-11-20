@@ -28,6 +28,7 @@ import { fetchInvoiceLines, forgetInvoiceLines } from "@/lib/invoice-lines";
 import { supabase } from "@/integrations/supabase/client";
 import { checkReturnLine, type ReturnUnitOption } from "@/lib/return-units";
 import { formatQty } from "@/lib/quantity";
+import { isReturnableBill } from "@/lib/return-bill-eligibility";
 
 const claimTypeLabels: Record<string, { label: string; icon: typeof RotateCcw; color: string }> = {
   return: { label: "Goods Returned", icon: RotateCcw, color: "bg-primary/10 text-primary" },
@@ -265,9 +266,8 @@ function NewClaimDialog({
   const billByOrderId = useMemo(() => {
     const map = new Map<string, Invoice>();
     invoices.forEach(inv => {
-      // Any issued bill can be returned against — a bill that has since been
-      // paid or sent is still a real bill; only an unissued draft is not.
-      if (inv.docType === "gst_invoice" && inv.status !== "draft" && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
+      // Payment/delivery state does not affect eligibility of a final GST/BOS bill.
+      if (isReturnableBill(inv) && inv.sourceOrderId) map.set(inv.sourceOrderId, inv);
     });
     return map;
   }, [invoices]);

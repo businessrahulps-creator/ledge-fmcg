@@ -117,5 +117,5 @@
 - [x] SEC-03 Targets money hidden (automated checks; four-role browser verification pending final pass)
 - [x] SEC-04 Dealer detail money hidden (automated checks; four-role browser verification pending final pass)
 - [x] UI-01 Stock godown value (capability tests; four-role browser verification pending final pass)
-- [ ] DOC-01 Returns bill eligibility
+- [x] DOC-01 Returns bill eligibility (25 checks passed; owner selected real BOS/2026-27/0023 through ORD-2026-0032; no return saved)
 - [ ] Full suite + four-role browser pass + report
