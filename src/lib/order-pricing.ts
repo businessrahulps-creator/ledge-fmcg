@@ -9,6 +9,7 @@ import { roundPaise } from "@/lib/money";
 import type { Scheme } from "@/data/mock-data";
 import { formatCurrency } from "@/data/mock-data";
 import { todayKey } from "@/utils/dateKey";
+import { schemeProductIds } from "@/lib/scheme-form";
 
 export interface PricingLineInput {
   productId: string;
@@ -62,15 +63,26 @@ export function computeOrderPricing(
   );
 
   const stacked: AppliedScheme[] = [];
+  const freeApplied: AppliedScheme[] = [];
   let best: AppliedScheme | null = null;
 
   for (const s of activeSchemes) {
     if (s.dealerId && s.dealerId !== dealerId) continue;
     if (s.minOrderValue > 0 && grossTotal < s.minOrderValue) continue;
 
-    // Every line of the product counts (the same product can appear twice).
-    const productLines = s.productId ? validLines.filter(l => l.productId === s.productId) : [];
-    if (s.productId) {
+    // Buy X Get Y on a product gives a free ₹0 item instead of a rupee discount.
+    if (s.schemeType === "buy_x_get_y" && s.productId) {
+      const q = validLines.filter(l => l.productId === s.productId).reduce((sum, l) => sum + l.quantity, 0);
+      if (s.buyQty > 0 && s.freeQty > 0 && Math.floor(q / s.buyQty) > 0) {
+        freeApplied.push({ scheme: s, savings: 0, label: `Buy ${s.buyQty} Get ${s.freeQty} Free` });
+      }
+      continue;
+    }
+
+    // Every line of the picked products counts (the same product can appear twice).
+    const ids = schemeProductIds(s);
+    const productLines = ids.length ? validLines.filter(l => ids.includes(l.productId)) : [];
+    if (ids.length) {
       if (productLines.length === 0) continue;
       const q = productLines.reduce((sum, l) => sum + l.quantity, 0);
       if (s.minQty > 0 && q < s.minQty) continue;
@@ -82,20 +94,15 @@ export function computeOrderPricing(
     let label = "";
     switch (s.schemeType) {
       case "percentage": {
-        const base = s.productId ? productLines.reduce((sum, l) => sum + lineAmount(l), 0) : grossTotal;
+        const base = ids.length ? productLines.reduce((sum, l) => sum + lineAmount(l), 0) : grossTotal;
         savings = (base * s.discountPercent) / 100;
         label = `${s.discountPercent}% off`;
         break;
       }
       case "buy_x_get_y": {
         if (s.buyQty > 0) {
-          if (s.productId) {
-            const q = productLines.reduce((sum, l) => sum + l.quantity, 0);
-            const price = productLines.reduce((m, l) => Math.max(m, l.unitPrice), 0);
-            savings = Math.floor(q / s.buyQty) * s.freeQty * price;
-          } else {
-            savings = Math.floor(totalQty / s.buyQty) * s.freeQty * topPrice;
-          }
+          // Older order-wide offers (no product picked) keep their rupee saving.
+          savings = Math.floor(totalQty / s.buyQty) * s.freeQty * topPrice;
         }
         label = `Buy ${s.buyQty} Get ${s.freeQty} Free`;
         break;
@@ -114,8 +121,9 @@ export function computeOrderPricing(
     else if (!best || savings > best.savings) best = applied;
   }
 
-  const appliedSchemes = best ? [...stacked, best] : stacked;
-  const lineDiscounts = allocateLineDiscounts(validLines, appliedSchemes);
+  const discountSchemes = best ? [...stacked, best] : stacked;
+  const lineDiscounts = allocateLineDiscounts(validLines, discountSchemes);
+  const appliedSchemes = [...discountSchemes, ...freeApplied];
   const totalSchemeSavings = r2(lineDiscounts.reduce((a, b) => a + b, 0));
 
   return {
@@ -138,7 +146,9 @@ export function allocateLineDiscounts(lines: PricingLineInput[], applied: Applie
   const amounts = valid.map(l => r2(l.quantity * l.unitPrice));
   const disc = valid.map(() => 0);
   for (const a of applied) {
-    const idx = valid.map((l, i) => i).filter(i => !a.scheme.productId || valid[i].productId === a.scheme.productId);
+    if (a.savings <= 0) continue;
+    const ids = schemeProductIds(a.scheme);
+    const idx = valid.map((l, i) => i).filter(i => ids.length === 0 || ids.includes(valid[i].productId));
     const tot = idx.reduce((s, i) => s + amounts[i], 0);
     if (idx.length === 0) continue;
     const shares = idx.map(i => (tot > 0 ? r2((a.savings * amounts[i]) / tot) : 0));
@@ -159,4 +169,47 @@ export function serializeAppliedSchemes(applied: AppliedScheme[]) {
     schemeLabel: a.label,
     savings: a.savings,
   }));
+}
+
+export interface FreeLine {
+  productId: string;
+  quantity: number;
+  schemeId: string;
+  schemeName: string;
+  label: string;
+}
+
+/**
+ * Free ₹0 items from Buy X Get Y offers — same rule as book_order_atomic:
+ * every full `buyQty` of the bought product gives `freeQty` of the free product
+ * (a different product if the offer names one). Pass only the paid lines.
+ */
+export function computeFreeLines(
+  lines: PricingLineInput[],
+  allSchemes: Scheme[],
+  dealerId: string,
+  referenceDate?: string,
+): FreeLine[] {
+  const today = referenceDate || todayKey();
+  const valid = lines.filter(l => l.productId && l.quantity > 0);
+  const gross = roundPaise(valid.reduce((s, l) => s + roundPaise(l.quantity * l.unitPrice), 0));
+  const out: FreeLine[] = [];
+  for (const s of allSchemes) {
+    if (s.schemeType !== "buy_x_get_y" || !s.productId) continue;
+    if (!s.isActive || s.validFrom > today || (s.validUntil && s.validUntil < today)) continue;
+    if (s.dealerId && s.dealerId !== dealerId) continue;
+    if (s.minOrderValue > 0 && gross < s.minOrderValue) continue;
+    if (!(s.buyQty > 0 && s.freeQty > 0)) continue;
+    const q = valid.filter(l => l.productId === s.productId).reduce((sum, l) => sum + l.quantity, 0);
+    const sets = Math.floor(q / s.buyQty);
+    if (sets <= 0) continue;
+    out.push({
+      productId: s.freeProductId || s.productId,
+      quantity: sets * s.freeQty,
+      schemeId: s.id,
+      schemeName: s.name,
+      label: `Buy ${s.buyQty} Get ${s.freeQty} Free`,
+    });
+  }
+  return out;
 }

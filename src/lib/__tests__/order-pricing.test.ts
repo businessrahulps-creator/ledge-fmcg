@@ -66,8 +66,8 @@ describe("computeOrderPricing", () => {
       ...baseScheme, id: "s3", schemeType: "buy_x_get_y", buyQty: 5, freeQty: 1, productId: "p1",
     }];
     const result = computeOrderPricing(lines, schemes, "d1");
-    // p1 has qty 10, sets = floor(10/5) = 2, savings = 2 * 1 * 100 = 200
-    expect(result.totalSchemeSavings).toBe(200);
+    // Product offers now add a free ₹0 item instead of taking money off the bill.
+    expect(result.totalSchemeSavings).toBe(0);
     expect(result.appliedSchemes[0].label).toBe("Buy 5 Get 1 Free");
   });
 

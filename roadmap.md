@@ -125,4 +125,5 @@
 
 - [x] Offers plan Phase 1 (free product + product list fields)
 - [x] Offers plan Phase 2 (offer screen)
-- [ ] Offers plan Phases 3-5 (screen, order form, send/bills, QA-OFFER test data)
+- [x] Offers plan Phase 3 (free items on orders)
+- [ ] Offers plan Phases 4-5 (screen, order form, send/bills, QA-OFFER test data)

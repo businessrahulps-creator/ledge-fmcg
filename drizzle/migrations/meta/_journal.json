@@ -526,6 +526,13 @@
       "when": 1795164991033,
       "tag": "0074_scheme_free_product_and_multi_products",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1795165535812,
+      "tag": "0075_book_order_free_items_and_multi_product_offers",
+      "breakpoints": true
     }
   ]
 }

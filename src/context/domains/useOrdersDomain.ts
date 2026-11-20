@@ -112,6 +112,7 @@ export function useOrdersDomain(deps: OrdersDeps) {
           product_id: l.productId,
           quantity: l.quantity,
           unit_price: l.unitPrice,
+          is_free: !!l.isFree,
         })),
         p_godown_id: order.godownId || null,
         p_applied_schemes: (order.appliedSchemes || []).map(s => ({
@@ -306,7 +307,8 @@ export function useOrdersDomain(deps: OrdersDeps) {
       if (updates.lines.length > 0) {
         const lineRows = updates.lines.map(l => ({
           order_id: id, product_id: l.productId, product_name: l.productName,
-          quantity: l.quantity, unit_price: l.unitPrice, line_total: l.lineTotal,
+          quantity: l.quantity, unit_price: l.isFree ? 0 : l.unitPrice, line_total: l.isFree ? 0 : l.lineTotal,
+          is_free: !!l.isFree, scheme_id: l.isFree ? (l.schemeId || null) : null,
         }));
         const { error: insErr } = await supabase.from("order_lines").insert(lineRows);
         if (insErr) { handleSupabaseError(insErr, { source: "crud:order_lines.insert", title: "Failed to insert line items", context: { id } }); return; }

@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { formatCurrency } from "@/data/mock-data";
-import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts } from "@/lib/order-pricing";
+import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts, computeFreeLines } from "@/lib/order-pricing";
 import { billEquivalentTotal, projectedExposure } from "@/lib/credit-exposure";
 import { useApi } from "@/services/api";
 import {
@@ -248,6 +248,11 @@ export default function NewOrder() {
   );
   const appliedSchemes = pricing.appliedSchemes;
   const totalSchemeSavings = pricing.totalSchemeSavings;
+  // Free ₹0 items from Buy X Get Y offers — worked out from the paid lines, never typed in.
+  const freeLines = useMemo(
+    () => computeFreeLines(lines.map((l) => ({ productId: l.productId, quantity: l.quantity ?? 0, unitPrice: l.unitPrice })), allSchemes, selectedDealer),
+    [allSchemes, selectedDealer, lines],
+  );
 
   // Credit guard — projected against the bill this order will become (order value + GST),
   // because the dealer's outstanding figure is itself GST-inclusive.
@@ -420,7 +425,15 @@ export default function NewOrder() {
           unitPrice: l.unitPrice,
           lineTotal: qty * l.unitPrice,
         };
-      }),
+      }).concat(freeLines.map((f) => ({
+        productId: f.productId,
+        productName: products.find((p) => p.id === f.productId)?.name || "",
+        quantity: f.quantity,
+        unitPrice: 0,
+        lineTotal: 0,
+        isFree: true,
+        schemeId: f.schemeId,
+      }))),
       total: validLines.reduce((sum, l) => sum + (l.quantity ?? 0) * l.unitPrice, 0),
       paymentMode: "cash" as const,
       paymentStatus: "pending" as const,
@@ -735,6 +748,21 @@ export default function NewOrder() {
                     </motion.div>
                   ))}
                 </AnimatePresence>
+                {freeLines.map((f) => (
+                  <div key={`free-${f.schemeId}`} className="rounded-lg border border-success/30 bg-success/5 p-3 md:p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{products.find((p) => p.id === f.productId)?.name || "Free item"}</p>
+                        <p className="text-[11px] text-muted-foreground">Free — offer: {f.schemeName} ({f.label})</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="num">Qty {f.quantity}</span>
+                        <span className="num font-medium">{formatCurrency(0)}</span>
+                        <span className="rounded bg-success px-2 py-0.5 text-[11px] font-semibold text-success-foreground">Free</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
               {attemptedSave && errors.products && (
                 <p className="mt-2 text-xs text-destructive">Add at least one product with quantity greater than 0.</p>
@@ -904,7 +932,7 @@ export default function NewOrder() {
                         <p className="text-success/70">{label}</p>
                       </div>
                       <span className="font-semibold text-success shrink-0 ml-2">
-                        -{formatCurrency(savings)}
+                        {savings > 0 ? `-${formatCurrency(savings)}` : "Free item added"}
                       </span>
                     </div>
                   ))}

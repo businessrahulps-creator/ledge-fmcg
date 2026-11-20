@@ -87,6 +87,10 @@ export interface OrderLine {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  /** Free item added by a Buy X Get Y offer (₹0). */
+  isFree?: boolean;
+  /** Offer that gave this free item. */
+  schemeId?: string | null;
 }
 
 export interface OrderScheme {

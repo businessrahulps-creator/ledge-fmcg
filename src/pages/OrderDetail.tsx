@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RouteSkeleton } from "@/components/ui/route-skeleton";
 import { formatCurrency, type Order, type OrderLine } from "@/data/mock-data";
-import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts } from "@/lib/order-pricing";
+import { computeOrderPricing, serializeAppliedSchemes, allocateLineDiscounts, computeFreeLines } from "@/lib/order-pricing";
 import { useApi } from "@/services/api";
 import { PaymentsPanel } from "@/components/orders/PaymentsPanel";
 import { downloadInvoicePdf } from "@/components/billing/InvoicePreviewDialog";
@@ -153,7 +153,8 @@ export default function OrderDetail() {
     setEditDealerId(order.distributorId);
     setEditSalespersonId(order.salespersonId);
     setEditGodown(order.godownId || "");
-    setEditLines(order.lines.map(l => ({
+    // Free offer items are rebuilt from the paid lines, so they are not editable.
+    setEditLines(order.lines.filter(l => !l.isFree).map(l => ({
       id: crypto.randomUUID(),
       productId: l.productId,
       productName: l.productName,
@@ -210,6 +211,10 @@ export default function OrderDetail() {
     () => computeOrderPricing(editLines, allSchemes, editDealerId),
     [allSchemes, editDealerId, editLines],
   );
+  const editFreeLines = useMemo(
+    () => computeFreeLines(editLines.map(l => ({ productId: l.productId, quantity: l.quantity ?? 0, unitPrice: l.unitPrice })), allSchemes, editDealerId),
+    [allSchemes, editDealerId, editLines],
+  );
 
   const executeSaveOrder = async () => {
     if (!order) return;
@@ -242,7 +247,15 @@ export default function OrderDetail() {
         unitPrice: l.unitPrice,
         lineTotal: qty * l.unitPrice,
       };
-    });
+    }).concat(editFreeLines.map(f => ({
+      productId: f.productId,
+      productName: products.find(p => p.id === f.productId)?.name || "",
+      quantity: f.quantity,
+      unitPrice: 0,
+      lineTotal: 0,
+      isFree: true,
+      schemeId: f.schemeId,
+    })));
 
     const newTotal = newLines.reduce((sum, l) => sum + l.lineTotal, 0);
 
@@ -675,7 +688,10 @@ export default function OrderDetail() {
           <ul className="divide-y divide-border/60">
             {order.lines.map((l, i) => (
               <li key={`${l.productId}-${i}`} className="flex items-center gap-3 px-4 py-3 text-xs">
-                <span className="min-w-0 flex-1 truncate font-medium">{l.productName}</span>
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {l.productName}
+                  {l.isFree && <span className="ml-2 rounded bg-success px-1.5 py-0.5 text-[10px] font-semibold text-success-foreground">Free</span>}
+                </span>
                 <span className="w-14 shrink-0 text-right tabular-nums text-muted-foreground">× {l.quantity}</span>
                 <span className="w-24 shrink-0 text-right tabular-nums text-muted-foreground">{formatCurrency(l.unitPrice)}</span>
                 <span className="w-24 shrink-0 text-right tabular-nums font-semibold">{formatCurrency(l.lineTotal)}</span>
@@ -702,7 +718,7 @@ export default function OrderDetail() {
                     <span className="font-medium text-success">{s.schemeName}</span>
                     {s.schemeLabel && <span className="text-success/70 ml-1">({s.schemeLabel})</span>}
                   </div>
-                  <span className="font-semibold text-success">-{formatCurrency(s.savings)}</span>
+                  <span className="font-semibold text-success">{s.savings > 0 ? `-${formatCurrency(s.savings)}` : "Free item"}</span>
                 </div>
               ))}
             </div>
@@ -1025,6 +1041,16 @@ export default function OrderDetail() {
                 <span className="text-sm font-semibold tabular-nums">{formatCurrency(editTotal)}</span>
               </div>
             </div>
+
+            {editFreeLines.map(f => (
+              <div key={`free-${f.schemeId}`} className="flex items-center justify-between rounded-md border border-success/30 bg-success/5 px-3 py-2 text-xs">
+                <span className="min-w-0 truncate">
+                  <span className="font-medium">{products.find(p => p.id === f.productId)?.name || "Free item"}</span>
+                  <span className="text-muted-foreground"> · Free — {f.schemeName}</span>
+                </span>
+                <span className="num shrink-0">Qty {f.quantity} · {formatCurrency(0)}</span>
+              </div>
+            ))}
 
             {editPricing.totalSchemeSavings > 0 && (
               <p className="text-xs text-success">

@@ -20,6 +20,7 @@ export function mapOrders(ordersData: any[], allLines: any[], allOrderSchemes: a
     list.push({
       productId: l.product_id, productName: l.product_name,
       quantity: l.quantity, unitPrice: Number(l.unit_price), lineTotal: Number(l.line_total),
+      isFree: !!l.is_free, schemeId: l.scheme_id || null,
     });
     linesByOrder.set(l.order_id, list);
   }
