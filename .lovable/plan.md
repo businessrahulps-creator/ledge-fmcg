@@ -28,7 +28,11 @@ Done one phase at a time; each phase pauses for "go" before the next.
 
 ## Phase 5 — Checks
 - Tests: free quantity maths, different/same product, removal below threshold, ₹0 allowed only on free lines, totals not reduced twice, multi-product % and flat matching.
-- Live check on the order form, send, and the bill.
+- **Test data in your workspace (clearly tagged "QA-OFFER", removable after):**
+  - Three offers: one Percentage (10% on 3 picked products), one Flat (₹500 off above ₹10,000 on 2 picked products), one Buy X Get Y with a different free product (Buy 10 Basmati Rice 5kg, get 1 Sunflower Oil 1L).
+  - Three orders: (1) Buy X Get Y order at 20 units → 2 free oil added at ₹0; (2) Percentage order mixing picked and non-picked products; (3) Flat order above and just below ₹10,000.
+- Each test order is checked live: order form, saving, sending (stock of the free item goes down), bill/receipt showing "Free" at ₹0, and totals matching the expected figures.
+- Results reported with before/after stock and amounts; test data removed only when you say so.
 
 ## Not changing
 - Existing orders and bills already sent (no rewrite of history).
