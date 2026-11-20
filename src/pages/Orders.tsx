@@ -1,3 +1,4 @@
+import { displayDeliveryStatus } from "@/lib/order-cancelled";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
@@ -145,7 +146,7 @@ export default function Orders() {
       o.orderNumber.toLowerCase().includes(q) ||
       o.distributorName.toLowerCase().includes(q);
     const matchesPayment = !canSeeMoney || paymentFilter === "all" || payStatus(o.id) === paymentFilter;
-    const matchesDelivery = deliveryFilter === "all" || o.deliveryStatus === deliveryFilter;
+    const matchesDelivery = deliveryFilter === "all" || displayDeliveryStatus(o) === deliveryFilter;
     const matchesNeedsBill = !needsBillOnly || (!o.cancelledAt && o.deliveryStatus !== "pending" && !billedOrderIds.has(o.id));
     return matchesSearch && matchesPayment && matchesDelivery && matchesNeedsBill;
   }), [orders, canSeeMoney, debouncedSearch, paymentFilter, deliveryFilter, needsBillOnly, billedOrderIds, payStatus]);
@@ -288,7 +289,7 @@ export default function Orders() {
                     formatCurrency(o.total - (o.schemeSavings || 0)),
                     o.paymentMode.replace("_", " "),
                     canSeeMoney ? payStatus(o.id) ?? "" : "",
-                    o.deliveryStatus,
+                    displayDeliveryStatus(o),
                     formatIndianDate(o.dispatchDate),
                     o.vehicle || "",
                     o.driverName || "",
@@ -404,6 +405,7 @@ export default function Orders() {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="dispatched">Sent</SelectItem>
                 <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
             {needsBillCount > 0 && (
@@ -463,7 +465,7 @@ export default function Orders() {
                           onClick={() => navigate(`/orders/${order.id}`)}
                           onMouseEnter={() => prefetchRoute(`/orders/${order.id}`)}
                           onFocus={() => prefetchRoute(`/orders/${order.id}`)}
-                          className="group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none"
+                          className={`group border-b border-border/50 row-hover cursor-pointer transition-transform duration-[120ms] ease-fluent hover:translate-x-px active:translate-x-px motion-reduce:transform-none ${order.cancelledAt ? "bg-muted/40" : ""}`}
                         >
                           <td className="px-4 py-3.5 font-medium text-foreground whitespace-nowrap">{order.orderNumber}</td>
                           <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">{formatIndianDate(order.date)}</td>
@@ -474,9 +476,9 @@ export default function Orders() {
                           <td className="px-4 py-3.5 text-right font-medium whitespace-nowrap">{formatCurrency(order.total - (order.schemeSavings || 0))}</td>
                           <td className="px-4 py-3.5">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              {canSeeMoney && <StatusBadge status={payStatus(order.id)} />}
+                              {canSeeMoney && !order.cancelledAt && <StatusBadge status={payStatus(order.id)} />}
                               {order.cancelledAt ? (
-                                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-destructive px-2 py-0.5 text-[11px] font-semibold text-destructive-foreground">Cancelled</span>
                               ) : (
                                 <StatusBadge status={order.deliveryStatus} kind="delivery" />
                               )}
@@ -511,7 +513,7 @@ export default function Orders() {
                     onClick={() => navigate(`/orders/${order.id}`)}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/orders/${order.id}`); } }}
                     onTouchStart={() => prefetchRoute(`/orders/${order.id}`)}
-                    className="list-row-cv flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover"
+                    className={`list-row-cv flex min-h-[64px] cursor-pointer items-center gap-3 border-b border-border/50 px-4 py-3.5 card-hover ${order.cancelledAt ? "bg-muted/40 text-muted-foreground" : ""}`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">
@@ -522,9 +524,9 @@ export default function Orders() {
                         {order.distributorName} · {formatIndianDate(order.date)}
                       </p>
                       <div className="mt-2 -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        {canSeeMoney && <StatusBadge status={payStatus(order.id)} />}
+                        {canSeeMoney && !order.cancelledAt && <StatusBadge status={payStatus(order.id)} />}
                         {order.cancelledAt ? (
-                          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Cancelled</span>
+                          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-destructive px-2 py-0.5 text-[11px] font-semibold text-destructive-foreground">Cancelled</span>
                         ) : (
                           <StatusBadge status={order.deliveryStatus} kind="delivery" />
                         )}
@@ -578,7 +580,7 @@ export default function Orders() {
                 o.salesperson,
                 formatCurrencyPdf(o.total - (o.schemeSavings || 0)),
                 canSeeMoney ? titleCase(payStatus(o.id) ?? "") : "",
-                titleCase(o.deliveryStatus),
+                titleCase(displayDeliveryStatus(o)),
               ]),
             });
           }}

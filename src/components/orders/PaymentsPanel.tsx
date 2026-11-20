@@ -236,7 +236,7 @@ export function PaymentsPanel({
         {[
           { label: invoiceId ? "Billed" : "Order total", value: docTotal },
           { label: "Received", value: received },
-          { label: "Still due", value: balance },
+          { label: "Still due", value: cancelled && received <= 0 ? 0 : balance },
         ].map(cell => (
           <div key={cell.label} className="px-4 py-3">
             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{cell.label}</p>

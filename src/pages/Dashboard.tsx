@@ -1,3 +1,4 @@
+import { isAwaitingDispatch } from "@/lib/order-cancelled";
 import { useIstDay } from "@/hooks/useIstDay";
 import { istCalendarNow } from "@/utils/dateKey";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -211,8 +212,8 @@ export default function Dashboard() {
     const dayBookedRev = bookedRevenue(filteredOrders);
     const totalRevenue = dayDeliveredRev; // legacy alias used elsewhere
     const totalOrders = filteredOrders.length;
-    const pendingOrders = filteredOrders.filter((o) => o.deliveryStatus === "pending").length;
-    const dispatchedOrders = filteredOrders.filter((o) => o.deliveryStatus === "dispatched").length;
+    const pendingOrders = filteredOrders.filter(isAwaitingDispatch).length;
+    const dispatchedOrders = filteredOrders.filter((o) => !o.cancelledAt && o.deliveryStatus === "dispatched").length;
     return { totalRevenue, dayDeliveredRev, dayBookedRev, totalOrders, pendingOrders, dispatchedOrders };
   }, [orders, filteredOrders, selectedDate]);
   const { totalRevenue, totalOrders, pendingOrders, dispatchedOrders } = dayAgg;
@@ -347,7 +348,7 @@ export default function Dashboard() {
                   </>
                 )}
                 {(() => {
-                  const pendingToSend = orders.filter((o) => o.deliveryStatus === "pending").length;
+                  const pendingToSend = orders.filter(isAwaitingDispatch).length;
                   return pendingToSend > 0 ? (
                     <Link to="/orders" className="hover:text-primary transition-colors">
                       {pendingToSend} {pendingToSend === 1 ? "order" : "orders"} waiting to send
@@ -761,7 +762,7 @@ className="h-full rounded-full bg-foreground/50"
                         <td className="px-6 py-4 text-muted-foreground">{formatIndianDate(order.date)}</td>
                         {access.money && <td className="px-6 py-4 text-right font-medium">{formatCurrency(netTotal(order))}</td>}
                         {access.money && <td className="px-6 py-4"><StatusBadge status={payStatus(order.id)} /></td>}
-                        <td className="px-6 py-4"><StatusBadge status={order.deliveryStatus} /></td>
+                        <td className="px-6 py-4">{order.cancelledAt ? <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] font-semibold text-destructive-foreground">Cancelled</span> : <StatusBadge status={order.deliveryStatus} />}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -787,7 +788,7 @@ className="h-full rounded-full bg-foreground/50"
                         <span className="text-[11px] text-muted-foreground">{o.orderNumber} · {formatIndianDate(o.date)}</span>
                         <div className="flex gap-1.5">
                           {access.money && <StatusBadge status={payStatus(o.id)} />}
-                          <StatusBadge status={o.deliveryStatus} />
+                          {o.cancelledAt ? <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] font-semibold text-destructive-foreground">Cancelled</span> : <StatusBadge status={o.deliveryStatus} />}
                         </div>
                       </div>
                     </motion.div>

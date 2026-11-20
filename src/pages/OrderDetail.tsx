@@ -449,7 +449,8 @@ export default function OrderDetail() {
   const dispatched = order.deliveryStatus === "dispatched" || order.deliveryStatus === "delivered";
   const delivered = order.deliveryStatus === "delivered";
   const settled = balance <= 0 && received > 0;
-  const canEdit = !dispatched && !hasBill;
+  const isCancelled = !!order.cancelledAt;
+  const canEdit = !dispatched && !hasBill && !isCancelled;
   /* Only GST-registered businesses need confirmed rates before billing. */
   const gstPending = pendingOrderGstProducts(companyInfo.gstin, hasBill, order.lines, products);
   const gstBlocked = gstPending.length > 0;
@@ -499,8 +500,12 @@ export default function OrderDetail() {
           subtitle={`${order.distributorName} · ${formatIndianDate(order.date)}`}
           aside={
             <>
-              {canSeeMoney && <StatusBadge status={moneyStatus} />}
-              <StatusBadge status={order.deliveryStatus} kind="delivery" />
+              {isCancelled ? (
+                <span className="inline-flex items-center rounded-md bg-destructive px-2.5 py-1 text-xs font-semibold text-destructive-foreground">Cancelled</span>
+              ) : (<>
+                {canSeeMoney && <StatusBadge status={moneyStatus} />}
+                <StatusBadge status={order.deliveryStatus} kind="delivery" />
+              </>)}
             </>
           }
           figures={[
@@ -526,9 +531,9 @@ export default function OrderDetail() {
             },
             {
               label: "Balance to collect",
-              value: formatCurrency(balance),
-              tone: (balance > 0 ? "attention" : "good") as "attention" | "good",
-              note: balance > 0 ? "Still to be collected" : "Nothing pending",
+              value: formatCurrency(isCancelled && !hasBill ? 0 : balance),
+              tone: (!(isCancelled && !hasBill) && balance > 0 ? "attention" : "good") as "attention" | "good",
+              note: isCancelled && !hasBill ? "Order cancelled — no payment due" : balance > 0 ? "Still to be collected" : "Nothing pending",
             }] : []),
           ]}
         />
@@ -539,6 +544,11 @@ export default function OrderDetail() {
             <p className="mt-1 text-xs text-muted-foreground">
               {formatIndianDate(order.cancelledAt)}{order.cancelReason ? ` — ${order.cancelReason}` : ""}
             </p>
+            {!dispatched && (
+              <p className="mt-2 text-xs text-foreground">
+                <span className="font-semibold">Stock untouched</span> — nothing was taken out of {warehouseName}. Stock only leaves the godown when an order is sent.
+              </p>
+            )}
           </div>
         )}
 
@@ -658,7 +668,7 @@ export default function OrderDetail() {
               </Button>
             ) : (
               <p className="text-right text-xs text-muted-foreground">
-                Locked — the bill is final. Use a return to correct it.
+                {isCancelled ? "Locked — this order was cancelled." : "Locked — the bill is final. Use a return to correct it."}
               </p>
             )}
           </div>
@@ -813,7 +823,7 @@ export default function OrderDetail() {
                 <FileText className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{finalInvoice?.supplyType === "bill_of_supply" ? "View bill" : "View GST bill"}</span>
               </Button>
-            ) : (
+            ) : isCancelled ? null : (
               <Button
                 variant="outline"
                 size="sm"
@@ -861,7 +871,7 @@ export default function OrderDetail() {
               paid={moneyLoaded ? { paid: money.received, balance: Math.max(0, money.balance) } : null}
             />
 
-            <Button
+            {!isCancelled && <Button
               size="sm"
               variant="outline"
               className="text-[#128C4B] hover:text-[#128C4B]"
@@ -869,7 +879,7 @@ export default function OrderDetail() {
             >
               <WhatsAppIcon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">WhatsApp</span>
-            </Button>
+            </Button>}
             {!order.cancelledAt && order.deliveryStatus === "pending" && (
               <Button
                 size="sm"
@@ -880,7 +890,7 @@ export default function OrderDetail() {
                 <span className="hidden sm:inline">Cancel order</span>
               </Button>
             )}
-            <Button
+            {!isCancelled && <Button
               variant="destructive"
               size="sm"
               className="ml-auto"
@@ -898,9 +908,9 @@ export default function OrderDetail() {
               <span className="hidden sm:inline">
                 {finalInvoice || order.deliveryStatus === "delivered" || received > 0 ? "Cannot delete" : "Delete"}
               </span>
-            </Button>
+            </Button>}
           </div>
-          {received > 0 && order.deliveryStatus !== "delivered" && (
+          {received > 0 && !isCancelled && order.deliveryStatus !== "delivered" && (
             <p className="mt-2 text-[11px] text-muted-foreground">
               This order cannot be deleted because money has been received against it. Cancel those payments first.
             </p>
