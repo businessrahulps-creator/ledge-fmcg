@@ -20,6 +20,8 @@ import { formatCurrency } from "@/data/mock-data";
 import { formatIndianDate } from "@/utils/formatDate";
 import type { Scheme } from "@/data/mock-data";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { normalizeSchemeForm, validateSchemeForm, buyXGetYSummary, schemeProductIds } from "@/lib/scheme-form";
 import {
   Plus,
   Gift,
@@ -97,6 +99,8 @@ const emptyScheme: Omit<Scheme, "id"> = {
   minOrderValue: 0,
   minQty: 0,
   productId: null,
+  productIds: null,
+  freeProductId: null,
   dealerId: null,
   isActive: true,
   validFrom: todayKey(),
@@ -119,6 +123,11 @@ export default function Schemes() {
   const [form, setForm] = useState<Omit<Scheme, "id">>(emptyScheme);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [freeIsDifferent, setFreeIsDifferent] = useState(false);
+  const [pickProducts, setPickProducts] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const sellable = useMemo(() => products.filter(p => p.itemKind !== "raw_material"), [products]);
+  const nameOf = useCallback((id: string) => products.find(p => p.id === id)?.name, [products]);
 
   const handleRefresh = useCallback(async () => {
     if (api.refreshAll) await api.refreshAll();
@@ -130,6 +139,9 @@ export default function Schemes() {
   const openAdd = () => {
     setEditingScheme(null);
     setForm(emptyScheme);
+    setFreeIsDifferent(false);
+    setPickProducts(false);
+    setProductSearch("");
     setDialogOpen(true);
   };
 
@@ -139,20 +151,26 @@ export default function Schemes() {
       name: s.name, description: s.description, schemeType: s.schemeType,
       discountPercent: s.discountPercent, buyQty: s.buyQty, freeQty: s.freeQty,
       flatAmount: s.flatAmount, minOrderValue: s.minOrderValue, minQty: s.minQty,
-      productId: s.productId, dealerId: s.dealerId, isActive: s.isActive,
+      productId: s.productId, productIds: schemeProductIds(s), freeProductId: s.freeProductId ?? null,
+      dealerId: s.dealerId, isActive: s.isActive, isCombinable: s.isCombinable,
       validFrom: s.validFrom, validUntil: s.validUntil,
     });
+    setFreeIsDifferent(!!s.freeProductId && s.freeProductId !== s.productId);
+    setPickProducts(schemeProductIds(s).length > 0);
+    setProductSearch("");
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) {
-      toast.error("Name required", { description: "Please enter a scheme name." });
+    const err = validateSchemeForm(form);
+    if (err) {
+      toast.error("Check the offer", { description: err });
       return;
     }
+    const clean = normalizeSchemeForm(form);
     const ok = editingScheme
-      ? await api.schemes.update({ ...editingScheme, ...form })
-      : await api.schemes.create({ id: crypto.randomUUID(), ...form });
+      ? await api.schemes.update({ ...editingScheme, ...clean })
+      : await api.schemes.create({ id: crypto.randomUUID(), ...clean });
     if (!ok) return; // the save failed — keep the form open, error already shown
     toast.success(editingScheme ? "Scheme updated" : "Scheme created");
     setDialogOpen(false);
@@ -178,7 +196,7 @@ export default function Schemes() {
       s.name.toLowerCase().includes(q) ||
       s.schemeType.toLowerCase().includes(q) ||
       s.description.toLowerCase().includes(q) ||
-      (s.productId && products.find(p => p.id === s.productId)?.name.toLowerCase().includes(q)) ||
+      [...schemeProductIds(s), ...(s.freeProductId ? [s.freeProductId] : [])].some(id => products.find(p => p.id === id)?.name.toLowerCase().includes(q)) ||
       (s.dealerId && dealers.find(d => d.id === s.dealerId)?.name.toLowerCase().includes(q))
     );
   }, [schemes, search, products, dealers]);
@@ -401,25 +419,55 @@ export default function Schemes() {
             )}
 
             {form.schemeType === "buy_x_get_y" && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Buy Quantity</Label>
-                  <NumberInput
-                    allowEmpty={false}
-                    min={1}
-                    value={form.buyQty}
-                    onValueChange={v => setForm(f => ({ ...f, buyQty: v ?? 1 }))}
-                  />
+              <div className="space-y-4">
+                <div className="space-y-3 rounded-md border border-border p-3">
+                  <p className="text-xs font-semibold">1. What the dealer buys</p>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Product to buy *</Label>
+                    <Select value={form.productId || ""} onValueChange={v => setForm(f => ({ ...f, productId: v }))}>
+                      <SelectTrigger className="h-10"><SelectValue placeholder="Pick a product" /></SelectTrigger>
+                      <SelectContent>
+                        {sellable.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Buy quantity</Label>
+                    <NumberInput allowEmpty={false} min={1} value={form.buyQty} onValueChange={v => setForm(f => ({ ...f, buyQty: v ?? 1 }))} />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Get Free Quantity</Label>
-                  <NumberInput
-                    allowEmpty={false}
-                    min={1}
-                    value={form.freeQty}
-                    onValueChange={v => setForm(f => ({ ...f, freeQty: v ?? 1 }))}
-                  />
+                <div className="space-y-3 rounded-md border border-border p-3">
+                  <p className="text-xs font-semibold">2. What the dealer gets free</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[{ k: false, l: "Same product" }, { k: true, l: "Different product" }].map(o => {
+                      const on = o.k === freeIsDifferent;
+                      return (
+                        <button
+                          key={o.l}
+                          type="button"
+                          onClick={() => { setFreeIsDifferent(o.k); if (!o.k) setForm(f => ({ ...f, freeProductId: null })); }}
+                          className={cn("touch-target rounded-md border px-3 py-2 text-xs font-medium", on ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border")}
+                        >{o.l}</button>
+                      );
+                    })}
+                  </div>
+                  {freeIsDifferent && (
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Free product</Label>
+                      <Select value={form.freeProductId || ""} onValueChange={v => setForm(f => ({ ...f, freeProductId: v }))}>
+                        <SelectTrigger className="h-10"><SelectValue placeholder="Pick the free product" /></SelectTrigger>
+                        <SelectContent>
+                          {sellable.filter(p => p.id !== form.productId).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Free quantity</Label>
+                    <NumberInput allowEmpty={false} min={1} value={form.freeQty} onValueChange={v => setForm(f => ({ ...f, freeQty: v ?? 1 }))} />
+                  </div>
                 </div>
+                <p className="rounded-md bg-muted px-3 py-2 text-xs">{buyXGetYSummary(form, nameOf)}</p>
               </div>
             )}
 
@@ -436,10 +484,9 @@ export default function Schemes() {
               </div>
             )}
 
-            {/* Conditions */}
-            <div className="grid grid-cols-2 gap-3">
+            {form.schemeType !== "buy_x_get_y" && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Min Order Value (₹)</Label>
+                <Label className="text-xs">Min order value (₹, optional)</Label>
                 <NumberInput
                   allowDecimal
                   allowEmpty={false}
@@ -449,54 +496,67 @@ export default function Schemes() {
                   placeholder="0 = no minimum"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Min Product Qty</Label>
-                <NumberInput
-                  allowEmpty={false}
-                  min={0}
-                  value={form.minQty}
-                  onValueChange={v => setForm(f => ({ ...f, minQty: v ?? 0 }))}
-                  placeholder="0 = no minimum"
-                />
-              </div>
-            </div>
+            )}
 
-            {/* Product & Dealer filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Specific Product (optional)</Label>
-                <Select
-                  value={form.productId || "all"}
-                  onValueChange={v => setForm(f => ({ ...f, productId: v === "all" ? null : v }))}
-                >
-                  <SelectTrigger className="h-10">
-                    <SelectValue placeholder="All products" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Products</SelectItem>
-                    {products.filter(p => p.itemKind !== "raw_material").map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {form.schemeType !== "buy_x_get_y" && (
+              <div className="space-y-2">
+                <Label className="text-xs">Applies to</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[{ k: false, l: "All products" }, { k: true, l: "Select products" }].map(o => {
+                    const on = o.k === pickProducts;
+                    return (
+                      <button
+                        key={o.l}
+                        type="button"
+                        onClick={() => { setPickProducts(o.k); if (!o.k) setForm(f => ({ ...f, productIds: null, productId: null })); }}
+                        className={cn("touch-target rounded-md border px-3 py-2 text-xs font-medium", on ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border")}
+                      >{o.l}</button>
+                    );
+                  })}
+                </div>
+                {pickProducts && (
+                  <div className="space-y-2">
+                    <Input placeholder="Search products" value={productSearch} onChange={e => setProductSearch(e.target.value)} className="h-10" />
+                    <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                      {sellable.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map(p => {
+                        const checked = (form.productIds ?? []).includes(p.id);
+                        return (
+                          <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-1.5 text-xs hover:bg-muted">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={c => setForm(f => {
+                                const cur = f.productIds ?? [];
+                                const next = c ? [...cur, p.id] : cur.filter(id => id !== p.id);
+                                return { ...f, productIds: next, productId: next[0] ?? null };
+                              })}
+                            />
+                            {p.name}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">{(form.productIds ?? []).length} picked</p>
+                  </div>
+                )}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Specific Dealer (optional)</Label>
-                <Select
-                  value={form.dealerId || "all"}
-                  onValueChange={v => setForm(f => ({ ...f, dealerId: v === "all" ? null : v }))}
-                >
-                  <SelectTrigger className="h-10">
-                    <SelectValue placeholder="All dealers" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Dealers</SelectItem>
-                    {dealers.map(d => (
-                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Specific dealer (optional)</Label>
+              <Select
+                value={form.dealerId || "all"}
+                onValueChange={v => setForm(f => ({ ...f, dealerId: v === "all" ? null : v }))}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="All dealers" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Dealers</SelectItem>
+                  {dealers.map(d => (
+                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Validity */}
@@ -569,7 +629,11 @@ function SchemeCard({
   onDelete: () => void;
 }) {
   const Icon = getSchemeIcon(s.schemeType);
-  const product = s.productId ? products.find(p => p.id === s.productId) : null;
+  const nameOf = (id: string) => products.find(p => p.id === id)?.name;
+  const isBxgy = s.schemeType === "buy_x_get_y";
+  const listNames = isBxgy ? [] : schemeProductIds(s).map(nameOf).filter(Boolean) as string[];
+  const buyName = isBxgy && s.productId ? nameOf(s.productId) : undefined;
+  const freeName = isBxgy && s.freeProductId && s.freeProductId !== s.productId ? nameOf(s.freeProductId) : undefined;
   const dealer = s.dealerId ? dealers.find(d => d.id === s.dealerId) : null;
 
   const today = todayKey();
@@ -613,16 +677,29 @@ function SchemeCard({
       <div className="mt-3 flex flex-wrap gap-1.5">
         {isExpired && <Badge variant="destructive" className="text-[10px]">Expired</Badge>}
         {isUpcoming && <Badge variant="secondary" className="text-[10px]">Upcoming</Badge>}
-        {product && (
+        {buyName && (
           <Badge variant="outline" className="text-[10px] gap-1">
             <Package className="h-2.5 w-2.5" />
-            {product.name}
+            Buy: {buyName}
           </Badge>
         )}
+        {isBxgy && (buyName || freeName) && (
+          <Badge variant="outline" className="text-[10px] gap-1">
+            <Gift className="h-2.5 w-2.5" />
+            Free: {freeName ?? buyName}
+          </Badge>
+        )}
+        {listNames.slice(0, 3).map(n => (
+          <Badge key={n} variant="outline" className="text-[10px] gap-1">
+            <Package className="h-2.5 w-2.5" />
+            {n}
+          </Badge>
+        ))}
+        {listNames.length > 3 && <Badge variant="outline" className="text-[10px]">+{listNames.length - 3} more</Badge>}
         {dealer && (
           <Badge variant="outline" className="text-[10px]">{dealer.name}</Badge>
         )}
-        {s.minOrderValue > 0 && (
+        {!isBxgy && s.minOrderValue > 0 && (
           <Badge variant="outline" className="text-[10px]">Min {formatCurrency(s.minOrderValue)}</Badge>
         )}
       </div>

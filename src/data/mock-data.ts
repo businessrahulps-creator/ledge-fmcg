@@ -39,6 +39,10 @@ export interface Scheme {
   minOrderValue: number;
   minQty: number;
   productId: string | null;
+  /** Percentage/Flat: products the offer is limited to (null = all). */
+  productIds?: string[] | null;
+  /** Buy X Get Y: product given free (null = same as productId). */
+  freeProductId?: string | null;
   dealerId: string | null;
   isActive: boolean;
   validFrom: string;

@@ -112,6 +112,8 @@ export function mapScheme(s: any): Scheme {
     discountPercent: Number(s.discount_percent || 0), buyQty: s.buy_qty || 0, freeQty: s.free_qty || 0,
     flatAmount: Number(s.flat_amount || 0), minOrderValue: Number(s.min_order_value || 0), minQty: s.min_qty || 0,
     productId: s.product_id || null, dealerId: s.dealer_id || null,
+    productIds: Array.isArray(s.product_ids) && s.product_ids.length ? s.product_ids : null,
+    freeProductId: s.free_product_id || null,
     isActive: s.is_active, validFrom: s.valid_from, validUntil: s.valid_until || null,
     isCombinable: s.is_combinable ?? true,
   };

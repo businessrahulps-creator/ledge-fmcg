@@ -26,6 +26,8 @@ export function useCatalogDomain(deps: DomainDeps) {
       buy_qty: s.buyQty, free_qty: s.freeQty, flat_amount: s.flatAmount,
       min_order_value: s.minOrderValue, min_qty: s.minQty,
       product_id: s.productId || null, dealer_id: s.dealerId || null,
+      product_ids: s.productIds && s.productIds.length ? s.productIds : null,
+      free_product_id: s.freeProductId || null,
       is_active: s.isActive, valid_from: s.validFrom, valid_until: s.validUntil || null,
       is_combinable: s.isCombinable ?? true,
     }),
