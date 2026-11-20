@@ -15,6 +15,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { useApi } from "@/services/api";
 import { useShopVisits } from "@/hooks/useShopVisits";
 import { salespersonCoverage } from "@/lib/salesperson-identity";
+import { useCan } from "@/hooks/useCan";
 import { useReceivables } from "@/hooks/useReceivables";
 import { formatIndianDate } from "@/utils/formatDate";
 
@@ -22,6 +23,7 @@ export default function SalespersonDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
+  const canSeeMoney = useCan("see_money");
 
   const items = api.salespersons.list();
   const orders = api.orders.list();
@@ -82,11 +84,12 @@ export default function SalespersonDetail() {
               </div>
             </div>
           </div>
-          <Button
+          {canSeeMoney && <Button
             variant="outline"
             size="sm"
             className="h-9 gap-1.5 ml-13 sm:ml-0"
             onClick={async () => {
+              if (!canSeeMoney) return;
               const { SalespersonStatementPdf } = await import("@/components/pdf/SalespersonStatementPdf");
               downloadPdf(
                 pdfFilename("salesperson-statement", person.name.replace(/\s+/g, "-")),
@@ -105,7 +108,7 @@ export default function SalespersonDetail() {
           >
             <FileText className="h-3.5 w-3.5" />
             Statement PDF
-          </Button>
+          </Button>}
         </div>
 
         {/* Info Cards */}
@@ -122,20 +125,20 @@ export default function SalespersonDetail() {
             <span className="text-xs text-muted-foreground">Region</span>
             <p className="mt-0.5 text-sm font-medium">{person.region}</p>
           </div>
-          <div className="glass-card p-3 md:p-4">
+          {canSeeMoney && <div className="glass-card p-3 md:p-4">
             <span className="text-xs text-muted-foreground">Total Value</span>
             <p className="mt-0.5 text-sm font-medium">{formatCurrency(person.totalValue)}</p>
-          </div>
+          </div>}
         </div>
 
         {/* Performance Health */}
-        <div className={`rounded-lg border border-border p-3 md:p-4 ${hc.bg}`}>
+        {canSeeMoney && <div className={`rounded-lg border border-border p-3 md:p-4 ${hc.bg}`}>
           <div className="flex items-center gap-2 mb-1">
             <span className={`h-2 w-2 rounded-full ${hc.dot}`} />
             <span className={`text-xs font-semibold ${hc.color}`}>{hc.label}</span>
           </div>
           <p className="text-xs text-muted-foreground">{insight}</p>
-        </div>
+        </div>}
 
         {/* Scorecard Metrics */}
         <div>
@@ -160,6 +163,7 @@ export default function SalespersonDetail() {
               <span className="text-xs text-muted-foreground">Orders (90d)</span>
               <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.orders90d}</p>
             </div>
+            {canSeeMoney && <>
             <div className="glass-card p-3 md:p-4">
               <span className="text-xs text-muted-foreground">Average order amount</span>
               <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.avgOrderValue)}</p>
@@ -168,6 +172,7 @@ export default function SalespersonDetail() {
               <span className="text-xs text-muted-foreground">Revenue (30d)</span>
               <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(sc.totalRevenue30d)}</p>
             </div>
+            </>}
           </div>
 
           {coverage && (
@@ -188,11 +193,11 @@ export default function SalespersonDetail() {
           )}
 
           <div className="mt-3 grid grid-cols-2 gap-3 md:gap-4">
-            <div className="glass-card p-3 md:p-4">
+            {canSeeMoney && <div className="glass-card p-3 md:p-4">
               <span className="text-xs text-muted-foreground">Payment Collection</span>
               <p className="mt-0.5 text-sm font-semibold md:text-base">{sc.paymentCollectionEfficiency.toFixed(0)}%</p>
               <Progress value={sc.paymentCollectionEfficiency} className="mt-2 h-1.5" />
-            </div>
+            </div>}
             <div className="glass-card p-3 md:p-4">
               <div className="flex items-center gap-1">
                 <Zap className="h-3 w-3 text-muted-foreground" />
@@ -221,7 +226,7 @@ export default function SalespersonDetail() {
           const weeklyTarget = allTargets.find(t => t.entityType === "salesperson" && t.entityId === id && t.periodType === "weekly" && t.periodStart === weekStart);
           const monthlyTarget = allTargets.find(t => t.entityType === "salesperson" && t.entityId === id && t.periodType === "monthly" && t.periodStart === monthStart);
           const target = dailyTarget || weeklyTarget || monthlyTarget;
-          if (!target || (target.targetRevenue <= 0 && target.targetOrders <= 0)) return null;
+          if (!target || ((!canSeeMoney || target.targetRevenue <= 0) && target.targetOrders <= 0)) return null;
           const periodLabel = target.periodType === "daily" ? "Today" : target.periodType === "weekly" ? "This Week" : new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
           const periodEnd = target.periodType === "daily" ? today : target.periodType === "weekly" ? addDaysToKey(weekStart, 6) : toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
           const filteredOrders = personOrders.filter(o => o.date >= target.periodStart && o.date <= periodEnd);
@@ -229,7 +234,7 @@ export default function SalespersonDetail() {
           const actualOrd = filteredOrders.length;
           const revPct = target.targetRevenue > 0 ? Math.round((actualRev / target.targetRevenue) * 100) : 0;
           const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
-          const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
+          const mainPct = canSeeMoney && target.targetRevenue > 0 ? revPct : ordPct;
           const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
           const statusColor = mainPct > 100 ? "text-success" : mainPct >= 70 ? "text-primary" : mainPct >= 40 ? "text-warning" : "text-destructive";
           const barColor = mainPct > 100 ? "[&>div]:bg-success" : mainPct >= 70 ? "[&>div]:bg-primary" : mainPct >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive";
@@ -247,7 +252,7 @@ export default function SalespersonDetail() {
                 </div>
                 <Progress value={Math.min(mainPct, 100)} className={`h-2 mb-3 ${barColor}`} />
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
-                  {target.targetRevenue > 0 && (
+                  {canSeeMoney && target.targetRevenue > 0 && (
                     <div>
                       <span className="text-muted-foreground">Order value</span>
                       <p className="font-semibold">{formatCurrency(actualRev)} / {formatCurrency(target.targetRevenue)}</p>
@@ -275,8 +280,8 @@ export default function SalespersonDetail() {
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     <th className="px-4 py-2.5 font-medium">Order</th>
                     <th className="px-4 py-2.5 font-medium">Dealer</th>
-                    <th className="px-4 py-2.5 font-medium text-right">Amount</th>
-                    <th className="px-4 py-2.5 font-medium">Payment</th>
+                    {canSeeMoney && <th className="px-4 py-2.5 font-medium text-right">Amount</th>}
+                    {canSeeMoney && <th className="px-4 py-2.5 font-medium">Payment</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -284,8 +289,8 @@ export default function SalespersonDetail() {
                     <tr key={o.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => navigate(`/orders/${o.id}`)}>
                       <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
                       <td className="px-4 py-3 text-muted-foreground">{o.distributorName}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
-                      <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>
+                      {canSeeMoney && <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>}
+                      {canSeeMoney && <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>}
                     </tr>
                   ))}
                 </tbody>
@@ -295,11 +300,11 @@ export default function SalespersonDetail() {
                   <div key={o.id} className="px-4 py-3 card-hover cursor-pointer" onClick={() => navigate(`/orders/${o.id}`)}>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
-                      <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
+                      {canSeeMoney && <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>}
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">{o.distributorName}</span>
-                      <StatusBadge status={payStatus(o.id)} />
+                      {canSeeMoney && <StatusBadge status={payStatus(o.id)} />}
                     </div>
                   </div>
                 ))}
@@ -314,7 +319,7 @@ export default function SalespersonDetail() {
 
         {/* Activity History */}
         <div className="glass-card p-4 md:p-6">
-          <EntityHistory entityType="salesperson" entityId={id!} />
+          {id && <EntityHistory entityType="salesperson" entityId={id} />}
         </div>
       </div>
     </AppLayout>

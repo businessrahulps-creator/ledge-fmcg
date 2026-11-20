@@ -113,7 +113,7 @@
 
 ## Pre-publish audit fixes (one at a time)
 - [x] SEC-01 Sales Team money hidden
-- [ ] SEC-02 Salesperson detail
+- [x] SEC-02 Salesperson detail money hidden (automated checks; four-role browser verification pending final pass)
 - [ ] SEC-03 Targets
 - [ ] SEC-04 Dealer detail
 - [ ] UI-01 Stock godown value
