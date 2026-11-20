@@ -31,3 +31,13 @@ These screens read money from bills/payments that the app already loads for ever
 
 ## Final report
 Per-finding status (FIXED / NOT FIXED / NEEDS VERIFICATION), files changed, tests, browser results actually run, remaining risks, and confirmation no records were changed.
+
+## Order of work (one at a time)
+Each fix is built, tested and reported on its own; I pause for your "go" before starting the next.
+1. SEC-01 Sales Team
+2. SEC-02 Salesperson detail
+3. SEC-03 Targets
+4. SEC-04 Dealer detail
+5. UI-01 Stock godown value
+6. DOC-01 Returns bill eligibility
+7. Full suite + four-role browser pass + final report
