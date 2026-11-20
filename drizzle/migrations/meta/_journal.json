@@ -519,6 +519,13 @@
       "when": 1795084764421,
       "tag": "0073_returns_require_money_access",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1795164991033,
+      "tag": "0074_scheme_free_product_and_multi_products",
+      "breakpoints": true
     }
   ]
 }

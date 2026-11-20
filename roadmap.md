@@ -122,3 +122,6 @@
 - [x] Accountant live checks — server role verified, five screens desktop/phone, team export, stock quantities/values without Add Stock, real BOS selection; no save
 - [x] Sales Rep live checks — server role verified; five screens desktop/phone; team and inventory exports omit totals; ledger falls back to overview; Returns denied; no save
 - [x] Viewer live checks + scoped final sign-off — server role verified; desktop/phone screens and exports hide financial totals, retain stock quantities; direct ledger falls back and Returns denied; no save or publication. Broader release remains conditional on risks documented in final-release-verification.md.
+
+- [x] Offers plan Phase 1 (free product + product list fields)
+- [ ] Offers plan Phases 2-5 (screen, order form, send/bills, QA-OFFER test data)

@@ -1387,6 +1387,7 @@ export type Database = {
           gst_rate: number | null
           id: string
           igst_amount: number
+          is_free: boolean
           line_total: number
           loaded_quantity: number | null
           order_id: string
@@ -1394,6 +1395,7 @@ export type Database = {
           product_id: string
           product_name: string
           quantity: number
+          scheme_id: string | null
           scheme_snapshot: Json
           sgst_amount: number
           taxable_amount: number | null
@@ -1410,6 +1412,7 @@ export type Database = {
           gst_rate?: number | null
           id?: string
           igst_amount?: number
+          is_free?: boolean
           line_total: number
           loaded_quantity?: number | null
           order_id: string
@@ -1417,6 +1420,7 @@ export type Database = {
           product_id: string
           product_name: string
           quantity: number
+          scheme_id?: string | null
           scheme_snapshot?: Json
           sgst_amount?: number
           taxable_amount?: number | null
@@ -1433,6 +1437,7 @@ export type Database = {
           gst_rate?: number | null
           id?: string
           igst_amount?: number
+          is_free?: boolean
           line_total?: number
           loaded_quantity?: number | null
           order_id?: string
@@ -1440,6 +1445,7 @@ export type Database = {
           product_id?: string
           product_name?: string
           quantity?: number
+          scheme_id?: string | null
           scheme_snapshot?: Json
           sgst_amount?: number
           taxable_amount?: number | null
@@ -1465,6 +1471,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
             referencedColumns: ["id"]
           },
         ]
@@ -2335,6 +2348,7 @@ export type Database = {
           description: string
           discount_percent: number
           flat_amount: number
+          free_product_id: string | null
           free_qty: number
           id: string
           is_active: boolean
@@ -2343,6 +2357,7 @@ export type Database = {
           min_qty: number
           name: string
           product_id: string | null
+          product_ids: string[] | null
           scheme_type: string
           updated_at: string
           valid_from: string
@@ -2356,6 +2371,7 @@ export type Database = {
           description?: string
           discount_percent?: number
           flat_amount?: number
+          free_product_id?: string | null
           free_qty?: number
           id?: string
           is_active?: boolean
@@ -2364,6 +2380,7 @@ export type Database = {
           min_qty?: number
           name: string
           product_id?: string | null
+          product_ids?: string[] | null
           scheme_type?: string
           updated_at?: string
           valid_from?: string
@@ -2377,6 +2394,7 @@ export type Database = {
           description?: string
           discount_percent?: number
           flat_amount?: number
+          free_product_id?: string | null
           free_qty?: number
           id?: string
           is_active?: boolean
@@ -2385,6 +2403,7 @@ export type Database = {
           min_qty?: number
           name?: string
           product_id?: string | null
+          product_ids?: string[] | null
           scheme_type?: string
           updated_at?: string
           valid_from?: string
@@ -2417,6 +2436,13 @@ export type Database = {
             columns: ["dealer_id"]
             isOneToOne: false
             referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schemes_free_product_id_fkey"
+            columns: ["free_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
