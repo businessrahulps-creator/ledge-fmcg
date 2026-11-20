@@ -583,10 +583,11 @@ function NewClaimDialog({
                     <label className="space-y-1">
                       <span className="block text-[11px] text-muted-foreground">{label}</span>
                       <NumberInput
-                        allowEmpty={false}
+                        allowEmpty
                         allowDecimal={line.unit.factor !== 1}
                         min={0}
-                        value={value}
+                        placeholder="0"
+                        value={value === 0 ? null : value}
                         onValueChange={v => set(prev => ({ ...prev, [id]: v ?? 0 }))}
                         className="h-9 w-full text-sm text-right"
                       />

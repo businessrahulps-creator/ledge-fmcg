@@ -26,6 +26,8 @@ export interface NumberInputProps
   /** Called when a typed value above `max` is silently pulled back down to `max`. */
   onClampedToMax?: (max: number) => void;
   className?: string;
+  /** Select the whole value when the box gets focus so typing replaces it. Defaults to true. */
+  selectOnFocus?: boolean;
 }
 
 const inrFormatter = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
@@ -51,6 +53,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       allowEmpty = true,
       currency = false,
       onClampedToMax,
+      selectOnFocus = true,
       onBlur,
       onFocus,
       className,
@@ -68,7 +71,10 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     // diverges from what we have parsed.
     const [draft, setDraft] = React.useState<string>(valueAsString);
 
+    const focusedRef = React.useRef(false);
     React.useEffect(() => {
+      // While the user is typing, never yank their draft (e.g. "" snapping back to "0").
+      if (focusedRef.current) return;
       const parsedDraft = draft === "" ? null : Number(draft);
       const parentValue = value === undefined ? null : value;
       if (parsedDraft !== parentValue && !(Number.isNaN(parsedDraft) && parentValue === null)) {
@@ -89,6 +95,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
       if (next !== "" && !validPattern.test(next)) return; // reject keystroke
       if (!allowNegative && next.startsWith("-")) return;
+      // Drop stray leading zeros: "09" -> "9", "-007" -> "-7"; "0.5" stays.
+      next = next.replace(/^(-?)0+(?=\d)/, "$1");
 
       setDraft(next);
 
@@ -115,6 +123,13 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       setFocused(true);
+      focusedRef.current = true;
+      if (selectOnFocus) {
+        const el = e.currentTarget;
+        requestAnimationFrame(() => {
+          if (document.activeElement === el) el.select();
+        });
+      }
       // When currency, switch to raw digits for editing.
       if (currency) {
         const raw = valueAsString;
@@ -125,6 +140,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setFocused(false);
+      focusedRef.current = false;
       let committed: number | null;
       if (draft === "" || draft === "-" || draft === "." || draft === "-.") {
         committed = allowEmpty ? null : (min ?? 0);
