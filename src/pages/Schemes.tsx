@@ -92,11 +92,12 @@ const emptyScheme: Omit<Scheme, "id"> = {
   name: "",
   description: "",
   schemeType: "percentage",
-  discountPercent: 10,
-  buyQty: 10,
-  freeQty: 2,
-  flatAmount: 500,
-  minOrderValue: 0,
+  // Number boxes start blank (undefined) so nothing is pre-filled; normalizeSchemeForm stores blanks as 0.
+  discountPercent: undefined as unknown as number,
+  buyQty: undefined as unknown as number,
+  freeQty: undefined as unknown as number,
+  flatAmount: undefined as unknown as number,
+  minOrderValue: undefined as unknown as number,
   minQty: 0,
   productId: null,
   productIds: null,
@@ -409,11 +410,12 @@ export default function Schemes() {
                 <Label className="text-xs">Discount Percentage (%)</Label>
                 <NumberInput
                   allowDecimal
-                  allowEmpty={false}
+                  allowEmpty
                   min={0}
                   max={100}
+                  placeholder="e.g. 10"
                   value={form.discountPercent}
-                  onValueChange={v => setForm(f => ({ ...f, discountPercent: v ?? 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, discountPercent: v as number }))}
                 />
               </div>
             )}
@@ -433,7 +435,7 @@ export default function Schemes() {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Buy quantity</Label>
-                    <NumberInput allowEmpty={false} min={1} value={form.buyQty} onValueChange={v => setForm(f => ({ ...f, buyQty: v ?? 1 }))} />
+                    <NumberInput allowEmpty min={1} placeholder="e.g. 10" value={form.buyQty} onValueChange={v => setForm(f => ({ ...f, buyQty: v as number }))} />
                   </div>
                 </div>
                 <div className="space-y-3 rounded-md border border-border p-3">
@@ -464,7 +466,7 @@ export default function Schemes() {
                   )}
                   <div className="space-y-1.5">
                     <Label className="text-xs">Free quantity</Label>
-                    <NumberInput allowEmpty={false} min={1} value={form.freeQty} onValueChange={v => setForm(f => ({ ...f, freeQty: v ?? 1 }))} />
+                    <NumberInput allowEmpty min={1} placeholder="e.g. 1" value={form.freeQty} onValueChange={v => setForm(f => ({ ...f, freeQty: v as number }))} />
                   </div>
                 </div>
                 <p className="rounded-md bg-muted px-3 py-2 text-xs">{buyXGetYSummary(form, nameOf)}</p>
@@ -476,10 +478,11 @@ export default function Schemes() {
                 <Label className="text-xs">Discount Amount (₹)</Label>
                 <NumberInput
                   allowDecimal
-                  allowEmpty={false}
+                  allowEmpty
                   min={0}
+                  placeholder="e.g. 500"
                   value={form.flatAmount}
-                  onValueChange={v => setForm(f => ({ ...f, flatAmount: v ?? 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, flatAmount: v as number }))}
                 />
               </div>
             )}
@@ -489,10 +492,10 @@ export default function Schemes() {
                 <Label className="text-xs">Min order value (₹, optional)</Label>
                 <NumberInput
                   allowDecimal
-                  allowEmpty={false}
+                  allowEmpty
                   min={0}
                   value={form.minOrderValue}
-                  onValueChange={v => setForm(f => ({ ...f, minOrderValue: v ?? 0 }))}
+                  onValueChange={v => setForm(f => ({ ...f, minOrderValue: v as number }))}
                   placeholder="0 = no minimum"
                 />
               </div>

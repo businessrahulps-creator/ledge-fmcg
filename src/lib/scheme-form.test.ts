@@ -44,3 +44,22 @@ describe("offer form rules", () => {
     expect(schemeFreeProductId({ productId: "rice", freeProductId: null })).toBe("rice");
   });
 });
+
+describe("blank number boxes", () => {
+  const base = { name: "X", description: "", productId: "p1", productIds: null, freeProductId: null, dealerId: null, isActive: true, validFrom: "2026-11-20", validUntil: null, minQty: 0 } as any;
+  it("asks for buy quantity when blank", () => {
+    expect(validateSchemeForm({ ...base, schemeType: "buy_x_get_y", freeQty: 1 })).toBe("Enter the buy quantity.");
+  });
+  it("asks for free quantity when blank", () => {
+    expect(validateSchemeForm({ ...base, schemeType: "buy_x_get_y", buyQty: 10 })).toBe("Enter the free quantity.");
+  });
+  it("asks for discount percentage when blank", () => {
+    expect(validateSchemeForm({ ...base, schemeType: "percentage" })).toBe("Enter a discount percentage.");
+  });
+  it("asks for flat amount when blank", () => {
+    expect(validateSchemeForm({ ...base, schemeType: "flat_discount" })).toBe("Enter a discount amount.");
+  });
+  it("blank min order value saves as 0", () => {
+    expect(normalizeSchemeForm({ ...base, schemeType: "percentage", discountPercent: 5 }).minOrderValue).toBe(0);
+  });
+});

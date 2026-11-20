@@ -19,9 +19,13 @@ export function validateSchemeForm(f: SchemeForm): SchemeFormError {
   if (!f.name.trim()) return "Please enter an offer name.";
   if (f.schemeType === "buy_x_get_y") {
     if (!f.productId) return "Pick the product to buy.";
+    if (f.buyQty == null) return "Enter the buy quantity.";
     if (!(f.buyQty >= 1)) return "Buy quantity must be at least 1.";
+    if (f.freeQty == null) return "Enter the free quantity.";
     if (!(f.freeQty >= 1)) return "Free quantity must be at least 1.";
   }
+  if (f.schemeType === "percentage" && f.discountPercent == null) return "Enter a discount percentage.";
+  if (f.schemeType === "flat_discount" && f.flatAmount == null) return "Enter a discount amount.";
   if (f.schemeType === "percentage" && !(f.discountPercent > 0 && f.discountPercent <= 100)) return "Discount must be between 1 and 100%.";
   if (f.schemeType === "flat_discount" && !(f.flatAmount > 0)) return "Discount amount must be more than ₹0.";
   return null;
@@ -33,7 +37,17 @@ export function validateSchemeForm(f: SchemeForm): SchemeFormError {
  * - Percentage / Flat: an optional product list, no free product, no minimum quantity.
  *   The old single `productId` is kept as the first picked product so older readers never widen the offer.
  */
-export function normalizeSchemeForm(f: SchemeForm): SchemeForm {
+export function normalizeSchemeForm(input: SchemeForm): SchemeForm {
+  // Blank boxes in the form are stored as 0 (blank min order value = no minimum).
+  const f: SchemeForm = {
+    ...input,
+    discountPercent: input.discountPercent ?? 0,
+    buyQty: input.buyQty ?? 0,
+    freeQty: input.freeQty ?? 0,
+    flatAmount: input.flatAmount ?? 0,
+    minOrderValue: input.minOrderValue ?? 0,
+    minQty: input.minQty ?? 0,
+  };
   if (f.schemeType === "buy_x_get_y") {
     const free = f.freeProductId && f.freeProductId !== f.productId ? f.freeProductId : null;
     return { ...f, minOrderValue: 0, minQty: 0, productIds: null, freeProductId: free };
@@ -54,6 +68,7 @@ export function buyXGetYSummary(
 ): string {
   const buy = f.productId ? nameOf(f.productId) : undefined;
   if (!buy) return "Pick the product to buy to see the summary.";
+  if (!(f.buyQty >= 1) || !(f.freeQty >= 1)) return "Enter the buy and free quantities to see the summary.";
   const freeId = f.freeProductId || f.productId!;
   const free = nameOf(freeId) ?? buy;
   return `For every ${f.buyQty} ${buy} bought, the dealer gets ${f.freeQty} ${free} free (₹0).`;
