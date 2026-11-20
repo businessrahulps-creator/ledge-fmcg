@@ -11,7 +11,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, MapPin, Phone, Mail, FileText, TrendingUp, TrendingDown, Minus, Shield, ShieldAlert, Store, ChevronDown, ChevronUp, Plus, Trash2, Target } from "lucide-react";
 import { EntityHistory } from "@/components/layout/EntityHistory";
 import { DealerVisitsPanel } from "@/components/visits/DealerVisitsPanel";
@@ -57,6 +57,10 @@ export default function DealerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const api = useApi();
+  const canSeeMoney = useCan("see_money");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab") || "overview";
+  const activeTab = ["overview", "orders", "secondary", ...(canSeeMoney ? ["ledger"] : [])].includes(requestedTab) ? requestedTab : "overview";
 
   const items = api.dealers.list();
   const orders = api.orders.list();
@@ -157,16 +161,17 @@ export default function DealerDetail() {
             <Button
               size="sm"
               className="h-9 gap-1.5 bg-[#25D366] hover:bg-[#1ebe57] text-white"
-              onClick={() => shareDealerOnWhatsApp(dealer)}
+              onClick={() => shareDealerOnWhatsApp(dealer, canSeeMoney)}
             >
               <WhatsAppIcon className="h-3.5 w-3.5" />
               WhatsApp
             </Button>
-            <Button
+            {canSeeMoney && <Button
               variant="outline"
               size="sm"
               className="h-9 gap-1.5"
               onClick={async () => {
+                if (!canSeeMoney) return;
                 const { DealerStatementPdf } = await import("@/components/pdf/DealerStatementPdf");
                 const doc = React.createElement(DealerStatementPdf, {
                   companyName: api.companyInfo.name,
@@ -196,15 +201,19 @@ export default function DealerDetail() {
             >
               <FileText className="h-3.5 w-3.5" />
               Statement PDF
-            </Button>
+            </Button>}
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={(tab) => {
+          const next = new URLSearchParams(searchParams);
+          next.set("tab", tab);
+          setSearchParams(next, { replace: true });
+        }} className="w-full">
           <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders ({dealerOrders.length})</TabsTrigger>
-            <TabsTrigger value="ledger">Bills & payments</TabsTrigger>
+            {canSeeMoney && <TabsTrigger value="ledger">Bills & payments</TabsTrigger>}
             <TabsTrigger value="secondary">Dealer sales to shops</TabsTrigger>
           </TabsList>
 
@@ -216,11 +225,12 @@ export default function DealerDetail() {
                 <span className="text-xs text-muted-foreground">Total Orders</span>
                 <p className="mt-0.5 text-sm font-semibold md:text-base">{formatNumber(dealer.totalOrders)}</p>
               </div>
-              <div className="glass-card p-3 md:p-4">
+              {canSeeMoney && <div className="glass-card p-3 md:p-4">
                 <span className="text-xs text-muted-foreground">Total Value</span>
                 <p className="mt-0.5 text-sm font-semibold md:text-base">{formatCurrency(dealer.totalValue)}</p>
-              </div>
+              </div>}
               {(() => {
+                if (!canSeeMoney) return null;
                 const limit = dealer.creditLimit || 0;
                 const outstanding = dealer.outstandingAmount || 0;
                 const pct = limit > 0 ? (outstanding / limit) * 100 : 0;
@@ -240,6 +250,7 @@ export default function DealerDetail() {
 
             {/* Unpaid bills & ageing — bills minus receipts minus credit notes */}
             {(() => {
+              if (!canSeeMoney) return null;
               const outRows = dealerReceivables;
               const totalOut = sumDue(outRows);
               if (totalOut <= 0) return null;
@@ -397,7 +408,7 @@ export default function DealerDetail() {
             })()}
 
             {/* Churn Risk */}
-            <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 ${risk.bg}`}>
+            {canSeeMoney && <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 ${risk.bg}`}>
               {sc.churnRisk === "high" ? <ShieldAlert className={`h-4 w-4 ${risk.color}`} /> : <Shield className={`h-4 w-4 ${risk.color}`} />}
               <div className="flex-1">
                 <span className={`text-xs font-semibold ${risk.color}`}>{risk.label}</span>
@@ -409,7 +420,7 @@ export default function DealerDetail() {
                 <span className={`h-1.5 w-1.5 rounded-full ${risk.dot}`} />
                 {sc.churnRisk.toUpperCase()}
               </span>
-            </div>
+            </div>}
 
             {/* Scorecard Metrics */}
             <div className="grid grid-cols-2 gap-2 md:gap-3">
@@ -427,6 +438,7 @@ export default function DealerDetail() {
                 <span className="text-[10px] text-muted-foreground">Orders (90d)</span>
                 <p className="text-sm font-semibold mt-0.5">{sc.orders90d}</p>
               </div>
+              {canSeeMoney && <>
               <div className="glass-card p-3">
                 <span className="text-[10px] text-muted-foreground">Average order amount</span>
                 <p className="text-sm font-semibold mt-0.5">{formatCurrency(sc.avgOrderValue)}</p>
@@ -435,10 +447,11 @@ export default function DealerDetail() {
                 <span className="text-[10px] text-muted-foreground">Value (30d)</span>
                 <p className="text-sm font-semibold mt-0.5">{formatCurrency(sc.totalValue30d)}</p>
               </div>
+              </>}
             </div>
 
             {/* Payment Timeliness */}
-            <div className="glass-card p-3">
+            {canSeeMoney && <div className="glass-card p-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] text-muted-foreground">Payment Timeliness (On-time %)</span>
                 <span className={`text-xs font-semibold ${sc.paymentTimeliness >= 60 ? "text-success" : sc.paymentTimeliness >= 30 ? "text-warning" : "text-destructive"}`}>
@@ -446,7 +459,7 @@ export default function DealerDetail() {
                 </span>
               </div>
               <Progress value={sc.paymentTimeliness} className="h-2" />
-            </div>
+            </div>}
 
             {/* Targets */}
             {(() => {
@@ -461,7 +474,7 @@ export default function DealerDetail() {
               const weeklyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "weekly" && t.periodStart === weekStart);
               const monthlyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "monthly" && t.periodStart === monthStart);
               const target = dailyTarget || weeklyTarget || monthlyTarget;
-              if (!target || (target.targetRevenue <= 0 && target.targetOrders <= 0)) return null;
+              if (!target || ((!canSeeMoney || target.targetRevenue <= 0) && target.targetOrders <= 0)) return null;
               const periodLabel = target.periodType === "daily" ? "Today" : target.periodType === "weekly" ? "This Week" : new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
               const periodEnd = target.periodType === "daily" ? today : target.periodType === "weekly" ? addDaysToKey(weekStart, 6) : toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
               const filteredOrders = dealerOrders.filter(o => o.date >= target.periodStart && o.date <= periodEnd);
@@ -469,7 +482,7 @@ export default function DealerDetail() {
               const actualOrd = filteredOrders.length;
               const revPct = target.targetRevenue > 0 ? Math.round((actualRev / target.targetRevenue) * 100) : 0;
               const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
-              const mainPct = target.targetRevenue > 0 ? revPct : ordPct;
+              const mainPct = canSeeMoney && target.targetRevenue > 0 ? revPct : ordPct;
               const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
               const statusColor = mainPct > 100 ? "text-success" : mainPct >= 70 ? "text-primary" : mainPct >= 40 ? "text-warning" : "text-destructive";
               const barColor = mainPct > 100 ? "[&>div]:bg-success" : mainPct >= 70 ? "[&>div]:bg-primary" : mainPct >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive";
@@ -487,7 +500,7 @@ export default function DealerDetail() {
                     </div>
                     <Progress value={Math.min(mainPct, 100)} className={`h-2 mb-3 ${barColor}`} />
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      {target.targetRevenue > 0 && (
+                      {canSeeMoney && target.targetRevenue > 0 && (
                         <div>
                           <span className="text-muted-foreground">Order value</span>
                           <p className="font-semibold">{formatCurrency(actualRev)} / {formatCurrency(target.targetRevenue)}</p>
@@ -515,8 +528,8 @@ export default function DealerDetail() {
                     <tr className="border-b border-border text-left text-xs text-muted-foreground">
                       <th className="px-4 py-2.5 font-medium">Order</th>
                       <th className="px-4 py-2.5 font-medium">Date</th>
-                      <th className="px-4 py-2.5 font-medium text-right">Amount</th>
-                      <th className="px-4 py-2.5 font-medium">Payment</th>
+                      {canSeeMoney && <th className="px-4 py-2.5 font-medium text-right">Amount</th>}
+                      {canSeeMoney && <th className="px-4 py-2.5 font-medium">Payment</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -524,8 +537,8 @@ export default function DealerDetail() {
                       <tr key={o.id} className="border-b border-border/50 row-hover cursor-pointer" onClick={() => navigate(`/orders/${o.id}`)}>
                         <td className="px-4 py-3 font-medium text-primary">{o.orderNumber}</td>
                         <td className="px-4 py-3 text-muted-foreground">{formatIndianDate(o.date)}</td>
-                        <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>
-                        <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>
+                        {canSeeMoney && <td className="px-4 py-3 text-right font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</td>}
+                        {canSeeMoney && <td className="px-4 py-3"><StatusBadge status={payStatus(o.id)} /></td>}
                       </tr>
                     ))}
                   </tbody>
@@ -535,11 +548,11 @@ export default function DealerDetail() {
                     <div key={o.id} className="px-4 py-3 card-hover cursor-pointer" onClick={() => navigate(`/orders/${o.id}`)}>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-primary">{o.orderNumber}</span>
-                        <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>
+                        {canSeeMoney && <span className="text-xs font-medium">{formatCurrency(o.total - (o.schemeSavings || 0))}</span>}
                       </div>
                       <div className="mt-0.5 flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{formatIndianDate(o.date)}</span>
-                        <StatusBadge status={payStatus(o.id)} />
+                        {canSeeMoney && <StatusBadge status={payStatus(o.id)} />}
                       </div>
                     </div>
                   ))}
@@ -553,7 +566,7 @@ export default function DealerDetail() {
           </TabsContent>
 
           {/* Ledger Tab */}
-          <TabsContent value="ledger" className="space-y-4">
+          {canSeeMoney && <TabsContent value="ledger" className="space-y-4">
             {(() => {
               type LedgerEntry = { date: string; particulars: string; debit: number; credit: number; balance: number; orderId?: string };
               const entries: Omit<LedgerEntry, "balance">[] = [];
@@ -678,7 +691,7 @@ export default function DealerDetail() {
                 </>
               );
             })()}
-          </TabsContent>
+          </TabsContent>}
 
           {/* Secondary Sales Tab */}
           <TabsContent value="secondary" className="space-y-4">
@@ -738,11 +751,11 @@ export default function DealerDetail() {
         </Tabs>
       </div>
 
-        <DealerVisitsPanel dealerId={id!} dealerName={dealer?.name ?? ""} />
+        {id && <DealerVisitsPanel dealerId={id} dealerName={dealer.name} />}
 
         {/* Activity History */}
         <div className="glass-card p-4 md:p-6">
-          <EntityHistory entityType="dealer" entityId={id!} />
+          {id && <EntityHistory entityType="dealer" entityId={id} />}
         </div>
 
       {/* Secondary Sale Modal */}

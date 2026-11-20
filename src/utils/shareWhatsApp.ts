@@ -253,13 +253,13 @@ export function shareDealerOnWhatsApp(dealer: {
   contact: string;
   totalOrders: number;
   totalValue: number;
-}) {
+}, canSeeMoney = true) {
   const msg = [
     `👤 *Dealer: ${dealer.name}*`,
     `📍 Location: ${dealer.location}`,
     `📞 Contact: ${dealer.contact}`,
     `📦 Orders: ${dealer.totalOrders}`,
-    `💰 Total Value: ${formatCurrency(dealer.totalValue)}`,
+    ...(canSeeMoney ? [`💰 Total Value: ${formatCurrency(dealer.totalValue)}`] : []),
   ].join("\n");
 
   const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
