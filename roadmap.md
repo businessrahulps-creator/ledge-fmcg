@@ -132,5 +132,5 @@
 - [x] Phase 1: database foundation + assignments
 - [x] Phase 2: server rules
 - [x] Phase 3: activity + alerts
-- [ ] Phase 4: waiting for user go
-- [ ] Phase 5: testing
+- [x] Phase 4: Team screen, handover, Ops reassign
+- [ ] Phase 5: waiting for user go

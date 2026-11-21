@@ -1,7 +1,7 @@
 import { RoleAvatar } from "@/components/layout/RoleAvatar";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { MoreHorizontal, Sparkles, Lock, UserPlus, Clock } from "lucide-react";
+import { MoreHorizontal, Sparkles, Lock, UserPlus, Clock, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,8 @@ import { InviteSheet } from "./InviteSheet";
 import { OverrideDrawer } from "./OverrideDrawer";
 import { PendingInviteCard, type PendingInvite } from "./PendingInviteCard";
 import { useInvite } from "@/hooks/useInvite";
+import { HandOverSheet } from "./HandOverSheet";
+import { canManageMember, canAssignOwner, isMasterOwner, type GovernanceCtx } from "@/lib/team-governance";
 
 const INACTIVE_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -57,22 +59,29 @@ export function TeamRoster({ companyId }: Props) {
   const [removeFor, setRemoveFor] = useState<RosterMember | null>(null);
   const [saving, setSaving] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
+  const [masterOwnerId, setMasterOwnerId] = useState<string | null>(null);
+  const [handOverOpen, setHandOverOpen] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
     let alive = true;
     supabase
       .from("companies")
-      .select("name")
+      .select("name, master_owner_user_id")
       .eq("id", companyId)
       .maybeSingle()
       .then(({ data }) => {
-        if (alive && data?.name) setCompanyName(data.name);
+        if (!alive || !data) return;
+        if (data.name) setCompanyName(data.name);
+        setMasterOwnerId(data.master_owner_user_id ?? null);
       });
     return () => {
       alive = false;
     };
-  }, [companyId]);
+  }, [companyId, members]);
+
+  const gov: GovernanceCtx = { callerId: user?.id, masterOwnerId };
+  const iAmMaster = isMasterOwner(gov, user?.id);
 
   const handleResendInvite = async (inviteId: string) => {
     const token = await resendInvite(inviteId);
@@ -89,11 +98,6 @@ export function TeamRoster({ companyId }: Props) {
       await refresh();
     }
   };
-
-  const ownerCount = useMemo(
-    () => members.filter((m) => m.role === "super_admin").length,
-    [members],
-  );
 
   const sorted = useMemo(() => {
     if (!user?.id) return members;
@@ -190,7 +194,9 @@ export function TeamRoster({ companyId }: Props) {
             key={m.id}
             member={m}
             isSelf={m.userId === user?.id}
-            isLastOwner={m.role === "super_admin" && ownerCount === 1}
+            isMaster={isMasterOwner(gov, m.userId)}
+            canManage={canManageMember(gov, { userId: m.userId, isOwner: m.role === "super_admin" })}
+            onHandOver={iAmMaster && m.userId === user?.id ? () => setHandOverOpen(true) : undefined}
             onChangeJob={() => openPicker(m)}
             onOpenOverrides={() => setOverrideFor(m)}
             onRemove={() => setRemoveFor(m)}
@@ -232,13 +238,7 @@ export function TeamRoster({ companyId }: Props) {
           onConfirm={handleRoleChange}
           selectedRole={selectedRole}
           setSelectedRole={setSelectedRole}
-          disabledMessage={
-            pickerFor.role === "super_admin" &&
-            ownerCount === 1 &&
-            selectedRole !== "super_admin"
-              ? "You can't demote the last Owner. Promote someone else first."
-              : undefined
-          }
+          excludeRoles={canAssignOwner(gov) || pickerFor.role === "super_admin" ? [] : ["super_admin"]}
         />
       )}
 
@@ -260,6 +260,14 @@ export function TeamRoster({ companyId }: Props) {
         />
       )}
 
+      <HandOverSheet
+        open={handOverOpen}
+        onOpenChange={setHandOverOpen}
+        members={members.filter((m) => m.userId !== user?.id)}
+        businessName={companyName}
+        onDone={refresh}
+      />
+
       <RemoveMemberDialog
         member={removeFor}
         defaults={defaults}
@@ -276,7 +284,9 @@ export function TeamRoster({ companyId }: Props) {
 interface RosterCardProps {
   member: RosterMember;
   isSelf: boolean;
-  isLastOwner: boolean;
+  isMaster: boolean;
+  canManage: boolean;
+  onHandOver?: () => void;
   onChangeJob: () => void;
   onOpenOverrides: () => void;
   onRemove: () => void;
@@ -286,7 +296,9 @@ interface RosterCardProps {
 function RosterCard({
   member,
   isSelf,
-  isLastOwner,
+  isMaster,
+  canManage,
+  onHandOver,
   onChangeJob,
   onOpenOverrides,
   onRemove,
@@ -296,7 +308,7 @@ function RosterCard({
   const Icon = job.icon;
 
   const isOwner = member.role === "super_admin";
-  const lockedPill = isSelf || isLastOwner || isOwner;
+  const lockedPill = !canManage;
   const updatedAt = member.updatedAt ? new Date(member.updatedAt) : null;
   const isInactive =
     !!updatedAt && Date.now() - updatedAt.getTime() > INACTIVE_THRESHOLD_MS;
@@ -311,6 +323,12 @@ function RosterCard({
           {isSelf && (
             <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
               you
+            </span>
+          )}
+          {isMaster && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
+              <Crown className="h-3 w-3" strokeWidth={2} />
+              Master Owner
             </span>
           )}
           {member.hasOverrides && member.role !== "super_admin" && (
@@ -376,19 +394,33 @@ function RosterCard({
             title={
               isSelf
                 ? "You can't change your own job"
-                : isOwner
-                  ? "An owner's job can't be changed"
-                  : "Tap to change job"
+                : isMaster
+                  ? "The Master Owner's job can't be changed"
+                  : isOwner && !canManage
+                    ? "Only the Master Owner can change Owners"
+                    : "Tap to change job"
             }
           >
             <Icon className="h-3 w-3" strokeWidth={2} />
             {job.label}
             {lockedPill && <Lock className="ml-0.5 h-2.5 w-2.5" />}
           </button>
+          {isOwner && !isSelf && !canManage && !isMaster && (
+            <p className="mt-1 text-[11px] text-muted-foreground">Only the Master Owner can change Owners.</p>
+          )}
+          {onHandOver && (
+            <button
+              type="button"
+              onClick={onHandOver}
+              className="touch-target ml-2 inline-flex items-center gap-1.5 rounded-md border border-border/70 px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
+            >
+              <Crown className="h-3 w-3" /> Hand over Master Owner
+            </button>
+          )}
         </div>
       </div>
 
-      {!isSelf && !isOwner && (
+      {canManage && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="touch-target h-8 w-8 shrink-0" aria-label={`More actions for ${member.name || member.email}`}>
@@ -396,7 +428,7 @@ function RosterCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem disabled={isLastOwner} onSelect={onChangeJob}>
+            <DropdownMenuItem onSelect={onChangeJob}>
               Change job
             </DropdownMenuItem>
             {member.role !== "super_admin" && (
@@ -405,7 +437,6 @@ function RosterCard({
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
-              disabled={isLastOwner}
               className="text-destructive focus:text-destructive"
               onSelect={onRemove}
             >
@@ -446,7 +477,7 @@ function RemoveMemberDialog({ member, defaults, onCancel, onConfirm, saving }: R
         <AlertDialogHeader>
           <AlertDialogTitle>Remove {member?.name || "this member"} from your team?</AlertDialogTitle>
           <AlertDialogDescription className="text-xs text-muted-foreground">
-            {summary} This can't be undone.
+            {member?.role === "super_admin" ? "They are an Owner. " : ""}{summary} This can't be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-0">

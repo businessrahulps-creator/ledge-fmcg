@@ -561,6 +561,13 @@
       "when": 1795252436889,
       "tag": "0079_master_owner_activity_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1795252602183,
+      "tag": "0080_ops_company_members_for_master_owner",
+      "breakpoints": true
     }
   ]
 }

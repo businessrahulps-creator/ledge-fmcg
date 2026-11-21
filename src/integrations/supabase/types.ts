@@ -3623,6 +3623,16 @@ export type Database = {
       }
       my_pending_invite: { Args: never; Returns: string }
       ops_company_detail: { Args: { p_company_id: string }; Returns: Json }
+      ops_company_members: {
+        Args: { p_company: string }
+        Returns: {
+          email: string
+          full_name: string
+          is_master: boolean
+          role: string
+          user_id: string
+        }[]
+      }
       ops_guard: {
         Args: { p_action: string; p_target_id?: string; p_target_type?: string }
         Returns: undefined

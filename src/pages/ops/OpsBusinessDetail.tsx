@@ -4,6 +4,7 @@ import { OpsLayout } from "@/components/ops/OpsLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatNumber } from "@/utils/formatCurrency";
 import { opsApi } from "./ops-api";
+import { OpsMasterOwnerCard } from "@/components/ops/OpsMasterOwnerCard";
 import { StatTile, OpsCard, OpsTable, Th, Td, OpsEmpty, fmtDate, fmtDateTime } from "./ops-ui";
 
 const ROLE_LABEL: Record<string, string> = {
@@ -96,6 +97,8 @@ export default function OpsBusinessDetail() {
               )}
             </OpsCard>
           </div>
+
+          <OpsMasterOwnerCard companyId={id} />
 
           <OpsCard title="Recent errors" className="mt-5">
             {(data?.errors.length ?? 0) === 0 && <OpsEmpty>No errors reported.</OpsEmpty>}
