@@ -127,3 +127,10 @@
 - [x] Offers plan Phase 2 (offer screen)
 - [x] Offers plan Phase 3 (free items on orders)
 - [ ] Offers plan Phases 4-5 (screen, order form, send/bills, QA-OFFER test data)
+
+## Master Owner governance
+- [x] Phase 1: database foundation + assignments
+- [ ] Phase 2: server rules (waiting for user go)
+- [ ] Phase 3: audit/alerts
+- [ ] Phase 4: Team screen + handover
+- [ ] Phase 5: testing

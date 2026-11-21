@@ -540,6 +540,13 @@
       "when": 1795165978428,
       "tag": "0076_bill_free_lines_first",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1795251910301,
+      "tag": "0077_master_owner_foundation",
+      "breakpoints": true
     }
   ]
 }

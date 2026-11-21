@@ -317,6 +317,7 @@ export type Database = {
           intel_settings: Json
           invoice_prefix: string
           logo_url: string
+          master_owner_user_id: string | null
           name: string
           next_invoice_sequence: number
           next_order_sequence: number
@@ -342,6 +343,7 @@ export type Database = {
           intel_settings?: Json
           invoice_prefix?: string
           logo_url?: string
+          master_owner_user_id?: string | null
           name: string
           next_invoice_sequence?: number
           next_order_sequence?: number
@@ -367,6 +369,7 @@ export type Database = {
           intel_settings?: Json
           invoice_prefix?: string
           logo_url?: string
+          master_owner_user_id?: string | null
           name?: string
           next_invoice_sequence?: number
           next_order_sequence?: number
@@ -3592,6 +3595,7 @@ export type Database = {
           seq: number
         }[]
       }
+      is_master_owner: { Args: { _user?: string }; Returns: boolean }
       is_platform_staff: { Args: { _user_id: string }; Returns: boolean }
       log_failed_attempt: {
         Args: {
