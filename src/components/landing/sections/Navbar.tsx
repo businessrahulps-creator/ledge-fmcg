@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { noCompanyDestination } from "@/components/onboarding/NoCompanyGuard";
 import { motion, AnimatePresence } from "framer-motion";
 import { spring } from "@/lib/motion";
 import ledgeLogo from "@/assets/ledge-logo.webp";
@@ -20,6 +21,13 @@ const isMac =
 
 export function Navbar() {
   const { user, companyId } = useAuth();
+  const navigate = useNavigate();
+  // Signed in without a business: check for a waiting invite before /welcome.
+  const onSetupClick = (e: React.MouseEvent) => {
+    if (!user || companyId) return;
+    e.preventDefault();
+    noCompanyDestination().then((to) => navigate(to));
+  };
   const [scrolled, setScrolled] = useState(false);
   const [onDark, setOnDark] = useState(true);
   const [open, setOpen] = useState(false);
@@ -152,7 +160,7 @@ export function Navbar() {
                 </Link>
               )}
               <motion.div whileTap={{ scale: 0.97 }} transition={spring.snappy} className="ml-1">
-                <Link to={user ? (companyId ? "/dashboard" : "/welcome") : "/signup"} className="lp-nav-cta">
+                <Link to={user ? (companyId ? "/dashboard" : "/welcome") : "/signup"} onClick={onSetupClick} className="lp-nav-cta">
                   {user ? (companyId ? "Open Ledge" : "Finish setup") : "Start Free Trial"}
                 </Link>
               </motion.div>

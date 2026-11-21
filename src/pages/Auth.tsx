@@ -1,4 +1,4 @@
-import { fetchMyPendingInvite } from "@/components/onboarding/NoCompanyGuard";
+import { fetchMyPendingInvite, noCompanyDestination } from "@/components/onboarding/NoCompanyGuard";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -182,7 +182,7 @@ export default function Auth() {
 
       await refreshProfile();
       if (safeBack) { try { sessionStorage.removeItem("ledge:postAuthRedirect"); } catch { /* ignore */ } }
-      navigate(safeBack ?? "/welcome", { replace: true });
+      navigate(safeBack ?? (await noCompanyDestination()), { replace: true });
     } catch (err: any) {
       toast.error("Couldn't create your account", { description: err.message });
       logError({ source: "auth:signup", error: err });

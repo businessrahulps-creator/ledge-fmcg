@@ -3,6 +3,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+/** Where a signed-in person with no business should go: their invite if one waits, else /welcome. */
+export async function noCompanyDestination(): Promise<string> {
+  const token = await fetchMyPendingInvite();
+  return token ? `/invite/${token}` : "/welcome";
+}
+
 /** Server check: does this signed-in person (with no business) have a waiting team invite? */
 export async function fetchMyPendingInvite(): Promise<string | null> {
   try {

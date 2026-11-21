@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { noCompanyDestination } from "@/components/onboarding/NoCompanyGuard";
 import { motion, useReducedMotion } from "framer-motion";
 import { MorphHamburger } from "./MorphHamburger";
 import ledgeLogo from "@/assets/ledge-logo.webp";
@@ -24,6 +25,13 @@ const navLinks = [
  */
 export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
   const { user, companyId } = useAuth();
+  const navigate = useNavigate();
+  // Signed in without a business: check for a waiting invite before /welcome.
+  const onSetupClick = (e: React.MouseEvent) => {
+    if (!user || companyId) return;
+    e.preventDefault();
+    noCompanyDestination().then((to) => navigate(to));
+  };
   const reduce = useReducedMotion();
   const firstFocusRef = useRef<HTMLAnchorElement>(null);
 
@@ -137,7 +145,7 @@ export function MobileMenuOverlay({ onClose }: MobileMenuOverlayProps) {
         >
           <Link
             to={user ? (companyId ? "/dashboard" : "/welcome") : "/signup"}
-            onClick={onClose}
+            onClick={(e) => { onSetupClick(e); onClose(); }}
             className="lp-btn-primary-dark lp-shimmer flex items-center justify-center rounded-lp-xs py-4 font-body font-semibold text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {user ? (companyId ? "Open Ledge" : "Finish setup") : "Start Free Trial"}
