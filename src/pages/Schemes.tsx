@@ -386,7 +386,17 @@ export default function Schemes() {
                 {SCHEME_TYPES.map(t => (
                   <button
                     key={t.value}
-                    onClick={() => setForm(f => ({ ...f, schemeType: t.value }))}
+                    onClick={() => {
+                      if (t.value === form.schemeType) return;
+                      if (t.value === "buy_x_get_y") {
+                        setPickProducts(false);
+                        setForm(f => ({ ...f, schemeType: t.value, productIds: null, minOrderValue: null as any }));
+                      } else {
+                        const fromBxgy = form.schemeType === "buy_x_get_y";
+                        setForm(f => ({ ...f, schemeType: t.value, freeProductId: null, buyQty: null as any, freeQty: null as any, minQty: null as any, ...(fromBxgy ? { productId: null, productIds: null } : {}) }));
+                        if (fromBxgy) setPickProducts(false);
+                      }
+                    }}
                     className={cn(
                       "flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
                       form.schemeType === t.value
@@ -511,7 +521,7 @@ export default function Schemes() {
                       <button
                         key={o.l}
                         type="button"
-                        onClick={() => { setPickProducts(o.k); if (!o.k) setForm(f => ({ ...f, productIds: null, productId: null })); }}
+                        onClick={() => { setPickProducts(o.k); setForm(f => o.k ? ({ ...f, productIds: f.productIds ?? [] }) : ({ ...f, productIds: null, productId: null })); }}
                         className={cn("touch-target rounded-md border px-3 py-2 text-xs font-medium", on ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border")}
                       >{o.l}</button>
                     );

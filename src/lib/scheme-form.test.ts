@@ -63,3 +63,22 @@ describe("blank number boxes", () => {
     expect(normalizeSchemeForm({ ...base, schemeType: "percentage", discountPercent: 5 }).minOrderValue).toBe(0);
   });
 });
+
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+import { normalizeSchemeForm as n2, validateSchemeForm as v2 } from "./scheme-form";
+d2("offer product scope", () => {
+  const base: any = { name: "X", schemeType: "percentage", discountPercent: 10, productId: "p1", productIds: null };
+  i2("leftover productId with no list saves as all products", () => {
+    const r = n2(base); e2(r.productIds).toBeNull(); e2(r.productId).toBeNull();
+  });
+  i2("empty selection is refused", () => {
+    e2(v2({ ...base, productIds: [] })).toMatch(/at least one product/);
+  });
+  i2("picked list saves as-is", () => {
+    e2(n2({ ...base, productIds: ["p2", "p3"] }).productIds).toEqual(["p2", "p3"]);
+  });
+  i2("buy x get y keeps its product", () => {
+    const r = n2({ ...base, schemeType: "buy_x_get_y", buyQty: 2, freeQty: 1 });
+    e2(r.productId).toBe("p1"); e2(v2({ ...base, schemeType: "buy_x_get_y", buyQty: 2, freeQty: 1, productIds: [] })).toBeNull();
+  });
+});

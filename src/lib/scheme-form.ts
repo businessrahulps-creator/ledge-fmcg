@@ -24,6 +24,8 @@ export function validateSchemeForm(f: SchemeForm): SchemeFormError {
     if (f.freeQty == null) return "Enter the free quantity.";
     if (!(f.freeQty >= 1)) return "Free quantity must be at least 1.";
   }
+  if (f.schemeType !== "buy_x_get_y" && Array.isArray(f.productIds) && f.productIds.length === 0)
+    return "Please select at least one product, or choose 'All products'.";
   if (f.schemeType === "percentage" && f.discountPercent == null) return "Enter a discount percentage.";
   if (f.schemeType === "flat_discount" && f.flatAmount == null) return "Enter a discount amount.";
   if (f.schemeType === "percentage" && !(f.discountPercent > 0 && f.discountPercent <= 100)) return "Discount must be between 1 and 100%.";
@@ -52,7 +54,7 @@ export function normalizeSchemeForm(input: SchemeForm): SchemeForm {
     const free = f.freeProductId && f.freeProductId !== f.productId ? f.freeProductId : null;
     return { ...f, minOrderValue: 0, minQty: 0, productIds: null, freeProductId: free };
   }
-  const ids = Array.from(new Set(f.productIds ?? (f.productId ? [f.productId] : [])));
+  const ids = Array.from(new Set(f.productIds ?? []));
   return {
     ...f,
     minQty: 0,
