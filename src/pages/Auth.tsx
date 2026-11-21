@@ -1,3 +1,4 @@
+import { fetchMyPendingInvite } from "@/components/onboarding/NoCompanyGuard";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -65,6 +66,7 @@ export default function Auth() {
   const verified = params.get("verified") === "1";
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const redirectStarted = useRef(false);
   useFocusFirstField(stage === "email", panelRef, [mode]);
 
   // Already signed in? Honour an invite/redirect target first, otherwise
@@ -81,7 +83,21 @@ export default function Auth() {
       navigate(redirect, { replace: true });
       return;
     }
-    navigate(companyId ? "/dashboard" : "/welcome", { replace: true });
+    if (companyId) {
+      redirectStarted.current = true;
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+    // No business yet: check for a pending invite first so invitees go
+    // straight to /invite/:token instead of hopping through /welcome.
+    if (redirectStarted.current) return;
+    redirectStarted.current = true;
+    let cancelled = false;
+    fetchMyPendingInvite().then((token) => {
+      if (cancelled) { redirectStarted.current = false; return; }
+      navigate(token ? `/invite/${token}` : "/welcome", { replace: true });
+    });
+    return () => { cancelled = true; };
   }, [user, companyId, authReady, profileLoaded, navigate, params]);
 
   // ── Signup form ──────────────────────────────────────────────────────────
