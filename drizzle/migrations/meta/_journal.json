@@ -554,6 +554,13 @@
       "when": 1795252099084,
       "tag": "0078_master_owner_server_rules",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1795252436889,
+      "tag": "0079_master_owner_activity_alerts",
+      "breakpoints": true
     }
   ]
 }
