@@ -103,8 +103,30 @@ I'll pause for "go" between phases, as before.
 - anaar stays without a Master Owner until you decide; Owner-tier changes there are blocked meanwhile.
 - No data is deleted anywhere in this plan.
 
-## Decisions needing your approval
+## Approved decisions
 
-1. Who is anaar's Master Owner (Rajan P S or Swetha)?
-2. Confirm the previous Master Owner stays an Owner after handover (recommended), rather than being dropped to Manager.
-3. Confirm handover confirmation = type the business name.
+1. anaar's Master Owner: **Rajan P S**.
+2. After handover, the previous Master Owner stays a regular Owner.
+3. Handover confirmation = type the business name.
+
+## Phase 1 — exact changes (first build step)
+
+Schema (one migration, additive only, nothing dropped or renamed):
+- `ALTER TABLE companies ADD COLUMN master_owner_user_id uuid NULL` + index.
+- New function `is_master_owner(uuid)` (read-only check).
+- New trigger on `companies` that refuses changes to `master_owner_user_id` unless made by an approved server function, and requires the person to be an Owner of that business.
+
+Data (same migration, only this one column is written):
+- Every business with exactly one Owner: column set to that Owner's user ID.
+- anaar: column set to Rajan P S's user ID (looked up by email/name and shown to you in the result before Phase 2).
+- Businesses with zero Owners (if any): left empty and listed in the report.
+
+Not touched: `user_roles`, `profiles`, custom access, invites, orders, bills, payments, stock, activity history, any existing function or permission.
+
+Verification after running (read-only):
+- Every business shows its Master Owner; that person is a `super_admin` of that business.
+- Count of Owners/roles per business identical before and after.
+- A direct app-side attempt to change the column is refused.
+- Full test suite still green.
+
+Then I stop and wait for your go before Phase 2.
