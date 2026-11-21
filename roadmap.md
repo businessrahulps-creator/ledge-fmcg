@@ -130,7 +130,7 @@
 
 ## Master Owner governance
 - [x] Phase 1: database foundation + assignments
-- [ ] Phase 2: server rules (waiting for user go)
-- [ ] Phase 3: audit/alerts
+- [x] Phase 2: server rules
+- [ ] Phase 3: waiting for user go
 - [ ] Phase 4: Team screen + handover
 - [ ] Phase 5: testing

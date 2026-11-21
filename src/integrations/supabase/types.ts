@@ -3690,6 +3690,10 @@ export type Database = {
         }[]
       }
       order_bill_equivalent: { Args: { p_order_id: string }; Returns: number }
+      platform_reassign_master_owner: {
+        Args: { p_company: string; p_new_user: string; p_reason: string }
+        Returns: Json
+      }
       preview_dispatch_impact: {
         Args: { p_order_id: string }
         Returns: {
@@ -3820,6 +3824,10 @@ export type Database = {
       }
       state_code_of_gstin: { Args: { p_gstin: string }; Returns: string }
       supplier_balance: { Args: { p_supplier: string }; Returns: number }
+      transfer_master_owner_atomic: {
+        Args: { p_confirm_text: string; p_new_user: string }
+        Returns: Json
+      }
       void_invoice_payment_atomic: {
         Args: { p_payment_id: string; p_reason: string }
         Returns: Json
