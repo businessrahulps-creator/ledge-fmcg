@@ -67,6 +67,7 @@ export const CAP_LABEL: Record<string, string> = {
   manage_team: "team management",
   manage_billing: "billing",
   manage_buying: "buying from suppliers",
+  manage_business: "business settings",
   see_money: "money and revenue",
   manage_stock: "stock and products",
   manage_schemes: "schemes",
