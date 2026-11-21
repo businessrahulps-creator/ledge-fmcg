@@ -133,4 +133,4 @@
 - [x] Phase 2: server rules
 - [x] Phase 3: activity + alerts
 - [x] Phase 4: Team screen, handover, Ops reassign
-- [ ] Phase 5: testing in progress (Fiza waits on her email)
+- [ ] Phase 5: testing in progress (Fiza waits on her confirmation email click)

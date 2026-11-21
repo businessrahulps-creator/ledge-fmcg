@@ -568,6 +568,13 @@
       "when": 1795252602183,
       "tag": "0080_ops_company_members_for_master_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1795253092691,
+      "tag": "0081_fix_master_owner_protection",
+      "breakpoints": true
     }
   ]
 }
