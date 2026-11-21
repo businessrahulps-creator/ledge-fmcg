@@ -85,11 +85,16 @@ export default function Welcome() {
   }, [user, companyId, authReady, profileLoaded, navigate, step]);
 
   // Invited people join their team instead of setting up a new business.
+  // Hold the screen until the check finishes so invitees never see the setup form.
+  const [inviteChecked, setInviteChecked] = useState(false);
   useEffect(() => {
-    if (!authReady || !profileLoaded || !user || companyId) return;
+    if (!authReady || !profileLoaded || !user) return;
+    if (companyId) { setInviteChecked(true); return; }
     let alive = true;
     fetchMyPendingInvite().then((token) => {
-      if (alive && token) navigate(`/invite/${token}`, { replace: true });
+      if (!alive) return;
+      if (token) navigate(`/invite/${token}`, { replace: true });
+      else setInviteChecked(true);
     });
     return () => { alive = false; };
   }, [authReady, profileLoaded, user, companyId, navigate]);
@@ -174,6 +179,8 @@ export default function Welcome() {
 
   const progress = step === 0 ? 0.35 : step === 1 ? 0.65 : 0.9;
   const ribbonLabel = `Step ${step + 1} of 3`;
+
+  if (!inviteChecked) return null;
 
   return (
     <AuthShell progress={progress} ribbonLabel={ribbonLabel}>
