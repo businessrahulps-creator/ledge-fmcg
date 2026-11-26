@@ -46,7 +46,9 @@ import { TablePageSkeleton } from "@/components/ui/page-skeleton";
 import { usePageLoading } from "@/hooks/use-loading";
 import { ReportExportFooter } from "@/components/reports/ReportExportFooter";
 import { exportXlsx, xlsxFilename } from "@/utils/exportXlsx";
-import { filterByTimePeriod, periodRangeLabel, type TimePeriod } from "@/components/reports/TimePeriodFilter";
+import { resolveWindow, inWindow, windowLabel, type BillingPeriod } from "@/lib/billing-period";
+import { DateRangeFields } from "@/components/billing/DateRangeFields";
+import { todayKey } from "@/utils/dateKey";
 import { cn } from "@/lib/utils";
 
 type DocType = Invoice["docType"];
@@ -117,23 +119,28 @@ export default function Billing() {
   const restoredFilters = useMemo(() => {
     try {
       const raw = sessionStorage.getItem(FILTER_KEY);
-      return raw ? JSON.parse(raw) as { search?: string; type?: string; period?: TimePeriod | "all"; tab?: string } : {};
+      return raw ? JSON.parse(raw) as { search?: string; type?: string; period?: BillingPeriod; from?: string; to?: string; tab?: string } : {};
     } catch { return {}; }
   }, []);
 
   const [tab, setTab] = useState(restoredFilters.tab || "collections");
   const [search, setSearch] = useState(restoredFilters.search || "");
   const [filterType, setFilterType] = useState<string>(restoredFilters.type || "all");
-  const [timePeriod, setTimePeriod] = useState<TimePeriod | "all">(restoredFilters.period || "all");
+  const [timePeriod, setTimePeriod] = useState<BillingPeriod>(restoredFilters.period || "all");
+  const [customFrom, setCustomFrom] = useState<string>(restoredFilters.from || todayKey());
+  const [customTo, setCustomTo] = useState<string>(restoredFilters.to || todayKey());
+  /** Inclusive India-day window for every tab, total and export; null = all time. */
+  const dayWindow = useMemo(() => resolveWindow(timePeriod, customFrom, customTo), [timePeriod, customFrom, customTo]);
+  const periodCaption = windowLabel(dayWindow);
   const [payFilter, setPayFilter] = useState<"all" | "unpaid" | "partial" | "paid" | "overdue">("all");
   const [modeFilter, setModeFilter] = useState<string>("all");
   const [collectTarget, setCollectTarget] = useState<Invoice | null>(null);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(FILTER_KEY, JSON.stringify({ search, type: filterType, period: timePeriod, tab }));
+      sessionStorage.setItem(FILTER_KEY, JSON.stringify({ search, type: filterType, period: timePeriod, from: customFrom, to: customTo, tab }));
     } catch { /* quota — ignore */ }
-  }, [search, filterType, timePeriod, tab]);
+  }, [search, filterType, timePeriod, customFrom, customTo, tab]);
 
   const handleDownloadPdf = useCallback(async (inv: Invoice) => {
     try {
@@ -144,22 +151,13 @@ export default function Billing() {
   }, []);
 
 
-  /** Search + period filter, shared by every tab. */
-  const inPeriod = useCallback((list: Invoice[]) => {
-    if (timePeriod === "all") return list;
-    return filterByTimePeriod(list.map(i => ({ ...i, date: i.invoiceDate })), timePeriod)
-      .map(({ date, ...rest }) => rest as Invoice);
-  }, [timePeriod]);
+  /** Search + period filter, shared by every tab. Bills use their bill date. */
+  const inPeriod = useCallback((list: Invoice[]) =>
+    dayWindow ? list.filter(i => inWindow(i.invoiceDate, dayWindow)) : list, [dayWindow]);
 
-  /** Same period window, for anything that isn't an invoice (orders, credit notes). */
-  const inPeriodBy = useCallback(<T,>(list: T[], getDate: (row: T) => string) => {
-    if (timePeriod === "all") return list;
-    const keep = new Set(
-      filterByTimePeriod(list.map((row, idx) => ({ __idx: idx, date: getDate(row) })), timePeriod)
-        .map(r => (r as { __idx: number }).__idx),
-    );
-    return list.filter((_, idx) => keep.has(idx));
-  }, [timePeriod]);
+  /** Same window, for anything that isn't an invoice (orders, credit notes, payments). */
+  const inPeriodBy = useCallback(<T,>(list: T[], getDate: (row: T) => string) =>
+    dayWindow ? list.filter(row => inWindow(getDate(row), dayWindow)) : list, [dayWindow]);
 
   /** Typing shouldn't recompute the whole page on every letter. */
   const dq = useDebounce(search, 250);
@@ -233,14 +231,14 @@ export default function Billing() {
   /** Every receipt taken, newest first. */
   const paymentRows = useMemo(() => {
     const q = dq.trim().toLowerCase();
-    return receipts
+    return inPeriodBy(receipts, r => r.paidOn)
       .filter(r => modeFilter === "all" || r.mode === modeFilter)
       .filter(r => {
         if (!q) return true;
         const against = r.invoiceId ? invoiceNumberById.get(r.invoiceId) : r.orderId ? orderNumberById.get(r.orderId) : "";
         return (against || "").toLowerCase().includes(q) || dealerName(r.distributorId).toLowerCase().includes(q);
       });
-  }, [receipts, modeFilter, dq, invoiceNumberById, orderNumberById, dealerName]);
+  }, [receipts, inPeriodBy, modeFilter, dq, invoiceNumberById, orderNumberById, dealerName]);
 
   /** Bills and credit notes together, so a reduced bill can always be traced to its note. */
   const documents = useMemo(() => {
@@ -501,7 +499,7 @@ export default function Billing() {
                 </SelectContent>
               </Select>
             )}
-            <Select value={timePeriod} onValueChange={v => setTimePeriod(v as TimePeriod | "all")}>
+            <Select value={timePeriod} onValueChange={v => setTimePeriod(v as BillingPeriod)}>
               <SelectTrigger className="w-full sm:w-[170px] h-10">
                 <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
                 <SelectValue />
@@ -512,12 +510,16 @@ export default function Billing() {
                 <SelectItem value="weekly">Last 7 days</SelectItem>
                 <SelectItem value="monthly">Last 30 days</SelectItem>
                 <SelectItem value="yearly">Last 365 days</SelectItem>
+                <SelectItem value="custom">Pick dates</SelectItem>
               </SelectContent>
             </Select>
+            {timePeriod === "custom" && (
+              <DateRangeFields from={customFrom} to={customTo} onFrom={setCustomFrom} onTo={setCustomTo} />
+            )}
           </div>
-          {timePeriod !== "all" && (
-            <span className="whitespace-nowrap text-[11px] text-muted-foreground/70 sm:ml-1">
-              Showing {periodRangeLabel(timePeriod)}
+          {dayWindow && (
+            <span className="text-[11px] text-muted-foreground/70 sm:ml-1">
+              Showing {periodCaption} · totals for bills dated in this period; amounts owed are as of today
             </span>
           )}
         </div>
@@ -671,7 +673,7 @@ export default function Billing() {
                     selection: { company: true, summary: true, table: true },
                     title: "Money still to collect",
                     subtitle: [
-                      timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                      periodCaption,
                       payFilter === "unpaid" ? "Unpaid bills only"
                         : payFilter === "partial" ? "Part paid bills only"
                         : payFilter === "paid" ? "Settled bills only"
@@ -803,7 +805,7 @@ export default function Billing() {
                     company: api.companyInfo,
                     selection: { company: true, summary: true, table: true },
                     title: "Payments received",
-                    subtitle: timePeriod === "all" ? "All time" : periodRangeLabel(timePeriod),
+                    subtitle: periodCaption,
                     summary: [],
                     columns: [
                       { header: "Date", width: "11%" },
