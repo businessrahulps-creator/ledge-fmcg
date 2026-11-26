@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications, NotificationType, type Notification } from "@/hooks/use-notifications";
 import { SmartTime } from "@/components/ui/smart-time";
 import { useCan } from "@/hooks/useCan";
@@ -112,7 +111,7 @@ export function NotificationCenter() {
             ))}
           </div>
         )}
-        <ScrollArea className="max-h-[420px]">
+        <div className="max-h-[min(420px,65vh)] overflow-y-auto overscroll-contain">
           {groups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
               <Bell className="h-8 w-8" strokeWidth={1} />
@@ -169,7 +168,7 @@ export function NotificationCenter() {
               })}
             </div>
           )}
-        </ScrollArea>
+        </div>
         {canSeeActivity && (
           <button
             onClick={() => { setOpen(false); navigate("/activity"); }}
