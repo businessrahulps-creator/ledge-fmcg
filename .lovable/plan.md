@@ -49,5 +49,14 @@ No change and no migration needed. Existing tables already hold what's needed: c
 - Extra tests: dealer calculation; return attributed to original salesperson/dealer after reassignment; duplicate return prevention; historical lookup; navigation performs no target write.
 - Delivery after build approval: full test suite, new tests, clean build, changed-file list, limitations. No publishing.
 
-## Open limitation to confirm
-- "No revenue in the backend payload for non-money users": today the app loads order and bill rows for the business under existing RLS, and screens hide money for non-money users. Achievement is calculated in the app from that data, so this plan hides revenue in the UI but cannot by itself keep order amounts out of what the browser receives. A full guarantee needs a server-side summary function that returns revenue only with see_money (no table change, one new database function). Recommended as a follow-up; included in this build only if you approve it.
+## Server-side financial summary (approved, in this build)
+- New database function `target_achievement_summary(period_type, period_start, scope, scope_id)`: SECURITY DEFINER, fixed search path, execute revoked from public/anon, granted to signed-in users only.
+- Inside it: company comes from the caller's own membership (get_company_id), never from input; see_money checked with has_capability for the caller; no permission flag is accepted from the app.
+- Returns only aggregates for the requested period and scope (business, salesperson or dealer): delivered orders, fully returned orders, achievement %/status for order targets. Gross, returns deducted, returns on earlier orders, net and revenue % are returned only with see_money; otherwise those fields are null. No order, bill or credit-note rows are returned.
+- Same rules as the shared app calculation (accepted credit notes only, deduplicated lines, original order's salesperson/dealer, period of credit note date); tests check both give the same numbers.
+- Targets, Salesperson, Dealer, Command Centre and Reports target figures read from this function, so non-money users never receive revenue in the response.
+- No table changes; existing RLS and role permissions untouched; no target record is written.
+- Tests: money role and non-money role through the app and by calling the function directly; other business's ids return nothing.
+
+## Build phases
+1. Shared calculation module + tests. 2. Server summary function + direct-call tests. 3. Targets pickers and read-only navigation. 4. Salesperson, Dealer, Command Centre and Reports alignment. 5. Full test suite, clean build, browser check, report. No publishing.
