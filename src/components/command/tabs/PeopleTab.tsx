@@ -1,3 +1,5 @@
+import { monthlyTargetsFor } from "@/lib/target-achievement";
+import { todayKey as __todayKey } from "@/utils/dateKey";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApi } from "@/services/api";
@@ -80,7 +82,7 @@ export function PeopleTab({ range }: Props) {
       .map((s) => {
         const actual = revBy.get(s.id) || 0;
         const prev = prevRevBy.get(s.id) || 0;
-        const target = targets.find((t) => t.entityId === s.id && t.entityType === "salesperson")?.targetRevenue || 0;
+        const target = monthlyTargetsFor(targets, __todayKey()).find((t) => t.entityId === s.id)?.targetRevenue || 0;
         const ordersCount = ordBy.get(s.id) || 0;
         return {
           ...s,

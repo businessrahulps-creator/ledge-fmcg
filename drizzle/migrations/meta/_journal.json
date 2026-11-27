@@ -575,6 +575,13 @@
       "when": 1795253092691,
       "tag": "0081_fix_master_owner_protection",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1795754550908,
+      "tag": "0082_target_achievement_summary",
+      "breakpoints": true
     }
   ]
 }

@@ -3834,6 +3834,19 @@ export type Database = {
       }
       state_code_of_gstin: { Args: { p_gstin: string }; Returns: string }
       supplier_balance: { Args: { p_supplier: string }; Returns: number }
+      target_achievement_summary: {
+        Args: { p_period_start: string; p_period_type: string }
+        Returns: {
+          delivered_count: number
+          entity_id: string
+          entity_type: string
+          fully_returned_count: number
+          gross: number
+          net: number
+          returns_deducted: number
+          returns_on_earlier_orders: number
+        }[]
+      }
       transfer_master_owner_atomic: {
         Args: { p_confirm_text: string; p_new_user: string }
         Returns: Json

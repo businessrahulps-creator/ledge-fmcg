@@ -1,3 +1,4 @@
+import { TargetProgressCard } from "@/components/targets/TargetProgressCard";
 import { acquiredByLabel, assignedLabel } from "@/lib/salesperson-identity";
 import { toDateKey, addDaysToKey, istCalendarNow } from "@/utils/dateKey";
 import { useState, useMemo } from "react";
@@ -462,61 +463,7 @@ export default function DealerDetail() {
             </div>}
 
             {/* Targets */}
-            {(() => {
-              const allTargets = api.targets.list();
-              const now = istCalendarNow();
-              const today = toDateKey(now);
-              const dayOfWeek = now.getDay();
-              const mondayOffset = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-              const weekStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), mondayOffset));
-              const monthStart = toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
-              const dailyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "daily" && t.periodStart === today);
-              const weeklyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "weekly" && t.periodStart === weekStart);
-              const monthlyTarget = allTargets.find(t => t.entityType === "dealer" && t.entityId === id && t.periodType === "monthly" && t.periodStart === monthStart);
-              const target = dailyTarget || weeklyTarget || monthlyTarget;
-              if (!target || ((!canSeeMoney || target.targetRevenue <= 0) && target.targetOrders <= 0)) return null;
-              const periodLabel = target.periodType === "daily" ? "Today" : target.periodType === "weekly" ? "This Week" : new Date(monthStart).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
-              const periodEnd = target.periodType === "daily" ? today : target.periodType === "weekly" ? addDaysToKey(weekStart, 6) : toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-              const filteredOrders = dealerOrders.filter(o => o.date >= target.periodStart && o.date <= periodEnd);
-              const actualRev = filteredOrders.reduce((s, o) => s + o.total - (o.schemeSavings || 0), 0);
-              const actualOrd = filteredOrders.length;
-              const revPct = target.targetRevenue > 0 ? Math.round((actualRev / target.targetRevenue) * 100) : 0;
-              const ordPct = target.targetOrders > 0 ? Math.round((actualOrd / target.targetOrders) * 100) : 0;
-              const mainPct = canSeeMoney && target.targetRevenue > 0 ? revPct : ordPct;
-              const statusLabel = mainPct > 100 ? "Exceeded" : mainPct >= 70 ? "On Track" : mainPct >= 40 ? "Behind Target" : "Needs Attention";
-              const statusColor = mainPct > 100 ? "text-success" : mainPct >= 70 ? "text-primary" : mainPct >= 40 ? "text-warning" : "text-destructive";
-              const barColor = mainPct > 100 ? "[&>div]:bg-success" : mainPct >= 70 ? "[&>div]:bg-primary" : mainPct >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive";
-              return (
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold md:text-sm flex items-center gap-2">
-                    <Target className="h-3.5 w-3.5 text-primary" />
-                    Targets & Achievements
-                    <span className="text-[10px] font-normal text-muted-foreground">({periodLabel})</span>
-                  </h3>
-                  <div className="glass-card p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-semibold ${statusColor}`}>{statusLabel}</span>
-                      <span className={`text-lg font-bold ${statusColor}`}>{mainPct}%</span>
-                    </div>
-                    <Progress value={Math.min(mainPct, 100)} className={`h-2 mb-3 ${barColor}`} />
-                    <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      {canSeeMoney && target.targetRevenue > 0 && (
-                        <div>
-                          <span className="text-muted-foreground">Order value</span>
-                          <p className="font-semibold">{formatCurrency(actualRev)} / {formatCurrency(target.targetRevenue)}</p>
-                        </div>
-                      )}
-                      {target.targetOrders > 0 && (
-                        <div>
-                          <span className="text-muted-foreground">Orders</span>
-                          <p className="font-semibold">{actualOrd} / {target.targetOrders}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
+        {id && <TargetProgressCard entityType="dealer" entityId={id} canSeeMoney={canSeeMoney} />}
           </TabsContent>
 
           {/* Orders Tab */}

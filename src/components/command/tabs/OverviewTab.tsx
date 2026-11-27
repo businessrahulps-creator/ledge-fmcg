@@ -1,3 +1,5 @@
+import { monthlyTargetsFor } from "@/lib/target-achievement";
+import { todayKey as __todayKey } from "@/utils/dateKey";
 import { useMemo } from "react";
 import { useApi } from "@/services/api";
 import { formatCurrency } from "@/data/mock-data";
@@ -122,8 +124,7 @@ export function OverviewTab({ range, period = "30d" }: Props) {
     }
 
     // Period target — sum salesperson monthly targets, scaled to period length.
-    const monthlyTargetTotal = targets
-      .filter((t) => t.entityType === "salesperson")
+    const monthlyTargetTotal = monthlyTargetsFor(targets, __todayKey())
       .reduce((s, t) => s + (t.targetRevenue || 0), 0);
     const daysTotal = Math.max(1, Math.round((range.to.getTime() - range.from.getTime()) / 86400_000));
     const now = Date.now();

@@ -3,7 +3,15 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Targets from "./Targets";
 
-const mocks = vi.hoisted(() => ({ money: false, manage: false, update: vi.fn(), remove: vi.fn() }));
+const mocks = vi.hoisted(() => ({ money: false, manage: false, update: vi.fn(), remove: vi.fn(), create: vi.fn() }));
+// Mirrors the server: money fields are null without see_money.
+vi.mock("@/hooks/use-target-achievement", async () => {
+  const actual = await vi.importActual<typeof import("@/hooks/use-target-achievement")>("@/hooks/use-target-achievement");
+  const row = (entityType: string, entityId: string | null) => ({ entityType, entityId,
+    gross: mocks.money ? 500 : null, returnsDeducted: mocks.money ? 0 : null, returnsOnEarlierOrders: mocks.money ? 0 : null, net: mocks.money ? 500 : null,
+    deliveredCount: 1, fullyReturnedCount: 0 });
+  return { ...actual, useTargetAchievement: () => ({ data: [row("company", null), row("salesperson", "s1"), row("dealer", "d1")] }) };
+});
 vi.mock("@/hooks/useCan", () => ({ useCan: (key: string) => key === "see_money" ? mocks.money : mocks.manage }));
 vi.mock("@/hooks/use-loading", () => ({ usePageLoading: () => false }));
 vi.mock("@/components/layout/AppLayout", () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => children }));
@@ -19,7 +27,7 @@ vi.mock("@/services/api", async () => {
       list: () => [
         { id: "t1", entityType: "salesperson", entityId: "s1", entityName: "Test person", periodType: "monthly", periodStart: period, targetRevenue: 1000, targetOrders: 4 },
         { id: "t2", entityType: "dealer", entityId: "d1", entityName: "Test dealer", periodType: "monthly", periodStart: period, targetRevenue: 2000, targetOrders: 4 },
-      ], update: mocks.update, create: vi.fn(), remove: mocks.remove,
+      ], update: mocks.update, create: mocks.create, remove: mocks.remove,
     },
   }) };
 });
@@ -69,6 +77,18 @@ describe("Targets financial access", () => {
     fireEvent.change(orders, { target: { value: "" } });
     fireEvent.blur(orders);
     await waitFor(() => expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ id: "t1", targetRevenue: 1000, targetOrders: 0 })));
+    expect(mocks.remove).not.toHaveBeenCalled();
+  });
+
+  it("moving between periods only reads; it never saves or overwrites a target", () => {
+    open(true, true);
+    fireEvent.click(screen.getByRole("button", { name: "Next month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Previous month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Previous month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Weekly" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next week" }));
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.create).not.toHaveBeenCalled();
     expect(mocks.remove).not.toHaveBeenCalled();
   });
 });

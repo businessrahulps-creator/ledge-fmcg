@@ -1,11 +1,10 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SignalCard } from "@/components/ui/signal-card";
 import { KpiStrip } from "@/components/ui/kpi-strip";
 import { EmptyCard } from "@/components/ui/empty-card";
 import { useApi } from "@/services/api";
 import { useCan } from "@/hooks/useCan";
-import { netTotal } from "@/lib/revenue";
 import { usePageLoading } from "@/hooks/use-loading";
 
 import { formatCurrency } from "@/data/mock-data";
@@ -20,94 +19,18 @@ import { toast } from "sonner";
 import type { Target as TargetType } from "@/context/DataContext";
 import { EntityCard } from "@/components/ui/entity-card";
 import { EntityAvatar } from "@/components/ui/entity-avatar";
-import { toDateKey, todayKey, istCalendarNow } from "@/utils/dateKey";
+import { todayKey } from "@/utils/dateKey";
+import { statusFor, canonicalStart, findTarget, normalizeStoredStart, type TargetPeriodType, type TargetStatus } from "@/lib/target-achievement";
+import { useTargetAchievement, pickRow } from "@/hooks/use-target-achievement";
+import { PeriodPicker } from "@/components/targets/PeriodPicker";
 
-type PeriodType = "daily" | "weekly" | "monthly";
-
-function getMonthOptions() {
-  const opts: { value: string; label: string }[] = [];
-  const now = istCalendarNow();
-  for (let i = -2; i <= 3; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const value = toDateKey(d);
-    const label = d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-    opts.push({ value, label });
-  }
-  return opts;
-}
-
-function getDailyOptions() {
-  const opts: { value: string; label: string }[] = [];
-  const now = istCalendarNow();
-  for (let i = -7; i <= 7; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const value = toDateKey(d);
-    const isToday = i === 0;
-    const label = isToday
-      ? `Today (${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
-      : d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
-    opts.push({ value, label });
-  }
-  return opts;
-}
-
-function getMonday(d: Date) {
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.getFullYear(), d.getMonth(), diff);
-}
-
-function getWeeklyOptions() {
-  const opts: { value: string; label: string }[] = [];
-  const now = istCalendarNow();
-  const thisMonday = getMonday(now);
-  for (let i = -2; i <= 2; i++) {
-    const monday = new Date(thisMonday);
-    monday.setDate(monday.getDate() + i * 7);
-    const sunday = new Date(monday);
-    sunday.setDate(sunday.getDate() + 6);
-    const value = toDateKey(monday);
-    const isCurrent = i === 0;
-    const label = isCurrent
-      ? `This Week (${monday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })})`
-      : `${monday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`;
-    opts.push({ value, label });
-  }
-  return opts;
-}
-
-function getPeriodEnd(periodType: PeriodType, periodStart: string) {
-  const d = new Date(periodStart);
-  if (periodType === "daily") return periodStart;
-  if (periodType === "weekly") {
-    const end = new Date(d);
-    end.setDate(end.getDate() + 6);
-    return toDateKey(end);
-  }
-  return toDateKey(new Date(d.getFullYear(), d.getMonth() + 1, 0));
-}
-
-function getDefaultPeriodStart(periodType: PeriodType) {
-  const now = istCalendarNow();
-  if (periodType === "daily") return todayKey();
-  if (periodType === "weekly") return toDateKey(getMonday(now));
-  return toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
-}
-
-type StatusKey = "exceeded" | "on_track" | "behind" | "needs_attention" | "no_target";
-
-function getStatus(actual: number, target: number): StatusKey {
-  if (target <= 0) return "no_target";
-  const pct = (actual / target) * 100;
-  if (pct > 100) return "exceeded";
-  if (pct >= 70) return "on_track";
-  if (pct >= 40) return "behind";
-  return "needs_attention";
-}
+type PeriodType = TargetPeriodType;
+type StatusKey = TargetStatus;
+const getStatus = statusFor;
 
 const STATUS_CONFIG: Record<StatusKey, { label: string; color: string; bg: string; dot: string }> = {
   // Brand placement (PR-B): "Exceeded" is the canonical Forest moment — money goal beaten.
-  exceeded: { label: "Exceeded", color: "text-success font-semibold", bg: "bg-success/12 ring-1 ring-success/20", dot: "bg-success" },
+  exceeded: { label: "Achieved", color: "text-success font-semibold", bg: "bg-success/12 ring-1 ring-success/20", dot: "bg-success" },
   on_track: { label: "On Track", color: "text-primary", bg: "bg-primary/5", dot: "bg-primary" },
   behind: { label: "Behind Target", color: "text-warning", bg: "bg-warning/5", dot: "bg-warning" },
   needs_attention: { label: "Needs Attention", color: "text-destructive", bg: "bg-destructive/5", dot: "bg-destructive" },
@@ -131,6 +54,9 @@ interface InlineTargetRowProps {
   subtitle: string;
   actualRevenue: number;
   actualOrders: number;
+  gross?: number | null;
+  returnsDeducted?: number | null;
+  fullyReturned?: number;
   existingTarget?: TargetType;
   periodStart: string;
   periodType: PeriodType;
@@ -140,7 +66,7 @@ interface InlineTargetRowProps {
   canSeeMoney: boolean;
 }
 
-function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, existingTarget, periodStart, periodType, onSave, onClear, readOnly = false, canSeeMoney }: InlineTargetRowProps) {
+function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRevenue, actualOrders, gross, returnsDeducted, fullyReturned = 0, existingTarget, periodStart, periodType, onSave, onClear, readOnly = false, canSeeMoney }: InlineTargetRowProps) {
   const [revInput, setRevInput] = useState<number | null>(existingTarget?.targetRevenue ?? null);
   const [ordInput, setOrdInput] = useState<number | null>(existingTarget?.targetOrders ?? null);
   const [dirty, setDirty] = useState(false);
@@ -171,7 +97,7 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
       entityId,
       entityName,
       periodType,
-      periodStart,
+      periodStart: existingTarget?.periodStart ?? periodStart,
       targetRevenue: canSeeMoney ? targetRev : (existingTarget?.targetRevenue ?? 0),
       targetOrders: targetOrd,
     });
@@ -236,6 +162,9 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
                 <span className={`${sc.color} num`}>{Math.round((actualRevenue / targetRev) * 100)}%</span>
               </div>
               <Progress value={Math.min(revPct, 100)} className={`h-1.5 ${getProgressColor(revStatus)}`} />
+              {gross != null && (
+                <p className="text-[10px] text-muted-foreground num">Sales {formatCurrency(gross)} − returns {formatCurrency(returnsDeducted ?? 0)}</p>
+              )}
             </div>
           )}
         </div>}
@@ -260,6 +189,9 @@ function InlineTargetRow({ entityId, entityName, entityType, subtitle, actualRev
               <Progress value={Math.min(ordPct, 100)} className={`h-1.5 ${getProgressColor(ordStatus)}`} />
             </div>
           )}
+          {fullyReturned > 0 && (
+            <p className="text-[10px] text-muted-foreground num">Delivered orders {actualOrders} · fully returned {fullyReturned}</p>
+          )}
         </div>
       </div>
     </EntityCard>
@@ -279,63 +211,30 @@ export default function Targets() {
   const canSeeMoney = useCan("see_money");
   const isLoading = usePageLoading(api.loading);
   const [periodType, setPeriodType] = useState<PeriodType>("monthly");
-  const [period, setPeriod] = useState(getDefaultPeriodStart("monthly"));
+  const [period, setPeriod] = useState(canonicalStart("monthly", todayKey()));
   const [search, setSearch] = useState("");
-
-  const monthOptions = useMemo(() => getMonthOptions(), []);
-  const dailyOptions = useMemo(() => getDailyOptions(), []);
-  const weeklyOptions = useMemo(() => getWeeklyOptions(), []);
 
   const handlePeriodTypeChange = useCallback((pt: PeriodType) => {
     setPeriodType(pt);
-    setPeriod(getDefaultPeriodStart(pt));
+    setPeriod(canonicalStart(pt, todayKey()));
   }, []);
 
-  const orders = api.orders.list();
   const dealers = api.dealers.list();
   const salespersons = api.salespersons.list();
   const targets = api.targets.list();
 
-  const periodEnd = getPeriodEnd(periodType, period);
+  // Achievement comes from the server summary (delivered orders by delivery
+  // day, minus issued credit notes by note day). Money fields are empty for
+  // people without money access. Reading never writes targets.
+  const { data: achRows } = useTargetAchievement(periodType, period);
+  const actualFor = useCallback((et: "salesperson" | "dealer", id: string) => {
+    const r = pickRow(achRows, et, id);
+    return { revenue: r?.net ?? 0, orders: r?.deliveredCount ?? 0, gross: r?.gross ?? null, returnsDeducted: r?.returnsDeducted ?? null, fullyReturned: r?.fullyReturnedCount ?? 0 };
+  }, [achRows]);
+  const companyRow = pickRow(achRows, "company", null);
 
-  // Achievement is calculated on DELIVERED revenue, windowed by delivered_at
-  const periodOrders = useMemo(() =>
-    orders.filter(o => {
-      if (o.deliveryStatus !== "delivered") return false;
-      const key = (o.deliveredAt || "").slice(0, 10);
-      return key >= period && key <= periodEnd;
-    }),
-    [orders, period, periodEnd]
-  );
-
-  const spActuals = useMemo(() => {
-    const map = new Map<string, { revenue: number; orders: number }>();
-    periodOrders.forEach(o => {
-      const cur = map.get(o.salespersonId) || { revenue: 0, orders: 0 };
-      cur.revenue += netTotal(o);
-      cur.orders += 1;
-      map.set(o.salespersonId, cur);
-    });
-    return map;
-  }, [periodOrders]);
-
-  const dealerActuals = useMemo(() => {
-    const map = new Map<string, { revenue: number; orders: number }>();
-    periodOrders.forEach(o => {
-      const cur = map.get(o.distributorId) || { revenue: 0, orders: 0 };
-      cur.revenue += netTotal(o);
-      cur.orders += 1;
-      map.set(o.distributorId, cur);
-    });
-    return map;
-  }, [periodOrders]);
-
-  const getTarget = useCallback((entityType: string, entityId: string) => {
-    return targets.find(t =>
-      t.entityType === entityType && t.entityId === entityId &&
-      t.periodType === periodType && t.periodStart === period
-    );
-  }, [targets, period, periodType]);
+  const getTarget = useCallback((entityType: string, entityId: string) =>
+    findTarget(targets, periodType, period, entityType, entityId), [targets, period, periodType]);
 
   const handleSave = useCallback(async (target: TargetType) => {
     return target.id ? await api.targets.update(target) : await api.targets.create(target);
@@ -344,14 +243,6 @@ export default function Targets() {
   const handleClear = useCallback(async (id: string) => api.targets.remove(id), [api.targets]);
 
   // Blocking page skeleton removed — empty-state handles first-paint.
-
-  const dateOptions = periodType === "daily" ? dailyOptions : periodType === "weekly" ? weeklyOptions : monthOptions;
-
-  const periodLabel = periodType === "daily"
-    ? new Date(period).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })
-    : periodType === "weekly"
-    ? `Week of ${new Date(period).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-    : new Date(period).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
   return (
     <AppLayout>
@@ -383,26 +274,17 @@ export default function Targets() {
                 </button>
               ))}
             </div>
-            {/* Period Selector */}
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className="flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-56"
-            >
-              {dateOptions.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <PeriodPicker periodType={periodType} value={period} onChange={setPeriod} />
           </div>
         </div>
 
         {/* Summary Stats */}
         {(() => {
-          const periodTargets = targets.filter(t => t.periodType === periodType && t.periodStart === period);
+          const periodTargets = targets.filter(t => t.periodType === periodType && normalizeStoredStart(periodType, t.periodStart) === period);
           const spTargets = periodTargets.filter(t => t.entityType === "salesperson");
           const dlTargets = periodTargets.filter(t => t.entityType === "dealer");
           const totalTargetRev = periodTargets.reduce((s, t) => s + t.targetRevenue, 0);
-          const totalActualRev = periodOrders.reduce((s, o) => s + netTotal(o), 0);
+          const totalActualRev = companyRow?.net ?? 0;
           const overallPct = totalTargetRev > 0 ? Math.round((totalActualRev / totalTargetRev) * 100) : 0;
           const overallStatus = getStatus(totalActualRev, totalTargetRev);
 
@@ -410,7 +292,7 @@ export default function Targets() {
           const spBehind = spTargets
             .map(t => {
               const sp = salespersons.find(s => s.id === t.entityId);
-              const actual = spActuals.get(t.entityId)?.revenue || 0;
+              const actual = actualFor("salesperson", t.entityId).revenue;
               return { name: sp?.name || "Unknown", pct: t.targetRevenue > 0 ? (actual / t.targetRevenue) * 100 : 0 };
             })
             .filter(x => x.pct < 60)
@@ -471,7 +353,7 @@ export default function Targets() {
               const filtered = q ? salespersons.filter(sp => sp.name.toLowerCase().includes(q) || (sp.region || "").toLowerCase().includes(q)) : salespersons;
               return filtered.length > 0 ? (
               filtered.map(sp => {
-                const actual = spActuals.get(sp.id) || { revenue: 0, orders: 0 };
+                const actual = actualFor("salesperson", sp.id);
                 const existingTarget = getTarget("salesperson", sp.id);
                 return (
                   <InlineTargetRow
@@ -482,6 +364,9 @@ export default function Targets() {
                     subtitle={sp.region || "No region"}
                     actualRevenue={actual.revenue}
                     actualOrders={actual.orders}
+                    gross={canSeeMoney ? actual.gross : null}
+                    returnsDeducted={actual.returnsDeducted}
+                    fullyReturned={actual.fullyReturned}
                     existingTarget={existingTarget}
                     periodStart={period}
                     periodType={periodType}
@@ -510,7 +395,7 @@ export default function Targets() {
               const filtered = q ? dealers.filter(d => d.name.toLowerCase().includes(q) || (d.location || "").toLowerCase().includes(q)) : dealers;
               return filtered.length > 0 ? (
               filtered.map(d => {
-                const actual = dealerActuals.get(d.id) || { revenue: 0, orders: 0 };
+                const actual = actualFor("dealer", d.id);
                 const existingTarget = getTarget("dealer", d.id);
                 return (
                   <InlineTargetRow
@@ -521,6 +406,9 @@ export default function Targets() {
                     subtitle={d.location || "No location"}
                     actualRevenue={actual.revenue}
                     actualOrders={actual.orders}
+                    gross={canSeeMoney ? actual.gross : null}
+                    returnsDeducted={actual.returnsDeducted}
+                    fullyReturned={actual.fullyReturned}
                     existingTarget={existingTarget}
                     periodStart={period}
                     periodType={periodType}

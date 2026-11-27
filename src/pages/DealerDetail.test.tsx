@@ -5,6 +5,13 @@ import DealerDetail from "./DealerDetail";
 
 const mocks = vi.hoisted(() => ({ money: false, share: vi.fn() }));
 vi.mock("@/hooks/useCan", () => ({ useCan: (key: string) => key === "see_money" && mocks.money }));
+// Mirrors the server summary: money fields are null without see_money.
+vi.mock("@/hooks/use-target-achievement", async () => {
+  const actual = await vi.importActual<typeof import("@/hooks/use-target-achievement")>("@/hooks/use-target-achievement");
+  return { ...actual, useTargetAchievement: () => ({ data: [{ entityType: "dealer", entityId: "d1",
+    gross: mocks.money ? 500 : null, returnsDeducted: mocks.money ? 0 : null, returnsOnEarlierOrders: mocks.money ? 0 : null, net: mocks.money ? 500 : null,
+    deliveredCount: 1, fullyReturnedCount: 0 }] }) };
+});
 vi.mock("@/components/layout/AppLayout", () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => children }));
 vi.mock("@/components/layout/EntityHistory", () => ({ EntityHistory: () => null }));
 vi.mock("@/components/visits/DealerVisitsPanel", () => ({ DealerVisitsPanel: () => <div>Test visits</div> }));

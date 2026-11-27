@@ -1,3 +1,5 @@
+import { monthlyTargetsFor } from "@/lib/target-achievement";
+import { todayKey as __todayKey } from "@/utils/dateKey";
 /**
  * Command surface — period helpers + signal derivation engine.
  *
@@ -195,7 +197,7 @@ export function deriveSignals(ctx: SignalContext): CommandSignal[] {
   const revBySp = new Map<string, number>();
   for (const o of periodOrders) revBySp.set(o.salespersonId, (revBySp.get(o.salespersonId) || 0) + netTotal(o));
   const behind = salespersons.filter((s) => {
-    const target = ctx.targets.find((t) => t.entityId === s.id && t.entityType === "salesperson");
+    const target = monthlyTargetsFor(ctx.targets, __todayKey()).find((t) => t.entityId === s.id);
     if (!target || !target.targetRevenue) return false;
     const actual = revBySp.get(s.id) || 0;
     return actual / target.targetRevenue < 0.5; // < 50% of period target
@@ -347,8 +349,7 @@ export function buildRevenueTrend(
   const points: TrendPoint[] = [];
 
   // Total target across all salesperson targets active in range, distributed evenly.
-  const totalTarget = targets
-    .filter((t) => t.entityType === "salesperson")
+  const totalTarget = monthlyTargetsFor(targets, __todayKey())
     .reduce((s, t) => s + (t.targetRevenue || 0), 0);
   const perBucketTarget = totalTarget / buckets;
 

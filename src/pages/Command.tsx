@@ -1,3 +1,5 @@
+import { monthlyTargetsFor } from "@/lib/target-achievement";
+import { todayKey as __todayKey } from "@/utils/dateKey";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -253,7 +255,7 @@ export default function Command() {
       .slice(0, 10)
       .map(([id, val]) => {
         const sp = salespersons.find((s) => s.id === id);
-        const tgt = targets.find((t) => t.entityId === id && t.entityType === "salesperson");
+        const tgt = monthlyTargetsFor(targets, __todayKey()).find((t) => t.entityId === id);
         const pct = tgt?.targetRevenue ? `${Math.round((val / tgt.targetRevenue) * 100)}%` : "—";
         return { name: sp?.name || "Unknown", primary: formatCurrencyPdf(val), secondary: pct };
       });
